@@ -1,0 +1,14 @@
+data {
+X.gen[0] ~ dnorm(0, 1)
+for (t in 1:20) {
+  X.gen[t] ~ dnorm(X[t-1], 1)
+  Y[t] ~ dnorm(X[t], 0.5)
+  }
+}
+model {
+X[0] ~ dnorm(0, 1)
+for (t in 1:20) {
+  X[t] ~ dnorm(X[t-1], 1)
+  Y[t] ~ dnorm(X[t], 0.5)
+  }
+}

@@ -1,0 +1,22 @@
+var
+   N, a, b, lambda[N], n[N,N], y[N,N], z[N,N]
+data {
+   for (i in 1:N) {
+      y[i,i] <- 0
+   }
+   
+}
+model {
+   for (i in 1:N) {
+      lambda[i] ~ dgamma(a,b)
+      for (j in 1:i) {
+         y[i,j] ~ dbin(n[i,j], lambda[i]/(lambda[i]+lambda[i]))
+      }
+      for (j in i+1:N) {
+         y[i,j] <- n[i,j]-y[j,i]
+      }
+      for (j in 1:N) {
+         z[i,j] ~ dgamma(n[i,j], lambda[i]+lambda[j])
+      }
+   }
+}
