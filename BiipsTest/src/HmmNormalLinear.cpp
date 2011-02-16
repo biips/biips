@@ -20,8 +20,8 @@ namespace Biips
 
   const String HmmNormalLinear::NAME_ = "HMM Normal Linear 1D";
 
-  HmmNormalLinear::HmmNormalLinear(int argc, char** argv, Size verbose, Bool showFinal, Bool showAll, Bool precFlag, std::ostream & os)
-  : BaseType(argc, argv, NAME_, verbose, showFinal, showAll, os), precFlag_(precFlag)
+  HmmNormalLinear::HmmNormalLinear(int argc, char** argv, Size verbose, Size showMode, Bool precFlag, std::ostream & os)
+  : BaseType(argc, argv, NAME_, verbose, showMode, os), precFlag_(precFlag)
   {
     // Default model parameters
     sizeParamMap_["t.max"] = 20;
@@ -257,7 +257,7 @@ namespace Biips
     x_quant_05[t].Alloc(scalarAcc_.Quantile(0));
     x_quant_95[t].Alloc(scalarAcc_.Quantile(1));
 
-    if (showAllPlot_)
+    if (showMode_ >= 2)
     {
       ScalarHistogram pdf_hist = scalarAcc_.Pdf();
       Plot pdf_plot_PF(argc_, argv_);
@@ -322,7 +322,7 @@ namespace Biips
     if (!plotFileName.empty())
       results_plot.PrintPdf(plotFileName);
 
-    if( showFinalPlot_ )
+    if( showMode_ >= 1 )
       results_plot.Show();
   }
 
