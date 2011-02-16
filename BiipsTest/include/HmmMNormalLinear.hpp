@@ -36,7 +36,7 @@ namespace Biips
   public:
     typedef ModelTest BaseType;
 
-    HmmMNormalLinear(int argc, char** argv, Size verbose = 1, Bool showFinal = false, Bool showAll = false, Bool precFlag = false, std::ostream & os = std::cout);
+    HmmMNormalLinear(int argc, char** argv, Size verbose = 1, Size showMode = 0, Bool precFlag = false, std::ostream & os = std::cout);
 
     virtual void PrintIntro() const;
 
