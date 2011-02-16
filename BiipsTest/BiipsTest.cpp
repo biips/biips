@@ -64,18 +64,18 @@ BOOST_AUTO_TEST_CASE( my_test )
   try
   {
 #endif
-    Size test_id;
+    Size model_id;
     String model_file_name;
     Size exec_step;
     String check_mode;
-    String show_mode;
+    Size show_mode;
     Size data_rng_seed;
     Size smc_rng_seed;
     vector<Size> n_particles;
     Scalar ess_threshold;
     Size resample_type;
     Size n_smc;
-    Scalar reject_rate;
+    Scalar reject_level;
     String plot_file_name;
     String config_file_name;
     vector<String> mutations;
@@ -106,12 +106,12 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 2: \thigh.")
         ("interactive,i", "asks questions to the user.\n"
             "applies when verbose>0.")
-        ("show-plots,s", po::value<String>(&show_mode)->default_value("none"),"shows plots, interrupting execution.\n"
+        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),"shows plots, interrupting execution.\n"
             "applies when n-smc=1.\n"
             "values:\n"
-            " none: \tno plots are shown.\n"
-            " final: \tfinal results plots are shown.\n"
-            " all: \tall plots are shown.")
+            " 0: \tno plots are shown.\n"
+            " 1: \tfinal results plots are shown.\n"
+            " 2: \tall plots are shown.")
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
             " 0: \tsamples or reads values of the graph.\n"
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     // config file
     po::options_description config("Configuration");
     config.add_options()
-        ("model-id", po::value<Size>(&test_id), "model identifier.\n"
+        ("model-id", po::value<Size>(&model_id), "model identifier.\n"
             "values:\n"
             " 1: \tHMM Normal linear 1D.\n"
             " 2: \tHMM Normal non linear 1D.\n"
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("smc-rng-seed", po::value<Size>(&smc_rng_seed), "SMC sampler rng seed. default=time().\n"
             "applies when n-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
-        ("reject-level", po::value<Scalar>(&reject_rate)->default_value(0.01), "accepted level of rejection in checks.")
+        ("reject-level", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
         ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
             "applies when n-smc=1.")
         ;
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     config_file_options.add(config).add(hidden);
 
     po::options_description visible(
-        "\nUsage: BiipsTest [OPTION]... --test-id=<id> [OPTION]...\n"
+        "\nUsage: BiipsTest [OPTION]... --model-id=<id> [OPTION]...\n"
         "runs test <id> with default model parameters, with multiple OPTION parameters.\n"
         "       BiipsTest [OPTION]... <CONFIG_FILE> [OPTION]...\n"
         "runs test configuration from file <CONFIG_FILE>, with multiple OPTION parameters.\n"
@@ -258,40 +258,37 @@ BOOST_AUTO_TEST_CASE( my_test )
 
       store_unregistered(parsed_sources, sources_names, model_map, dim_map, data_map, bench_filter_map, bench_smooth_map, errors_filter_ref_map, errors_smooth_ref_map);
 
-
-      Bool show_all_plots = (show_mode == "all");
-      Bool show_final_plots = show_all_plots || (show_mode == "final");
       Bool interactive = vm.count("interactive");
       Bool prec_param = vm.count("prec-param");
 
       // Select test
       Types<ModelTest>::Ptr p_model_test;
-      if (vm.count("test-id"))
+      if (vm.count("model-id"))
       {
-        switch (test_id)
+        switch (model_id)
         {
           case 0:
             break;
           case 1:
-            p_model_test = Types<ModelTest>::Ptr(new HmmNormalLinear(argc, argv, verbosity, show_final_plots, show_all_plots, prec_param, cout));
+            p_model_test = Types<ModelTest>::Ptr(new HmmNormalLinear(argc, argv, verbosity, show_mode, prec_param, cout));
             break;
           case 2:
-            p_model_test = Types<ModelTest>::Ptr(new HmmNormalNonLinear(argc, argv, verbosity, show_final_plots, show_all_plots, prec_param, cout));
+            p_model_test = Types<ModelTest>::Ptr(new HmmNormalNonLinear(argc, argv, verbosity, show_mode, prec_param, cout));
             break;
           case 3:
-            p_model_test = Types<ModelTest>::Ptr(new HmmMNormalLinear(argc, argv, verbosity, show_final_plots, show_all_plots, prec_param, cout));
+            p_model_test = Types<ModelTest>::Ptr(new HmmMNormalLinear(argc, argv, verbosity, show_mode, prec_param, cout));
             break;
           case 4:
-            p_model_test = Types<ModelTest>::Ptr(new HmmMNormalLinear4D(argc, argv, verbosity, show_final_plots, show_all_plots, prec_param, cout));
+            p_model_test = Types<ModelTest>::Ptr(new HmmMNormalLinear4D(argc, argv, verbosity, show_mode, prec_param, cout));
             break;
           default:
-            boost::throw_exception(po::error("ERROR: unknown test-id value."));
+            boost::throw_exception(po::error("ERROR: unknown model-id value."));
             break;
         }
       }
       else
       {
-        boost::throw_exception(po::error("ERROR: missing test-id option."));
+        boost::throw_exception(po::error("ERROR: missing model-id option."));
       }
 
       // Intro
@@ -479,7 +476,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 {
                   acc_ref_type errors_filter_ref_acc;
 
-                  errors_filter_ref_acc = acc_ref_type(quantile_probability = 1-reject_rate);
+                  errors_filter_ref_acc = acc_ref_type(quantile_probability = 1-reject_level);
                   for (Size i =0; i<errors_filter_ref_map[mut][n_part].size(); ++i)
                     errors_filter_ref_acc(errors_filter_ref_map[mut][n_part][i]);
                   error_filter_threshold = p_square_quantile(errors_filter_ref_acc);
@@ -492,7 +489,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 {
                   acc_ref_type errors_smooth_ref_acc;
 
-                  errors_smooth_ref_acc = acc_ref_type(quantile_probability = 1-reject_rate);
+                  errors_smooth_ref_acc = acc_ref_type(quantile_probability = 1-reject_level);
                   for (Size i =0; i<errors_smooth_ref_map[mut][n_part].size(); ++i)
                     errors_smooth_ref_acc(errors_smooth_ref_map[mut][n_part][i]);
                   error_smooth_threshold = p_square_quantile(errors_smooth_ref_acc);
@@ -552,7 +549,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 pressEnterToContinue();
 
               // Plot results
-              if (n_smc==1 && (vm.count("plot-file-name") || show_final_plots) )
+              if (n_smc==1 && (vm.count("plot-file-name") || show_mode >= 2) )
               {
                 p_model_test->PlotResults(plot_file_name);
                 if (verbosity>0 && vm.count("plot-file-name"))
@@ -568,7 +565,7 @@ BOOST_AUTO_TEST_CASE( my_test )
               if ((check_mode=="all" || check_mode=="filter") && errors_filter_ref_valid && !errors_filter_new_map[mut][n_part].empty())
               {
                 if (verbosity>0)
-                  cout << "Checking filtering errors fitness with reject level " << reject_rate << endl;
+                  cout << "Checking filtering errors fitness with reject level " << reject_level << endl;
                 Scalar ks_filter_stat = ksTwoSamplesStat(errors_filter_new_map[mut][n_part].begin(),
                     errors_filter_new_map[mut][n_part].end(),
                     errors_filter_ref_map[mut][n_part].begin(),
@@ -581,13 +578,13 @@ BOOST_AUTO_TEST_CASE( my_test )
                 if (verbosity>0)
                   cout << "\t" << "Kolmogorov-Smirnov test: D = " << ks_filter_stat << ", p-value = " << ks_filter_prob << endl;
 
-                BOOST_CHECK_GT(ks_filter_prob, reject_rate);
+                BOOST_CHECK_GT(ks_filter_prob, reject_level);
               }
 
               if ((check_mode=="all" || check_mode=="smooth") && errors_smooth_ref_valid && !errors_smooth_new_map[mut][n_part].empty())
               {
                 if (verbosity>0)
-                  cout << "Checking smoothing errors fitness with reject level " << reject_rate << endl;
+                  cout << "Checking smoothing errors fitness with reject level " << reject_level << endl;
                 Scalar ks_smooth_stat = ksTwoSamplesStat(errors_smooth_new_map[mut][n_part].begin(),
                     errors_smooth_new_map[mut][n_part].end(),
                     errors_smooth_ref_map[mut][n_part].begin(),
@@ -600,7 +597,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 if (verbosity>0)
                   cout << "\t" << "Kolmogorov-Smirnov test: D = " << ks_smooth_stat << ", p-value = " << ks_smooth_prob << endl;
 
-                BOOST_CHECK_GT(ks_smooth_prob, reject_rate);
+                BOOST_CHECK_GT(ks_smooth_prob, reject_level);
               }
             }
           }

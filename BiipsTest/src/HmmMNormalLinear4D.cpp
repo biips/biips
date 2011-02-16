@@ -19,8 +19,8 @@ namespace Biips
 
   const String HmmMNormalLinear4D::NAME_ = "HMM multivariate Normal linear 4D";
 
-  HmmMNormalLinear4D::HmmMNormalLinear4D(int argc, char** argv, Size verbose, Bool showFinal, Bool showAll, Bool precFlag, std::ostream & os)
-  : BaseType(argc, argv, verbose, showFinal, showAll, precFlag_, os)
+  HmmMNormalLinear4D::HmmMNormalLinear4D(int argc, char** argv, Size verbose, Size showMode, Bool precFlag, std::ostream & os)
+  : BaseType(argc, argv, verbose, showMode, precFlag_, os)
   {
     setName(NAME_);
 

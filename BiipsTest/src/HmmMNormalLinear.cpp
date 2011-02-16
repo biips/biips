@@ -22,8 +22,8 @@ namespace Biips
 
   const String HmmMNormalLinear::NAME_ = "HMM multivariate Normal Linear";
 
-  HmmMNormalLinear::HmmMNormalLinear(int argc, char** argv, Size verbose, Bool showFinal, Bool showAll, Bool precFlag, std::ostream & os)
-  : BaseType(argc, argv, NAME_, verbose, showFinal, showAll, os), precFlag_(precFlag)
+  HmmMNormalLinear::HmmMNormalLinear(int argc, char** argv, Size verbose, Size showMode, Bool precFlag, std::ostream & os)
+  : BaseType(argc, argv, NAME_, verbose, showMode, os), precFlag_(precFlag)
   {
     // Default model parameters
     sizeParamMap_["t.max"] = 20;
@@ -499,7 +499,7 @@ namespace Biips
     if (!plotFileName.empty())
       results_plot.PrintPdf(plotFileName);
 
-    if( showFinalPlot_ )
+    if( showMode_ >= 1 )
       results_plot.Show();
   }
 

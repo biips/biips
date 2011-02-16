@@ -24,8 +24,7 @@ namespace Biips
     char** argv_;
     String name_;
     Size verbose_;
-    Bool showFinalPlot_;
-    Bool showAllPlot_;
+    Size showMode_;
     mutable std::ostream & os_;
 
     Graph::Ptr pDataGraph_;
@@ -65,8 +64,6 @@ namespace Biips
 
     void printLine(std::ostream & os, const DataType::Array & dataArray, Size dim = 0, char separator = ' ') const;
 
-//    void inputValues(DataType::Array & values, Size varLen, const DimArray::Ptr varDimPtr, std::istream & is) const;
-
     void setDataArrayMap(const std::map<String, std::vector<DataType> > & from, std::map<String, DataType::Array> & to);
 
     void setObsValues();
@@ -84,8 +81,8 @@ namespace Biips
     void setName(const String & name) { name_ = name; };
 
   public:
-    ModelTest(int argc, char** argv, const String & name, Size verbose = 1, Bool showFinal = false, Bool showAll = false, std::ostream & os = std::cout)
-    : argc_(argc), argv_(argv), name_(name), verbose_(verbose), showFinalPlot_(showFinal), showAllPlot_(showAll), os_(os) {};
+    ModelTest(int argc, char** argv, const String & name, Size verbose = 1, Size showMode = 0, std::ostream & os = std::cout)
+    : argc_(argc), argv_(argv), name_(name), verbose_(verbose), showMode_(showMode), os_(os) {};
 
     virtual const String & Name() const { return name_; };
 

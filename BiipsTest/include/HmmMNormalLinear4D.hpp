@@ -24,7 +24,7 @@ namespace Biips
   public:
     typedef HmmMNormalLinear BaseType;
 
-    HmmMNormalLinear4D(int argc, char** argv, Size verbose = 1, Bool showFinal = false, Bool showAll = false, Bool precFlag = false, std::ostream & os = std::cout);
+    HmmMNormalLinear4D(int argc, char** argv, Size verbose = 1, Size showMode = 0, Bool precFlag = false, std::ostream & os = std::cout);
 
     virtual void PrintIntro() const;
 
