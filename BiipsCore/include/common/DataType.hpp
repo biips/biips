@@ -196,17 +196,17 @@ namespace Biips
     /*!
      * @return the values array
      */
-    const StorageType & Value() const { assert(pValue_); return *pValue_; };
+    const StorageType & Values() const { assert(pValue_); return *pValue_; };
     //! ValArray accessor.
     /*!
      * @return a reference to the values array
      */
-    StorageType & Value() { assert(pValue_); return *pValue_; };
+    StorageType & Values() { assert(pValue_); return *pValue_; };
     //! ValArray accessor.
     /*!
      * @return the values array shared pointer
      */
-    const Types<StorageType>::Ptr & ValuePtr() const { return pValue_; };
+    const Types<StorageType>::Ptr & ValuesPtr() const { return pValue_; };
 
     /*!
      * Most of the DataType objects will contain one scalar value.
@@ -249,7 +249,7 @@ namespace Biips
     DataType & Alloc(const DataType & from)
     {
       pDim_ = DimArray::Ptr(new DimArray(from.Dim()));
-      pValue_ = StorageType::Ptr(new StorageType(from.Value()));
+      pValue_ = StorageType::Ptr(new StorageType(from.Values()));
       return *this;
     } // TODO check dim
     DataType & Alloc(Scalar scal)

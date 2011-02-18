@@ -28,7 +28,7 @@ namespace Biips
     explicit Vector(size_type sz) : BaseType(sz) {}
     Vector(size_type sz, value_type val) : BaseType(sz, array_type(sz, val)) {}
     Vector(size_type sz, const array_type & value) : BaseType(sz, value) {}
-    explicit Vector(const DataType & data) : BaseType(data.Length(), data.Value()) {}
+    explicit Vector(const DataType & data) : BaseType(data.Length(), data.Values()) {}
     template<class AE>
     Vector(const ublas::vector_expression<AE> &ae) : BaseType(ae) {}
 
@@ -51,7 +51,7 @@ namespace Biips
     BaseType::swap;
 
   public:
-    explicit VectorRef(DataType & dat) : BaseType(dat.Length(), array_type()), pData_(&dat), released_(false) { BaseType::data().swap(pData_->Value()); }
+    explicit VectorRef(DataType & dat) : BaseType(dat.Length(), array_type()), pData_(&dat), released_(false) { BaseType::data().swap(pData_->Values()); }
 
     VectorRef(VectorRef & vec_ref) : BaseType(vec_ref.size(), array_type()), pData_(vec_ref.pData_), released_(vec_ref.released_)
     {
@@ -75,9 +75,9 @@ namespace Biips
     // TODO put in cpp
     void resize (size_type s, bool preserve = true) { BaseType::resize(s, preserve); pData_->Dim()[0] = s; }
 
-    virtual ~VectorRef() { if (! released_) data().swap(pData_->Value()); }
+    virtual ~VectorRef() { if (! released_) data().swap(pData_->Values()); }
 
-    void Release() { if (! released_) { data().swap(pData_->Value()); released_ = true;} }
+    void Release() { if (! released_) { data().swap(pData_->Values()); released_ = true;} }
 
     Bool Released() const { return released_; }
   };

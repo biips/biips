@@ -19,7 +19,7 @@ namespace Biips
       const DataType & val = paramValues[0];
 
       DataType ans(DimArray(1,1));
-      ans.ScalarView() = val.Value().Sum();
+      ans.ScalarView() = val.Values().Sum();
 
       return ans;
     }

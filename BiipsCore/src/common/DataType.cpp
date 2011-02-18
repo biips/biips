@@ -19,7 +19,7 @@ namespace Biips
   DataType & DataType::operator = (const DataType & dat)
   {
     pDim_ = dat.DimPtr();
-    pValue_ = dat.ValuePtr();
+    pValue_ = dat.ValuesPtr();
     return *this;
   }
 
@@ -84,10 +84,10 @@ namespace Biips
         indices[dim] = range.Lower()[dim];
         while ( indices[dim] < range.Upper()[dim] )
         {
-          os << Value()[range.GetOffset(indices)] << ", ";
+          os << Values()[range.GetOffset(indices)] << ", ";
           ++indices[dim];
         }
-        os << Value()[range.GetOffset(indices)];
+        os << Values()[range.GetOffset(indices)];
         if ( indices[dim-1] < range.Upper()[dim-1])
           os << std::endl;
         ++indices[dim-1];
@@ -99,10 +99,10 @@ namespace Biips
       indices[dim] = range.Lower()[dim];
       while ( indices[dim] < range.Upper()[dim] )
       {
-        os << Value()[range.GetOffset(indices)] << std::endl;
+        os << Values()[range.GetOffset(indices)] << std::endl;
         ++indices[dim];
       }
-      os << Value()[range.GetOffset(indices)];
+      os << Values()[range.GetOffset(indices)];
     }
   }
 
