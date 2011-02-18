@@ -31,7 +31,7 @@ namespace Biips
   void ModelTest::printLine(std::ostream & os, const DataType::Array & dataArray, Size dim, char separator) const
   {
     for (Size k=0; k<dataArray.size(); ++k)
-      os << dataArray[k].Value()[dim] << separator;
+      os << dataArray[k].Values()[dim] << separator;
     os << std::endl;
   }
 
@@ -44,7 +44,7 @@ namespace Biips
       const String & var_name = obsVarNames_[i_var];
       DataType::Array & gen_val = dataValuesMap_[var_name];
       for (Size k=0; k<gen_val.size(); ++k)
-        obs_values[modelNodeIdMap_[var_name][k]] = gen_val[k].ValuePtr();
+        obs_values[modelNodeIdMap_[var_name][k]] = gen_val[k].ValuesPtr();
     }
     pModelGraph_->SetObsValues(obs_values);
   }
@@ -350,8 +350,8 @@ namespace Biips
         for (Size k=0; k<smc_values.size(); ++k)
         {
           Size dim = smc_values[k].Length(); // TODO check dim
-          Vector diff_vec(dim, smc_values[k].Value() - bench_values[k].Value());
-          Matrix var_chol(dim, dim, bench_var_values[k].Value());
+          Vector diff_vec(dim, smc_values[k].Values() - bench_values[k].Values());
+          Matrix var_chol(dim, dim, bench_var_values[k].Values());
           ublas::cholesky_factorize(var_chol);
           ublas::inplace_solve(var_chol, diff_vec, ublas::lower_tag());
           error += ublas::inner_prod(diff_vec, diff_vec);

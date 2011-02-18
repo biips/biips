@@ -17,7 +17,7 @@ namespace Biips
       // TODO check paramValues
       const DataType & val = paramValues[0];
 
-      DataType ans = DataType(val.DimPtr(), -val.Value());
+      DataType ans = DataType(val.DimPtr(), -val.Values());
       return ans;
     }
 }

@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 pressEnterToContinue();
 
               // Plot results
-              if (n_smc==1 && (vm.count("plot-file-name") || show_mode >= 2) )
+              if (n_smc==1 && (vm.count("plot-file-name") || show_mode >= 1) )
               {
                 p_model_test->PlotResults(plot_file_name);
                 if (verbosity>0 && vm.count("plot-file-name"))

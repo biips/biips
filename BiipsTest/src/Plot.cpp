@@ -73,8 +73,8 @@ namespace Biips
     Size i = 0;
     while( (it_x != x.end()) && (it_y != y.end()) )
     {
-      x_data[i] = it_x->Value().ScalarView();
-      y_data[i] = it_y->Value().ScalarView();
+      x_data[i] = it_x->Values().ScalarView();
+      y_data[i] = it_y->Values().ScalarView();
       ++it_x;
       ++it_y;
       ++i;
@@ -137,8 +137,8 @@ namespace Biips
     Size i = 0;
     while( (it_x != x.end()) && (it_y != y.end()) )
     {
-      x_data[i] = it_x->Value().ScalarView();
-      y_data[i] = it_y->Value().ScalarView();
+      x_data[i] = it_x->Values().ScalarView();
+      y_data[i] = it_y->Values().ScalarView();
       ++it_x;
       ++it_y;
       ++i;

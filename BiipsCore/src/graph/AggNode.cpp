@@ -23,7 +23,7 @@ namespace Biips
     DataType ans(pDim_);
     for (Size i = 0; i < ans.Length(); ++i)
     {
-      ans.Value()[i] = paramValues[i].Value()[offsets_[i]];
+      ans.Values()[i] = paramValues[i].Values()[offsets_[i]];
     }
     return ans;
   }

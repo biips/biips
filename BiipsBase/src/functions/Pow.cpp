@@ -23,12 +23,12 @@ namespace Biips
       DataType ans;
       if ( base.IsScalar() )
       {
-        ans = DataType(exponent.DimPtr(), exponent.Value().Apply(std::bind1st(pow_scalar, base.ScalarView())));
+        ans = DataType(exponent.DimPtr(), exponent.Values().Apply(std::bind1st(pow_scalar, base.ScalarView())));
       }
       else if ( exponent.IsScalar() )
-        ans = DataType(base.DimPtr(), base.Value().Apply(std::bind2nd(pow_scalar, exponent.ScalarView())));
+        ans = DataType(base.DimPtr(), base.Values().Apply(std::bind2nd(pow_scalar, exponent.ScalarView())));
       else
-        ans = DataType(base.DimPtr(), base.Value().Apply(pow_scalar, exponent.Value()));
+        ans = DataType(base.DimPtr(), base.Values().Apply(pow_scalar, exponent.Values()));
       return ans;
     }
 }

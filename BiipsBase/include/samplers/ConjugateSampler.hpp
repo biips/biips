@@ -188,7 +188,7 @@ namespace Biips
       DataType::Array post_param_values = postParam(prior_param_values, like_param_contrib);
 
       DataType sampled_data = PriorDist::Instance()->Sample(post_param_values, pRng_);
-      nodeValuesMap_[nodeId_] = sampled_data.ValuePtr();
+      nodeValuesMap_[nodeId_] = sampled_data.ValuesPtr();
 
       sampledFlagsMap_[nodeId_] = true;
 
