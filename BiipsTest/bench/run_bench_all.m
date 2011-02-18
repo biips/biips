@@ -32,7 +32,7 @@ if nargin < 6, period = 1; end
 %% HMM 1D linear gaussian
 
 if (sum(model_ids == 1))
-    test_id = 1;
+    model_id = 1;
     dimx = 1;
     dimy = 1;
     
@@ -80,14 +80,14 @@ if (sum(model_ids == 1))
     
     model_name = sprintf('HMM 1D linear gaussian, t = 0:%d', t_max);
     
-    model = {model_const, model_dim, sample_param, sample_obs, bench, smc, mutation_names, model_name, const_names, var_names, test_id};
+    model = {model_const, model_dim, sample_param, sample_obs, bench, smc, mutation_names, model_name, const_names, var_names, model_id};
     models = [models, {model} ];
 end
 
 %% HMM 1D non linear gaussian
 
 if (sum(model_ids == 2))
-    test_id = 2;
+    model_id = 2;
     dimx = 1;
     dimy = 1;
     t_max = 20;
@@ -132,7 +132,7 @@ if (sum(model_ids == 2))
     
     model_name = sprintf('HMM 1D non linear gaussian, t = 0:%d', t_max);
     
-    model = {model_const, model_dim, sample_param, sample_obs, bench, smc, mutation_names, model_name, const_names, var_names, test_id};
+    model = {model_const, model_dim, sample_param, sample_obs, bench, smc, mutation_names, model_name, const_names, var_names, model_id};
     
     models = [models, {model} ];
 end
@@ -295,12 +295,12 @@ function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs
     mutation_names = model{7};
     const_names = model{9};
     var_names = model{10};
-    test_id = model{11};
+    model_id = model{11};
     
     fid = fopen(file_name, 'w');
     
     % print generic parameters
-    fprintf(fid, 'test-id = %d\n', test_id);
+    fprintf(fid, 'model-id = %d\n', model_id);
     
     for n = n_part
         fprintf(fid, 'particles = %d\n', n);
