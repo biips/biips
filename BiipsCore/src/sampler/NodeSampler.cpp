@@ -27,7 +27,7 @@ namespace Biips
     if ( nodeIdDefined_ && attributesDefined_ && !sampledFlagsMap_[nodeId_]) // TODO manage else case : throw exception
     {
       DataType::Array params = getParamValues(nodeId_, pGraph_, this);
-      nodeValuesMap_[nodeId_] = node.Eval(params).ValuePtr();
+      nodeValuesMap_[nodeId_] = node.Eval(params).ValuesPtr();
 
       sampledFlagsMap_[nodeId_] = true;
     }
@@ -39,7 +39,7 @@ namespace Biips
     if ( nodeIdDefined_ && attributesDefined_ ) // TODO manage else case : throw exception
     {
       DataType::Array params = getParamValues(nodeId_, pGraph_, this);
-      nodeValuesMap_[nodeId_] = node.Sample(params, pRng_).ValuePtr(); // TODO check dims ?
+      nodeValuesMap_[nodeId_] = node.Sample(params, pRng_).ValuesPtr(); // TODO check dims ?
       sampledFlagsMap_[nodeId_] = true;
     }
   }

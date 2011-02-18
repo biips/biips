@@ -39,7 +39,7 @@ namespace Biips
     DataType sample(mean.DimPtr());
     for (Size i = 0; i < sample.Length(); ++i)
     {
-      sample.Value()[i] = gen();
+      sample.Values()[i] = gen();
     }
     return sample;
   }
@@ -51,7 +51,7 @@ namespace Biips
     const DataType & mean = paramValues[0]; // TODO check dim
     const DataType & var = paramValues[1]; // TODO check dim
 
-    Vector diff_vec(x.Length(), x.Value() - mean.Value()); // TODO check dim
+    Vector diff_vec(x.Length(), x.Values() - mean.Values()); // TODO check dim
 
     Matrix var_chol(var);
     ublas::cholesky_factorize(var_chol);

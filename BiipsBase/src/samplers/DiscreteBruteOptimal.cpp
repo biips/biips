@@ -62,16 +62,16 @@ namespace Biips
           pGraph_->VisitNode(*it_offspring, like_form_vis);
           ++it_offspring;
         }
-        post_param_values[0].Value()[k-1] *= exp(like_form_vis.Value());
+        post_param_values[0].Values()[k-1] *= exp(like_form_vis.Value());
       }
 
-      nodeValuesMap_[nodeId_] = DCat::Instance()->Sample(post_param_values, pRng_).ValuePtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
+      nodeValuesMap_[nodeId_] = DCat::Instance()->Sample(post_param_values, pRng_).ValuesPtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
 
       sampledFlagsMap_[nodeId_] = true;
 
       DataType sampled_data(node.DimPtr(), nodeValuesMap_[nodeId_]);
 
-      logWeight_ = log(post_param_values[0].Value().Sum());
+      logWeight_ = log(post_param_values[0].Values().Sum());
     }
   }
 

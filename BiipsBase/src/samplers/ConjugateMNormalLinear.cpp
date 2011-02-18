@@ -146,7 +146,7 @@ namespace Biips
       DataType::Array post_param_values(2);
       post_param_values[0] = DataType(post_mean);
       post_param_values[1] = DataType(post_prec);
-      nodeValuesMap_[nodeId_] = DMNorm::Instance()->Sample(post_param_values, pRng_).ValuePtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
+      nodeValuesMap_[nodeId_] = DMNorm::Instance()->Sample(post_param_values, pRng_).ValuesPtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
 
       DataType::Array norm_const_param_values(2);
       norm_const_param_values[0] = DataType(obs_pred);

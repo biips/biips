@@ -261,7 +261,7 @@ void store_unregistered(const std::vector<po::parsed_options> & parsed_sources,
                   else
                     datatype_map[var].push_back(DataType(p_scalar_dim));
                 }
-                datatype_map[var][t].Value()[dim-1] = value;
+                datatype_map[var][t].Values()[dim-1] = value;
                 ++t;
               }
             }

@@ -462,14 +462,14 @@ namespace Biips
       Types<Scalar>::Array x_est_PS_1(t_max+1);
       for (Size t=0; t<t_max+1; ++t)
       {
-        x_gen_0[t] = x_gen[t].Value()[0];
-        x_gen_1[t] = x_gen[t].Value()[1];
-        x_est_KF_0[t] = x_est_KF[t].Value()[0];
-        x_est_KF_1[t] = x_est_KF[t].Value()[1];
-        x_est_PF_0[t] = x_est_PF[t].Value()[0];
-        x_est_PF_1[t] = x_est_PF[t].Value()[1];
-        x_est_PS_0[t] = x_est_PS[t].Value()[0];
-        x_est_PS_1[t] = x_est_PS[t].Value()[1];
+        x_gen_0[t] = x_gen[t].Values()[0];
+        x_gen_1[t] = x_gen[t].Values()[1];
+        x_est_KF_0[t] = x_est_KF[t].Values()[0];
+        x_est_KF_1[t] = x_est_KF[t].Values()[1];
+        x_est_PF_0[t] = x_est_PF[t].Values()[0];
+        x_est_PF_1[t] = x_est_PF[t].Values()[1];
+        x_est_PS_0[t] = x_est_PS[t].Values()[0];
+        x_est_PS_1[t] = x_est_PS[t].Values()[1];
       }
 
       results_plot.AddCurve(x_gen_0, x_gen_1, "hidden state", Qt::black, 2, Qt::NoPen, 9, QwtSymbol::Cross);
@@ -480,8 +480,8 @@ namespace Biips
       {
         for (Size t=0; t<t_max; ++t)
         {
-          y_obs_0[t] = y_obs[t].Value()[0];
-          y_obs_1[t] = y_obs[t].Value()[1];
+          y_obs_0[t] = y_obs[t].Values()[0];
+          y_obs_1[t] = y_obs[t].Values()[1];
         }
         results_plot.AddCurve(y_obs_0, y_obs_1, "observation", Qt::gray, 2, Qt::NoPen, 8, QwtSymbol::XCross);
       }

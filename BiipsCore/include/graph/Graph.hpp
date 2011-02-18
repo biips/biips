@@ -89,7 +89,7 @@ namespace Biips
     NodeId AddConstantNode(const DimArray::Ptr & pDim, const Types<StorageType>::Ptr & pValue);
     NodeId AddConstantNode(const DimArray & dim, const Types<StorageType>::Ptr & pValue);
 
-    NodeId AddConstantNode(const DataType & data) { return AddConstantNode(data.DimPtr(), data.ValuePtr()); }
+    NodeId AddConstantNode(const DataType & data) { return AddConstantNode(data.DimPtr(), data.ValuesPtr()); }
 
     NodeId AddAggNode(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);
     NodeId AddAggNode(const DimArray & dim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);

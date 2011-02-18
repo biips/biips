@@ -21,12 +21,12 @@ namespace Biips
       DataType ans;
       if ( left.IsScalar() )
       {
-        ans = DataType(right.DimPtr(), left.ScalarView() / right.Value());
+        ans = DataType(right.DimPtr(), left.ScalarView() / right.Values());
       }
       else if ( right.IsScalar() )
-        ans = DataType(left.DimPtr(), left.Value() / right.ScalarView());
+        ans = DataType(left.DimPtr(), left.Values() / right.ScalarView());
       else
-        ans = DataType(left.DimPtr(), left.Value() / right.Value());
+        ans = DataType(left.DimPtr(), left.Values() / right.Values());
       return ans;
     }
 }

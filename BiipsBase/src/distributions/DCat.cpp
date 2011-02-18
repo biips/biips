@@ -21,7 +21,7 @@ namespace Biips
     const DataType & weights = paramValues[0]; // TODO check dim
 
     typedef boost::random::discrete_distribution<Int ,Scalar> GenType;
-    GenType gen(weights.Value().begin(), weights.Value().end());
+    GenType gen(weights.Values().begin(), weights.Values().end());
 
     return DataType(Scalar(gen(pRng->GetGen()) + 1));
   }
@@ -32,7 +32,7 @@ namespace Biips
     const DataType & weights = paramValues[0]; // TODO check dim
     Scalar my_point = x.ScalarView(); // TODO check dim
 
-    return log(weights.Value()[Size(my_point)-1]);
+    return log(weights.Values()[Size(my_point)-1]);
   }
 
 }
