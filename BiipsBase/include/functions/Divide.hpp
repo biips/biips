@@ -11,21 +11,21 @@
 #ifndef BIIPS_DIVIDE_HPP_
 #define BIIPS_DIVIDE_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Divide : public Biips::Function
+  class Divide : public BinaryScalarFunction<std::divides<Scalar> >
   {
-  protected:
+  public:
     typedef Divide SelfType;
+    typedef BinaryScalarFunction<std::divides<Scalar> > BaseType;
 
-    Divide() : Function("/", 2) {};
+  protected:
+    Divide() : BaseType("/") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

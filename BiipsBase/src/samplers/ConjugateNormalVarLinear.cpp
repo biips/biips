@@ -133,16 +133,16 @@ namespace Biips
       Scalar post_mean = post_var * (prior_mean / prior_var + like_mean);
       like_mean /= like_var_inv;
 
-      DataType::Array post_param_values(2);
-      post_param_values[0] = DataType(post_mean);
-      post_param_values[1] = DataType(post_var);
+      MultiArray::Array post_param_values(2);
+      post_param_values[0] = MultiArray(post_mean);
+      post_param_values[1] = MultiArray(post_var);
       nodeValuesMap_[nodeId_] = DNormVar::Instance()->Sample(post_param_values,
           pRng_).ValuesPtr();
 
-      DataType::Array norm_const_param_values(2);
-      norm_const_param_values[0] = DataType(like_mean);
-      norm_const_param_values[1] = DataType(prior_var + 1 / like_var_inv);
-      logWeight_ = DNormVar::Instance()->LogUnnormPdf(DataType(prior_mean),
+      MultiArray::Array norm_const_param_values(2);
+      norm_const_param_values[0] = MultiArray(like_mean);
+      norm_const_param_values[1] = MultiArray(prior_var + 1 / like_var_inv);
+      logWeight_ = DNormVar::Instance()->LogUnnormPdf(MultiArray(prior_mean),
           norm_const_param_values);
       // TODO optimize computation removing constant terms
 
@@ -175,7 +175,7 @@ namespace Biips
       if (nodeIdDefined_)
       {
         conjugate_ = false;
-        if (node.PriorName() == "dnorm.var")
+        if (node.PriorName() == "dnormvar")
         {
           NodeId mean_id = node.Parents()[0];
           NodeId var_id = node.Parents()[1];
@@ -227,7 +227,7 @@ namespace Biips
         canSample_ = false;
         if ( !pGraph_->GetObserved()[nodeId_] ) // TODO throw exception
         {
-          if (node.PriorName() == "dnorm.var")
+          if (node.PriorName() == "dnormvar")
           {
             StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
             boost::tie(it_offspring, it_offspring_end)

@@ -16,9 +16,9 @@ namespace Biips
   class Graph;
   class NodeSampler;
 
-  DataType getNodeValue(NodeId nodeId, const Graph * pGraph, NodeSampler * pNodeSampler);
+  MultiArray getNodeValue(NodeId nodeId, const Graph * pGraph, NodeSampler * pNodeSampler);
 
-  DataType::Array getParamValues(NodeId nodeId, const Graph * pGraph, NodeSampler * pSampleNodeVis);
+  MultiArray::Array getParamValues(NodeId nodeId, const Graph * pGraph, NodeSampler * pSampleNodeVis);
 }
 
 

@@ -19,7 +19,7 @@ namespace Biips
 
 
   void ConjugateMNormalVar::formLikeParamContrib(NodeId likeId,
-      DataType::Array & likeParamContribValues)
+      MultiArray::Array & likeParamContribValues)
   {
     VectorRef like_mean(likeParamContribValues[0]);
     MatrixRef like_prec(likeParamContribValues[1]);
@@ -33,7 +33,7 @@ namespace Biips
     ublas::cholesky_factorize(prec_i_mat);
     ublas::cholesky_invert(prec_i_mat);
 
-    DataType obs_i(pGraph_->GetNode(likeId).DimPtr(), pGraph_->GetValues()[likeId]);
+    MultiArray obs_i(pGraph_->GetNode(likeId).DimPtr(), pGraph_->GetValues()[likeId]);
     VectorRef obs_i_vec(obs_i);
 
     like_mean += ublas::prod(prec_i_mat, obs_i_vec);
@@ -41,8 +41,8 @@ namespace Biips
   }
 
 
-  DataType::Array ConjugateMNormalVar::postParam(const DataType::Array & priorParamValues,
-      const DataType::Array & likeParamContribValues) const
+  MultiArray::Array ConjugateMNormalVar::postParam(const MultiArray::Array & priorParamValues,
+      const MultiArray::Array & likeParamContribValues) const
   {
     Matrix post_cov(priorParamValues[1]);
 
@@ -57,17 +57,17 @@ namespace Biips
 
     post_mean = ublas::prod(post_cov, post_mean);
 
-    DataType::Array post_param_values(2);
-    post_param_values[0] = DataType(post_mean);
-    post_param_values[1] = DataType(post_cov);
+    MultiArray::Array post_param_values(2);
+    post_param_values[0] = MultiArray(post_mean);
+    post_param_values[1] = MultiArray(post_cov);
     return post_param_values;
   }
 
 
-  Scalar ConjugateMNormalVar::computeLogWeight(const DataType & sampledData,
-      const DataType::Array & priorParamValues,
-      const DataType::Array & postParamValues,
-      const DataType::Array & LikeParamContrib)
+  Scalar ConjugateMNormalVar::computeLogWeight(const MultiArray & sampledData,
+      const MultiArray::Array & priorParamValues,
+      const MultiArray::Array & postParamValues,
+      const MultiArray::Array & LikeParamContrib)
   {
     Matrix norm_const_cov(LikeParamContrib[1]);
     ublas::cholesky_factorize(norm_const_cov);
@@ -76,9 +76,9 @@ namespace Biips
     Vector norm_const_mean = ublas::prod(norm_const_cov, Vector(LikeParamContrib[0]));
     norm_const_cov += Matrix(priorParamValues[1]);
 
-    DataType::Array norm_const_param_values(2);
-    norm_const_param_values[0] = DataType(norm_const_mean);
-    norm_const_param_values[1] = DataType(norm_const_cov);
+    MultiArray::Array norm_const_param_values(2);
+    norm_const_param_values[0] = MultiArray(norm_const_mean);
+    norm_const_param_values[1] = MultiArray(norm_const_cov);
     return DMNormVar::Instance()->LogUnnormPdf(priorParamValues[0], norm_const_param_values);
   }
 

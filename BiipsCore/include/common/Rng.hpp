@@ -20,6 +20,9 @@ namespace Biips
   class Rng : public smc::rng
   {
   public:
+    typedef Rng SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+
     typedef boost::mt19937 GenType;
     typedef GenType::result_type ResultType;
 

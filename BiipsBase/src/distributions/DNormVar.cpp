@@ -16,7 +16,19 @@
 namespace Biips
 {
 
-  DataType DNormVar::Sample(const DataType::Array & paramValues, Rng * pRng) const
+  Bool DNormVar::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    const DimArray & left = *paramDims[0];
+    const DimArray & right = *paramDims[1];
+    return left.IsScalar() && right.IsScalar();
+  }
+
+  DimArray DNormVar::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    return *P_SCALAR_DIM;
+  }
+
+  MultiArray DNormVar::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
   {
     // TODO check paramValues
     Scalar mean = paramValues[0].ScalarView(); // TODO check dim
@@ -29,11 +41,11 @@ namespace Biips
     typedef meta::random_generator<DistType, Rng::GenType&>::type GenType;
     GenType gen = make_random_generator(pRng->GetGen(), dist);
 
-    return DataType(gen());
+    return MultiArray(gen());
   }
 
 
-  Scalar DNormVar::LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const
+  Scalar DNormVar::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     Scalar mean = paramValues[0].ScalarView(); // TODO check dim
     Scalar var = paramValues[1].ScalarView(); // TODO check dim

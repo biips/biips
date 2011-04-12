@@ -11,21 +11,28 @@
 #ifndef BIIPS_POW_HPP_
 #define BIIPS_POW_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
-
-  class Pow : public Biips::Function
+  struct PowScalar : public std::binary_function<Scalar, Scalar, Scalar>
   {
-  protected:
-    typedef Pow SelfType;
+    Scalar operator() (Scalar base, Scalar exponent) const
+    {
+      return std::pow(base, exponent);
+    }
+  };
 
-    Pow() : Function("^", 2) {};
+  class Pow : public BinaryScalarFunction<PowScalar>
+  {
+  public:
+    typedef Pow SelfType;
+    typedef BinaryScalarFunction<PowScalar> BaseType;
+
+  protected:
+    Pow() : BaseType("^") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

@@ -61,45 +61,81 @@ namespace Biips
       {
         case MULTIPLY:
         {
-          NodeId left_operand_id = node.Parents()[0];
-          NodeId right_operand_id = node.Parents()[1];
-          switch( nodesRelation(left_operand_id, myId_, pGraph_) )
+          // Exactly one parent must be DEPENDING and linear.
+          // the other parents must be KNOWN and scalar
+          ans_ = true;
+          Bool depending_is_found = false;
+          for (Size i=0; i<node.Parents().size() && ans_; ++i)
           {
-            case KNOWN:
+            NodeId operand_id = node.Parents()[i];
+            switch( nodesRelation(operand_id, myId_, pGraph_) )
             {
-              if ( pGraph_->GetNode(left_operand_id).Dim().IsScalar() )
+              case KNOWN:
               {
-                SelfType right_op_is_linear_vis(pGraph_, myId_);
-                pGraph_->VisitNode(right_operand_id, right_op_is_linear_vis);
-                ans_ = right_op_is_linear_vis.IsLinear();
+                ans_ = pGraph_->GetNode(operand_id).Dim().IsScalar();
+                break;
               }
-              else
-                ans_ = false;
-              break;
-            }
-            case DEPENDING:
-            {
-              if ( pGraph_->GetNode(right_operand_id).Dim().IsScalar() )
+              case DEPENDING:
               {
-                SelfType left_op_is_linear_vis(pGraph_, myId_);
-                pGraph_->VisitNode(left_operand_id, left_op_is_linear_vis);
-                if ( left_op_is_linear_vis.IsLinear() )
-                  ans_ = (nodesRelation(right_operand_id, myId_, pGraph_) == KNOWN);
+                if (!depending_is_found)
+                {
+                  depending_is_found = true;
+                  SelfType op_is_linear_vis(pGraph_, myId_);
+                  pGraph_->VisitNode(operand_id, op_is_linear_vis);
+                  ans_ = op_is_linear_vis.IsLinear();
+                }
                 else
                   ans_ = false;
+                break;
               }
-              else
+              default:
                 ans_ = false;
-              break;
+                break;
             }
-            default:
-              ans_ = false;
-              break;
           }
+
+          if (!depending_is_found)
+            ans_ = false;
+
           break;
         }
 
-        case ADD: case SUBSTRACT:
+        case ADD:
+        {
+          // Parents must be KNOWN or DEPENDING and linear.
+          // At least one parent must be DEPENDING and linear.
+          ans_ = true;
+          Bool depending_is_found = false;
+          for (Size i=0; i<node.Parents().size() && ans_; ++i)
+          {
+            NodeId operand_id = node.Parents()[i];
+            switch( nodesRelation(operand_id, myId_, pGraph_) )
+            {
+              case KNOWN:
+              {
+                break;
+              }
+              case DEPENDING:
+              {
+                depending_is_found = true;
+                SelfType op_is_linear_vis(pGraph_, myId_);
+                pGraph_->VisitNode(operand_id, op_is_linear_vis);
+                ans_ = op_is_linear_vis.IsLinear();
+                break;
+              }
+              default:
+                ans_ = false;
+                break;
+            }
+          }
+
+          if (!depending_is_found)
+            ans_ = false;
+
+          break;
+        }
+
+        case SUBSTRACT:
         {
           NodeId left_operand_id = node.Parents()[0];
           NodeId right_operand_id = node.Parents()[1];

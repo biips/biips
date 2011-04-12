@@ -25,7 +25,6 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.955485677" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1055815362" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.371926597" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="/usr/include/qwt-qt4"/>
@@ -36,7 +35,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsTest/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/non_parametric}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.91367630" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -44,7 +42,6 @@
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.2075834757" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.exe.debug.option.debugging.level.1491054740" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.include.paths.1835895020" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.723133123" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -54,18 +51,18 @@
 <option id="gnu.cpp.link.option.paths.834391266" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Debug}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Debug}&quot;"/>
-<listOptionValue builtIn="false" value="/usr/lib"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/lib}&quot;"/>
+<listOptionValue builtIn="false" value="/usr/lib"/>
 </option>
 <option id="gnu.cpp.link.option.libs.1397943201" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="boost_unit_test_framework"/>
 <listOptionValue builtIn="false" value="boost_program_options"/>
+<listOptionValue builtIn="false" value="qwt-qt4"/>
 <listOptionValue builtIn="false" value="BiipsBase"/>
 <listOptionValue builtIn="false" value="BiipsCore"/>
 <listOptionValue builtIn="false" value="smctc"/>
 <listOptionValue builtIn="false" value="gsl"/>
 <listOptionValue builtIn="false" value="gslcblas"/>
-<listOptionValue builtIn="false" value="qwt-qt4"/>
 </option>
 <option id="gnu.cpp.link.option.shared.1835408046" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" value="false" valueType="boolean"/>
 <option id="gnu.cpp.link.option.flags.1576707549" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
@@ -76,7 +73,6 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1233726062" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 <option id="gnu.both.asm.option.include.paths.366076305" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1881836962" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -84,7 +80,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="src/t_ParseTree.cpp|src/t_HmmMultiDLinear.cpp|src/t_HmmMultiD.cpp|src/t_Hmm1DNonLinear.cpp|src/t_Hmm1DLinear.cpp|src/t_Hmm1D.cpp|src/t_DirichletMultinomialSimplified.cpp|src/t_DirichletMultinomial.cpp|src/t_BetaBinomial.cpp|src/Copy of ModelTest.cpp|t_Hmm1D_mini.cpp|t_Hmm1DLinear_tuto.cpp|KalmanFilter.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="t_Hmm1D_mini.cpp|src/t_ParseTree.cpp|src/t_HmmMultiDLinear.cpp|src/t_HmmMultiD.cpp|src/t_Hmm1DNonLinear.cpp|src/t_Hmm1DLinear.cpp|src/t_Hmm1D.cpp|src/t_DirichletMultinomialSimplified.cpp|src/t_DirichletMultinomial.cpp|src/t_BetaBinomial.cpp|src/Copy of ModelTest.cpp|t_Hmm1DLinear_tuto.cpp|KalmanFilter.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -95,12 +91,8 @@
 <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsBase/Debug"/>
 </externalSetting>
 </externalSettings>
-<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-<externalSetting>
-<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsCore"/>
-<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCore/Debug"/>
-</externalSetting>
-</externalSettings>
+<externalSettings containerId="smctc;0.1168322298" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="scannerConfiguration">
@@ -901,7 +893,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsTest/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/non_parametric}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1652551640" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -919,18 +910,18 @@
 <option id="gnu.cpp.link.option.paths.762233743" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
-<listOptionValue builtIn="false" value="/usr/lib"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/lib}&quot;"/>
+<listOptionValue builtIn="false" value="/usr/lib"/>
 </option>
 <option id="gnu.cpp.link.option.libs.313426954" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="boost_unit_test_framework"/>
 <listOptionValue builtIn="false" value="boost_program_options"/>
+<listOptionValue builtIn="false" value="qwt-qt4"/>
 <listOptionValue builtIn="false" value="BiipsBase"/>
 <listOptionValue builtIn="false" value="BiipsCore"/>
 <listOptionValue builtIn="false" value="smctc"/>
 <listOptionValue builtIn="false" value="gsl"/>
 <listOptionValue builtIn="false" value="gslcblas"/>
-<listOptionValue builtIn="false" value="qwt-qt4"/>
 </option>
 <option id="gnu.cpp.link.option.flags.1648228980" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1272418767" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -948,7 +939,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="src/t_ParseTree.cpp|src/t_HmmMultiDLinear.cpp|src/t_HmmMultiD.cpp|src/t_Hmm1DNonLinear.cpp|src/t_Hmm1DLinear.cpp|src/t_Hmm1D.cpp|src/t_DirichletMultinomialSimplified.cpp|src/t_DirichletMultinomial.cpp|src/t_BetaBinomial.cpp|src/Copy of ModelTest.cpp|t_Hmm1D_mini.cpp|t_Hmm1DLinear_tuto.cpp|KalmanFilter.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="t_Hmm1D_mini.cpp|src/t_ParseTree.cpp|src/t_HmmMultiDLinear.cpp|src/t_HmmMultiD.cpp|src/t_Hmm1DNonLinear.cpp|src/t_Hmm1DLinear.cpp|src/t_Hmm1D.cpp|src/t_DirichletMultinomialSimplified.cpp|src/t_DirichletMultinomial.cpp|src/t_BetaBinomial.cpp|src/Copy of ModelTest.cpp|t_Hmm1DLinear_tuto.cpp|KalmanFilter.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>

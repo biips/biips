@@ -37,7 +37,7 @@ namespace Biips
 
     std::map<String, Size> sizeParamMap_;
     std::map<String, Scalar> scalarParamMap_;
-    std::map<String, DataType> dataTypeParamMap_;
+    std::map<String, MultiArray> dataTypeParamMap_;
 
     Types<String>::Array inDataVarNames_;
     Types<String>::Array obsVarNames_;
@@ -50,27 +50,27 @@ namespace Biips
     std::map<String, Types<NodeId>::Array> dataNodeIdMap_;
     std::map<String, Types<NodeId>::Array> modelNodeIdMap_;
 
-    std::map<String, DataType::Array> dataValuesMap_;
-    std::map<String, DataType::Array> benchFilterValuesMap_;
-    std::map<String, DataType::Array> benchSmoothValuesMap_;
-    std::map<String, DataType::Array> smcFilterValuesMap_;
-    std::map<String, DataType::Array> smcSmoothValuesMap_;
+    std::map<String, MultiArray::Array> dataValuesMap_;
+    std::map<String, MultiArray::Array> benchFilterValuesMap_;
+    std::map<String, MultiArray::Array> benchSmoothValuesMap_;
+    std::map<String, MultiArray::Array> smcFilterValuesMap_;
+    std::map<String, MultiArray::Array> smcSmoothValuesMap_;
 
 
     template<typename InputIterator>
     void printValues(std::ostream & os, const String & name, InputIterator first, const InputIterator & last, char separator = ' ') const;
 
-    void printValues(std::ostream & os, const String & name, const DataType::Array & dataArray, Size len = 1, char separator = ' ') const;
+    void printValues(std::ostream & os, const String & name, const MultiArray::Array & dataArray, Size len = 1, char separator = ' ') const;
 
-    void printLine(std::ostream & os, const DataType::Array & dataArray, Size dim = 0, char separator = ' ') const;
+    void printLine(std::ostream & os, const MultiArray::Array & dataArray, Size dim = 0, char separator = ' ') const;
 
-    void setDataArrayMap(const std::map<String, std::vector<DataType> > & from, std::map<String, DataType::Array> & to);
+    void setDataArrayMap(const std::map<String, std::vector<MultiArray> > & from, std::map<String, MultiArray::Array> & to);
 
     void setObsValues();
 
     Bool error(Scalar & error, const Types<String>::Array & varNames,
-        const std::map<String, DataType::Array> & smcValuesMap,
-        const std::map<String, DataType::Array> & benchValuesMap) const;
+        const std::map<String, MultiArray::Array> & smcValuesMap,
+        const std::map<String, MultiArray::Array> & benchValuesMap) const;
 
     virtual void initFilterAccumulators() = 0;
     virtual void initSmoothAccumulators() = 0;
@@ -89,11 +89,11 @@ namespace Biips
     virtual void PrintIntro() const = 0;
 
 //    virtual void InputModelParam(std::istream & is = std::cin) = 0;
-    void SetModelParam(const std::map<String, DataType> & model_param_map);
+    void SetModelParam(const std::map<String, MultiArray> & model_param_map);
     void SetDimensions(const std::map<String, DimArray::Ptr> & dim_map);
-    void SetData(const std::map<String, std::vector<DataType> > & data_map) { setDataArrayMap(data_map, dataValuesMap_); }
-    void SetBenchFilter(const std::map<String, std::vector<DataType> > & bench_filter_map) { setDataArrayMap(bench_filter_map, benchFilterValuesMap_); }
-    void SetBenchSmooth(const std::map<String, std::vector<DataType> > & bench_smooth_map) { setDataArrayMap(bench_smooth_map, benchSmoothValuesMap_); }
+    void SetData(const std::map<String, std::vector<MultiArray> > & data_map) { setDataArrayMap(data_map, dataValuesMap_); }
+    void SetBenchFilter(const std::map<String, std::vector<MultiArray> > & bench_filter_map) { setDataArrayMap(bench_filter_map, benchFilterValuesMap_); }
+    void SetBenchSmooth(const std::map<String, std::vector<MultiArray> > & bench_smooth_map) { setDataArrayMap(bench_smooth_map, benchSmoothValuesMap_); }
 
     virtual void BuildDataGraph();
 
@@ -102,6 +102,7 @@ namespace Biips
     const std::map<String, Size> & DataUnobsNodesSummary() const { return pDataGraph_->UnobsNodesSummary(); };
 
     void PrintDataGraph() { pDataGraph_->PrintGraph(os_); };
+    void PrintDataGraphviz() { pDataGraph_->PrintGraphviz(os_); };
 
     void SampleData(Size rngSeed);
 
@@ -122,6 +123,7 @@ namespace Biips
     const std::map<String, Size> & ModelUnobsNodesSummary() const { return pModelGraph_->UnobsNodesSummary(); };
 
     void PrintModelGraph() { pModelGraph_->PrintGraph(os_); };
+    void PrintModelGraphviz() { pModelGraph_->PrintGraphviz(os_); };
 
     void ClearSMC();
     virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, Scalar essThreshold = 0.5, ResampleType rsType = SMC_RESAMPLE_STRATIFIED, Bool showProgress = true);

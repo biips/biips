@@ -15,38 +15,11 @@
 
 #include "common/Types.hpp"
 
-#include <boost/numeric/ublas/fwd.hpp>
 #include <boost/operators.hpp>
 #include <algorithm>
 
 namespace Biips
 {
-  //! Alias for ublas namespace
-  /*!
-   * Boost.uBLAS is a C++ template class library for Basic Linear Algebra.
-   * It provides BLAS level 1, 2, 3 functionality for dense, packed and sparse matrices.
-   * The design and implementation unify mathematical notation via operator overloading
-   * and efficient code generation via expression templates.
-   * http://www.boost.org/doc/libs/1_44_0/libs/numeric/ublas/doc/index.htm
-   */
-  namespace ublas = boost::numeric::ublas;
-
-  //! The row-major ordering type
-  /*!
-   * Specifies the storage ordering type of the values of an
-   * n-dimensional object in a contiguous array container.
-   * Row-major means the right most index moves faster.
-   * Row-major is used in C/C++ arrays.
-   */
-  typedef ublas::row_major RowMajorOrder;
-  //! The column-major ordering type
-  /*!
-   * Specifies the ordering type of values of an n-dimensional
-   * in a contiguous array container.
-   * Column-major means the left most index moves faster.
-   * Column-major is used in Fortran, Matlab, Octave and R arrays.
-   */
-  typedef ublas::column_major ColumnMajorOrder;
 
 
   //! A values array class
@@ -64,9 +37,6 @@ namespace Biips
     typedef ValArray SelfType;
     //! A shared pointer of ValArray
     typedef Types<SelfType>::Ptr Ptr;
-
-    //! Storage order used in Biips is row-major
-    typedef RowMajorOrder StorageOrder;
 
     /*!
      * Creates an empty ValArray.
@@ -207,11 +177,23 @@ namespace Biips
     ValArray Apply(BinaryOperator op, const ValArray & rhs) const;
 
     /*!
-     * Prints the elements of the ValArray in line and comma separated
-     * @param os output stream receiving the print
+     * Applies an unary operator to each element of this ValArray.
+     * The resault is stored in this ValArray.
+     * @param op Unary operator. It can be a functor or a function pointer
      */
-    void Print(std::ostream & os = std::cout) const;
+    template <typename UnaryOperator>
+    ValArray & SelfApply(UnaryOperator op);
 
+    /*!
+     * Applies a binary operator element-wise to this ValArray and another
+     * ValArray of the same size.
+     * The result is stored in this ValArray.
+     * @param op Binary operator. It can be a functor or a function pointer
+     * @param rhs The right hand side operand ValArray
+     * @return The result ValArray
+     */
+    template <typename BinaryOperator>
+    ValArray & SelfApply(BinaryOperator op, const ValArray & rhs);
 
   };
 
@@ -233,6 +215,21 @@ namespace Biips
     return ans;
   }
 
+  template <typename UnaryOperator>
+  ValArray & ValArray::SelfApply(UnaryOperator op)
+  {
+    std::transform(begin(), end(), begin(), op);
+    return *this;
+  }
+
+
+  template <typename BinaryOperator>
+  ValArray & ValArray::SelfApply(BinaryOperator op, const ValArray & rhs)
+  {
+    std::transform(begin(), end(), rhs.begin(), begin(), op);
+    return *this;
+  }
+
 
   ValArray operator - (Scalar val, const ValArray & rhs);
   ValArray operator / (Scalar val, const ValArray & rhs);
@@ -243,26 +240,6 @@ namespace Biips
   ValArray operator < (Scalar val, const ValArray & rhs);
   ValArray operator >= (Scalar val, const ValArray & rhs);
   ValArray operator <= (Scalar val, const ValArray & rhs);
-
-  inline Scalar sqrtScalar(Scalar s)
-  {
-    return std::sqrt(s);
-  }
-
-
-  inline Scalar cosScalar(Scalar s)
-  {
-    return std::cos(s);
-  }
-
-
-  struct PowScalar : public std::binary_function<Scalar, Scalar, Scalar>
-  {
-    Scalar operator() (Scalar base, Scalar exponent) const
-    {
-      return std::pow(base, exponent);
-    }
-  };
 
 }
 

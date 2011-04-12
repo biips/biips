@@ -52,7 +52,7 @@ namespace Biips
     virtual const String & Name() const { return NAME_; };
 
     template <typename NodeValuesMapType, typename FlagsMapType>
-    void SetAttributes(NodeValuesMapType & nodeValues, FlagsMapType & sampledFlags, Rng * pRng);
+    void SetAttributes(NodeValuesMapType & nodeValues, FlagsMapType & sampledFlags, Rng * pRng); // TODO rename into SetMembers
     void Sample(NodeId nodeId);
 
     explicit NodeSampler(const Graph * pGraph) :

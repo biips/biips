@@ -27,7 +27,7 @@ namespace Biips
     typedef GetMLinearTransformVisitor SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef DataType::StorageType StorageType;
+    typedef MultiArray::StorageType StorageType;
 
     const Graph * pGraph_;
     NodeId myId_;

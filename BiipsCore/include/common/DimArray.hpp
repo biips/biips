@@ -89,7 +89,11 @@ namespace Biips
      * Indicates whether the DimArray corresponds to a squared matrix.
      */
     Bool IsSquared() const { return IsMatrix() && (at(0) == at(1)); }
+
+    DimArray Drop() const;
   };
+
+  const DimArray::Ptr P_SCALAR_DIM(new DimArray(1, 1));
 }
 
 #endif /* BIIIPS_DIMARRAY_HPP_ */

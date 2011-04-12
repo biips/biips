@@ -133,16 +133,16 @@ namespace Biips
       Scalar post_mean = (prior_mean * prior_prec + like_mean) / post_prec;
       like_mean /= like_prec;
 
-      DataType::Array post_param_values(2);
-      post_param_values[0] = DataType(post_mean);
-      post_param_values[1] = DataType(post_prec);
+      MultiArray::Array post_param_values(2);
+      post_param_values[0] = MultiArray(post_mean);
+      post_param_values[1] = MultiArray(post_prec);
       nodeValuesMap_[nodeId_] = DNorm::Instance()->Sample(post_param_values,
           pRng_).ValuesPtr();
 
-      DataType::Array norm_const_param_values(2);
-      norm_const_param_values[0] = DataType(like_mean);
-      norm_const_param_values[1] = DataType(1.0 / (1.0 / prior_prec + 1.0 / like_prec) );
-      logWeight_ = DNorm::Instance()->LogUnnormPdf(DataType(prior_mean),
+      MultiArray::Array norm_const_param_values(2);
+      norm_const_param_values[0] = MultiArray(like_mean);
+      norm_const_param_values[1] = MultiArray(1.0 / (1.0 / prior_prec + 1.0 / like_prec) );
+      logWeight_ = DNorm::Instance()->LogUnnormPdf(MultiArray(prior_mean),
           norm_const_param_values);
       // TODO optimize computation removing constant terms
 

@@ -47,11 +47,15 @@ namespace Biips
      * Constructs a Function object from a name and number
      * of parameters.
      * @param name name of the function in BUGS language
-     * @param nParam number of parameters
+     * @param nParam number of parameters (0 means a variable number of parameters)
      * This constructor is protected according to the singleton
      * design pattern.
      */
     Function(const String & name, Size nParam) : name_(name), nParam_(nParam) {};
+
+    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
+
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
 
   public:
     typedef Function SelfType;
@@ -63,14 +67,36 @@ namespace Biips
     //! Number of parameters member accessor
     Size NParam() const { return nParam_; };
 
+    Bool CheckNParam(Size n) const { return nParam_ > 0 ? n == nParam_ : n > 0; }
+
+    /*!
+     * Checks whether dimensions of the function parameters are correct.
+     *
+     * @param paramDims Array of length npar_ denoting the dimensions of
+     * the parameters, with any redundant dimensions dropped.
+     */
+    Bool CheckParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+
+    /*!
+     * Calculates what the dimension of the return value should be,
+     * based on the dimensions of the arguments. The dimension of the
+     * return value cannot depend on the value of any of the arguments,
+     * only their dimensions.
+     *
+     * @param paramDims Array of DimArray::Ptr denoting the dimensions of the
+     * parameters. This array must return true when passed to
+     * CheckParamDims.
+     */
+    DimArray Dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+
     //! Evaluation of the function
     /*!
      * Evaluates the function given its parameters values in paramValues.
      * @param paramValues values array of the parameters.
-     * The DataType values must ordered according
+     * The MultiArray values must ordered according
      * to the parameters order of the function.
      */
-    virtual DataType Eval(const DataType::Array & paramValues) const = 0;
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const = 0;
 
     virtual ~Function() {};
   };

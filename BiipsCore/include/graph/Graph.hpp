@@ -15,11 +15,14 @@
 #include "function/Function.hpp"
 #include "distribution/Distribution.hpp"
 
+#include <boost/graph/graphviz.hpp>
+
 
 namespace Biips
 {
 
   class NodeVisitor;
+
 
   class Graph
   {
@@ -27,11 +30,8 @@ namespace Biips
     typedef Graph SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef std::map<String, Function::Ptr> FunctionTab;
-    typedef std::map<String, Distribution::Ptr> DistributionTab;
-
   protected:
-    typedef DataType::StorageType StorageType;
+    typedef MultiArray::StorageType StorageType;
 
     typedef GraphTypes::FullGraph FullGraph;
 
@@ -76,39 +76,48 @@ namespace Biips
     std::map<String, Size> nodesSummaryMap_;
     std::map<String, Size> unobsNodesSummaryMap_;
 
-    void buildDirectEdges();
     void topologicalSort();
     void buildStochasticParentEdges();
     void buildStochasticChildrenEdges();
     void setValue(NodeId nodeId, const ValArray::Ptr & pVal) { boost::put(boost::vertex_value, fullGraph_, nodeId, pVal); }
+    Types<DimArray::Ptr>::Array getParamDims(const Types<NodeId>::Array parameters) const;
 
   public:
-    static FunctionTab & FuncTab() { static FunctionTab ans; return ans; };
-    static DistributionTab & DistTab() { static DistributionTab ans; return ans; };
+    Graph();
 
     NodeId AddConstantNode(const DimArray::Ptr & pDim, const Types<StorageType>::Ptr & pValue);
     NodeId AddConstantNode(const DimArray & dim, const Types<StorageType>::Ptr & pValue);
 
-    NodeId AddConstantNode(const DataType & data) { return AddConstantNode(data.DimPtr(), data.ValuesPtr()); }
+    NodeId AddConstantNode(const MultiArray & data) { return AddConstantNode(data.DimPtr(), data.ValuesPtr()); }
 
     NodeId AddAggNode(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);
     NodeId AddAggNode(const DimArray & dim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);
 
-    NodeId AddLogicalNode(const DimArray::Ptr & pDim, const String & funcName, const Types<NodeId>::Array & parameters);
-    NodeId AddLogicalNode(const DimArray & dim, const String & funcName, const Types<NodeId>::Array & parameters);
+    NodeId AddLogicalNode(const DimArray::Ptr & pDim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters);
+    NodeId AddLogicalNode(const DimArray & dim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters);
+    NodeId AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters);
 
-    NodeId AddStochasticNode(const DimArray::Ptr & pDim, const String & distName, const Types<NodeId>::Array & parameters, Bool observed = false);
-    NodeId AddStochasticNode(const DimArray & dim, const String & distName, const Types<NodeId>::Array & parameters, Bool observed = false);
+    NodeId AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed = false);
+    NodeId AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed = false);
+    NodeId AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed = false);
 
-    NodeId AddStochasticNode(const DimArray::Ptr & pDim, const String & distName, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue);
-    NodeId AddStochasticNode(const DimArray & dim, const String & distName, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue);
+    NodeId AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue);
+    NodeId AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue);
+    NodeId AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue);
 
-    Types<DirectParentNodeIdIterator>::Pair GetParents(NodeId nodeId) const { return boost::adjacent_vertices(nodeId, directParentGraph_); }; // TODO check builtFlag_
-    Types<DirectChildrenNodeIdIterator>::Pair GetChildren(NodeId nodeId) const { return boost::adjacent_vertices(nodeId, directChildrenGraph_); }; // TODO check builtFlag_
-    Types<StochasticParentNodeIdIterator>::Pair GetStochasticParents(NodeId nodeId) const { return boost::adjacent_vertices(nodeId, stochasticParentGraph_); }; // TODO check builtFlag_
-    Types<StochasticChildrenNodeIdIterator>::Pair GetStochasticChildren(NodeId nodeId) const { return boost::adjacent_vertices(nodeId, stochasticChildrenGraph_); }; // TODO check builtFlag_
+    void PopNode();
+
+    Types<DirectParentNodeIdIterator>::Pair GetParents(NodeId nodeId) const;
+    Types<DirectChildrenNodeIdIterator>::Pair GetChildren(NodeId nodeId) const;
+    Types<StochasticParentNodeIdIterator>::Pair GetStochasticParents(NodeId nodeId) const;
+    Types<StochasticChildrenNodeIdIterator>::Pair GetStochasticChildren(NodeId nodeId) const;
+
+    Types<NodeId>::ConstIteratorPair GetNodes() const;
 
     Size GetSize() const { return boost::num_vertices(fullGraph_); };
+    Bool Empty() const { return boost::num_vertices(fullGraph_) == 0; };
+    Bool IsBuilt() const { return builtFlag_; };
+
     const std::map<String, Size> & NodesSummary() const { return nodesSummaryMap_; };
     const std::map<String, Size> & UnobsNodesSummary() const { return unobsNodesSummaryMap_; };
     Bool HasCycle() const;
@@ -120,15 +129,53 @@ namespace Biips
     NodeValues SampleValues(Rng * pRng) const;
     ConstObservedPropertyMap GetObserved() const { return boost::get(boost::vertex_observed, fullGraph_); }
     ConstValuesPropertyMap GetValues() const { return boost::get(boost::vertex_value, fullGraph_); }
+    void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
     void SetObsValues(const NodeValues & nodeValues);
-    Types<NodeId>::ConstIteratorPair GetNodes() const { return iterRange(topoOrder_); }; // TODO check builtFlag_
-    void PrintGraph(std::ostream & os = std::cout) const; // TODO check builtFlag_
+
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
     Node const & GetNode(NodeId nodeId) const { return *boost::get(boost::vertex_node_ptr, fullGraph_, nodeId); };
     Node const & operator[] (NodeId nodeId) const { return GetNode(nodeId); };
 
-    Graph();
+    // TODO remove from the class
+    void PrintGraph(std::ostream & os = std::cout) const;
+    void PrintTopoOrder(std::ostream & os = std::cout) const;
+
+    template<typename VertexWriter>
+    void PrintGraphviz(std::ostream & os, VertexWriter vw) const;
+    void PrintGraphviz(std::ostream & os) const;
   };
+
+
+  template<typename VertexWriter>
+  void Graph::PrintGraphviz(std::ostream & os, VertexWriter vw) const
+  {
+    boost::write_graphviz(os, directChildrenGraph_, vw);
+  }
+
+
+  class VertexPropertyWriter
+  {
+  protected:
+    const Graph & graph_;
+
+  public:
+    typedef VertexPropertyWriter SelfType;
+
+    VertexPropertyWriter(const Graph & graph): graph_(graph) {}
+    virtual ~VertexPropertyWriter() {}
+
+    virtual void operator()(std::ostream & out, NodeId id) const;
+
+  protected:
+    virtual String label(NodeId id) const;
+
+    virtual String shape(NodeId id) const;
+
+    virtual String color(NodeId id) const;
+
+    virtual String style(NodeId id) const;
+  };
+
 
 }
 

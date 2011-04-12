@@ -52,7 +52,7 @@ namespace Biips
       {
         if ( pGraph_->GetObserved()[nodeId_] )
         {
-          DataType cov_i_dat(getNodeValue(node.Parents()[1], pGraph_, pSampleNodeVis_));
+          MultiArray cov_i_dat(getNodeValue(node.Parents()[1], pGraph_, pSampleNodeVis_));
           MatrixRef cov_i(cov_i_dat);
           Size dim_obs = cov_i.size1();
           Size cov_old_dim = cov_.size1();
@@ -73,7 +73,7 @@ namespace Biips
           b_.resize(b_old_size + b_i.size());
           ublas::project(b_, ublas::range(b_old_size, b_.size())) = b_i;
 
-          DataType obs_i_dat(node.DimPtr(), pGraph_->GetValues()[nodeId_]);
+          MultiArray obs_i_dat(node.DimPtr(), pGraph_->GetValues()[nodeId_]);
 
           VectorRef obs_i(obs_i_dat);
           Size obs_old_size = obs_.size();
@@ -118,7 +118,7 @@ namespace Biips
       const Matrix & like_cov = like_form_vis.GetCov();
       const Vector & obs = like_form_vis.GetObs();
 
-      DataType prior_var_dat(getNodeValue(prior_var_id, pGraph_, this));
+      MultiArray prior_var_dat(getNodeValue(prior_var_id, pGraph_, this));
       MatrixRef prior_var(prior_var_dat);
 
       Matrix kalman_gain = ublas::prod(prior_var, ublas::trans(like_A));
@@ -128,7 +128,7 @@ namespace Biips
       ublas::cholesky_invert(inn_cov_inv);
       kalman_gain = ublas::prod(kalman_gain, inn_cov_inv);
 
-      DataType prior_mean_dat(getNodeValue(prior_mean_id, pGraph_, this));
+      MultiArray prior_mean_dat(getNodeValue(prior_mean_id, pGraph_, this));
       VectorRef prior_mean(prior_mean_dat);
 
       Vector obs_pred = ublas::prod(like_A, prior_mean) + like_b;
@@ -138,15 +138,15 @@ namespace Biips
       Matrix post_var = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node, dim_node) - Matrix(ublas::prod(kalman_gain, like_A))), prior_var);
       prior_var.Release();
 
-      DataType::Array post_param_values(2);
-      post_param_values[0] = DataType(post_mean);
-      post_param_values[1] = DataType(post_var);
+      MultiArray::Array post_param_values(2);
+      post_param_values[0] = MultiArray(post_mean);
+      post_param_values[1] = MultiArray(post_var);
       nodeValuesMap_[nodeId_] = DMNormVar::Instance()->Sample(post_param_values, pRng_).ValuesPtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
 
-      DataType::Array norm_const_param_values(2);
-      norm_const_param_values[0] = DataType(obs_pred);
-      norm_const_param_values[1] = DataType(inn_cov);
-      logWeight_ = DMNormVar::Instance()->LogUnnormPdf(DataType(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
+      MultiArray::Array norm_const_param_values(2);
+      norm_const_param_values[0] = MultiArray(obs_pred);
+      norm_const_param_values[1] = MultiArray(inn_cov);
+      logWeight_ = DMNormVar::Instance()->LogUnnormPdf(MultiArray(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
       // TODO optimize computation removing constant terms
 
       sampledFlagsMap_[nodeId_] = true;
@@ -170,7 +170,7 @@ namespace Biips
       if ( nodeIdDefined_ )
       {
         conjugate_ = false;
-        if ( node.PriorName() == "dmnorm.var" )
+        if ( node.PriorName() == "dmnormvar" )
         {
           NodeId mean_id = node.Parents()[0];
           NodeId var_id = node.Parents()[1];
@@ -206,7 +206,7 @@ namespace Biips
         canSample_ = false;
         if ( !pGraph_->GetObserved()[nodeId_] ) // TODO throw exception
         {
-          if ( node.PriorName() == "dmnorm.var" )
+          if ( node.PriorName() == "dmnormvar" )
           {
             StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
             boost::tie(it_offspring, it_offspring_end) = pGraph_->GetStochasticChildren(nodeId_);

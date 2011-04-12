@@ -7,9 +7,7 @@
  * \version $LastChangedRevision$
  * Id:      $Id$
  *
- * Copied and pasted from Boost.uBlas mailing list
- * http://lists.boost.org/MailArchives/ublas/2005/07/0568.php
- * and added cholesky_det function
+ * COPY: part of this file is copied and pasted from Boost.uBlas mailing list
  */
 
 #ifndef BOOST_UBLAS_CHOLESKY_HPP_
@@ -21,6 +19,10 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
 namespace boost { namespace numeric { namespace ublas {
+
+  // COPY: Copied and pasted from Boost.uBlas mailing list
+  // http://lists.boost.org/MailArchives/ublas/2005/07/0568.php
+  // COPY: ********** from here **********
 
   //! Inplace Cholesky factorization
   template<class M>
@@ -128,6 +130,8 @@ namespace boost { namespace numeric { namespace ublas {
     // multiply the upper and lower inverses together
     m = prod(trans(triangular_adaptor<M,lower>(m)), triangular_adaptor<M,lower>(m));
   }
+
+  // COPY: ********** to here **********
 
   //! Cholesky matrix determinant
   /*!

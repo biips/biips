@@ -16,8 +16,20 @@
 
 namespace Biips
 {
+
+  Bool DBin::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    const DimArray & left = *paramDims[0];
+    const DimArray & right = *paramDims[1];
+    return left.IsScalar() && right.IsScalar();
+  }
+
+  DimArray DBin::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    return *P_SCALAR_DIM;
+  }
   
-  DataType DBin::Sample(const DataType::Array & paramValues, Rng * pRng) const
+  MultiArray DBin::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
   {
     // TODO check paramValues
     Scalar trials = paramValues[0].ScalarView(); // TODO check dim
@@ -29,11 +41,11 @@ namespace Biips
     typedef boost::variate_generator<Rng::GenType&, DistType> GenType;
     GenType gen(pRng->GetGen(), dist);
 
-    return DataType(gen());
+    return MultiArray(gen());
   }
 
 
-  Scalar DBin::LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const
+  Scalar DBin::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     // TODO check paramValues
     Scalar trials = paramValues[0].ScalarView(); // TODO check dim
