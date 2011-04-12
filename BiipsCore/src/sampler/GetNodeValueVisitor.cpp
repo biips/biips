@@ -23,14 +23,14 @@ namespace Biips
   {
   protected:
     NodeSampler * pSampleNodeVis_;
-    DataType value_;
+    MultiArray value_;
 
   public:
     virtual void Visit(const ConstantNode & node);
     virtual void Visit(const StochasticNode & node);
     virtual void Visit(const LogicalNode & node);
 
-    const DataType & GetValue() const { return value_; };
+    const MultiArray & GetValue() const { return value_; };
 
     explicit GetNodeValueVisitor(NodeSampler * pSampleNodeVis) : pSampleNodeVis_(pSampleNodeVis) {};
   };
@@ -40,7 +40,7 @@ namespace Biips
   {
     if ( nodeIdDefined_ ) // TODO manage else case : throw exception
     {
-      value_ = DataType(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
+      value_ = MultiArray(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
     }
   }
 
@@ -51,7 +51,7 @@ namespace Biips
       {
         if ( pSampleNodeVis_->sampledFlagsMap_[nodeId_] )// TODO manage else case : throw exception
         {
-          value_ = DataType(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
+          value_ = MultiArray(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
         }
       }
   }
@@ -68,12 +68,12 @@ namespace Biips
         node.AcceptVisitor(*pSampleNodeVis_);
         pSampleNodeVis_->SetNodeId(snv_node_id);
       }
-      value_ = DataType(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
+      value_ = MultiArray(node.DimPtr(), pSampleNodeVis_->nodeValuesMap_[nodeId_]);
     }
   }
 
 
-  DataType getNodeValue(NodeId nodeId, const Graph * pGraph, NodeSampler * pNodeSampler)
+  MultiArray getNodeValue(NodeId nodeId, const Graph * pGraph, NodeSampler * pNodeSampler)
   {
     GetNodeValueVisitor get_val_vis(pNodeSampler);
     pGraph->VisitNode(nodeId, get_val_vis);
@@ -81,11 +81,11 @@ namespace Biips
   }
 
 
-  DataType::Array getParamValues(NodeId nodeId, const Graph * pGraph, NodeSampler * pSampleNodeVis)
+  MultiArray::Array getParamValues(NodeId nodeId, const Graph * pGraph, NodeSampler * pSampleNodeVis)
   {
     GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = pGraph->GetParents(nodeId);
-    DataType::Array param_values(std::distance(it_param, it_param_end));
+    MultiArray::Array param_values(std::distance(it_param, it_param_end));
     Size i = 0;
     while (it_param != it_param_end)
     {

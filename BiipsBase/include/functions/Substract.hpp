@@ -11,21 +11,21 @@
 #ifndef BIIPS_SUBSTRACT_HPP_
 #define BIIPS_SUBSTRACT_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Substract : public Biips::Function
+  class Substract : public BinaryScalarFunction<std::minus<Scalar> >
   {
-  protected:
+  public:
     typedef Substract SelfType;
+    typedef BinaryScalarFunction<std::minus<Scalar> > BaseType;
 
-    Substract() : Function("-", 2) {};
+  protected:
+    Substract() : BaseType("-") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

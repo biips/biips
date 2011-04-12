@@ -16,10 +16,10 @@
 #include <string>
 #include <vector>
 #include <deque>
-//#include <limits>
 #include <cmath>
+#include <limits>
 #include <boost/shared_ptr.hpp>
-#include <iostream>
+#include <boost/numeric/ublas/fwd.hpp>
 
 
 //! The namespace where all @biips symbols live.
@@ -66,9 +66,7 @@ namespace Biips
 
     typedef std::vector<SelfType> Array; //!< Array type defined with a std::vector<>
     typedef typename Array::iterator Iterator; //!< Iterator type of the Array type
-    typedef typename Array::reverse_iterator ReverseIterator; //!< Reverse iterator type of the Array type
     typedef typename Array::const_iterator ConstIterator; //!< Const iterator type of the Array type
-    typedef typename Array::const_reverse_iterator ConstReverseIterator; //!< Const reverse iterator type of the Array type
 
     typedef std::vector<Ptr> PtrArray; //!< Array of pointers defined with a std::vector<boost::shared_ptr<> >
 
@@ -77,23 +75,65 @@ namespace Biips
     typedef std::pair<ConstIterator, ConstIterator> ConstIteratorPair; //!< Pair of ConstIterators type, used to define a range
   };
 
+  //! Node identifiers type
+  /*!
+   * Each Node in a Graph is associated a NodeId, i.e. a unique identifer
+   * which is nothing but a positive integer.
+   * It is used as index to access the Node in a Graph object or its
+   * associated properties in arrays.
+   */
+  typedef Size NodeId;
 
-//  const Size BIIPS_SIZEMIN = std::numeric_limits<Size>::min();
-//  const Size BIIPS_SIZEMAX = std::numeric_limits<Size>::max();
-//
-//  const Int BIIPS_INTMIN = std::numeric_limits<Int>::min();
-//  const Int BIIPS_INTMAX = std::numeric_limits<Int>::max();
-//
-//  const Real BIIPS_REALMIN = std::numeric_limits<Real>::min();
-//  const Real BIIPS_REALMAX = std::numeric_limits<Real>::max();
-//  const Real BIIPS_NEGINF = -std::numeric_limits<Real>::infinity();
-//  const Real BIIPS_POSINF = std::numeric_limits<Real>::infinity();
-//  const Real BIIPS_NAN = std::numeric_limits<Real>::quiet_NaN();
+  //! Alias for ublas namespace
+  /*!
+   * Boost.uBLAS is a C++ template class library for Basic Linear Algebra.
+   * It provides BLAS level 1, 2, 3 functionality for dense, packed and sparse matrices.
+   * The design and implementation unify mathematical notation via operator overloading
+   * and efficient code generation via expression templates.
+   * http://www.boost.org/doc/libs/1_44_0/libs/numeric/ublas/doc/index.htm
+   */
+  namespace ublas = boost::numeric::ublas;
 
+  //! The row-major ordering type
+  /*!
+   * Specifies the storage ordering type of the values of an
+   * n-dimensional object in a contiguous array container.
+   * Row-major means the right most index moves faster.
+   * Row-major is used in C/C++ arrays.
+   */
+  typedef ublas::row_major RowMajorOrder;
+  //! The column-major ordering type
+  /*!
+   * Specifies the ordering type of values of an n-dimensional
+   * in a contiguous array container.
+   * Column-major means the left most index moves faster.
+   * Column-major is used in Fortran, Matlab, Octave and R arrays.
+   */
+  typedef ublas::column_major ColumnMajorOrder;
 
-//  Bool isFinite(Scalar r) { return finite(r); }
-//
-//  Bool isNan(Scalar r) { return isnan(r); }
+  //! Storage order used in Biips is row-major
+  typedef RowMajorOrder StorageOrder;
+
+  const Size BIIPS_SIZEMIN = std::numeric_limits<Size>::min();
+  const Size BIIPS_SIZEMAX = std::numeric_limits<Size>::max();
+  const Size BIIPS_SIZENA = BIIPS_SIZEMAX-1;
+
+  const Int BIIPS_INTMIN = std::numeric_limits<Int>::min();
+  const Int BIIPS_INTMAX = std::numeric_limits<Int>::max();
+
+  const Real BIIPS_REALMIN = std::numeric_limits<Real>::min();
+  const Real BIIPS_REALMAX = std::numeric_limits<Real>::max();
+  const Real BIIPS_NEGINF = -std::numeric_limits<Real>::infinity();
+  const Real BIIPS_POSINF = std::numeric_limits<Real>::infinity();
+  const Real BIIPS_REALNAN = std::numeric_limits<Real>::quiet_NaN();
+  const Real BIIPS_REALNA = BIIPS_REALMAX * (1 - std::numeric_limits<Real>::epsilon());
+
+  const NodeId NULL_NODEID = BIIPS_SIZENA;
+
+  inline Bool isFinite(Scalar r) { return finite(r); }
+
+  inline Bool isNan(Scalar r) { return isnan(r); }
+  inline Bool isNan(Size s) { return isnan(s); }
 
 }
 

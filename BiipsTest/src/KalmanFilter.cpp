@@ -48,7 +48,7 @@ namespace Biips
   }
 
 
-  void KalmanFilter::Init(const DataType & xtminus1, const DataType & Ptminus1, StateType stateType)
+  void KalmanFilter::Init(const MultiArray & xtminus1, const MultiArray & Ptminus1, StateType stateType)
   {
     t_ = 0;
     stateType_ = stateType;
@@ -64,14 +64,14 @@ namespace Biips
     }
   }
 
-  void KalmanFilter::SetEvolutionModel(const DataType & Ft, const DataType & Bt, const DataType & Qt)
+  void KalmanFilter::SetEvolutionModel(const MultiArray & Ft, const MultiArray & Bt, const MultiArray & Qt)
   {
     Ft_ = Matrix(Ft);
     Bt_ = Matrix(Bt);
     Qt_ = Matrix(Qt);
   }
 
-  void KalmanFilter::SetObservationModel(const DataType & Ht, const DataType & Rt)
+  void KalmanFilter::SetObservationModel(const MultiArray & Ht, const MultiArray & Rt)
   {
     Ht_ = Matrix(Ht);
     Rt_ = Matrix(Rt);
@@ -106,12 +106,12 @@ namespace Biips
     Rt_ = Matrix(1, 1, Rt);
   }
 
-  void KalmanFilter::Update(const DataType & zt)
+  void KalmanFilter::Update(const MultiArray & zt)
   {
     zt_ = Vector(zt);
     updateCore();
   }
-  void KalmanFilter::Update(const DataType & zt, const DataType & ut)
+  void KalmanFilter::Update(const MultiArray & zt, const MultiArray & ut)
   {
     ut_ = Vector(ut);
     Update(zt);
@@ -130,7 +130,7 @@ namespace Biips
   }
 
 
-  KalmanFilter::KalmanFilter(const DataType & xtminus1, const DataType & Ptminus1, const DataType & Rt, StateType stateType)
+  KalmanFilter::KalmanFilter(const MultiArray & xtminus1, const MultiArray & Ptminus1, const MultiArray & Rt, StateType stateType)
   :  t_(0), dimx_(xtminus1.Length()), dimz_(Rt.Dim()[0]),
      xtminus1_(dimx_), Ptminus1_(dimx_, dimx_),
      Ft_(ublas::identity_matrix<Scalar>(dimx_)), ut_(1, 0.0), Bt_(dimx_, 1, 0.0), Qt_(Ptminus1),

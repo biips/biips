@@ -3,6 +3,7 @@
 	<name>BiipsTest</name>
 	<comment></comment>
 	<projects>
+		<project>smctc</project>
 		<project>BiipsBase</project>
 		<project>BiipsCore</project>
 	</projects>

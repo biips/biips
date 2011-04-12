@@ -11,21 +11,21 @@
 #ifndef BIIPS_ADD_HPP_
 #define BIIPS_ADD_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
   
-  class Add : public Biips::Function
+  class Add : public VariableScalarFunction<std::plus<Scalar> >
   {
-  protected:
+  public:
     typedef Add SelfType;
+    typedef VariableScalarFunction<std::plus<Scalar> > BaseType;
 
-    Add() : Function("+", 2) {};
+  protected:
+    Add() : BaseType("+") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

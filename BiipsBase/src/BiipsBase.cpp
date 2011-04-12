@@ -9,7 +9,9 @@
  */
 
 #include "BiipsBase.hpp"
-#include "graph/Graph.hpp"
+#include "function/FunctionTable.hpp"
+#include "distribution/DistributionTable.hpp"
+#include "sampler/SMCSampler.hpp"
 
 #include "functions/Multiply.hpp"
 #include "functions/Add.hpp"
@@ -32,46 +34,65 @@
 #include "distributions/DBin.hpp"
 #include "distributions/DCat.hpp"
 
+#include "samplers/DiscreteOptimal.hpp"
+#include "samplers/ConjugateNormalVar.hpp"
+#include "samplers/ConjugateNormal.hpp"
+#include "samplers/ConjugateBeta.hpp"
+#include "samplers/ConjugateMNormalVar.hpp"
+#include "samplers/ConjugateMNormal.hpp"
+#include "samplers/ConjugateNormalVarLinear.hpp"
+#include "samplers/ConjugateNormalLinear.hpp"
+#include "samplers/ConjugateMNormalVarLinear.hpp"
+#include "samplers/ConjugateMNormalLinear.hpp"
+
 namespace Biips
 {
 
-  // TODO add a insert NodeSamplerFactory function
-
-  void insertFunction(const Function::Ptr & func)
+  void loadBaseModule(FunctionTable & funcTab, DistributionTable & distTab)
   {
-    static Graph::FunctionTab & funcTab = Graph::FuncTab();
-    funcTab[func->Name()] = func;
-  }
+    funcTab.Insert(Multiply::Instance());
+    funcTab.Insert(Add::Instance());
+    funcTab.Insert(MatMult::Instance());
+    funcTab.Insert(Substract::Instance());
+    funcTab.Insert(Divide::Instance());
+    funcTab.Insert(Neg::Instance());
+    funcTab.Insert(Pow::Instance());
+    funcTab.Insert(Cos::Instance());
+    funcTab.Insert(Sqrt::Instance());
+    funcTab.Insert(Transpose::Instance());
+    funcTab.Insert(Sum::Instance());
+    funcTab.Insert(Equal::Instance());
 
+    distTab.Insert(DNorm::Instance());
+    distTab.Insert(DNormVar::Instance());
+    distTab.Insert(DMNorm::Instance());
+    distTab.Insert(DMNormVar::Instance());
+    distTab.Insert(DBeta::Instance());
+    distTab.Insert(DBin::Instance());
+    distTab.Insert(DCat::Instance());
 
-  void insertDistribution(const Distribution::Ptr & dist)
-  {
-    static Graph::DistributionTab & distTab = Graph::DistTab();
-    distTab[dist->Name()] = dist;
-  }
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateMNormalLinearFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateMNormalVarLinearFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateNormalLinearFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateNormalVarLinearFactory::Instance(), true));
 
-  void loadBaseModule()
-  {
-    insertFunction(Multiply::Instance());
-    insertFunction(Add::Instance());
-    insertFunction(MatMult::Instance());
-    insertFunction(Substract::Instance());
-    insertFunction(Divide::Instance());
-    insertFunction(Neg::Instance());
-    insertFunction(Pow::Instance());
-    insertFunction(Cos::Instance());
-    insertFunction(Sqrt::Instance());
-    insertFunction(Transpose::Instance());
-    insertFunction(Sum::Instance());
-    insertFunction(Equal::Instance());
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateMNormalFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateMNormalVarFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateBetaFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateNormalFactory::Instance(), true));
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(ConjugateNormalVarFactory::Instance(), true));
 
-    insertDistribution(DNorm::Instance());
-    insertDistribution(DNormVar::Instance());
-    insertDistribution(DMNorm::Instance());
-    insertDistribution(DMNormVar::Instance());
-    insertDistribution(DBeta::Instance());
-    insertDistribution(DBin::Instance());
-    insertDistribution(DCat::Instance());
+    SMCSampler::NodeSamplerFactories().push_front(
+        std::make_pair(DiscreteOptimalFactory::Instance(), true));
   }
 
 }

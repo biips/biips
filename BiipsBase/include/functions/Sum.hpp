@@ -23,8 +23,12 @@ namespace Biips
 
     Sum() : Function("sum", 1) {};
 
+    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; };
+
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
 
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };

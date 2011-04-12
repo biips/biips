@@ -81,7 +81,7 @@ namespace Biips
         sampled_flags[id] = observed_map[id];
       }
       NodeSampler sample_node_vis(this);
-      Rng * pRng = 0;
+      Rng * pRng = NULL;
       sample_node_vis.SetAttributes(node_values, sampled_flags, pRng);
       VisitNode(node_id, sample_node_vis);
 
@@ -106,13 +106,13 @@ namespace Biips
   }
 
 
-  NodeId Graph::AddLogicalNode(const DimArray::Ptr & pDim, const String & funcName, const Types<NodeId>::Array & parameters)
+  NodeId Graph::AddLogicalNode(const DimArray::Ptr & pDim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
   {
-    static FunctionTab & funcTab_ = FuncTab();
+    if (!pFunc)
+      throw LogicError("Try to add LogicalNode with Null Function pointer.");
 
     NodeId node_id = boost::add_vertex(fullGraph_);
-    // TODO check if funcName is in funcTab_, else throw exception
-    Node::Ptr new_node(new FuncNode(pDim, funcTab_[funcName], parameters));
+    Node::Ptr new_node(new FuncNode(pDim, pFunc, parameters));
     boost::put(boost::vertex_node_ptr, fullGraph_, node_id, new_node);
 
     for (Size i=0; i < parameters.size(); ++i)
@@ -146,7 +146,7 @@ namespace Biips
         sampled_flags[id] = observed_map[id];
       }
       NodeSampler sample_node_vis(this);
-      Rng * pRng = 0;
+      Rng * pRng = NULL;
       sample_node_vis.SetAttributes(node_values, sampled_flags, pRng);
       VisitNode(node_id, sample_node_vis);
 
@@ -163,20 +163,44 @@ namespace Biips
     return node_id;
   }
 
-  NodeId Graph::AddLogicalNode(const DimArray & dim, const String & funcName, const Types<NodeId>::Array & parameters)
+  NodeId Graph::AddLogicalNode(const DimArray & dim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
   {
     DimArray::Ptr pDim(new DimArray(dim));
-    return AddLogicalNode(pDim, funcName, parameters);
+    return AddLogicalNode(pDim, pFunc, parameters);
   }
 
 
-  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const String & distName, const Types<NodeId>::Array & parameters, Bool observed)
+  Types<DimArray::Ptr>::Array Graph::getParamDims(const Types<NodeId>::Array parameters) const
   {
-    static DistributionTab & distTab_ = DistTab();
+    Types<DimArray::Ptr>::Array param_dims(parameters.size());
+    for (Size i = 0; i<parameters.size(); ++i)
+      param_dims[i] = GetNode(parameters[i]).DimPtr();
+
+    return param_dims;
+  }
+
+
+  NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
+  {
+    if (!pFunc)
+      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+
+    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
+
+    DimArray::Ptr pDim(new DimArray(pFunc->Dim(param_dims)));
+
+    return AddLogicalNode(pDim, pFunc, parameters);
+  }
+
+
+  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
+  {
+    if (!pDist)
+      throw LogicError("Try to add LogicalNode with Null Function pointer.");
 
     NodeId node_id = boost::add_vertex(fullGraph_);
-    // TODO check if distName is in distTab_, else throw exception
-    Node::Ptr new_node(new StochasticNode(pDim, distTab_[distName], parameters));
+
+    Node::Ptr new_node(new StochasticNode(pDim, pDist, parameters));
     boost::put(boost::vertex_node_ptr, fullGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, fullGraph_, node_id, observed);
 
@@ -193,27 +217,87 @@ namespace Biips
     return node_id;
   }
 
-  NodeId Graph::AddStochasticNode(const DimArray & dim, const String & distName, const Types<NodeId>::Array & parameters, Bool observed)
+  NodeId Graph::AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
   {
     DimArray::Ptr pDim(new DimArray(dim));
-    return AddStochasticNode(pDim, distName, parameters, observed);
+    return AddStochasticNode(pDim, pDist, parameters, observed);
+  }
+
+  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
+  {
+    if (!pDist)
+      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+
+    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
+
+    DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
+
+    return AddStochasticNode(pDim, pDist, parameters, observed);
   }
 
 
-  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const String & distName, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
+  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
   {
-    NodeId node_id = AddStochasticNode(pDim, distName, parameters, true);
+    NodeId node_id = AddStochasticNode(pDim, pDist, parameters, true);
 
     boost::put(boost::vertex_value, fullGraph_, node_id, pObsValue);
 
     return node_id;
   }
 
-  NodeId Graph::AddStochasticNode(const DimArray & dim, const String & distName, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
+  NodeId Graph::AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
   {
-    DimArray::Ptr pDim(new DimArray(dim));
-    return AddStochasticNode(pDim, distName, parameters, pObsValue);
+    if (!pDist)
+      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+
+    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
+
+    DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
+
+    // TODO check dimensions of pObsValue
+    return AddStochasticNode(pDim, pDist, parameters, pObsValue);
   }
+
+
+  void Graph::PopNode()
+  {
+    if (Empty())
+      throw LogicError("Can not pop node: the graph is empty.");
+
+    NodeId last_node_id = GetSize()-1;
+
+    DirectChildrenNodeIdIterator it_children, it_children_end;
+    boost::tie(it_children, it_children_end) = GetChildren(last_node_id);
+    if (it_children != it_children_end)
+      throw LogicError("Last inserted node can not have children.");
+
+    boost::clear_vertex(last_node_id, fullGraph_);
+
+    switch(GetNode(last_node_id).GetType())
+    {
+      case CONSTANT:
+        nodesSummaryMap_["Constant"] -= 1;
+        break;
+      case LOGICAL:
+        nodesSummaryMap_["Logical"] -= 1;
+        if (!GetObserved()[last_node_id])
+          unobsNodesSummaryMap_["Logical"] -= 1;
+        break;
+      case STOCHASTIC:
+        nodesSummaryMap_["Stochastic"] -= 1;
+        if (!GetObserved()[last_node_id])
+          unobsNodesSummaryMap_["Stochastic"] -= 1;
+        break;
+      default:
+        throw LogicError("Unknown node type.");
+        break;
+
+    }
+    boost::remove_vertex(last_node_id, fullGraph_);
+
+    builtFlag_ = false;
+  }
+
 
   void Graph::topologicalSort()
   {
@@ -272,7 +356,7 @@ namespace Biips
     OutEdgeIdIterator it_child_out_edge_id, it_child_out_edge_id_end;
     Types<EdgeId>::Array child_out_edges;
 
-    for (Types<NodeId>::ConstReverseIterator rit_nodes = topoOrder_.rbegin(); rit_nodes != topoOrder_.rend(); ++rit_nodes)
+    for (Types<NodeId>::Array::const_reverse_iterator rit_nodes = topoOrder_.rbegin(); rit_nodes != topoOrder_.rend(); ++rit_nodes)
     {
       boost::tie(it_direct_children, it_direct_children_end) = boost::adjacent_vertices(*rit_nodes, directChildrenGraph_);
       // copy children ids into another vector, because iterators can be invalidated by modifications of the graph
@@ -322,14 +406,19 @@ namespace Biips
     // are there any cycles in the graph?
     Bool has_cycle = false;
     cycle_detector vis(has_cycle);
-    boost::depth_first_search(fullGraph_, boost::visitor(vis));
+    boost::depth_first_search(directParentGraph_, boost::visitor(vis));
     return has_cycle;
-    // TODO manage bad graphs : throw exception ?
   }
 
 
   void Graph::Build()
   {
+    if (builtFlag_)
+      throw LogicError("The graph is already built.");
+
+    if (HasCycle())
+      throw RuntimeError("The graph has a cycle.");
+
     topologicalSort();
 
     buildStochasticParentEdges();
@@ -338,6 +427,42 @@ namespace Biips
 
     builtFlag_ = true;
   }
+
+
+  Types<Graph::DirectParentNodeIdIterator>::Pair Graph::GetParents(NodeId nodeId) const
+  {
+    return boost::adjacent_vertices(nodeId, directParentGraph_);
+  };
+
+  Types<Graph::DirectChildrenNodeIdIterator>::Pair Graph::GetChildren(NodeId nodeId) const
+  {
+    return boost::adjacent_vertices(nodeId, directChildrenGraph_);
+  };
+
+  Types<Graph::StochasticParentNodeIdIterator>::Pair Graph::GetStochasticParents(NodeId nodeId) const
+  {
+    if (!builtFlag_)
+      throw LogicError("Can not access a graph that is not built.");
+
+    return boost::adjacent_vertices(nodeId, stochasticParentGraph_);
+  };
+
+  Types<Graph::StochasticChildrenNodeIdIterator>::Pair Graph::GetStochasticChildren(NodeId nodeId) const
+  {
+    if (!builtFlag_)
+      throw LogicError("Can not access a graph that is not built.");
+
+    return boost::adjacent_vertices(nodeId, stochasticChildrenGraph_);
+  };
+
+
+  Types<NodeId>::ConstIteratorPair Graph::GetNodes() const
+  {
+    if (!builtFlag_)
+      throw LogicError("Can not access a graph that is not built.");
+
+    return iterRange(topoOrder_);
+  };
 
 
   void Graph::VisitNode(NodeId nodeId, NodeVisitor & vis)
@@ -392,6 +517,15 @@ namespace Biips
   }
 
 
+  void Graph::SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue)
+  {
+    if ( GetObserved()[nodeId] ) // TODO manage else case : throw exception
+    {
+      setValue(nodeId, pObsValue);
+    }
+  }
+
+
   class SetObsValuesVisitor : public NodeVisitor
   {
   protected:
@@ -424,19 +558,27 @@ namespace Biips
   }
 
 
-  void Graph::PrintGraph(std::ostream & os) const // TODO check builtFlag_
+  void Graph::PrintGraph(std::ostream & os) const
   {
-    os << "Graph adjacency list (node's direct parents): " << std::endl;
     boost::print_graph(directParentGraph_);
+  };
 
-    os << std::endl << "Topological order (parents before children): " << std::endl;
+
+  void Graph::PrintTopoOrder(std::ostream & os) const
+  {
+    if (!builtFlag_)
+    {
+      os << "Can not print topological order: graph is not built." << std::endl;
+      return;
+    }
+
     Types<NodeId>::ConstIterator it_node, it_node_end;
     boost::tie(it_node, it_node_end) = GetNodes();
     os << *it_node;
     for (++it_node; it_node != it_node_end; ++it_node)
       os << ", "<< *it_node;
     os << std::endl;
-  };
+  }
 
 
   Graph::Graph() : directParentGraph_(fullGraph_, DirectEdgePredicate(boost::get(boost::edge_type, fullGraph_))),
@@ -451,5 +593,133 @@ namespace Biips
     unobsNodesSummaryMap_["Stochastic"] = 0;
     unobsNodesSummaryMap_["Logical"] = 0;
   };
+
+
+  void Graph::PrintGraphviz(std::ostream & os) const
+  {
+    VertexPropertyWriter vpw(*this);
+    PrintGraphviz(os, vpw);
+  }
+
+
+  void VertexPropertyWriter::operator()(std::ostream & out, NodeId id) const
+  {
+    out << "[label=\"" << label(id) << "\"";
+    out << ", shape=\"" << shape(id) << "\"";
+    out << ", style=\"" << style(id) << "\"";
+    out << ", color=\"" << color(id) << "\"";
+    out << ", fillcolor=\"" << "gray" << "\"";
+
+    out << "]";
+  }
+
+
+
+  class GetLabelVisitor : public ConstNodeVisitor
+  {
+  protected:
+    const Graph & graph_;
+    String label_;
+
+  public:
+    virtual void Visit(const ConstantNode & node)
+    {
+      label_.clear();
+    };
+
+    virtual void Visit(const StochasticNode & node)
+    {
+      label_ = node.PriorName() + "\\n";
+    };
+
+    virtual void Visit(const LogicalNode & node)
+    {
+      label_ = node.FuncName() + "\\n";
+    };
+
+    const String & GetLabel() const { return label_; }
+
+    explicit GetLabelVisitor(const Graph & graph)
+    : graph_(graph) {}
+  };
+
+
+  String VertexPropertyWriter::label(NodeId id) const
+  {
+    GetLabelVisitor get_label_vis(graph_);
+    graph_.VisitNode(id, get_label_vis);
+    String ans = get_label_vis.GetLabel();
+
+    std::ostringstream oss;
+    oss << id;
+    ans += oss.str();
+
+    return ans;
+  }
+
+
+  String VertexPropertyWriter::shape(NodeId id) const
+  {
+    String ans;
+    switch(graph_.GetNode(id).GetType())
+    {
+      case CONSTANT:
+        ans = "box";
+        break;
+      case LOGICAL:
+        ans = "box";
+        break;
+      case STOCHASTIC:
+        ans = "ellipse";
+        break;
+      default:
+        break;
+    }
+    return ans;
+  }
+
+
+  String VertexPropertyWriter::color(NodeId id) const
+  {
+    String ans;
+    switch(graph_.GetNode(id).GetType())
+    {
+      case CONSTANT:
+        ans += "gray";
+        break;
+      case LOGICAL:
+        break;
+      case STOCHASTIC:
+        break;
+      default:
+        break;
+    }
+    return ans;
+  }
+
+
+  String VertexPropertyWriter::style(NodeId id) const
+  {
+    String ans;
+    switch(graph_.GetNode(id).GetType())
+    {
+      case CONSTANT:
+        break;
+      case LOGICAL:
+        ans = "rounded";
+        break;
+      case STOCHASTIC:
+        break;
+      default:
+        break;
+    }
+
+    if (graph_.GetObserved()[id])
+    {
+      ans += ", filled";
+    }
+
+    return ans;
+  }
 
 }

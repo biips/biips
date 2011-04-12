@@ -52,6 +52,9 @@ namespace Biips
      */
     Distribution(const String & name, Size nParam) : name_(name), nParam_(nParam) {};
 
+    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
+
   public:
     typedef Distribution SelfType;
     //! A Distribution shared pointer
@@ -62,17 +65,34 @@ namespace Biips
     //! Number of parameters member accessor
     Size NParam() const { return nParam_; };
 
+    Bool CheckNParam(Size n) const { return n == nParam_; }
+
+    /*!
+    * Checks that dimensions of the parameters are correct.
+    *
+    * This function only needs to be run once for each parameter
+    * vector. Thereafter, the values of the parameters will change,
+    * but the dimensions will not.
+    */
+    Bool CheckParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+
+    /*!
+    * Calculates what the dimension of the distribution should be,
+    * based on the dimensions of its parameters.
+    */
+    DimArray Dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+
     //! Sampling method
     /*!
-     * Samples according to the distribution, given DataType values of the parameters
+     * Samples according to the distribution, given MultiArray values of the parameters
      * and a RNG object.
      * \param paramValues values array of the parameters.
-     * The DataType values must ordered according
+     * The MultiArray values must ordered according
      * to the parameters order of the distribution.
      * \param pRng RNG pointer
      * \return a random sample
      */
-    virtual DataType Sample(const DataType::Array & paramValues, Rng * pRng) const = 0;
+    virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const = 0;
     //! Logarithmic unnormalized probability density function
     /*!
      * Evaluates the log unnormalized pdf at point x, given the distribution
@@ -81,10 +101,10 @@ namespace Biips
      * evaluation.
      * @param x point of evaluation
      * @param paramValues values array of the parameters.
-     * The DataType values must ordered according
+     * The MultiArray values must ordered according
      * to the parameters order of the distribution.
      */
-    virtual Scalar LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const = 0;
+    virtual Scalar LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const = 0;
 
     virtual ~Distribution() {};
 

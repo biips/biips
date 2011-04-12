@@ -11,21 +11,21 @@
 #ifndef BIIPS_MULTIPLY_HPP_
 #define BIIPS_MULTIPLY_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
   
-  class Multiply : public Biips::Function
+  class Multiply : public VariableScalarFunction<std::multiplies<Scalar> >
   {
-  protected:
+  public:
     typedef Multiply SelfType;
+    typedef VariableScalarFunction<std::multiplies<Scalar> > BaseType;
 
-    Multiply() : Function("*", 2) {};
+  protected:
+    Multiply() : BaseType("*") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

@@ -11,21 +11,29 @@
 #ifndef BIIPS_SQRT_HPP_
 #define BIIPS_SQRT_HPP_
 
-#include "functions/Pow.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Sqrt : public Biips::Function
+  struct SqrtScalar : public std::unary_function<Scalar, Scalar>
   {
-  protected:
-    typedef Sqrt SelfType;
+    Scalar operator() (Scalar val) const
+    {
+      return std::sqrt(val);
+    }
+  };
 
-    Sqrt() : Function("sqrt", 1) {};
+  class Sqrt : public UnaryScalarFunction<SqrtScalar>
+  {
+  public:
+    typedef Sqrt SelfType;
+    typedef UnaryScalarFunction<SqrtScalar> BaseType;
+
+  protected:
+    Sqrt() : BaseType("sqrt") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

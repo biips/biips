@@ -35,7 +35,7 @@ namespace Biips
     typedef Types<SelfType>::IteratorPair IteratorPair;
 
   protected:
-    typedef DataType::StorageType StorageType;
+    typedef MultiArray::StorageType StorageType;
 
     Distribution::Ptr pPrior_;
 
@@ -46,8 +46,8 @@ namespace Biips
 
     const String & PriorName() const { return pPrior_->Name(); };
 
-    DataType Sample(const DataType::Array & paramValues, Rng * pRng) const { return pPrior_->Sample(paramValues, pRng); };
-    Scalar LogUnnormLike(const DataType & x, const DataType::Array & paramValues) const { return pPrior_->LogUnnormPdf(x, paramValues); };
+    MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const { return pPrior_->Sample(paramValues, pRng); };
+    Scalar LogUnnormLike(const MultiArray & x, const MultiArray::Array & paramValues) const { return pPrior_->LogUnnormPdf(x, paramValues); };
 
     StochasticNode(const DimArray::Ptr pDim, const Distribution::Ptr & pPrior, const Types<NodeId>::Array & parameters) : Node(pDim, parameters), pPrior_(pPrior) {}
 

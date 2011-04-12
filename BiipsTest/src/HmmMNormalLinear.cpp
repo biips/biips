@@ -12,6 +12,10 @@
 
 #include "BiipsCore.hpp"
 #include "BiipsBase.hpp"
+
+#include "samplers/ConjugateMNormalLinear.hpp"
+#include "samplers/ConjugateMNormalVarLinear.hpp"
+
 #include "KalmanFilter.hpp"
 #include "Plot.hpp"
 #include "TestIO.hpp"
@@ -77,7 +81,7 @@ namespace Biips
     }
 
     Size t_max = sizeParamMap_.at("t.max");
-    std::vector<DataType> u_vec(t_max, DataType(dimArrayMap_["u"]));
+    std::vector<MultiArray> u_vec(t_max, MultiArray(dimArrayMap_["u"]));
     dataValuesMap_["u"].SetPtr(u_vec.begin(), u_vec.end());
 
     obsVarNames_.push_back("y");
@@ -168,43 +172,43 @@ namespace Biips
 //
 //    if (verbose_)
 //      os_ << "Initial state mean vector: ";
-//    InputDataType(dataTypeParamMap_["mean.x.0"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["mean.x.0"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "mean_x0 = " << dataTypeParamMap_["mean.x.0"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "Initial state covariance matrix: ";
-//    InputDataType(dataTypeParamMap_["P.0"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["P.0"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "P0 = " << dataTypeParamMap_["P.0"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "State transition matrix: ";
-//    InputDataType(dataTypeParamMap_["F"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["F"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "F = " << dataTypeParamMap_["F"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "Control transition matrix: ";
-//    InputDataType(dataTypeParamMap_["B"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["B"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "B = " << dataTypeParamMap_["B"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "State covariance matrix: ";
-//    InputDataType(dataTypeParamMap_["Q"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["Q"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "Q = " << dataTypeParamMap_["Q"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "Observation transition matrix: ";
-//    InputDataType(dataTypeParamMap_["H"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["H"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "H = " << dataTypeParamMap_["H"] << endl << endl;
 //
 //    if (verbose_)
 //      os_ << "Observation covariance matrix: ";
-//    InputDataType(dataTypeParamMap_["R"], "", 0, is);
+//    InputMultiArray(dataTypeParamMap_["R"], "", 0, is);
 //    if (verbose_)
 //      os_ << endl << "R = " << dataTypeParamMap_["R"] << endl << endl;
 //
@@ -230,7 +234,9 @@ namespace Biips
   {
     // load Base module
     //-----------------
-    loadBaseModule();
+    FunctionTable funcTab;
+    DistributionTable distTab;
+    loadBaseModule(funcTab, distTab);
 
     // graph
     //------
@@ -251,7 +257,7 @@ namespace Biips
     Size t_max = sizeParamMap_["t.max"];
 
     Types<NodeId>::Array u(t_max);
-    const DataType::Array & u_val = dataValuesMap_["u"];
+    const MultiArray::Array & u_val = dataValuesMap_["u"];
     for (Size t=1; t<=t_max; ++t)
       u[t-1] = pModelGraph_->AddConstantNode(u_val[t-1]);
 
@@ -278,41 +284,41 @@ namespace Biips
     params[0] = mean_x0;
     params[1] = P0;
     if (precFlag_)
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dmnorm", params);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnorm"], params);
     else
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dmnorm.var", params);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnormvar"], params);
 
     for (Size t=1; t<=t_max; ++t)
     {
       params[0] = F;
       params[1] = x[t-1];
-      prod_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], "%*%", params);
+      prod_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["%*%"], params);
 
       params[0] = B;
       params[1] = u[t-1];
-      prod_u[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], "%*%", params);
+      prod_u[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["%*%"], params);
 
       params[0] = prod_x[t-1];
       params[1] = prod_u[t-1];
-      sum_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], "+", params);
+      sum_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["+"], params);
 
       params[0] = sum_x[t-1];
       params[1] = Q;
       if (precFlag_)
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dmnorm", params);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnorm"], params);
       else
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dmnorm.var", params);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnormvar"], params);
 
       params[0] = H;
       params[1] = x[t];
-      prod_y[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["y"], "%*%", params);
+      prod_y[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["y"], funcTab["%*%"], params);
 
       params[0] = prod_y[t-1];
       params[1] = R;
       if (precFlag_)
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dmnorm", params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dmnorm"], params, true);
       else
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dmnorm.var", params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dmnormvar"], params, true);
     }
 
     // build graph
@@ -329,15 +335,15 @@ namespace Biips
   void HmmMNormalLinear::RunBench()
   {
     Size t_max = sizeParamMap_["t.max"];
-    const DataType & mean_x0_val = dataTypeParamMap_["mean.x.0"];
-    const DataType & P0_val = dataTypeParamMap_["P.0"];
-    const DataType & Q_val = dataTypeParamMap_["Q"];
-    const DataType & F_val = dataTypeParamMap_["F"];
-    const DataType & B_val = dataTypeParamMap_["B"];
-    const DataType & H_val = dataTypeParamMap_["H"];
-    const DataType & R_val = dataTypeParamMap_["R"];
+    const MultiArray & mean_x0_val = dataTypeParamMap_["mean.x.0"];
+    const MultiArray & P0_val = dataTypeParamMap_["P.0"];
+    const MultiArray & Q_val = dataTypeParamMap_["Q"];
+    const MultiArray & F_val = dataTypeParamMap_["F"];
+    const MultiArray & B_val = dataTypeParamMap_["B"];
+    const MultiArray & H_val = dataTypeParamMap_["H"];
+    const MultiArray & R_val = dataTypeParamMap_["R"];
 
-    const DataType::Array & y_obs = dataValuesMap_.at("y");
+    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
 
     // kalman filter
     //--------------
@@ -345,16 +351,16 @@ namespace Biips
     kalman_filter.SetEvolutionModel(F_val, B_val, Q_val);
     kalman_filter.SetObservationModel(H_val, R_val);
 
-    benchFilterValuesMap_["x"].SetPtr(DataType::Array(t_max+1));
-    benchFilterValuesMap_["var.x"].SetPtr(DataType::Array(t_max+1));
-    DataType::Array & x_est_KF = benchFilterValuesMap_["x"];
-    DataType::Array & x_var_KF = benchFilterValuesMap_["var.x"];
+    benchFilterValuesMap_["x"].SetPtr(MultiArray::Array(t_max+1));
+    benchFilterValuesMap_["var.x"].SetPtr(MultiArray::Array(t_max+1));
+    MultiArray::Array & x_est_KF = benchFilterValuesMap_["x"];
+    MultiArray::Array & x_var_KF = benchFilterValuesMap_["var.x"];
 
     x_est_KF[0].SetPtr(mean_x0_val);
     x_var_KF[0].SetPtr(P0_val);
 
     Bool u_flag = dataValuesMap_.count("u");
-    DataType u_val(dimArrayMap_["u"]);
+    MultiArray u_val(dimArrayMap_["u"]);
     for (Size t = 1; t < t_max+1; ++t)
     {
       if (u_flag)
@@ -374,13 +380,13 @@ namespace Biips
   }
 
 
-  void HmmMNormalLinear::initAccumulators(std::map<String, DataType::Array> & statsValuesMap)
+  void HmmMNormalLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
   {
     elementAcc_.AddFeature(MEAN);
 
     Size t_max = sizeParamMap_["t.max"];
 
-    statsValuesMap["x"].SetPtr(DataType::Array(t_max+1));
+    statsValuesMap["x"].SetPtr(MultiArray::Array(t_max+1));
   }
 
   void HmmMNormalLinear::initFilterAccumulators()
@@ -388,11 +394,11 @@ namespace Biips
     initAccumulators(smcFilterValuesMap_);
   }
 
-  void HmmMNormalLinear::accumulate(Size t, std::map<String, DataType::Array> & statsValuesMap, const String & title)
+  void HmmMNormalLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
   {
     Types<NodeId>::Array & x = modelNodeIdMap_["x"];
 
-    DataType::Array & x_est = statsValuesMap["x"];
+    MultiArray::Array & x_est = statsValuesMap["x"];
 
     pSampler_->Accumulate(x[t], elementAcc_);
     x_est[t].Alloc(elementAcc_.Mean());
@@ -416,11 +422,11 @@ namespace Biips
 
   void HmmMNormalLinear::PlotResults(const String & plotFileName) const
   {
-    const DataType::Array & x_gen = dataValuesMap_.at("x");
-    const DataType::Array & y_obs = dataValuesMap_.at("y");
-    const DataType::Array & x_est_KF = benchFilterValuesMap_.at("x");
-    const DataType::Array & x_est_PF = smcFilterValuesMap_.at("x");
-    const DataType::Array & x_est_PS = smcSmoothValuesMap_.at("x");
+    const MultiArray::Array & x_gen = dataValuesMap_.at("x");
+    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
+    const MultiArray::Array & x_est_KF = benchFilterValuesMap_.at("x");
+    const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
+    const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
 
     Size t_max = sizeParamMap_.at("t.max");
     Size dim_x = (*dimArrayMap_.at("x"))[0];
@@ -430,13 +436,13 @@ namespace Biips
 
     if (dim_x == 1)
     {
-      DataType::Array time_x(t_max+1);
-      DataType::Array time_y(t_max);
-      time_x[0] = DataType(0.0);
+      MultiArray::Array time_x(t_max+1);
+      MultiArray::Array time_y(t_max);
+      time_x[0] = MultiArray(0.0);
       for (Size t=1; t<t_max+1; ++t)
       {
-        time_x[t] = DataType(Scalar(t));
-        time_y[t-1] = DataType(Scalar(t));
+        time_x[t] = MultiArray(Scalar(t));
+        time_y[t-1] = MultiArray(Scalar(t));
       }
 
       results_plot.AddCurve(time_x, x_gen, "hidden state", Qt::black, 2, Qt::NoPen, 9, QwtSymbol::Cross);

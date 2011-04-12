@@ -15,7 +15,7 @@
 namespace Biips
 {
 
-  void ModelTest::printValues(std::ostream & os, const String & name, const DataType::Array & dataArray, Size len, char separator) const
+  void ModelTest::printValues(std::ostream & os, const String & name, const MultiArray::Array & dataArray, Size len, char separator) const
   {
     for (Size dim=0; dim<len; ++dim)
     {
@@ -28,7 +28,7 @@ namespace Biips
   }
 
 
-  void ModelTest::printLine(std::ostream & os, const DataType::Array & dataArray, Size dim, char separator) const
+  void ModelTest::printLine(std::ostream & os, const MultiArray::Array & dataArray, Size dim, char separator) const
   {
     for (Size k=0; k<dataArray.size(); ++k)
       os << dataArray[k].Values()[dim] << separator;
@@ -42,7 +42,7 @@ namespace Biips
     for (Size i_var=0; i_var<obsVarNames_.size(); ++i_var)
     {
       const String & var_name = obsVarNames_[i_var];
-      DataType::Array & gen_val = dataValuesMap_[var_name];
+      MultiArray::Array & gen_val = dataValuesMap_[var_name];
       for (Size k=0; k<gen_val.size(); ++k)
         obs_values[modelNodeIdMap_[var_name][k]] = gen_val[k].ValuesPtr();
     }
@@ -50,41 +50,16 @@ namespace Biips
   }
 
 
-//  void ModelTest::progressBar(Scalar progress)
-//  {
-//    static const Size N_CHAR = 40;
-//    static Size current_pos;
-//    using namespace std;
-//    if ( progress == 0.0)
-//    {
-//      current_pos = 0;
-//      os_ << String(N_CHAR, '-') << "|" << pSampler_->NIterations() << endl;
-//    }
-//    else
-//    {
-//      Size new_pos = floor(progress * N_CHAR);
-//      if (new_pos > current_pos)
-//      os_ << String(new_pos - current_pos, '*');
-//      current_pos = new_pos;
-//    }
-//    if (progress == 1.0)
-//    {
-//      os_ << "100%" << endl;
-//    }
-//    os_.flush();
-//  }
-
-
-  void ModelTest::SetModelParam(const std::map<String, DataType> & model_param_map)
+  void ModelTest::SetModelParam(const std::map<String, MultiArray> & model_param_map)
   {
     String var;
 
-    std::map<String, DataType>::const_iterator it_param_map = model_param_map.begin();
+    std::map<String, MultiArray>::const_iterator it_param_map = model_param_map.begin();
     while(it_param_map != model_param_map.end())
     {
       String var = it_param_map->first;
       if (sizeParamMap_.count(var))
-        sizeParamMap_[var] = floor(it_param_map->second.ScalarView());
+        sizeParamMap_[var] = roundSize(it_param_map->second.ScalarView());
       else if (scalarParamMap_.count(var))
         scalarParamMap_[var] = it_param_map->second.ScalarView();
       else
@@ -99,9 +74,9 @@ namespace Biips
   }
 
 
-  void ModelTest::setDataArrayMap(const std::map<String, std::vector<DataType> > & from, std::map<String, DataType::Array> & to)
+  void ModelTest::setDataArrayMap(const std::map<String, std::vector<MultiArray> > & from, std::map<String, MultiArray::Array> & to)
   {
-    std::map<String, std::vector<DataType> >::const_iterator it_from = from.begin();
+    std::map<String, std::vector<MultiArray> >::const_iterator it_from = from.begin();
     while(it_from != from.end())
     {
       to[it_from->first].SetPtr(it_from->second.begin(), it_from->second.end());
@@ -128,10 +103,10 @@ namespace Biips
     {
       const String & var_name = inDataVarNames_[i_var];
       Size var_len = dataNodeIdMap_[var_name].size();
-      dataValuesMap_[var_name].SetPtr(DataType::Array(var_len));
-      DataType::Array & gen_values = dataValuesMap_[var_name];
+      dataValuesMap_[var_name].SetPtr(MultiArray::Array(var_len));
+      MultiArray::Array & gen_values = dataValuesMap_[var_name];
       for (Size k=0; k<gen_values.size(); ++k)
-        gen_values[k] = DataType(dimArrayMap_[var_name], gen_node_values[dataNodeIdMap_[var_name][k]]);
+        gen_values[k] = MultiArray(dimArrayMap_[var_name], gen_node_values[dataNodeIdMap_[var_name][k]]);
     }
     if (verbose_>=2)
     {
@@ -152,7 +127,7 @@ namespace Biips
 //    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
 //    {
 //      const String & var_name = inDataVarNames_[i_var];
-//      const DataType::Array & gen_values = dataValuesMap_.at(var_name);
+//      const MultiArray::Array & gen_values = dataValuesMap_.at(var_name);
 //      printValues(os, var_name, gen_values, dimArrayMap_.at(var_name)->Length());
 //    }
 //  }
@@ -254,10 +229,20 @@ namespace Biips
     pSampler_ = SMCSampler::Ptr(new SMCSampler(nParticles, pModelGraph_.get(), &my_rng));
     pSampler_->SetResampleParams(rsType, essThreshold);
 
-    if (! prior)
+    std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact
+    = SMCSampler::NodeSamplerFactories().begin();
+    for (; it_sampler_fact != SMCSampler::NodeSamplerFactories().end();
+        ++it_sampler_fact)
     {
-      for (Size i=0; i<nodeSamplerFactoryInvOrder_.size(); ++i)
-        pSampler_->PushNodeSamplerFactory(nodeSamplerFactoryInvOrder_[i]);
+      if (prior)
+      {
+        it_sampler_fact->second = false;
+        continue;
+      }
+      Bool active = std::find(nodeSamplerFactoryInvOrder_.begin(),
+          nodeSamplerFactoryInvOrder_.end(),
+          it_sampler_fact->first) != nodeSamplerFactoryInvOrder_.end();
+      it_sampler_fact->second = active;
     }
 
     pSampler_->Initialize();
@@ -271,8 +256,9 @@ namespace Biips
     initFilterAccumulators();
 
     Size current_pos = 0;
+    time_t timer = 0;
     if (verbose_ == 1 && showProgress)
-      current_pos = progressBar(0.0, current_pos, os_, toString(pSampler_->NIterations()));
+      progressBar(0.0, current_pos, timer, os_, toString(pSampler_->NIterations()));
     else if (verbose_>=2)
       os_ << "SMC sampler's progress: " << std::endl;
 
@@ -283,7 +269,7 @@ namespace Biips
     {
       pSampler_->Iterate();
       if (verbose_ == 1 && showProgress)
-        current_pos = progressBar(Scalar(t+1)/t_max, current_pos, os_);
+        progressBar(Scalar(t+1)/t_max, current_pos, timer, os_);
       else if (verbose_>=2)
         pSampler_->PrintSamplerState();
 
@@ -329,11 +315,9 @@ namespace Biips
 
 
   Bool ModelTest::error(Scalar & error, const Types<String>::Array & varNames,
-      const std::map<String, DataType::Array> & smcValuesMap,
-      const std::map<String, DataType::Array> & benchValuesMap) const
+      const std::map<String, MultiArray::Array> & smcValuesMap,
+      const std::map<String, MultiArray::Array> & benchValuesMap) const
   {
-    static std::binder2nd<PowScalar> squared_scalar = std::bind2nd(PowScalar(), 2.0);
-
     Bool valid = false;
     error = 0.0;
 
@@ -343,9 +327,9 @@ namespace Biips
 
       if (smcValuesMap.count(var_name) && benchValuesMap.count(var_name) && benchValuesMap.count("var."+var_name))
       {
-        const DataType::Array & smc_values = smcValuesMap.find(var_name)->second;
-        const DataType::Array & bench_values = benchValuesMap.find(var_name)->second;
-        const DataType::Array & bench_var_values = benchValuesMap.find("var."+var_name)->second;
+        const MultiArray::Array & smc_values = smcValuesMap.find(var_name)->second;
+        const MultiArray::Array & bench_values = benchValuesMap.find(var_name)->second;
+        const MultiArray::Array & bench_var_values = benchValuesMap.find("var."+var_name)->second;
 
         for (Size k=0; k<smc_values.size(); ++k)
         {

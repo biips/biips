@@ -38,6 +38,8 @@ namespace Biips
   class DiscreteScalarAccumulator;
   class ElementAccumulator;
 
+  class Monitor;
+
 
   class SMCSampler : protected smc::sampler<NodeValues>
   {
@@ -58,8 +60,6 @@ namespace Biips
     static Flags & sampledFlagsBefore();
     static Flags & sampledFlagsAfter();
 
-    Types<NodeSamplerFactory::Ptr>::Array nodeSamplerFactoryInvOrder_; // TDOD replace by list
-
     Types<Types<NodeId>::Array>::Array nodeIdSequence_;
     Types<NodeSampler::Ptr>::Array nodeSamplerSequence_;
 //    Biips::History History;
@@ -77,26 +77,39 @@ namespace Biips
     void buildNodeIdSequence();
     void buildNodeSamplers();
 
+    // Forbid copying
+    SMCSampler(const SMCSampler & from);
+    SMCSampler & operator= (const SMCSampler & rhs);
+
   public:
-    void PushNodeSamplerFactory(const NodeSamplerFactory::Ptr & pNodeSamplerFactory) { nodeSamplerFactoryInvOrder_.push_back(pNodeSamplerFactory); };
-    void PopNodeSamplerFactory(Size n = 1) { for (Size i=0; i<n; ++i) nodeSamplerFactoryInvOrder_.pop_back(); };
-    Size NNodeSamplerFactories() const { return nodeSamplerFactoryInvOrder_.size(); };
-    void SetResampleParams(ResampleType rtMode, Scalar threshold) { BaseType::SetResampleParams(rtMode, threshold); }
-    void Initialize();
+    static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & NodeSamplerFactories();
+
+    static const Types<NodeId>::Array & NextSampledNodes() { return *iterNodeId(); };
+
+    Size NParticles() const { return Size(N); };
+    Bool IsInitialized() const { return initialized_; };
+    Bool IsSampling() const { return iterNodeId() != nodeIdSequence_.begin(); };
+    Bool AtEnd() const { return iterNodeId() == nodeIdSequence_.end(); };
     Size NIterations() const { return nodeSamplerSequence_.size(); };
-    void PrintSamplersSequence(std::ostream & os = std::cout) const;
-    void Iterate();
-    Scalar GetNodeId() const { return iterNodeId()->front(); }
     Scalar Ess() const { return ess_; }
     Bool Resampled() const { return nResampled; }
+
+    Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
+    // TODO remove from the class
+    void PrintSamplersSequence(std::ostream & os = std::cout) const;
     void PrintSamplerState(std::ostream & os = std::cout) const;
 
+    void SetResampleParams(ResampleType rtMode, Scalar threshold) { BaseType::SetResampleParams(rtMode, threshold); }
+    void Initialize();
+    void Iterate();
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
 //    template<typename Features>
 //    void Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const;
+
+    void MonitorNode(NodeId nodeId, Monitor & monitor);
 
 
     //---------- Constructors and Destructors ----------

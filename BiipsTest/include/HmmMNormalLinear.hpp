@@ -23,12 +23,12 @@ namespace Biips
 
     static const String NAME_;
 
-    void initAccumulators(std::map<String, DataType::Array> & statsValuesMap);
+    void initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap);
 
     virtual void initFilterAccumulators();
     virtual void initSmoothAccumulators();
 
-    void accumulate(Size t, std::map<String, DataType::Array> & statsValuesMap, const String & title);
+    void accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title);
 
     virtual void filterAccumulate(Size t);
     virtual void smoothAccumulate(Size t);

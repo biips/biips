@@ -1,0 +1,7 @@
+COPY:
+Files 
+- parser_extra.h
+- ParseTree.h
+are direct copies from JAGS (Just Another Gibbs Sampler) 2.1.0 source files.
+They are copyright (C) 2002-10 Martyn Plummer
+and GNU GPL (General Public License) licensed.

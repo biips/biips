@@ -94,7 +94,7 @@ namespace Biips
    * node_values[5] stores the ValArray pointer of node 5.
    * NodeValues objects have the size of the Graph object.
    */
-  typedef Types<Types<DataType::StorageType>::Ptr>::Array NodeValues;
+  typedef Types<Types<MultiArray::StorageType>::Ptr>::Array NodeValues;
 
 
   //! Graph related types
@@ -123,7 +123,7 @@ namespace Biips
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
     boost::property<boost::vertex_node_ptr_t, Node::Ptr,
     boost::property<boost::vertex_observed_t, Bool,
-    boost::property<boost::vertex_value_t, Types<DataType::StorageType>::Ptr> > >,
+    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > >,
     boost::property<boost::edge_type_t, EdgeType>
     > FullGraph;
 

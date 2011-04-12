@@ -58,17 +58,6 @@ namespace Biips
   }
 
 
-  void ValArray::Print(std::ostream & os) const
-  {
-    if (!empty())
-    {
-      os << (*this)[0];
-      for (Size i = 1; i< size(); ++i)
-        os << ", " << (*this)[i];
-      os << std::endl;
-    }
-  }
-
   ValArray operator - (Scalar val, const ValArray & rhs)
   {
     ValArray ans(rhs.size(), val);

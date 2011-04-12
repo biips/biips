@@ -17,10 +17,10 @@ namespace Biips
 
   const String AggNode::NAME_ = "aggregate";
 
-  DataType AggNode::Eval(const DataType::Array & paramValues) const
+  MultiArray AggNode::Eval(const MultiArray::Array & paramValues) const
   // TODO checks
   {
-    DataType ans(pDim_);
+    MultiArray ans(pDim_);
     for (Size i = 0; i < ans.Length(); ++i)
     {
       ans.Values()[i] = paramValues[i].Values()[offsets_[i]];

@@ -54,28 +54,28 @@ namespace Biips
     void updateCore();
 
   public:
-    void Init(const DataType & xtminus1, const DataType & Ptminus1, StateType stateType = UPDATED);
+    void Init(const MultiArray & xtminus1, const MultiArray & Ptminus1, StateType stateType = UPDATED);
 
-    void SetEvolutionModel(const DataType & Ft, const DataType & Bt, const DataType & Qt);
-    void SetObservationModel(const DataType & Ht, const DataType & Rt);
+    void SetEvolutionModel(const MultiArray & Ft, const MultiArray & Bt, const MultiArray & Qt);
+    void SetObservationModel(const MultiArray & Ht, const MultiArray & Rt);
 
     void Init(Scalar xtminus1, Scalar Ptminus1, StateType stateType = UPDATED);
 
     void SetEvolutionModel(Scalar Ft, Scalar Bt, Scalar Qt);
     void SetObservationModel(Scalar Ht, Scalar Rt);
 
-    void Update(const DataType & zt);
-    void Update(const DataType & zt, const DataType & ut);
+    void Update(const MultiArray & zt);
+    void Update(const MultiArray & zt, const MultiArray & ut);
 
     void Update(Scalar zt);
     void Update(Scalar zt, Scalar ut);
 
-    DataType GetPriorEstimate() const { return DataType(xtPred_); }
-    DataType GetPriorCovariance() const { return DataType(PtPred_); }
-    DataType GetPosteriorEstimate() const { return DataType(xt_); }
-    DataType GetPosteriorCovariance() const { return DataType(Pt_); }
+    MultiArray GetPriorEstimate() const { return MultiArray(xtPred_); }
+    MultiArray GetPriorCovariance() const { return MultiArray(PtPred_); }
+    MultiArray GetPosteriorEstimate() const { return MultiArray(xt_); }
+    MultiArray GetPosteriorCovariance() const { return MultiArray(Pt_); }
 
-    KalmanFilter(const DataType & xtminus1, const DataType & Ptminus1, const DataType & Rt, StateType stateType = UPDATED);
+    KalmanFilter(const MultiArray & xtminus1, const MultiArray & Ptminus1, const MultiArray & Rt, StateType stateType = UPDATED);
 
     KalmanFilter(Scalar xtminus1, Scalar Ptminus1, Scalar Rt, StateType stateType = UPDATED);
   };

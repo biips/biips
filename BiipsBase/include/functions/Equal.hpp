@@ -11,21 +11,21 @@
 #ifndef BIIPS_EQUAL_HPP_
 #define BIIPS_EQUAL_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Equal : public Biips::Function
+  class Equal : public BinaryScalarFunction<std::equal_to<Scalar> >
   {
-  protected:
+  public:
     typedef Equal SelfType;
+    typedef BinaryScalarFunction<std::equal_to<Scalar> > BaseType;
 
-    Equal() : Function("==", 2) {};
+  protected:
+    Equal() : BaseType("==") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

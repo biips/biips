@@ -1,0 +1,54 @@
+var N, K, alpha, sigma,
+  pi.gen[K], pi[K,N], n[K,N], v[K,N], s[K,N], m[K,N], mu.Y[K,N], var.Y[N],
+  C[N], Y[N]
+  
+data {
+  N <- 20
+  K <- 4
+  alpha <- 1
+  sigma <- 0.5
+  
+  for (k in 1:K) {
+    n[k,0] <- 0
+    var.Y[0] <- 1
+    s[k,0] <- 0
+    mu.Y[0] <- 0
+    pi[k,0] <- 1/K
+  }
+  
+  for (t in 1:N-1) {
+    C[t+1] ~ dcat(pi.gen[])
+    Y[t+1] ~ dnorm(mu.gen[], var.gen[])
+  }
+}
+
+model {
+    C[1] ~ dcat(pi[,0])
+    
+    n[,] <- n[,t-1] + (C[t] == k[])
+    
+    v[,t] <- (C[t+1] == k[]) * sigma^2 / (sigma^2 + n[,t])
+    var.Y[t] <- sum(v[,t])
+    
+    s[,t] <- s[,t-1] + (C[t] == k[]) * Y[t]
+    m[,t] <- (C[t+1] == k[]) * v[,t] / sigma^2 * s[,t]
+    mu.Y[t] <- sum(m[,t])
+    
+    Y[t+1] ~ dnorm(mu.Y[t], var.Y[t])
+  for (t in 1:N-1) {
+    pi[,t] <- (n[,t] + alpha/K) / (t + alpha)
+    
+    C[t+1] ~ dcat(pi[,t])
+    
+    n[,t] <- n[,t-1] + (C[t] == k[])
+    
+    v[,t] <- (C[t+1] == k[]) * sigma^2 / (sigma^2 + n[,t])
+    var.Y[t] <- sum(v[,t])
+    
+    s[,t] <- s[,t-1] + (C[t] == k[]) * Y[t]
+    m[,t] <- (C[t+1] == k[]) * v[,t] / sigma^2 * s[,t]
+    mu.Y[t] <- sum(m[,t])
+    
+    Y[t+1] ~ dnorm(mu.Y[t], var.Y[t])
+  }
+}

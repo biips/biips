@@ -23,8 +23,12 @@ namespace Biips
 
     MatMult() : Function("%*%", 2) {};
 
+    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
 
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
