@@ -12,6 +12,8 @@
 #define BIIPSCORE_HPP_
 
 #include "common/Common.hpp"
+#include "function/FunctionTable.hpp"
+#include "distribution/DistributionTable.hpp"
 #include "graph/Node.hpp"
 #include "graph/ConstantNode.hpp"
 #include "graph/StochasticNode.hpp"

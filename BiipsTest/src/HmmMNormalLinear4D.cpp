@@ -96,7 +96,7 @@ namespace Biips
     }
 
     Size t_max = sizeParamMap_.at("t.max");
-    std::vector<DataType> u_vec(t_max, DataType(dimArrayMap_["u"]));
+    std::vector<MultiArray> u_vec(t_max, MultiArray(dimArrayMap_["u"]));
     dataValuesMap_["u"].SetPtr(u_vec.begin(), u_vec.end());
 
   }

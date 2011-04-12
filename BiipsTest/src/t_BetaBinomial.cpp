@@ -131,9 +131,9 @@ void t_BetaBinomial(int argc, char* argv[])
 
       // create constant nodes
       //----------------------
-      NodeId alpha = graph.AddConstantNode(DataType(alpha_val));
-      NodeId beta = graph.AddConstantNode(DataType(beta_val));
-      NodeId n_trials = graph.AddConstantNode(DataType(n_trials_val));
+      NodeId alpha = graph.AddConstantNode(MultiArray(alpha_val));
+      NodeId beta = graph.AddConstantNode(MultiArray(beta_val));
+      NodeId n_trials = graph.AddConstantNode(MultiArray(n_trials_val));
 
       // create Stochastic nodeId collections
       //-----------------------------------

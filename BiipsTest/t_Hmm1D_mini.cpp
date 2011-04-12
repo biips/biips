@@ -48,10 +48,14 @@ int main(int argc, char* argv[])
   // Variance of Y[t] | Y[t] :
   Scalar var_y_val = 0.5;
 
+  // Declare FunctionTable and a DistributionTable :
+  //------------------------------------------------
+  FunctionTable func_tab;
+  DistributionTable dist_tab;
+
   // Load the Base module :
   //-----------------------
-  loadBaseModule();
-
+  loadBaseModule(func_tab, dist_tab);
 
   // Declare the Graph object :
   //---------------------------
@@ -59,20 +63,15 @@ int main(int argc, char* argv[])
 
   // Add the constant nodes to the graph :
   //--------------------------------------
-
-  NodeId mean_x0 = graph.AddConstantNode(DataType(mean_x0_val));
-  NodeId var_x0 = graph.AddConstantNode(DataType(var_x0_val));
-  NodeId var_x = graph.AddConstantNode(DataType(var_x_val));
-  NodeId var_y = graph.AddConstantNode(DataType(var_y_val));
+  NodeId mean_x0 = graph.AddConstantNode(MultiArray(mean_x0_val));
+  NodeId var_x0 = graph.AddConstantNode(MultiArray(var_x0_val));
+  NodeId var_x = graph.AddConstantNode(MultiArray(var_x_val));
+  NodeId var_y = graph.AddConstantNode(MultiArray(var_y_val));
 
   // Create stochastic NodeId collections to store X and Y's components identifiers :
   //---------------------------------------------------------------------------------
   Types<NodeId>::Array x(t_max+1);
   Types<NodeId>::Array y(t_max);
-
-  // Create a DimArray object used to store the dimension of the nodes :
-  //--------------------------------------------------------------------
-  DimArray::Ptr scalar_dim(new DimArray(1,1));
 
   // Create a NodeId array to handle the parents of each stochastic node :
   //----------------------------------------------------------------------
@@ -82,7 +81,7 @@ int main(int argc, char* argv[])
   //---------------------------------------
   params[0] = mean_x0;
   params[1] = var_x0;
-  x[0] = graph.AddStochasticNode(scalar_dim, "dnorm.var", params, false);
+  x[0] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
 
   // Add the other stochastic nodes to the graph :
   //----------------------------------------------
@@ -91,17 +90,13 @@ int main(int argc, char* argv[])
     // Add X[t]
     params[0] = x[t-1];
     params[1] = var_x;
-    x[t] = graph.AddStochasticNode(scalar_dim, "dnorm.var", params, false);
+    x[t] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
 
     // Add Y[t]
     params[0] = x[t];
     params[1] = var_y;
-    y[t-1] = graph.AddStochasticNode(scalar_dim, "dnorm.var", params, true);
+    y[t-1] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, true);
   }
-
-  // Check if the graph has cycles :
-  //--------------------------------
-  Bool has_cycle = graph.HasCycle();
 
   // Build the graph :
   //------------------
@@ -109,7 +104,6 @@ int main(int argc, char* argv[])
 
   // Generate data :
   //----------------
-
   // Declare a random number generator, initialized with an integer seed
   Rng my_rng(0);
 
@@ -118,7 +112,6 @@ int main(int argc, char* argv[])
 
   // Set the observations values according to the generated values
   graph.SetObsValues(gen_values);
-
 
 
  /*==================================*
@@ -135,10 +128,6 @@ int main(int argc, char* argv[])
   //--------------------------------
   SMCSampler sampler(nb_particles, &graph, &my_rng);
   sampler.SetResampleParams(SMC_RESAMPLE_STRATIFIED, 0.5);
-
-  // Push NodeSampler factories into the list :
-  //-------------------------------------------
-  sampler.PushNodeSamplerFactory(ConjugateNormalFactory::Instance());
 
   // Initialize the SMCSampler object :
   //-----------------------------------

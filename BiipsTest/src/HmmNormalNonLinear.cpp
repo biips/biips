@@ -75,7 +75,9 @@ namespace Biips
   {
     // load Base module
     //-----------------
-    loadBaseModule();
+    FunctionTable funcTab;
+    DistributionTable distTab;
+    loadBaseModule(funcTab, distTab);
 
     // graph
     //------
@@ -89,14 +91,14 @@ namespace Biips
     Scalar var_x_val = scalarParamMap_["var.x"];
     Scalar var_y_val = scalarParamMap_["var.y"];
 
-    NodeId mean_x0 = pModelGraph_->AddConstantNode(DataType(mean_x0_val));
-    NodeId a_f = pModelGraph_->AddConstantNode(DataType(0.5));
-    NodeId b_f = pModelGraph_->AddConstantNode(DataType(25.0));
-    NodeId c_f = pModelGraph_->AddConstantNode(DataType(1.0));
-    NodeId d_f = pModelGraph_->AddConstantNode(DataType(8.0));
-    NodeId e_f = pModelGraph_->AddConstantNode(DataType(1.2));
-    NodeId a_g = pModelGraph_->AddConstantNode(DataType(20.0));
-    NodeId expo = pModelGraph_->AddConstantNode(DataType(2.0));
+    NodeId mean_x0 = pModelGraph_->AddConstantNode(MultiArray(mean_x0_val));
+    NodeId a_f = pModelGraph_->AddConstantNode(MultiArray(0.5));
+    NodeId b_f = pModelGraph_->AddConstantNode(MultiArray(25.0));
+    NodeId c_f = pModelGraph_->AddConstantNode(MultiArray(1.0));
+    NodeId d_f = pModelGraph_->AddConstantNode(MultiArray(8.0));
+    NodeId e_f = pModelGraph_->AddConstantNode(MultiArray(1.2));
+    NodeId a_g = pModelGraph_->AddConstantNode(MultiArray(20.0));
+    NodeId expo = pModelGraph_->AddConstantNode(MultiArray(2.0));
 
     NodeId prec_or_var_x0;
     NodeId prec_or_var_x;
@@ -104,15 +106,15 @@ namespace Biips
 
     if (precFlag_)
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(DataType(1.0 / var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(DataType(1.0 / var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(DataType(1.0 / var_y_val));
+      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x0_val));
+      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x_val));
+      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_y_val));
     }
     else
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(DataType(var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(DataType(var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(DataType(var_y_val));
+      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(var_x0_val));
+      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(var_x_val));
+      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(var_y_val));
     }
 
     Size t_max = sizeParamMap_["t.max"];
@@ -152,133 +154,133 @@ namespace Biips
     {
       binary_params[0] = mean_x0;
       binary_params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm", binary_params, false);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], binary_params, false);
 
       binary_params[0] = x[0];
       binary_params[1] = expo;
-      pow_x[0] = pModelGraph_->AddLogicalNode(scalar_dim, "^", binary_params);
+      pow_x[0] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["^"], binary_params);
 
       for (Size t=1; t<t_max+1; ++t)
       {
         binary_params[0] = a_f;
         binary_params[1] = x[t-1];
-        prod_a_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_a_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         binary_params[0] = c_f;
         binary_params[1] = pow_x[t-1];
-        sum_c_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        sum_c_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = x[t-1];
         binary_params[1] = sum_c_f[t-1];
-        div_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "/", binary_params);
+        div_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["/"], binary_params);
 
         binary_params[0] = b_f;
         binary_params[1] = div_f[t-1];
-        prod_b_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_b_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
-        time[t-1] = pModelGraph_->AddConstantNode(DataType(Scalar(t)));
+        time[t-1] = pModelGraph_->AddConstantNode(MultiArray(Scalar(t)));
 
         binary_params[0] = e_f;
         binary_params[1] = time[t-1];
-        prod_e_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_e_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         unary_param[0] = prod_e_f[t-1];
-        cos_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "cos", unary_param);
+        cos_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["cos"], unary_param);
 
         binary_params[0] = d_f;
         binary_params[1] = cos_f[t-1];
-        prod_d_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_d_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         binary_params[0] = prod_a_f[t-1];
         binary_params[1] = prod_b_f[t-1];
-        sum1_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        sum1_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = sum1_f[t-1];
         binary_params[1] = prod_d_f[t-1];
-        f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = f[t-1];
         binary_params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm", binary_params, false);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], binary_params, false);
 
         binary_params[0] = x[t];
         binary_params[1] = expo;
-        pow_x[t] = pModelGraph_->AddLogicalNode(scalar_dim, "^", binary_params);
+        pow_x[t] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["^"], binary_params);
 
         binary_params[0] = pow_x[t];
         binary_params[1] = a_g;
-        g[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "/", binary_params);
+        g[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["/"], binary_params);
 
         binary_params[0] = g[t-1];
         binary_params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dnorm", binary_params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnorm"], binary_params, true);
       }
     }
     else
     {
       binary_params[0] = mean_x0;
       binary_params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm.var", binary_params, false);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], binary_params, false);
 
       binary_params[0] = x[0];
       binary_params[1] = expo;
-      pow_x[0] = pModelGraph_->AddLogicalNode(scalar_dim, "^", binary_params);
+      pow_x[0] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["^"], binary_params);
 
 
       for (Size t=1; t<t_max+1; ++t)
       {
         binary_params[0] = a_f;
         binary_params[1] = x[t-1];
-        prod_a_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_a_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         binary_params[0] = c_f;
         binary_params[1] = pow_x[t-1];
-        sum_c_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        sum_c_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = x[t-1];
         binary_params[1] = sum_c_f[t-1];
-        div_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "/", binary_params);
+        div_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["/"], binary_params);
 
         binary_params[0] = b_f;
         binary_params[1] = div_f[t-1];
-        prod_b_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_b_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
-        time[t-1] = pModelGraph_->AddConstantNode(DataType(Scalar(t)));
+        time[t-1] = pModelGraph_->AddConstantNode(MultiArray(Scalar(t)));
 
         binary_params[0] = e_f;
         binary_params[1] = time[t-1];
-        prod_e_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_e_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         unary_param[0] = prod_e_f[t-1];
-        cos_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "cos", unary_param);
+        cos_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["cos"], unary_param);
 
         binary_params[0] = d_f;
         binary_params[1] = cos_f[t-1];
-        prod_d_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "*", binary_params);
+        prod_d_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["*"], binary_params);
 
         binary_params[0] = prod_a_f[t-1];
         binary_params[1] = prod_b_f[t-1];
-        sum1_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        sum1_f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = sum1_f[t-1];
         binary_params[1] = prod_d_f[t-1];
-        f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "+", binary_params);
+        f[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["+"], binary_params);
 
         binary_params[0] = f[t-1];
         binary_params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm.var", binary_params, false);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], binary_params, false);
 
         binary_params[0] = x[t];
         binary_params[1] = expo;
-        pow_x[t] = pModelGraph_->AddLogicalNode(scalar_dim, "^", binary_params);
+        pow_x[t] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["^"], binary_params);
 
         binary_params[0] = pow_x[t];
         binary_params[1] = a_g;
-        g[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, "/", binary_params);
+        g[t-1] = pModelGraph_->AddLogicalNode(scalar_dim, funcTab["/"], binary_params);
 
         binary_params[0] = g[t-1];
         binary_params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dnorm.var", binary_params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnormvar"], binary_params, true);
       }
     }
 
@@ -294,7 +296,7 @@ namespace Biips
   }
 
 
-  void HmmNormalNonLinear::initAccumulators(std::map<String, DataType::Array> & statsValuesMap)
+  void HmmNormalNonLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
@@ -306,10 +308,10 @@ namespace Biips
 
     Size t_max = sizeParamMap_["t.max"];
 
-    statsValuesMap["x"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.var"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.q05"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.q95"].SetPtr(DataType::Array(t_max+1));
+    statsValuesMap["x"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.var"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.q05"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.q95"].SetPtr(MultiArray::Array(t_max+1));
   }
 
   void HmmNormalNonLinear::initFilterAccumulators()
@@ -317,14 +319,14 @@ namespace Biips
     initAccumulators(smcFilterValuesMap_);
   }
 
-  void HmmNormalNonLinear::accumulate(Size t, std::map<String, DataType::Array> & statsValuesMap, const String & title)
+  void HmmNormalNonLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
   {
     Types<NodeId>::Array & x = modelNodeIdMap_["x"];
 
-    DataType::Array & x_est = statsValuesMap["x"];
-    DataType::Array & x_var = statsValuesMap["x.var"];
-    DataType::Array & x_quant_05 = statsValuesMap["x.q05"];
-    DataType::Array & x_quant_95 = statsValuesMap["x.q95"];
+    MultiArray::Array & x_est = statsValuesMap["x"];
+    MultiArray::Array & x_var = statsValuesMap["x.var"];
+    MultiArray::Array & x_quant_05 = statsValuesMap["x.q05"];
+    MultiArray::Array & x_quant_95 = statsValuesMap["x.q95"];
 
     pSampler_->Accumulate(x[t], scalarAcc_);
     x_est[t].Alloc(scalarAcc_.Mean());
@@ -361,21 +363,21 @@ namespace Biips
 
   void HmmNormalNonLinear::PlotResults(const String & plotFileName) const
   {
-    const DataType::Array & x_gen = dataValuesMap_.at("x");
-    const DataType::Array & y_obs = dataValuesMap_.at("y");
-    const DataType::Array & x_est_PF = smcFilterValuesMap_.at("x");
-    const DataType::Array & x_quant_05_PF = smcFilterValuesMap_.at("x.q05");
-    const DataType::Array & x_quant_95_PF = smcFilterValuesMap_.at("x.q95");
-    const DataType::Array & x_est_PS = smcSmoothValuesMap_.at("x");
+    const MultiArray::Array & x_gen = dataValuesMap_.at("x");
+    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
+    const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
+    const MultiArray::Array & x_quant_05_PF = smcFilterValuesMap_.at("x.q05");
+    const MultiArray::Array & x_quant_95_PF = smcFilterValuesMap_.at("x.q95");
+    const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
 
     Size t_max = sizeParamMap_.at("t.max");
-    DataType::Array time_x(t_max+1);
-    DataType::Array time_y(t_max);
-    time_x[0] = DataType(0.0);
+    MultiArray::Array time_x(t_max+1);
+    MultiArray::Array time_y(t_max);
+    time_x[0] = MultiArray(0.0);
     for (Size t=1; t<t_max+1; ++t)
     {
-      time_x[t] = DataType(Scalar(t));
-      time_y[t-1] = DataType(Scalar(t));
+      time_x[t] = MultiArray(Scalar(t));
+      time_y[t-1] = MultiArray(Scalar(t));
     }
 
     Plot results_plot(argc_, argv_);

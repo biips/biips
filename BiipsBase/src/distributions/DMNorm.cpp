@@ -20,11 +20,26 @@
 namespace Biips
 {
 
-  DataType DMNorm::Sample(const DataType::Array & paramValues, Rng * pRng) const
+  Bool DMNorm::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    const DimArray & left = *paramDims[0];
+    const DimArray & right = *paramDims[1];
+    if ((left.IsVector() && right.IsSquared()))
+      return (left[0] == right[0]);
+    else
+      return false;
+  }
+
+  DimArray DMNorm::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    return *paramDims[0];
+  }
+
+  MultiArray DMNorm::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
   {
     // TODO check paramValues
-    const DataType & mean = paramValues[0]; // TODO check dim
-    const DataType & prec = paramValues[1]; // TODO check dim
+    const MultiArray & mean = paramValues[0]; // TODO check dim
+    const MultiArray & prec = paramValues[1]; // TODO check dim
 
     Matrix var_chol(prec);
     ublas::cholesky_factorize(var_chol);
@@ -38,7 +53,7 @@ namespace Biips
     typedef boost::variate_generator<Rng::GenType&, DistType > GenType;
     GenType gen(pRng->GetGen(), dist);
 
-    DataType sample(mean.DimPtr());
+    MultiArray sample(mean.DimPtr());
     for (Size i = 0; i < sample.Length(); ++i)
     {
       sample.Values()[i] = gen();
@@ -47,11 +62,11 @@ namespace Biips
   }
 
 
-  Scalar DMNorm::LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const
+  Scalar DMNorm::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     // TODO check paramValues
-    const DataType & mean = paramValues[0]; // TODO check dim
-    const DataType & prec = paramValues[1]; // TODO check dim
+    const MultiArray & mean = paramValues[0]; // TODO check dim
+    const MultiArray & prec = paramValues[1]; // TODO check dim
 
     Vector diff_vec(x.Length(), x.Values() - mean.Values()); // TODO check dim
 

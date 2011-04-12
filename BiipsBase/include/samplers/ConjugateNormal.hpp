@@ -32,15 +32,15 @@ namespace Biips
     explicit ConjugateNormal(const Graph * pGraph )
      : BaseType(pGraph) {};
 
-    virtual DataType::Array initLikeParamContrib() const;
+    virtual MultiArray::Array initLikeParamContrib() const;
     virtual void formLikeParamContrib(NodeId likeId,
-        DataType::Array & likeParamContribValues);
-    virtual DataType::Array postParam(const DataType::Array & priorParamContribValues,
-        const DataType::Array & likeParamContribValues) const;
-    virtual Scalar computeLogWeight(const DataType & sampledData,
-        const DataType::Array & priorParamValues,
-        const DataType::Array & postParamValues,
-        const DataType::Array & LikeParamContrib);
+        MultiArray::Array & likeParamContribValues);
+    virtual MultiArray::Array postParam(const MultiArray::Array & priorParamContribValues,
+        const MultiArray::Array & likeParamContribValues) const;
+    virtual Scalar computeLogWeight(const MultiArray & sampledData,
+        const MultiArray::Array & priorParamValues,
+        const MultiArray::Array & postParamValues,
+        const MultiArray::Array & LikeParamContrib);
 
   public:
     virtual const String & Name() const { return NAME_; };

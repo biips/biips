@@ -23,9 +23,12 @@ namespace Biips
 
       DBin() : Distribution("dbin", 2) {};
 
+      virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+      virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+
     public:
-      virtual DataType Sample(const DataType::Array & paramValues, Rng * pRng) const;
-      virtual Scalar LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const;
+      virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const;
+      virtual Scalar LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
 
       static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
     };

@@ -6,6 +6,8 @@
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
+ *
+ * COPY: part of this file is copied and pasted from SMCTC sampler<Space> class
  */
 
 #include "sampler/SMCSampler.hpp"
@@ -15,6 +17,7 @@
 #include "graph/StochasticNode.hpp"
 #include "graph/LogicalNode.hpp"
 #include "sampler/Accumulator.hpp"
+#include "model/Monitor.hpp"
 
 
 namespace Biips
@@ -22,36 +25,53 @@ namespace Biips
 
   Graph * SMCSampler::pGraph_;
 
+  std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & SMCSampler::NodeSamplerFactories()
+  {
+    static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > ans;
+    return ans;
+  }
+
   Flags & SMCSampler::sampledFlagsBefore() { static Flags ans(pGraph_->GetSize()); return ans; };
   Flags & SMCSampler::sampledFlagsAfter() { static Flags ans(pGraph_->GetSize()); return ans; };
 
   void SMCSampler::buildNodeSamplers()
   {
     nodeSamplerSequence_.resize(nodeIdSequence_.size());
-    Flags flags_node_sampler_affected_sequence(nodeIdSequence_.size(), false);
 
-    Types<NodeSamplerFactory::Ptr>::ReverseIterator rit_node_sampler_factory_order = nodeSamplerFactoryInvOrder_.rbegin();
+    std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::const_iterator it_sampler_factory
+      = NodeSamplerFactories().begin();
 
     Types<Types<NodeId>::Array>::Iterator it_node_id;
     Types<NodeSampler::Ptr>::Iterator it_node_sampler;
-    Flags::iterator it_flags_node_sampler_affected;
 
-    while ( rit_node_sampler_factory_order != nodeSamplerFactoryInvOrder_.rend() )
+    for(; it_sampler_factory != NodeSamplerFactories().end();
+        ++it_sampler_factory)
     {
+      if(!it_sampler_factory->second)
+        continue;
+
       it_node_id = nodeIdSequence_.begin();
       it_node_sampler = nodeSamplerSequence_.begin();
-      it_flags_node_sampler_affected = flags_node_sampler_affected_sequence.begin();
-      while ( it_node_id != nodeIdSequence_.end() )
+      for(; it_node_id != nodeIdSequence_.end();
+          ++it_node_id, ++it_node_sampler)
       {
-        if ( !(*it_flags_node_sampler_affected) )
+        if ( !(*it_node_sampler) )
         {
-          *it_flags_node_sampler_affected = (*rit_node_sampler_factory_order)->Create(pGraph_, it_node_id->front(), *it_node_sampler);
+          it_sampler_factory->first->Create(pGraph_, it_node_id->front(), *it_node_sampler);
         }
-        ++it_node_id;
-        ++it_node_sampler;
-        ++it_flags_node_sampler_affected;
       }
-      ++rit_node_sampler_factory_order;
+    }
+
+    // affect default prior NodeSampler to all non affected nodes
+    it_node_id = nodeIdSequence_.begin();
+    it_node_sampler = nodeSamplerSequence_.begin();
+    for(; it_node_id != nodeIdSequence_.end();
+        ++it_node_id, ++it_node_sampler)
+    {
+      if ( !(*it_node_sampler) )
+      {
+        NodeSamplerFactory::Instance()->Create(pGraph_, it_node_id->front(), *it_node_sampler);
+      }
     }
   }
 
@@ -70,25 +90,20 @@ namespace Biips
 
   void SMCSampler::fMove(long lTime, Particle & lastParticle, Rng * pRng)
   {
-    static Types<Types<NodeId>::Array>::Iterator & iterNodeId_ = iterNodeId();
-    static Types<NodeSampler::Ptr>::Iterator & iterNodeSampler_ = iterNodeSampler();
-    static Flags & sampledFlagsBefore_ = sampledFlagsBefore();
-    static Flags & sampledFlagsAfter_ = sampledFlagsAfter();
-
     // sample current stochastic node
     NodeValues & moved_particle_value = *(lastParticle.GetValuePointer());
-    sampledFlagsAfter_ = sampledFlagsBefore_;
-    (*iterNodeSampler_)->SetAttributes(moved_particle_value, sampledFlagsAfter_, pRng);
-    (*iterNodeSampler_)->Sample(iterNodeId_->front());
+    sampledFlagsAfter() = sampledFlagsBefore();
+    (*iterNodeSampler())->SetAttributes(moved_particle_value, sampledFlagsAfter(), pRng);
+    (*iterNodeSampler())->Sample(iterNodeId()->front());
 
     // update particle log weight
-    lastParticle.AddToLogWeight((*iterNodeSampler_)->LogWeight());
+    lastParticle.AddToLogWeight((*iterNodeSampler())->LogWeight());
 
     // compute all logical children
-    Types<NodeId>::Iterator it_logical_children = iterNodeId_->begin()+1;
-    while(it_logical_children != iterNodeId_->end())
+    Types<NodeId>::Iterator it_logical_children = iterNodeId()->begin()+1;
+    while(it_logical_children != iterNodeId()->end())
     {
-      (*iterNodeSampler_)->Sample(*it_logical_children);
+      (*iterNodeSampler())->Sample(*it_logical_children);
       ++it_logical_children;
     }
   }
@@ -98,8 +113,6 @@ namespace Biips
   : BaseType(nbParticles, SMC_HISTORY_NONE), Moves(&fInitialize, &fMove), pRng_(pRng), initialized_(false)
   {
     pGraph_ = pGraph;
-
-    nodeSamplerFactoryInvOrder_.push_back(NodeSamplerFactory::Instance());
   }
 
 
@@ -119,7 +132,7 @@ namespace Biips
     {
       if ( nodeIdDefined_ ) // TODO manage else case : throw exception
       {
-        if ( ! pGraph_->GetObserved()[nodeId_] )
+        if ( !pGraph_->GetObserved()[nodeId_] )
         {
           // push a new array whose first element is the stochastic node
           pNodeIdSequence_->push_back(Types<NodeId>::Array(1,nodeId_));
@@ -131,7 +144,7 @@ namespace Biips
     {
       if ( nodeIdDefined_ ) // TODO manage else case : throw exception
       {
-        if ( ! pGraph_->GetObserved()[nodeId_] )
+        if ( !pNodeIdSequence_->empty() && !pGraph_->GetObserved()[nodeId_] )
         {
           // push all the logical children back in the last array
           pNodeIdSequence_->back().push_back(nodeId_);
@@ -139,18 +152,18 @@ namespace Biips
       }
     };
 
-    explicit BuildNodeIdSequenceVisitor(const Graph * pGraph, Types<Types<NodeId>::Array>::Array * pNodeIdSequence)
+    BuildNodeIdSequenceVisitor(const Graph * pGraph, Types<Types<NodeId>::Array>::Array * pNodeIdSequence)
     : pGraph_(pGraph), pNodeIdSequence_(pNodeIdSequence) {};
   };
 
 
   void SMCSampler::buildNodeIdSequence()
   {
-    // this will buil an array of NodeId arrays whose first
+    // this will build an array of NodeId arrays whose first
     // element are the unobserved stochastic nodes
     // followed by their logical children
     // in topological order
-    BuildNodeIdSequenceVisitor build_node_id_sequence_vis(pGraph_, & nodeIdSequence_);
+    BuildNodeIdSequenceVisitor build_node_id_sequence_vis(pGraph_, &nodeIdSequence_);
     pGraph_->VisitGraph(build_node_id_sequence_vis);
   }
 
@@ -164,22 +177,28 @@ namespace Biips
   }
 
 
+  Types<std::pair<NodeId, String> >::Array SMCSampler::GetSamplersSequence() const
+  {
+    Types<std::pair<NodeId, String> >::Array ans;
+    for (Size k = 0; k<nodeIdSequence_.size(); ++k)
+    {
+      ans.push_back(std::make_pair(nodeIdSequence_[k].front(), nodeSamplerSequence_[k]->Name()));
+    }
+    return ans;
+  }
+
+
   void SMCSampler::Initialize()
   {
-    static Types<Types<NodeId>::Array>::Iterator & iterNodeId_ = iterNodeId();
-    static Types<NodeSampler::Ptr>::Iterator & iterNodeSampler_ = iterNodeSampler();
-    static Flags & sampledFlagsBefore_ = sampledFlagsBefore();
-    static Flags & sampledFlagsAfter_ = sampledFlagsAfter();
-
     buildNodeIdSequence();
     buildNodeSamplers();
 
-    iterNodeId_ = nodeIdSequence_.begin();
-    iterNodeSampler_ = nodeSamplerSequence_.begin();
+    iterNodeId() = nodeIdSequence_.begin();
+    iterNodeSampler() = nodeSamplerSequence_.begin();
 
-    for (NodeId id= 0; id<sampledFlagsBefore_.size(); ++id)
+    for (NodeId id= 0; id<sampledFlagsBefore().size(); ++id)
     {
-      sampledFlagsBefore_[id] = sampledFlagsAfter_[id] = pGraph_->GetObserved()[id];
+      sampledFlagsBefore()[id] = sampledFlagsAfter()[id] = pGraph_->GetObserved()[id];
     }
 
     T = 0;
@@ -198,57 +217,61 @@ namespace Biips
 
   void SMCSampler::Iterate()
   {
-    static Types<Types<NodeId>::Array>::Iterator & iterNodeId_ = iterNodeId();
-    static Types<NodeSampler::Ptr>::Iterator & iterNodeSampler_ = iterNodeSampler();
-    static Flags & sampledFlagsBefore_ = sampledFlagsBefore();
-    static Flags & sampledFlagsAfter_ = sampledFlagsAfter();
+    if (!initialized_)
+      throw LogicError("Can not iterate SMCSampler: not initialized.");
 
-    if ( iterNodeId_ != nodeIdSequence_.end() ) // TODO manage the else case
+    if ( iterNodeId() == nodeIdSequence_.end() )
+      throw LogicError("Can not iterate SMCSampler: the sequence have reached the end.");
+
+    sampledFlagsBefore() = sampledFlagsAfter();
+
+    if (nResampled)
+      Resample(rtResampleMode);
+
+    // COPY: copied and pasted from SMCTC sampler<Space>::IterateESS method
+    // and then modified to fit Biips code
+    // COPY: ********** from here **********
+
+    nAccepted = 0;
+
+    //Move the particle set.
+    for(int i = 0; i < N; i++)
+      Moves.DoMove(T+1, pParticles[i], pRng_);
+
+    //Normalize the weights to sensible values....
+    double dMaxWeight = -std::numeric_limits<double>::infinity();
+    for(int i = 0; i < N; i++)
+      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
+    for(int i = 0; i < N; i++)
+      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
+
+    //Check if the ESS is below some reasonable threshold and resample if necessary.
+    //A mechanism for setting this threshold is required.
+    ess_ = GetESS();
+    if (ess_ < dResampleThreshold)
+      nResampled = 1;
+    else
     {
-      sampledFlagsBefore_ = sampledFlagsAfter_;
-
-      if (nResampled)
-        Resample(rtResampleMode);
-
-      nAccepted = 0;
-
-      //Move the particle set.
-      for(int i = 0; i < N; i++)
-        Moves.DoMove(T+1, pParticles[i], pRng_);
-
-      //Normalize the weights to sensible values....
-      double dMaxWeight = -std::numeric_limits<double>::infinity();
-      for(int i = 0; i < N; i++)
-        dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
-      for(int i = 0; i < N; i++)
-        pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
-
-      //Check if the ESS is below some reasonable threshold and resample if necessary.
-      //A mechanism for setting this threshold is required.
-      ess_ = GetESS();
-      if (ess_ < dResampleThreshold)
-        nResampled = 1;
-      else
+      nResampled = 0;
+      for (int i = 0; i<N ; ++i)
       {
-        nResampled = 0;
-        for (int i = 0; i<N ; ++i)
-        {
-          uRSIndices[i] = i;
-        }
+        uRSIndices[i] = i;
       }
-
-      //      //the current particle set should be appended to the historical process.
-      //      if(htHistoryMode != ::SMC_HISTORY_NONE)
-      //      {
-      //        History.PushBack(N, pParticles, nAccepted, HistoryFlags(nResampled), pGraph_->GetNodePtr(*iterNodeId_), Types<Size>::Array(uRSIndices, uRSIndices+N));
-      //      }
-
-      // Increment the evolution time.
-      T++;
-
-      ++iterNodeId_;
-      ++iterNodeSampler_;
     }
+
+    //      //the current particle set should be appended to the historical process.
+    //      if(htHistoryMode != ::SMC_HISTORY_NONE)
+    //      {
+    //        History.PushBack(N, pParticles, nAccepted, HistoryFlags(nResampled), pGraph_->GetNodePtr(*iterNodeId()), Types<Size>::Array(uRSIndices, uRSIndices+N));
+    //      }
+
+    // Increment the evolution time.
+    T++;
+
+    // COPY: ********** to here **********
+
+    ++iterNodeId();
+    ++iterNodeSampler();
   }
 
 
@@ -275,21 +298,27 @@ namespace Biips
   }
 
 
+  void SMCSampler::MonitorNode(NodeId nodeId, Monitor & monitor)
+  {
+    for (Size i=0; i < Size(N); i++)
+      monitor.PushParticle(nodeId, pParticles[i].GetValue()[nodeId], exp(pParticles[i].GetLogWeight()));
+  }
+
   void SMCSampler::PrintSamplerState(std::ostream & os) const
   {
-    const Types<Types<NodeId>::Array>::ConstIterator & iterNodeId_ = iterNodeId();
+    const Types<Types<NodeId>::Array>::ConstIterator & iter_node_id = iterNodeId();
 
     if (!initialized_)
       os << "Non initialized" << std::endl;
-    else if ( iterNodeId_ == nodeIdSequence_.begin() )
+    else if ( iter_node_id == nodeIdSequence_.begin() )
       os << "Initialized" << std::endl;
     else
     {
       Size old_prec = os.precision();
       os.precision(4);
-      Size k = std::distance(nodeIdSequence_.begin(), iterNodeId_-1);
+      Size k = std::distance(nodeIdSequence_.begin(), iter_node_id-1);
       os << k << ": ESS/N = " << std::fixed << ess_/N;
-      if (iterNodeId_ != nodeIdSequence_.end() && nResampled)
+      if (iter_node_id != nodeIdSequence_.end() && nResampled)
         os << ", Resampled";
       os << std::endl;
       os.precision(old_prec);
@@ -302,7 +331,7 @@ namespace Biips
   //    featuresAcc.Clear();
   //    for(Size i=0; i < Size(N); i++)
   //      featuresAcc.Push(pParticles[i].GetValue()[nodeId], exp(pParticles[i].GetLogWeight()));
-  ////    featuresAcc.SetDim(pGraph_->GetNode(nodeId).Dim());
+  // //    featuresAcc.SetDim(pGraph_->GetNode(nodeId).Dim());
   //  }
 
 

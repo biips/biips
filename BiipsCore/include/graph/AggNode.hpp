@@ -31,7 +31,7 @@ namespace Biips
     static const String & Name() { return NAME_; }
 
     virtual const String & FuncName() const { return Name(); };
-    virtual DataType Eval(const DataType::Array & paramValues) const;
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
 
     AggNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets) : LogicalNode(pDim, parameters), offsets_(offsets) {}
     // TODO check lengths

@@ -36,7 +36,7 @@ namespace Biips
     virtual void AcceptVisitor(ConstNodeVisitor & vis) const;
 
     virtual const String & FuncName() const = 0;
-    virtual DataType Eval(const DataType::Array & paramValues) const = 0;
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const = 0;
 
     LogicalNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters) : Node(pDim, parameters) {}
 

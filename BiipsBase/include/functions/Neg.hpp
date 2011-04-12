@@ -11,21 +11,21 @@
 #ifndef BIIPS_NEG_HPP_
 #define BIIPS_NEG_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Neg : public Biips::Function
+  class Neg : public UnaryScalarFunction<std::negate<Scalar> >
   {
-  protected:
+  public:
     typedef Neg SelfType;
+    typedef UnaryScalarFunction<std::negate<Scalar> > BaseType;
 
-    Neg() : Function("NEG", 1) {};
+  protected:
+    Neg() : BaseType("NEG") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

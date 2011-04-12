@@ -51,7 +51,7 @@ namespace Biips
       {
         if ( pGraph_->GetObserved()[nodeId_] )
         {
-          DataType prec_i_dat(getNodeValue(node.Parents()[1], pGraph_, pSampleNodeVis_));
+          MultiArray prec_i_dat(getNodeValue(node.Parents()[1], pGraph_, pSampleNodeVis_));
           MatrixRef prec_i(prec_i_dat);
           Size dim_obs = prec_i.size1();
           Size prec_old_dim = prec_.size1();
@@ -72,7 +72,7 @@ namespace Biips
           b_.resize(b_old_size + b_i.size());
           ublas::project(b_, ublas::range(b_old_size, b_.size())) = b_i;
 
-          DataType obs_i_dat(node.DimPtr(), pGraph_->GetValues()[nodeId_]);
+          MultiArray obs_i_dat(node.DimPtr(), pGraph_->GetValues()[nodeId_]);
 
           VectorRef obs_i(obs_i_dat);
           Size obs_old_size = obs_.size();
@@ -132,7 +132,7 @@ namespace Biips
       ublas::cholesky_invert(inn_prec);
       kalman_gain = ublas::prod(kalman_gain, inn_prec);
 
-      DataType prior_mean_dat(getNodeValue(prior_mean_id, pGraph_, this));
+      MultiArray prior_mean_dat(getNodeValue(prior_mean_id, pGraph_, this));
       VectorRef prior_mean(prior_mean_dat);
 
       Vector obs_pred = ublas::prod(like_A, prior_mean) + like_b;
@@ -143,15 +143,15 @@ namespace Biips
       ublas::cholesky_factorize(post_prec);
       ublas::cholesky_invert(post_prec);
 
-      DataType::Array post_param_values(2);
-      post_param_values[0] = DataType(post_mean);
-      post_param_values[1] = DataType(post_prec);
+      MultiArray::Array post_param_values(2);
+      post_param_values[0] = MultiArray(post_mean);
+      post_param_values[1] = MultiArray(post_prec);
       nodeValuesMap_[nodeId_] = DMNorm::Instance()->Sample(post_param_values, pRng_).ValuesPtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
 
-      DataType::Array norm_const_param_values(2);
-      norm_const_param_values[0] = DataType(obs_pred);
-      norm_const_param_values[1] = DataType(inn_prec);
-      logWeight_ = DMNorm::Instance()->LogUnnormPdf(DataType(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
+      MultiArray::Array norm_const_param_values(2);
+      norm_const_param_values[0] = MultiArray(obs_pred);
+      norm_const_param_values[1] = MultiArray(inn_prec);
+      logWeight_ = DMNorm::Instance()->LogUnnormPdf(MultiArray(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
       // TODO optimize computation removing constant terms
 
       sampledFlagsMap_[nodeId_] = true;

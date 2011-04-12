@@ -27,15 +27,6 @@ namespace Biips
   };
 
 
-  //! Node identifiers type
-  /*!
-   * Each Node in a Graph is associated a NodeId, i.e. a unique identifer
-   * which is nothing but a positive integer.
-   * It is used as index to access the Node in a Graph object or its
-   * associated properties in arrays.
-   */
-  typedef Size NodeId;
-
   class NodeVisitor;
   class ConstNodeVisitor;
 

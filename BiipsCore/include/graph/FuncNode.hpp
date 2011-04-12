@@ -28,7 +28,7 @@ namespace Biips
 
   public:
     virtual const String & FuncName() const { return pFunc_->Name(); };
-    virtual DataType Eval(const DataType::Array & paramValues) const { return pFunc_->Eval(paramValues); };
+    virtual MultiArray Eval(const MultiArray::Array & paramValues) const { return pFunc_->Eval(paramValues); };
 
     FuncNode(const DimArray::Ptr pDim, const Function::Ptr & pFunc,
         const Types<NodeId>::Array & parameters)

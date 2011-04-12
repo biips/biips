@@ -11,6 +11,8 @@
 
 #include "TestIO.hpp"
 
+#include <ctime>
+
 namespace Biips
 {
   using namespace std;
@@ -29,6 +31,7 @@ namespace Biips
     {
       cout << message;
       is >> ans;
+      is.ignore();
     }
     for (Size i=0; i<nb_newlines; ++i)
       cout << endl;
@@ -36,13 +39,14 @@ namespace Biips
   }
 
 
-  Size progressBar(Scalar progress, Size currentPos, std::ostream & os, String finalValue, Size length)
+  void progressBar(Scalar progress, Size & currentPos, time_t & timer, std::ostream & os, String finalValue, Size length)
   {
     using namespace std;
     if (progress == 0.0)
     {
       os << String(length, '-') << "|" << finalValue << endl;
       currentPos = 0;
+      time(&timer);
     }
     else
     {
@@ -51,11 +55,13 @@ namespace Biips
         os << String(new_pos - currentPos, '*');
       currentPos = new_pos;
       if (progress == 1.0)
-        os << "100%" << endl;
+      {
+        time_t start = timer;
+        os << "100% in ";
+        os << time(&timer)-start << " sec." << endl;
+      }
     }
     os.flush();
-
-    return currentPos;
   }
 
 }

@@ -11,21 +11,30 @@
 #ifndef BIIPS_COS_HPP_
 #define BIIPS_COS_HPP_
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Cos : public Biips::Function
+  struct CosScalar : public std::unary_function<Scalar, Scalar>
   {
-  protected:
-    typedef Cos SelfType;
+    Scalar operator() (Scalar val) const
+    {
+      return std::cos(val);
+    }
+  };
 
-    Cos() : Function("cos", 1) {};
+
+  class Cos : public UnaryScalarFunction<CosScalar>
+  {
+  public:
+    typedef Cos SelfType;
+    typedef UnaryScalarFunction<CosScalar> BaseType;
+
+  protected:
+    Cos() : BaseType("cos") {};
 
   public:
-    virtual DataType Eval(const DataType::Array & paramValues) const;
-
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

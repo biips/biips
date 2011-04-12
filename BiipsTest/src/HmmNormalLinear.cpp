@@ -11,6 +11,10 @@
 #include "HmmNormalLinear.hpp"
 #include "BiipsCore.hpp"
 #include "BiipsBase.hpp"
+
+#include "samplers/ConjugateNormal.hpp"
+#include "samplers/ConjugateNormalVar.hpp"
+
 #include "KalmanFilter.hpp"
 #include "Plot.hpp"
 #include "TestIO.hpp"
@@ -91,7 +95,7 @@ namespace Biips
     Scalar var_x_val = scalarParamMap_["var.x"];
     Scalar var_y_val = scalarParamMap_["var.y"];
 
-    const DataType::Array & y_obs = dataValuesMap_.at("y");
+    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
 
     // kalman filter
     //--------------
@@ -99,13 +103,13 @@ namespace Biips
     kalman_filter.SetEvolutionModel(1.0, 0.0, var_x_val);
     kalman_filter.SetObservationModel(1.0, var_y_val);
 
-    benchFilterValuesMap_["x"].SetPtr(DataType::Array(t_max+1));
-    benchFilterValuesMap_["var.x"].SetPtr(DataType::Array(t_max+1));
-    DataType::Array & x_est_KF = benchFilterValuesMap_["x"];
-    DataType::Array & x_var_KF = benchFilterValuesMap_["var.x"];
+    benchFilterValuesMap_["x"].SetPtr(MultiArray::Array(t_max+1));
+    benchFilterValuesMap_["var.x"].SetPtr(MultiArray::Array(t_max+1));
+    MultiArray::Array & x_est_KF = benchFilterValuesMap_["x"];
+    MultiArray::Array & x_var_KF = benchFilterValuesMap_["var.x"];
 
-    x_est_KF[0] = DataType(mean_x0_val);
-    x_var_KF[0] = DataType(var_x0_val);
+    x_est_KF[0] = MultiArray(mean_x0_val);
+    x_var_KF[0] = MultiArray(var_x0_val);
 
     for (Size t = 1; t < t_max+1; ++t)
     {
@@ -127,7 +131,9 @@ namespace Biips
   {
     // load Base module
     //-----------------
-    loadBaseModule();
+    FunctionTable funcTab;
+    DistributionTable distTab;
+    loadBaseModule(funcTab, distTab);
 
     // graph
     //------
@@ -140,7 +146,7 @@ namespace Biips
     Scalar var_x_val = scalarParamMap_["var.x"];
     Scalar var_y_val = scalarParamMap_["var.y"];
 
-    NodeId mean_x0 = pModelGraph_->AddConstantNode(DataType(mean_x0_val));
+    NodeId mean_x0 = pModelGraph_->AddConstantNode(MultiArray(mean_x0_val));
 
     NodeId prec_or_var_x0;
     NodeId prec_or_var_x;
@@ -148,15 +154,15 @@ namespace Biips
 
     if (precFlag_)
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(DataType(1.0 / var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(DataType(1.0 / var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(DataType(1.0 / var_y_val));
+      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x0_val));
+      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x_val));
+      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_y_val));
     }
     else
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(DataType(var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(DataType(var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(DataType(var_y_val));
+      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(var_x0_val));
+      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(var_x_val));
+      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(var_y_val));
     }
 
     Size t_max = sizeParamMap_["t.max"];
@@ -177,34 +183,34 @@ namespace Biips
     {
       params[0] = mean_x0;
       params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm", params);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], params);
 
       for (Size t=1; t<t_max+1; ++t)
       {
         params[0] = x[t-1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm", params);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], params);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dnorm", params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnorm"], params, true);
       }
     }
     else
     {
       params[0] = mean_x0;
       params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm.var", params);
+      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], params);
 
       for (Size t=1; t<t_max+1; ++t)
       {
         params[0] = x[t-1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], "dnorm.var", params);
+        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], params);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], "dnorm.var", params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnormvar"], params, true);
       }
     }
 
@@ -219,7 +225,7 @@ namespace Biips
   }
 
 
-  void HmmNormalLinear::initAccumulators(std::map<String, DataType::Array> & statsValuesMap)
+  void HmmNormalLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
@@ -231,10 +237,10 @@ namespace Biips
 
     Size t_max = sizeParamMap_["t.max"];
 
-    statsValuesMap["x"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.var"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.q05"].SetPtr(DataType::Array(t_max+1));
-    statsValuesMap["x.q95"].SetPtr(DataType::Array(t_max+1));
+    statsValuesMap["x"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.var"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.q05"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x.q95"].SetPtr(MultiArray::Array(t_max+1));
   }
 
   void HmmNormalLinear::initFilterAccumulators()
@@ -242,14 +248,14 @@ namespace Biips
     initAccumulators(smcFilterValuesMap_);
   }
 
-  void HmmNormalLinear::accumulate(Size t, std::map<String, DataType::Array> & statsValuesMap, const String & title)
+  void HmmNormalLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
   {
     Types<NodeId>::Array & x = modelNodeIdMap_["x"];
 
-    DataType::Array & x_est = statsValuesMap["x"];
-    DataType::Array & x_var = statsValuesMap["x.var"];
-    DataType::Array & x_quant_05 = statsValuesMap["x.q05"];
-    DataType::Array & x_quant_95 = statsValuesMap["x.q95"];
+    MultiArray::Array & x_est = statsValuesMap["x"];
+    MultiArray::Array & x_var = statsValuesMap["x.var"];
+    MultiArray::Array & x_quant_05 = statsValuesMap["x.q05"];
+    MultiArray::Array & x_quant_95 = statsValuesMap["x.q95"];
 
     pSampler_->Accumulate(x[t], scalarAcc_);
     x_est[t].Alloc(scalarAcc_.Mean());
@@ -286,21 +292,21 @@ namespace Biips
 
   void HmmNormalLinear::PlotResults(const String & plotFileName) const
   {
-    const DataType::Array & x_gen = dataValuesMap_.at("x");
-    const DataType::Array & y_obs = dataValuesMap_.at("y");
-    const DataType::Array & x_est_PF = smcFilterValuesMap_.at("x");
-    const DataType::Array & x_quant_05_PF = smcFilterValuesMap_.at("x.q05");
-    const DataType::Array & x_quant_95_PF = smcFilterValuesMap_.at("x.q95");
-    const DataType::Array & x_est_PS = smcSmoothValuesMap_.at("x");
+    const MultiArray::Array & x_gen = dataValuesMap_.at("x");
+    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
+    const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
+    const MultiArray::Array & x_quant_05_PF = smcFilterValuesMap_.at("x.q05");
+    const MultiArray::Array & x_quant_95_PF = smcFilterValuesMap_.at("x.q95");
+    const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
 
     Size t_max = sizeParamMap_.at("t.max");
-    DataType::Array time_x(t_max+1);
-    DataType::Array time_y(t_max);
-    time_x[0] = DataType(0.0);
+    MultiArray::Array time_x(t_max+1);
+    MultiArray::Array time_y(t_max);
+    time_x[0] = MultiArray(0.0);
     for (Size t=1; t<t_max+1; ++t)
     {
-      time_x[t] = DataType(Scalar(t));
-      time_y[t-1] = DataType(Scalar(t));
+      time_x[t] = MultiArray(Scalar(t));
+      time_y[t-1] = MultiArray(Scalar(t));
     }
 
     Plot results_plot(argc_, argv_);

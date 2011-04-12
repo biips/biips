@@ -46,14 +46,14 @@ namespace Biips
     explicit ConjugateSampler(const Graph * pGraph )
      : NodeSampler(pGraph) {};
 
-    virtual DataType::Array initLikeParamContrib() const;
-    virtual void formLikeParamContrib(NodeId likeId, DataType::Array & likeParamContribValues) = 0;
-    virtual DataType::Array postParam(const DataType::Array & priorParamContribValues,
-        const DataType::Array & likeParamContribValues) const = 0;
-    virtual Scalar computeLogWeight(const DataType & sampfedData,
-        const DataType::Array & priorParamValues,
-        const DataType::Array & postParamValues,
-        const DataType::Array & LikeParamContrib = DataType::Array());
+    virtual MultiArray::Array initLikeParamContrib() const;
+    virtual void formLikeParamContrib(NodeId likeId, MultiArray::Array & likeParamContribValues) = 0;
+    virtual MultiArray::Array postParam(const MultiArray::Array & priorParamContribValues,
+        const MultiArray::Array & likeParamContribValues) const = 0;
+    virtual Scalar computeLogWeight(const MultiArray & sampfedData,
+        const MultiArray::Array & priorParamValues,
+        const MultiArray::Array & postParamValues,
+        const MultiArray::Array & LikeParamContrib = MultiArray::Array());
 
   public:
     static Bool IsConjugate(const StochasticNode & node, NodeId priorId, const Graph * pGraph);
@@ -92,16 +92,16 @@ namespace Biips
 
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  DataType::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
+  MultiArray::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
   {
-    DataType::Array paramContribValues(PriorDist::Instance()->NParam());
+    MultiArray::Array paramContribValues(PriorDist::Instance()->NParam());
 
     GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
     boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(nodeId_);
     Size i = 0;
     while(it_parents != it_parents_end)
     {
-      paramContribValues[i] = DataType(pGraph_->GetNode(*it_parents).DimPtr());
+      paramContribValues[i] = MultiArray(pGraph_->GetNode(*it_parents).DimPtr());
       ++it_parents;
       ++i;
     }
@@ -110,10 +110,10 @@ namespace Biips
 
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogWeight(const DataType & sampledData,
-      const DataType::Array & priorParamValues,
-      const DataType::Array & postParamValues,
-      const DataType::Array & LikeParamContrib)
+  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogWeight(const MultiArray & sampledData,
+      const MultiArray::Array & priorParamValues,
+      const MultiArray::Array & postParamValues,
+      const MultiArray::Array & LikeParamContrib)
   {
     Scalar logWeight = PriorDist::Instance()->LogUnnormPdf(sampledData, priorParamValues);
     logWeight -= PriorDist::Instance()->LogUnnormPdf(sampledData, postParamValues);
@@ -145,7 +145,7 @@ namespace Biips
 
     const Graph * pGraph_;
     ConjugateSampler * pNodeSampler_;
-    DataType::Array paramContribValues_;
+    MultiArray::Array paramContribValues_;
 
   public:
     virtual void Visit(const ConstantNode & node) {} // TODO throw exception
@@ -157,7 +157,7 @@ namespace Biips
         pNodeSampler_->formLikeParamContrib(nodeId_, paramContribValues_);
     }
 
-    const DataType::Array & GetParamContribValues() const { return paramContribValues_; }
+    const MultiArray::Array & GetParamContribValues() const { return paramContribValues_; }
 
     LikeFormVisitor(const Graph * pGraph, ConjugateSampler * pNodeSampler) :
       pGraph_(pGraph), pNodeSampler_(pNodeSampler),
@@ -172,7 +172,7 @@ namespace Biips
   {
     if (nodeIdDefined_ && attributesDefined_) // TODO manage else case : throw exception
     {
-      DataType::Array prior_param_values = getParamValues(nodeId_, pGraph_, this);
+      MultiArray::Array prior_param_values = getParamValues(nodeId_, pGraph_, this);
 
       StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
       boost::tie(it_offspring, it_offspring_end)
@@ -183,11 +183,11 @@ namespace Biips
         pGraph_->VisitNode(*it_offspring, like_form_vis);
         ++it_offspring;
       }
-      DataType::Array like_param_contrib = like_form_vis.GetParamContribValues();
+      MultiArray::Array like_param_contrib = like_form_vis.GetParamContribValues();
 
-      DataType::Array post_param_values = postParam(prior_param_values, like_param_contrib);
+      MultiArray::Array post_param_values = postParam(prior_param_values, like_param_contrib);
 
-      DataType sampled_data = PriorDist::Instance()->Sample(post_param_values, pRng_);
+      MultiArray sampled_data = PriorDist::Instance()->Sample(post_param_values, pRng_);
       nodeValuesMap_[nodeId_] = sampled_data.ValuesPtr();
 
       sampledFlagsMap_[nodeId_] = true;

@@ -15,21 +15,35 @@
 namespace Biips
 {
 
-  DataType DCat::Sample(const DataType::Array & paramValues, Rng * pRng) const
+  Bool DCat::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    const DimArray & dim = *paramDims[0];
+    if (dim.IsVector())
+      return (dim[0] > 0);
+    else
+      return false;
+  }
+
+  DimArray DCat::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    return *P_SCALAR_DIM;
+  }
+
+  MultiArray DCat::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
   {
     // TODO check paramValues
-    const DataType & weights = paramValues[0]; // TODO check dim
+    const MultiArray & weights = paramValues[0]; // TODO check dim
 
     typedef boost::random::discrete_distribution<Int ,Scalar> GenType;
     GenType gen(weights.Values().begin(), weights.Values().end());
 
-    return DataType(Scalar(gen(pRng->GetGen()) + 1));
+    return MultiArray(Scalar(gen(pRng->GetGen()) + 1));
   }
 
 
-  Scalar DCat::LogUnnormPdf(const DataType & x, const DataType::Array & paramValues) const
+  Scalar DCat::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
-    const DataType & weights = paramValues[0]; // TODO check dim
+    const MultiArray & weights = paramValues[0]; // TODO check dim
     Scalar my_point = x.ScalarView(); // TODO check dim
 
     return log(weights.Values()[Size(my_point)-1]);

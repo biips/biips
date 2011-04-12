@@ -9,7 +9,13 @@
  */
 
 #include "sampler/Accumulator.hpp"
+#include "common/Integer.hpp"
 
+
+namespace Biips
+{
+  inline Scalar sqrtScalar(Scalar s) { return std::sqrt(s); };
+}
 
 namespace std
 {
@@ -50,7 +56,7 @@ namespace Biips
 
   void DiscreteScalarHistogram::Push(Scalar position, Scalar value)
   {
-    Size u_position = floor(position);
+    Size u_position = roundSize(position);
     if ( empty() )
     {
       // insert intermediate 0
@@ -62,7 +68,7 @@ namespace Biips
     }
     else
     {
-      Size u_back_pos = floor(back().first);
+      Size u_back_pos = roundSize(back().first);
       if ( u_position > u_back_pos )
       {
         // insert intermediate 0
@@ -74,7 +80,7 @@ namespace Biips
       }
       else
       {
-        Size u_front_pos = floor(front().first);
+        Size u_front_pos = roundSize(front().first);
         if ( (u_position >= u_front_pos) )
         {
           iterator it_position = std::find_if(begin(), end(), ScalarPairEqualPredicate(u_position));
@@ -101,7 +107,6 @@ namespace Biips
   : pdfCacheSize_(1), pdfNumBins_(1), cdfNumCells_(1),
     acc_(Tags::Pdf::cache_size = pdfCacheSize_, Tags::Pdf::num_bins = pdfNumBins_, Tags::Quantiles::probabilities = quantileProbs_, Tags::Cdf::num_cells = cdfNumCells_)
   {
-    featuresMap_[COUNT] = false;
     featuresMap_[SUM_OF_WEIGHTS] = false;
     featuresMap_[SUM] = false;
     featuresMap_[MEAN] = false;
@@ -124,9 +129,7 @@ namespace Biips
   {
     switch(tag)
     {
-      case COUNT:
-        acc_.drop<Tags::Count>();
-        break;
+      // FIXME: never drop COUNT: problem when the only feature is PDF or CDF or QUANTILES
       case SUM_OF_WEIGHTS:
         acc_.drop<Tags::SumOfWeights>();
         break;
@@ -202,7 +205,6 @@ namespace Biips
   ElementAccumulator::ElementAccumulator()
   : dimDefined_(false)
   {
-    featuresMap_[COUNT] = false;
     featuresMap_[SUM_OF_WEIGHTS] = false;
     featuresMap_[SUM] = false;
     featuresMap_[MEAN] = false;
@@ -220,9 +222,6 @@ namespace Biips
   {
     switch(tag)
     {
-      case COUNT:
-        acc_.drop<Tags::Count>();
-        break;
       case SUM_OF_WEIGHTS:
         acc_.drop<Tags::SumOfWeights>();
         break;
@@ -279,7 +278,6 @@ namespace Biips
 
   DiscreteScalarAccumulator::DiscreteScalarAccumulator()
   {
-    featuresMap_[COUNT] = false;
     featuresMap_[SUM_OF_WEIGHTS] = false;
     featuresMap_[MIN] = false;
     featuresMap_[MAX] = false;
@@ -287,7 +285,6 @@ namespace Biips
     featuresMap_[CDF] = false;
     featuresMap_[MAX_PDF] = false;
 
-    droppableFeatures_.insert(COUNT);
     droppableFeatures_.insert(SUM_OF_WEIGHTS);
     droppableFeatures_.insert(MIN);
     droppableFeatures_.insert(MAX);
@@ -306,9 +303,6 @@ namespace Biips
    {
      switch(tag)
      {
-       case COUNT:
-         acc_.drop<Tags::Count>();
-         break;
        case SUM_OF_WEIGHTS:
          acc_.drop<Tags::SumOfWeights>();
          break;

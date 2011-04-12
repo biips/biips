@@ -122,11 +122,11 @@ namespace Biips
     protected:
       Size rhs_;
     public:
-      ScalarPairEqualPredicate(Scalar rhs) : rhs_(floor(rhs)) {}
+      ScalarPairEqualPredicate(Scalar rhs) : rhs_(roundSize(rhs)) {}
       ScalarPairEqualPredicate(Size rhs) : rhs_(rhs) {}
       Bool operator() (const PairType & lhs) const
       {
-        return floor(lhs.first) == rhs_;
+        return roundSize(lhs.first) == rhs_;
       }
     };
 
@@ -210,7 +210,7 @@ namespace Biips
   class ElementAccumulator
   {
   public:
-    typedef DataType::StorageType StorageType;
+    typedef MultiArray::StorageType StorageType;
 
     typedef ElementAccumulator SelfType;
     typedef Types<SelfType>::Ptr Ptr;
@@ -249,13 +249,13 @@ namespace Biips
 
     Size Count() const { return acc::count(acc_); }; // TODO throw exception
     Scalar SumOfWeights() const { return acc::sum_of_weights(acc_); }; // TODO throw exception
-    DataType Sum() const { return DataType(pDim_, acc::weighted_sum(acc_)); }; // TODO check dimDefined_  // TODO throw exception
-    DataType Mean() const { return DataType(pDim_, acc::weighted_mean(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    DataType Variance() const { return DataType(pDim_, acc::weighted_variance(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Sum() const { return MultiArray(pDim_, acc::weighted_sum(acc_)); }; // TODO check dimDefined_  // TODO throw exception
+    MultiArray Mean() const { return MultiArray(pDim_, acc::weighted_mean(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Variance() const { return MultiArray(pDim_, acc::weighted_variance(acc_)); }; // TODO check dimDefined_ // TODO throw exception
     template<Size Order>
-    DataType Moment() const { return DataType(pDim_, acc::weighted_moment<Order>(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    DataType Skewness() const { return DataType(pDim_, acc::weighted_skewness(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    DataType Kurtosis() const { return DataType(pDim_, acc::weighted_kurtosis(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Moment() const { return MultiArray(pDim_, acc::weighted_moment<Order>(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Skewness() const { return MultiArray(pDim_, acc::weighted_skewness(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Kurtosis() const { return MultiArray(pDim_, acc::weighted_kurtosis(acc_)); }; // TODO check dimDefined_ // TODO throw exception
   };
 
 
@@ -345,7 +345,7 @@ namespace Biips
 //  class VectorAccumulator
 //  {
 //  public:
-//    typedef DataType::StorageType StorageType;
+//    typedef MultiArray::StorageType StorageType;
 //
 //    typedef VectorAccumulator<Features> SelfType;
 //    typedef typename Types<SelfType>::Ptr Ptr;
@@ -364,8 +364,8 @@ namespace Biips
 //
 //    Size Count() const { return acc::count(acc_); };
 //    Scalar SumOfWeights() const { return acc::sum_of_weights(acc_); };
-//    DataType Mean() const { return DataType(DimArray(1, len_), acc::weighted_mean(acc_)); }; // TODO check lenDefined_
-//    DataType Variance() const { return DataType(DimArray(2, len_), acc::weighted_variance(acc_)); }; // TODO check lenDefined_
+//    MultiArray Mean() const { return MultiArray(DimArray(1, len_), acc::weighted_mean(acc_)); }; // TODO check lenDefined_
+//    MultiArray Variance() const { return MultiArray(DimArray(2, len_), acc::weighted_variance(acc_)); }; // TODO check lenDefined_
 //
 //    VectorAccumulator() : lenDefined_(false) {}
 //  };

@@ -109,22 +109,22 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
     cout << "K = " << K_val << endl;
     cout << endl;
 
-    DataType pi_val(DimArray(1, K_val));
-    InputDataType(pi_val, "Categories weights to be estimated:", 1, in_file_stream);
+    MultiArray pi_val(DimArray(1, K_val));
+    InputMultiArray(pi_val, "Categories weights to be estimated:", 1, in_file_stream);
     cout << "pi = " << endl << pi_val << endl;
     cout << endl;
 
-    DataType mu_k_val(DimArray(1, K_val));
-    InputDataType(mu_k_val, "Cluster mean values:", 1, in_file_stream);
+    MultiArray mu_k_val(DimArray(1, K_val));
+    InputMultiArray(mu_k_val, "Cluster mean values:", 1, in_file_stream);
     cout << "mu_k = " << endl << mu_k_val << endl;
     cout << endl;
 
-    DataType var_k_val(DimArray(1, K_val));
-    InputDataType(var_k_val, "Cluster variance values:", 1, in_file_stream);
+    MultiArray var_k_val(DimArray(1, K_val));
+    InputMultiArray(var_k_val, "Cluster variance values:", 1, in_file_stream);
     cout << "var_k = " << endl << var_k_val << endl;
     cout << endl;
 
-    DataType prec_k_val(DimArray(1, K_val));
+    MultiArray prec_k_val(DimArray(1, K_val));
     if (precision_parameter_flag)
       prec_k_val.Value() = 1.0 / var_k_val.Value();
 
@@ -192,7 +192,7 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
       else
         prec_or_var_k_gen = data_graph.AddConstantNode(var_k_val);
 
-      DataType k_data(k_vec_dim);
+      MultiArray k_data(k_vec_dim);
       for (Size i = 0; i < k_data.Length(); ++i)
         k_data.Value()[i] = Scalar(i+1);
       NodeId k_vec = data_graph.AddConstantNode(k_data);
@@ -252,7 +252,7 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
         if (precision_parameter_flag)
           Y_gen[t] = data_graph.AddStochasticNode(scalar_dim, "dnorm", binary_params, true);
         else
-          Y_gen[t] = data_graph.AddStochasticNode(scalar_dim, "dnorm.var", binary_params, true);
+          Y_gen[t] = data_graph.AddStochasticNode(scalar_dim, "dnormvar", binary_params, true);
       }
 
       // build graph
@@ -309,17 +309,17 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
 
       // create constant nodes
       //----------------------
-      NodeId K_inv = graph.AddConstantNode(DataType(Scalar(1.0 / K_val)));
+      NodeId K_inv = graph.AddConstantNode(MultiArray(Scalar(1.0 / K_val)));
       mu_k = graph.AddConstantNode(mu_k_val);
-      NodeId alpha = graph.AddConstantNode(DataType(alpha_val));
-      NodeId sigma = graph.AddConstantNode(DataType(sigma_val));
-      NodeId expo = graph.AddConstantNode(DataType(2.0));
+      NodeId alpha = graph.AddConstantNode(MultiArray(alpha_val));
+      NodeId sigma = graph.AddConstantNode(MultiArray(sigma_val));
+      NodeId expo = graph.AddConstantNode(MultiArray(2.0));
 
       k_vec = graph.AddConstantNode(k_data);
 
       NodeId one = 0;
       if (precision_parameter_flag)
-        one = graph.AddConstantNode(DataType(Scalar(1.0)));
+        one = graph.AddConstantNode(MultiArray(Scalar(1.0)));
 
       // create NodeId collections
       //--------------------------
@@ -349,11 +349,11 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
 
       // n initialization
       //-----------------
-      n_k[0] = graph.AddConstantNode(DataType(k_vec_dim));
+      n_k[0] = graph.AddConstantNode(MultiArray(k_vec_dim));
 
       for (Size t=0; t<t_max; ++t)
       {
-        time[t] = graph.AddConstantNode(DataType(Scalar(t)));
+        time[t] = graph.AddConstantNode(MultiArray(Scalar(t)));
 
         binary_params[0] = time[t];
         binary_params[1] = alpha;
@@ -435,13 +435,13 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
         {
           binary_params[0] = mu_Y[t];
           binary_params[1] = var_Y[t];
-          Y[t] = graph.AddStochasticNode(scalar_dim, "dnorm.var", binary_params, true);
+          Y[t] = graph.AddStochasticNode(scalar_dim, "dnormvar", binary_params, true);
         }
       }
 
       // t = t_max
       //----------
-      time[t_max] = graph.AddConstantNode(DataType(Scalar(t_max)));
+      time[t_max] = graph.AddConstantNode(MultiArray(Scalar(t_max)));
 
       binary_params[0] = time[t_max];
       binary_params[1] = alpha;
@@ -513,7 +513,7 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
       if ( promptFlag )
         PressEnterToContinue();
 
-#ifndef VALGRIND_PROFILE_ON
+#ifndef BIIPS_VALGRIND_ON
       DiscreteScalarAccumulator stats_acc;
       stats_acc.AddFeature(PDF);
       stats_acc.AddFeature(MAX_PDF);
@@ -528,7 +528,7 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
         sampler.Iterate();
         sampler.PrintSamplerState();
 
-#ifndef VALGRIND_PROFILE_ON
+#ifndef BIIPS_VALGRIND_ON
         // Filtering estimates
         //-------------------
         sampler.Accumulate(C[t], stats_acc);
@@ -547,7 +547,7 @@ void t_DirichletMultinomialSimplified(int argc, char* argv[])
 #endif
       }
 
-#ifndef VALGRIND_PROFILE_ON
+#ifndef BIIPS_VALGRIND_ON
       if ( promptFlag )
         PressEnterToContinue();
 
