@@ -165,7 +165,7 @@ namespace Biips
 
 
   // TODO traiter le cas des variables dicretes
-  ScalarHistogram Model::ExtractFilterPdf(NodeId nodeId, Size numBins, Scalar cache_fraction) const
+  ScalarHistogram Model::ExtractFilterPdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter pdf: no SMCSampler.");
@@ -187,7 +187,7 @@ namespace Biips
 
     ScalarAccumulator scalar_acc;
     scalar_acc.AddFeature(PDF);
-    scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cache_fraction), numBins);
+    scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cacheFraction), numBins);
 
     it->second->Accumulate(nodeId, scalar_acc);
 

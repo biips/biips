@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("ess-threshold", po::value<Scalar>(&ess_threshold)->default_value(0.5), "ESS resampling threshold.")
         ("n-smc", po::value<Size>(&n_smc)->default_value(1), "number of independent SMC executions for each mutation and number of particles.")
 //        ("prec-param", "uses precision parameter instead of variance for normal distributions.")
-        ("reject-level", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
+        ("alpha", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
 //        ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
 //            "applies when n-smc=1.")
         ("dot-file", po::value<String>(&dot_file_name), "dot file name.\n"
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Check model syntax
     // ------------------
     if (verbosity>0)
-      cout << "Parsing model in: --model-file=" << model_file_name << endl;
+      cout << PROMPT_STRING << "Parsing model in: --model-file=" << model_file_name << endl;
 
     if (!console.CheckModel(model_file, verbosity>0))
       throw RuntimeError("Model syntax is incorrect.");
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Read data
     // ------------------
     if (verbosity>0)
-      cout << "Reading data in: --cfg=" << config_file_name << endl;
+      cout << PROMPT_STRING << "Reading data in: --cfg=" << config_file_name << endl;
 
     map<String, MultiArray> data_map = transformStoredDataMap(data_map_stored);
 
@@ -305,10 +305,13 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (!vm.count("data-rng-seed"))
       data_rng_seed = time(0);
     if (verbosity>0)
-      cout << "--" << "data-rng-seed=" << data_rng_seed << endl;
+      cout << INDENT_STRING << "data-rng-seed = " << data_rng_seed << endl;
 
     if (!console.Compile(data_map, true, data_rng_seed, verbosity>0))
       throw RuntimeError("Failed to compile model.");
+
+    if (verbosity>0 && interactive)
+      pressEnterToContinue();
 
     // Write dot file
     //----------------------
@@ -316,7 +319,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (vm.count("dot-file"))
     {
       if (verbosity>0)
-        cout << "Writing dot file in:" << dot_file_name << endl;
+        cout << PROMPT_STRING << "Writing dot file in: " << dot_file_name << endl;
 
       std::ofstream ofs(dot_file_name.c_str());
 
@@ -344,7 +347,7 @@ BOOST_AUTO_TEST_CASE( my_test )
       }
 
       if (verbosity>0)
-        cout << "Monitoring variable " << name << endl;
+        cout << PROMPT_STRING << "Monitoring variable " << name << endl;
     }
 
     if (verbosity>0 && interactive && !monitored_var.empty())
@@ -369,17 +372,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Run SMC samplers
     //----------------------
 
-    if (verbosity>0)
-    {
-      cout << "Resampling method of SMC algorithms:" << endl;
-      cout << "--" << "resampling=" << resample_type << endl;
-      cout << "--" << "ess-threshold=" << ess_threshold << endl;
-      //      cout << INDENT_STRING << "resampling type: " << resample_type_name_map[resample_type] << ", threshold: " << ess_threshold << " ESS/N" << endl;
-    }
-
-    if (verbosity>0 && interactive)
-      pressEnterToContinue();
-
     map<String, map<Size, vector<Scalar> > > errors_filter_new_map;
     map<String, map<Size, vector<Scalar> > > errors_smooth_new_map;
 
@@ -393,10 +385,12 @@ BOOST_AUTO_TEST_CASE( my_test )
 
         if (verbosity>0)
         {
-          cout << "Running " << n_smc << " SMC algorithms" << endl;
-          cout << "--" << "mutation=" << mut << endl;
-          cout << "--" << "particles=" << n_part << endl;
-//          cout << INDENT_STRING << "mutation: " << mut << ", particles: " << n_part << endl;
+          cout << PROMPT_STRING << "Running " << n_smc << " SMC algorithms" << endl;
+          cout << INDENT_STRING << "mutation = " << mut << endl;
+          cout << INDENT_STRING << "particles = " << n_part << endl;
+          cout << INDENT_STRING << "resampling = " << resample_type << endl;
+          cout << INDENT_STRING << "ess-threshold = " << ess_threshold << endl;
+          //      cout << INDENT_STRING << "resampling type: " << resample_type_name_map[resample_type] << ", threshold: " << ess_threshold << " ESS/N" << endl;
         }
 
         if (verbosity>0 && interactive && n_smc>1)
@@ -415,9 +409,11 @@ BOOST_AUTO_TEST_CASE( my_test )
             smc_rng_seed = time(0)+i_smc+1;
           if (n_smc==1 && verbosity>0)
           {
-            cout << "--" << "smc-rng-seed=" << smc_rng_seed << endl;
-//            cout << INDENT_STRING << "rng seed: " << smc_rng_seed << endl;
+            cout << INDENT_STRING << "smc-rng-seed = " << smc_rng_seed << endl;
           }
+
+          if (verbosity>0 && interactive && n_smc==1)
+            pressEnterToContinue();
 
           if (!console.Initialize(n_part, smc_rng_seed, mut=="prior", verbosity * (n_smc==1 || verbosity>1)))
             throw RuntimeError("Failed to initialize model.");
@@ -432,7 +428,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (verbosity==1 && n_smc>1)
             ++(*p_show_progress);
 
-          if (verbosity>0 && interactive && n_smc==1 && i_mut < mutations.size()-1 && i_n_part < n_particles.size()-1)
+          if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
           // Extract filter mean of monitored values
@@ -444,70 +440,14 @@ BOOST_AUTO_TEST_CASE( my_test )
             const String & name = monitored_var[i];
 
             if (verbosity>0 && n_smc==1)
-              cout << "Extracting filtering mean of variable " << name << endl;
+              cout << PROMPT_STRING << "Extracting filtering mean of variable " << name << endl;
 
             if (!console.ExtractFilterStat(name, MEAN, filter_mean_map[name]))
               throw RuntimeError(String("Failed to extract filtering mean of variable") + name);
           }
 
-          if (exec_step<2)
-            continue;
 
-          if (verbosity>0 && interactive && n_smc==1 && i_mut < mutations.size()-1 && i_n_part < n_particles.size()-1)
-            pressEnterToContinue();
-
-          // Compute filter mean error of monitored values
-          //----------------------------------------------
-          Scalar error_filter = 0.0;
-
-          for (Size i=0; i<monitored_var.size(); ++i)
-          {
-            const String & name = monitored_var[i];
-
-            if (verbosity>0 && n_smc==1)
-              cout << "Computing filtering error of variable " << name << endl;
-
-            if(!computeError(error_filter, name, filter_mean_map, bench_filter_map_stored))
-              throw RuntimeError(String("Failed to compute filtering error of variable ") + name);
-          }
-
-          error_filter *= n_part;
-
-          if (verbosity>0 && n_smc==1)
-          {
-            cout << INDENT_STRING << "filtering error = " << error_filter << endl;
-          }
-          errors_filter_new_map[mut][n_part].push_back(error_filter);
-
-          // plot filtering Pdf
-          //---------------------------
-          if (show_mode >= 2 && n_smc==1)
-          {
-            std::map<String, std::map<IndexRange, ScalarHistogram> > filter_pdf_map;
-
-            for (Size i=0; i<monitored_var.size(); ++i)
-            {
-              const String & name = monitored_var[i];
-
-              if (verbosity>0 && n_smc==1)
-                cout << "Extracting filtering Pdf of variable " << name << endl;
-
-              if(!console.ExtractFilterPdf(name, filter_pdf_map[name], num_bins))
-                throw RuntimeError(String("Failed to extract filtering Pdf of variable ") + name);
-
-              for (std::map<IndexRange, ScalarHistogram>::iterator it_filter_pdf_map = filter_pdf_map[name].begin();
-                  it_filter_pdf_map != filter_pdf_map[name].end(); ++it_filter_pdf_map)
-              {
-                Plot pdf_plot_PF(argc, argv);
-                pdf_plot_PF.AddHistogram(it_filter_pdf_map->second, "", Qt::blue);
-                pdf_plot_PF.SetTitle(String("Filtering Pdf histogram of variable: ") + name + print(it_filter_pdf_map->first));
-                pdf_plot_PF.SetBackgroundColor(Qt::white);
-                pdf_plot_PF.Show();
-              }
-            }
-          }
-
-          // plot final curve
+          // plot mean curve
           //---------------------------
           if (show_mode >= 1 && n_smc==1)
           {
@@ -533,8 +473,8 @@ BOOST_AUTO_TEST_CASE( my_test )
                 }
 
                 Plot results_plot(argc, argv);
-                results_plot.AddCurve(index, x_bench, "Bench estimate", Qt::green, 2);
-                results_plot.AddCurve(index, x_est_PF, "PF estimate", Qt::blue, 2);
+                results_plot.AddCurve(index, x_bench, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+                results_plot.AddCurve(index, x_est_PF, "PF estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
 
                 results_plot.SetTitle(String("Filtering mean estimate of variable ") + name);
                 results_plot.SetAxesLabels("index", name);
@@ -561,8 +501,8 @@ BOOST_AUTO_TEST_CASE( my_test )
                 }
 
                 Plot results_plot(argc, argv);
-                results_plot.AddCurve(x_bench_0, x_bench_1, "Bench estimate", Qt::green, 2);
-                results_plot.AddCurve(x_est_PF_0, x_est_PF_1, "PF estimate", Qt::blue, 2);
+                results_plot.AddCurve(x_bench_0, x_bench_1, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+                results_plot.AddCurve(x_est_PF_0, x_est_PF_1, "PF estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
 
                 results_plot.SetTitle(String("Filtering mean estimate of variable ") + name + " only the 2 first component");
                 results_plot.SetAxesLabels(name+" (component 1)", name+" (component 2");
@@ -573,13 +513,77 @@ BOOST_AUTO_TEST_CASE( my_test )
             }
           }
 
-          if (verbosity>0 && interactive)
+          if (verbosity>0 && interactive && n_smc==1)
+            pressEnterToContinue();
+
+
+          // plot filtering Pdf
+          //---------------------------
+          if (show_mode >= 2 && n_smc==1)
+          {
+            std::map<String, std::map<IndexRange, ScalarHistogram> > filter_pdf_map;
+
+            for (Size i=0; i<monitored_var.size(); ++i)
+            {
+              const String & name = monitored_var[i];
+
+              if (verbosity>0 && n_smc==1)
+                cout << PROMPT_STRING << "Extracting filtering Pdf of variable " << name << endl;
+
+              if(!console.ExtractFilterPdf(name, filter_pdf_map[name], num_bins, 1.0))
+                throw RuntimeError(String("Failed to extract filtering Pdf of variable ") + name);
+
+              for (std::map<IndexRange, ScalarHistogram>::iterator it_filter_pdf_map = filter_pdf_map[name].begin();
+                  it_filter_pdf_map != filter_pdf_map[name].end(); ++it_filter_pdf_map)
+              {
+                Plot pdf_plot_PF(argc, argv);
+                pdf_plot_PF.AddHistogram(it_filter_pdf_map->second, "", Qt::blue);
+                pdf_plot_PF.SetTitle(String("Filtering Pdf histogram of variable: ") + name + print(it_filter_pdf_map->first));
+                pdf_plot_PF.SetBackgroundColor(Qt::white);
+                pdf_plot_PF.Show();
+              }
+            }
+
+            if (verbosity>0 && interactive)
+              pressEnterToContinue();
+          }
+
+          if (exec_step<2)
+            continue;
+
+
+          // Compute filter mean error of monitored values
+          //----------------------------------------------
+          Scalar error_filter = 0.0;
+
+          for (Size i=0; i<monitored_var.size(); ++i)
+          {
+            const String & name = monitored_var[i];
+
+            if (verbosity>0 && n_smc==1)
+              cout << PROMPT_STRING << "Computing filtering error of variable " << name << endl;
+
+            if(!computeError(error_filter, name, filter_mean_map, bench_filter_map_stored))
+              throw RuntimeError(String("Failed to compute filtering error of variable ") + name);
+          }
+
+          error_filter *= n_part;
+
+          if (verbosity>0 && n_smc==1)
+          {
+            cout << INDENT_STRING << "filtering error = " << error_filter << endl;
+          }
+          errors_filter_new_map[mut][n_part].push_back(error_filter);
+
+
+          if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
         }
 
 
         if (exec_step < 3)
           continue;
+
         // Check errors
         //-------------
 
@@ -628,12 +632,9 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           if (verbosity>0)
           {
-            cout << "Checking errors < 1-alpha quantile of reference errors" << endl;
-            cout << INDENT_STRING << "alpha: " << reject_level << endl;
+            cout << PROMPT_STRING << "Checking errors < 1-alpha quantile of reference errors" << endl;
+            cout << INDENT_STRING << "alpha = " << reject_level << endl;
           }
-
-          if (verbosity>0 && interactive)
-            pressEnterToContinue();
 
           using namespace acc;
           typedef accumulator_set<Scalar, features<tag::p_square_quantile> > acc_ref_type;
@@ -682,7 +683,10 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (check_filter && !errors_filter_new_map[mut][n_part].empty())
           {
             if (verbosity>0)
-              cout << "Checking filtering errors fitness with reject level " << reject_level << endl;
+            {
+              cout << PROMPT_STRING << "Checking filtering errors fitness with reject level" << endl;
+              cout << INDENT_STRING << "alpha = " << reject_level << endl;
+            }
             Scalar ks_filter_stat = ksTwoSamplesStat(errors_filter_new_map[mut][n_part].begin(),
                 errors_filter_new_map[mut][n_part].end(),
                 errors_filter_ref_map_stored[mut][n_part].begin(),
@@ -702,7 +706,10 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (check_smooth && !errors_smooth_new_map[mut][n_part].empty())
           {
             if (verbosity>0)
-              cout << "Checking smoothing errors fitness with reject level " << reject_level << endl;
+            {
+              cout << PROMPT_STRING << "Checking smoothing errors fitness with reject level" << endl;
+              cout << INDENT_STRING << "alpha = " << reject_level << endl;
+            }
             Scalar ks_smooth_stat = ksTwoSamplesStat(errors_smooth_new_map[mut][n_part].begin(),
                 errors_smooth_new_map[mut][n_part].end(),
                 errors_smooth_ref_map_stored[mut][n_part].begin(),
