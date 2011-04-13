@@ -124,7 +124,7 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cache_fraction) const
+  Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -153,7 +153,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id, numBins, cache_fraction);
+      ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id, numBins, cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 

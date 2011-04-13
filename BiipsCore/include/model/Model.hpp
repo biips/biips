@@ -46,7 +46,7 @@ namespace Biips
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const;
 
-    ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cache_fraction = 0.25) const;
+    ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
     void IterateSampler();
 
