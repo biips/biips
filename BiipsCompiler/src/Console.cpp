@@ -153,7 +153,7 @@ namespace Biips
     if (pModel_)
     {
       if (verbose)
-        out_ << "Replacing existing model" << endl;
+        out_ << PROMPT_STRING << "Replacing existing model" << endl;
       ClearModel();
     }
 
@@ -221,7 +221,7 @@ namespace Biips
   void Console::ClearModel(Bool verbose)
   {
     if (verbose)
-      out_ << "Deleting model" << endl;
+      out_ << PROMPT_STRING << "Deleting model" << endl;
     pModel_ = BUGSModel::Ptr();
   }
 
@@ -244,7 +244,7 @@ namespace Biips
     if (pModel_)
     {
       if (verbose)
-        out_ << "Replacing existing model" << endl;
+        out_ << PROMPT_STRING << "Replacing existing model" << endl;
       ClearModel();
     }
 
@@ -258,7 +258,7 @@ namespace Biips
       Compiler compiler(*pModel_, dataMap);
 
       if (verbose)
-        out_ << "Compiling data graph" << endl;
+        out_ << PROMPT_STRING << "Compiling data graph" << endl;
       try
       {
         if (pVariables_)
@@ -356,7 +356,7 @@ namespace Biips
     Compiler compiler(*pModel_, dataMap);
 
     if (verbose)
-      out_ << "Compiling model graph" << endl;
+      out_ << PROMPT_STRING << "Compiling model graph" << endl;
     try
     {
       if (pVariables_)
@@ -443,7 +443,7 @@ namespace Biips
 
       if(verbose >0)
       {
-        out_ << "Initializing model";
+        out_ << PROMPT_STRING << "Initializing model";
         if (prior)
           out_ << " using prior mutation";
 
@@ -456,7 +456,7 @@ namespace Biips
 
       if (verbose >1)
       {
-        out_ << "Samplers sequence :" << endl;
+        out_ << INDENT_STRING << "Samplers sequence :" << endl;
         pModel_->PrintSamplersSequence(out_);
       }
     }
@@ -486,7 +486,7 @@ namespace Biips
       Size n_iter = pModel_->Sampler().NIterations();
 
       if (verbose)
-        out_ << "Running SMC Sampler of " << n_iter << " iterations" << endl;
+        out_ << PROMPT_STRING << "Running SMC Sampler of " << n_iter << " iterations" << endl;
 
       Types<boost::progress_display>::Ptr p_show_progress;
       if (verbose)
@@ -511,7 +511,7 @@ namespace Biips
   Bool Console::LoadBaseModule(Bool verbose)
   {
     if (verbose)
-      out_ << "Loading Base module" << endl;
+      out_ << PROMPT_STRING << "Loading Base module" << endl;
 
     try
     {
@@ -581,7 +581,7 @@ namespace Biips
   }
 
 
-  Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins)
+  Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -601,7 +601,7 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->ExtractFilterPdf(name, pdfMap, numBins, 0.25);
+      Bool ok = pModel_->ExtractFilterPdf(name, pdfMap, numBins, cacheFraction);
       if (!ok)
       {
         err_ << "Failed to extract filter pdf for variable " <<
