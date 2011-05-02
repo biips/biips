@@ -41,7 +41,7 @@ namespace Biips
   }
 
 
-  Scalar DCat::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DCat::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     const MultiArray & weights = paramValues[0]; // TODO check dim
     Scalar my_point = x.ScalarView(); // TODO check dim

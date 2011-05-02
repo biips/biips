@@ -47,13 +47,13 @@ namespace Biips
       const MultiArray::Array & postParamValues,
       const MultiArray::Array & LikeParamContrib)
   {
-    Scalar logWeight = DBeta::Instance()->LogUnnormPdf(sampledData, priorParamValues);
-    logWeight -= DBeta::Instance()->LogUnnormPdf(sampledData, postParamValues);
+    Scalar logWeight = DBeta::Instance()->LogPdf(sampledData, priorParamValues);
+    logWeight -= DBeta::Instance()->LogPdf(sampledData, postParamValues);
 
     MultiArray::Array like_param_values(2);
     like_param_values[0] = MultiArray(LikeParamContrib[0].ScalarView());
     like_param_values[1] = sampledData;
-    logWeight += DBin::Instance()->LogUnnormPdf(MultiArray(LikeParamContrib[1].ScalarView()), like_param_values);
+    logWeight += DBin::Instance()->LogPdf(MultiArray(LikeParamContrib[1].ScalarView()), like_param_values);
 
     return logWeight;
   }

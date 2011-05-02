@@ -46,7 +46,7 @@ namespace Biips
   }
 
 
-  Scalar DNorm::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DNorm::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     Scalar mean = paramValues[0].ScalarView(); // TODO check dim
     Scalar prec = paramValues[1].ScalarView(); // TODO check dim
@@ -54,7 +54,8 @@ namespace Biips
 
     typedef boost::math::normal DistType;
     DistType dist(mean, 1.0/sqrt(prec));
-    return boost::math::log_unnormalized_pdf(dist, my_point);
+    return log(boost::math::pdf(dist, my_point));
+//    return boost::math::log_unnormalized_pdf(dist, my_point);
   }
 
 }

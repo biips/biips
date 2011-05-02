@@ -45,7 +45,7 @@ namespace Biips
   }
 
 
-  Scalar DBeta::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DBeta::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     // TODO check paramValues
     Scalar alpha = paramValues[0].ScalarView(); // TODO check dim

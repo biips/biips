@@ -45,7 +45,7 @@ namespace Biips
   }
 
 
-  Scalar DBin::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DBin::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     // TODO check paramValues
     Scalar trials = paramValues[0].ScalarView(); // TODO check dim

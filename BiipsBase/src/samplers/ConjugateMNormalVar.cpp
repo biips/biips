@@ -79,7 +79,7 @@ namespace Biips
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(norm_const_mean);
     norm_const_param_values[1] = MultiArray(norm_const_cov);
-    return DMNormVar::Instance()->LogUnnormPdf(priorParamValues[0], norm_const_param_values);
+    return DMNormVar::Instance()->LogPdf(priorParamValues[0], norm_const_param_values);
   }
 
 

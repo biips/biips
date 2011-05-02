@@ -38,7 +38,7 @@ namespace Biips
 
       if (compute_log_like)
       {
-        logLikelihood_ += node.LogUnnormLike(MultiArray(node.DimPtr(), pGraph_->GetValues()[nodeId_]),
+        logLikelihood_ += node.LogLike(MultiArray(node.DimPtr(), pGraph_->GetValues()[nodeId_]),
           getParamValues(nodeId_, pGraph_, pSampleNodeVis_)); // TODO check dims ?
       }
     }

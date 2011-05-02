@@ -1,4 +1,4 @@
-function [x_est, x_res, w_res, x, w, ESS, n_child, ind_parent, varargout] = run_particle_filter(dimx, t_final, y_obs, initiate_particles, mutation, N, ESS_thres, varargin)
+function [x_est, x_res, w_res, x, w, ESS, log_norm_const, n_child, ind_parent, varargout] = run_particle_filter(dimx, t_final, y_obs, initiate_particles, mutation, N, ESS_thres, varargin)
 
 % Step 1 : Initialization
 %========================
@@ -19,6 +19,7 @@ w          = zeros(1,t_final+1,N);
 w_res      = zeros(1,t_final+1,N);
 x_est      = zeros(dimx,t_final+1);
 ESS        = zeros(1,t_final+1);
+log_norm_const = zeros(1,t_final+1);
 n_child    = zeros(1,t_final+1,N);
 ind_parent = zeros(1,t_final,N);
 
@@ -43,9 +44,9 @@ n_child(1,1,:) = ones(N,1);
 for t = 1 : t_final
     % Mutation
     if (nargin == 7)
-        [x(:,t+1,:), log_w_t(1,1,:), w(1,t+1,:), x_est(:,t+1), ESS(1,t+1)] = mutate_particles(x_res(:,t,:), log_w_t(1,1,:), y_obs(:,t), mutation, t);
+        [x(:,t+1,:), log_w_t(1,1,:), w(1,t+1,:), x_est(:,t+1), ESS(1,t+1), log_norm_const(1,t+1)] = mutate_particles(x_res(:,t,:), log_w_t(1,1,:), y_obs(:,t), mutation, t, log_norm_const(1,t));
     elseif (nargin == 8)
-        [x(:,t+1,:), log_w_t(1,1,:), w(1,t+1,:), x_est(:,t+1), ESS(1,t+1), var_z(:,:,t+1,:)] = mutate_particles(x_res(:,t,:), log_w_t(1,1,:), y_obs(:,t), mutation, t, var_z(:,:,t,:));
+        [x(:,t+1,:), log_w_t(1,1,:), w(1,t+1,:), x_est(:,t+1), ESS(1,t+1), log_norm_const(1,t+1), var_z(:,:,t+1,:)] = mutate_particles(x_res(:,t,:), log_w_t(1,1,:), y_obs(:,t), mutation, t, log_norm_const(1,t), var_z(:,:,t,:));
     end
     % Resampling/Selection
     if ( ESS(1,t+1) / N < ESS_thres )

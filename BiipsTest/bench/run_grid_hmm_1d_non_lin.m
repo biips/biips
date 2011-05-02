@@ -1,4 +1,4 @@
-function [mean_filter, var_filter, mean_smooth, var_smooth] = run_grid_hmm_1d_non_lin(t_final, y_obs, xinf, xsup, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell)
+function [mean_filter, var_filter, mean_smooth, var_smooth, log_norm_const] = run_grid_hmm_1d_non_lin(t_final, y_obs, xinf, xsup, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell)
 
 % make grid
 xstep = (xsup-xinf) / n_cell;
@@ -23,6 +23,8 @@ var_filter = zeros(1, t_final+1);
 integrand = integrand .* xgrid(1,:);
 var_filter(1) = sum(xstep(1) * (integrand(1:end-1) + integrand(2:end))/2) - mean_filter(1)^2;
 
+log_norm_const = zeros(1, t_final+1);
+
 log_incr_prior = zeros(t_final,n_cell+1, n_cell+1);
 log_prior = zeros(t_final,n_cell+1);
 
@@ -41,6 +43,8 @@ for t=1:t_final
     
     integrand = prior .* exp(log_like);
     norm_const_incr = sum(xstep(t+1) * (integrand(1:end-1) + integrand(2:end))/2);
+    
+    log_norm_const(t+1) = log_norm_const(t) + log(norm_const_incr);
     
     log_post_filter(t+1,:) = log_prior(t,:) + log_like - log(norm_const_incr);
     post = exp(log_post_filter(t+1,:));

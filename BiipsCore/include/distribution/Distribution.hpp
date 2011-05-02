@@ -104,7 +104,7 @@ namespace Biips
      * The MultiArray values must ordered according
      * to the parameters order of the distribution.
      */
-    virtual Scalar LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const = 0;
+    virtual Scalar LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const = 0;
 
     virtual ~Distribution() {};
 
