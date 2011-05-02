@@ -296,7 +296,7 @@ namespace Biips
   }
 
 
-  void HmmNormalNonLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
+  void HmmNormalNonLinear::initAccumulators(Size nParticles, Size numBins, std::map<String, MultiArray::Array> & statsValuesMap)
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
@@ -304,7 +304,7 @@ namespace Biips
     Scalar probs[] = {0.05, 0.95};
     scalarAcc_.SetQuantileProbs(probs, probs + sizeof(probs) / sizeof(probs[0]));
     scalarAcc_.AddFeature(PDF);
-    scalarAcc_.SetPdfParam(200, 40);
+    scalarAcc_.SetPdfParam(floor(nParticles*0.25), numBins);
 
     Size t_max = sizeParamMap_["t.max"];
 
@@ -314,9 +314,9 @@ namespace Biips
     statsValuesMap["x.q95"].SetPtr(MultiArray::Array(t_max+1));
   }
 
-  void HmmNormalNonLinear::initFilterAccumulators()
+  void HmmNormalNonLinear::initFilterAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcFilterValuesMap_);
+    initAccumulators(nParticles, numBins, smcFilterValuesMap_);
   }
 
   void HmmNormalNonLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
@@ -350,9 +350,9 @@ namespace Biips
     accumulate(t, smcFilterValuesMap_, "Filtering");
   }
 
-  void HmmNormalNonLinear::initSmoothAccumulators()
+  void HmmNormalNonLinear::initSmoothAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcSmoothValuesMap_);
+    initAccumulators(nParticles, numBins, smcSmoothValuesMap_);
   }
 
   void HmmNormalNonLinear::smoothAccumulate(Size t)

@@ -225,7 +225,7 @@ namespace Biips
   }
 
 
-  void HmmNormalLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
+  void HmmNormalLinear::initAccumulators(Size nParticles, Size numBins, std::map<String, MultiArray::Array> & statsValuesMap)
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
@@ -233,7 +233,7 @@ namespace Biips
     Scalar probs[] = {0.05, 0.95};
     scalarAcc_.SetQuantileProbs(probs, probs + sizeof(probs) / sizeof(probs[0]));
     scalarAcc_.AddFeature(PDF);
-    scalarAcc_.SetPdfParam(200, 40);
+    scalarAcc_.SetPdfParam(floor(nParticles*0.25), numBins);
 
     Size t_max = sizeParamMap_["t.max"];
 
@@ -243,9 +243,9 @@ namespace Biips
     statsValuesMap["x.q95"].SetPtr(MultiArray::Array(t_max+1));
   }
 
-  void HmmNormalLinear::initFilterAccumulators()
+  void HmmNormalLinear::initFilterAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcFilterValuesMap_);
+    initAccumulators(nParticles, numBins, smcFilterValuesMap_);
   }
 
   void HmmNormalLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
@@ -279,9 +279,9 @@ namespace Biips
     accumulate(t, smcFilterValuesMap_, "Filtering");
   }
 
-  void HmmNormalLinear::initSmoothAccumulators()
+  void HmmNormalLinear::initSmoothAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcSmoothValuesMap_);
+    initAccumulators(nParticles, numBins, smcSmoothValuesMap_);
   }
 
   void HmmNormalLinear::smoothAccumulate(Size t)
@@ -318,7 +318,7 @@ namespace Biips
     results_plot.AddCurve(time_x, x_quant_05_PF, "PF 5% quantile", Qt::blue, 0.5, Qt::DashLine);
     results_plot.AddCurve(time_x, x_quant_95_PF, "PF 95% quantile", Qt::blue, 0.5, Qt::DashLine);
     if(benchSmoothValuesMap_.count("x"))
-      results_plot.AddCurve(time_x, benchSmoothValuesMap_.at("x"), "KS estimate", Qt::green, 2);
+      results_plot.AddCurve(time_x, benchSmoothValuesMap_.at("x"), "KS estimate", Qt::magenta, 2);
     results_plot.AddCurve(time_x, x_est_PS, "PS estimate", Qt::cyan, 2);
     results_plot.SetTitle("");
     results_plot.SetAxesLabels("time", "state");
