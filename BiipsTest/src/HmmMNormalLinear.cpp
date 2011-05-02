@@ -380,7 +380,7 @@ namespace Biips
   }
 
 
-  void HmmMNormalLinear::initAccumulators(std::map<String, MultiArray::Array> & statsValuesMap)
+  void HmmMNormalLinear::initAccumulators(Size nParticles, Size numBins, std::map<String, MultiArray::Array> & statsValuesMap)
   {
     elementAcc_.AddFeature(MEAN);
 
@@ -389,9 +389,9 @@ namespace Biips
     statsValuesMap["x"].SetPtr(MultiArray::Array(t_max+1));
   }
 
-  void HmmMNormalLinear::initFilterAccumulators()
+  void HmmMNormalLinear::initFilterAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcFilterValuesMap_);
+    initAccumulators(nParticles, numBins, smcFilterValuesMap_);
   }
 
   void HmmMNormalLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
@@ -409,9 +409,9 @@ namespace Biips
     accumulate(t, smcFilterValuesMap_, "Filtering");
   }
 
-  void HmmMNormalLinear::initSmoothAccumulators()
+  void HmmMNormalLinear::initSmoothAccumulators(Size nParticles, Size numBins)
   {
-    initAccumulators(smcSmoothValuesMap_);
+    initAccumulators(nParticles, numBins, smcSmoothValuesMap_);
   }
 
   void HmmMNormalLinear::smoothAccumulate(Size t)

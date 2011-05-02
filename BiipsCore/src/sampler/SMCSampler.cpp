@@ -290,8 +290,14 @@ namespace Biips
   void SMCSampler::Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n) const
   {
     featuresAcc.Init();
+
+    //Normalize the weights to sensible values....
+    double dMaxWeight = -std::numeric_limits<double>::infinity();
+    for(int i = 0; i < N; i++)
+      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
+
     for(Size i=0; i < Size(N); i++)
-      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight()));
+      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight() - dMaxWeight));
   }
 
 

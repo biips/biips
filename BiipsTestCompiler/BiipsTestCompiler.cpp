@@ -248,7 +248,6 @@ BOOST_AUTO_TEST_CASE( my_test )
 #endif
 
     Bool interactive = vm.count("interactive");
-//      Bool prec_param = vm.count("prec-param");
 //    Bool prior = vm.count("prior");
 
     if (!vm.count("model-file"))
@@ -437,10 +436,12 @@ BOOST_AUTO_TEST_CASE( my_test )
           Scalar log_norm_const;
           console.RunSMCSampler(resample_type_map.at(resample_type), ess_threshold, log_norm_const, (verbosity>1 || (verbosity>0 && n_smc==1)));
 
-          log_norm_const_smc.push_back(log_norm_const);
-
           if (verbosity==1 && n_smc>1)
             ++(*p_show_progress);
+          else if (verbosity>0)
+            cout << INDENT_STRING << "log-normalizing constant = " << log_norm_const << endl;
+
+          log_norm_const_smc.push_back(log_norm_const);
 
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();

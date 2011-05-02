@@ -1,6 +1,6 @@
 function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
 %RUN_BENCH_ALL Runs all implemented benches
-%   [errors_filter_all, errors_smooth_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
+%   [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
 %   
 %   For each model ids, the program
 %   - samples one set of observations,

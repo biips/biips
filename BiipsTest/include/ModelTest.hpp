@@ -72,8 +72,8 @@ namespace Biips
         const std::map<String, MultiArray::Array> & smcValuesMap,
         const std::map<String, MultiArray::Array> & benchValuesMap) const;
 
-    virtual void initFilterAccumulators() = 0;
-    virtual void initSmoothAccumulators() = 0;
+    virtual void initFilterAccumulators(Size nParticles, Size numBins) = 0;
+    virtual void initSmoothAccumulators(Size nParticles, Size numBins) = 0;
 
     virtual void filterAccumulate(Size t) = 0;
     virtual void smoothAccumulate(Size t) = 0;
@@ -126,7 +126,7 @@ namespace Biips
     void PrintModelGraphviz() { pModelGraph_->PrintGraphviz(os_); };
 
     void ClearSMC();
-    virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, Scalar essThreshold = 0.5, ResampleType rsType = SMC_RESAMPLE_STRATIFIED, Bool showProgress = true);
+    virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, Scalar essThreshold = 0.5, ResampleType rsType = SMC_RESAMPLE_STRATIFIED, Bool showProgress = true, Size numBins = 40);
 
     virtual void PlotResults(const String & plotFileName = "") const = 0;
 
