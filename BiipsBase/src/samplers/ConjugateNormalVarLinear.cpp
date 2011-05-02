@@ -142,7 +142,7 @@ namespace Biips
       MultiArray::Array norm_const_param_values(2);
       norm_const_param_values[0] = MultiArray(like_mean);
       norm_const_param_values[1] = MultiArray(prior_var + 1 / like_var_inv);
-      logWeight_ = DNormVar::Instance()->LogUnnormPdf(MultiArray(prior_mean),
+      logWeight_ = DNormVar::Instance()->LogPdf(MultiArray(prior_mean),
           norm_const_param_values);
       // TODO optimize computation removing constant terms
 

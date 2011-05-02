@@ -12,7 +12,7 @@ start_time=`date +%s`
 for cfg in bench/*.cfg; do
 	ntests=`expr $ntests + 1`
 	
-	$1/BiipsTest $cfg --n-smc=$2 $3 $4 $5
+	$1/BiipsTest $cfg --repeat-smc=$2 $3 $4 $5
 	
 	if [ $? -ne 0 ]; then
 	{

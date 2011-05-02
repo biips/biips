@@ -26,13 +26,27 @@
 #include <ctime>
 
 #include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/p_square_quantile.hpp>
+#include <boost/math/distributions/students_t.hpp>
 #include <boost/progress.hpp>
 
 namespace Biips
 {
   const String BIIPSTEST_CONFIG_FILE_NAME = "biipstest.cfg";
   const String BIIPSTEST_VERSION = "BiipsTestCompiler, version 0.05";
+
+  static const map<String, ResampleType> & resampleTypeMap()
+  {
+    static map<String, ResampleType> resample_type_map;
+    resample_type_map["multinomial"] = SMC_RESAMPLE_MULTINOMIAL;
+    resample_type_map["residual"] = SMC_RESAMPLE_RESIDUAL;
+    resample_type_map["stratified"] = SMC_RESAMPLE_STRATIFIED;
+    resample_type_map["systematic"] = SMC_RESAMPLE_SYSTEMATIC;
+
+    return resample_type_map;
+  }
 
   Bool computeError(Scalar & error, const String & varName,
       const std::map<String, std::map<IndexRange, MultiArray> > & smcMeanValuesMap,
@@ -56,14 +70,14 @@ BOOST_AUTO_TEST_CASE( my_test )
 #endif
     String model_file_name;
     Size exec_step;
-    String check_mode;
+    Size check_mode;
     Size show_mode;
     Size data_rng_seed;
     Size smc_rng_seed;
     vector<Size> n_particles;
 //    Size n_particles;
     Scalar ess_threshold;
-    Size resample_type;
+    String resample_type;
     Size n_smc;
     Scalar reject_level;
 //    String plot_file_name;
@@ -73,17 +87,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     Size verbosity;
     Size num_bins;
 
-    map<Size, ResampleType> resample_type_map;
-    resample_type_map[0] = SMC_RESAMPLE_MULTINOMIAL;
-    resample_type_map[1] = SMC_RESAMPLE_RESIDUAL;
-    resample_type_map[2] = SMC_RESAMPLE_STRATIFIED;
-    resample_type_map[3] = SMC_RESAMPLE_SYSTEMATIC;
-
-    map<Size, String> resample_type_name_map;
-    resample_type_name_map[0] = "MULTINOMIAL";
-    resample_type_name_map[1] = "RESIDUAL";
-    resample_type_name_map[2] = "STRATIFIED";
-    resample_type_name_map[3] = "SYSTEMATIC";
+    const map<String, ResampleType> & resample_type_map = resampleTypeMap();
 
     // Declare a group of options that will be
     // allowed only on command line
@@ -99,23 +103,23 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("interactive", "asks questions to the user.\n"
             "applies when verbose>0.")
         ("show-plots,s", po::value<Size>(&show_mode)->default_value(0), "shows plots, interrupting execution.\n"
-            "applies when n-smc=1.\n"
+            "applies when repeat-smc=1.\n"
             "values:\n"
-            " 0: \tno plots are shown.\n"
-            " 1: \tfinal results plots are shown.\n"
-            " 2: \tall plots are shown.")
+            " 0: \tno plots.\n"
+            " 1: \tshows final results plots.\n"
+            " 2: \t1 + shows pdf histogram plots.")
         ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histogram plots.")
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
             " 0: \tsamples or reads values of the graph.\n"
-            " 1: \tcomputes or reads benchmark values.\n"
-            " 2: \truns SMC sampler, computes estimates and errors vs benchmarks.\n"
-            " 3: \tchecks that errors vs benchmarks are distributed according to reference SMC errors, when n-smc>1. checks that error is lesser than a 1-(reject-level) quantile of the reference SMC errors, when n-smc=1.")
-        ("check-mode", po::value<String>(&check_mode)->default_value("filter"), "errors to be checked.\n"
+            " 1: \t0 + computes or reads benchmark values.\n"
+            " 2: \t1 + runs SMC sampler, computes estimates and errors vs benchmarks.\n"
+            " 3: \t2 + checks that errors vs benchmarks are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
+        ("check-mode", po::value<Size>(&check_mode)->default_value(1), "errors to be checked.\n"
             "values:\n"
-            " filter: \tchecks filtering errors only.\n"
-            " smooth: \tchecks smoothing errors only.\n"
-            " all: \tchecks both.")
+            " 0: \tchecks normalizing-constant mean.\n"
+            " 1: \t0 + checks filtering errors goodness of fit.\n"
+            " 2: \t1 + checks smoothing errors goodness of fit.")
         ;
 
     // Declare a group of options that will be
@@ -127,24 +131,23 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("data-rng-seed", po::value<Size>(&data_rng_seed), "data sampler rng seed. default=time().")
         ("particles", po::value<vector<Size> >(&n_particles)->default_value(vector<Size>(1, 1000)), "numbers of particles.")
         ("smc-rng-seed", po::value<Size>(&smc_rng_seed), "SMC sampler rng seed. default=time().\n"
-            "applies when n-smc=1.")
+            "applies when repeat-smc=1.")
         ("mutations", po::value<vector<String> >(&mutations)->default_value(vector<String>(1, "optimal")), "type of exploration used in the mutation step of the SMC algorithm.\n"
             "values:\n"
             " optimal: \tuse optimal mutation, when possible.\n"
             " prior: \tuse prior mutation.\n"
             " <other>: \tpossible model-specific mutation.")
-        ("resampling", po::value<Size>(&resample_type)->default_value(2), "resampling method.\n"
+        ("resampling", po::value<String>(&resample_type)->default_value("stratified"), "resampling method.\n"
             "values:\n"
-            " 0: \tMULTINOMIAL.\n"
-            " 1: \tRESIDUAL.\n"
-            " 2: \tSTRATIFIED.\n"
-            " 3: \tSYSTEMATIC.")
+            " multinomial\n"
+            " residual\n"
+            " stratified\n"
+            " systematic")
         ("ess-threshold", po::value<Scalar>(&ess_threshold)->default_value(0.5), "ESS resampling threshold.")
-        ("n-smc", po::value<Size>(&n_smc)->default_value(1), "number of independent SMC executions for each mutation and number of particles.")
-//        ("prec-param", "uses precision parameter instead of variance for normal distributions.")
+        ("repeat-smc", po::value<Size>(&n_smc)->default_value(1), "number of independent SMC executions for each mutation and number of particles.")
         ("alpha", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
 //        ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
-//            "applies when n-smc=1.")
+//            "applies when repeat-smc=1.")
         ("dot-file", po::value<String>(&dot_file_name), "dot file name.\n"
             "The file will be created or overwritten.")
         ;
@@ -228,12 +231,13 @@ BOOST_AUTO_TEST_CASE( my_test )
     vector<String> monitored_var;
     StoredDimMap dim_map_stored;
     StoredDataMap data_map_stored;
+    Scalar log_norm_const_bench = 0.0;
     StoredDataMap bench_filter_map_stored;
     StoredDataMap bench_smooth_map_stored;
     StoredErrorsMap errors_filter_ref_map_stored;
     StoredErrorsMap errors_smooth_ref_map_stored;
 
-    storeUnregistered(parsed_sources, sources_names, monitored_var, dim_map_stored, data_map_stored, bench_filter_map_stored, bench_smooth_map_stored, errors_filter_ref_map_stored, errors_smooth_ref_map_stored);
+    storeUnregistered(parsed_sources, sources_names, monitored_var, dim_map_stored, data_map_stored, log_norm_const_bench, bench_filter_map_stored, bench_smooth_map_stored, errors_filter_ref_map_stored, errors_smooth_ref_map_stored);
 
 #ifdef BIIPS_DEBUG_ON
     cout << "Stored data variables: ";
@@ -248,7 +252,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 //    Bool prior = vm.count("prior");
 
     if (!vm.count("model-file"))
-      boost::throw_exception(po::error("Missing --model-file option."));
+      boost::throw_exception(po::error("Missing model-file option."));
 
     // Open model file
     // ------------------
@@ -262,13 +266,13 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Check model syntax
     // ------------------
     if (verbosity>0)
-      cout << PROMPT_STRING << "Parsing model in: --model-file=" << model_file_name << endl;
+    {
+      cout << PROMPT_STRING << "Parsing model in:"<< endl;
+      cout << INDENT_STRING << "model-file = " << model_file_name << endl;
+    }
 
     if (!console.CheckModel(model_file, verbosity>0))
       throw RuntimeError("Model syntax is incorrect.");
-
-    if (verbosity>0)
-      cout << INDENT_STRING << "Model syntax is correct." << endl;
 
     if (verbosity>0 && interactive)
       pressEnterToContinue();
@@ -276,7 +280,10 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Read data
     // ------------------
     if (verbosity>0)
-      cout << PROMPT_STRING << "Reading data in: --cfg=" << config_file_name << endl;
+    {
+      cout << PROMPT_STRING << "Reading data in:" << endl;
+      cout << INDENT_STRING << "cfg = " << config_file_name << endl;
+    }
 
     map<String, MultiArray> data_map = transformStoredDataMap(data_map_stored);
 
@@ -319,7 +326,10 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (vm.count("dot-file"))
     {
       if (verbosity>0)
-        cout << PROMPT_STRING << "Writing dot file in: " << dot_file_name << endl;
+      {
+        cout << PROMPT_STRING << "Writing dot file in:" << endl;
+        cout << INDENT_STRING << "dot-file = " << dot_file_name << endl;
+      }
 
       std::ofstream ofs(dot_file_name.c_str());
 
@@ -372,8 +382,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Run SMC samplers
     //----------------------
 
-    map<String, map<Size, vector<Scalar> > > errors_filter_new_map;
-    map<String, map<Size, vector<Scalar> > > errors_smooth_new_map;
 
     // Run SMC sampler
     for (Size i_n_part=0; i_n_part<n_particles.size(); ++i_n_part)
@@ -390,7 +398,6 @@ BOOST_AUTO_TEST_CASE( my_test )
           cout << INDENT_STRING << "particles = " << n_part << endl;
           cout << INDENT_STRING << "resampling = " << resample_type << endl;
           cout << INDENT_STRING << "ess-threshold = " << ess_threshold << endl;
-          //      cout << INDENT_STRING << "resampling type: " << resample_type_name_map[resample_type] << ", threshold: " << ess_threshold << " ESS/N" << endl;
         }
 
         if (verbosity>0 && interactive && n_smc>1)
@@ -399,6 +406,10 @@ BOOST_AUTO_TEST_CASE( my_test )
         Types<boost::progress_display>::Ptr p_show_progress;
         if (verbosity==1 && n_smc>1)
           p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_smc, cout, ""));
+
+        vector<Scalar> errors_filter_new;
+        vector<Scalar> errors_smooth_new;
+        vector<Scalar> log_norm_const_smc;
 
         for (Size i_smc=0; i_smc<n_smc; ++i_smc)
         {
@@ -423,7 +434,10 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           // Run sampler
           //----------------------
-          console.RunSMCSampler(resample_type_map[resample_type], ess_threshold, (verbosity>1 || (verbosity>0 && n_smc==1)));
+          Scalar log_norm_const;
+          console.RunSMCSampler(resample_type_map.at(resample_type), ess_threshold, log_norm_const, (verbosity>1 || (verbosity>0 && n_smc==1)));
+
+          log_norm_const_smc.push_back(log_norm_const);
 
           if (verbosity==1 && n_smc>1)
             ++(*p_show_progress);
@@ -573,7 +587,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           {
             cout << INDENT_STRING << "filtering error = " << error_filter << endl;
           }
-          errors_filter_new_map[mut][n_part].push_back(error_filter);
+          errors_filter_new.push_back(error_filter);
 
 
           if (verbosity>0 && interactive && n_smc==1)
@@ -584,11 +598,49 @@ BOOST_AUTO_TEST_CASE( my_test )
         if (exec_step < 3)
           continue;
 
+        // Check normalizing constant mean;
+        if (!log_norm_const_bench)
+        {
+          cerr << "Warning: no log-normalizing constant reference." << endl;
+          cerr << "         missing 'log-norm-const' option in section [bench]." << endl;
+        }
+        else if (n_smc==1)
+        {
+          cerr << "Warning: can not check normalizing constant mean with repeat-smc = 1." << endl;
+        }
+        else
+        {
+          cout << PROMPT_STRING << "Checking normalizing constant mean with reject level " << reject_level << endl;
+          cout << INDENT_STRING << "expected log-norm-const mean = " << log_norm_const_bench << endl;
+
+          using namespace acc;
+          typedef accumulator_set<long double, features<tag::mean, tag::variance> > acc_ref_type;
+
+          acc_ref_type norm_const_smc_acc;
+
+          for (Size i =0; i<log_norm_const_smc.size(); ++i)
+            norm_const_smc_acc(expl(log_norm_const_smc[i]));
+
+          cout << INDENT_STRING << "SMC sample log-norm-const mean = " << log(mean(norm_const_smc_acc)) << endl;
+
+          Scalar student_stat = (mean(norm_const_smc_acc) - exp(log_norm_const_bench)) / sqrt(variance(norm_const_smc_acc)) * sqrt(double(n_smc));
+          boost::math::students_t student_dist(n_smc-1);
+
+          Scalar t_p_value = 2*cdf(complement(student_dist, fabs(student_stat)));
+
+          cout << INDENT_STRING << "Student t-test: t = " << student_stat << ", p-value = " << t_p_value << endl;
+
+          BOOST_CHECK_GT(t_p_value, reject_level);
+        }
+
         // Check errors
         //-------------
 
-        Bool check_filter = check_mode=="filter" || check_mode=="all";
-        Bool check_smooth = check_mode=="smooth" || check_mode=="all";
+        if (check_mode<1)
+          continue;
+
+        Bool check_filter = check_mode>=1;
+        Bool check_smooth = check_mode>=2;
 
         if (check_filter)
         {
@@ -605,6 +657,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             check_filter = false;
           }
         }
+
         if (check_smooth)
         {
           if (!errors_smooth_ref_map_stored.count(mut) || !errors_smooth_ref_map_stored[mut].count(n_part))
@@ -621,8 +674,6 @@ BOOST_AUTO_TEST_CASE( my_test )
           }
         }
 
-        if (!check_filter && !check_smooth)
-          continue;
 
         if (n_smc==1)
         {
@@ -653,7 +704,7 @@ BOOST_AUTO_TEST_CASE( my_test )
               cout << INDENT_STRING << "filtering errors quantile = " << error_filter_threshold << endl;
             }
 
-            BOOST_CHECK_LT(errors_filter_new_map[mut][n_part].front(), error_filter_threshold);
+            BOOST_CHECK_LT(errors_filter_new.front(), error_filter_threshold);
           }
 
           if (check_smooth)
@@ -668,31 +719,29 @@ BOOST_AUTO_TEST_CASE( my_test )
             if (verbosity>0)
               cout << INDENT_STRING << "smoothing errors quantile = " << error_smooth_threshold << endl;
 
-            BOOST_CHECK_LT(errors_smooth_new_map[mut][n_part].front(), error_smooth_threshold);
+            BOOST_CHECK_LT(errors_smooth_new.front(), error_smooth_threshold);
           }
-
 
           if (verbosity>0 && interactive)
             pressEnterToContinue();
         }
 
 
-
         else if (n_smc>1)
         {
-          if (check_filter && !errors_filter_new_map[mut][n_part].empty())
+          if (check_filter && !errors_filter_new.empty())
           {
             if (verbosity>0)
             {
-              cout << PROMPT_STRING << "Checking filtering errors fitness with reject level" << endl;
+              cout << PROMPT_STRING << "Checking filtering errors fitness with reject level alpha" << endl;
               cout << INDENT_STRING << "alpha = " << reject_level << endl;
             }
-            Scalar ks_filter_stat = ksTwoSamplesStat(errors_filter_new_map[mut][n_part].begin(),
-                errors_filter_new_map[mut][n_part].end(),
+            Scalar ks_filter_stat = ksTwoSamplesStat(errors_filter_new.begin(),
+                errors_filter_new.end(),
                 errors_filter_ref_map_stored[mut][n_part].begin(),
                 errors_filter_ref_map_stored[mut][n_part].end());
 
-            Size n_err = errors_filter_new_map[mut][n_part].size();
+            Size n_err = errors_filter_new.size();
             Size n_err_ref = errors_filter_ref_map_stored[mut][n_part].size();
             Scalar ks_filter_prob = ksProb(sqrt(n_err*n_err_ref/(n_err+n_err_ref)) * ks_filter_stat);
 
@@ -703,19 +752,19 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           }
 
-          if (check_smooth && !errors_smooth_new_map[mut][n_part].empty())
+          if (check_smooth && !errors_smooth_new.empty())
           {
             if (verbosity>0)
             {
-              cout << PROMPT_STRING << "Checking smoothing errors fitness with reject level" << endl;
+              cout << PROMPT_STRING << "Checking smoothing errors fitness with reject level alpha" << endl;
               cout << INDENT_STRING << "alpha = " << reject_level << endl;
             }
-            Scalar ks_smooth_stat = ksTwoSamplesStat(errors_smooth_new_map[mut][n_part].begin(),
-                errors_smooth_new_map[mut][n_part].end(),
+            Scalar ks_smooth_stat = ksTwoSamplesStat(errors_smooth_new.begin(),
+                errors_smooth_new.end(),
                 errors_smooth_ref_map_stored[mut][n_part].begin(),
                 errors_smooth_ref_map_stored[mut][n_part].end());
 
-            Size n_err = errors_smooth_new_map[mut][n_part].size();
+            Size n_err = errors_smooth_new.size();
             Size n_err_ref = errors_smooth_ref_map_stored[mut][n_part].size();
             Scalar ks_smooth_prob = ksProb(sqrt(n_err*n_err_ref/(n_err+n_err_ref)) * ks_smooth_stat);
 

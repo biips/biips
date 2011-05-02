@@ -62,7 +62,7 @@ namespace Biips
   }
 
 
-  Scalar DMNorm::LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DMNorm::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
   {
     // TODO check paramValues
     const MultiArray & mean = paramValues[0]; // TODO check dim
@@ -74,8 +74,8 @@ namespace Biips
     ublas::cholesky_factorize(prec_chol);
 
     diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,ublas::lower>(prec_chol));
-    //return -1/2.0 * (diff_vec.size()*log(2*M_PI) + 2*log(choleskyDet(var_chol)) + ublas::inner_prod(diff_vec, diff_vec));
-    return log(ublas::cholesky_det(prec_chol)) - ublas::inner_prod(diff_vec, diff_vec) / 2.0;
+    return log(ublas::cholesky_det(prec_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));
+    //return log(ublas::cholesky_det(prec_chol)) - 0.5 * ublas::inner_prod(diff_vec, diff_vec);
   }
 
 

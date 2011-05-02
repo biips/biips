@@ -1,6 +1,6 @@
-function [errors_filter_all, errors_smooth_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
+function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
 %RUN_BENCH_ALL Runs all implemented benches
-%   [errors_filter_all, errors_smooth_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
+%   [errors_filter_all, errors_smooth_all, norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
 %   
 %   For each model ids, the program
 %   - samples one set of observations,
@@ -26,6 +26,7 @@ function [errors_filter_all, errors_smooth_all, models] = run_bench_all(model_id
 models = {};
 errors_filter_all = {};
 errors_smooth_all = {};
+log_norm_const_bench_all = {};
 
 if nargin < 6, period = 1; end
 
@@ -151,7 +152,10 @@ for i = 1:length(models)
     mutation_names = model{7};
     model_name = model{8};
     
-    [errors_filter, errors_smooth, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, period);
+    fprintf('--------------------------------------------------------\n')
+    fprintf('Model : %s\n', model_name)
+    
+    [errors_filter, errors_smooth, log_norm_const_bench, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, period);
     
     % plot errors distributions
 %     scrsz = get(0, 'ScreenSize');
@@ -169,10 +173,11 @@ for i = 1:length(models)
     plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
     
     % print results
-    print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
+    print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
     
     errors_filter_all = [errors_filter_all, {errors_filter} ];
     errors_smooth_all = [errors_smooth_all, {errors_smooth} ];
+    log_norm_const_bench_all = [log_norm_const_bench_all, {log_norm_const_bench(end)} ];
 end
 
 end
@@ -191,18 +196,18 @@ x_tplus1 = evolution_model(x_t, t);
 log_w_update = ones(size(x_t,2), 1);
 end
 
-function [x_filter_smc, ess_filter, x_smooth_smc, ess_smooth] = smc_hmm(model_const, model_dim, y_obs, n_part, ess_thres, initiate, mutation, backward_smoother)
+function [x_filter_smc, ess_filter, x_smooth_smc, ess_smooth, log_norm_const] = smc_hmm(model_const, model_dim, y_obs, n_part, ess_thres, initiate, mutation, backward_smoother)
 t_max = model_const(1);
 dimx = model_dim(1);
 
 % Forward particle filter
-[x_filter_smc, ~, ~, x_PF, w_PF, ess_filter] = run_particle_filter(dimx, t_max, y_obs, initiate, mutation, n_part, ess_thres);
+[x_filter_smc, ~, ~, x_PF, w_PF, ess_filter, log_norm_const] = run_particle_filter(dimx, t_max, y_obs, initiate, mutation, n_part, ess_thres);
 % Backward particle smoother
 [x_smooth_smc, ~, ess_smooth] = run_backward_smoother(t_max, x_PF, w_PF, backward_smoother);
 end
 
 
-function [x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = bench_hmm_1d_lin_gauss(model_const, y_obs)
+function [x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, log_norm_const] = bench_hmm_1d_lin_gauss(model_const, y_obs)
 t_max = model_const(1);
 mu_x_0 = model_const(2);
 var_x_0 = model_const(3);
@@ -210,13 +215,13 @@ var_x = model_const(4);
 var_y = model_const(5);
 
 % Kalman filter
-[x_filter_bench, var_filter_bench, x_pred_KF, var_pred_KF] = run_kalman_filter_1D(mu_x_0, var_x_0, t_max, zeros(1,t_max), y_obs, 1, 0, var_x, 1, var_y);
+[x_filter_bench, var_filter_bench, x_pred_KF, var_pred_KF, log_norm_const] = run_kalman_filter_1D(mu_x_0, var_x_0, t_max, zeros(1,t_max), y_obs, 1, 0, var_x, 1, var_y);
 % Kalman smoother
 [x_smooth_bench, var_smooth_bench] = run_kalman_smoother_1D(x_filter_bench, var_filter_bench, x_pred_KF, var_pred_KF, t_max, 1);
 end
 
 
-function [x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = bench_hmm_1d_non_lin_gauss(model_const, y_obs, f_evolution, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell)
+function [x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, log_norm_const] = bench_hmm_1d_non_lin_gauss(model_const, y_obs, f_evolution, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell)
 t_max = model_const(1);
 mu_x_0 = model_const(2);
 var_x_0 = model_const(3);
@@ -238,7 +243,7 @@ end
 xinf(2:end) = xcenter(2:end) - xdelta;
 xsup(2:end) = xcenter(2:end) + xdelta;
 
-[x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_grid_hmm_1d_non_lin(t_max, y_obs, xinf, xsup, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell);
+[x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, log_norm_const] = run_grid_hmm_1d_non_lin(t_max, y_obs, xinf, xsup, log_init_prior_pdf, log_prior_pdf, log_like_pdf, n_cell);
 end
 
 
@@ -288,7 +293,7 @@ function plot_error_dist(errors, h_fig, i_sub, n_bin, fig_title, n_part, mutatio
 end
 
 
-function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth)
+function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth)
     
     model_const = model{1};
     model_dim = model{2};
@@ -306,7 +311,7 @@ function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs
         fprintf(fid, 'particles = %d\n', n);
     end
     
-    fprintf(fid, 'resampling = %g\n', 0);
+    fprintf(fid, 'resampling = multinomial\n');
     
     fprintf(fid, 'ess-threshold = %g\n', ess_thres);
     
@@ -361,6 +366,10 @@ function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs
             fprintf(fid, '\n');
         end
     end
+    
+    % print bench normalizing constant
+    fprintf(fid, '[bench]\n');
+    fprintf(fid, 'log-norm-const = %g\n', log_norm_const_bench);
     
     % print bench filtering results
     fprintf(fid, '[bench.filter]\n');

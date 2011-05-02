@@ -28,7 +28,7 @@ namespace Biips
 
     public:
       virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const;
-      virtual Scalar LogUnnormPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
+      virtual Scalar LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
 
       static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
     };

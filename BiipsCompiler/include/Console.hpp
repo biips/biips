@@ -87,7 +87,7 @@ namespace Biips
 
     Bool PrintGraphviz(std::ostream & os);
 
-    Bool RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Bool verbose = true);
+    Bool RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose = true);
 
     /*! Clears the model */
     void ClearModel(Bool verbose = true);
@@ -100,6 +100,10 @@ namespace Biips
     Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
 
     Bool ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
+
+    Bool ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
+
+    Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
   };
 
 }

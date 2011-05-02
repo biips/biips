@@ -28,6 +28,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
     vector<string> & monitor,
     StoredDimMap & dim_map,
     StoredDataMap & data_map,
+    Scalar & log_norm_const_bench,
     StoredDataMap & bench_filter_map,
     StoredDataMap & bench_smooth_map,
     StoredErrorsMap & errors_filter_map,
@@ -129,6 +130,13 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       // bench and errors sections
       else if (section == "bench" || section == "errors")
       {
+        // check if multiple values
+        if (var == "log-norm-const")
+        {
+          istringstream(parsed.options[op].value[0]) >> log_norm_const_bench;
+          continue;
+        }
+
         if ((pos = var.find('.')) == string::npos)
         {
           cerr << "in source: " << source << ". ";

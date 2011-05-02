@@ -47,7 +47,7 @@ namespace Biips
     const String & PriorName() const { return pPrior_->Name(); };
 
     MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const { return pPrior_->Sample(paramValues, pRng); };
-    Scalar LogUnnormLike(const MultiArray & x, const MultiArray::Array & paramValues) const { return pPrior_->LogUnnormPdf(x, paramValues); };
+    Scalar LogLike(const MultiArray & x, const MultiArray::Array & paramValues) const { return pPrior_->LogPdf(x, paramValues); };
 
     StochasticNode(const DimArray::Ptr pDim, const Distribution::Ptr & pPrior, const Types<NodeId>::Array & parameters) : Node(pDim, parameters), pPrior_(pPrior) {}
 
