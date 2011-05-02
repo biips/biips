@@ -64,6 +64,7 @@ namespace Biips
     return p_monitor;
   }
 
+
   void Model::IterateSampler()
   {
     if (!pSampler_)
@@ -164,7 +165,70 @@ namespace Biips
   }
 
 
-  // TODO traiter le cas des variables dicretes
+  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const
+  {
+    if (!pSampler_)
+      throw LogicError("Can not extract smooth tree statistic: no SMCSampler.");
+
+    ElementAccumulator elem_acc;
+    elem_acc.AddFeature(statFeature);
+
+    switch (statFeature)
+    {
+      case MIN: case MAX: case PDF: case QUANTILES: case CDF: case MAX_PDF:
+        throw LogicError("Can not extract statistic in Model::ExtractSmoothTreeStat.");
+        break;
+      default:
+        pSampler_->Accumulate(nodeId, elem_acc);
+        break;
+    }
+
+    MultiArray stat_marray;
+
+    switch (statFeature)
+    {
+      case COUNT:
+        stat_marray.Alloc(Scalar(elem_acc.Count()));
+        break;
+      case SUM_OF_WEIGHTS:
+        stat_marray.Alloc(elem_acc.SumOfWeights());
+        break;
+      case SUM:
+        stat_marray.SetPtr(elem_acc.Sum());
+        break;
+      case MEAN:
+        stat_marray.SetPtr(elem_acc.Mean());
+        break;
+      case VARIANCE:
+        stat_marray.SetPtr(elem_acc.Variance());
+        break;
+      case MOMENT2:
+        stat_marray.SetPtr(elem_acc.Moment<2>());
+        break;
+      case MOMENT3:
+        stat_marray.SetPtr(elem_acc.Moment<3>());
+        break;
+      case MOMENT4:
+        stat_marray.SetPtr(elem_acc.Moment<4>());
+        break;
+      case MOMENT5:
+        stat_marray.SetPtr(elem_acc.Moment<5>());
+        break;
+      case SKEWNESS:
+        stat_marray.SetPtr(elem_acc.Skewness());
+        break;
+      case KURTOSIS:
+        stat_marray.SetPtr(elem_acc.Kurtosis());
+        break;
+      default:
+        break;
+    }
+
+    return stat_marray;
+  }
+
+
+  // TODO manage dicrete variable cases
   ScalarHistogram Model::ExtractFilterPdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)
@@ -190,6 +254,26 @@ namespace Biips
     scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cacheFraction), numBins);
 
     it->second->Accumulate(nodeId, scalar_acc);
+
+    return scalar_acc.Pdf();
+  }
+
+
+  // TODO manage dicrete variable cases
+  ScalarHistogram Model::ExtractSmoothTreePdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
+  {
+    if (!pSampler_)
+      throw LogicError("Can not extract smooth tree pdf: no SMCSampler.");
+
+    if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
+      throw LogicError("Can not extract smooth tree pdf: node is not scalar.");
+
+
+    ScalarAccumulator scalar_acc;
+    scalar_acc.AddFeature(PDF);
+    scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cacheFraction), numBins);
+
+    pSampler_->Accumulate(nodeId, scalar_acc);
 
     return scalar_acc.Pdf();
   }

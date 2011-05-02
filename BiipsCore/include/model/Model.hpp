@@ -48,6 +48,11 @@ namespace Biips
 
     ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
+    // TODO manage multi statFeature
+    MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const;
+
+    ScalarHistogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+
     void IterateSampler();
 
     virtual ~Model() {};

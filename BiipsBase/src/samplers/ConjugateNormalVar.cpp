@@ -61,7 +61,7 @@ namespace Biips
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(like_mean_contrib / like_var_inv_contrib);
     norm_const_param_values[1] = MultiArray(prior_var + 1.0 / like_var_inv_contrib);
-    return DNormVar::Instance()->LogUnnormPdf(priorParamValues[0], norm_const_param_values);
+    return DNormVar::Instance()->LogPdf(priorParamValues[0], norm_const_param_values);
   }
 
 

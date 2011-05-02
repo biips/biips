@@ -204,12 +204,12 @@ namespace Biips
     T = 0;
 
     for(int i = 0; i < N; i++)
+    {
       pParticles[i] = Moves.DoInit(pRng_);
+      pParticles[i].SetLogWeight(-log(Scalar(N)));
+    }
 
-    //    if(htHistoryMode != ::SMC_HISTORY_NONE)
-    //    {
-    //      while(History.Pop());
-    //    }
+    logNormConst_ = 0.0;
 
     initialized_ = true;
   }
@@ -228,7 +228,7 @@ namespace Biips
     if (nResampled)
       Resample(rtResampleMode);
 
-    // COPY: copied and pasted from SMCTC sampler<Space>::IterateESS method
+    // COPY: copied and pasted from SMCTC sampler<Space>::IterateESS and GetESS methods
     // and then modified to fit Biips code
     // COPY: ********** from here **********
 
@@ -238,16 +238,30 @@ namespace Biips
     for(int i = 0; i < N; i++)
       Moves.DoMove(T+1, pParticles[i], pRng_);
 
-    //Normalize the weights to sensible values....
-    double dMaxWeight = -std::numeric_limits<double>::infinity();
+//    //Normalize the weights to sensible values....
+//    double dMaxWeight = -std::numeric_limits<double>::infinity();
+//    for(int i = 0; i < N; i++)
+//      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
+//    for(int i = 0; i < N; i++)
+//      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
+
+    //Normalize the weights to sum to 1
+    long double sum = 0.0;
     for(int i = 0; i < N; i++)
-      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
+      sum += expl(pParticles[i].GetLogWeight());
+
     for(int i = 0; i < N; i++)
-      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
+      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - log(sum));
 
     //Check if the ESS is below some reasonable threshold and resample if necessary.
     //A mechanism for setting this threshold is required.
-    ess_ = GetESS();
+
+    long double sumsq = 0;
+    for(int i = 0; i < N; i++)
+      sumsq += expl(2.0*(pParticles[i].GetLogWeight()));
+
+    ess_ = 1/sumsq;
+
     if (ess_ < dResampleThreshold)
       nResampled = 1;
     else
@@ -259,16 +273,14 @@ namespace Biips
       }
     }
 
-    //      //the current particle set should be appended to the historical process.
-    //      if(htHistoryMode != ::SMC_HISTORY_NONE)
-    //      {
-    //        History.PushBack(N, pParticles, nAccepted, HistoryFlags(nResampled), pGraph_->GetNodePtr(*iterNodeId()), Types<Size>::Array(uRSIndices, uRSIndices+N));
-    //      }
-
     // Increment the evolution time.
     T++;
 
     // COPY: ********** to here **********
+
+    // increment the normalizing constant
+    logNormConst_ += log(sum);
+
 
     ++iterNodeId();
     ++iterNodeSampler();

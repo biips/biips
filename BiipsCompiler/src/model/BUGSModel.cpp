@@ -124,6 +124,30 @@ namespace Biips
   }
 
 
+  Bool BUGSModel::ExtractSmoothTreeStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const
+  {
+    if (!statMap.empty())
+      throw LogicError("Can not extract smooth tree statistic: statistics map is not empty.");
+
+    if (!symbolTable_.Contains(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      NodeId node_id = it->second;
+      MultiArray stat_marray(BaseType::ExtractSmoothTreeStat(node_id, statFeature));
+      statMap.insert(std::make_pair(index_range, stat_marray));
+    }
+
+    return true;
+  }
+
+
   Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
@@ -154,6 +178,40 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id, numBins, cacheFraction);
+      pdfMap.insert(std::make_pair(index_range, pdf_hist));
+    }
+
+    return true;
+  }
+
+
+  Bool BUGSModel::ExtractSmoothTreePdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  {
+    if (!pdfMap.empty())
+      throw LogicError("Can not extract smooth tree pdf: pdf map is not empty.");
+
+    if (!symbolTable_.Contains(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    // check that all the nodes are scalar
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      if (index_range.Length() != 1)
+        return false;
+    }
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      NodeId node_id = it->second;
+      ScalarHistogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id, numBins, cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 

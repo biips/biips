@@ -68,6 +68,7 @@ namespace Biips
 
     Bool initialized_;
     Scalar ess_;
+    Scalar logNormConst_;
 
     //---------- Member functions ----------
 //    static void mutateNode(NodeId nodeId, MutationNodeVisitor::Ptr pMutationVis, NodeValues & particleValue, Flags & sampledFlags, Rng * pRng);
@@ -92,6 +93,7 @@ namespace Biips
     Bool AtEnd() const { return iterNodeId() == nodeIdSequence_.end(); };
     Size NIterations() const { return nodeSamplerSequence_.size(); };
     Scalar Ess() const { return ess_; }
+    Scalar LogNormConst() const { return logNormConst_; }
     Bool Resampled() const { return nResampled; }
 
     Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
@@ -99,7 +101,7 @@ namespace Biips
     void PrintSamplersSequence(std::ostream & os = std::cout) const;
     void PrintSamplerState(std::ostream & os = std::cout) const;
 
-    void SetResampleParams(ResampleType rtMode, Scalar threshold) { BaseType::SetResampleParams(rtMode, threshold); }
+    void SetResampleParams(ResampleType rtMode, Scalar threshold) { BaseType::SetResampleParams(rtMode, threshold < 1.0 ? threshold : N); }
     void Initialize();
     void Iterate();
 

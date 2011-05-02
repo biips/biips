@@ -146,7 +146,7 @@ namespace Biips
       MultiArray::Array norm_const_param_values(2);
       norm_const_param_values[0] = MultiArray(obs_pred);
       norm_const_param_values[1] = MultiArray(inn_cov);
-      logWeight_ = DMNormVar::Instance()->LogUnnormPdf(MultiArray(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
+      logWeight_ = DMNormVar::Instance()->LogPdf(MultiArray(obs), norm_const_param_values); // TODO LogPdf( Numerical::Array, Numerical ) to avoid use of pointer function
       // TODO optimize computation removing constant terms
 
       sampledFlagsMap_[nodeId_] = true;

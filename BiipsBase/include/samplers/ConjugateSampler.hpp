@@ -115,8 +115,8 @@ namespace Biips
       const MultiArray::Array & postParamValues,
       const MultiArray::Array & LikeParamContrib)
   {
-    Scalar logWeight = PriorDist::Instance()->LogUnnormPdf(sampledData, priorParamValues);
-    logWeight -= PriorDist::Instance()->LogUnnormPdf(sampledData, postParamValues);
+    Scalar logWeight = PriorDist::Instance()->LogPdf(sampledData, priorParamValues);
+    logWeight -= PriorDist::Instance()->LogPdf(sampledData, postParamValues);
 
     StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
     boost::tie(it_offspring, it_offspring_end) = pGraph_->GetStochasticChildren(nodeId_);

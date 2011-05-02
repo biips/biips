@@ -466,7 +466,7 @@ namespace Biips
   }
 
 
-  Bool Console::RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Bool verbose)
+  Bool Console::RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose)
   {
     if (!pModel_)
     {
@@ -500,6 +500,10 @@ namespace Biips
         if (p_show_progress)
           ++(*p_show_progress);
       }
+
+      // normalizing constant
+      log_norm_const = pModel_->Sampler().LogNormConst();
+
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -527,7 +531,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-        err_ << "Can't set monitor. No model!" << endl;
+        err_ << "Can't set filter monitor. No model!" << endl;
         return false;
     }
 
@@ -581,6 +585,40 @@ namespace Biips
   }
 
 
+  Bool Console::ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't extract smooth tree statistic. No model!" << endl;
+        return false;
+    }
+    if (!pModel_->IsInitialized())
+    {
+      err_ << "Can't extract smooth tree statistic. SMC sampler not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't extract smooth tree statistic. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothTreeStat(name, statFeature, statMap);
+      if (!ok)
+      {
+        err_ << "Failed to extract smooth tree statistic for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
@@ -605,6 +643,40 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract filter pdf for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't extract smooth tree pdf. No model!" << endl;
+        return false;
+    }
+    if (!pModel_->IsInitialized())
+    {
+      err_ << "Can't extract smooth tree pdf. SMC sampler not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't extract smooth tree pdf. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothTreePdf(name, pdfMap, numBins, cacheFraction);
+      if (!ok)
+      {
+        err_ << "Failed to extract smooth tree pdf for variable " <<
             name << endl;
         return false;
       }

@@ -133,6 +133,8 @@ namespace Biips
     Bool ErrorFilter(Scalar & errorFilter) const { return error(errorFilter, inBenchFilterVarNames_, smcFilterValuesMap_, benchFilterValuesMap_); };
     Bool ErrorSmooth(Scalar & errorSmooth) const { return error(errorSmooth, inBenchFilterVarNames_, smcSmoothValuesMap_, benchSmoothValuesMap_); };
 
+    Scalar LogNormConst() const { return pSampler_->LogNormConst(); };
+
   };
 
 
