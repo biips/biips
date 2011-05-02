@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     String config_file_name;
     vector<String> mutations;
     Size verbosity;
+    Size num_bins;
 
     // Declare a group of options that will be
     // allowed only on command line
@@ -101,6 +102,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 0: \tno plots.\n"
             " 1: \tshows final results plots.\n"
             " 2: \t1 + shows pdf histogram plots.")
+        ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histogram plots.")
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
             " 0: \tsamples or reads values of the graph.\n"
@@ -483,10 +485,12 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (n_smc==1 && verbosity>0)
             cout << INDENT_STRING << "rng seed: " << smc_rng_seed << endl;
 
-          p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", ess_threshold, resampleTypeMap().at(resample_type), n_smc==1);
+          p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", ess_threshold, resampleTypeMap().at(resample_type), n_smc==1, num_bins);
 
           if (verbosity==1 && n_smc>1)
             progressBar(Scalar(i_smc+1)/n_smc, pogress_pos, timer, cout);
+          else if (verbosity>0)
+            cout << INDENT_STRING << "log-normalizing constant = " << p_model_test->LogNormConst() << endl;
 
           log_norm_const_smc.push_back(p_model_test->LogNormConst());
 
@@ -601,7 +605,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           {
             cerr << "Warning: no smoothing reference errors." << endl;
             cerr << "         option '" << mut << "." << n_part << "'  in section [bench.smooth] has no value." << endl;
-            check_filter = false;
+            check_smooth = false;
           }
         }
 

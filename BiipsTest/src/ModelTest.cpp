@@ -220,7 +220,7 @@ namespace Biips
     smcSmoothValuesMap_.clear();
   }
 
-  void ModelTest::RunSMC(Size nParticles, Size rngSeed, Bool prior, Scalar essThreshold, ResampleType rsType, Bool showProgress)
+  void ModelTest::RunSMC(Size nParticles, Size rngSeed, Bool prior, Scalar essThreshold, ResampleType rsType, Bool showProgress, Size numBins)
   {
     Rng my_rng(rngSeed);
 
@@ -253,7 +253,7 @@ namespace Biips
       os_ << std::endl;
     }
 
-    initFilterAccumulators();
+    initFilterAccumulators(nParticles, numBins);
 
     Size current_pos = 0;
     time_t timer = 0;
@@ -292,7 +292,7 @@ namespace Biips
     scalarAcc_.ClearFeatures();
     discreteScalarAcc_.ClearFeatures();
 
-    initSmoothAccumulators();
+    initSmoothAccumulators(nParticles, numBins);
 
     // smoothing
     for (Size t=0; t<t_max; ++t)
