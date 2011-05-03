@@ -611,7 +611,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         }
         else
         {
-          cout << PROMPT_STRING << "Checking normalizing constant mean with reject level " << reject_level << endl;
+          cout << PROMPT_STRING << "Checking normalizing constant mean with reject level alpha = " << reject_level << endl;
           cout << INDENT_STRING << "expected log-norm-const mean = " << log_norm_const_bench << endl;
 
           using namespace acc;
@@ -733,10 +733,8 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (check_filter && !errors_filter_new.empty())
           {
             if (verbosity>0)
-            {
-              cout << PROMPT_STRING << "Checking filtering errors fitness with reject level alpha" << endl;
-              cout << INDENT_STRING << "alpha = " << reject_level << endl;
-            }
+              cout << PROMPT_STRING << "Checking filtering errors fitness with reject level alpha = " << reject_level << endl;
+
             Scalar ks_filter_stat = ksTwoSamplesStat(errors_filter_new.begin(),
                 errors_filter_new.end(),
                 errors_filter_ref_map_stored[mut][n_part].begin(),
@@ -756,10 +754,8 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (check_smooth && !errors_smooth_new.empty())
           {
             if (verbosity>0)
-            {
-              cout << PROMPT_STRING << "Checking smoothing errors fitness with reject level alpha" << endl;
-              cout << INDENT_STRING << "alpha = " << reject_level << endl;
-            }
+              cout << PROMPT_STRING << "Checking smoothing errors fitness with reject level alpha = " << reject_level << endl;
+
             Scalar ks_smooth_stat = ksTwoSamplesStat(errors_smooth_new.begin(),
                 errors_smooth_new.end(),
                 errors_smooth_ref_map_stored[mut][n_part].begin(),
