@@ -75,7 +75,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     Size data_rng_seed;
     Size smc_rng_seed;
     vector<Size> n_particles;
-//    Size n_particles;
     Scalar ess_threshold;
     String resample_type;
     Size n_smc;
@@ -111,10 +110,10 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histogram plots.")
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
-            " 0: \tsamples or reads values of the graph.\n"
-            " 1: \t0 + computes or reads benchmark values.\n"
-            " 2: \t1 + runs SMC sampler, computes estimates and errors vs benchmarks.\n"
-            " 3: \t2 + checks that errors vs benchmarks are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
+            " 0: \tcompiles model, generates data and reads values from cfg file.\n"
+            " 1: \t0 + runs SMC samplers and extract statistics.\n"
+            " 2: \t1 + computes errors vs benchmarks.\n"
+            " 3: \t2 + checks that errors are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
         ("check-mode", po::value<Size>(&check_mode)->default_value(1), "errors to be checked.\n"
             "values:\n"
             " 0: \tchecks normalizing-constant mean.\n"
@@ -351,9 +350,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     {
       const String & name = monitored_var[i];
       if (!console.SetFilterMonitor(name))
-      {
         throw RuntimeError(String("Failed to monitor variable ") + name);
-      }
 
       if (verbosity>0)
         cout << PROMPT_STRING << "Monitoring variable " << name << endl;
@@ -362,27 +359,9 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (verbosity>0 && interactive && !monitored_var.empty())
       pressEnterToContinue();
 
-//    // Reading benchmarks values
-//    //----------------------
-//    else
-//    {
-//      if (verbosity>0)
-//        cout << "Reading benchmarks values in file: " << config_file_name << endl;
-//      p_model_test->SetBenchFilter(bench_filter_map_stored);
-//      p_model_test->SetBenchSmooth(bench_smooth_map_stored);
-//    }
-//
-//    if (exec_step < 2)
-//      return;
-//
-//    if (verbosity>0 && interactive)
-//      pressEnterToContinue();
 
     // Run SMC samplers
     //----------------------
-
-
-    // Run SMC sampler
     for (Size i_n_part=0; i_n_part<n_particles.size(); ++i_n_part)
     {
       Size n_part = n_particles[i_n_part];
@@ -414,13 +393,10 @@ BOOST_AUTO_TEST_CASE( my_test )
         {
           // Initialize sampler
           //----------------------
-
           if (n_smc>1 || !vm.count("smc-rng-seed"))
             smc_rng_seed = time(0)+i_smc+1;
           if (n_smc==1 && verbosity>0)
-          {
             cout << INDENT_STRING << "smc-rng-seed = " << smc_rng_seed << endl;
-          }
 
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
@@ -585,9 +561,8 @@ BOOST_AUTO_TEST_CASE( my_test )
           error_filter *= n_part;
 
           if (verbosity>0 && n_smc==1)
-          {
             cout << INDENT_STRING << "filtering error = " << error_filter << endl;
-          }
+
           errors_filter_new.push_back(error_filter);
 
 
@@ -701,9 +676,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             error_filter_threshold = p_square_quantile(errors_filter_ref_acc);
 
             if (verbosity>0)
-            {
               cout << INDENT_STRING << "filtering errors quantile = " << error_filter_threshold << endl;
-            }
 
             BOOST_CHECK_LT(errors_filter_new.front(), error_filter_threshold);
           }

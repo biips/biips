@@ -23,8 +23,8 @@
 //! This file defines the smc::sampler class which is used to implement entire particle systems.
 
 /*
- * last modified : 28/04/2011
- *         lines : 65-66, 107, 181-182, 228-229, 490-491, 504-505, 508-509
+ * last modified : 30/09/2010
+ *         lines : 65-66, 107, 181-182, 228-229, 490-491, 504-505
  *        author : Adrien Todeschini
  *                 Development Engineer
  *                 Team ALEA
@@ -505,8 +505,7 @@ namespace smc {
     for(unsigned int i = 0; int(i) < N ; ++i) { /* Modified on 30/09/2010 by Adrien Todeschini */
       if(uRSIndices[i] != i)
 	pParticles[i].SetValue(pParticles[uRSIndices[i]].GetValue());
-//      pParticles[i].SetLogWeight(0); /* Modified on 28/04/2011 by Adrien Todeschini */
-      pParticles[i].SetLogWeight(-log(double(N))); /* Modified on 28/04/2011 by Adrien Todeschini */
+      pParticles[i].SetLogWeight(0.0);
     }
   } 
 

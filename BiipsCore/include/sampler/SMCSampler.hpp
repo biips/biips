@@ -67,6 +67,7 @@ namespace Biips
     Rng * pRng_;
 
     Bool initialized_;
+    Scalar sumOfWeights_;
     Scalar ess_;
     Scalar logNormConst_;
 
