@@ -547,8 +547,11 @@ BOOST_AUTO_TEST_CASE( my_test )
         }
         else
         {
-          cout << "Checking normalizing constant mean with reject level " << reject_level << endl;
-          cout << INDENT_STRING << "expected log-norm-const mean = " << log_norm_const_bench << endl;
+          if (verbosity>0)
+          {
+            cout << "Checking normalizing constant mean with reject level " << reject_level << endl;
+            cout << INDENT_STRING << "expected log-norm-const mean = " << log_norm_const_bench << endl;
+          }
 
           using namespace acc;
           typedef accumulator_set<long double, features<tag::mean, tag::variance> > acc_ref_type;
@@ -616,7 +619,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           Scalar error_filter_threshold;
           Scalar error_smooth_threshold;
 
-          if (verbosity>0 && (check_filter || check_smooth))
+          if (verbosity>0)
           {
             cout << "Computing 1-alpha quantile of reference errors distribution" << endl;
             cout << INDENT_STRING << "alpha = " << reject_level << endl;
