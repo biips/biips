@@ -33,15 +33,17 @@ namespace Biips
 
     Graph * GraphPtr() { return pGraph_.get(); }
 
+    Monitor::Ptr SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
+
     const SMCSampler & Sampler() const;
-
-    Bool IsInitialized() const { return pSampler_; }
-
-    void InitSampler(Size nParticles, Rng::Ptr pRng);
 
     void SetResampleParam(ResampleType rtMode, Scalar threshold);
 
-    Monitor::Ptr SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
+    void InitSampler(Size nParticles, Rng::Ptr pRng);
+
+    Bool IsInitialized() const { return pSampler_; }
+
+    void IterateSampler();
 
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const;
@@ -52,8 +54,6 @@ namespace Biips
     MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const;
 
     ScalarHistogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-
-    void IterateSampler();
 
     virtual ~Model() {};
   };

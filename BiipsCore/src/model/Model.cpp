@@ -15,6 +15,30 @@
 namespace Biips
 {
 
+  void Model::SetResampleParam(ResampleType rtMode, Scalar threshold)
+  {
+    if (!pSampler_)
+      throw LogicError("Can not set resampling parameters: no SMCSampler.");
+
+    pSampler_->SetResampleParams(rtMode, threshold);
+  }
+
+
+  Monitor::Ptr Model::SetFilterMonitor(const Types<NodeId>::Array & nodeIds)
+  {
+    Monitor::Ptr p_monitor(new Monitor());
+
+    for (Size i=0; i<nodeIds.size(); ++i)
+    {
+      if (filterMonitorsMap_.count(nodeIds[i]))
+        continue; // Node has already a filter monitor
+
+      filterMonitorsMap_.insert(std::make_pair(nodeIds[i], p_monitor));
+    }
+    return p_monitor;
+  }
+
+
   const SMCSampler & Model::Sampler() const
   {
     if (!pSampler_)
@@ -38,30 +62,6 @@ namespace Biips
     {
       it->second->Clear();
     }
-  }
-
-
-  void Model::SetResampleParam(ResampleType rtMode, Scalar threshold)
-  {
-    if (!pSampler_)
-      throw LogicError("Can not set resampling parameters: no SMCSampler.");
-
-    pSampler_->SetResampleParams(rtMode, threshold);
-  }
-
-
-  Monitor::Ptr Model::SetFilterMonitor(const Types<NodeId>::Array & nodeIds)
-  {
-    Monitor::Ptr p_monitor(new Monitor());
-
-    for (Size i=0; i<nodeIds.size(); ++i)
-    {
-      if (filterMonitorsMap_.count(nodeIds[i]))
-        throw LogicError("Node has already a filter monitor.");
-
-      filterMonitorsMap_.insert(std::make_pair(nodeIds[i], p_monitor));
-    }
-    return p_monitor;
   }
 
 

@@ -202,6 +202,7 @@ namespace Biips
     }
 
     T = 0;
+    nResampled = 0;
 
     for(int i = 0; i < N; i++)
     {
@@ -226,7 +227,10 @@ namespace Biips
     sampledFlagsBefore() = sampledFlagsAfter();
 
     if (nResampled)
+    {
       Resample(rtResampleMode);
+      sumOfWeights_ = N;
+    }
 
     // COPY: copied and pasted from SMCTC sampler<Space>::IterateESS and GetESS methods
     // and then modified to fit Biips code
@@ -238,29 +242,24 @@ namespace Biips
     for(int i = 0; i < N; i++)
       Moves.DoMove(T+1, pParticles[i], pRng_);
 
-//    //Normalize the weights to sensible values....
-//    double dMaxWeight = -std::numeric_limits<double>::infinity();
-//    for(int i = 0; i < N; i++)
-//      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
-//    for(int i = 0; i < N; i++)
-//      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
-
-    //Normalize the weights to sum to 1
-    long double sum = 0.0;
+    //Normalize the weights to sensible values....
+    double dMaxWeight = -std::numeric_limits<double>::infinity();
     for(int i = 0; i < N; i++)
-      sum += expl(pParticles[i].GetLogWeight());
-
+      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
     for(int i = 0; i < N; i++)
-      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - log(sum));
+      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
 
     //Check if the ESS is below some reasonable threshold and resample if necessary.
     //A mechanism for setting this threshold is required.
+    long double sum = 0.0;
+    for(int i = 0; i < N; i++)
+      sum += expl(pParticles[i].GetLogWeight());
 
     long double sumsq = 0;
     for(int i = 0; i < N; i++)
       sumsq += expl(2.0*(pParticles[i].GetLogWeight()));
 
-    ess_ = 1/sumsq;
+    ess_ = expl(-log(sumsq) + 2*log(sum));
 
     if (ess_ < dResampleThreshold)
       nResampled = 1;
@@ -273,14 +272,18 @@ namespace Biips
       }
     }
 
+    // increment the normalizing constant
+    if (T == 0)
+      logNormConst_ += log(sum) + dMaxWeight;
+    else
+      logNormConst_ += log(sum) - log(sumOfWeights_) + dMaxWeight;
+
     // Increment the evolution time.
     T++;
 
     // COPY: ********** to here **********
 
-    // increment the normalizing constant
-    logNormConst_ += log(sum);
-
+    sumOfWeights_ = sum;
 
     ++iterNodeId();
     ++iterNodeSampler();
@@ -290,14 +293,8 @@ namespace Biips
   void SMCSampler::Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n) const
   {
     featuresAcc.Init();
-
-    //Normalize the weights to sensible values....
-    double dMaxWeight = -std::numeric_limits<double>::infinity();
-    for(int i = 0; i < N; i++)
-      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
-
     for(Size i=0; i < Size(N); i++)
-      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight() - dMaxWeight));
+      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight()));
   }
 
 
