@@ -19,11 +19,11 @@
 #include "sampler/Accumulator.hpp"
 #include "model/Monitor.hpp"
 
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/discrete_distribution_sw_2009.hpp>
 
 namespace Biips
 {
-
-  Graph * SMCSampler::pGraph_;
 
   std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & SMCSampler::NodeSamplerFactories()
   {
@@ -31,8 +31,6 @@ namespace Biips
     return ans;
   }
 
-  Flags & SMCSampler::sampledFlagsBefore() { static Flags ans(pGraph_->GetSize()); return ans; };
-  Flags & SMCSampler::sampledFlagsAfter() { static Flags ans(pGraph_->GetSize()); return ans; };
 
   void SMCSampler::buildNodeSamplers()
   {
@@ -56,9 +54,7 @@ namespace Biips
           ++it_node_id, ++it_node_sampler)
       {
         if ( !(*it_node_sampler) )
-        {
           it_sampler_factory->first->Create(pGraph_, it_node_id->front(), *it_node_sampler);
-        }
       }
     }
 
@@ -69,50 +65,49 @@ namespace Biips
         ++it_node_id, ++it_node_sampler)
     {
       if ( !(*it_node_sampler) )
-      {
         NodeSamplerFactory::Instance()->Create(pGraph_, it_node_id->front(), *it_node_sampler);
-      }
     }
   }
 
 
-  Particle SMCSampler::fInitialize(Rng * pRng)
+  Particle SMCSampler::initParticle(Rng * pRng)
   {
     NodeValues init_particle_value(pGraph_->GetSize());
     for (NodeId id= 0; id<init_particle_value.size(); ++id)
-    {
       init_particle_value[id] = pGraph_->GetValues()[id];
-    }
 
     return Particle(init_particle_value, 0.0);
   }
 
 
-  void SMCSampler::fMove(long lTime, Particle & lastParticle, Rng * pRng)
+  void SMCSampler::moveParticle(long lTime, Particle & lastParticle, Rng * pRng)
   {
     // sample current stochastic node
-    NodeValues & moved_particle_value = *(lastParticle.GetValuePointer());
-    sampledFlagsAfter() = sampledFlagsBefore();
-    (*iterNodeSampler())->SetAttributes(moved_particle_value, sampledFlagsAfter(), pRng);
-    (*iterNodeSampler())->Sample(iterNodeId()->front());
+    NodeValues & moved_particle_value = lastParticle.Value();
+    sampledFlagsAfter_ = sampledFlagsBefore_;
+    (*iterNodeSampler_)->SetAttributes(moved_particle_value, sampledFlagsAfter_, pRng);
+    (*iterNodeSampler_)->Sample(iterNodeId_->front());
 
     // update particle log weight
-    lastParticle.AddToLogWeight((*iterNodeSampler())->LogWeight());
+    lastParticle.AddToLogWeight((*iterNodeSampler_)->LogWeight());
 
     // compute all logical children
-    Types<NodeId>::Iterator it_logical_children = iterNodeId()->begin()+1;
-    while(it_logical_children != iterNodeId()->end())
+    Types<NodeId>::Iterator it_logical_children = iterNodeId_->begin()+1;
+    while(it_logical_children != iterNodeId_->end())
     {
-      (*iterNodeSampler())->Sample(*it_logical_children);
+      (*iterNodeSampler_)->Sample(*it_logical_children);
       ++it_logical_children;
     }
   }
 
 
   SMCSampler::SMCSampler(Size nbParticles, Graph * pGraph, Rng * pRng)
-  : BaseType(nbParticles, SMC_HISTORY_NONE), Moves(&fInitialize, &fMove), pRng_(pRng), initialized_(false)
+  : nParticles_(nbParticles), pGraph_(pGraph), pRng_(pRng),
+    resampleMode_(SMC_RESAMPLE_STRATIFIED), resampleThreshold_(0.5 * nbParticles),
+    rsWeights_(nbParticles), rsCount_(nbParticles), rsIndices_(nbParticles),
+    sampledFlagsBefore_(pGraph->GetSize()), sampledFlagsAfter_(pGraph->GetSize()),
+    particles_(nbParticles), initialized_(false)
   {
-    pGraph_ = pGraph;
   }
 
 
@@ -171,9 +166,7 @@ namespace Biips
   void SMCSampler::PrintSamplersSequence(std::ostream & os) const
   {
     for (Size  k = 0; k<nodeIdSequence_.size(); ++k)
-    {
       os << k << ": node " << nodeIdSequence_[k].front() << ", " << nodeSamplerSequence_[k]->Name() << std::endl;
-    }
   }
 
 
@@ -181,10 +174,16 @@ namespace Biips
   {
     Types<std::pair<NodeId, String> >::Array ans;
     for (Size k = 0; k<nodeIdSequence_.size(); ++k)
-    {
       ans.push_back(std::make_pair(nodeIdSequence_[k].front(), nodeSamplerSequence_[k]->Name()));
-    }
+
     return ans;
+  }
+
+
+  void SMCSampler::SetResampleParams(ResampleType rsMode, Scalar threshold)
+  {
+    resampleMode_ = rsMode;
+    resampleThreshold_ = threshold < 1.0 ? threshold * nParticles_ : nParticles_;
   }
 
 
@@ -193,21 +192,19 @@ namespace Biips
     buildNodeIdSequence();
     buildNodeSamplers();
 
-    iterNodeId() = nodeIdSequence_.begin();
-    iterNodeSampler() = nodeSamplerSequence_.begin();
+    iterNodeId_ = nodeIdSequence_.begin();
+    iterNodeSampler_ = nodeSamplerSequence_.begin();
 
-    for (NodeId id= 0; id<sampledFlagsBefore().size(); ++id)
+    for (NodeId id= 0; id<sampledFlagsBefore_.size(); ++id)
+      sampledFlagsBefore_[id] = sampledFlagsAfter_[id] = pGraph_->GetObserved()[id];
+
+    t_ = 0;
+    resampled_ = false;
+
+    for(Size i = 0; i < nParticles_; i++)
     {
-      sampledFlagsBefore()[id] = sampledFlagsAfter()[id] = pGraph_->GetObserved()[id];
-    }
-
-    T = 0;
-    nResampled = 0;
-
-    for(int i = 0; i < N; i++)
-    {
-      pParticles[i] = Moves.DoInit(pRng_);
-      pParticles[i].SetLogWeight(-log(Scalar(N)));
+      particles_[i] = initParticle(pRng_);
+      particles_[i].SetLogWeight(-log(Scalar(nParticles_)));
     }
 
     logNormConst_ = 0.0;
@@ -221,107 +218,238 @@ namespace Biips
     if (!initialized_)
       throw LogicError("Can not iterate SMCSampler: not initialized.");
 
-    if ( iterNodeId() == nodeIdSequence_.end() )
+    if ( iterNodeId_ == nodeIdSequence_.end() )
       throw LogicError("Can not iterate SMCSampler: the sequence have reached the end.");
 
-    sampledFlagsBefore() = sampledFlagsAfter();
+    sampledFlagsBefore_ = sampledFlagsAfter_;
 
-    if (nResampled)
+    if (resampled_)
     {
-      Resample(rtResampleMode);
-      sumOfWeights_ = N;
+      resample(resampleMode_);
+      sumOfWeights_ = nParticles_;
     }
 
     // COPY: copied and pasted from SMCTC sampler<Space>::IterateESS and GetESS methods
     // and then modified to fit Biips code
     // COPY: ********** from here **********
 
-    nAccepted = 0;
-
     //Move the particle set.
-    for(int i = 0; i < N; i++)
-      Moves.DoMove(T+1, pParticles[i], pRng_);
+    for(Size i = 0; i < nParticles_; i++)
+      moveParticle(t_+1, particles_[i], pRng_);
 
     //Normalize the weights to sensible values....
-    double dMaxWeight = -std::numeric_limits<double>::infinity();
-    for(int i = 0; i < N; i++)
-      dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
-    for(int i = 0; i < N; i++)
-      pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
+    Scalar max_weight = particles_[0].GetLogWeight();
+    for(Size i = 1; i < nParticles_; i++)
+      max_weight = std::max(max_weight, particles_[i].GetLogWeight());
+    for(Size i = 0; i < nParticles_; i++)
+      particles_[i].SetLogWeight(particles_[i].GetLogWeight() - max_weight);
 
     //Check if the ESS is below some reasonable threshold and resample if necessary.
     //A mechanism for setting this threshold is required.
     long double sum = 0.0;
-    for(int i = 0; i < N; i++)
-      sum += expl(pParticles[i].GetLogWeight());
+    for(Size i = 0; i < nParticles_; i++)
+      sum += expl(particles_[i].GetLogWeight());
 
     long double sumsq = 0;
-    for(int i = 0; i < N; i++)
-      sumsq += expl(2.0*(pParticles[i].GetLogWeight()));
+    for(Size i = 0; i < nParticles_; i++)
+      sumsq += expl(2.0*(particles_[i].GetLogWeight()));
 
-    ess_ = expl(-log(sumsq) + 2*log(sum));
+    ess_ = expl(-logl(sumsq) + 2*logl(sum));
 
-    if (ess_ < dResampleThreshold)
-      nResampled = 1;
+    if (ess_ < resampleThreshold_)
+      resampled_ = true;
     else
     {
-      nResampled = 0;
-      for (int i = 0; i<N ; ++i)
-      {
-        uRSIndices[i] = i;
-      }
+      resampled_ = false;
+      for (Size i = 0; i<nParticles_ ; ++i)
+        rsIndices_[i] = i;
     }
 
     // increment the normalizing constant
-    if (T == 0)
-      logNormConst_ += log(sum) + dMaxWeight;
+    if (t_ == 0)
+      logNormConst_ += log(sum) + max_weight;
     else
-      logNormConst_ += log(sum) - log(sumOfWeights_) + dMaxWeight;
+      logNormConst_ += log(sum) - log(sumOfWeights_) + max_weight;
 
     // Increment the evolution time.
-    T++;
+    ++t_;
 
     // COPY: ********** to here **********
 
     sumOfWeights_ = sum;
 
-    ++iterNodeId();
-    ++iterNodeSampler();
+    ++iterNodeId_;
+    ++iterNodeSampler_;
   }
+
+
+  // COPY: copied and pasted from SMCTC sampler<Space>::resample method
+  // and then modified to fit Biips code
+  // COPY: ********** from here **********
+  void SMCSampler::resample(ResampleType rsMode)
+  {
+    //Resampling is done in place.
+
+    for(Size i = 0; i < nParticles_; ++i)
+      rsCount_[i] = 0;
+
+    typedef boost::random::discrete_distribution<Int ,Scalar> CategoricalDist;
+    typedef boost::uniform_real<Scalar> UniformDist;
+
+    //First obtain a count of the number of children each particle has.
+    switch(rsMode)
+    {
+      case SMC_RESAMPLE_MULTINOMIAL:
+      {
+        //Sample from a suitable multinomial vector
+        for(Size i = 0; i < nParticles_; ++i)
+          rsWeights_[i] = particles_[i].GetWeight();
+
+        CategoricalDist dist(rsWeights_.begin(), rsWeights_.end());
+        for (Size i=0; i<nParticles_; ++i)
+          rsCount_[dist(pRng_->GetGen())]++;
+        break;
+      }
+
+      case SMC_RESAMPLE_RESIDUAL:
+      {
+        //Sample from a suitable multinomial vector and add the integer replicate
+        //counts afterwards.
+        for(Size i = 0; i < nParticles_; ++i)
+          rsWeights_[i] = particles_[i].GetWeight();
+
+        Size multinomial_count = nParticles_;
+        for(Size i = 0; i < nParticles_; ++i)
+        {
+          rsWeights_[i] = nParticles_*rsWeights_[i] / sumOfWeights_;
+          rsIndices_[i] = floor(rsWeights_[i]); //Reuse temporary storage.
+          rsWeights_[i] = (rsWeights_[i] - rsIndices_[i]);
+          multinomial_count -= rsIndices_[i];
+        }
+
+        CategoricalDist dist(rsWeights_.begin(), rsWeights_.end());
+        for (Size i=0; i<multinomial_count; ++i)
+          rsCount_[dist(pRng_->GetGen())]++;
+
+        for(Size i = 0; i < nParticles_; ++i)
+          rsCount_[i] += rsIndices_[i];
+        break;
+      }
+
+      case SMC_RESAMPLE_STRATIFIED:
+      default:
+      {
+        // Procedure for stratified sampling
+        Scalar weight_cumulative = 0.0;
+        //Generate a random number between 0 and 1/nParticles_ times the sum of the weights
+        UniformDist dist(0.0, 1.0 / nParticles_);
+        Scalar rand_unif = dist(pRng_->GetGen());
+
+        Size j = 0, k = 0;
+        for(Size i = 0; i < nParticles_; ++i)
+          rsCount_[i] = 0;
+
+        weight_cumulative = particles_[0].GetWeight() / sumOfWeights_;
+        while(j < nParticles_)
+        {
+          while((weight_cumulative - rand_unif) > Scalar(j)/nParticles_ && j < nParticles_)
+          {
+            rsCount_[k]++;
+            j++;
+            rand_unif = dist(pRng_->GetGen());
+          }
+          k++;
+          weight_cumulative += particles_[k].GetWeight() / sumOfWeights_;
+        }
+        break;
+      }
+
+      case SMC_RESAMPLE_SYSTEMATIC:
+      {
+        // Procedure for stratified sampling but with a common RV for each stratum
+        Scalar weight_cumulative = 0.0;
+        //Generate a random number between 0 and 1/nParticles_ times the sum of the weights
+        UniformDist dist(0.0, 1.0 / nParticles_);
+        Scalar rand_unif = dist(pRng_->GetGen());
+
+        Size j = 0, k = 0;
+        for(Size i = 0; i < nParticles_; ++i)
+          rsCount_[i] = 0;
+
+        weight_cumulative = particles_[0].GetWeight() / sumOfWeights_;
+        while(j < nParticles_)
+        {
+          while((weight_cumulative - rand_unif) > Scalar(j)/nParticles_ && j < nParticles_)
+          {
+            rsCount_[k]++;
+            j++;
+          }
+          k++;
+          weight_cumulative += particles_[k].GetWeight() / sumOfWeights_;
+        }
+        break;
+
+      }
+    }
+
+    //Map count to indices to allow in-place resampling
+    for (Size i=0, j=0; i<nParticles_; ++i)
+    {
+      if (rsCount_[i]>0)
+      {
+        rsIndices_[i] = i;
+        while (rsCount_[i]>1)
+        {
+          while (rsCount_[j]>0) ++j; // find next free spot
+          rsIndices_[j++] = i; // assign index
+          --rsCount_[i]; // decrement number of remaining offsprings
+        }
+      }
+    }
+
+    //Perform the replication of the chosen.
+    for(Size i = 0; i < nParticles_ ; ++i)
+    {
+      if(rsIndices_[i] != i)
+        particles_[i].Value() = particles_[rsIndices_[i]].GetValue();
+      particles_[i].SetLogWeight(0.0);
+    }
+  }
+  // COPY: ********** to here **********
 
 
   void SMCSampler::Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n) const
   {
     featuresAcc.Init();
-    for(Size i=0; i < Size(N); i++)
-      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight()));
+    for(Size i=0; i < nParticles_; i++)
+      featuresAcc.Push((*(particles_[i].GetValue()[nodeId]))[n], particles_[i].GetWeight());
   }
 
 
   void SMCSampler::Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n) const
   {
     featuresAcc.Init();
-    for(Size i=0; i < Size(N); i++)
-      featuresAcc.Push((*(pParticles[i].GetValue()[nodeId]))[n], exp(pParticles[i].GetLogWeight()));
+    for(Size i=0; i < nParticles_; i++)
+      featuresAcc.Push((*(particles_[i].GetValue()[nodeId]))[n], particles_[i].GetWeight());
   }
 
   void SMCSampler::Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const
   {
     featuresAcc.Init(pGraph_->GetNode(nodeId).DimPtr());
-    for(Size i=0; i < Size(N); i++)
-      featuresAcc.Push(pParticles[i].GetValue()[nodeId], exp(pParticles[i].GetLogWeight()));
+    for(Size i=0; i < nParticles_; i++)
+      featuresAcc.Push(particles_[i].GetValue()[nodeId], particles_[i].GetWeight());
   }
 
 
   void SMCSampler::MonitorNode(NodeId nodeId, Monitor & monitor)
   {
-    for (Size i=0; i < Size(N); i++)
-      monitor.PushParticle(nodeId, pParticles[i].GetValue()[nodeId], exp(pParticles[i].GetLogWeight()));
+    for (Size i=0; i < nParticles_; i++)
+      monitor.PushParticle(nodeId, particles_[i].GetValue()[nodeId], particles_[i].GetWeight());
   }
 
   void SMCSampler::PrintSamplerState(std::ostream & os) const
   {
-    const Types<Types<NodeId>::Array>::ConstIterator & iter_node_id = iterNodeId();
+    const Types<Types<NodeId>::Array>::ConstIterator & iter_node_id = iterNodeId_;
 
     if (!initialized_)
       os << "Non initialized" << std::endl;
@@ -332,8 +460,8 @@ namespace Biips
       Size old_prec = os.precision();
       os.precision(4);
       Size k = std::distance(nodeIdSequence_.begin(), iter_node_id-1);
-      os << k << ": ESS/N = " << std::fixed << ess_/N;
-      if (iter_node_id != nodeIdSequence_.end() && nResampled)
+      os << k << ": ESS/N = " << std::fixed << ess_/nParticles_;
+      if (iter_node_id != nodeIdSequence_.end() && resampled_)
         os << ", Resampled";
       os << std::endl;
       os.precision(old_prec);
@@ -344,8 +472,8 @@ namespace Biips
   //  void SMCSampler::Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const
   //  {
   //    featuresAcc.Clear();
-  //    for(Size i=0; i < Size(N); i++)
-  //      featuresAcc.Push(pParticles[i].GetValue()[nodeId], exp(pParticles[i].GetLogWeight()));
+  //    for(Size i=0; i < nParticles_; i++)
+  //      featuresAcc.Push(particles_[i].GetValue()[nodeId], exp(particles_[i].GetLogWeight()));
   // //    featuresAcc.SetDim(pGraph_->GetNode(nodeId).Dim());
   //  }
 

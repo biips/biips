@@ -54,7 +54,6 @@ namespace Biips
     typedef boost::math::normal DistType;
     DistType dist(mean, sqrt(var));
     return log(boost::math::pdf(dist, my_point));
-//    return boost::math::log_unnormalized_pdf(dist, my_point);
   }
 
 }

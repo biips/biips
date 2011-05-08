@@ -29,12 +29,6 @@ using std::endl;
 
 // FIXME
 #define BIIPS_CONSOLE_CATCH_ERRORS                                  \
-  catch(smc::exception & e)                                         \
-  {                                                                 \
-    std::cerr << "SMCTC ERROR: " << e << endl;                      \
-    ClearModel();                                                   \
-    return false;                                                   \
-  }                                                                 \
   catch (RuntimeError & except)                                     \
   {                                                                 \
     err_ << "RUNTIME ERROR: " << except.what() << endl;             \

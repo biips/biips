@@ -25,12 +25,12 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.733951727" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1297931945" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.258422349" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsTestCompiler/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/Qt"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtCore"/>
@@ -43,8 +43,9 @@
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1060427947" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.exe.debug.option.debugging.level.163530055" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.include.paths.1975905256" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1628587326" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
@@ -57,15 +58,12 @@
 <listOptionValue builtIn="false" value="BiipsCompiler"/>
 <listOptionValue builtIn="false" value="BiipsBase"/>
 <listOptionValue builtIn="false" value="BiipsCore"/>
-<listOptionValue builtIn="false" value="smctc"/>
-<listOptionValue builtIn="false" value="gsl"/>
-<listOptionValue builtIn="false" value="gslcblas"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1728974059" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/lib}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Release}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Debug}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Debug}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Debug}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1353289355" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -74,8 +72,9 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.439623026" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 <option id="gnu.both.asm.option.include.paths.1806813962" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1548326705" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
@@ -502,18 +501,22 @@
 </scannerConfigBuildInfo>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-<externalSettings containerId="BiipsBase;cdt.managedbuild.config.gnu.lib.debug.1789708723" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+<externalSettings containerId="BiipsBase;cdt.managedbuild.config.gnu.lib.release.2139229436" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 <externalSetting>
 <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsBase"/>
-<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsBase/Debug"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsBase/Release"/>
 </externalSetting>
 </externalSettings>
-<externalSettings containerId="smctc;0.1168322298" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-<externalSettings containerId="BiipsCompiler;cdt.managedbuild.config.gnu.so.debug.713408452" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.release.334175014" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+<externalSetting>
+<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsCore"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCore/Release"/>
+</externalSetting>
+</externalSettings>
+<externalSettings containerId="BiipsCompiler;cdt.managedbuild.config.gnu.so.release.194922081" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 <externalSetting>
 <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsCompiler"/>
-<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCompiler/Debug"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCompiler/Release"/>
 </externalSetting>
 </externalSettings>
 </storageModule>
@@ -560,7 +563,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsTestCompiler/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/Qt"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtCore"/>
@@ -588,13 +590,9 @@
 <listOptionValue builtIn="false" value="BiipsCompiler"/>
 <listOptionValue builtIn="false" value="BiipsBase"/>
 <listOptionValue builtIn="false" value="BiipsCore"/>
-<listOptionValue builtIn="false" value="smctc"/>
-<listOptionValue builtIn="false" value="gsl"/>
-<listOptionValue builtIn="false" value="gslcblas"/>
 </option>
 <option id="gnu.cpp.link.option.paths.628099017" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/lib}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Release}&quot;"/>
 </option>
@@ -1036,7 +1034,6 @@
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-<externalSettings containerId="smctc;0.1168322298" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 <externalSettings containerId="BiipsBase;cdt.managedbuild.config.gnu.lib.release.2139229436" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 <externalSetting>
 <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsBase"/>

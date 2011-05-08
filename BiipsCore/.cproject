@@ -31,7 +31,7 @@
 <option id="gnu.cpp.compiler.lib.debug.option.debugging.level.1798816936" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.1985661070" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/random}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.401587553" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -45,10 +45,10 @@
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.721247756" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.base.1581770337" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
-<option defaultValue="true" id="gnu.c.link.option.shared.1238818837" superClass="gnu.c.link.option.shared" valueType="boolean"/>
+<option defaultValue="true" id="gnu.c.link.option.shared.1238818837" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1552794372" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
-<option defaultValue="true" id="gnu.cpp.link.option.shared.1031672981" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
+<option defaultValue="true" id="gnu.cpp.link.option.shared.1031672981" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1321037029" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -614,7 +614,7 @@
 <option id="gnu.cpp.compiler.lib.release.option.debugging.level.390219598" name="Debug Level" superClass="gnu.cpp.compiler.lib.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.331298453" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/random}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2146776990" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -624,10 +624,10 @@
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.218541372" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.base.1148909038" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
-<option defaultValue="true" id="gnu.c.link.option.shared.140296254" superClass="gnu.c.link.option.shared" valueType="boolean"/>
+<option defaultValue="true" id="gnu.c.link.option.shared.140296254" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1806376962" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
-<option defaultValue="true" id="gnu.cpp.link.option.shared.1608712613" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
+<option defaultValue="true" id="gnu.cpp.link.option.shared.1608712613" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1777191946" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>

@@ -33,7 +33,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.293809760" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -41,7 +40,7 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.520565498" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.214839742" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.so.debug.option.debugging.level.1570168851" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-<option id="gnu.c.compiler.option.include.paths.1638778139" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<option id="gnu.c.compiler.option.include.paths.1638778139" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1691730917" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -51,7 +50,7 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1346368251" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 <option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.433096227" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
-<option id="gnu.cpp.link.option.paths.1347923372" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+<option id="gnu.cpp.link.option.paths.1347923372" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Debug}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1040040574" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -60,7 +59,7 @@
 </inputType>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.704766869" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
-<option id="gnu.both.asm.option.include.paths.1251513324" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<option id="gnu.both.asm.option.include.paths.1251513324" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.766031790" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -531,7 +530,7 @@
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.567867627" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
 <builder buildPath="${workspace_loc:/BiipsCompiler/Release}" id="cdt.managedbuild.target.gnu.builder.so.release.1344524712" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.so.release"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1312946558" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.311833576" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
+<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.311833576" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
 <option id="gnu.cpp.compiler.so.release.option.optimization.level.1687830947" name="Optimization Level" superClass="gnu.cpp.compiler.so.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.so.release.option.debugging.level.288361245" name="Debug Level" superClass="gnu.cpp.compiler.so.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.897304549" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
@@ -539,7 +538,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1250584100" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -547,7 +545,7 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.1200957171" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
 <option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.so.release.option.optimization.level.220618107" name="Optimization Level" superClass="gnu.c.compiler.so.release.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.so.release.option.debugging.level.1125945136" name="Debug Level" superClass="gnu.c.compiler.so.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-<option id="gnu.c.compiler.option.include.paths.176434715" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<option id="gnu.c.compiler.option.include.paths.176434715" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
@@ -558,7 +556,7 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.660390647" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 <option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1234075721" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
-<option id="gnu.cpp.link.option.paths.340119985" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+<option id="gnu.cpp.link.option.paths.340119985" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
 </option>
@@ -568,7 +566,7 @@
 </inputType>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.so.release.1456007926" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release">
-<option id="gnu.both.asm.option.include.paths.1401185139" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<option id="gnu.both.asm.option.include.paths.1401185139" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>

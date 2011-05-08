@@ -70,7 +70,7 @@ namespace Biips
     if (!pSampler_)
       throw LogicError("Can not iterate a Null SMCSampler.");
 
-    const Types<NodeId>::Array & sampled_nodes = SMCSampler::NextSampledNodes();
+    const Types<NodeId>::Array & sampled_nodes = pSampler_->NextSampledNodes();
 
     pSampler_->Iterate();
 

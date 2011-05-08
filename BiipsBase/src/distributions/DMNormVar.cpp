@@ -73,7 +73,6 @@ namespace Biips
 
     ublas::inplace_solve(var_chol, diff_vec, ublas::lower_tag());
     return -log(ublas::cholesky_det(var_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));
-    //return -log(ublas::cholesky_det(var_chol)) - 0.5 * ublas::inner_prod(diff_vec, diff_vec);
   }
 
 
