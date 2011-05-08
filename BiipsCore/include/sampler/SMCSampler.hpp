@@ -6,29 +6,24 @@
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
+ *
+ * COPY: Adapted from SMCTC smc::sampler class
  */
 
 #ifndef BIIPS_SMCSAMPLER_HPP_
 #define BIIPS_SMCSAMPLER_HPP_
 
-#include "MoveSet.hpp"
 #include "NodeSampler.hpp"
+#include "Particle.hpp"
 
 
 namespace Biips
 {
-
-
-//  ///Specifiers for various resampling algorithms:
-//  enum ResampleType { SMC_RESAMPLE_MULTINOMIAL = 0,
-//    SMC_RESAMPLE_RESIDUAL,
-//    SMC_RESAMPLE_STRATIFIED,
-//    SMC_RESAMPLE_SYSTEMATIC };
-//
-//  ///Storage types for the history of the particle system.
-//  enum HistoryType { SMC_HISTORY_NONE = 0,
-//    SMC_HISTORY_RAM };
-
+  ///Specifiers for various resampling algorithms:
+  enum ResampleType { SMC_RESAMPLE_MULTINOMIAL = 0,
+    SMC_RESAMPLE_RESIDUAL,
+    SMC_RESAMPLE_STRATIFIED,
+    SMC_RESAMPLE_SYSTEMATIC };
 
   class Graph;
 
@@ -40,31 +35,46 @@ namespace Biips
 
   class Monitor;
 
-
-  class SMCSampler : protected smc::sampler<NodeValues>
+  class SMCSampler
   {
   public:
     typedef SMCSampler SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    typedef smc::sampler<NodeValues> BaseType;
-//    typedef smc::historyflags HistoryFlags;
-
     typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
 
     //---------- Member data ----------
-    static Graph * pGraph_;
-    static Types<Types<NodeId>::Array>::Iterator & iterNodeId() { static Types<Types<NodeId>::Array>::Iterator ans; return ans; };
-    static Types<NodeSampler::Ptr>::Iterator & iterNodeSampler() { static Types<NodeSampler::Ptr>::Iterator ans; return ans; };
-    static Flags & sampledFlagsBefore();
-    static Flags & sampledFlagsAfter();
+    ///Number of particles in the system.
+    Size nParticles_;
+    ///The current evolution time of the system.
+    Size t_;
+    const Graph * pGraph_;
+    Rng * pRng_;
+
+    ///The resampling mode which is to be employed.
+    ResampleType resampleMode_;
+    ///The effective sample size at which resampling should be used.
+    Scalar resampleThreshold_;
+    ///Structure used internally for resampling.
+    Types<Scalar>::Array rsWeights_;
+    ///Structure used internally for resampling.
+    Types<Size>::Array rsCount_;
+    ///Structure used internally for resampling.
+    Types<Size>::Array rsIndices_;
+
+    Types<Types<NodeId>::Array>::Iterator iterNodeId_;
+    Types<NodeSampler::Ptr>::Iterator iterNodeSampler_;
+    Flags sampledFlagsBefore_;
+    Flags sampledFlagsAfter_;
 
     Types<Types<NodeId>::Array>::Array nodeIdSequence_;
     Types<NodeSampler::Ptr>::Array nodeSamplerSequence_;
-//    Biips::History History;
-    Biips::MoveSet Moves;
-    Rng * pRng_;
+
+    Types<Particle>::Array particles_;
+
+    ///A flag which tracks whether the ensemble was resampled during this iteration
+    Bool resampled_;
 
     Bool initialized_;
     Scalar sumOfWeights_;
@@ -72,12 +82,11 @@ namespace Biips
     Scalar logNormConst_;
 
     //---------- Member functions ----------
-//    static void mutateNode(NodeId nodeId, MutationNodeVisitor::Ptr pMutationVis, NodeValues & particleValue, Flags & sampledFlags, Rng * pRng);
-    static Particle fInitialize(Rng * pRng);
-    static void fMove(long lTime, Particle & lastParticle, Rng * pRng);
-
     void buildNodeIdSequence();
     void buildNodeSamplers();
+    Particle initParticle(Rng * pRng);
+    void moveParticle(long lTime, Particle & lastParticle, Rng * pRng);
+    void resample(ResampleType rsMode);
 
     // Forbid copying
     SMCSampler(const SMCSampler & from);
@@ -86,23 +95,25 @@ namespace Biips
   public:
     static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & NodeSamplerFactories();
 
-    static const Types<NodeId>::Array & NextSampledNodes() { return *iterNodeId(); };
+    SMCSampler(Size nbParticles, Graph * pGraph, Rng * pRng);
+    virtual ~SMCSampler() {}
 
-    Size NParticles() const { return Size(N); };
+    Size NParticles() const { return nParticles_; };
     Bool IsInitialized() const { return initialized_; };
-    Bool IsSampling() const { return iterNodeId() != nodeIdSequence_.begin(); };
-    Bool AtEnd() const { return iterNodeId() == nodeIdSequence_.end(); };
+    Bool IsSampling() const { return iterNodeId_ != nodeIdSequence_.begin(); };
+    Bool AtEnd() const { return iterNodeId_ == nodeIdSequence_.end(); };
     Size NIterations() const { return nodeSamplerSequence_.size(); };
     Scalar Ess() const { return ess_; }
     Scalar LogNormConst() const { return logNormConst_; }
-    Bool Resampled() const { return nResampled; }
+    Bool Resampled() const { return resampled_; }
+    const Types<NodeId>::Array & NextSampledNodes() { return *iterNodeId_; };
 
     Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
     // TODO remove from the class
     void PrintSamplersSequence(std::ostream & os = std::cout) const;
     void PrintSamplerState(std::ostream & os = std::cout) const;
 
-    void SetResampleParams(ResampleType rtMode, Scalar threshold) { BaseType::SetResampleParams(rtMode, threshold < 1.0 ? threshold : N); }
+    void SetResampleParams(ResampleType rsMode, Scalar threshold);
     void Initialize();
     void Iterate();
 
@@ -113,15 +124,7 @@ namespace Biips
 //    void Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const;
 
     void MonitorNode(NodeId nodeId, Monitor & monitor);
-
-
-    //---------- Constructors and Destructors ----------
-    SMCSampler(Size nbParticles, Graph * pGraph, Rng * pRng);
-    virtual ~SMCSampler() {};
   };
-
-
-
 
 } /* namespace Biips */
 
