@@ -75,7 +75,6 @@ namespace Biips
 
     diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,ublas::lower>(prec_chol));
     return log(ublas::cholesky_det(prec_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));
-    //return log(ublas::cholesky_det(prec_chol)) - 0.5 * ublas::inner_prod(diff_vec, diff_vec);
   }
 
 

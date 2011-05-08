@@ -31,7 +31,6 @@
 <option id="gnu.cpp.compiler.option.include.paths.1379414267" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/math_toolkit}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/random}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/distribution_common}&quot;"/>
@@ -527,7 +526,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/smctc/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/math_toolkit}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/random}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include/boost/sandbox/statistics/distribution_common}&quot;"/>

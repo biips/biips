@@ -12,16 +12,11 @@
 #define BIIPS_ERROR_HPP_
 
 #include <exception>
-#include "smc-exception.hh"
 
 #include "common/Types.hpp"
 
 //! A macro defining the catch instruction of biips errors
 #define BIIPS_CATCH_ERRORS                     \
-  catch(smc::exception & e)                    \
-  {                                            \
-    std::cerr << "SMCTC ERROR: " << e;         \
-  }                                            \
   catch (RuntimeError & e)                     \
   {                                            \
     std::cerr << "RUNTIME ERROR: " << e.what();\

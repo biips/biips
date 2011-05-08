@@ -12,12 +12,11 @@
 #define BIIPS_RNG_HPP_
 
 #include <boost/random/mersenne_twister.hpp>
-#include <rng.hh>
 
 namespace Biips
 {
   
-  class Rng : public smc::rng
+  class Rng
   {
   public:
     typedef Rng SelfType;

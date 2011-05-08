@@ -3,7 +3,6 @@
 	<name>BiipsTestCompiler</name>
 	<comment></comment>
 	<projects>
-		<project>smctc</project>
 		<project>BiipsBase</project>
 		<project>BiipsCompiler</project>
 		<project>BiipsCore</project>
@@ -35,7 +34,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/BiipsTestCompiler/Debug}</value>
+					<value>${workspace_loc:/BiipsTestCompiler/Release}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
