@@ -102,6 +102,7 @@ namespace Biips
     Bool IsInitialized() const { return initialized_; };
     Bool IsSampling() const { return iterNodeId_ != nodeIdSequence_.begin(); };
     Bool AtEnd() const { return iterNodeId_ == nodeIdSequence_.end(); };
+    Size Time() const { return t_; }
     Size NIterations() const { return nodeSamplerSequence_.size(); };
     Scalar Ess() const { return ess_; }
     Scalar LogNormConst() const { return logNormConst_; }
@@ -123,7 +124,8 @@ namespace Biips
 //    template<typename Features>
 //    void Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const;
 
-    void MonitorNode(NodeId nodeId, Monitor & monitor);
+    void SetMonitorWeights(Monitor & monitor);
+    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor);
   };
 
 } /* namespace Biips */

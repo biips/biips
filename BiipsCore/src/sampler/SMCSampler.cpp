@@ -441,10 +441,15 @@ namespace Biips
   }
 
 
-  void SMCSampler::MonitorNode(NodeId nodeId, Monitor & monitor)
+  void SMCSampler::SetMonitorWeights(Monitor & monitor)
   {
-    for (Size i=0; i < nParticles_; i++)
-      monitor.PushParticle(nodeId, particles_[i].GetValue()[nodeId], particles_[i].GetWeight());
+    monitor.SetWeights(particles_, ess_, sumOfWeights_, logNormConst_);
+  }
+
+
+  void SMCSampler::SetMonitorNodeValues(NodeId nodeId, Monitor & monitor)
+  {
+    monitor.SetNodeValues(nodeId, particles_);
   }
 
   void SMCSampler::PrintSamplerState(std::ostream & os) const
