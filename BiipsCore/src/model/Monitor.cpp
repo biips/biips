@@ -10,6 +10,7 @@
 
 #include "model/Monitor.hpp"
 #include "common/Error.hpp"
+#include "sampler/Particle.hpp"
 #include "sampler/Accumulator.hpp"
 
 namespace Biips
@@ -17,38 +18,34 @@ namespace Biips
 
   Bool Monitor::Contains(NodeId nodeId) const
   {
-    return nodeParticles_.find(nodeId) != nodeParticles_.end();
+    return particleValuesMap_.count(nodeId);
   }
 
 
-  void Monitor::AddNode(NodeId nodeId, Size nParticles, Scalar ess)
+  void Monitor::SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst)
+  {
+    ess_ = ess;
+    sumOfWeights_ = sumOfWeights;
+    logNormConst_ = logNormConst;
+
+    weights_.resize(particles.size());
+    logWeights_.resize(particles.size());
+    for(Size i=0; i<particles.size(); ++i)
+    {
+      weights_[i] = particles[i].GetWeight();
+      logWeights_[i] = particles[i].GetLogWeight();
+    }
+  }
+
+
+  void Monitor::SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles)
   {
     if (Contains(nodeId))
       throw LogicError("Can not add node: it has already been added in the Monitor.");
 
-    nodeParticles_[nodeId].reserve(nParticles);
-    nodeEss_.insert(std::make_pair(nodeId, ess));
-  }
-
-
-  void Monitor::PushParticle(NodeId nodeId, const ValArray::Ptr & pValue, Scalar weight)
-  {
-    if(!Contains(nodeId))
-      throw LogicError("Can not push particle: Node is not monitored.");
-
-    if (nodeParticles_[nodeId].size() == nodeParticles_[nodeId].capacity())
-      throw LogicError("Can not push particle in Monitor: exceeds number of particles.");
-
-    nodeParticles_[nodeId].push_back(std::make_pair(pValue, weight));
-  }
-
-
-  Scalar Monitor::GetESS(NodeId nodeId) const
-  {
-    if (!Contains(nodeId))
-      throw LogicError("Can not get ESS: Node is not monitored.");
-
-    return nodeEss_.at(nodeId);
+    particleValuesMap_[nodeId].resize(particles.size());
+    for(Size i=0; i<particles.size(); ++i)
+      particleValuesMap_[nodeId][i] = particles[i].GetValue()[nodeId];
   }
 
 
@@ -59,8 +56,8 @@ namespace Biips
 
     featuresAcc.Init();
 
-    for(Size i=0; i < nodeParticles_.at(nodeId).size(); ++i)
-      featuresAcc.Push((*(nodeParticles_.at(nodeId)[i].first))[n], nodeParticles_.at(nodeId)[i].second);
+    for(Size i=0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      featuresAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
   }
 
   void Monitor::Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc, const DimArray::Ptr & pDim) const
@@ -70,7 +67,7 @@ namespace Biips
 
     featuresAcc.Init(pDim);
 
-    for(Size i=0; i < nodeParticles_.at(nodeId).size(); ++i)
-      featuresAcc.Push(nodeParticles_.at(nodeId)[i].first, nodeParticles_.at(nodeId)[i].second);
+    for(Size i=0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      featuresAcc.Push(particleValuesMap_.at(nodeId)[i], weights_[i]);
   }
 }

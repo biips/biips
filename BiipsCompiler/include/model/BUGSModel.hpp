@@ -28,8 +28,6 @@ namespace Biips
     typedef BUGSModel SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    std::map<String, Monitor::Ptr> monitorsMap_;
-
   protected:
     SymbolTable symbolTable_;
 
@@ -42,7 +40,7 @@ namespace Biips
 
     Bool SetFilterMonitor(const String & name);
 
-    Bool IsFilterMonitored(const String & name) const { return monitorsMap_.find(name) != monitorsMap_.end(); }
+    Bool IsFilterMonitored(const String & name) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
 

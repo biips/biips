@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE( my_test )
               cout << PROMPT_STRING << "Extracting filtering mean of variable " << name << endl;
 
             if (!console.ExtractFilterStat(name, MEAN, filter_mean_map[name]))
-              throw RuntimeError(String("Failed to extract filtering mean of variable") + name);
+              throw RuntimeError(String("Failed to extract filtering mean of variable ") + name);
           }
 
 

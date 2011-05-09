@@ -21,6 +21,7 @@ namespace Biips
 
   class ScalarAccumulator;
   class ElementAccumulator;
+  class Particle;
 
   class Monitor
   {
@@ -29,27 +30,34 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    typedef Types<std::pair<ValArray::Ptr, Scalar> >::Array WeightedSample;
+    typedef Types<ValArray::Ptr>::Array ParticleValue;
 
-    std::map<NodeId, WeightedSample> nodeParticles_;
-    std::map<NodeId, Scalar> nodeEss_;
+    Size t_;
+    NodeId sampledNodeId_;
+    std::map<NodeId, Types<ValArray::Ptr>::Array> particleValuesMap_;
+    Types<Scalar>::Array logWeights_;
+    Types<Scalar>::Array weights_;
+    Scalar ess_;
+    Scalar sumOfWeights_;
+    Scalar logNormConst_;
 
   public:
-    Monitor() {};
+    Monitor(Size t, NodeId sampledNodeId) : t_(t), sampledNodeId_(sampledNodeId) {};
 
     Bool Contains(NodeId nodeId) const;
 
-    void AddNode(NodeId nodeId, Size nParticles, Scalar ess);
+    void SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst);
 
-    void PushParticle(NodeId nodeId, const ValArray::Ptr & pValue, Scalar weight);
+    void SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles);
 
-    Scalar GetESS(NodeId nodeId) const;
+    Scalar GetESS(NodeId nodeId) const { return ess_; };
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
 
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc, const DimArray::Ptr & pDim) const;
 
-    void Clear() { nodeParticles_.clear(); nodeEss_.clear(); };
+    void ClearNode(NodeId nodeId) { particleValuesMap_.at(nodeId).clear(); };
+    void Clear() { particleValuesMap_.clear(); logWeights_.clear(); weights_.clear(); };
 
     virtual ~Monitor() {};
   };

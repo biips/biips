@@ -43,9 +43,7 @@ namespace Biips
       // initialized with BIIPS_REALNA
       const NodeArray & node_array = symbolTable_.GetNodeArray(var_name);
       if (!data_table.count(var_name))
-      {
         data_table[var_name] = MultiArray(node_array.Range().Dim(), BIIPS_REALNA);
-      }
 
       // get the subrange in the NodeArray
       IndexRange range = node_array.GetRange(node_id);
@@ -70,9 +68,6 @@ namespace Biips
 
   Bool BUGSModel::SetFilterMonitor(const String & name)
   {
-    if (monitorsMap_.count(name))
-      return false;
-
     // TODO use Monitor Factory
 
     if (!symbolTable_.Contains(name))
@@ -85,13 +80,28 @@ namespace Biips
 
     for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
         it != node_id_range_bimap.end(); ++it)
-    {
       node_ids.push_back(it->left);
+
+    BaseType::SetFilterMonitor(node_ids);
+
+    return true;
+  }
+
+
+  Bool BUGSModel::IsFilterMonitored(const String & name) const
+  {
+    if (!symbolTable_.Contains(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    for(boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
+        it != node_id_range_bimap.end(); ++it)
+    {
+      if (!filterMonitorsMap_.count(it->left))
+        return false;
     }
-
-    Monitor::Ptr p_monitor = BaseType::SetFilterMonitor(node_ids);
-
-    monitorsMap_.insert(std::make_pair(name, p_monitor));
 
     return true;
   }
@@ -102,10 +112,7 @@ namespace Biips
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
 
-    if (!monitorsMap_.count(name))
-      return false;
-
-    if (!symbolTable_.Contains(name))
+    if (!IsFilterMonitored(name))
       return false;
 
     const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
@@ -153,10 +160,7 @@ namespace Biips
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
 
-    if (!monitorsMap_.count(name))
-      return false;
-
-    if (!symbolTable_.Contains(name))
+    if (!IsFilterMonitored(name))
       return false;
 
     const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
