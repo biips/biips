@@ -24,18 +24,30 @@ namespace Biips
   }
 
 
-  Monitor::Ptr Model::SetFilterMonitor(const Types<NodeId>::Array & nodeIds)
+  void Model::SetDefaultFilterMonitors()
   {
-    Monitor::Ptr p_monitor(new Monitor());
-
-    for (Size i=0; i<nodeIds.size(); ++i)
+    for (NodeId id=0; id<pGraph_->GetSize(); ++id)
     {
-      if (filterMonitorsMap_.count(nodeIds[i]))
-        continue; // Node has already a filter monitor
+      if (pGraph_->GetNode(id).GetType() == STOCHASTIC)
+        if (pGraph_->GetObserved()[id])
+        {
+          // Monitor all unobserved stochastic nodes
+          filterMonitorsMap_[id];
 
-      filterMonitorsMap_.insert(std::make_pair(nodeIds[i], p_monitor));
+          // and its direct parents
+          GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+          boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(id);
+          for (; it_parents != it_parents_end; ++it_parents)
+            filterMonitorsMap_[*it_parents];
+        }
     }
-    return p_monitor;
+  }
+
+
+  void Model::SetFilterMonitor(const Types<NodeId>::Array & nodeIds)
+  {
+    for (Size i=0; i<nodeIds.size(); ++i)
+      filterMonitorsMap_[nodeIds[i]];
   }
 
 
@@ -57,10 +69,11 @@ namespace Biips
     pSampler_->Initialize();
 
     // Clear Filter Monitors
+    filterMonitors_.clear();
     for (std::map<NodeId, Monitor::Ptr>::iterator  it = filterMonitorsMap_.begin();
         it != filterMonitorsMap_.end(); ++it)
     {
-      it->second->Clear();
+      it->second = Monitor::Ptr();
     }
   }
 
@@ -70,23 +83,26 @@ namespace Biips
     if (!pSampler_)
       throw LogicError("Can not iterate a Null SMCSampler.");
 
+    Size t = pSampler_->Time();
     const Types<NodeId>::Array & sampled_nodes = pSampler_->NextSampledNodes();
 
     pSampler_->Iterate();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    Monitor::Ptr p_monitor;
+    Monitor::Ptr p_monitor(new Monitor(t, sampled_nodes[0])); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->SetMonitorWeights(*p_monitor);
     for (Size i=0; i<sampled_nodes.size(); ++i)
     {
       node_id = sampled_nodes[i];
       if(filterMonitorsMap_.count(node_id))
       {
-        p_monitor = filterMonitorsMap_.at(node_id);
-        p_monitor->AddNode(node_id, pSampler_->NParticles(), pSampler_->Ess());
-        pSampler_->MonitorNode(node_id, *p_monitor);
+        pSampler_->SetMonitorNodeValues(node_id, *p_monitor);
+        filterMonitorsMap_[node_id] = p_monitor;
       }
     }
+
+    filterMonitors_.push_back(p_monitor);
   }
 
 
@@ -95,16 +111,15 @@ namespace Biips
     if (!pSampler_)
       throw LogicError("Can not extract filter statistic: no SMCSampler.");
 
-
-    // Search the filter Monitor object responsible of the nodeId
-    std::map<NodeId, Monitor::Ptr>::const_iterator it = filterMonitorsMap_.begin();
-    for (; it != filterMonitorsMap_.end(); ++it)
+    // FIXME Search the first filter Monitor object responsible of the nodeId
+    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
+    for (; it != filterMonitors_.end(); ++it)
     {
-      if (it->second->Contains(nodeId))
+      if ((*it)->Contains(nodeId))
         break;
     }
 
-    if (it == filterMonitorsMap_.end())
+    if (it == filterMonitors_.end())
       throw LogicError("Node is not yet monitored.");
 
     ElementAccumulator elem_acc;
@@ -116,7 +131,7 @@ namespace Biips
         throw LogicError("Can not extract statistic in Model::ExtractFilterStat.");
         break;
       default:
-        it->second->Accumulate(nodeId, elem_acc, pGraph_->GetNode(nodeId).DimPtr());
+        (*it)->Accumulate(nodeId, elem_acc, pGraph_->GetNode(nodeId).DimPtr());
         break;
     }
 
@@ -165,6 +180,7 @@ namespace Biips
   }
 
 
+  // FIXME Still valid after optimization ?
   MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const
   {
     if (!pSampler_)
@@ -237,29 +253,29 @@ namespace Biips
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
       throw LogicError("Can not extract filter pdf: node is not scalar.");
 
-
-    // Search the filter Monitor object responsible of the nodeId
-    std::map<NodeId, Monitor::Ptr>::const_iterator it = filterMonitorsMap_.begin();
-    for (; it != filterMonitorsMap_.end(); ++it)
+    // FIXME Search the first filter Monitor object responsible of the nodeId
+    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
+    for (; it != filterMonitors_.end(); ++it)
     {
-      if (it->second->Contains(nodeId))
+      if ((*it)->Contains(nodeId))
         break;
     }
 
-    if (it == filterMonitorsMap_.end())
+    if (it == filterMonitors_.end())
       throw LogicError("Node is not yet monitored.");
 
     ScalarAccumulator scalar_acc;
     scalar_acc.AddFeature(PDF);
     scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cacheFraction), numBins);
 
-    it->second->Accumulate(nodeId, scalar_acc);
+    (*it)->Accumulate(nodeId, scalar_acc);
 
     return scalar_acc.Pdf();
   }
 
 
   // TODO manage dicrete variable cases
+  // FIXME Still valid after optimization ?
   ScalarHistogram Model::ExtractSmoothTreePdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)

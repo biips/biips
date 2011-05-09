@@ -25,6 +25,7 @@ namespace Biips
     Graph::Ptr pGraph_;
     SMCSampler::Ptr pSampler_;
     Rng::Ptr pRng_;
+    Types<Monitor::Ptr>::Array filterMonitors_;
     std::map<NodeId, Monitor::Ptr> filterMonitorsMap_;
 
   public:
@@ -33,7 +34,9 @@ namespace Biips
 
     Graph * GraphPtr() { return pGraph_.get(); }
 
-    Monitor::Ptr SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
+    void SetDefaultFilterMonitors();
+
+    void SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
 
     const SMCSampler & Sampler() const;
 
