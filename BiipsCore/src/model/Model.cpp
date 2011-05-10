@@ -29,7 +29,8 @@ namespace Biips
     for (NodeId id=0; id<pGraph_->GetSize(); ++id)
     {
       if (pGraph_->GetNode(id).GetType() == STOCHASTIC)
-        if (pGraph_->GetObserved()[id])
+      {
+        if (!pGraph_->GetObserved()[id])
         {
           // Monitor all unobserved stochastic nodes
           filterMonitorsMap_[id];
@@ -40,7 +41,10 @@ namespace Biips
           for (; it_parents != it_parents_end; ++it_parents)
             filterMonitorsMap_[*it_parents];
         }
+      }
     }
+
+    defaultMonitorsSet_ = true;
   }
 
 
@@ -90,7 +94,7 @@ namespace Biips
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    Monitor::Ptr p_monitor(new Monitor(t, sampled_nodes[0])); // FIXME Do we create monitor object even if no nodes are monitored ?
+    Monitor::Ptr p_monitor(new Monitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSampler_->SetMonitorWeights(*p_monitor);
     for (Size i=0; i<sampled_nodes.size(); ++i)
     {
@@ -106,20 +110,43 @@ namespace Biips
   }
 
 
+  void Model::InitBackwardSmoother()
+  {
+    if (!defaultMonitorsSet_)
+      throw LogicError("Can not initiate backward smoother: default monitors not set.");
+
+    pSmoother_ = BackwardSmoother::Ptr(new BackwardSmoother(pGraph_, filterMonitors_));
+
+    pSmoother_->Initialize();
+  }
+
+
+  void Model::IterateBackwardSmoother()
+  {
+    if (!pSmoother_)
+      throw LogicError("Can not iterate backward smoother: not initialized.");
+
+    pSmoother_->IterateBack();
+  }
+
+
   MultiArray Model::ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter statistic: no SMCSampler.");
 
-    // FIXME Search the first filter Monitor object responsible of the nodeId
-    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
-    for (; it != filterMonitors_.end(); ++it)
-    {
-      if ((*it)->Contains(nodeId))
-        break;
-    }
+//    // FIXME Search the first filter Monitor object responsible of the nodeId
+//    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
+//    for (; it != filterMonitors_.end(); ++it)
+//    {
+//      if ((*it)->Contains(nodeId))
+//        break;
+//    }
+//
+//    if (it == filterMonitors_.end())
+//      throw LogicError("Node is not yet monitored.");
 
-    if (it == filterMonitors_.end())
+    if (filterMonitorsMap_.find(nodeId) == filterMonitorsMap_.end())
       throw LogicError("Node is not yet monitored.");
 
     ElementAccumulator elem_acc;
@@ -131,7 +158,7 @@ namespace Biips
         throw LogicError("Can not extract statistic in Model::ExtractFilterStat.");
         break;
       default:
-        (*it)->Accumulate(nodeId, elem_acc, pGraph_->GetNode(nodeId).DimPtr());
+        filterMonitorsMap_.at(nodeId)->Accumulate(nodeId, elem_acc, pGraph_->GetNode(nodeId).DimPtr());
         break;
     }
 
@@ -253,22 +280,25 @@ namespace Biips
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
       throw LogicError("Can not extract filter pdf: node is not scalar.");
 
-    // FIXME Search the first filter Monitor object responsible of the nodeId
-    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
-    for (; it != filterMonitors_.end(); ++it)
-    {
-      if ((*it)->Contains(nodeId))
-        break;
-    }
+//    // FIXME Search the first filter Monitor object responsible of the nodeId
+//    Types<Monitor::Ptr>::ConstIterator it = filterMonitors_.begin();
+//    for (; it != filterMonitors_.end(); ++it)
+//    {
+//      if ((*it)->Contains(nodeId))
+//        break;
+//    }
+//
+//    if (it == filterMonitors_.end())
+//      throw LogicError("Node is not yet monitored.");
 
-    if (it == filterMonitors_.end())
+    if (filterMonitorsMap_.find(nodeId) == filterMonitorsMap_.end())
       throw LogicError("Node is not yet monitored.");
 
     ScalarAccumulator scalar_acc;
     scalar_acc.AddFeature(PDF);
     scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles()*cacheFraction), numBins);
 
-    (*it)->Accumulate(nodeId, scalar_acc);
+    filterMonitorsMap_.at(nodeId)->Accumulate(nodeId, scalar_acc);
 
     return scalar_acc.Pdf();
   }

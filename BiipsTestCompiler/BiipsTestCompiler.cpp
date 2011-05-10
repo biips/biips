@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 #endif
     String model_file_name;
     Size exec_step;
+    Bool do_smooth;
     Size check_mode;
     Size show_mode;
     Size data_rng_seed;
@@ -114,6 +115,10 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 1: \t0 + runs SMC samplers and extract statistics.\n"
             " 2: \t1 + computes errors vs benchmarks.\n"
             " 3: \t2 + checks that errors are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
+        ("smooth", po::value<Bool>(&do_smooth)->default_value(true), "toggle backward smoothing step.\n"
+            "values:\n"
+            " true: \tenable backward smoothing step.\n"
+            " false: \tdisable backward smoothing step.")
         ("check-mode", po::value<Size>(&check_mode)->default_value(1), "errors to be checked.\n"
             "values:\n"
             " 0: \tchecks normalizing-constant mean.\n"
@@ -346,6 +351,18 @@ BOOST_AUTO_TEST_CASE( my_test )
 
 
     // Monitor variables
+    if (do_smooth)
+    {
+      if (verbosity>0)
+        cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
+
+      if (!console.SetDefaultFilterMonitors())
+        throw RuntimeError("Failed to set default filter monitors");
+    }
+
+    if (verbosity>0)
+      cout << PROMPT_STRING << "Setting user filter monitors" << endl;
+
     for (Size i=0; i<monitored_var.size(); ++i)
     {
       const String & name = monitored_var[i];
@@ -353,7 +370,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         throw RuntimeError(String("Failed to monitor variable ") + name);
 
       if (verbosity>0)
-        cout << PROMPT_STRING << "Monitoring variable " << name << endl;
+        cout << INDENT_STRING << "monitoring variable " << name << endl;
     }
 
     if (verbosity>0 && interactive && !monitored_var.empty())
@@ -568,6 +585,16 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
+
+          // Run backward smoother
+          //----------------------
+          if (do_smooth)
+          {
+            console.RunBackwardSmoother((verbosity>1 || (verbosity>0 && n_smc==1)));
+
+            if (verbosity>0 && interactive && n_smc==1)
+              pressEnterToContinue();
+          }
         }
 
 
