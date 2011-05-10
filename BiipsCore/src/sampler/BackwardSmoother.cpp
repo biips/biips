@@ -69,48 +69,53 @@ namespace Biips
           throw LogicError("Can not iterate BackwardSmoother: not all the parents of the last sampled node are monitored.");
       }
     }
-    MultiArray::Array param_values_i(last_parents_ids.size());
 
     Size n_particles = weights_.size();
     ublas::matrix<Scalar> P_mat(n_particles, n_particles);
 
+    MultiArray::Array param_values_i(last_parents_ids.size());
+    NodeId param_id = NULL_NODEID;
+    MultiArray last_particle_value_j;
+
+    // Computing matrix P
     for (Size i=0; i<n_particles; ++i)
     {
       for (Size j=0; j<n_particles; ++j)
       {
         for (Size p=0; p<last_parents_ids.size(); ++p)
         {
-          NodeId param_id = last_parents_ids[p];
-          const DimArray::Ptr & param_dim = pGraph_->GetNode(param_id).DimPtr();
+          param_id = last_parents_ids[p];
           // TODO: improve access to node values
           if (pGraph_->GetObserved()[param_id])
-            param_values_i[p].SetPtr(param_dim, pGraph_->GetValues()[param_id]);
+            param_values_i[p].SetPtr(pGraph_->GetNode(param_id).DimPtr(), pGraph_->GetValues()[param_id]);
           else
-            param_values_i[p].SetPtr(param_dim, new_monitor.GetNodeValues(param_id)[i]);
+            param_values_i[p].SetPtr(pGraph_->GetNode(param_id).DimPtr(), new_monitor.GetNodeValues(param_id)[i]);
         }
 
-        MultiArray last_particle_value_j(last_node.DimPtr(), last_monitor.GetNodeValues(last_node_id)[j]);
+        last_particle_value_j.SetPtr(last_node.DimPtr(), last_monitor.GetNodeValues(last_node_id)[j]);
 
         P_mat(i,j) = exp(last_node.LogLike(last_particle_value_j, param_values_i));
       }
     }
 
-    // TODO optimize using matrix operations
-    ValArray new_weights = new_monitor.GetWeights();
-    for (Size i=0; i<n_particles; ++i)
-    {
-      long double sum_j = 0.0;
-      for (Size j=0; j<n_particles; ++j)
-      {
-        long double sum_l = 0.0;
-        for (Size l=0; l<n_particles; ++l)
-          sum_l += (long double)weights_[l] * P_mat(l,j);
-        sum_j += (long double)weights_[j] * P_mat(i,j) / sum_l;
-      }
-      new_weights[i] *= sum_j;
-    }
+    // Updating weights
+    Vector weights_filter_vec(n_particles, Vector::array_type());
+    weights_filter_vec.data().swap(new_monitor.Weights());
 
-    weights_.swap(new_weights);
+    Vector weights_vec = ublas::prod(weights_filter_vec, P_mat);
+    for (Size i=0; i<n_particles; ++i)
+      weights_[i] /= weights_vec[i];
+
+    weights_vec.data().clear();
+    weights_vec.data().swap(weights_);
+
+    weights_vec = ublas::prod(P_mat, weights_vec);
+    weights_vec.data().swap(weights_);
+
+    for (Size i=0; i<n_particles; ++i)
+      weights_[i] *= weights_filter_vec[i];
+
+    weights_filter_vec.data().swap(new_monitor.Weights());
 
     filterMonitors_.pop_back();
   }

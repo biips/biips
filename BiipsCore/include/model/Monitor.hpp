@@ -58,6 +58,7 @@ namespace Biips
     Scalar GetESS() const { return ess_; };
     Scalar GetSumOfWeights() const { return sumOfWeights_; };
     const ValArray & GetWeights() const { return weights_; };
+    ValArray & Weights() { return weights_; };
     const ValArray & GetLogWeights() const { return logWeights_; };
     const Types<ValArray::Ptr>::Array & GetNodeValues(NodeId nodeId) const { return particleValuesMap_.at(nodeId); };
 
