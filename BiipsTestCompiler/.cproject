@@ -60,10 +60,9 @@
 <listOptionValue builtIn="false" value="BiipsCore"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1728974059" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Release}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Debug}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Debug}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Debug}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1353289355" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -592,8 +591,8 @@
 <listOptionValue builtIn="false" value="BiipsCore"/>
 </option>
 <option id="gnu.cpp.link.option.paths.628099017" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Release}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Release}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/Release}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1148954592" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

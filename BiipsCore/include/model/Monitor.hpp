@@ -20,6 +20,7 @@ namespace Biips
 {
 
   class ScalarAccumulator;
+  class DiscreteScalarAccumulator;
   class ElementAccumulator;
   class Particle;
 
@@ -35,8 +36,8 @@ namespace Biips
     Size t_;
     NodeId sampledNodeId_;
     std::map<NodeId, Types<ValArray::Ptr>::Array> particleValuesMap_;
-    Types<Scalar>::Array logWeights_;
-    Types<Scalar>::Array weights_;
+    ValArray logWeights_;
+    ValArray weights_;
     Scalar ess_;
     Scalar sumOfWeights_;
     Scalar logNormConst_;
@@ -50,10 +51,18 @@ namespace Biips
 
     void SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles);
 
-    Scalar GetESS(NodeId nodeId) const { return ess_; };
+    Size NParticles() const { return weights_.size(); }
+
+    Size GetTime() const { return t_; };
+    NodeId GetSampledNode() const { return sampledNodeId_; };
+    Scalar GetESS() const { return ess_; };
+    Scalar GetSumOfWeights() const { return sumOfWeights_; };
+    const ValArray & GetWeights() const { return weights_; };
+    const ValArray & GetLogWeights() const { return logWeights_; };
+    const Types<ValArray::Ptr>::Array & GetNodeValues(NodeId nodeId) const { return particleValuesMap_.at(nodeId); };
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
-
+    void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc, const DimArray::Ptr & pDim) const;
 
     void ClearNode(NodeId nodeId) { particleValuesMap_.at(nodeId).clear(); };

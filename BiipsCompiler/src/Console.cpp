@@ -14,7 +14,7 @@
 #include "compiler/Compiler.hpp"
 #include "print/print.hpp"
 
-// FIXME to be removed. Manage dynamical loaded modules
+// FIXME to be removed. Manage dynamically loaded modules
 #include "BiipsBase.hpp"
 
 #include "compiler/parser_extra.h"
@@ -505,6 +505,53 @@ namespace Biips
   }
 
 
+  Bool Console::RunBackwardSmoother(Bool verbose)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't run backward smoother. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->IsInitialized())
+    {
+      err_ << "Can't run backward smoother. SMC sampler did not run!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't run backward smoother. SMC sampler did not finish!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->InitBackwardSmoother();
+
+      Size n_iter = pModel_->Sampler().NIterations() - 1;
+
+      if (verbose)
+        out_ << PROMPT_STRING << "Running backward smoother of " << n_iter << " iterations" << endl;
+
+      Types<boost::progress_display>::Ptr p_show_progress;
+      if (verbose)
+        p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
+
+      // filtering
+      for (Size n=n_iter; n>0; --n)
+      {
+        pModel_->IterateBackwardSmoother();
+
+        if (p_show_progress)
+          ++(*p_show_progress);
+      }
+
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   // FIXME add module manager and a load module by name function
   Bool Console::LoadBaseModule(Bool verbose)
   {
@@ -514,6 +561,24 @@ namespace Biips
     try
     {
       loadBaseModule(Compiler::FuncTab(), Compiler::DistTab());
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::SetDefaultFilterMonitors()
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't set default filter monitors. No model!" << endl;
+        return false;
+    }
+
+    try
+    {
+      pModel_->SetDefaultFilterMonitors();
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
