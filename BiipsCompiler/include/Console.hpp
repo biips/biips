@@ -60,6 +60,9 @@ namespace Biips
      */
     Bool CheckModel(std::FILE * file, Bool verbose = true);
 
+    // FIXME add module manager and a load module by name function
+    Bool LoadBaseModule(Bool verbose = true);
+
     /*!
      * Compiles the model.
      *
@@ -75,6 +78,15 @@ namespace Biips
      */
     Bool Compile(std::map<String, MultiArray> & dataMap, Bool genData, Size dataRngSeed, Bool verbose = true);
 
+    Bool PrintGraphviz(std::ostream & os);
+
+    /*! Clears the model */
+    void ClearModel(Bool verbose = true);
+
+    Bool SetDefaultFilterMonitors();
+
+    Bool SetFilterMonitor(const String & name);
+
     /*!
      * @short Initializes the model.
      *
@@ -85,17 +97,9 @@ namespace Biips
      */
     Bool Initialize(Size nParticles, Size rng_seed, Bool prior, Size verbose = 1);
 
-    Bool PrintGraphviz(std::ostream & os);
-
     Bool RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose = true);
 
-    /*! Clears the model */
-    void ClearModel(Bool verbose = true);
-
-    // FIXME add module manager and a load module by name function
-    Bool LoadBaseModule(Bool verbose = true);
-
-    Bool SetFilterMonitor(const String & name);
+    Bool RunBackwardSmoother(Bool verbose = true);
 
     Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
 

@@ -13,6 +13,7 @@
 
 #include "graph/Graph.hpp"
 #include "sampler/SMCSampler.hpp"
+#include "sampler/BackwardSmoother.hpp"
 #include "model/Monitor.hpp"
 #include "sampler/Accumulator.hpp"
 
@@ -24,13 +25,15 @@ namespace Biips
   protected:
     Graph::Ptr pGraph_;
     SMCSampler::Ptr pSampler_;
+    BackwardSmoother::Ptr pSmoother_;
     Rng::Ptr pRng_;
     Types<Monitor::Ptr>::Array filterMonitors_;
     std::map<NodeId, Monitor::Ptr> filterMonitorsMap_;
+    Bool defaultMonitorsSet_;
 
   public:
 
-    Model() : pGraph_(new Graph()) {}
+    Model() : pGraph_(new Graph()), defaultMonitorsSet_(false) {}
 
     Graph * GraphPtr() { return pGraph_.get(); }
 
@@ -47,6 +50,10 @@ namespace Biips
     Bool IsInitialized() const { return pSampler_; }
 
     void IterateSampler();
+
+    void InitBackwardSmoother();
+
+    void IterateBackwardSmoother();
 
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const;

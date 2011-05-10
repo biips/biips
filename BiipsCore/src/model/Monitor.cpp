@@ -60,6 +60,19 @@ namespace Biips
       featuresAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
   }
 
+
+  void Monitor::Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n) const
+  {
+    if (!Contains(nodeId))
+      throw LogicError("Can not accumulate: Node is not monitored.");
+
+    featuresAcc.Init();
+
+    for(Size i=0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      featuresAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
+  }
+
+
   void Monitor::Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc, const DimArray::Ptr & pDim) const
   {
     if (!Contains(nodeId))

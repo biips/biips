@@ -17,14 +17,6 @@
 namespace Biips
 {
 
-  template<typename T>
-  String print(const T & val)
-  {
-    std::ostringstream ostr;
-    ostr << val;
-    return ostr.str();
-  }
-
   class ValArray;
 
   /*!
