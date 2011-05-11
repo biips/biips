@@ -39,9 +39,16 @@ namespace Biips
     void Initialize();
     void IterateBack();
 
+    Size Time() const { return t_; }
+    Bool AtEnd() const { return filterMonitors_.size()==1; }
+    Types<NodeId>::Array UpdatedNodes() const { return filterMonitors_.back()->GetNodes(); };
+
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
+
+    void SetMonitorWeights(Monitor & monitor) const;
+    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const;
   };
 
 }

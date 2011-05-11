@@ -16,7 +16,7 @@
 #include "function/FunctionTable.hpp"
 #include "distribution/DistributionTable.hpp"
 #include "model/BUGSModel.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 namespace Biips
 {

@@ -13,7 +13,7 @@
 #include "common/IndexRangeIterator.hpp"
 #include "model/NodeArray.hpp"
 #include "graph/Graph.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 namespace Biips
 {

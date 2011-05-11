@@ -12,7 +12,7 @@
 
 #include "Console.hpp"
 #include "compiler/Compiler.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 // FIXME to be removed. Manage dynamically loaded modules
 #include "BiipsBase.hpp"
@@ -467,7 +467,7 @@ namespace Biips
       err_ << "Can't run SMC sampler. No model!" << endl;
       return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't run SMC sampler. Not initialized!" << endl;
       return false;
@@ -512,7 +512,7 @@ namespace Biips
       err_ << "Can't run backward smoother. No model!" << endl;
       return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't run backward smoother. SMC sampler did not run!" << endl;
       return false;
@@ -593,6 +593,7 @@ namespace Biips
         err_ << "Can't set filter monitor. No model!" << endl;
         return false;
     }
+    // TODO: check that sampler did not start
 
     try
     {
@@ -610,6 +611,31 @@ namespace Biips
   }
 
 
+  Bool Console::SetSmoothMonitor(const String & name)
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't set smooth monitor. No model!" << endl;
+        return false;
+    }
+    // TODO: check that sampler did not start
+
+    try
+    {
+      Bool ok = pModel_->SetSmoothMonitor(name);
+      if (!ok)
+      {
+        err_ << "Failed to set smooth monitor for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -617,7 +643,7 @@ namespace Biips
         err_ << "Can't extract filter statistic. No model!" << endl;
         return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't extract filter statistic. SMC sampler not initialized!" << endl;
       return false;
@@ -644,6 +670,40 @@ namespace Biips
   }
 
 
+  Bool Console::ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't extract backward smoother statistic. No model!" << endl;
+        return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't extract backward smoother statistic. Backward smoother not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't extract backward smoother statistic. Backward smoother still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothStat(name, statFeature, statMap);
+      if (!ok)
+      {
+        err_ << "Failed to extract backward smoother statistic for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -651,7 +711,7 @@ namespace Biips
         err_ << "Can't extract smooth tree statistic. No model!" << endl;
         return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't extract smooth tree statistic. SMC sampler not initialized!" << endl;
       return false;
@@ -685,7 +745,7 @@ namespace Biips
         err_ << "Can't extract filter pdf. No model!" << endl;
         return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't extract filter pdf. SMC sampler not initialized!" << endl;
       return false;
@@ -712,6 +772,40 @@ namespace Biips
   }
 
 
+  Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  {
+    if (!pModel_)
+    {
+        err_ << "Can't extract backward smoother pdf. No model!" << endl;
+        return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't extract backward smoother pdf. SMC sampler not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't extract backward smoother pdf. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothPdf(name, pdfMap, numBins, cacheFraction);
+      if (!ok)
+      {
+        err_ << "Failed to extract backward smoother pdf for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
@@ -719,7 +813,7 @@ namespace Biips
         err_ << "Can't extract smooth tree pdf. No model!" << endl;
         return false;
     }
-    if (!pModel_->IsInitialized())
+    if (!pModel_->SamplerInitialized())
     {
       err_ << "Can't extract smooth tree pdf. SMC sampler not initialized!" << endl;
       return false;

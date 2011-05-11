@@ -86,6 +86,7 @@ namespace Biips
     Bool SetDefaultFilterMonitors();
 
     Bool SetFilterMonitor(const String & name);
+    Bool SetSmoothMonitor(const String & name);
 
     /*!
      * @short Initializes the model.
@@ -102,11 +103,11 @@ namespace Biips
     Bool RunBackwardSmoother(Bool verbose = true);
 
     Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
-
-    Bool ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
-
+    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
     Bool ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
 
+    Bool ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
+    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
     Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
   };
 

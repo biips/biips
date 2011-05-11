@@ -10,7 +10,7 @@
 
 #include "model/BUGSModel.hpp"
 #include "common/IndexRangeIterator.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 namespace Biips
 {
@@ -88,6 +88,28 @@ namespace Biips
   }
 
 
+  Bool BUGSModel::SetSmoothMonitor(const String & name)
+  {
+    // TODO use Monitor Factory
+
+    if (!symbolTable_.Contains(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    Types<NodeId>::Array node_ids;
+
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
+        it != node_id_range_bimap.end(); ++it)
+      node_ids.push_back(it->left);
+
+    BaseType::SetSmoothMonitor(node_ids);
+
+    return true;
+  }
+
+
   Bool BUGSModel::IsFilterMonitored(const String & name) const
   {
     if (!symbolTable_.Contains(name))
@@ -100,6 +122,25 @@ namespace Biips
         it != node_id_range_bimap.end(); ++it)
     {
       if (!filterMonitorsMap_.count(it->left))
+        return false;
+    }
+
+    return true;
+  }
+
+
+  Bool BUGSModel::IsSmoothMonitored(const String & name) const
+  {
+    if (!symbolTable_.Contains(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    for(boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
+        it != node_id_range_bimap.end(); ++it)
+    {
+      if (!smoothMonitorsMap_.count(it->left))
         return false;
     }
 
@@ -124,6 +165,30 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       MultiArray stat_marray(BaseType::ExtractFilterStat(node_id, statFeature));
+      statMap.insert(std::make_pair(index_range, stat_marray));
+    }
+
+    return true;
+  }
+
+
+  Bool BUGSModel::ExtractSmoothStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const
+  {
+    if (!statMap.empty())
+      throw LogicError("Can not extract filter statistic: statistics map is not empty.");
+
+    if (!IsSmoothMonitored(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      NodeId node_id = it->second;
+      MultiArray stat_marray(BaseType::ExtractSmoothStat(node_id, statFeature));
       statMap.insert(std::make_pair(index_range, stat_marray));
     }
 
@@ -182,6 +247,40 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id, numBins, cacheFraction);
+      pdfMap.insert(std::make_pair(index_range, pdf_hist));
+    }
+
+    return true;
+  }
+
+
+  Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  {
+    if (!pdfMap.empty())
+      throw LogicError("Can not extract filter pdf: pdf map is not empty.");
+
+    if (!IsSmoothMonitored(name))
+      return false;
+
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
+     = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+
+    // check that all the nodes are scalar
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      if (index_range.Length() != 1)
+        return false;
+    }
+
+    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
+        it != node_id_range_bimap.right.end(); ++it)
+    {
+      const IndexRange & index_range = it->first;
+      NodeId node_id = it->second;
+      ScalarHistogram pdf_hist = BaseType::ExtractSmoothPdf(node_id, numBins, cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
