@@ -12,7 +12,7 @@
 
 #include "model/SymbolTable.hpp"
 #include "model/Model.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 namespace Biips
 {

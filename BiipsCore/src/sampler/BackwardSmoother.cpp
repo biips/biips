@@ -36,16 +36,18 @@ namespace Biips
     if (!initialized_)
       throw LogicError("Can not iterate BackwardSmoother: not initialized.");
 
-    Monitor & last_monitor = *filterMonitors_.back();
+    Monitor::Ptr p_last_monitor = filterMonitors_.back();
+    filterMonitors_.pop_back();
+
     if (t_ == 0)
       throw LogicError("Can not iterate BackwardSmoother: the sequence has reached the end.");
 
     --t_;
 
-    if (filterMonitors_.size() < 2)
+    if (filterMonitors_.empty())
       throw LogicError("Can not iterate BackwardSmoother: there is no remaining iteration of filtering Monitor object.");
 
-    Monitor & new_monitor = **(filterMonitors_.end()-2);
+    Monitor & new_monitor = *(filterMonitors_.back());
 
     if (new_monitor.GetTime() != t_)
     {
@@ -53,7 +55,7 @@ namespace Biips
           + print(t_) + (" of filtering Monitor object."));
     }
 
-    NodeId last_node_id = last_monitor.GetSampledNode();
+    NodeId last_node_id = p_last_monitor->GetSampledNode();
     if (pGraph_->GetNode(last_node_id).GetType() != STOCHASTIC)
       throw LogicError("Can not iterate BackwardSmoother: last sampled node is not stochastic.");
 
@@ -92,9 +94,9 @@ namespace Biips
             param_values_i[p].SetPtr(pGraph_->GetNode(param_id).DimPtr(), new_monitor.GetNodeValues(param_id)[i]);
         }
 
-        last_particle_value_j.SetPtr(last_node.DimPtr(), last_monitor.GetNodeValues(last_node_id)[j]);
+        last_particle_value_j.SetPtr(last_node.DimPtr(), p_last_monitor->GetNodeValues(last_node_id)[j]);
 
-        P_mat(i,j) = exp(last_node.LogLike(last_particle_value_j, param_values_i));
+        P_mat(i,j) = exp(last_node.LogPriorPdf(last_particle_value_j, param_values_i));
       }
     }
 
@@ -116,8 +118,6 @@ namespace Biips
       weights_[i] *= weights_filter_vec[i];
 
     weights_filter_vec.data().swap(new_monitor.Weights());
-
-    filterMonitors_.pop_back();
   }
 
 
@@ -154,6 +154,19 @@ namespace Biips
     featuresAcc.Init(pGraph_->GetNode(nodeId).DimPtr());
     for(Size i=0; i < last_monitor.NParticles(); i++)
       featuresAcc.Push(last_monitor.GetNodeValues(nodeId)[i], weights_[i]);
+  }
+
+
+  void BackwardSmoother::SetMonitorWeights(Monitor & monitor) const
+  {
+    monitor.Weights().assign(weights_.begin(), weights_.end());
+  }
+
+
+  void BackwardSmoother::SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const
+  {
+    Monitor & last_monitor = *filterMonitors_.back();
+    monitor.NodeValues(nodeId).assign(last_monitor.GetNodeValues(nodeId).begin(), last_monitor.GetNodeValues(nodeId).end());
   }
 
 }

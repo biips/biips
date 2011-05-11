@@ -441,13 +441,13 @@ namespace Biips
   }
 
 
-  void SMCSampler::SetMonitorWeights(Monitor & monitor)
+  void SMCSampler::SetMonitorWeights(Monitor & monitor) const
   {
     monitor.SetWeights(particles_, ess_, sumOfWeights_, logNormConst_);
   }
 
 
-  void SMCSampler::SetMonitorNodeValues(NodeId nodeId, Monitor & monitor)
+  void SMCSampler::SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const
   {
     monitor.SetNodeValues(nodeId, particles_);
   }
