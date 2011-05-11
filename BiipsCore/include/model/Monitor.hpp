@@ -47,6 +47,8 @@ namespace Biips
 
     Bool Contains(NodeId nodeId) const;
 
+    Types<NodeId>::Array GetNodes() const;
+
     void SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst);
 
     void SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles);
@@ -58,9 +60,12 @@ namespace Biips
     Scalar GetESS() const { return ess_; };
     Scalar GetSumOfWeights() const { return sumOfWeights_; };
     const ValArray & GetWeights() const { return weights_; };
-    ValArray & Weights() { return weights_; };
     const ValArray & GetLogWeights() const { return logWeights_; };
     const Types<ValArray::Ptr>::Array & GetNodeValues(NodeId nodeId) const { return particleValuesMap_.at(nodeId); };
+
+    // TODO remove
+    ValArray & Weights() { return weights_; };
+    Types<ValArray::Ptr>::Array & NodeValues(NodeId nodeId) { return particleValuesMap_[nodeId]; };
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;

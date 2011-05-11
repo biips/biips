@@ -22,6 +22,19 @@ namespace Biips
   }
 
 
+  Types<NodeId>::Array Monitor::GetNodes() const
+  {
+    Types<NodeId>::Array nodes(particleValuesMap_.size());
+    std::map<NodeId, Types<ValArray::Ptr>::Array>::const_iterator it = particleValuesMap_.begin();
+    for (Size i=0; it != particleValuesMap_.end(); ++it)
+    {
+      nodes[i] = it->first;
+      ++i;
+    }
+    return nodes;
+  }
+
+
   void Monitor::SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst)
   {
     ess_ = ess;

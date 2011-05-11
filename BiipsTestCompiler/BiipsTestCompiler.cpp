@@ -20,7 +20,7 @@
 #include "kolmogorov.hpp"
 #include "common/cholesky.hpp"
 #include "Plot.hpp"
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 
 #include <fstream>
 #include <ctime>
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 #endif
     String model_file_name;
     Size exec_step;
-    Bool do_smooth;
+    String do_smooth_str;
     Size check_mode;
     Size show_mode;
     Size data_rng_seed;
@@ -115,11 +115,11 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 1: \t0 + runs SMC samplers and extract statistics.\n"
             " 2: \t1 + computes errors vs benchmarks.\n"
             " 3: \t2 + checks that errors are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
-        ("smooth", po::value<Bool>(&do_smooth)->default_value(true), "toggle backward smoothing step.\n"
+        ("smooth", po::value<String>(&do_smooth_str)->default_value("on"), "toggle backward smoothing step.\n"
             "values:\n"
-            " true: \tenable backward smoothing step.\n"
-            " false: \tdisable backward smoothing step.")
-        ("check-mode", po::value<Size>(&check_mode)->default_value(1), "errors to be checked.\n"
+            " on: \tenable backward smoothing step.\n"
+            " off: \tdisable backward smoothing step.")
+        ("check-mode", po::value<Size>(&check_mode)->default_value(2), "errors to be checked.\n"
             "values:\n"
             " 0: \tchecks normalizing-constant mean.\n"
             " 1: \t0 + checks filtering errors goodness of fit.\n"
@@ -257,6 +257,14 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (!vm.count("model-file"))
       boost::throw_exception(po::error("Missing model-file option."));
 
+    Bool do_smooth;
+    if (do_smooth_str == "on")
+      do_smooth = true;
+    else if (do_smooth_str == "off")
+      do_smooth = false;
+    else
+      boost::throw_exception(po::invalid_syntax("smooth", do_smooth_str + " is not a valid value."));
+
     // Open model file
     // ------------------
     FILE * model_file = fopen(model_file_name.c_str(), "r");
@@ -351,21 +359,13 @@ BOOST_AUTO_TEST_CASE( my_test )
 
 
     // Monitor variables
-    if (do_smooth)
-    {
-      if (verbosity>0)
-        cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
-
-      if (!console.SetDefaultFilterMonitors())
-        throw RuntimeError("Failed to set default filter monitors");
-    }
-
     if (verbosity>0)
       cout << PROMPT_STRING << "Setting user filter monitors" << endl;
 
     for (Size i=0; i<monitored_var.size(); ++i)
     {
       const String & name = monitored_var[i];
+
       if (!console.SetFilterMonitor(name))
         throw RuntimeError(String("Failed to monitor variable ") + name);
 
@@ -375,6 +375,35 @@ BOOST_AUTO_TEST_CASE( my_test )
 
     if (verbosity>0 && interactive && !monitored_var.empty())
       pressEnterToContinue();
+
+    if (do_smooth)
+    {
+      if (verbosity>0)
+        cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
+
+      if (!console.SetDefaultFilterMonitors())
+        throw RuntimeError("Failed to set default filter monitors");
+
+      if (verbosity>0 && interactive && !monitored_var.empty())
+        pressEnterToContinue();
+
+      if (verbosity>0)
+        cout << PROMPT_STRING << "Setting user smoother monitors" << endl;
+
+      for (Size i=0; i<monitored_var.size(); ++i)
+      {
+        const String & name = monitored_var[i];
+
+        if (!console.SetSmoothMonitor(name))
+          throw RuntimeError(String("Failed to monitor variable ") + name);
+
+        if (verbosity>0)
+          cout << INDENT_STRING << "monitoring variable " << name << endl;
+      }
+
+      if (verbosity>0 && interactive && !monitored_var.empty())
+        pressEnterToContinue();
+    }
 
 
     // Run SMC samplers
@@ -429,9 +458,10 @@ BOOST_AUTO_TEST_CASE( my_test )
           Scalar log_norm_const;
           console.RunSMCSampler(resample_type_map.at(resample_type), ess_threshold, log_norm_const, (verbosity>1 || (verbosity>0 && n_smc==1)));
 
-          if (verbosity==1 && n_smc>1)
+          if (verbosity==1 && n_smc>1 && !do_smooth)
             ++(*p_show_progress);
-          else if (verbosity>0)
+
+          if (verbosity>0 && n_smc==1)
             cout << INDENT_STRING << "log-normalizing constant = " << log_norm_const << endl;
 
           log_norm_const_smc.push_back(log_norm_const);
@@ -524,7 +554,6 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
-
           // plot filtering Pdf
           //---------------------------
           if (show_mode >= 2 && n_smc==1)
@@ -582,15 +611,161 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           errors_filter_new.push_back(error_filter);
 
-
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
+
           // Run backward smoother
-          //----------------------
+          //-------------------------------------------------
           if (do_smooth)
           {
             console.RunBackwardSmoother((verbosity>1 || (verbosity>0 && n_smc==1)));
+
+            if (verbosity==1 && n_smc>1)
+              ++(*p_show_progress);
+
+            if (verbosity>0 && interactive && n_smc==1)
+              pressEnterToContinue();
+
+            // Extract smooth mean of monitored values
+            //----------------------------------------
+            std::map<String, std::map<IndexRange, MultiArray> > smooth_mean_map;
+
+            for (Size i=0; i<monitored_var.size(); ++i)
+            {
+              const String & name = monitored_var[i];
+
+              if (verbosity>0 && n_smc==1)
+                cout << PROMPT_STRING << "Extracting smoothing mean of variable " << name << endl;
+
+              if (!console.ExtractSmoothStat(name, MEAN, smooth_mean_map[name]))
+                throw RuntimeError(String("Failed to extract smoothing mean of variable ") + name);
+            }
+
+            // plot smooth mean curve
+            //---------------------------
+            if (show_mode >= 1 && n_smc==1)
+            {
+              for (Size i=0; i<monitored_var.size(); ++i)
+              {
+                const String & name = monitored_var[i];
+
+                if (smooth_mean_map.at(name).begin()->first.Dim().IsScalar())
+                {
+                  Size len = smooth_mean_map.at(name).size();
+
+                  Types<Scalar>::Array x_est_PS(len);
+                  Types<Scalar>::Array x_bench(len);
+                  Types<Scalar>::Array index(len);
+
+                  std::map<IndexRange, MultiArray>::iterator it_smooth_mean = smooth_mean_map.at(name).begin();
+                  for (Size k=0; it_smooth_mean != smooth_mean_map.at(name).end();
+                      ++k, ++it_smooth_mean)
+                  {
+                    x_bench[k] = bench_smooth_map_stored.at(name)[k].ScalarView();
+                    x_est_PS[k] = it_smooth_mean->second.ScalarView();
+                    index[k] = k;
+                  }
+
+                  Plot results_plot(argc, argv);
+                  results_plot.AddCurve(index, x_bench, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+                  results_plot.AddCurve(index, x_est_PS, "PS estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+
+                  results_plot.SetTitle(String("Smoothing mean estimate of variable ") + name);
+                  results_plot.SetAxesLabels("index", name);
+                  results_plot.SetBackgroundColor(Qt::white);
+                  results_plot.SetLegend(QwtPlot::RightLegend);
+                  results_plot.Show();
+                }
+                else
+                {
+                  Size len = smooth_mean_map.at(name).size();
+
+                  Types<Scalar>::Array x_bench_0(len);
+                  Types<Scalar>::Array x_bench_1(len);
+                  Types<Scalar>::Array x_est_PS_0(len);
+                  Types<Scalar>::Array x_est_PS_1(len);
+                  std::map<IndexRange, MultiArray>::iterator it_smooth_mean = smooth_mean_map.at(name).begin();
+                  for (Size k=0; it_smooth_mean != smooth_mean_map.at(name).end();
+                      ++k, ++it_smooth_mean)
+                  {
+                    x_bench_0[k] = bench_smooth_map_stored.at(name)[k].Values()[0];
+                    x_bench_1[k] = bench_smooth_map_stored.at(name)[k].Values()[1];
+                    x_est_PS_0[k] = it_smooth_mean->second.Values()[0];
+                    x_est_PS_1[k] = it_smooth_mean->second.Values()[1];
+                  }
+
+                  Plot results_plot(argc, argv);
+                  results_plot.AddCurve(x_bench_0, x_bench_1, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+                  results_plot.AddCurve(x_est_PS_0, x_est_PS_1, "PS estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
+
+                  results_plot.SetTitle(String("Smoothing mean estimate of variable ") + name + " only the 2 first component");
+                  results_plot.SetAxesLabels(name+" (component 1)", name+" (component 2");
+                  results_plot.SetBackgroundColor(Qt::white);
+                  results_plot.SetLegend(QwtPlot::RightLegend);
+                  results_plot.Show();
+                }
+              }
+            }
+
+            if (verbosity>0 && interactive && n_smc==1)
+              pressEnterToContinue();
+
+            // plot smoothing Pdf
+            //---------------------------
+            if (show_mode >= 2 && n_smc==1)
+            {
+              std::map<String, std::map<IndexRange, ScalarHistogram> > smooth_pdf_map;
+
+              for (Size i=0; i<monitored_var.size(); ++i)
+              {
+                const String & name = monitored_var[i];
+
+                if (verbosity>0 && n_smc==1)
+                  cout << PROMPT_STRING << "Extracting smoothing Pdf of variable " << name << endl;
+
+                if(!console.ExtractSmoothPdf(name, smooth_pdf_map[name], num_bins, 1.0))
+                  throw RuntimeError(String("Failed to extract smoothing Pdf of variable ") + name);
+
+                for (std::map<IndexRange, ScalarHistogram>::iterator it_smooth_pdf_map = smooth_pdf_map[name].begin();
+                    it_smooth_pdf_map != smooth_pdf_map[name].end(); ++it_smooth_pdf_map)
+                {
+                  Plot pdf_plot_PF(argc, argv);
+                  pdf_plot_PF.AddHistogram(it_smooth_pdf_map->second, "", Qt::blue);
+                  pdf_plot_PF.SetTitle(String("Smoothing Pdf histogram of variable: ") + name + print(it_smooth_pdf_map->first));
+                  pdf_plot_PF.SetBackgroundColor(Qt::white);
+                  pdf_plot_PF.Show();
+                }
+              }
+
+              if (verbosity>0 && interactive)
+                pressEnterToContinue();
+            }
+
+            if (exec_step<2)
+              continue;
+
+            // Compute smooth mean error of monitored values
+            //----------------------------------------------
+            Scalar error_smooth = 0.0;
+
+            for (Size i=0; i<monitored_var.size(); ++i)
+            {
+              const String & name = monitored_var[i];
+
+              if (verbosity>0 && n_smc==1)
+                cout << PROMPT_STRING << "Computing smoothing error of variable " << name << endl;
+
+              if(!computeError(error_smooth, name, smooth_mean_map, bench_smooth_map_stored))
+                throw RuntimeError(String("Failed to compute smoothing error of variable ") + name);
+            }
+
+            error_smooth *= n_part;
+
+            if (verbosity>0 && n_smc==1)
+              cout << INDENT_STRING << "smoothing error = " << error_smooth << endl;
+
+            errors_smooth_new.push_back(error_smooth);
 
             if (verbosity>0 && interactive && n_smc==1)
               pressEnterToContinue();
@@ -600,6 +775,9 @@ BOOST_AUTO_TEST_CASE( my_test )
 
         if (exec_step < 3)
           continue;
+
+        // Checks
+        //-------------------------------
 
         // Check normalizing constant mean;
         if (!log_norm_const_bench)
@@ -634,6 +812,9 @@ BOOST_AUTO_TEST_CASE( my_test )
           cout << INDENT_STRING << "Student t-test: t = " << student_stat << ", p-value = " << t_p_value << endl;
 
           BOOST_CHECK_GT(t_p_value, reject_level);
+
+          if (verbosity>0 && interactive)
+            pressEnterToContinue();
         }
 
         // Check errors
@@ -749,6 +930,8 @@ BOOST_AUTO_TEST_CASE( my_test )
 
             BOOST_CHECK_GT(ks_filter_prob, reject_level);
 
+            if (verbosity>0 && interactive)
+              pressEnterToContinue();
           }
 
           if (check_smooth && !errors_smooth_new.empty())

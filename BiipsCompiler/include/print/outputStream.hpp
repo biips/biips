@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file print.hpp
+/*! \file outputStream.hpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,8 +8,8 @@
  * $Id$
  */
 
-#ifndef BIIPS_PRINT_HPP_
-#define BIIPS_PRINT_HPP_
+#ifndef BIIPS_OUTPUTSTREAM_HPP_
+#define BIIPS_OUTPUTSTREAM_HPP_
 
 #include "common/Types.hpp"
 #include <sstream>
@@ -44,4 +44,4 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_PRINT_HPP_ */
+#endif /* BIIPS_OUTPUTSTREAM_HPP_ */

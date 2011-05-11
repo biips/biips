@@ -29,7 +29,12 @@ namespace Biips
     Rng::Ptr pRng_;
     Types<Monitor::Ptr>::Array filterMonitors_;
     std::map<NodeId, Monitor::Ptr> filterMonitorsMap_;
+    Types<Monitor::Ptr>::Array smoothMonitors_;
+    std::map<NodeId, Monitor::Ptr> smoothMonitorsMap_;
     Bool defaultMonitorsSet_;
+
+    MultiArray extractMonitorStat(NodeId nodeId, StatsTag statFeature, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+    ScalarHistogram extractMonitorPdf(NodeId nodeId, Size numBins, Scalar cacheFraction, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
 
   public:
 
@@ -40,16 +45,19 @@ namespace Biips
     void SetDefaultFilterMonitors();
 
     void SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
-
-    const SMCSampler & Sampler() const;
+    void SetSmoothMonitor(const Types<NodeId>::Array & nodeIds);
 
     void SetResampleParam(ResampleType rtMode, Scalar threshold);
 
+    Bool SamplerInitialized() const { return pSampler_; }
+    const SMCSampler & Sampler() const;
+
     void InitSampler(Size nParticles, Rng::Ptr pRng);
 
-    Bool IsInitialized() const { return pSampler_; }
-
     void IterateSampler();
+
+    Bool SmootherInitialized() const { return pSmoother_; }
+    const BackwardSmoother & Smoother() const;
 
     void InitBackwardSmoother();
 
@@ -57,8 +65,10 @@ namespace Biips
 
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const;
+    MultiArray ExtractSmoothStat(NodeId nodeId, StatsTag statFeature) const;
 
     ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    ScalarHistogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
     // TODO manage multi statFeature
     MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const;

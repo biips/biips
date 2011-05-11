@@ -124,8 +124,8 @@ namespace Biips
 //    template<typename Features>
 //    void Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const;
 
-    void SetMonitorWeights(Monitor & monitor);
-    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor);
+    void SetMonitorWeights(Monitor & monitor) const;
+    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const;
   };
 
 } /* namespace Biips */

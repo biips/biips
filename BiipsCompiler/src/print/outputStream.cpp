@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file print.cpp
+/*! \file outputStream.cpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,7 +8,7 @@
  * $Id$
  */
 
-#include "print/print.hpp"
+#include "print/outputStream.hpp"
 #include "common/ValArray.hpp"
 #include "common/MultiArray.hpp"
 #include "common/IndexRange.hpp"
