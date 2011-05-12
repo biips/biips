@@ -14,7 +14,7 @@
 #include "graph/ConstantNode.hpp"
 #include "graph/LogicalNode.hpp"
 #include "graph/StochasticNode.hpp"
-#include "graph/Graph.hpp"
+#include "model/Monitor.hpp"
 
 namespace Biips
 {
@@ -90,6 +90,32 @@ namespace Biips
     while (it_param != it_param_end)
     {
       param_values[i] = getNodeValue(*it_param, pGraph, pSampleNodeVis);
+      ++it_param;
+      ++i;
+    }
+    return param_values;
+  }
+
+
+
+  MultiArray getNodeValue(NodeId nodeId, const Graph::Ptr & pGraph, const Monitor & monitor, Size particleIndex)
+  {
+    if (pGraph->GetObserved()[nodeId])
+      return MultiArray(pGraph->GetNode(nodeId).DimPtr(), pGraph->GetValues()[nodeId]);
+    else
+      return MultiArray(pGraph->GetNode(nodeId).DimPtr(), monitor.GetNodeValues(nodeId)[particleIndex]);
+  }
+
+
+  MultiArray::Array getParamValues(NodeId nodeId, const Graph::Ptr & pGraph, const Monitor & monitor, Size particleIndex)
+  {
+    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    boost::tie(it_param, it_param_end) = pGraph->GetParents(nodeId);
+    MultiArray::Array param_values(std::distance(it_param, it_param_end));
+    Size i = 0;
+    while (it_param != it_param_end)
+    {
+      param_values[i] = getNodeValue(*it_param, pGraph, monitor, particleIndex);
       ++it_param;
       ++i;
     }
