@@ -88,7 +88,10 @@ namespace Biips
                   b_ += ublas::scalar_vector<Scalar>(b_.size(), op_val);
                 }
                 else
-                  b_ += getNodeValue(operand_id, pGraph_, pNodeSampler_).VectorView();
+                {
+                  MultiArray op_val = getNodeValue(operand_id, pGraph_, pNodeSampler_);
+                  b_ += VectorRef(op_val);
+                }
                 break;
               }
               case DEPENDING:
@@ -135,8 +138,11 @@ namespace Biips
                 b_ = ublas::scalar_vector<Scalar>(b_.size(), l_op_val);
               }
               else
-                b_ = getNodeValue(left_operand_id, pGraph_,
-                    pNodeSampler_).VectorView();
+              {
+                MultiArray l_op_val = getNodeValue(left_operand_id, pGraph_,
+                    pNodeSampler_);
+                b_ = VectorRef(l_op_val);
+              }
               break;
             }
             case DEPENDING:
@@ -163,8 +169,11 @@ namespace Biips
                 b_ -= ublas::scalar_vector<Scalar>(b_.size(), r_op_val);
               }
               else
-                b_ -= getNodeValue(left_operand_id, pGraph_,
-                    pNodeSampler_).VectorView();
+              {
+                MultiArray r_op_val = getNodeValue(left_operand_id, pGraph_,
+                                    pNodeSampler_);
+                b_ -= VectorRef(r_op_val);
+              }
               break;
             }
             case DEPENDING:
