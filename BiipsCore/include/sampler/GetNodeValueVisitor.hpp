@@ -11,14 +11,18 @@
 #ifndef BIIPS_GETNODEVALUEVISITOR_HPP_
 #define BIIPS_GETNODEVALUEVISITOR_HPP_
 
+#include "graph/Graph.hpp"
+
 namespace Biips
 {
-  class Graph;
   class NodeSampler;
+  class Monitor;
 
   MultiArray getNodeValue(NodeId nodeId, const Graph * pGraph, NodeSampler * pNodeSampler);
+  MultiArray getNodeValue(NodeId nodeId, const Graph::Ptr & pGraph, const Monitor & monitor, Size particleIndex);
 
   MultiArray::Array getParamValues(NodeId nodeId, const Graph * pGraph, NodeSampler * pSampleNodeVis);
+  MultiArray::Array getParamValues(NodeId nodeId, const Graph::Ptr & pGraph, const Monitor & monitor, Size particleIndex);
 }
 
 

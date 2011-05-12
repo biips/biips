@@ -80,9 +80,9 @@ namespace Biips
 
     for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
         it != node_id_range_bimap.end(); ++it)
-      node_ids.push_back(it->left);
-
-    BaseType::SetFilterMonitor(node_ids);
+    {
+      BaseType::SetFilterMonitor(it->left);
+    }
 
     return true;
   }
@@ -102,9 +102,9 @@ namespace Biips
 
     for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
         it != node_id_range_bimap.end(); ++it)
-      node_ids.push_back(it->left);
-
-    BaseType::SetSmoothMonitor(node_ids);
+    {
+      BaseType::SetSmoothMonitor(it->left);
+    }
 
     return true;
   }

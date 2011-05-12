@@ -12,6 +12,7 @@
 #include "graph/StochasticNode.hpp"
 #include "common/Utility.hpp"
 #include "sampler/Accumulator.hpp"
+#include "sampler/GetNodeValueVisitor.hpp"
 
 namespace Biips
 {
@@ -75,8 +76,7 @@ namespace Biips
     Size n_particles = weights_.size();
     ublas::matrix<Scalar> P_mat(n_particles, n_particles);
 
-    MultiArray::Array param_values_i(last_parents_ids.size());
-    NodeId param_id = NULL_NODEID;
+    MultiArray::Array param_values_i;
     MultiArray last_particle_value_j;
 
     // Computing matrix P
@@ -84,17 +84,9 @@ namespace Biips
     {
       for (Size j=0; j<n_particles; ++j)
       {
-        for (Size p=0; p<last_parents_ids.size(); ++p)
-        {
-          param_id = last_parents_ids[p];
-          // TODO: improve access to node values
-          if (pGraph_->GetObserved()[param_id])
-            param_values_i[p].SetPtr(pGraph_->GetNode(param_id).DimPtr(), pGraph_->GetValues()[param_id]);
-          else
-            param_values_i[p].SetPtr(pGraph_->GetNode(param_id).DimPtr(), new_monitor.GetNodeValues(param_id)[i]);
-        }
+        param_values_i.SetPtr(getParamValues(last_node_id, pGraph_, new_monitor, i));
 
-        last_particle_value_j.SetPtr(last_node.DimPtr(), p_last_monitor->GetNodeValues(last_node_id)[j]);
+        last_particle_value_j.SetPtr(getNodeValue(last_node_id, pGraph_, *p_last_monitor, j));
 
         P_mat(i,j) = exp(last_node.LogPriorPdf(last_particle_value_j, param_values_i));
       }
