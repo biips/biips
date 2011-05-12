@@ -44,8 +44,8 @@ namespace Biips
 
     void SetDefaultFilterMonitors();
 
-    void SetFilterMonitor(const Types<NodeId>::Array & nodeIds);
-    void SetSmoothMonitor(const Types<NodeId>::Array & nodeIds);
+    Bool SetFilterMonitor(NodeId nodeId);
+    Bool SetSmoothMonitor(NodeId nodeId);
 
     void SetResampleParam(ResampleType rtMode, Scalar threshold);
 

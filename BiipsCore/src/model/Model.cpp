@@ -48,19 +48,27 @@ namespace Biips
   }
 
 
-  void Model::SetFilterMonitor(const Types<NodeId>::Array & nodeIds)
+  Bool Model::SetFilterMonitor(NodeId nodeId)
   {
-    for (Size i=0; i<nodeIds.size(); ++i)
-      filterMonitorsMap_[nodeIds[i]];
+    // it is no use monitoring observed nodes
+    if (pGraph_->GetObserved()[nodeId])
+      return false;
+
+    filterMonitorsMap_[nodeId];
+    return true;
   }
 
 
-  void Model::SetSmoothMonitor(const Types<NodeId>::Array & nodeIds)
+  Bool Model::SetSmoothMonitor(NodeId nodeId)
   {
-    SetFilterMonitor(nodeIds);
+    SetFilterMonitor(nodeId);
 
-    for (Size i=0; i<nodeIds.size(); ++i)
-      smoothMonitorsMap_[nodeIds[i]];
+    // it is no use monitoring observed nodes
+    if (pGraph_->GetObserved()[nodeId])
+      return false;
+
+    smoothMonitorsMap_[nodeId];
+    return true;
   }
 
 
