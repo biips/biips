@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file Substract.hpp
+/*! \file Subtract.hpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,22 +8,22 @@
  * $Id$
  */
 
-#ifndef BIIPS_SUBSTRACT_HPP_
-#define BIIPS_SUBSTRACT_HPP_
+#ifndef BIIPS_SUBTRACT_HPP_
+#define BIIPS_SUBTRACT_HPP_
 
 #include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Substract : public BinaryScalarFunction<std::minus<Scalar> >
+  class Subtract : public BinaryScalarFunction<std::minus<Scalar> >
   {
   public:
-    typedef Substract SelfType;
+    typedef Subtract SelfType;
     typedef BinaryScalarFunction<std::minus<Scalar> > BaseType;
 
   protected:
-    Substract() : BaseType("-") {};
+    Subtract() : BaseType("-") {};
 
   public:
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
@@ -31,4 +31,4 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_SUBSTRACT_HPP_ */
+#endif /* BIIPS_SUBTRACT_HPP_ */
