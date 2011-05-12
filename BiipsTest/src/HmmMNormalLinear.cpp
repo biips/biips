@@ -67,15 +67,15 @@ namespace Biips
 
     if (precFlag_)
     {
-      MatrixRef P0_prec_mat = dataTypeParamMap_["P.0"].MatrixView();
+      MatrixRef P0_prec_mat(dataTypeParamMap_["P.0"]);
       ublas::cholesky_factorize(P0_prec_mat);
       ublas::cholesky_invert(P0_prec_mat);
 
-      MatrixRef Q_prec_mat = dataTypeParamMap_["Q"].MatrixView();
+      MatrixRef Q_prec_mat(dataTypeParamMap_["Q"]);
       ublas::cholesky_factorize(Q_prec_mat);
       ublas::cholesky_invert(Q_prec_mat);
 
-      MatrixRef R_prec_mat = dataTypeParamMap_["R"].MatrixView();
+      MatrixRef R_prec_mat(dataTypeParamMap_["R"]);
       ublas::cholesky_factorize(R_prec_mat);
       ublas::cholesky_invert(R_prec_mat);
     }

@@ -51,20 +51,4 @@ namespace Biips
     return *this;
   }
 
-
-  VectorRef MultiArray::VectorView()
-  {
-    assert( IsVector() && pValues_);
-    return VectorRef(*this);
-  } // TODO throw exception
-
-  MatrixRef MultiArray::MatrixView()
-  {
-    assert( IsMatrix() && pValues_ );
-    return MatrixRef(*this);
-  } // TODO throw exception
-
-
-
-
 }
