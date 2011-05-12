@@ -47,8 +47,8 @@ namespace Biips
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
 
-    void SetMonitorWeights(Monitor & monitor) const;
-    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const;
+    void SetMonitorWeights(SmoothMonitor & monitor) const;
+    void SetMonitorNodeValues(NodeId nodeId, SmoothMonitor & monitor) const;
   };
 
 }

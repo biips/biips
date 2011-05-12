@@ -16,7 +16,7 @@
 #include "functions/Multiply.hpp"
 #include "functions/Add.hpp"
 #include "functions/MatMult.hpp"
-#include "functions/Substract.hpp"
+#include "functions/Subtract.hpp"
 #include "functions/Divide.hpp"
 #include "functions/Neg.hpp"
 #include "functions/Pow.hpp"
@@ -53,7 +53,7 @@ namespace Biips
     funcTab.Insert(Multiply::Instance());
     funcTab.Insert(Add::Instance());
     funcTab.Insert(MatMult::Instance());
-    funcTab.Insert(Substract::Instance());
+    funcTab.Insert(Subtract::Instance());
     funcTab.Insert(Divide::Instance());
     funcTab.Insert(Neg::Instance());
     funcTab.Insert(Pow::Instance());

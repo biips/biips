@@ -31,50 +31,74 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    typedef Types<ValArray::Ptr>::Array ParticleValue;
-
     Size t_;
     NodeId sampledNodeId_;
-    std::map<NodeId, Types<ValArray::Ptr>::Array> particleValuesMap_;
-    ValArray logWeights_;
     ValArray weights_;
     Scalar ess_;
     Scalar sumOfWeights_;
-    Scalar logNormConst_;
+    typedef Types<ValArray::Ptr>::Array ParticleValues;
+    std::map<NodeId, ParticleValues> particleValuesMap_;
+
+    Bool weightsSwapped_;
+    void checkSwapped() const;
 
   public:
-    Monitor(Size t, NodeId sampledNodeId) : t_(t), sampledNodeId_(sampledNodeId) {};
+    Monitor(Size t, NodeId sampledNodeId) : t_(t), sampledNodeId_(sampledNodeId), weightsSwapped_(false) {};
+    virtual ~Monitor() {};
 
     Bool Contains(NodeId nodeId) const;
-
     Types<NodeId>::Array GetNodes() const;
 
-    void SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst);
-
-    void SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles);
-
     Size NParticles() const { return weights_.size(); }
-
     Size GetTime() const { return t_; };
     NodeId GetSampledNode() const { return sampledNodeId_; };
     Scalar GetESS() const { return ess_; };
     Scalar GetSumOfWeights() const { return sumOfWeights_; };
-    const ValArray & GetWeights() const { return weights_; };
-    const ValArray & GetLogWeights() const { return logWeights_; };
-    const Types<ValArray::Ptr>::Array & GetNodeValues(NodeId nodeId) const { return particleValuesMap_.at(nodeId); };
+    const ValArray & GetWeights() const { checkSwapped(); return weights_; };
 
-    // TODO remove
-    ValArray & Weights() { return weights_; };
-    Types<ValArray::Ptr>::Array & NodeValues(NodeId nodeId) { return particleValuesMap_[nodeId]; };
+    void SwapWeights(ValArray::BaseType & vec) { weights_.swap(vec); weightsSwapped_ = !weightsSwapped_; };
+
+    const ParticleValues & GetNodeValues(NodeId nodeId) const { return particleValuesMap_.at(nodeId); };
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc, const DimArray::Ptr & pDim) const;
 
     void ClearNode(NodeId nodeId) { particleValuesMap_.at(nodeId).clear(); };
-    void Clear() { particleValuesMap_.clear(); logWeights_.clear(); weights_.clear(); };
+  };
 
-    virtual ~Monitor() {};
+
+  class FilterMonitor : public Monitor
+  {
+  public:
+    typedef FilterMonitor SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+    typedef Monitor BaseType;
+
+  protected:
+    Scalar logNormConst_;
+
+  public:
+    FilterMonitor(Size t, NodeId sampledNodeId) : BaseType(t, sampledNodeId) {};
+    virtual ~FilterMonitor() {};
+
+    void SetWeights(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Scalar logNormConst);
+    void SetNodeValues(NodeId nodeId, const Types<Particle>::Array & particles);
+  };
+
+
+  class SmoothMonitor : public Monitor
+  {
+  public:
+    typedef SmoothMonitor SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+    typedef Monitor BaseType;
+
+    SmoothMonitor(Size t, NodeId sampledNodeId) : BaseType(t, sampledNodeId) {};
+    virtual ~SmoothMonitor() {};
+
+    void SetWeights(const ValArray & weights) { checkSwapped(); weights_.assign(weights.begin(), weights.end()); }
+    void SetNodeValues(NodeId nodeId, const Monitor & filterMonitor) { particleValuesMap_[nodeId].assign(filterMonitor.GetNodeValues(nodeId).begin(), filterMonitor.GetNodeValues(nodeId).end()); };
   };
 
 }
