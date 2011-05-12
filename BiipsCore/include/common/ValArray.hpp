@@ -26,7 +26,7 @@ namespace Biips
   /*!
    * ValArray is the raw contiguous array container of data values.
    * It inherits publicly std::vector<Scalar>
-   * and comes along with elementwise operators.
+   * and comes along with element-wise operators.
    */
   class ValArray : public std::vector<Scalar>,
   boost::arithmetic<ValArray,
@@ -70,7 +70,7 @@ namespace Biips
 
     //! Plus assign operator.
     /*!
-     * Adds rhs elementwise.
+     * Adds rhs element-wise.
      * @param rhs must have the same size
      */
     ValArray & operator += (const ValArray & rhs);
@@ -83,19 +83,19 @@ namespace Biips
     //! Minus assign operator.
     /*!
      *
-     * Substracts rhs elementwise.
+     * Subtracts rhs element-wise.
      */
     ValArray & operator -= (const ValArray & rhs);
     //! Scalar minus assign operator.
     /*!
      *
-     * Substracts val to each element.
+     * Subtracts val to each element.
      */
     ValArray & operator -= (Scalar val);
     //! Multiply assign operator.
     /*!
      *
-     * Multiplies by rhs elementwise.
+     * Multiplies by rhs element-wise.
      * @param rhs must have the same size
      */
     ValArray & operator *= (const ValArray & rhs);
@@ -108,7 +108,7 @@ namespace Biips
     //! Divide assign operator.
     /*!
      *
-     * Divides by rhs elementwise.
+     * Divides by rhs element-wise.
      * @param rhs must have the same size
      */
     ValArray & operator /= (const ValArray & rhs);
@@ -178,7 +178,7 @@ namespace Biips
 
     /*!
      * Applies an unary operator to each element of this ValArray.
-     * The resault is stored in this ValArray.
+     * The result is stored in this ValArray.
      * @param op Unary operator. It can be a functor or a function pointer
      */
     template <typename UnaryOperator>
