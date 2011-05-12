@@ -119,7 +119,7 @@ namespace Biips
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    Monitor::Ptr p_monitor(new Monitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
+    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSampler_->SetMonitorWeights(*p_monitor);
     for (Size i=0; i<sampled_nodes.size(); ++i)
     {
@@ -149,7 +149,7 @@ namespace Biips
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    Monitor::Ptr p_monitor(new Monitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
+    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSmoother_->SetMonitorWeights(*p_monitor);
     for (Size i=0; i<updated_nodes.size(); ++i)
     {
@@ -177,7 +177,7 @@ namespace Biips
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    Monitor::Ptr p_monitor(new Monitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
+    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSmoother_->SetMonitorWeights(*p_monitor);
     for (Size i=0; i<updated_nodes.size(); ++i)
     {
