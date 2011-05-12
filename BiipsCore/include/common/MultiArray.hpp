@@ -14,8 +14,7 @@
 #include "common/Types.hpp"
 #include "common/DimArray.hpp"
 #include "common/ValArray.hpp"
-
-#include <cassert>
+#include "common/Error.hpp"
 
 namespace Biips
 {
@@ -51,6 +50,9 @@ namespace Biips
     Types<DimArray>::Ptr pDim_;
     //! Shared pointer of the values array of the data
     Types<StorageType>::Ptr pValues_;
+
+    void checkDimPtr() const { if(!pDim_) throw LogicError("Can not access dimension of MultiArray: null pointer."); }
+    void checkValuesPtr() const { if(!pValues_) throw LogicError("Can not access values of MultiArray: null pointer."); }
 
   public:
     MultiArray() {}
@@ -141,43 +143,43 @@ namespace Biips
     /*!
      * @return the size of the DimArray
      */
-    Size NDim() const { assert(pDim_); return pDim_->size(); };
+    Size NDim() const { checkDimPtr(); return pDim_->size(); };
     //! Length of the DatType
     /*!
      * Computes the product of the sizes of each dimension
      * @return the number of elements of the MultiArray
      */
-    Size Length() const { assert(pDim_); return pDim_->Length(); };
+    Size Length() const { checkDimPtr(); return pDim_->Length(); };
     /*!
      * Indicates whether the MultiArray corresponds to a scalar object,
      * i.e. containing only one element.
      */
-    Bool IsScalar() const { assert(pDim_); return pDim_->IsScalar(); }
+    Bool IsScalar() const { checkDimPtr(); return pDim_->IsScalar(); }
     /*!
      * Indicates whether the MultiArray corresponds to a vector object,
      * i.e. only one dimension.
      */
-    Bool IsVector() const { assert(pDim_); return pDim_->IsVector(); }
+    Bool IsVector() const { checkDimPtr(); return pDim_->IsVector(); }
     /*!
      * Indicates whether the MultiArray corresponds to a matrix object,
      * i.e. exactly two dimensions.
      */
-    Bool IsMatrix() const { assert(pDim_); return pDim_->IsMatrix(); }
+    Bool IsMatrix() const { checkDimPtr(); return pDim_->IsMatrix(); }
     /*!
      * Indicates whether the MultiArray corresponds to a squared matrix.
      */
-    Bool IsSquared() const { assert(pDim_); return pDim_->IsSquared(); }
+    Bool IsSquared() const { checkDimPtr(); return pDim_->IsSquared(); }
 
     //! DimArray accessor.
     /*!
      * @return the dimension array
      */
-    const DimArray & Dim() const { assert(pDim_); return *pDim_; };
+    const DimArray & Dim() const { checkDimPtr(); return *pDim_; };
     //! DimArray accessor.
     /*!
      * @return a reference to the dimension array
      */
-    DimArray & Dim() { assert(pDim_); return *pDim_; };
+    DimArray & Dim() { checkDimPtr(); return *pDim_; };
     //! DimArray shared pointer accessor.
     /*!
      * @return the dimension array shared pointer
@@ -188,12 +190,12 @@ namespace Biips
     /*!
      * @return the values array
      */
-    const StorageType & Values() const { assert(pValues_); return *pValues_; };
+    const StorageType & Values() const { checkValuesPtr(); return *pValues_; };
     //! ValArray accessor.
     /*!
      * @return a reference to the values array
      */
-    StorageType & Values() { assert(pValues_); return *pValues_; };
+    StorageType & Values() { checkValuesPtr(); return *pValues_; };
     //! ValArray accessor.
     /*!
      * @return the values array shared pointer
@@ -205,31 +207,13 @@ namespace Biips
      * This method gives a convenient Scalar handle of the ValArray.
      * @return The first value of the ValArray if size is 1
      */
-    Scalar ScalarView() const { assert( IsScalar() && pValues_ && (pValues_->size() == 1) ); return (*pValues_)[0]; } // TODO throw exception
+    Scalar ScalarView() const { return (*pValues_)[0]; } // TODO throw exception
     /*!
      * Most of the MultiArray objects will contain one scalar value.
      * This method gives a convenient Scalar handle of the ValArray.
      * @return  A reference to the first value of the ValArray if size is 1
      */
-    Scalar & ScalarView() { assert( IsScalar() && pValues_ && (pValues_->size() == 1) ); return (*pValues_)[0]; } // TODO throw exception
-    /*!
-     * If the MultiArray is a vector, this method gives a convenient
-     * vector interface to it.
-     * @return A vector proxy object.
-     * @warning The ValArray values are swapped with the VectorRef one
-     * until its destruction or call to its Release method. During this time,
-     * the MultiArray's ValArray is empty.
-     */
-    VectorRef VectorView();
-    /*!
-     * If the MultiArray is a matrix, this method gives a convenient
-     * matrix interface to it.
-     * @return A matrix proxy object
-     * @warning The ValArray values are swapped with the MatrixRef ones
-     * until its destruction or call to its Release method. During this time,
-     * the MultiArray's ValArray is empty.
-     */
-    MatrixRef MatrixView();
+    Scalar & ScalarView() { return (*pValues_)[0]; } // TODO throw exception
 
 
     MultiArray & Alloc(const MultiArray & from)

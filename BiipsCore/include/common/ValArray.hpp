@@ -11,8 +11,6 @@
 #ifndef BIIPS_VALARRAY_HPP_
 #define BIIPS_VALARRAY_HPP_
 
-#include <cassert>
-
 #include "common/Types.hpp"
 
 #include <boost/operators.hpp>
@@ -151,13 +149,13 @@ namespace Biips
      * This method gives a convenient Scalar handle of the ValArray.
      * @return The first value of the array if size is 1
      */
-    Scalar ScalarView() const { assert( size() == 1 ); return operator[](0); } // TODO throw exception
+    Scalar ScalarView() const { return operator[](0); } // TODO throw exception
     /*!
      * Most of the ValArray objects will contain one scalar value.
      * This method gives a convenient Scalar handle of the ValArray.
      * @return A reference to the first value of the array if size is 1
      */
-    Scalar & ScalarView() { assert( size() == 1 ); return operator[](0); } // TODO throw exception
+    Scalar & ScalarView() { return operator[](0); } // TODO throw exception
 
     /*!
      * Applies an unary operator to each element of the ValArray.
