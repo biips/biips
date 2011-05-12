@@ -102,7 +102,7 @@ namespace Biips
 
     // Updating weights
     Vector weights_filter_vec(n_particles, Vector::array_type());
-    weights_filter_vec.data().swap(new_monitor.Weights());
+    new_monitor.SwapWeights(weights_filter_vec.data());
 
     Vector weights_vec = ublas::prod(weights_filter_vec, P_mat);
     for (Size i=0; i<n_particles; ++i)
@@ -117,7 +117,7 @@ namespace Biips
     for (Size i=0; i<n_particles; ++i)
       weights_[i] *= weights_filter_vec[i];
 
-    weights_filter_vec.data().swap(new_monitor.Weights());
+    new_monitor.SwapWeights(weights_filter_vec.data());
   }
 
 
@@ -157,16 +157,16 @@ namespace Biips
   }
 
 
-  void BackwardSmoother::SetMonitorWeights(Monitor & monitor) const
+  void BackwardSmoother::SetMonitorWeights(SmoothMonitor & monitor) const
   {
-    monitor.Weights().assign(weights_.begin(), weights_.end());
+    monitor.SetWeights(weights_);
   }
 
 
-  void BackwardSmoother::SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const
+  void BackwardSmoother::SetMonitorNodeValues(NodeId nodeId, SmoothMonitor & monitor) const
   {
     Monitor & last_monitor = *filterMonitors_.back();
-    monitor.NodeValues(nodeId).assign(last_monitor.GetNodeValues(nodeId).begin(), last_monitor.GetNodeValues(nodeId).end());
+    monitor.SetNodeValues(nodeId, last_monitor);
   }
 
 }

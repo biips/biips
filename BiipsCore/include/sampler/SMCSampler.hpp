@@ -33,7 +33,7 @@ namespace Biips
   class DiscreteScalarAccumulator;
   class ElementAccumulator;
 
-  class Monitor;
+  class FilterMonitor;
 
   class SMCSampler
   {
@@ -124,8 +124,8 @@ namespace Biips
 //    template<typename Features>
 //    void Accumulate(NodeId nodeId, VectorAccumulator<Features> & featuresAcc) const;
 
-    void SetMonitorWeights(Monitor & monitor) const;
-    void SetMonitorNodeValues(NodeId nodeId, Monitor & monitor) const;
+    void SetMonitorWeights(FilterMonitor & monitor) const;
+    void SetMonitorNodeValues(NodeId nodeId, FilterMonitor & monitor) const;
   };
 
 } /* namespace Biips */

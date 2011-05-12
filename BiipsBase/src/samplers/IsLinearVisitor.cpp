@@ -16,7 +16,7 @@
 #include "functions/Multiply.hpp"
 #include "functions/Add.hpp"
 #include "functions/MatMult.hpp"
-#include "functions/Substract.hpp"
+#include "functions/Subtract.hpp"
 #include "functions/Divide.hpp"
 #include "functions/Neg.hpp"
 
@@ -31,7 +31,7 @@ namespace Biips
       linearFuncMap[Multiply::Instance()->Name()] = MULTIPLY;
       linearFuncMap[Add::Instance()->Name()] = ADD;
       linearFuncMap[MatMult::Instance()->Name()] = MAT_MULT;
-      linearFuncMap[Substract::Instance()->Name()] = SUBSTRACT;
+      linearFuncMap[Subtract::Instance()->Name()] = SUBSTRACT;
       linearFuncMap[Divide::Instance()->Name()] = DIVIDE;
       linearFuncMap[Neg::Instance()->Name()] = NEG;
     }
