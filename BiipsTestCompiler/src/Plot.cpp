@@ -24,6 +24,7 @@ namespace Biips
     // Set the style of the curves
     curves_.back()->setPen(QPen(color, lineWidth, style));
     curves_.back()->setSymbol(QwtSymbol(symbol, QBrush(color), QPen(color, lineWidth, Qt::SolidLine), QSize(symbolSize, symbolSize)));
+//    curves_.back()->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     // finally, refresh the plot
     qwtPlot_.replot();
   }
@@ -39,29 +40,27 @@ namespace Biips
     // Set the style of the curves
     curves_.back()->setPen(QPen(color, 1, Qt::SolidLine));
     curves_.back()->setStyle(QwtPlotCurve::Steps);
+    curves_.back()->setCurveAttribute(QwtPlotCurve::Inverted);
     curves_.back()->setBrush(color);
+//    curves_.back()->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     // finally, refresh the plot
     qwtPlot_.replot();
   }
 
 
-  void Plot::AddCurve(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color, uint width, Qt::PenStyle style, uint symbolSize, QwtSymbol::Style symbol)
+  void Plot::AddCurve(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color, uint lineWidth, Qt::PenStyle style, uint symbolSize, QwtSymbol::Style symbol)
   {
-    QwtArray<Scalar> x_data(x.size());
-    QwtArray<Scalar> y_data(y.size());
-    Types<Scalar>::ConstIterator it_x = x.begin();
-    Types<Scalar>::ConstIterator it_y = y.begin();
-    Size i = 0;
-    while( (it_x != x.end()) && (it_y != y.end()) )
-    {
-      x_data[i] = *it_x;
-      y_data[i] = *it_y;
-      ++it_x;
-      ++it_y;
-      ++i;
-    }
     // add curve
-    addCurveCore(x_data, y_data, name, color, width, style, symbolSize, symbol);
+    curves_.push_back(Types<QwtPlotCurve>::Ptr(new QwtPlotCurve(name.c_str())));
+    // copy the data into the curve
+    curves_.back()->setData(x.data(), y.data(), x.size());
+    curves_.back()->attach(&qwtPlot_);
+    // Set the style of the curves
+    curves_.back()->setPen(QPen(color, lineWidth, style));
+    curves_.back()->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    curves_.back()->setSymbol(QwtSymbol(symbol, QBrush(color), QPen(color, lineWidth, Qt::SolidLine), QSize(symbolSize, symbolSize)));
+    // finally, refresh the plot
+    qwtPlot_.replot();
   }
 
   void Plot::AddCurve(const MultiArray::Array & x, const MultiArray::Array & y, String name, const QColor & color, uint width, Qt::PenStyle style, uint symbolSize, QwtSymbol::Style symbol)
@@ -86,46 +85,42 @@ namespace Biips
 
   void Plot::AddHistogram(const ScalarHistogram & hist, String name, const QColor & color)
   {
-    Size hist_size = hist.size();
-    QwtArray<Scalar> x_data(hist.size()+1);
-    QwtArray<Scalar> y_data(hist.size()+1);
+    Types<Scalar>::Array x = hist.GetPositions();
+    Types<Scalar>::Array y = hist.GetFrequencies();
+    Scalar bin_size = x.back() - x[x.size()-2];
+    Scalar last_pos = x.back() + bin_size;
+    x.push_back(last_pos);
+    y.push_back(0.0);
+    AddHistogram(x, y, name, color);
 
-    x_data[0] = hist[0].first;
-    y_data[0] = 0.0;
-    for (Size i=1; i<hist_size; ++i)
-    {
-      x_data[i] = hist[i].first;
-      y_data[i] = hist[i-1].second;
-    }
-    Scalar bin_size;
-    if ( hist_size > 1 )
-      bin_size = hist.back().first - hist[hist_size-2].first;
-    else
-      bin_size = 1.0;
-    x_data[hist_size] = hist.back().first + bin_size;
-    y_data[hist_size] = hist.back().second;
-
-    // add histogram
-    addHistogramCore(x_data, y_data, name, color);
   }
 
   void Plot::AddHistogram(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color)
   {
-    QwtArray<Scalar> x_data(x.size());
-    QwtArray<Scalar> y_data(y.size());
-    Types<Scalar>::ConstIterator it_x = x.begin();
-    Types<Scalar>::ConstIterator it_y = y.begin();
-    Size i = 0;
-    while( (it_x != x.end()) && (it_y != y.end()) )
-    {
-      x_data[i] = *it_x;
-      y_data[i] = *it_y;
-      ++it_x;
-      ++it_y;
-      ++i;
-    }
-    // add histogram
-    addHistogramCore(x_data, y_data, name, color);
+    // add curve
+    curves_.push_back(Types<QwtPlotCurve>::Ptr(new QwtPlotCurve(name.c_str())));
+    // copy the data into the curve
+    curves_.back()->setData(x.data(), y.data(), x.size());
+    curves_.back()->attach(&qwtPlot_);
+    // Set the style of the curves
+    curves_.back()->setPen(QPen(color, 1, Qt::SolidLine));
+    curves_.back()->setStyle(QwtPlotCurve::Steps);
+    curves_.back()->setCurveAttribute(QwtPlotCurve::Inverted);
+    curves_.back()->setBrush(color);
+//    curves_.back()->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    // finally, refresh the plot
+    qwtPlot_.replot();
+
+    Types<Scalar>::Array x_base(2);
+    Types<Scalar>::Array y_base(2, 0.0);
+    x_base[0] = x.front();
+    x_base[1] = x.back();
+    curves_.push_back(Types<QwtPlotCurve>::Ptr(new QwtPlotCurve()));
+    // copy the data into the curve
+    curves_.back()->setData(x_base.data(), y_base.data(), x_base.size());
+    curves_.back()->attach(&qwtPlot_);
+    // Set the style of the curves
+    curves_.back()->setPen(QPen(color, 1, Qt::SolidLine));
   }
 
   void Plot::AddHistogram(const MultiArray::Array & x, const MultiArray::Array & y, String name, const QColor & color)

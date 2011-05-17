@@ -11,6 +11,7 @@
 #include "ModelTest.hpp"
 #include "TestIO.hpp"
 #include "common/cholesky.hpp"
+#include <boost/progress.hpp>
 
 namespace Biips
 {
@@ -245,7 +246,7 @@ namespace Biips
       it_sampler_fact->second = active;
     }
 
-    pSampler_->Initialize();
+    pSampler_->Build();
     if (verbose_>=2)
     {
       os_ << "Node sampler's sequence: " << std::endl;
@@ -253,23 +254,30 @@ namespace Biips
       os_ << std::endl;
     }
 
-    initFilterAccumulators(nParticles, numBins);
-
-    Size current_pos = 0;
-    time_t timer = 0;
+    Types<boost::progress_display>::Ptr p_show_progress;
     if (verbose_ == 1 && showProgress)
-      progressBar(0.0, current_pos, timer, os_, toString(pSampler_->NIterations()));
+      p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(pSampler_->NIterations(), os_, ""));
     else if (verbose_>=2)
       os_ << "SMC sampler's progress: " << std::endl;
 
+    // filtering
+    pSampler_->Initialize();
+
+    initFilterAccumulators(nParticles, numBins);
+    filterAccumulate(0);
+
+    if (verbose_ == 1 && showProgress)
+      ++(*p_show_progress);
+    else if (verbose_>=2)
+      pSampler_->PrintSamplerState();
+
     Size t_max = pSampler_->NIterations();
 
-    // filtering
-    for (Size t=0; t<t_max; ++t)
+    for (Size t=1; t<t_max; ++t)
     {
       pSampler_->Iterate();
       if (verbose_ == 1 && showProgress)
-        progressBar(Scalar(t+1)/t_max, current_pos, timer, os_);
+        ++(*p_show_progress);
       else if (verbose_>=2)
         pSampler_->PrintSamplerState();
 

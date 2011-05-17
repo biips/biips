@@ -89,14 +89,14 @@ namespace Biips
     Bool SetSmoothMonitor(const String & name);
 
     /*!
-     * @short Initializes the model.
+     * @short Builds the SMC sampler.
      *
      * The samplers are chosen for the unobserved
      * stochastic nodes based on the list of sampler factories.
      *
      * @returns true on success, false on failure
      */
-    Bool Initialize(Size nParticles, Size rng_seed, Bool prior, Size verbose = 1);
+    Bool BuildSampler(Size nParticles, Size rng_seed, Bool prior, Size verbose = 1);
 
     Bool RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose = true);
 

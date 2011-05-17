@@ -27,6 +27,10 @@ namespace Biips
 
   class Plot
   {
+  public:
+    typedef Plot SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+
   protected:
     QApplication qApp_;
     QwtPlot qwtPlot_;

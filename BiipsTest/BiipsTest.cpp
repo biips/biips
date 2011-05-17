@@ -33,6 +33,7 @@
 
 #include <boost/math/distributions/students_t.hpp>
 
+#include <boost/progress.hpp>
 
 namespace Biips
 {
@@ -467,10 +468,9 @@ BOOST_AUTO_TEST_CASE( my_test )
           cout << INDENT_STRING << "mutation: " << mut << ", particles: " << n_part << endl;
         }
 
-        Size pogress_pos = 0;
-        time_t timer = 0;
+        Types<boost::progress_display>::Ptr p_show_progress;
         if (verbosity==1 && n_smc>1)
-          progressBar(0.0, pogress_pos, timer, cout, toString(n_smc));
+          p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_smc, cout, ""));
 
         vector<Scalar> errors_filter_new;
         vector<Scalar> errors_smooth_new;
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", ess_threshold, resampleTypeMap().at(resample_type), n_smc==1, num_bins);
 
           if (verbosity==1 && n_smc>1)
-            progressBar(Scalar(i_smc+1)/n_smc, pogress_pos, timer, cout);
+            ++(*p_show_progress);
           else if (verbosity>0)
             cout << INDENT_STRING << "log-normalizing constant = " << p_model_test->LogNormConst() << endl;
 
