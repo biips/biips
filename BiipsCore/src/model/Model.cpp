@@ -90,13 +90,13 @@ namespace Biips
   }
 
 
-  void Model::InitSampler(Size nParticles, Rng::Ptr pRng)
+  void Model::BuildSampler(Size nParticles, Rng::Ptr pRng)
   {
     pRng_ = pRng;
 
     pSampler_ = SMCSampler::Ptr(new SMCSampler(nParticles, pGraph_.get(), pRng_.get()));
 
-    pSampler_->Initialize();
+    pSampler_->Build();
 
     // Clear Monitors
     filterMonitors_.clear();
@@ -115,15 +115,40 @@ namespace Biips
   }
 
 
+  void Model::InitSampler()
+  {
+    pSampler_->Initialize();
+
+    Size t = pSampler_->Time();
+    const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
+
+    // Filter Monitors
+    NodeId node_id = NULL_NODEID;
+    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->SetMonitorWeights(*p_monitor);
+    for (Size i=0; i<sampled_nodes.size(); ++i)
+    {
+      node_id = sampled_nodes[i];
+      if(filterMonitorsMap_.count(node_id))
+      {
+        pSampler_->SetMonitorNodeValues(node_id, *p_monitor);
+        filterMonitorsMap_[node_id] = p_monitor;
+      }
+    }
+
+    filterMonitors_.push_back(p_monitor);
+  }
+
+
   void Model::IterateSampler()
   {
     if (!pSampler_)
       throw LogicError("Can not iterate a Null SMCSampler.");
 
-    Size t = pSampler_->Time();
-    const Types<NodeId>::Array & sampled_nodes = pSampler_->NextSampledNodes();
-
     pSampler_->Iterate();
+
+    Size t = pSampler_->Time();
+    const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;

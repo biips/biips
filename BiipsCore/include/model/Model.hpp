@@ -49,11 +49,12 @@ namespace Biips
 
     void SetResampleParam(ResampleType rtMode, Scalar threshold);
 
-    Bool SamplerInitialized() const { return pSampler_; }
+    Bool SamplerBuilt() const { return pSampler_; }
     const SMCSampler & Sampler() const;
 
-    void InitSampler(Size nParticles, Rng::Ptr pRng);
+    void BuildSampler(Size nParticles, Rng::Ptr pRng);
 
+    void InitSampler();
     void IterateSampler();
 
     Bool SmootherInitialized() const { return pSmoother_; }
