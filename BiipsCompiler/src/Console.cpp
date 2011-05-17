@@ -411,16 +411,16 @@ namespace Biips
   }
 
 
-  Bool Console::Initialize(Size nParticles, Size smcRngSeed, Bool prior, Size verbose)
+  Bool Console::BuildSampler(Size nParticles, Size smcRngSeed, Bool prior, Size verbose)
   {
     if (!pModel_)
     {
-      err_ << "Can't initialize. No model!" << endl;
+      err_ << "Can't build SMC sampler. No model!" << endl;
       return true;
     }
     if (pModel_->GraphPtr()->Empty())
     {
-      err_ << "Can't initialize. No nodes in graph (Have you compiled the model?)" << endl;
+      err_ << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)" << endl;
       return true;
     }
     try
@@ -437,7 +437,7 @@ namespace Biips
 
       if(verbose >0)
       {
-        out_ << PROMPT_STRING << "Initializing model";
+        out_ << PROMPT_STRING << "Building SMC sampler";
         if (prior)
           out_ << " using prior mutation";
 
@@ -446,7 +446,7 @@ namespace Biips
 
       Rng::Ptr p_smc_rng(new Rng(smcRngSeed));
 
-      pModel_->InitSampler(nParticles, p_smc_rng);
+      pModel_->BuildSampler(nParticles, p_smc_rng);
 
       if (verbose >1)
       {
@@ -467,9 +467,9 @@ namespace Biips
       err_ << "Can't run SMC sampler. No model!" << endl;
       return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't run SMC sampler. Not initialized!" << endl;
+      err_ << "Can't run SMC sampler. Not built!" << endl;
       return false;
     }
 
@@ -487,7 +487,11 @@ namespace Biips
         p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
 
       // filtering
-      for (Size n=0; n<n_iter; ++n)
+      pModel_->InitSampler();
+      if (p_show_progress)
+        ++(*p_show_progress);
+
+      for (Size n=1; n<n_iter; ++n)
       {
         pModel_->IterateSampler();
 
@@ -512,7 +516,7 @@ namespace Biips
       err_ << "Can't run backward smoother. No model!" << endl;
       return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't run backward smoother. SMC sampler did not run!" << endl;
       return false;
@@ -643,9 +647,9 @@ namespace Biips
         err_ << "Can't extract filter statistic. No model!" << endl;
         return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract filter statistic. SMC sampler not initialized!" << endl;
+      err_ << "Can't extract filter statistic. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -711,9 +715,9 @@ namespace Biips
         err_ << "Can't extract smooth tree statistic. No model!" << endl;
         return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth tree statistic. SMC sampler not initialized!" << endl;
+      err_ << "Can't extract smooth tree statistic. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -745,9 +749,9 @@ namespace Biips
         err_ << "Can't extract filter pdf. No model!" << endl;
         return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract filter pdf. SMC sampler not initialized!" << endl;
+      err_ << "Can't extract filter pdf. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -813,9 +817,9 @@ namespace Biips
         err_ << "Can't extract smooth tree pdf. No model!" << endl;
         return false;
     }
-    if (!pModel_->SamplerInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth tree pdf. SMC sampler not initialized!" << endl;
+      err_ << "Can't extract smooth tree pdf. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())

@@ -76,6 +76,7 @@ namespace Biips
     ///A flag which tracks whether the ensemble was resampled during this iteration
     Bool resampled_;
 
+    Bool built_;
     Bool initialized_;
     Scalar sumOfWeights_;
     Scalar ess_;
@@ -84,8 +85,9 @@ namespace Biips
     //---------- Member functions ----------
     void buildNodeIdSequence();
     void buildNodeSamplers();
-    Particle initParticle(Rng * pRng);
-    void moveParticle(long lTime, Particle & lastParticle, Rng * pRng);
+    void moveParticle(Particle & lastParticle, Rng * pRng);
+    Scalar normalizeWeights();
+    Scalar sumOfWeightsAndEss();
     void resample(ResampleType rsMode);
 
     // Forbid copying
@@ -99,20 +101,19 @@ namespace Biips
     virtual ~SMCSampler() {}
 
     Size NParticles() const { return nParticles_; };
-    Bool IsInitialized() const { return initialized_; };
-    Bool IsSampling() const { return iterNodeId_ != nodeIdSequence_.begin(); };
-    Bool AtEnd() const { return iterNodeId_ == nodeIdSequence_.end(); };
+    Bool AtEnd() const { return iterNodeId_+1 == nodeIdSequence_.end(); };
     Size Time() const { return t_; }
     Size NIterations() const { return nodeSamplerSequence_.size(); };
     Scalar Ess() const { return ess_; }
     Scalar LogNormConst() const { return logNormConst_; }
-    Bool Resampled() const { return resampled_; }
-    const Types<NodeId>::Array & NextSampledNodes() { return *iterNodeId_; };
+    const Types<NodeId>::Array & SampledNodes() { return *iterNodeId_; };
 
     Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
     // TODO remove from the class
     void PrintSamplersSequence(std::ostream & os = std::cout) const;
     void PrintSamplerState(std::ostream & os = std::cout) const;
+
+    void Build() { buildNodeIdSequence(); buildNodeSamplers(); built_ = true; }
 
     void SetResampleParams(ResampleType rsMode, Scalar threshold);
     void Initialize();

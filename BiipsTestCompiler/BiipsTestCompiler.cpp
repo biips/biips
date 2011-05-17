@@ -48,6 +48,27 @@ namespace Biips
     return resample_type_map;
   }
 
+  std::map<String, std::map<IndexRange, MultiArray> > extractStat(Console & console, StatsTag tag,
+      const Types<String>::Array & monitoredVar, const String & statName, Bool verbose, Bool smooth = false);
+
+  struct Curve
+  {
+    Types<Scalar>::Array x;
+    Types<Scalar>::Array y;
+    String legend;
+    QColor color;
+    Size lineWidth;
+    Qt::PenStyle lineStyle;
+    Size symbolWidth;
+    QwtSymbol::Style symbol;
+  };
+
+  void plotStat(Console & console, const String & varName, const String & statName,
+      const StoredDataMap & benchStatMap, const std::map<String, std::map<IndexRange, MultiArray> > & smcStatMap,
+      Types<Curve>::Array & curves, Bool smooth = false);
+
+  void plotPdf(Console & console, const Types<String>::Array & monitoredVar, Bool verbose, Size numBins, Bool smooth = false);
+
   Bool computeError(Scalar & error, const String & varName,
       const std::map<String, std::map<IndexRange, MultiArray> > & smcMeanValuesMap,
       const std::map<String, std::vector<MultiArray> > & benchValuesMap);
@@ -57,6 +78,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::ifstream;
+
+
 
 BOOST_AUTO_TEST_CASE( my_test )
 {
@@ -417,7 +440,10 @@ BOOST_AUTO_TEST_CASE( my_test )
 
         if (verbosity>0)
         {
-          cout << PROMPT_STRING << "Running " << n_smc << " SMC algorithms" << endl;
+          cout << PROMPT_STRING << "Running " << n_smc << " SMC algorithms";
+          if (n_smc>1 && do_smooth)
+            cout << " with backward smoothing";
+          cout << endl;
           cout << INDENT_STRING << "mutation = " << mut << endl;
           cout << INDENT_STRING << "particles = " << n_part << endl;
           cout << INDENT_STRING << "resampling = " << resample_type << endl;
@@ -437,7 +463,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
         for (Size i_smc=0; i_smc<n_smc; ++i_smc)
         {
-          // Initialize sampler
+          // Build sampler
           //----------------------
           if (n_smc>1 || !vm.count("smc-rng-seed"))
             smc_rng_seed = time(0)+i_smc+1;
@@ -447,8 +473,8 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
-          if (!console.Initialize(n_part, smc_rng_seed, mut=="prior", verbosity * (n_smc==1 || verbosity>1)))
-            throw RuntimeError("Failed to initialize model.");
+          if (!console.BuildSampler(n_part, smc_rng_seed, mut=="prior", verbosity * (n_smc==1 || verbosity>1)))
+            throw RuntimeError("Failed to build sampler.");
 
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
@@ -471,83 +497,19 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           // Extract filter mean of monitored values
           //----------------------------------------
-          std::map<String, std::map<IndexRange, MultiArray> > filter_mean_map;
-
-          for (Size i=0; i<monitored_var.size(); ++i)
-          {
-            const String & name = monitored_var[i];
-
-            if (verbosity>0 && n_smc==1)
-              cout << PROMPT_STRING << "Extracting filtering mean of variable " << name << endl;
-
-            if (!console.ExtractFilterStat(name, MEAN, filter_mean_map[name]))
-              throw RuntimeError(String("Failed to extract filtering mean of variable ") + name);
-          }
+          std::map<String, std::map<IndexRange, MultiArray> > filter_mean_map =
+              extractStat(console, MEAN, monitored_var, "mean", (verbosity>0 && n_smc==1), false);
 
 
           // plot mean curve
           //---------------------------
+          std::map<String, Types<Curve>::Array> curves_map;
           if (show_mode >= 1 && n_smc==1)
           {
             for (Size i=0; i<monitored_var.size(); ++i)
             {
-              const String & name = monitored_var[i];
-
-              if (filter_mean_map.at(name).begin()->first.Dim().IsScalar())
-              {
-                Size len = filter_mean_map.at(name).size();
-
-                Types<Scalar>::Array x_est_PF(len);
-                Types<Scalar>::Array x_bench(len);
-                Types<Scalar>::Array index(len);
-
-                std::map<IndexRange, MultiArray>::iterator it_filter_mean = filter_mean_map.at(name).begin();
-                for (Size k=0; it_filter_mean != filter_mean_map.at(name).end();
-                    ++k, ++it_filter_mean)
-                {
-                  x_bench[k] = bench_filter_map_stored.at(name)[k].ScalarView();
-                  x_est_PF[k] = it_filter_mean->second.ScalarView();
-                  index[k] = k;
-                }
-
-                Plot results_plot(argc, argv);
-                results_plot.AddCurve(index, x_bench, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-                results_plot.AddCurve(index, x_est_PF, "PF estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-
-                results_plot.SetTitle(String("Filtering mean estimate of variable ") + name);
-                results_plot.SetAxesLabels("index", name);
-                results_plot.SetBackgroundColor(Qt::white);
-                results_plot.SetLegend(QwtPlot::RightLegend);
-                results_plot.Show();
-              }
-              else
-              {
-                Size len = filter_mean_map.at(name).size();
-
-                Types<Scalar>::Array x_bench_0(len);
-                Types<Scalar>::Array x_bench_1(len);
-                Types<Scalar>::Array x_est_PF_0(len);
-                Types<Scalar>::Array x_est_PF_1(len);
-                std::map<IndexRange, MultiArray>::iterator it_filter_mean = filter_mean_map.at(name).begin();
-                for (Size k=0; it_filter_mean != filter_mean_map.at(name).end();
-                    ++k, ++it_filter_mean)
-                {
-                  x_bench_0[k] = bench_filter_map_stored.at(name)[k].Values()[0];
-                  x_bench_1[k] = bench_filter_map_stored.at(name)[k].Values()[1];
-                  x_est_PF_0[k] = it_filter_mean->second.Values()[0];
-                  x_est_PF_1[k] = it_filter_mean->second.Values()[1];
-                }
-
-                Plot results_plot(argc, argv);
-                results_plot.AddCurve(x_bench_0, x_bench_1, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-                results_plot.AddCurve(x_est_PF_0, x_est_PF_1, "PF estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-
-                results_plot.SetTitle(String("Filtering mean estimate of variable ") + name + " only the 2 first component");
-                results_plot.SetAxesLabels(name+" (component 1)", name+" (component 2");
-                results_plot.SetBackgroundColor(Qt::white);
-                results_plot.SetLegend(QwtPlot::RightLegend);
-                results_plot.Show();
-              }
+              const String & var_name = monitored_var[i];
+              plotStat(console, var_name, "mean", bench_filter_map_stored, filter_mean_map, curves_map[var_name], false);
             }
           }
 
@@ -558,28 +520,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           //---------------------------
           if (show_mode >= 2 && n_smc==1)
           {
-            std::map<String, std::map<IndexRange, ScalarHistogram> > filter_pdf_map;
-
-            for (Size i=0; i<monitored_var.size(); ++i)
-            {
-              const String & name = monitored_var[i];
-
-              if (verbosity>0 && n_smc==1)
-                cout << PROMPT_STRING << "Extracting filtering Pdf of variable " << name << endl;
-
-              if(!console.ExtractFilterPdf(name, filter_pdf_map[name], num_bins, 1.0))
-                throw RuntimeError(String("Failed to extract filtering Pdf of variable ") + name);
-
-              for (std::map<IndexRange, ScalarHistogram>::iterator it_filter_pdf_map = filter_pdf_map[name].begin();
-                  it_filter_pdf_map != filter_pdf_map[name].end(); ++it_filter_pdf_map)
-              {
-                Plot pdf_plot_PF(argc, argv);
-                pdf_plot_PF.AddHistogram(it_filter_pdf_map->second, "", Qt::blue);
-                pdf_plot_PF.SetTitle(String("Filtering Pdf histogram of variable: ") + name + print(it_filter_pdf_map->first));
-                pdf_plot_PF.SetBackgroundColor(Qt::white);
-                pdf_plot_PF.Show();
-              }
-            }
+            plotPdf(console, monitored_var, (verbosity>0 && n_smc==1), num_bins, false);
 
             if (verbosity>0 && interactive)
               pressEnterToContinue();
@@ -629,18 +570,8 @@ BOOST_AUTO_TEST_CASE( my_test )
 
             // Extract smooth mean of monitored values
             //----------------------------------------
-            std::map<String, std::map<IndexRange, MultiArray> > smooth_mean_map;
-
-            for (Size i=0; i<monitored_var.size(); ++i)
-            {
-              const String & name = monitored_var[i];
-
-              if (verbosity>0 && n_smc==1)
-                cout << PROMPT_STRING << "Extracting smoothing mean of variable " << name << endl;
-
-              if (!console.ExtractSmoothStat(name, MEAN, smooth_mean_map[name]))
-                throw RuntimeError(String("Failed to extract smoothing mean of variable ") + name);
-            }
+            std::map<String, std::map<IndexRange, MultiArray> > smooth_mean_map =
+                extractStat(console, MEAN, monitored_var, "mean", (verbosity>0 && n_smc==1), true);
 
             // plot smooth mean curve
             //---------------------------
@@ -648,63 +579,8 @@ BOOST_AUTO_TEST_CASE( my_test )
             {
               for (Size i=0; i<monitored_var.size(); ++i)
               {
-                const String & name = monitored_var[i];
-
-                if (smooth_mean_map.at(name).begin()->first.Dim().IsScalar())
-                {
-                  Size len = smooth_mean_map.at(name).size();
-
-                  Types<Scalar>::Array x_est_PS(len);
-                  Types<Scalar>::Array x_bench(len);
-                  Types<Scalar>::Array index(len);
-
-                  std::map<IndexRange, MultiArray>::iterator it_smooth_mean = smooth_mean_map.at(name).begin();
-                  for (Size k=0; it_smooth_mean != smooth_mean_map.at(name).end();
-                      ++k, ++it_smooth_mean)
-                  {
-                    x_bench[k] = bench_smooth_map_stored.at(name)[k].ScalarView();
-                    x_est_PS[k] = it_smooth_mean->second.ScalarView();
-                    index[k] = k;
-                  }
-
-                  Plot results_plot(argc, argv);
-                  results_plot.AddCurve(index, x_bench, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-                  results_plot.AddCurve(index, x_est_PS, "PS estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-
-                  results_plot.SetTitle(String("Smoothing mean estimate of variable ") + name);
-                  results_plot.SetAxesLabels("index", name);
-                  results_plot.SetBackgroundColor(Qt::white);
-                  results_plot.SetLegend(QwtPlot::RightLegend);
-                  results_plot.Show();
-                }
-                else
-                {
-                  Size len = smooth_mean_map.at(name).size();
-
-                  Types<Scalar>::Array x_bench_0(len);
-                  Types<Scalar>::Array x_bench_1(len);
-                  Types<Scalar>::Array x_est_PS_0(len);
-                  Types<Scalar>::Array x_est_PS_1(len);
-                  std::map<IndexRange, MultiArray>::iterator it_smooth_mean = smooth_mean_map.at(name).begin();
-                  for (Size k=0; it_smooth_mean != smooth_mean_map.at(name).end();
-                      ++k, ++it_smooth_mean)
-                  {
-                    x_bench_0[k] = bench_smooth_map_stored.at(name)[k].Values()[0];
-                    x_bench_1[k] = bench_smooth_map_stored.at(name)[k].Values()[1];
-                    x_est_PS_0[k] = it_smooth_mean->second.Values()[0];
-                    x_est_PS_1[k] = it_smooth_mean->second.Values()[1];
-                  }
-
-                  Plot results_plot(argc, argv);
-                  results_plot.AddCurve(x_bench_0, x_bench_1, "Bench estimate", Qt::green, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-                  results_plot.AddCurve(x_est_PS_0, x_est_PS_1, "PS estimate", Qt::blue, 2, Qt::SolidLine, 10, QwtSymbol::Cross);
-
-                  results_plot.SetTitle(String("Smoothing mean estimate of variable ") + name + " only the 2 first component");
-                  results_plot.SetAxesLabels(name+" (component 1)", name+" (component 2");
-                  results_plot.SetBackgroundColor(Qt::white);
-                  results_plot.SetLegend(QwtPlot::RightLegend);
-                  results_plot.Show();
-                }
+                const String & var_name = monitored_var[i];
+                plotStat(console, var_name, "mean", bench_smooth_map_stored, smooth_mean_map, curves_map[var_name], true);
               }
             }
 
@@ -715,28 +591,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             //---------------------------
             if (show_mode >= 2 && n_smc==1)
             {
-              std::map<String, std::map<IndexRange, ScalarHistogram> > smooth_pdf_map;
-
-              for (Size i=0; i<monitored_var.size(); ++i)
-              {
-                const String & name = monitored_var[i];
-
-                if (verbosity>0 && n_smc==1)
-                  cout << PROMPT_STRING << "Extracting smoothing Pdf of variable " << name << endl;
-
-                if(!console.ExtractSmoothPdf(name, smooth_pdf_map[name], num_bins, 1.0))
-                  throw RuntimeError(String("Failed to extract smoothing Pdf of variable ") + name);
-
-                for (std::map<IndexRange, ScalarHistogram>::iterator it_smooth_pdf_map = smooth_pdf_map[name].begin();
-                    it_smooth_pdf_map != smooth_pdf_map[name].end(); ++it_smooth_pdf_map)
-                {
-                  Plot pdf_plot_PF(argc, argv);
-                  pdf_plot_PF.AddHistogram(it_smooth_pdf_map->second, "", Qt::blue);
-                  pdf_plot_PF.SetTitle(String("Smoothing Pdf histogram of variable: ") + name + print(it_smooth_pdf_map->first));
-                  pdf_plot_PF.SetBackgroundColor(Qt::white);
-                  pdf_plot_PF.Show();
-                }
-              }
+              plotPdf(console, monitored_var, (verbosity>0 && n_smc==1), num_bins, true);
 
               if (verbosity>0 && interactive)
                 pressEnterToContinue();
@@ -824,7 +679,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           continue;
 
         Bool check_filter = check_mode>=1;
-        Bool check_smooth = check_mode>=2;
+        Bool check_smooth = check_mode>=2 && do_smooth;
 
         if (check_filter)
         {
@@ -973,6 +828,189 @@ BOOST_AUTO_TEST_CASE( my_test )
 
 namespace Biips
 {
+
+  std::map<String, std::map<IndexRange, MultiArray> > extractStat(Console & console, StatsTag tag,
+      const Types<String>::Array & monitoredVar, const String & statName, Bool verbose, Bool smooth)
+  {
+    std::map<String, std::map<IndexRange, MultiArray> > stat_map;
+
+    for (Size i=0; i<monitoredVar.size(); ++i)
+    {
+      const String & name = monitoredVar[i];
+
+      if (verbose)
+      {
+        if (!smooth)
+          cout << PROMPT_STRING << "Extracting filtering " << statName << " of variable " << name << endl;
+        else
+          cout << PROMPT_STRING << "Extracting smoothing " << statName << " of variable " << name << endl;
+      }
+
+      if (!smooth)
+      {
+        if (!console.ExtractFilterStat(name, tag, stat_map[name]))
+          throw RuntimeError(String("Failed to extract filtering stat of variable ") + name);
+      }
+      else
+      {
+        if (!console.ExtractSmoothStat(name, tag, stat_map[name]))
+          throw RuntimeError(String("Failed to extract smoothing stat of variable ") + name);
+      }
+    }
+
+    return stat_map;
+  }
+
+
+  void plotStat(Console & console, const String & varName, const String & statName,
+      const StoredDataMap & benchStatMap, const std::map<String, std::map<IndexRange, MultiArray> > & smcStatMap,
+      Types<Curve>::Array & curves, Bool smooth)
+  {
+    curves.resize(curves.size()+2);
+    Curve & curve_bench = curves[curves.size()-2];
+    Curve & curve_smc = curves.back();
+
+    if (!smooth)
+    {
+      curve_bench.legend = String("Bench filter ") + statName;
+      curve_bench.color = Qt::green;
+      curve_bench.lineWidth = 1;
+      curve_bench.lineStyle = Qt::SolidLine;
+      curve_bench.symbolWidth = 7;
+      curve_bench.symbol = QwtSymbol::XCross;
+
+      curve_smc.legend = String("SMC filter ") + statName;
+      curve_smc.color = Qt::blue;
+      curve_smc.lineWidth = 1;
+      curve_smc.lineStyle = Qt::SolidLine;
+      curve_smc.symbolWidth = 7;
+      curve_smc.symbol = QwtSymbol::XCross;
+    }
+    else
+    {
+      curve_bench.legend = String("Bench smooth ") + statName;
+      curve_bench.color = Qt::magenta;
+      curve_bench.lineWidth = 1;
+      curve_bench.lineStyle = Qt::SolidLine;
+      curve_bench.symbolWidth = 7;
+      curve_bench.symbol = QwtSymbol::XCross;
+
+      curve_smc.legend = String("SMC smooth ") + statName;
+      curve_smc.color = Qt::cyan;
+      curve_smc.lineWidth = 1;
+      curve_smc.lineStyle = Qt::SolidLine;
+      curve_smc.symbolWidth = 7;
+      curve_smc.symbol = QwtSymbol::XCross;
+    }
+
+    Plot plot(0, 0);
+
+    if (smcStatMap.at(varName).begin()->first.Dim().IsScalar())
+    {
+      Size len = smcStatMap.at(varName).size();
+
+      curve_bench.x.resize(len);
+      curve_bench.y.resize(len);
+      curve_smc.x.resize(len);
+      curve_smc.y.resize(len);
+
+      std::map<IndexRange, MultiArray>::const_iterator it_smc_stat = smcStatMap.at(varName).begin();
+      for (Size k=0; it_smc_stat != smcStatMap.at(varName).end();
+          ++k, ++it_smc_stat)
+      {
+        curve_bench.x[k] = k;
+        curve_bench.y[k] = benchStatMap.at(varName)[k].ScalarView();
+        curve_smc.x[k] = k;
+        curve_smc.y[k] = it_smc_stat->second.ScalarView();
+      }
+
+      plot.SetTitle(String("SMC estimates vs. benchmarks of variable ") + varName);
+      plot.SetAxesLabels("index", varName);
+    }
+    else
+    {
+      Size len = smcStatMap.at(varName).size();
+
+      curve_bench.x.resize(len);
+      curve_bench.y.resize(len);
+      curve_smc.x.resize(len);
+      curve_smc.y.resize(len);
+
+      std::map<IndexRange, MultiArray>::const_iterator it_smc_stat = smcStatMap.at(varName).begin();
+      for (Size k=0; it_smc_stat != smcStatMap.at(varName).end();
+          ++k, ++it_smc_stat)
+      {
+        curve_bench.x[k] = benchStatMap.at(varName)[k].Values()[0];
+        curve_bench.y[k] = benchStatMap.at(varName)[k].Values()[1];
+        curve_smc.x[k] = it_smc_stat->second.Values()[0];
+        curve_smc.y[k] = it_smc_stat->second.Values()[1];
+      }
+
+      plot.SetTitle(String("SMC estimates vs. benchmarks of variable ") + varName + " (only the 2 first components)");
+      plot.SetAxesLabels(varName + " (1st component)", varName + " (2nd component)");
+    }
+
+    for (Size i=0; i<curves.size(); ++i)
+    {
+      plot.AddCurve(curves[i].x, curves[i].y, curves[i].legend,
+          curves[i].color, curves[i].lineWidth, curves[i].lineStyle,
+          curves[i].symbolWidth, curves[i].symbol);
+    }
+
+    plot.SetBackgroundColor(Qt::white);
+    plot.SetLegend(QwtPlot::RightLegend);
+    plot.Show();
+  }
+
+
+  void plotPdf(Console & console, const Types<String>::Array & monitoredVar, Bool verbose, Size numBins, Bool smooth)
+  {
+    std::map<String, std::map<IndexRange, ScalarHistogram> > pdf_map;
+
+    for (Size i=0; i<monitoredVar.size(); ++i)
+    {
+      const String & name = monitoredVar[i];
+
+      if (verbose)
+      {
+        if(!smooth)
+          cout << PROMPT_STRING << "Extracting filtering Pdf of variable " << name << endl;
+        else
+          cout << PROMPT_STRING << "Extracting smoothing Pdf of variable " << name << endl;
+      }
+
+      if(!smooth)
+      {
+        if(!console.ExtractFilterPdf(name, pdf_map[name], numBins, 1.0))
+
+          throw RuntimeError(String("Failed to extract filtering Pdf of variable ") + name);
+      }
+      else
+      {
+        if(!console.ExtractSmoothPdf(name, pdf_map[name], numBins, 1.0))
+          throw RuntimeError(String("Failed to extract smoothing Pdf of variable ") + name);
+      }
+
+      for (std::map<IndexRange, ScalarHistogram>::iterator it_pdf_map = pdf_map[name].begin();
+          it_pdf_map != pdf_map[name].end(); ++it_pdf_map)
+      {
+        Plot pdf_plot(0,0);
+        pdf_plot.AddHistogram(it_pdf_map->second, "", Qt::blue);
+        if(!smooth)
+        {
+          pdf_plot.SetTitle(String("Filtering Pdf histogram of variable: ") + name + print(it_pdf_map->first));
+        }
+        else
+        {
+          pdf_plot.SetTitle(String("Smoothing Pdf histogram of variable: ") + name + print(it_pdf_map->first));
+        }
+        pdf_plot.SetBackgroundColor(Qt::white);
+        pdf_plot.Show();
+      }
+    }
+  }
+
+
   Bool computeError(Scalar & error, const String & varName,
       const std::map<String, std::map<IndexRange, MultiArray> > & smcMeanValuesMap,
       const std::map<String, std::vector<MultiArray> > & benchValuesMap)
