@@ -10,7 +10,7 @@
 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE BiipsTest
+#define BOOST_TEST_MODULE BiipsTestCompiler
 #include <boost/test/unit_test.hpp>
 
 #include "config.hpp"
@@ -877,7 +877,7 @@ namespace Biips
       curve_bench.lineWidth = 1;
       curve_bench.lineStyle = Qt::SolidLine;
       curve_bench.symbolWidth = 7;
-      curve_bench.symbol = QwtSymbol::XCross;
+      curve_bench.symbol = QwtSymbol::Cross;
 
       curve_smc.legend = String("SMC filter ") + statName;
       curve_smc.color = Qt::blue;
@@ -893,7 +893,7 @@ namespace Biips
       curve_bench.lineWidth = 1;
       curve_bench.lineStyle = Qt::SolidLine;
       curve_bench.symbolWidth = 7;
-      curve_bench.symbol = QwtSymbol::XCross;
+      curve_bench.symbol = QwtSymbol::Cross;
 
       curve_smc.legend = String("SMC smooth ") + statName;
       curve_smc.color = Qt::cyan;
