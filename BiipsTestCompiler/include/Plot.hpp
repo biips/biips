@@ -37,27 +37,38 @@ namespace Biips
     Types<Types<QwtPlotCurve>::Ptr>::Array curves_;
     QwtLegend legend_;
 
-    void addCurveCore(const QwtArray<Scalar> & x_data, const QwtArray<Scalar> & y_data, String name, const QColor & color, uint lineWidth, Qt::PenStyle style, uint symbolSize, QwtSymbol::Style symbol);
+    void addCurveCore(const Scalar * x_data, const Scalar * y_data, Size lenght,
+        const String & name, const QColor & color, uint lineWidth, Qt::PenStyle style,
+        uint symbolSize, QwtSymbol::Style symbol, Bool antialiased, Bool smoothLine);
 
-    void addHistogramCore(const QwtArray<Scalar> & x_data, const QwtArray<Scalar> & y_data, String name, const QColor & color = Qt::blue);
+    void addHistogramCore(const Scalar * x_data, const Scalar * y_data, Size length,
+        const String & name, const QColor & color, Bool antialiased);
 
   public:
     Plot(int argc, char* argv[]);
     virtual ~Plot() {};
 
-    void AddCurve(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color = Qt::blue, uint width = 1, Qt::PenStyle style = Qt::SolidLine, uint symbolSize = 5, QwtSymbol::Style symbol = QwtSymbol::NoSymbol);
+    void AddCurve(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y,
+        const String & name, const QColor & color = Qt::blue, uint width = 1, Qt::PenStyle style = Qt::SolidLine,
+        uint symbolSize = 5, QwtSymbol::Style symbol = QwtSymbol::NoSymbol,
+        Bool antialiased = true, Bool smoothLine = false);
 
-    void AddCurve(const MultiArray::Array & x, const MultiArray::Array & y, String name, const QColor & color = Qt::blue, uint width = 1, Qt::PenStyle style = Qt::SolidLine, uint symbolSize = 5, QwtSymbol::Style symbol = QwtSymbol::NoSymbol);
+    void AddCurve(const MultiArray::Array & x, const MultiArray::Array & y,
+        const String & name, const QColor & color = Qt::blue, uint width = 1, Qt::PenStyle style = Qt::SolidLine,
+        uint symbolSize = 5, QwtSymbol::Style symbol = QwtSymbol::NoSymbol,
+        Bool antialiased = true, Bool smoothLine = false);
 
-    void AddHistogram(const ScalarHistogram & hist, String name, const QColor & color);
+    void AddHistogram(const ScalarHistogram & hist, const String & name, const QColor & color, Bool antialiased = false);
 
-    void AddHistogram(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color = Qt::blue);
+    void AddHistogram(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y,
+        const String & name, const QColor & color = Qt::blue, Bool antialiased = false);
 
-    void AddHistogram(const MultiArray::Array & x, const MultiArray::Array & y, String name, const QColor & color = Qt::blue);
+    void AddHistogram(const MultiArray::Array & x, const MultiArray::Array & y,
+        const String & name, const QColor & color = Qt::blue, Bool antialiased = false);
 
-    void SetTitle(const String & title);
+    void SetTitle(const String & title, Size size = 10, Size weight = 50);
 
-    void SetAxesLabels(const String & xlabel, const String & ylabel);
+    void SetAxesLabels(const String & xlabel, const String & ylabel, Size size = 10, Size weight = 50);
 
     void SetBackgroundColor(const QColor & c);
 
