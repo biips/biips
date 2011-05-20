@@ -207,7 +207,7 @@ namespace Biips
   void SMCSampler::Initialize()
   {
     if (!built_)
-      throw LogicError("Can not iterate SMCSampler: not built.");
+      throw LogicError("Can not initialize SMCSampler: not built.");
 
     t_ = 0;
 

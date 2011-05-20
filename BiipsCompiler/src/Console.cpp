@@ -62,6 +62,12 @@ using std::endl;
 namespace Biips
 {
 
+  Console::Console()
+    : out_(std::cout), err_(std::cerr), pData_(0), pRelations_(0),
+      pVariables_(0)
+  {
+  }
+
   Console::Console(std::ostream & out, std::ostream & err)
   : out_(out), err_(err), pData_(0), pRelations_(0),
     pVariables_(0)
@@ -540,7 +546,7 @@ namespace Biips
       if (verbose)
         p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
 
-      // filtering
+      // smoothing
       for (Size n=n_iter; n>0; --n)
       {
         pModel_->IterateBackwardSmoother();

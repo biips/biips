@@ -47,6 +47,7 @@ namespace Biips
      * @param err Output stream to which error messages will be printed.
      *
      */
+    Console();
     Console(std::ostream & out, std::ostream & err);
 
     ~Console();
