@@ -23,18 +23,15 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
-
     static const String NAME_;
 
     friend class DiscreteOptimalFactory;
 
-    explicit DiscreteOptimal(const Graph * pGraph) : NodeSampler(pGraph) {};
+    explicit DiscreteOptimal(const Graph & graph) : NodeSampler(graph) {};
+
+    virtual void sample(const StochasticNode & node);
 
   public:
-    virtual void Visit(const StochasticNode & node);
-    virtual Scalar LogWeight() { return logWeight_; };
-
     virtual const String & Name() const { return NAME_; };
 
     virtual ~DiscreteOptimal() {};
@@ -55,7 +52,7 @@ namespace Biips
 
   public:
     static BaseType::Ptr Instance() { return pDiscreteOptimalFactoryInstance_; };
-    virtual Bool Create(const Graph * pGraph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
+    virtual Bool Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
   };
 
 }

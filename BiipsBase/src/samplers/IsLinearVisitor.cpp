@@ -9,6 +9,7 @@
 */
 
 #include "samplers/IsLinearVisitor.hpp"
+#include "graph/NodeVisitor.hpp"
 #include "graph/Graph.hpp"
 #include "sampler/NodesRelationVisitor.hpp"
 #include "graph/StochasticNode.hpp"
@@ -23,213 +24,158 @@
 namespace Biips
 {
 
-  const std::map<String, IsLinearVisitor::LinearFuncType> & IsLinearVisitor::LinearFuncMap()
+  const std::map<String, LinearFuncType> & linearFuncMap()
   {
-    static std::map<String, LinearFuncType> linearFuncMap;
-    if ( linearFuncMap.empty() )
+    static std::map<String, LinearFuncType> linear_func_map;
+    if ( linear_func_map.empty() )
     {
-      linearFuncMap[Multiply::Instance()->Name()] = MULTIPLY;
-      linearFuncMap[Add::Instance()->Name()] = ADD;
-      linearFuncMap[MatMult::Instance()->Name()] = MAT_MULT;
-      linearFuncMap[Subtract::Instance()->Name()] = SUBSTRACT;
-      linearFuncMap[Divide::Instance()->Name()] = DIVIDE;
-      linearFuncMap[Neg::Instance()->Name()] = NEG;
+      linear_func_map[Multiply::Instance()->Name()] = MULTIPLY;
+      linear_func_map[Add::Instance()->Name()] = ADD;
+      linear_func_map[MatMult::Instance()->Name()] = MAT_MULT;
+      linear_func_map[Subtract::Instance()->Name()] = SUBSTRACT;
+      linear_func_map[Divide::Instance()->Name()] = DIVIDE;
+      linear_func_map[Neg::Instance()->Name()] = NEG;
     }
-    return linearFuncMap;
+    return linear_func_map;
   }
 
 
-  void IsLinearVisitor::Visit(const StochasticNode & node)
+  // --------------------------------------------------------------
+  // Is Linear
+  // --------------------------------------------------------------
+
+  class IsLinearVisitor : public ConstNodeVisitor
   {
-    if ( nodeIdDefined_ ) // TODO manage else case : throw exception
-    {
-      if ( nodeId_ == myId_ )
-        ans_ = true;
-      else
-        ans_ = false;
-    }
+  public:
+    typedef IsLinearVisitor SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+
+  protected:
+    const Graph & graph_;
+    NodeId myId_;
+    Bool ans_;
+
+    virtual void visit(const ConstantNode & node) { ans_ = false; }
+
+    virtual void visit(const StochasticNode & node);
+
+    virtual void visit(const LogicalNode & node);
+
+  public:
+    Bool IsLinear() const { return ans_; }
+
+    IsLinearVisitor(const Graph & graph, NodeId myId)
+    : graph_(graph), myId_(myId), ans_(false) {}
+  };
+
+
+  void IsLinearVisitor::visit(const StochasticNode & node)
+  {
+    ans_ = (nodeId_ == myId_);
   }
 
 
-  void IsLinearVisitor::Visit(const LogicalNode & node)
+  void IsLinearVisitor::visit(const LogicalNode & node)
   {
     ans_ = false;
-    std::map<String, IsLinearVisitor::LinearFuncType>::const_iterator it_func_type = LinearFuncMap().find(node.FuncName());
-    if ( it_func_type != LinearFuncMap().end() )
+
+    GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+    boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
+
+    Size n_par = std::distance(it_parents, it_parents_end);
+    Flags parents_linear(n_par, false);
+    Flags parents_known(n_par, false);
+
+    for (Size i=0; i<n_par; ++i)
     {
-      switch ( it_func_type->second )
-      {
-        case MULTIPLY:
-        {
-          // Exactly one parent must be DEPENDING and linear.
-          // the other parents must be KNOWN and scalar
-          ans_ = true;
-          Bool depending_is_found = false;
-          for (Size i=0; i<node.Parents().size() && ans_; ++i)
-          {
-            NodeId operand_id = node.Parents()[i];
-            switch( nodesRelation(operand_id, myId_, pGraph_) )
-            {
-              case KNOWN:
-              {
-                ans_ = pGraph_->GetNode(operand_id).Dim().IsScalar();
-                break;
-              }
-              case DEPENDING:
-              {
-                if (!depending_is_found)
-                {
-                  depending_is_found = true;
-                  SelfType op_is_linear_vis(pGraph_, myId_);
-                  pGraph_->VisitNode(operand_id, op_is_linear_vis);
-                  ans_ = op_is_linear_vis.IsLinear();
-                }
-                else
-                  ans_ = false;
-                break;
-              }
-              default:
-                ans_ = false;
-                break;
-            }
-          }
-
-          if (!depending_is_found)
-            ans_ = false;
-
-          break;
-        }
-
-        case ADD:
-        {
-          // Parents must be KNOWN or DEPENDING and linear.
-          // At least one parent must be DEPENDING and linear.
-          ans_ = true;
-          Bool depending_is_found = false;
-          for (Size i=0; i<node.Parents().size() && ans_; ++i)
-          {
-            NodeId operand_id = node.Parents()[i];
-            switch( nodesRelation(operand_id, myId_, pGraph_) )
-            {
-              case KNOWN:
-              {
-                break;
-              }
-              case DEPENDING:
-              {
-                depending_is_found = true;
-                SelfType op_is_linear_vis(pGraph_, myId_);
-                pGraph_->VisitNode(operand_id, op_is_linear_vis);
-                ans_ = op_is_linear_vis.IsLinear();
-                break;
-              }
-              default:
-                ans_ = false;
-                break;
-            }
-          }
-
-          if (!depending_is_found)
-            ans_ = false;
-
-          break;
-        }
-
-        case SUBSTRACT:
-        {
-          NodeId left_operand_id = node.Parents()[0];
-          NodeId right_operand_id = node.Parents()[1];
-          switch( nodesRelation(left_operand_id, myId_, pGraph_) )
-          {
-            case KNOWN:
-            {
-              SelfType right_op_is_linear_vis(pGraph_, myId_);
-              pGraph_->VisitNode(right_operand_id, right_op_is_linear_vis);
-              ans_ = right_op_is_linear_vis.IsLinear();
-              break;
-            }
-            case DEPENDING:
-            {
-              SelfType op_is_linear_vis(pGraph_, myId_);
-              pGraph_->VisitNode(left_operand_id, op_is_linear_vis);
-              if ( op_is_linear_vis.IsLinear() )
-              {
-                if ( nodesRelation(right_operand_id, myId_, pGraph_) == KNOWN  )
-                  ans_ = true;
-                else
-                {
-                  pGraph_->VisitNode(right_operand_id, op_is_linear_vis);
-                  ans_ = op_is_linear_vis.IsLinear();
-                }
-              }
-              break;
-            }
-            default:
-              ans_ = false;
-              break;
-          }
-          break;
-        }
-
-        case MAT_MULT:
-        {
-          NodeId left_operand_id = node.Parents()[0];
-          NodeId right_operand_id = node.Parents()[1];
-          if ( nodesRelation(left_operand_id, myId_, pGraph_) == KNOWN )
-          {
-            SelfType right_op_is_linear_vis(pGraph_, myId_);
-            pGraph_->VisitNode(right_operand_id, right_op_is_linear_vis);
-            ans_ = right_op_is_linear_vis.IsLinear();
-          }
-          else
-            ans_ = false;
-          break;
-        }
-
-        case DIVIDE:
-        {
-          NodeId left_operand_id = node.Parents()[0];
-          NodeId right_operand_id = node.Parents()[1];
-          if ( nodesRelation(right_operand_id, myId_, pGraph_) == KNOWN )
-          {
-            if ( pGraph_->GetNode(right_operand_id).Dim().IsScalar() )
-            {
-              SelfType left_op_is_linear_vis(pGraph_, myId_);
-              pGraph_->VisitNode(left_operand_id, left_op_is_linear_vis);
-              ans_ = left_op_is_linear_vis.IsLinear();
-            }
-            else
-              ans_ = false;
-          }
-          else
-            ans_ = false;
-          break;
-        }
-
-        case NEG:
-        {
-          NodeId operand_id = node.Parents()[0];
-          SelfType op_is_linear_vis(pGraph_, myId_);
-          pGraph_->VisitNode(operand_id, op_is_linear_vis);
-          ans_ = op_is_linear_vis.IsLinear();
-          break;
-        }
-
-        default:
-          ans_ = false;
-          break;
-      }
+      SelfType is_linear_vis(graph_, myId_);
+      graph_.VisitNode(*it_parents, is_linear_vis);
+      parents_linear[i] = is_linear_vis.IsLinear();
+      NodesRelationType parent_rel = nodesRelation(*it_parents, myId_, graph_);
+      if (parent_rel == UNKNOWN)
+        return;
+      parents_known[i] = (parent_rel == KNOWN);
     }
+
+    ans_ = node.IsLinear(parents_linear, parents_known);
   }
 
 
   // nodeB is expected to be a StochasticNode from the nodeSequence
-  Bool isLinear(NodeId nodeA, NodeId nodeB, const Graph * pGraph)
+  Bool isLinear(NodeId nodeA, NodeId nodeB, const Graph & graph)
   {
-    IsLinearVisitor vis(pGraph, nodeB);
-    pGraph->VisitNode(nodeA, vis);
+    IsLinearVisitor vis(graph, nodeB);
+    graph.VisitNode(nodeA, vis);
     return vis.IsLinear();
   }
 
 
+  // --------------------------------------------------------------
+  // Is Scale
+  // --------------------------------------------------------------
+
+  class IsScaleVisitor : public ConstNodeVisitor
+    {
+    public:
+      typedef IsScaleVisitor SelfType;
+      typedef Types<SelfType>::Ptr Ptr;
+
+    protected:
+      const Graph & graph_;
+      NodeId myId_;
+      Bool ans_;
+
+      virtual void visit(const ConstantNode & node) { ans_ = false; }
+
+      virtual void visit(const StochasticNode & node);
+
+      virtual void visit(const LogicalNode & node);
+
+    public:
+      Bool IsScale() const { return ans_; }
+
+      IsScaleVisitor(const Graph & graph, NodeId myId)
+      : graph_(graph), myId_(myId), ans_(false) {}
+    };
+
+
+    void IsScaleVisitor::visit(const StochasticNode & node)
+    {
+      ans_ = (nodeId_ == myId_);
+    }
+
+
+    void IsScaleVisitor::visit(const LogicalNode & node)
+    {
+      ans_ = false;
+
+      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
+
+      Size n_par = std::distance(it_parents, it_parents_end);
+      Flags parents_scale(n_par, false);
+      Flags parents_known(n_par, false);
+
+      for (Size i=0; i<n_par; ++i)
+      {
+        SelfType is_scale_vis(graph_, myId_);
+        graph_.VisitNode(*it_parents, is_scale_vis);
+        parents_scale[i] = is_scale_vis.IsScale();
+        NodesRelationType parent_rel = nodesRelation(*it_parents, myId_, graph_);
+        if (parent_rel == UNKNOWN)
+          return;
+        parents_known[i] = (parent_rel == KNOWN);
+      }
+
+      ans_ = node.IsScale(parents_scale, parents_known);
+    }
+
+
+    // nodeB is expected to be a StochasticNode from the nodeSequence
+    Bool isScale(NodeId nodeA, NodeId nodeB, const Graph & graph)
+    {
+      IsScaleVisitor vis(graph, nodeB);
+      graph.VisitNode(nodeA, vis);
+      return vis.IsScale();
+    }
 }

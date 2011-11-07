@@ -7,19 +7,19 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS NodeArray class
+ * COPY: Adapted from JAGS NodeArray class
  */
 
 #include "common/IndexRangeIterator.hpp"
 #include "model/NodeArray.hpp"
 #include "graph/Graph.hpp"
-#include "print/outputStream.hpp"
+#include "iostream/outStream.hpp"
 
 namespace Biips
 {
 
-  NodeArray::NodeArray(const String & name, Graph * pGraph, const DimArray & dim)
-   : name_(name), pGraph_(pGraph), range_(dim), nodeIds_(dim.Length(), NULL_NODEID), offsets_(dim.Length(), BIIPS_SIZENA)
+  NodeArray::NodeArray(const String & name, Graph & graph, const DimArray & dim)
+   : name_(name), graph_(graph), range_(dim), nodeIds_(dim.Length(), NULL_NODEID), offsets_(dim.Length(), BIIPS_SIZENA)
   {
   }
 
@@ -32,7 +32,7 @@ namespace Biips
       throw LogicError("Range error in NodeArray::IsEmpty");
 
     for (IndexRangeIterator it(targetRange); !it.AtEnd(); it.Next())
-      if (offsets_.at(range_.GetOffset(it)) != BIIPS_SIZENA)
+      if (nodeIds_.at(range_.GetOffset(it)) != NULL_NODEID)
         return false;
     return true;
     // COPY: ********** to here **********
@@ -40,14 +40,17 @@ namespace Biips
 
   void NodeArray::Insert(NodeId nodeId, const IndexRange & targetRange)
   {
-    if (nodeId >= pGraph_->GetSize() )
+    if (nodeId >= graph_.GetSize() )
       throw LogicError(String("Attempt to insert non existing node at ") + name_ +
           print(targetRange));
 
     // COPY: Copied an pasted from NodeArray::insert function of JAGS
     // and then modified to fit Biips code
     // COPY: ********** from here **********
-    if (pGraph_->GetNode(nodeId).Dim() != targetRange.Dim(true))
+    if (nodeId == NULL_NODEID)
+      throw LogicError(String("Attempt to insert NULL node at ") + name_ +
+          print(targetRange));
+    if (graph_.GetNode(nodeId).Dim() != targetRange.Dim(true))
       throw RuntimeError(String("Cannot insert node into ") + name_ +
           print(targetRange) + ". Dimension mismatch");
     if (!range_.Contains(targetRange))
@@ -71,72 +74,73 @@ namespace Biips
   }
 
 
-//  Bool NodeArray::findActiveIndices(Types<Size>::Array & ind, Size k,
-//      const IndexRange::Indices & lower, const DimArray & dim) const
-//  {
-//    // COPY: Copied an pasted from NodeArray::findActiveIndices function of JAGS
-//    // and then modified to fit Biips code
-//    // COPY: ********** from here **********
-//
-//    /*
-//       We pay a heavy computational price for the flexibility of
-//       allowing users to insert multivariate nodes in arbritary
-//       ways into the NodeArray.
-//
-//       Suppose we have an array of dimension [3,4,2,5], the lower index
-//       is [1,2,1,2] and the dimension of the node is [3,2]. Then the
-//       node could be inserted in 5 different ways.
-//
-//       [1:3, 2:3, 1, 2] Active indices (0,1)
-//       [1:3, 2, 1:2, 2]                (0,2)
-//       [1:3, 2, 1, 2:3]                (0,3)
-//       [1, 2:4, 1:2, 2]                (1,2)
-//       [1, 2:4, 1, 2:3]                (1,3)
-//
-//       We can't have active indices (2,3) because the node won't fit
-//    */
-//
-//    if (k == 0)
-//      ind[k] = 0;
-//    else
-//      ind[k] = ind[k-1] + 1;
-//    Size m = ind.size();
-//    Size M = range_.NDim(false);
-//    for (;ind[k] + m <= M + k; ind[k] += 1)
-//    {
-//      if (k == m - 1) {
-//        IndexRange::Indices upper(lower);
-//        for (Size l = 0; l < m; ++l)
-//        {
-//          upper[ind[l]] = upper[ind[l]] + dim[l] - 1;
-//        }
-//        IndexRange test_range(lower, upper);
-//        if (range_.Contains(test_range))
-//        {
-//          NodeId nodeId = nodeIds_[range_.GetOffset(lower)];
-//          Size j = 0;
-//          Bool ok = true;
-//          for (IndexRangeIterator i(test_range); !i.AtEnd(); i.Next(), ++j)
-//          {
-//            Size offset = range_.GetOffset(i);
-//            if (nodeIds_[offset] != nodeId || offsets_[offset] != j)
-//            {
-//              ok = false;
-//              break;
-//            }
-//          }
-//          if (ok)
-//            return true;
-//        }
-//      }
-//      else {
-//        if (findActiveIndices(ind, k+1, lower, dim))
-//          return true;
-//      }
-//    }
-//    return false;
-//    // COPY: ********** to here **********
-//  }
+  Bool NodeArray::findActiveIndices(Types<Size>::Array & ind, Size k,
+      const IndexRange::Indices & lower, const DimArray & dim) const
+  {
+    // COPY: Copied an pasted from NodeArray::findActiveIndices function of JAGS
+    // and then modified to fit Biips code
+    // COPY: ********** from here **********
+
+    /*
+       We pay a heavy computational price for the flexibility of
+       allowing users to insert multivariate nodes in arbritary
+       ways into the NodeArray.
+
+       Suppose we have an array of dimension [3,4,2,5], the lower index
+       is [1,2,1,2] and the dimension of the node is [3,2]. Then the
+       node could be inserted in 5 different ways.
+
+       [1:3, 2:3, 1, 2] Active indices (0,1)
+       [1:3, 2, 1:2, 2]                (0,2)
+       [1:3, 2, 1, 2:3]                (0,3)
+       [1, 2:4, 1:2, 2]                (1,2)
+       [1, 2:4, 1, 2:3]                (1,3)
+
+       We can't have active indices (2,3) because the node won't fit
+    */
+
+    if (k == 0)
+      ind[k] = 0;
+    else
+      ind[k] = ind[k-1] + 1;
+    Size m = ind.size();
+    Size M = range_.NDim(false);
+    for (;ind[k] + m <= M + k; ind[k] += 1)
+    {
+      if (k == m - 1)
+      {
+        IndexRange::Indices upper(lower);
+        for (Size l = 0; l < m; ++l)
+          upper[ind[l]] = upper[ind[l]] + dim[l] - 1;
+
+        IndexRange test_range(lower, upper);
+        if (range_.Contains(test_range))
+        {
+          NodeId nodeId = nodeIds_[range_.GetOffset(lower)];
+          Size j = 0;
+          Bool ok = true;
+          for (IndexRangeIterator i(test_range); !i.AtEnd(); i.Next(), ++j)
+          {
+            Size offset = range_.GetOffset(i);
+            if (nodeIds_[offset] != nodeId || offsets_[offset] != j)
+            {
+              ok = false;
+              break;
+            }
+          }
+          if (ok)
+            return true;
+        }
+      }
+      else
+      {
+        if (findActiveIndices(ind, k+1, lower, dim))
+          return true;
+      }
+    }
+    return false;
+    // COPY: ********** to here **********
+  }
 
 
   NodeId NodeArray::GetSubset(const IndexRange & subsetRange)//, Model & model)
@@ -167,8 +171,8 @@ namespace Biips
       parent_node_ids.push_back(nodeIds_[offset]);
       offsets.push_back(offsets_.at(offset));
     }
-    node_id = pGraph_->AddAggNode(subsetRange.Dim(true), parent_node_ids, offsets);
-    //model.addNode(node_id);
+    DimArray::Ptr p_dim(new DimArray(subsetRange.Dim(true)));
+    node_id = graph_.AddAggNode(p_dim, parent_node_ids, offsets);
     // COPY: ********** to here **********
 
     typedef boost::bimap<NodeId, IndexRange>::value_type Val;
@@ -195,57 +199,45 @@ namespace Biips
 
   const IndexRange & NodeArray::GetRange(NodeId nodeId) const
   {
+    //Look in the generated nodes first
     boost::bimap<NodeId, IndexRange>::left_const_iterator it = nodeIdRangeBimap_.left.find(nodeId);
     if (it != nodeIdRangeBimap_.left.end())
       return it->second;
-    else
+
+    // COPY: Copied an pasted from NodeArray::getRange function of JAGS
+    // and then modified to fit Biips code
+    // COPY: ********** from here **********
+    /* Find the lower limit of the range. This is easy */
+    Size ndim = range_.NDim(false);
+    IndexRange::Indices lower(ndim);
+    Size j = 0;
+    for (; j < range_.Length(); ++j)
+    {
+      if (nodeIds_[j] == nodeId)
+      {
+        lower = range_.GetIndex(j);
+        break;
+      }
+    }
+    if (j == range_.Length())
       return NULL_RANGE;
 
-//    // COPY: Copied an pasted from NodeArray::getRange function of JAGS
-//    // and then modified to fit Biips code
-//    // COPY: ********** from here **********
-//
-//    //Look in the generated nodes first
-//    for (std::map<IndexRange, NodeId>::const_iterator p = generatedSubsets_.begin();
-//        p != generatedSubsets_.end(); ++p)
-//    {
-//      if (nodeId == p->second)
-//        return p->first;
-//    }
-//
-//    /* Find the lower limit of the range. This is easy */
-//    Size ndim = range_.NDim(false);
-//    IndexRange::Indices lower(ndim);
-//    Size j = 0;
-//    for (; j < range_.Length(); ++j)
-//    {
-//      if (nodeIds_[j] == nodeId)
-//      {
-//        lower = range_.GetIndex(j);
-//        break;
-//      }
-//    }
-//    if (j == range_.Length())
-//    {
-//      return NULL_RANGE;
-//    }
-//
-//    ndim = pGraph_->GetNode(nodeId).Dim().size();
-//    Types<Size>::Array ind(ndim, 1);
-//    if (findActiveIndices(ind, 0, lower, pGraph_->GetNode(nodeId).Dim()))
-//    {
-//      IndexRange::Indices upper = lower;
-//      for (Size l = 0; l < ndim; ++l)
-//      {
-//        upper[ind[l]] = upper[ind[l]] + pGraph_->GetNode(nodeId).Dim()[l] - 1;
-//      }
-//      return IndexRange(lower, upper);
-//    }
-//    else
-//    {
-//      throw LogicError("Unable to find node range");
-//    }
-//    // COPY: ********** to here **********
+    ndim = graph_.GetNode(nodeId).Dim().size();
+    Types<Size>::Array ind(ndim, 1);
+    if (findActiveIndices(ind, 0, lower, graph_.GetNode(nodeId).Dim()))
+    {
+      IndexRange::Indices upper = lower;
+      for (Size l = 0; l < ndim; ++l)
+      {
+        upper[ind[l]] = upper[ind[l]] + graph_.GetNode(nodeId).Dim()[l] - 1;
+      }
+      return IndexRange(lower, upper);
+    }
+    else
+    {
+      throw LogicError("Unable to find node range");
+    }
+    // COPY: ********** to here **********
   }
 
   void NodeArray::SetData(const MultiArray & value)//, Model & model)
@@ -268,8 +260,8 @@ namespace Biips
         if (nodeIds_[i] == NULL_NODEID)
         {
           //Insert a new constant node
-          ValArray::Ptr pVal(new ValArray(1, x[i]));
-          NodeId cnode_id = pGraph_->AddConstantNode(P_SCALAR_DIM, pVal);
+          ValArray::Ptr p_val(new ValArray(1, x[i]));
+          NodeId cnode_id = graph_.AddConstantNode(P_SCALAR_DIM, p_val);
           //model.addNode(cnode_id);
           Insert(cnode_id, IndexRange(range_.GetIndex(i)));
         }
@@ -286,7 +278,7 @@ namespace Biips
     {
       //Step through each node
       NodeId node_id = *p;
-      Size len = pGraph_->GetNode(node_id).Dim().Length();
+      Size len = graph_.GetNode(node_id).Dim().Length();
       ValArray::Ptr p_node_value(new ValArray(len));
 
       //Get vector of values for this node
@@ -309,7 +301,7 @@ namespace Biips
       }
       if (!missing)
       {
-        pGraph_->SetObsValue(node_id, p_node_value);
+        graph_.SetObsValue(node_id, p_node_value);
       }
     }
     // COPY: ********** to here **********

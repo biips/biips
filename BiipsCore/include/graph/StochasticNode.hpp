@@ -17,16 +17,6 @@
 namespace Biips
 {
 
-  //! StochasticNode concrete class
-  /*!
-   * Represents a stochastic node in a DAG, defined by a distribution.
-   *
-   * This type of node is defined by ~ operator in BUGS language,
-   * followed by a distribution identifier
-   * and its parameters between parentheses.
-   * For example :
-   * x ~ dnorm(mu, var)
-   */
   class StochasticNode : public Node
   {
   public:
@@ -38,22 +28,29 @@ namespace Biips
     typedef MultiArray::StorageType StorageType;
 
     Distribution::Ptr pPrior_;
+    NodeId lowerNodeId_;
+    NodeId upperNodeId_;
 
   public:
     virtual NodeType GetType() const { return STOCHASTIC; };
     virtual void AcceptVisitor(NodeVisitor & vis);
     virtual void AcceptVisitor(ConstNodeVisitor & vis) const;
 
+    const Distribution::Ptr & PriorPtr() const { return pPrior_; };
     const String & PriorName() const { return pPrior_->Name(); };
 
-    MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const { return pPrior_->Sample(paramValues, pRng); };
-    Scalar LogPriorPdf(const MultiArray & x, const MultiArray::Array & paramValues) const { return pPrior_->LogPdf(x, paramValues); };
+    MultiArray Sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const { return pPrior_->Sample(paramValues, boundValues, rng); }
+    Scalar LogPriorDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const { return pPrior_->LogDensity(x, paramValues, boundValues); }
+    MultiArray::Pair UnboundedSupport(const MultiArray::Array & paramValues) const { return pPrior_->UnboundedSupport(paramValues); }
 
-    StochasticNode(const DimArray::Ptr pDim, const Distribution::Ptr & pPrior, const Types<NodeId>::Array & parameters) : Node(pDim, parameters), pPrior_(pPrior) {}
+    Bool IsLowerBounded() const { return lowerNodeId_ != NULL_NODEID; }
+    Bool IsUpperBounded() const { return upperNodeId_ != NULL_NODEID; }
+    Bool IsBounded() const { return IsLowerBounded() || IsUpperBounded(); }
+
+    StochasticNode(const DimArray::Ptr pDim, const Distribution::Ptr & pPrior, const Types<NodeId>::Array & parameters, NodeId lower = NULL_NODEID, NodeId upper = NULL_NODEID);
 
     virtual ~StochasticNode() {};
   };
-
 
 } /* namespace Biips */
 

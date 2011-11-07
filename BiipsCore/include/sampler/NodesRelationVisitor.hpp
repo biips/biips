@@ -11,11 +11,10 @@
 #ifndef BIIPS_NODESRELATIONVISITOR_HPP_
 #define BIIPS_NODESRELATIONVISITOR_HPP_
 
-#include "graph/NodeVisitor.hpp"
+#include "graph/GraphTypes.hpp"
 
 namespace Biips
 {
-
   class Graph;
 
   //! Nodes relation function
@@ -26,13 +25,14 @@ namespace Biips
    * This is particularly useful when establishing conjugacy relations
    * between stochastic nodes.
    * @param nodeA we look at nodeA from nodeB point of view.
-   * @param nodeB is expected to be a StochasticNode from the nodes sequence of the SMCSampler object.
-   * @param pGraph the Graph pointer to which we refer.
+   * @param nodeB is expected to be a StochasticNode from the nodes sequence of the ForwardSampler object.
+   * @param graph the Graph pointer to which we refer.
    * @return KNOWN, DEPENDING, or UNKNOWN
    * \see NodesRelationType
    */
-  NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph * pGraph);
+  NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph & graph);
 
+//  Types<NodesRelationType>::Array getParentnodesRelations(NodeId nodeId, const Graph & graph);
 }
 
 #endif /* BIIPS_NODESRELATIONVISITOR_HPP_ */

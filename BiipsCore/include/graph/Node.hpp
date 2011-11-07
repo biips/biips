@@ -15,15 +15,12 @@
 
 namespace Biips
 {
-  //! Type of node enumeration
-  /*!
-   * Nodes can be of three types.
-   */
+
   enum NodeType // FIXME useless with visitor pattern ?
   {
-    STOCHASTIC, //!< corresponds to StochasticNode type
-    LOGICAL, //!< corresponds to LogicalNode type
-    CONSTANT //!< corresponds to ConstantNode type
+    STOCHASTIC,
+    LOGICAL,
+    CONSTANT
   };
 
 
@@ -31,14 +28,6 @@ namespace Biips
   class ConstNodeVisitor;
 
 
-  //! Node abstract class
-  /*!
-   * Node class represents a node in a directed acyclic graph
-   * defining a stochastic model.
-   *
-   * Each Node object have a dimension array member
-   * and a parents array member.
-   */
   class Node
   {
   protected:
@@ -63,8 +52,8 @@ namespace Biips
     virtual void AcceptVisitor(NodeVisitor & vis) = 0;
     virtual void AcceptVisitor(ConstNodeVisitor & vis) const = 0;
 
-    explicit Node(const DimArray::Ptr & pDim) : pDim_(pDim) {}
-    Node(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parents) : pDim_(pDim), parents_(parents) {}
+    explicit Node(const DimArray::Ptr & pDim);
+    Node(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parents);
 
     virtual ~Node() {};
 

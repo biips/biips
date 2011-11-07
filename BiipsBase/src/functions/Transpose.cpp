@@ -19,9 +19,8 @@ namespace Biips
   }
 
 
-  MultiArray Transpose::Eval(const MultiArray::Array & paramValues) const
+  MultiArray Transpose::eval(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
     const MultiArray & val = paramValues[0];
 
     MultiArray ans(ublas::trans(Matrix(val)));

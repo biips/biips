@@ -17,13 +17,6 @@
 namespace Biips
 {
 
-  //! LogicalNode concrete class
-  /*!
-   * LogicalNode objects are deterministic nodes in a DAG, defined by
-   * a Function.
-   *
-   * This type of node can be defined by <- operator in BUGS language.
-   */
   class LogicalNode : public Node
   {
   public:
@@ -37,6 +30,9 @@ namespace Biips
 
     virtual const String & FuncName() const = 0;
     virtual MultiArray Eval(const MultiArray::Array & paramValues) const = 0;
+    virtual Bool IsFunction() const { return true; }
+    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const = 0;
+    virtual Bool IsLinear(const Flags & linearMask, const Flags & knownMask) const = 0;
 
     LogicalNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters) : Node(pDim, parameters) {}
 

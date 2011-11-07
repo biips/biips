@@ -18,6 +18,6 @@
 #include "Vector.hpp"
 #include "Matrix.hpp"
 #include "Utility.hpp"
-#include "Rng.hpp"
+#include "rng/Rng.hpp"
 
 #endif /* BIIPS_COMMON_HPP_ */

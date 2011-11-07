@@ -7,70 +7,66 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Console class
+ * COPY: Adapted from JAGS Console class
  */
 
 #include "Console.hpp"
 #include "compiler/Compiler.hpp"
-#include "print/outputStream.hpp"
+#include "iostream/outStream.hpp"
 
 // FIXME to be removed. Manage dynamically loaded modules
 #include "BiipsBase.hpp"
 
 #include "compiler/parser_extra.h"
 
+#include <cstdio>
 #include <boost/progress.hpp>
 
-// ********** Debug **********
-//#include "printParseTree.hpp"
-// ********** End Debug **********
+#ifdef BIIPS_COMPILER_DEBUG_ON
+#include "printParseTree.hpp"
+#endif
 
 using std::endl;
 
 // FIXME
-#define BIIPS_CONSOLE_CATCH_ERRORS                                  \
-  catch (RuntimeError & except)                                     \
-  {                                                                 \
-    err_ << "RUNTIME ERROR: " << except.what() << endl;             \
-    ClearModel();                                                   \
-    return false;                                                   \
-  }                                                                 \
-  catch (NodeError & except)                                        \
-  {                                                                 \
-    err_ << "LOGIC ERROR: in node " <<                              \
-        pModel_->GetSymbolTable().GetName(except.nodeId_) << endl;  \
-    err_ << except.what() << endl;                                  \
-    ClearModel();                                                   \
-    return false;                                                   \
-  }                                                                 \
-  catch (LogicError & except)                                       \
-  {                                                                 \
-    err_ << "LOGIC ERROR: " << except.what() << endl;               \
-    /*err_ << "Please send a bug report to "                          \
+#define BIIPS_CONSOLE_CATCH_ERRORS                                    \
+    catch (NodeError & except)                                        \
+    {                                                                 \
+      err_ << "Error in node " <<                                     \
+      pModel_->GetSymbolTable().GetName(except.GetNodeId()) << endl;  \
+      err_ << except.what() << endl;                                  \
+      ClearModel();                                                   \
+      return false;                                                   \
+    }                                                                 \
+    catch (RuntimeError & except)                                     \
+    {                                                                 \
+      err_ << "RUNTIME ERROR: " << except.what() << endl;             \
+      ClearModel();                                                   \
+      return false;                                                   \
+    }                                                                 \
+    catch (LogicError & except)                                       \
+    {                                                                 \
+      err_ << "LOGIC ERROR: " << except.what() << endl;               \
+      /*err_ << "Please send a bug report to "                          \
          << PACKAGE_BUGREPORT << endl;*/                              \
-    ClearModel();                                                   \
-    return false;                                                   \
-  }/*                                                                 \
-  catch(const std::exception & e)                                   \
-  {                                                                 \
-    std::cerr << "STD ERROR: " << e.what() << endl;                 \
-    ClearModel();                                                   \
-    return false;                                                   \
+    ClearModel();                                                     \
+    return false;                                                     \
+    }/*                                                                 \
+  catch(const std::exception & e)                                     \
+  {                                                                   \
+    std::cerr << "STD ERROR: " << e.what() << endl;                   \
+    ClearModel();                                                     \
+    return false;                                                     \
   }*/
 
 
 namespace Biips
 {
 
-  Console::Console()
-    : out_(std::cout), err_(std::cerr), pData_(0), pRelations_(0),
-      pVariables_(0)
-  {
-  }
 
   Console::Console(std::ostream & out, std::ostream & err)
-  : out_(out), err_(err), pData_(0), pRelations_(0),
-    pVariables_(0)
+  : out_(out), err_(err), pData_(NULL), pRelations_(NULL),
+    pVariables_(NULL)
   {
   }
 
@@ -78,15 +74,15 @@ namespace Biips
   void Console::clearParseTrees()
   {
     delete pData_;
-    pData_ = 0;
+    pData_ = NULL;
     delete pRelations_;
-    pRelations_ = 0;
+    pRelations_ = NULL;
     if (pVariables_)
     {
       for (Size i = 0; i < pVariables_->size(); ++i)
         delete (*pVariables_)[i];
       delete pVariables_;
-      pVariables_ = 0;
+      pVariables_ = NULL;
     }
   }
 
@@ -148,47 +144,59 @@ namespace Biips
   }
 
 
-  Bool Console::CheckModel(std::FILE * file, Bool verbose)
+  Bool Console::CheckModel(const String & modelFileName, Bool verbose)
   {
-    if (pModel_)
+    if (pRelations_ || pData_ || pVariables_)
     {
-      if (verbose)
-        out_ << PROMPT_STRING << "Replacing existing model" << endl;
-      ClearModel();
+      clearParseTrees();
+
+      if (pModel_)
+      {
+        if (verbose)
+          out_ << PROMPT_STRING << "Replacing existing model" << endl;
+        ClearModel();
+      }
     }
 
-    String message;
-    int status =  parse_bugs(file, pVariables_, pData_, pRelations_, message);
+    FILE * model_file = fopen(modelFileName.c_str(), "r");
 
-    // ********** Debug **********
-//    out_ << "============================" << endl;
-//    out_ << "Parsed variables:" << endl;
-//    out_ << "-----------------" << endl;
-//    if (pVariables_)
-//    {
-//      for (std::vector<ParseTree*>::iterator it_pvar = pVariables_->begin(); it_pvar != pVariables_->end(); ++it_pvar)
-//      {
-//        printParseTree(out_, *it_pvar);
-//        out_ << endl;
-//      }
-//    }
-//
-//    out_ << "Parsed data:" << endl;
-//    out_ << "------------" << endl;
-//    if (pData_)
-//    {
-//      printParseTree(out_, pData_);
-//    }
-//
-//    out_ << endl;
-//    out_ << "Parsed relations:" << endl;
-//    out_ << "-----------------" << endl;
-//    if (pRelations_)
-//    {
-//      printParseTree(out_, pRelations_);
-//    }
-//    out_ << "============================" << endl;
-    // ********** End Debug **********
+    if (!model_file)
+      throw RuntimeError(String("Failed to open file: ") + modelFileName);
+
+    String message;
+    int status =  parse_bugs(model_file, pVariables_, pData_, pRelations_, message);
+
+    fclose(model_file);
+
+#ifdef BIIPS_COMPILER_DEBUG_ON
+    out_ << "============================" << endl;
+    out_ << "Parsed variables:" << endl;
+    out_ << "-----------------" << endl;
+    if (pVariables_)
+    {
+      for (std::vector<ParseTree*>::iterator it_pvar = pVariables_->begin(); it_pvar != pVariables_->end(); ++it_pvar)
+      {
+        printParseTree(out_, *it_pvar);
+        out_ << endl;
+      }
+    }
+
+    out_ << "Parsed data:" << endl;
+    out_ << "------------" << endl;
+    if (pData_)
+    {
+      printParseTree(out_, pData_);
+    }
+
+    out_ << endl;
+    out_ << "Parsed relations:" << endl;
+    out_ << "-----------------" << endl;
+    if (pRelations_)
+    {
+      printParseTree(out_, pRelations_);
+    }
+    out_ << "============================" << endl;
+#endif
 
     if (status != 0)
     {
@@ -212,7 +220,7 @@ namespace Biips
     if (pRelations_)
       getVariableNames(pRelations_, names_set, counter_stack);
 
-    names_.assign(names_set.begin(), names_set.end());
+    nodeArrayNames_.assign(names_set.begin(), names_set.end());
 
     return true;
   }
@@ -222,7 +230,7 @@ namespace Biips
   {
     if (verbose)
       out_ << PROMPT_STRING << "Deleting model" << endl;
-    pModel_ = BUGSModel::Ptr();
+    pModel_.reset();
   }
 
 
@@ -249,7 +257,7 @@ namespace Biips
     }
 
     // FIXME
-    Rng datagen_rng(dataRngSeed);
+    Rng::Ptr p_datagen_rng(new Rng(dataRngSeed));
 
     if (pData_ && genData)
     {
@@ -318,12 +326,12 @@ namespace Biips
         if (verbose)
           out_ << INDENT_STRING << "Sampling data" << endl;
 
-        std::map<String, MultiArray> sampled_data_map(pModel_->Sample(&datagen_rng));
+        std::map<String, MultiArray> sampled_data_map(pModel_->Sample(p_datagen_rng));
 
         // FIXME
-//        //Save data generating RNG for later use. It is owned by the
-//        //RNGFactory, not the model.
-//        datagen_rng = pModel_->rng(0);
+        //        //Save data generating RNG for later use. It is owned by the
+        //        //RNGFactory, not the model.
+        //        datagen_rng = pModel_->rng(0);
 
         if (verbose)
           out_ << INDENT_STRING << "Reading data back into data table" << endl;
@@ -347,7 +355,7 @@ namespace Biips
           dataMap.insert(std::make_pair(name, sampled_values));
         }
 
-        pModel_ = BUGSModel::Ptr();
+        pModel_.reset();
       }
       BIIPS_CONSOLE_CATCH_ERRORS
     }
@@ -399,11 +407,11 @@ namespace Biips
         }
 
         // FIXME
-//        if (datagen_rng)
-//        {
-//          // Reuse the data-generation RNG, if there is one, for chain 0
-//          pModel_->setRNG(datagen_rng, 0);
-//        }
+        //        if (datagen_rng)
+        //        {
+        //          // Reuse the data-generation RNG, if there is one, for chain 0
+        //          pModel_->setRNG(datagen_rng, 0);
+        //        }
       }
       else
       {
@@ -422,20 +430,20 @@ namespace Biips
     if (!pModel_)
     {
       err_ << "Can't build SMC sampler. No model!" << endl;
-      return true;
+      return false;
     }
     if (pModel_->GraphPtr()->Empty())
     {
       err_ << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)" << endl;
-      return true;
+      return false;
     }
     try
     {
       // TODO manage this more finely
       // set all NodeSampler factories inactive if prior is true
       std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact
-      = SMCSampler::NodeSamplerFactories().begin();
-      for (; it_sampler_fact != SMCSampler::NodeSamplerFactories().end();
+      = ForwardSampler::NodeSamplerFactories().begin();
+      for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end();
           ++it_sampler_fact)
       {
         it_sampler_fact->second = !prior;
@@ -466,7 +474,7 @@ namespace Biips
   }
 
 
-  Bool Console::RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose)
+  Bool Console::RunForwardSampler(const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose, Bool progressBar)
   {
     if (!pModel_)
     {
@@ -481,21 +489,23 @@ namespace Biips
 
     try
     {
-      pModel_->SetResampleParam(rsType, ess_threshold);
+      pModel_->SetResampleParam(rsType, essThreshold);
 
       Size n_iter = pModel_->Sampler().NIterations();
 
       if (verbose)
-        out_ << PROMPT_STRING << "Running SMC Sampler of " << n_iter << " iterations" << endl;
+        out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter << " iterations" << endl;
 
       Types<boost::progress_display>::Ptr p_show_progress;
-      if (verbose)
+      if (progressBar)
         p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
 
       // filtering
       pModel_->InitSampler();
       if (p_show_progress)
         ++(*p_show_progress);
+      else if (verbose)
+        printSamplerState(pModel_->Sampler(), out_);
 
       for (Size n=1; n<n_iter; ++n)
       {
@@ -503,10 +513,12 @@ namespace Biips
 
         if (p_show_progress)
           ++(*p_show_progress);
+        else if (verbose)
+          printSamplerState(pModel_->Sampler(), out_);
       }
 
       // normalizing constant
-      log_norm_const = pModel_->Sampler().LogNormConst();
+      logNormConst = pModel_->Sampler().LogNormConst();
 
     }
     BIIPS_CONSOLE_CATCH_ERRORS
@@ -515,7 +527,7 @@ namespace Biips
   }
 
 
-  Bool Console::RunBackwardSmoother(Bool verbose)
+  Bool Console::RunBackwardSmoother(Bool verbose, Bool progressBar)
   {
     if (!pModel_)
     {
@@ -543,7 +555,7 @@ namespace Biips
         out_ << PROMPT_STRING << "Running backward smoother of " << n_iter << " iterations" << endl;
 
       Types<boost::progress_display>::Ptr p_show_progress;
-      if (verbose)
+      if (progressBar)
         p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
 
       // smoothing
@@ -582,8 +594,8 @@ namespace Biips
   {
     if (!pModel_)
     {
-        err_ << "Can't set default filter monitors. No model!" << endl;
-        return false;
+      err_ << "Can't set default filter monitors. No model!" << endl;
+      return false;
     }
 
     try
@@ -600,8 +612,8 @@ namespace Biips
   {
     if (!pModel_)
     {
-        err_ << "Can't set filter monitor. No model!" << endl;
-        return false;
+      err_ << "Can't set filter monitor. No model!" << endl;
+      return false;
     }
     // TODO: check that sampler did not start
 
@@ -621,12 +633,37 @@ namespace Biips
   }
 
 
+  Bool Console::SetSmoothTreeMonitor(const String & name)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't set smooth tree monitor. No model!" << endl;
+      return false;
+    }
+    // TODO: check that sampler did not start
+
+    try
+    {
+      Bool ok = pModel_->SetSmoothTreeMonitor(name);
+      if (!ok)
+      {
+        err_ << "Failed to set smooth tree monitor for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::SetSmoothMonitor(const String & name)
   {
     if (!pModel_)
     {
-        err_ << "Can't set smooth monitor. No model!" << endl;
-        return false;
+      err_ << "Can't set smooth monitor. No model!" << endl;
+      return false;
     }
     // TODO: check that sampler did not start
 
@@ -650,8 +687,8 @@ namespace Biips
   {
     if (!pModel_)
     {
-        err_ << "Can't extract filter statistic. No model!" << endl;
-        return false;
+      err_ << "Can't extract filter statistic. No model!" << endl;
+      return false;
     }
     if (!pModel_->SamplerBuilt())
     {
@@ -680,46 +717,12 @@ namespace Biips
   }
 
 
-  Bool Console::ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
-  {
-    if (!pModel_)
-    {
-        err_ << "Can't extract backward smoother statistic. No model!" << endl;
-        return false;
-    }
-    if (!pModel_->SmootherInitialized())
-    {
-      err_ << "Can't extract backward smoother statistic. Backward smoother not initialized!" << endl;
-      return false;
-    }
-    if (!pModel_->Smoother().AtEnd())
-    {
-      err_ << "Can't extract backward smoother statistic. Backward smoother still running!" << endl;
-      return false;
-    }
-
-    try
-    {
-      Bool ok = pModel_->ExtractSmoothStat(name, statFeature, statMap);
-      if (!ok)
-      {
-        err_ << "Failed to extract backward smoother statistic for variable " <<
-            name << endl;
-        return false;
-      }
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-
   Bool Console::ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
     {
-        err_ << "Can't extract smooth tree statistic. No model!" << endl;
-        return false;
+      err_ << "Can't extract smooth tree statistic. No model!" << endl;
+      return false;
     }
     if (!pModel_->SamplerBuilt())
     {
@@ -748,12 +751,46 @@ namespace Biips
   }
 
 
+  Bool Console::ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't extract backward smoother statistic. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't extract backward smoother statistic. Backward smoother not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't extract backward smoother statistic. Backward smoother still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothStat(name, statFeature, statMap);
+      if (!ok)
+      {
+        err_ << "Failed to extract backward smoother statistic for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
-        err_ << "Can't extract filter pdf. No model!" << endl;
-        return false;
+      err_ << "Can't extract filter pdf. No model!" << endl;
+      return false;
     }
     if (!pModel_->SamplerBuilt())
     {
@@ -782,46 +819,12 @@ namespace Biips
   }
 
 
-  Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
-  {
-    if (!pModel_)
-    {
-        err_ << "Can't extract backward smoother pdf. No model!" << endl;
-        return false;
-    }
-    if (!pModel_->SmootherInitialized())
-    {
-      err_ << "Can't extract backward smoother pdf. SMC sampler not initialized!" << endl;
-      return false;
-    }
-    if (!pModel_->Smoother().AtEnd())
-    {
-      err_ << "Can't extract backward smoother pdf. SMC sampler still running!" << endl;
-      return false;
-    }
-
-    try
-    {
-      Bool ok = pModel_->ExtractSmoothPdf(name, pdfMap, numBins, cacheFraction);
-      if (!ok)
-      {
-        err_ << "Failed to extract backward smoother pdf for variable " <<
-            name << endl;
-        return false;
-      }
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-
   Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
-        err_ << "Can't extract smooth tree pdf. No model!" << endl;
-        return false;
+      err_ << "Can't extract smooth tree pdf. No model!" << endl;
+      return false;
     }
     if (!pModel_->SamplerBuilt())
     {
@@ -850,13 +853,147 @@ namespace Biips
   }
 
 
+  Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't extract backward smoother pdf. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't extract backward smoother pdf. SMC sampler not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't extract backward smoother pdf. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->ExtractSmoothPdf(name, pdfMap, numBins, cacheFraction);
+      if (!ok)
+      {
+        err_ << "Failed to extract backward smoother pdf for variable " <<
+            name << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
+  {
+
+    if (!pModel_)
+    {
+      err_ << "Can't dump filter monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't dump filter monitors. SMC sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't dump filter monitors. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->DumpFilterMonitors(particlesMap);
+      if (!ok)
+      {
+        err_ << "Failed to dump filter monitors" << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump smooth tree monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't dump smooth tree monitors. SMC sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't dump smooth tree monitors. SMC sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->DumpSmoothTreeMonitors(particlesMap);
+      if (!ok)
+      {
+        err_ << "Failed to dump smooth tree monitors" << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump smooth monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't dump smooth monitors. Smoother not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't dump smooth monitors. Smoother still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->DumpSmoothMonitors(particlesMap);
+      if (!ok)
+      {
+        err_ << "Failed to dump smooth monitors" << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::PrintGraphviz(std::ostream & os)
   {
 
     if (!pModel_)
     {
-        err_ << "Can't print graphviz. No model!" << endl;
-        return false;
+      err_ << "Can't print graphviz. No model!" << endl;
+      return false;
     }
     try
     {

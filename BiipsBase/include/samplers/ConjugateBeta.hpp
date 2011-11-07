@@ -30,14 +30,13 @@ namespace Biips
   protected:
     friend class ConjugateSamplerFactory<SelfType>;
 
-    explicit ConjugateBeta(const Graph * pGraph )
-     : BaseType(pGraph) {};
+    explicit ConjugateBeta(const Graph & graph) : BaseType(graph) {}
 
     virtual void formLikeParamContrib(NodeId likeId,
         MultiArray::Array & likeParamContribValues);
     virtual MultiArray::Array postParam(const MultiArray::Array & priorParamContribValues,
         const MultiArray::Array & likeParamContribValues) const;
-    virtual Scalar computeLogWeight(const MultiArray & sampledData,
+    virtual Scalar computeLogIncrementalWeight(const MultiArray & sampledData,
         const MultiArray::Array & priorParamValues,
         const MultiArray::Array & postParamValues,
         const MultiArray::Array & LikeParamContrib);

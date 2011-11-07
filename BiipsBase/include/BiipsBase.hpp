@@ -12,12 +12,11 @@
 #define BIIPSBASE_HPP_
 
 
+#include "function/Function.hpp"
+#include "distribution/Distribution.hpp"
 
 namespace Biips
 {
-
-  class FunctionTable;
-  class DistributionTable;
 
   void loadBaseModule(FunctionTable & funcTab, DistributionTable & distTab);
 

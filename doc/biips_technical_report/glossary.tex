@@ -1,0 +1,50 @@
+\chapter*{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
+
+\begin{list}{}{}
+ \item[\textbf{Class:}] a class in C++ is a user-defined type that aggregates \textbf{members} (data fields of other types) and that defines its own \textbf{function members} (or \textbf{methods}), according to the principle of encapsulation. This design is specific to object-oriented programming. An instance of a class is called an \textbf{object}. An \textbf{abstract} class has at least one \textbf{pure virtual} function member. It only consists in a common interface for other \textbf{concrete} classes which will implement those pure virtual functions. Abstract classes can not be instantiated.
+
+
+%  \item[\textbf{Factory:}] 
+
+
+ \item[\textbf{Shared pointer:}] a smart pointer with shared ownership semantics used to store dynamically allocated variables. The ownership of the variables is shared between several pointers thanks to a counter based system. This way, the release of the allocated memory is automatic when the counter is null. Not only this avoids memory leaks, but this also provides a smart storage management avoiding duplications. 
+
+
+ \item[\textbf{\texttt{namespace}:}] a C++ keyword defining a scope for names of C++ declarations.
+\begin{verbatim}
+namespace Biips
+{
+ class Graph;
+}
+\end{verbatim}
+Outside the namespace scope, all names residing in it will be called using the namespace name before the \verb=::= scope resolution symbol as prefix.
+\begin{verbatim}
+Biips::Graph graph;
+\end{verbatim}
+The \verb=using namespace= command allows us to use the names residing in the namespace without a prefix.
+\begin{verbatim}
+using namespace Biips;
+Graph graph;
+\end{verbatim}
+Namespaces can be aliased.
+\begin{verbatim}
+namespace ublas = boost::numeric::ublas;
+\end{verbatim}
+
+
+ \item[\textbf{Polymorphism:}] is a principle of object-oriented programming. Basically, this corresponds to the idea that the execution of a portion of code depends on the type of data it applies on. One specific way of doing polymorphism in C++ is the inheritance of virtual member functions from a base class.
+
+
+ \item[\textbf{\texttt{static}:}] a C++ keyword particularly used to declare a static member or function member. A static member or function member is owned by the class itself and is not associated to any instance (object). Modification of a static member applies to the whole class. Static member functions can not access non static members.
+
+
+ \item[\textbf{\texttt{typedef}:}] a C++ keyword that defines aliases of other types.
+\begin{verbatim}
+typedef double Scalar;
+\end{verbatim}
+
+
+ \item[\textbf{\texttt{virtual}:}] a C++ keyword declaring a virtual function member. All derived classes can redefine their own implementation of these function members. Basically, a call to these virtual functions will result in the execution of the derived implementation even if the objects are stored in a base class object. This type of link is called \textbf{dynamic} because the executed code is only known at run-time. \textbf{Pure virtual} functions are only declared, they are only implemented in derived classes.
+
+\end{list}

@@ -1,0 +1,229 @@
+\chapter{Tutorial example}
+\label{examples}
+
+\lstset{language = C++, %
+ basicstyle=\small\ttfamily, %
+keywordstyle=\bfseries\color{RedViolet}, %
+identifierstyle=,%
+ commentstyle=\color{ForestGreen},%
+stringstyle=\color{blue},%
+%column=fixed,%
+basewidth={0.5em,0.45em},%
+%numbers=left, numberfirstline=false, numberstyle=\tiny, stepnumber=10, numbersep=5pt%
+}
+
+In this chapter, we present C++ code using the \biips Core library and the first module of extensions, \biips Base. This should quickly introduce you to defining a statistical model and run the SMC algorithm. This implies a C++ compilation for each defined model. Also, interactions may be poor. However, these examples will serve as a tutorial for understanding the the classes and their use. Future versions of \biips{} will use a BUGS language compiler allowing a more user-friendly model definition, without any C++ compilation.
+
+\section{Preamble}
+
+The source files will have to \verb=#include= the headers of \biips Core and the modules used, \eg{} \biips Base.
+\begin{lstlisting}
+#include "BiipsCore.hpp"
+#include "BiipsBase.hpp"
+\end{lstlisting}
+
+\paragraph{}
+As all \biips{} names reside in the \verb=Biips= namespace, a \verb=using= command will allow us to write \biips{} names without the prefix \verb=Biips=
+\begin{lstlisting}
+using namespace Biips;
+\end{lstlisting}
+
+
+\section{A simple particle filtering example}
+
+Let's consider the following linear gaussian state space model 1D (\ie{} the first functional test defined in \cite{biips_specifications_2010}) :
+
+$$
+X_0\sim \mathcal{N}(0,1)
+$$
+For $t=1,\ldots,20$
+$$
+X_t|X_{t-1}\sim \mathcal{N}(X_{t-1},1)
+$$
+$$
+Y_t|X_{t}\sim \mathcal{N}(X_{t},0.5)
+$$
+
+
+\paragraph{}
+The C++ code of this example is in appendix \ref{miniex}. In the following, we detail this code step-by-step. It doesn't have any input/output instructions in order to focus on understanding the basic rules of using \biips{} library.
+
+
+\subsection{Instantiate the model with \biips}
+
+\begin{enumerate}
+ \item Define the data :
+\begin{lstlisting}
+// Final time :
+Size t_max = 20;
+// Initial mean of X[0]
+Scalar mu_x0_val = 0;
+// Variance of X[0] :
+Scalar sig_x0_val = 1;
+// Variance of X[t] | X[t-1] :
+Scalar sig_x_val = 1;
+// Variance of Y[t] | Y[t] :
+Scalar sig_y_val = 0.5;
+\end{lstlisting}
+\texttt{Size} and \texttt{Scalar} are \verb=typedefs= of integer and floating-point types.
+
+
+ \item Declare a \texttt{FunctionTable} and a \texttt{DistributionTable} objects. They will contain Function and Distribution instances and allow us to access them by their name in BUGS language.
+\begin{lstlisting}
+FunctionTable func_tab;
+DistributionTable dist_tab;
+\end{lstlisting}
+
+
+ \item Load the Base module. This will add the distributions and functions declared in \biips Base library to the \texttt{FunctionTable} and \texttt{DistributionTable} objects. As a consequence, \texttt{Graph} will be able to instantiate logical and stochastic nodes based on those functions and distributions. This will also push \texttt{NodeSamplerFactory} instances in the \texttt{SMCSampler::NodeSamplerFactories} static member. The latter holds factories of sampling methods for one node of the graph in a priority order.
+\begin{lstlisting}
+loadBaseModule(func_tab, dist_tab);
+\end{lstlisting}
+
+
+ \item Declare the \texttt{Graph} object.
+\begin{lstlisting}
+Graph graph;
+\end{lstlisting}
+
+
+ \item Add the constant nodes to the graph.
+\begin{lstlisting}
+NodeId mu_x0 = graph.AddConstantNode(MultiArray(mu_x0_val));
+NodeId sig_x0 = graph.AddConstantNode(MultiArray(sig_x0_val));
+NodeId sig_x = graph.AddConstantNode(MultiArray(sig_x_val));
+NodeId sig_y = graph.AddConstantNode(MultiArray(sig_y_val));
+\end{lstlisting}
+The \texttt{AddConstantNode} method of \texttt{Graph} class must take a \texttt{MultiArray} object as argument. This object represents a n-dimensional data that aggregates (with shared pointers) its dimension (a \texttt{DimArray} object, which is an array of positive integers) and its values (a \texttt{ValArray} object, which is a \verb!std::vector! based container of scalar values, fitted with element-wise numerical operators and functions). It can be directly constructed from a \texttt{Scalar}. The unique identifier of the node is stored in a \texttt{NodeId} object, which is a \verb=typedef= of integer type.
+
+
+\item Create stochastic \texttt{NodeId} collections to store $X$ and $Y$'s components identifiers.
+\begin{lstlisting}
+Types<NodeId>::Array x(t_max+1);
+Types<NodeId>::Array y(t_max);
+\end{lstlisting}
+The template \verb=Types<class T>= structure defines derived types from its template parameter type such as \texttt{Array} (a \verb=typedef= for \verb=std::vector<T>=), \texttt{Ptr} (a typedef for \verb=boost::shared_ptr<T>=), etc.
+
+\item Create a \texttt{NodeId} array to handle the parents of each stochastic node.
+\begin{lstlisting}
+Types<NodeId>::Array params(2);
+\end{lstlisting}
+All stochastic nodes will have 2 parents.
+
+
+\item Add $X_0$ stochastic node to the graph.
+\begin{lstlisting}
+params[0] = mu_x0;
+params[1] = sig_x0;
+x[0] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+\end{lstlisting}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+The \texttt{AddStochasticNode} method of \texttt{Graph} class takes as arguments: the dimension of the node, a string identifying the distribution in the \texttt{DistributionTable} object (\eg{} \verb="dnormvar"= for the normal distribution\footnote{Conforming to the BUGS language, \texttt{"dnorm"} keyword defines a normal distribution which parameters are mean and precision (inverse of variance). We added the \texttt{"dnormvar"} keyword that takes the variance as second parameter.}), the list of its ordered parameters identifiers (mean and variance/precision for the normal distribution) and a boolean set to true if the node is observed. Alternatively, we can pass a \texttt{MultiArray} object as last argument defining the value of the observation.\\
+The dimension is stored in a \texttt{DimArray} object. \verb=P_SCALAR_DIM= is a constant shared pointer exposed by \biips Core library. It holds a \texttt{DimArray} object for scalars. This \texttt{DimArray} object is dynamically allocated and handled by a shared pointer so its ownership will be shared by all the nodes. It is declared and allocated as
+\begin{lstlisting}
+const DimArray::Ptr P_SCALAR_DIM(new DimArray(1,1));
+\end{lstlisting}
+The first argument is the number of dimensions (size of the array) and the second is the length of the dimensions (value of the elements of the array), \ie{} \verb=P_SCALAR_DIM= is here defined as a one element array containing 1.
+
+\item Add the other stochastic nodes to the graph.
+\begin{lstlisting}
+for (Size t=1; t<t_max+1; ++t)
+{
+  // Add X[t]
+  params[0] = x[t-1];
+  params[1] = sig_x;
+  x[t] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+
+  // Add Y[t]
+  params[0] = x[t];
+  params[1] = sig_y;
+  y[t-1] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, true);
+}
+\end{lstlisting}
+
+
+\item Check if the graph has cycles.
+\begin{lstlisting}
+Bool has_cycle = graph.HasCycle();
+\end{lstlisting}
+
+\item Build the graph.
+\begin{lstlisting}
+graph.Build();
+\end{lstlisting}
+After checking that the graph has no cycle, this will build the stochastic edges of the internal Boost graph structure allowing us to access stochastic parent/children relationships. Then the nodes are sorted in topological order where the parents before their children in a sequence.
+
+
+\item Generate data.
+\begin{lstlisting}
+// Declare a random number generator, initialized with an integer seed
+Rng my_rng(0);
+
+// Sample values according to the stochastic nodes prior distribution
+NodeValues gen_values = graph.SampleValues(&my_rng);
+
+// Set the observations values according to the generated values
+graph.SetObsValues(gen_values);
+\end{lstlisting}
+Here we generate a random sample for the whole graph. The values of each node are stored in a \texttt{NodeValues} object. This object is nothing but an array storing \texttt{ValArray::Ptr} objects (\ie{} shared pointers of \texttt{ValArray} objects) where the indices of the array correspond to the node identifiers (\ie{} \verb=gen_values[3]= is a shared pointer to the values of node 3). The call to \texttt{SetObsValues} method assigns their corresponding value in the \texttt{NodeValues} object to the observed stochastic nodes. We can easily produce a toy example this way. Changing the \texttt{Rng}\footnote{Random Number Generator} seed will change the sampled values.
+
+\end{enumerate}
+
+
+
+
+\subsection{Run the SMC algorithm}
+
+\begin{enumerate}
+ \item Define the number of particles.
+\begin{lstlisting}
+Size nb_particles = 1000;
+\end{lstlisting}
+
+
+ \item Declare the \texttt{SMCSampler} object.
+\begin{lstlisting}
+SMCSampler sampler(nb_particles, &graph, &my_rng);
+\end{lstlisting}
+
+
+ \item Initialize the \texttt{SMCSampler} object.
+\begin{lstlisting}
+sampler.Initialize();
+\end{lstlisting}
+In particular, this will build the \texttt{Node} sequence of the \texttt{SMCSampler} object. It consists of the unobserved stochastic nodes of the graph in a topological order (\ie{} all the parents of each node are placed before it in the sequence). Then, this will assign a sampling method to each node by trying, in the order of priority, the \texttt{Create()} method of each \texttt{NodeSamplerFactory} instance. If no advanced method can sample a node, the default prior \texttt{NodeSampler} implementation is assigned to it. The latter will sample the particles according to the prior distribution of the node.
+
+ \item Declare and configure a \texttt{ScalarAccumulator} object.
+\begin{lstlisting}
+ScalarAccumulator stats_acc;
+stats_acc.AddFeature(MEAN);
+stats_acc.AddFeature(VARIANCE);
+\end{lstlisting}
+This object will be used to compute the summary statistics of the posterior distribution, based on the particle values and weights. We have added \texttt{MEAN} and \texttt{VARIANCE} features but many others can be added. Computations are made efficient by taking into account the dependent computations between several features.
+
+
+ \item Declare \texttt{Scalar} arrays to store the posterior mean and variance estimates.
+\begin{lstlisting}
+Types<Scalar>::Array x_est_PF(t_max+1);
+Types<Scalar>::Array x_var_PF(t_max+1);
+\end{lstlisting}
+
+
+ \item Iterate the SMC algorithm and extract summary statistics.
+\begin{lstlisting}
+for (Size t=0; t<t_max+1; ++t)
+{
+  // Iterate the SMC algorithm : resample (if needed) and sample one node of the sequence
+  sampler.Iterate();
+
+  // Accumulate particles corresponding to the last updated node
+  sampler.Accumulate(x[t], stats_acc);
+
+  // extract summary statistics of the filtering density
+  x_est_PF[t] = stats_acc.Mean();
+  x_var_PF[t] = stats_acc.Variance();
+}
+\end{lstlisting}
+According to the model, the \texttt{SMCSampler}'s sequence is $X_0, X_1, \ldots, X_{20}$. Each time the \texttt{Iterate()} method is called, it re-samples (if needed) and samples the particles according to the \texttt{NodeSampler} method assigned to the current node. It then computes the new ESS\footnote{Effective Sample Size}. At step $t$, accumulation of node $k$ yields summary statistics of the posterior density $p(X_k|X_{0:t})$. Hence, accumulation of node $t$ at step $t$ corresponds to estimating the marginal filtering density $p(X_t|X{0:t})$.
+
+
+\end{enumerate}

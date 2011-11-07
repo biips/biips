@@ -1,0 +1,317 @@
+\chapter{Architecture}
+\label{architecture}
+
+
+\section{Existing softwares}
+
+\subsection{BUGS}
+Quoting the OpenBUGS Project web page\footnote{\href{http://www.openbugs.info}{http://www.openbugs.info}}:
+
+\begin{quote}
+\textbf{Overview...}\\
+BUGS\footnote{Bayesian inference Using Gibbs Sampling} is a software package for performing Bayesian inference Using Gibbs Sampling. The user specifies a statistical model, of (almost) arbitrary complexity, by simply stating the relationships between related variables. The software includes an 'expert system', which determines an appropriate MCMC (Markov chain Monte Carlo) scheme (based on the Gibbs sampler) for analysing the specified model. The user then controls the execution of the scheme and is free to choose from a wide range of output types.
+
+\textbf{Versions...}\\
+There are two main versions of BUGS, namely WinBUGS and OpenBUGS [...], an open-source version of the package, on which all future development work will be focused. OpenBUGS, therefore, represents the future of the BUGS project. [...]
+Note that software exists to run OpenBUGS (and analyse its output) from within both R and SAS, amongst others. [...]
+
+\textbf{How it works...}\\
+The specified model belongs to a class known as Directed Acyclic Graphs (DAGs), for which there exists an elegant underlying mathematical theory. This allows us to break down the analysis of arbitrarily large and complex structures into a sequence of relatively simple computations. BUGS includes a range of algorithms that its expert system can assign to each such computational task.
+[...]
+\end{quote}
+
+Its architecture is presented in \cite{lunn_winbugs_2000} but its code, written in Component Pascal, is not easily accessible and not well documented.
+
+
+\subsection{JAGS}
+JAGS\footnote{Just Another Gibbs Sampler}, written by Martyn Plummer, is a \textquotedblleft{}not wholly unlike BUGS\textquotedblright{} open source software (GPL\footnote{GNU General Public License} licensed). JAGS uses essentially the same model description language but it has been completely re-written. Its sources are in C++ and better documented.
+
+
+\subsection*{}
+\biips{} project is strongly inspired by both BUGS and JAGS. Indeed, we intend to propose SMC methods as an alternative to MCMC methods in bayesian graphical models inference, \ie{} we mainly want to change the core engine of the software. As a consequence, many parts of \biips{} are common with BUGS and JAGS, and even if they are re-written to suit with our goals, their design is very close. Also, some C++ sources of JAGS can eventually be re-used.
+
+
+\section{Short functional specifications}
+
+As a reminder, figure~\ref{fig:specgen} shows the input/output flow of the \biips{} software. See \cite{biips_specifications_2010} for more details.
+
+\begin{figure}[h!]
+\begin{center}
+\tikzstyle{input}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=2.5cm,
+                                    draw=blue!80,
+                                    fill=blue!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{processing}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=2.5cm,
+                                    draw=green!80,
+                                    fill=green!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{output}=[rectangle, rounded corners,
+                                                thick,
+                                                text width=2.5cm,
+                                                draw=orange!80,
+                                                fill=orange!25,
+                                                text centered,
+                                    font=\large,]
+\begin{tikzpicture}[node distance=4cm,auto,>=latex']
+\node[input] (stat)   {Statistical\\Model};
+\node[input] (data)   [below of= stat,node distance=1.2cm] {Data\\~};
+\node (param)   [input,below of=data,node distance=1.2cm] {Parameters\\~};
+\node (biips)   [processing,right of=data] {~\\\biips\\~};
+\node (text) [below of=biips, node distance=1.2cm, text=green, font=\normalsize] {Black box};
+\node (out)   [output,right of=biips] {Summary\\Statistics};
+ \path[->] (stat) edge[thick] (biips);
+ \path[->] (data) edge[thick] (biips);
+ \path[->] (param) edge[thick] (biips);
+ \path[->] (biips) edge[thick] (out);
+ \end{tikzpicture}
+ \caption{Input/output flow. Inputs are in blue and output in orange.}
+ \label{fig:specgen}
+ \end{center}
+ \end{figure}
+
+
+\paragraph{}
+More precisely:
+
+\paragraph{Input:}
+\begin{itemize}
+ \item Statistical model: it should be written in BUGS language. Inspired by S, this language is used by the wide community of BUGS software users. So we must consider the advantage for them to re-use, as they are, their model definitions written in this language. Moreover, JAGS is based on this language (except minor differences).
+ \item Data: for the same reason stated above, we should input data from a textual S language type format.
+ \item Parameters: a console interface should provide commands to specify the parameters of the algorithm as well as controls of the software.
+\end{itemize}
+
+\paragraph{Output:}
+\begin{itemize}
+ \item Summary Statistics: they should be output in textual S language type, table or graphical format.
+\end{itemize}
+
+\paragraph{}
+\biips{} applies SMC methods in an \textquotedblleft{}automatic\textquotedblright{} manner, \ie{} roughly as a black box, with default choice of the tuning parameters of the algorithm.
+
+
+\section{Software architecture}
+The software architecture has been divided into bricks, as shown in figure \ref{fig:bricks}, each one bringing a new level of functionality. The development is done bottom-up.
+
+\begin{figure}[h!]
+\begin{center}
+\tikzstyle{replace}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3cm,
+                                    draw=blue!80,
+                                    fill=blue!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{done}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3cm,
+                                    draw=green!80,
+                                    fill=green!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{todo}=[rectangle, rounded corners,
+                                                thick,
+                                                text width=3cm,
+                                                draw=orange!80,
+                                                fill=orange!25,
+                                                text centered,
+                                    font=\large,]
+
+\tikzstyle{donetest}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3cm,
+                                    draw=green!80,
+                                    %fill=green!20,
+                                    text=green!80,
+                                    text centered,
+                                    font=\large,
+                                    ]
+
+\tikzstyle{todotest}=[rectangle, rounded corners,
+                                                thick,
+                                                text width=3cm,
+                                                draw=orange!80,
+                                                %fill=orange!25,
+                                                text=orange!80,
+                                                text centered,
+                                    font=\large,]
+\begin{tikzpicture}[node distance=1.4cm,auto,>=latex']
+\node (smctc) [replace]   {SMCTC\\ \small (GPL)};
+\node (core)   [done,above of= smctc] {\biips\\Core};
+\node (base)   [done,above of= core] {\biips\\Base};
+\node (tests)   [donetest,right of=base,node distance=4cm] {Functional\\Tests 1};
+\node (comp)   [todo,above of=base] {BUGS language\\Compiler};
+\node (tests1)   [todotest,right of=comp,node distance=4cm] {Functional\\Tests 2};
+\node (tihm)   [todo,above of=comp] {Text\\Interface};
+\node (tests2)   [todotest,right of=tihm,node distance=4cm] {Functional\\Tests 3};
+\node (gihm)   [todo,above of=tihm] {Graphical\\Interface};
+\node (tests3)   [todotest,right of=gihm,node distance=4cm] {Functional\\Tests 4};
+\node (repl) [left of=smctc,node distance=3cm, text=blue, font=\normalsize] {To replace};
+\node (done) [left of=base,node distance=3cm, text=green, text centered, text width=3cm, font=\normalsize] {On going};
+% \node (stat) [below of=done,node distance=.7cm, text=green, text centered, text width=3cm, font=\normalsize] {\small 73 fichiers\\$\approx$ 4500 lignes};
+\node (todo) [left of=tihm,node distance=3cm, text=orange, font=\normalsize] {To do};
+ \path[->] (core) edge[thick] (smctc);
+ \path[->] (base) edge[thick] (core);
+ \path[->] (tests) edge[thick] (base);
+ \path[->] (comp) edge[thick] (base);
+ \path[->] (tests1) edge[thick] (comp);
+ \path[->] (tihm) edge[thick] (comp);
+ \path[->] (tests2) edge[thick] (tihm);
+ \path[->] (gihm) edge[thick] (tihm);
+ \path[->] (tests3) edge[thick] (gihm);
+\end{tikzpicture}
+\label{fig:bricks}
+\caption{\biips{}: software bricks}
+\end{center}
+\end{figure}
+ 
+\begin{itemize}
+ \item \textbf{\biips Core} is currently built over \textbf{SMCTC}\footnote{SMC Template Class} (GPL) in order to accelerate the development, but SMCTC has to be replaced afterwards. \biips Core library contains the core components of the program, \ie{} common types and classes used to define a bayesian graphical model and run a SMC sampler algorithm in order to estimate its posterior distribution.
+ \item \textbf{\biips Base} is the first module which contains concrete classes corresponding to the abstract classes defined in the \biips Core library. \\
+The complexity of the statistical models that can be defined with \biips{} increases with the number of concrete classes implemented in this module. In Addition, this architecture is intended to be extensible, \ie{} other modules (like \biips Base) with new features could be added afterwards.
+ \item The \textbf{BUGS language Compiler} is essential for defining models without having to compile a C++ source code every time. See \ref{jags_compiler} for more details on the re-usability of JAGS compiler.
+ \item The \textbf{Text interface} consists of a command line interpreter, which needs its own language. We can take ideas on JAGS terminal which is based on a Stata like syntax. This brick represents a common layer for all interface with other softwares such as Matlab or R. Moreover, batch treatments could be done thanks to this text interface, \ie{} submitting several commands at once in a script.
+ \item On top of this text interface, a \textbf{Graphical interface} (\eg{} Qt based) would make the software standalone. It should implement a graphical point-and-click editor of bayesian graphical models.
+\end{itemize}
+
+\paragraph{}
+Each time a new brick is built, some functional tests are performed according to the new features implemented.
+\begin{itemize}
+ \item \textbf{Functional Tests 1} based on \biips Base library implement different models specified in \cite{biips_specifications_2010} directly, by manual instantiations of the C++ classes. Chapter \ref{examples} details one of those tests. Section \ref{testing} explains a more rigorous procedure for testing \biips{} SMC algorithms on HMM models. The latter is implemented in \texttt{BiipsTest} program explained in section \ref{biipstest} of chapter \ref{developers}.
+ \item \textbf{Functional Tests 2} of the Compiler will be based on BUGS language text files defining the same models as stated above. An ultimate objective would be to compile all the test examples of the BUGS software and compare the results.
+ \item \textbf{Functional Tests 3} of the Text interface will use textual commands of the text interface to run examples.
+ \item \textbf{Functional Tests} of the Graphical interface will consist in running examples using clicks on menus and buttons of the graphical interface.
+\end{itemize}
+
+\section{Testing procedure}
+\label{testing}
+
+We need a testing procedure saying, yes or no, the program is correct, in an automatic manner, \ie{} without having to look at the results. This procedure will be launched after each modification of the code and assures us that no bugs were introduced since the last stable version. SMC algorithms compute an approximation of the true filtering/smoothing posterior distribution. They are intrinsically erroneous and the errors are random. How can we measure the quality of the estimation? How can we say the program is right? The requirements obviously depend on the SMC algorithm, \textit{i.e} the number of particles, the re-sampling method and the type of exploration (mutation) used. They also depend on the model and the observed values. As a consequence, there is no universal criteria: each \textbf{configuration} \textit{i.e} \{model, set of observations, SMC algorithm\}, have its own criteria.
+
+\paragraph{}
+We propose that, for each \textbf{configuration}, we run $n_{SMC}$ i.i.d. SMC algorithms and compute the error versus the true posterior mean. For instance, let us consider a HMM where $x_{0:T}$ is the state. Let us call $Z$ the error of one SMC run:
+$$
+ Z = N \sum_{t=0}^{T} (\hat{x_t}-\bar{x_t})^T \varSigma_t^{-1} (\hat{x_t}-\bar{x_t})
+$$
+where $N$ is the number of particles,\\
+$\hat{x_t} = \sum_{i=1}^N w^{(i)} x_t^{(i)}$ is the SMC posterior mean estimate,\\
+$\bar{x_t}$, and $\varSigma_t$ are the true posterior mean and covariance.
+
+\paragraph{}
+In a linear Gaussian HMM, the latter are computed using Kalman equations. In non linear models, they are approximated using a fine grid method.
+
+\paragraph{}
+Suppose $Z_{1}, \ldots, Z_{n}$ are $n$ i.i.d. observations of the error, drawn from a correct SMC implementation (\textit{e.g.} under Matlab) of the given configuration. Let $F$ be the cumulative distribution function of this population.
+
+\paragraph{}
+Let now $Z'_{1}, \ldots, Z'_{n'}$ be $n'$ i.i.d. observations of the error drawn from \biips{} implementation of the given configuration. Let $F'$ be the cumulative distribution function of this population.
+
+\paragraph{}
+We want to test the \textquotedblleft{}goodness-of-fit\textquotedblright{} between $\{Z\}$ and $\{Z'\}$ samples, \ie{} the null hypothesis $H_0: F = F'$, versus $H_1: F \neq F'$. Using a Kolmogorov-Smirnov test, the statistic is:
+$$
+D_{n,n'} = \sup_{x} |F_n(x)-F'_{n'}(x)|
+$$
+where $F_n$ and $F'_{n'}$ are the empirical distribution functions of the first and second sample respectively.
+
+\paragraph{}
+The null hypothesis is rejected at level $\alpha$ if:
+$$
+\sqrt{\frac{n+n'}{nn'}} D_{n,n'} > K_{\alpha}
+$$
+where $K_{\alpha}$ is such that $\Pr(K \leq K_{\alpha})=1-\alpha$ and $K$ is distributed according to the Kolmogorov-Smirnov distribution.
+
+\paragraph{}
+Alternatively, we can accept $H_0$ if the p-value is greater than $\alpha$:
+$$
+\Pr(K \geq \sqrt{\frac{n+n'}{nn'}} D_{n,n'}) \geq \alpha
+$$
+
+\paragraph{}
+Wish we test the correctness of \textbf{one} SMC run, we can check that its error does not exceed the empirical $1-\alpha$ quantile of the reference errors. Although this procedure is less powerful, it can be used for the sake of speed.
+
+\section{Directories structure}
+
+\textbf{\biips Core} code has been separated into the following folders:
+\begin{itemize}
+\item \textbf{common} contains the base types, classes and utilities common to all the other parts.
+\item \textbf{distribution} contains the \texttt{Distribution} abstract class.
+\item \textbf{function} contains the \texttt{Function} abstract class.
+\item \textbf{model} contains the \texttt{Model} class.
+\item \textbf{graph} contains the \texttt{Node} abstract class and its concrete classes as well as the \texttt{Graph} class.
+\item \textbf{sampler} contains the \texttt{NodeSampler} abstract class (mutation applied to one node) and the \texttt{SMCSampler} class (derived from \texttt{smc::Sampler} from SMCTC) which applies the SMC algorithm to the whole graph.
+\end{itemize}
+
+\paragraph{}
+\textbf{\biips Base} (as well as all future extension modules) code is divided into three folders :
+\begin{itemize}
+ \item \textbf{functions} contains concrete implementations of \texttt{Function} class, such as operators and usual mathematical functions. 
+ \item \textbf{distributions} contains concrete implementations of\texttt{Distribution} class, such as usual univariate and multivariate distributions.
+ \item \textbf{samplers} contains concrete implementations of \texttt{NodeSampler} class which update stochastic nodes in the graph.
+\end{itemize}
+
+
+
+\section{Development environment}
+
+\begin{itemize}
+ \item Language: We chose C++ for the object-oriented paradigm essential for \biips{} design, its flexibility, portability, popularity and reasonably fast execution.
+ \item OS\footnote{Operating System}: Linux Ubuntu 32 bits, yielding a complete development environment, including GCC\footnote{GNU Compiler Collection} and make.
+ \item IDE\footnote{Integrated Development Environment}: Eclipse CDT\footnote{Eclipse C/C++ Development Tooling}.
+ \item The software will be ported to other platforms via a cross-platform tool such as CMake.
+ \item Hosted on GForge INRIA, using SVN\footnote{Subversion} as version control system.
+\end{itemize}
+
+
+
+\section{Used libraries}
+
+Here are the libraries I use in the development, according to the following criteria: they must be portable and non restrictive for the license as we don't know which license will be used for \biips{} beforehand.
+
+\begin{itemize}
+ \item The \textbf{Standard C++ library} notably the \textbf{STL}\footnote{Standard Template Library} and its containers.
+ \item \textbf{Boost} is a collection of template libraries developed by an active community of the greatest C++ developers. It is a well recognized reference influencing the C++ standards.\\\\
+\begin{minipage}{0.8\textwidth}
+\begin{quote}
+\textquotedblleft...one of the most highly regarded and expertly designed C++ library projects in the world.\textquotedblright{} 
+\end{quote}
+\begin{flushright}\textminus{} Herb Sutter and Andrei Alexandrescu, C++ Coding Standards.
+\end{flushright}
+\end{minipage}\\\\
+Moreover, its license is not restrictive and most of the libraries are headers-only. Here are some used components :
+  \begin{itemize}
+  \item \textbf{Shared\_ptr} is an implementation of a shared pointer. In our case, the sequential particle re-samplings result in lot of data being common to many particles. Thanks to the shared ownership, this data is not duplicated and we do not need to manage their destruction.
+  \item \textbf{uBlas} provides vector and matrices containers as well as linear algebra operators conforming to BLAS\footnote{Basic Linear Algebra Subprograms}.
+  \item \textbf{BGL}\footnote{Boost Graph Library} provides graph structures and algorithms such as the topological order or the cycle detection.
+  \item \textbf{Random} allows pseudo random-numbers generation according to several distributions.
+  \item \textbf{Math toolkit} provides advanced mathematical functions as well as a collection of probability density functions.
+  \item \textbf{Accumulators} is a framework allowing to accumulate data in order to compute sums, means, variances, etc.
+  \item \textbf{Operators} facilitates the implementation of numerical operators into a class.
+  \item \textbf{Bimap} is a bidirectional maps library.
+  \item \textbf{Numeric Conversion} is a collection of tools to describe and perform conversions between values of different numeric types.
+  \item \textbf{Program\_options} allows program developers to obtain program options, that is (name, value) pairs from the user, via conventional methods such as command line and configuration file.
+  \item \textbf{Test} provides a matched set of components for writing test programs, organizing tests in to simple test cases and test suites, and controlling their runtime execution.
+  \item Most of these libraries have extensions in \textbf{Boost sandbox}. Those extensions non distributed in the official release (and not submitted to review) are free as well.
+  \end{itemize}
+ \item \textbf{QWT}\footnote{Qt Widgets for Technical applications} is based on \textbf{Qt} and allows us to plot scientific graphics.
+ \item \textbf{SMCTC} is used at first to accelerate the development but will be replaced afterwards by our own code. It uses \textbf{GSL}\footnote{GNU Scientific Library} for pseudo random numbers generation.
+\end{itemize}
+
+
+% \section{Design patterns}
+% 
+% Some used design patterns:
+% \begin{itemize}
+%  \item Factory permet de généraliser l'instanciation d'un type de base dans le but d'avoir un code extensible. Il est utilisé pour les mutations : il n'existe qu'une instance de factory pour les mutations et chaque mutation X (dérivée de la class de base) doit installer sa propre instance de factory dans l'instance générale pour que cette dernière crée une mutation X. Ainsi le code responsable de créer les mutations n'a pas besoin de connaître le constructeur de chaque mutation dérivée.
+%  \item Singleton est utilisé lorqu'une classe ne doit posséder qu'une seule instance. Celle-ci met son constructeur en membre privé ou protégé et dispose d'une méthode Instance qui retourne la seule instance de la classe. Ce patron est utilisé pour les Factorys mais également pour les Fonctions ou Distributions.
+%  \item Visitor est un patron qui permet de faire du polymorphisme (le code exécuté dépend du type d'objet). Il est utilisé pour les Nodes. Ceux-ci sont stockés dans un tableau de Nodes (classe de base) mais ils peuvent être de classe dérivée ConstantNode, LogicalNode ou StochasticNode. Pour faire une action différente sur chaque type, on dérive la classe NodeVisitor et on redéfinit un méthode Visit différente pour les trois types de Node. Ce procédé extensible permet de ne pas avoir à rajouter de fonctions membres virtuelles et d'éviter les \textit{dynamic\_cast}.
+% \end{itemize}
+% 

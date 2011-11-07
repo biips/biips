@@ -12,8 +12,10 @@
 #define BIIPS_MODELTEST_HPP_
 
 #include "graph/Graph.hpp"
-#include "sampler/SMCSampler.hpp"
+#include "sampler/ForwardSampler.hpp"
 #include "sampler/Accumulator.hpp"
+#include "function/Function.hpp"
+#include "distribution/Distribution.hpp"
 
 namespace Biips
 {
@@ -29,7 +31,7 @@ namespace Biips
 
     Graph::Ptr pDataGraph_;
     Graph::Ptr pModelGraph_;
-    SMCSampler::Ptr pSampler_;
+    ForwardSampler::Ptr pSampler_;
     Types<NodeSamplerFactory::Ptr>::Array nodeSamplerFactoryInvOrder_;
     ScalarAccumulator scalarAcc_;
     DiscreteScalarAccumulator discreteScalarAcc_;
@@ -56,6 +58,8 @@ namespace Biips
     std::map<String, MultiArray::Array> smcFilterValuesMap_;
     std::map<String, MultiArray::Array> smcSmoothValuesMap_;
 
+    FunctionTable funcTab_;
+    DistributionTable distTab_;
 
     template<typename InputIterator>
     void printValues(std::ostream & os, const String & name, InputIterator first, const InputIterator & last, char separator = ' ') const;
@@ -80,6 +84,8 @@ namespace Biips
 
     void setName(const String & name) { name_ = name; };
 
+    void loadBase();
+    
   public:
     ModelTest(int argc, char** argv, const String & name, Size verbose = 1, Size showMode = 0, std::ostream & os = std::cout)
     : argc_(argc), argv_(argv), name_(name), verbose_(verbose), showMode_(showMode), os_(os) {};
@@ -126,7 +132,7 @@ namespace Biips
     void PrintModelGraphviz() { pModelGraph_->PrintGraphviz(os_); };
 
     void ClearSMC();
-    virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, Scalar essThreshold = 0.5, ResampleType rsType = SMC_RESAMPLE_STRATIFIED, Bool showProgress = true, Size numBins = 40);
+    virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, const String & rsType = "stratified", Scalar essThreshold = 0.5, Bool showProgress = true, Size numBins = 40);
 
     virtual void PlotResults(const String & plotFileName = "") const = 0;
 

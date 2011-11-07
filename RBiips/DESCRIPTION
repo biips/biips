@@ -1,0 +1,11 @@
+Package: RBiips
+Type: Package
+Title: Running BiiPS from R
+Version: 0.6
+Date: 2011-10-06
+Author: INRIA
+Maintainer: biips-support <biips-support@lists.gforge.inria.fr>
+Description: Bayesian inference with interacting Particle Systems
+License: What Licence is it under ?
+LazyLoad: yes
+LinkingTo: Rcpp

@@ -11,27 +11,38 @@
 #ifndef BIIPS_DBIN_HPP_
 #define BIIPS_DBIN_HPP_
 
-#include "distribution/Distribution.hpp"
+#include "distributions/BoostScalarDistribution.hpp"
+#include <boost/random/binomial_distribution.hpp>
+#include <boost/math/distributions/binomial.hpp>
 
 namespace Biips
 {
-  
-  class DBin : public Distribution
-    {
-    protected:
-      typedef DBin SelfType;
 
-      DBin() : Distribution("dbin", 2) {};
+  typedef boost::math::binomial_distribution<Scalar> BinMathDistType;
+  typedef boost::binomial_distribution<Scalar> BinRandomDistType;
 
-      virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-      virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+  class DBin : public BoostScalarDistribution<BinMathDistType, BinRandomDistType>
+  {
+  public:
+    typedef DBin SelfType;
+    typedef BoostScalarDistribution<BinMathDistType, BinRandomDistType> BaseType;
 
-    public:
-      virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const;
-      virtual Scalar LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
+  protected:
+    DBin() : BaseType("dbin", 2, DIST_SPECIAL, true) {}
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Scalar unboundedLower(const MultiArray::Array & paramValues) const;
+    virtual Scalar unboundedUpper(const MultiArray::Array & paramValues) const;
 
-      static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
-    };
+    virtual MathDistType mathDist(const MultiArray::Array & paramValues) const;
+    virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const;
+
+  public:
+    virtual String Alias() const { return "dbinom"; }
+    virtual Bool IsSupportFixed(const Flags & fixmask) const;
+    virtual Scalar d(Scalar x, const MultiArray::Array & paramValues,
+        Bool give_log) const;
+    static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; }
+  };
 
 }
 

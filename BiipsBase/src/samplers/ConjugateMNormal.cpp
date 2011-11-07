@@ -24,13 +24,13 @@ namespace Biips
     VectorRef like_mean(likeParamContribValues[0]);
     MatrixRef like_prec(likeParamContribValues[1]);
 
-    GraphTypes::DirectParentNodeIdIterator it_parents = pGraph_->GetParents(likeId).first;
+    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId prec_id = *(++it_parents);
 
-    Matrix prec_i_mat(getNodeValue(prec_id, pGraph_, this));
+    Matrix prec_i_mat(getNodeValue(prec_id, graph_, *this));
 
-    MultiArray obs_i(pGraph_->GetNode(likeId).DimPtr(), pGraph_->GetValues()[likeId]);
+    MultiArray obs_i(graph_.GetNode(likeId).DimPtr(), graph_.GetValues()[likeId]);
     VectorRef obs_i_vec(obs_i);
 
     like_mean += ublas::prod(prec_i_mat, obs_i_vec);
@@ -60,7 +60,7 @@ namespace Biips
   }
 
 
-  Scalar ConjugateMNormal::computeLogWeight(const MultiArray & sampledData,
+  Scalar ConjugateMNormal::computeLogIncrementalWeight(const MultiArray & sampledData,
       const MultiArray::Array & priorParamValues,
       const MultiArray::Array & postParamValues,
       const MultiArray::Array & LikeParamContrib)
@@ -82,7 +82,12 @@ namespace Biips
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(norm_const_mean);
     norm_const_param_values[1] = MultiArray(norm_const_prec);
-    return DMNorm::Instance()->LogPdf(priorParamValues[0], norm_const_param_values);
+
+    Scalar log_incr_weight = DMNorm::Instance()->LogDensity(priorParamValues[0], norm_const_param_values, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    if (isNan(log_incr_weight))
+      throw RuntimeError("Failure to calculate log incremental weight.");
+
+    return log_incr_weight;
   }
 
 

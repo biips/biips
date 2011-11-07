@@ -33,7 +33,7 @@ if nargin < 6, period = 1; end
 %% HMM 1D linear gaussian
 
 if (sum(model_ids == 1))
-    model_file = 'data/hmm_1d_lin.bug';
+    model_file = 'model/hmm_1d_lin.bug';
     dot_file = 'results/hmm_1d_lin.dot';
     dimx = 1;
     dimy = 1;
@@ -91,7 +91,7 @@ end
 %% HMM 1D non linear gaussian
 
 if (sum(model_ids == 2))
-    model_file = 'data/hmm_1d_non_lin.bug';
+    model_file = 'model/hmm_1d_non_lin.bug';
     dot_file = 'results/hmm_1d_non_lin.dot';
     dimx = 1;
     dimy = 1;
@@ -196,7 +196,7 @@ x_tplus1 = evolution_model(x_t, t);
 log_w_update = log_like_pdf(y_tplus1, x_tplus1, t);
 end
 
-function [x_tplus1, log_w_update] = bad_mutation_hmm(x_t, y_tplus1, t, evolution_model)
+function [x_tplus1, log_w_update] = bad_mutation_hmm(x_t, ~, t, evolution_model)
 x_tplus1 = evolution_model(x_t, t);
 
 log_w_update = ones(size(x_t,2), 1);
@@ -286,11 +286,11 @@ function plot_error_dist(errors, h_fig, i_sub, n_bin, fig_title, n_part, mutatio
     
     hold on
     % chi squared curve
-    n = 50000;
-    chi_sq = sum(randn(k_degree, n).^2);
-    chi_sq_hist = histc(chi_sq, edges);
-    chi_sq_hist = chi_sq_hist/sum(chi_sq_hist) / delta;
-    plot(pos, chi_sq_hist, 'b--', 'LineWidth', 2)
+%     n = 50000;
+%     chi_sq = sum(randn(k_degree, n).^2);
+%     chi_sq_hist = histc(chi_sq, edges);
+%     chi_sq_hist = chi_sq_hist/sum(chi_sq_hist) / delta;
+%     plot(pos, chi_sq_hist, 'b--', 'LineWidth', 2)
     
     % normal approximation curve
 %     normpdf = @(x, mu, sig) 1/(sqrt(2*pi)*sig)*exp(-0.5*(x-mu).^2./sig.^2);

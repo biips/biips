@@ -12,15 +12,15 @@
 #define BIIPSCORE_HPP_
 
 #include "common/Common.hpp"
-#include "function/FunctionTable.hpp"
-#include "distribution/DistributionTable.hpp"
+#include "function/Function.hpp"
+#include "distribution/Distribution.hpp"
 #include "graph/Node.hpp"
 #include "graph/ConstantNode.hpp"
 #include "graph/StochasticNode.hpp"
 #include "graph/LogicalNode.hpp"
 #include "graph/GraphTypes.hpp"
 #include "graph/Graph.hpp"
-#include "sampler/SMCSampler.hpp"
+#include "sampler/ForwardSampler.hpp"
 #include "sampler/Accumulator.hpp"
 
 

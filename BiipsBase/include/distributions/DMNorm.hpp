@@ -23,11 +23,14 @@ namespace Biips
     DMNorm() : Distribution("dmnorm", 2) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MultiArray sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const;
+    virtual Scalar logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const;
+    virtual MultiArray::Pair unboundedSupport(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const;
-    virtual Scalar LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
+    virtual Bool IsSupportFixed(const Flags & fixmask) const { return true; }
 
     static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
   };

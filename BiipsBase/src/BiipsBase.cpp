@@ -9,9 +9,7 @@
  */
 
 #include "BiipsBase.hpp"
-#include "function/FunctionTable.hpp"
-#include "distribution/DistributionTable.hpp"
-#include "sampler/SMCSampler.hpp"
+#include "sampler/ForwardSampler.hpp"
 
 #include "functions/Multiply.hpp"
 #include "functions/Add.hpp"
@@ -33,6 +31,15 @@
 #include "distributions/DBeta.hpp"
 #include "distributions/DBin.hpp"
 #include "distributions/DCat.hpp"
+#include "distributions/DUnif.hpp"
+#include "distributions/DBern.hpp"
+#include "distributions/DExp.hpp"
+#include "distributions/DLnorm.hpp"
+#include "distributions/DChisqr.hpp"
+#include "distributions/DGamma.hpp"
+#include "distributions/DT.hpp"
+#include "distributions/DWeib.hpp"
+#include "distributions/DPar.hpp"
 
 #include "samplers/DiscreteOptimal.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
@@ -50,6 +57,7 @@ namespace Biips
 
   void loadBaseModule(FunctionTable & funcTab, DistributionTable & distTab)
   {
+    // TODO check returned boolean
     funcTab.Insert(Multiply::Instance());
     funcTab.Insert(Add::Instance());
     funcTab.Insert(MatMult::Instance());
@@ -57,12 +65,14 @@ namespace Biips
     funcTab.Insert(Divide::Instance());
     funcTab.Insert(Neg::Instance());
     funcTab.Insert(Pow::Instance());
+    funcTab.Insert(PowInfix::Instance());
     funcTab.Insert(Cos::Instance());
     funcTab.Insert(Sqrt::Instance());
     funcTab.Insert(Transpose::Instance());
     funcTab.Insert(Sum::Instance());
     funcTab.Insert(Equal::Instance());
 
+    // TODO check returned boolean
     distTab.Insert(DNorm::Instance());
     distTab.Insert(DNormVar::Instance());
     distTab.Insert(DMNorm::Instance());
@@ -70,28 +80,37 @@ namespace Biips
     distTab.Insert(DBeta::Instance());
     distTab.Insert(DBin::Instance());
     distTab.Insert(DCat::Instance());
+    distTab.Insert(DUnif::Instance());
+    distTab.Insert(DBern::Instance());
+    distTab.Insert(DExp::Instance());
+    distTab.Insert(DLnorm::Instance());
+    distTab.Insert(DChisqr::Instance());
+    distTab.Insert(DGamma::Instance());
+    distTab.Insert(DT::Instance());
+    distTab.Insert(DWeib::Instance());
+    distTab.Insert(DPar::Instance());
 
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateMNormalLinearFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateMNormalVarLinearFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateNormalLinearFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateNormalVarLinearFactory::Instance(), true));
 
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateMNormalFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateMNormalVarFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateBetaFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateNormalFactory::Instance(), true));
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(ConjugateNormalVarFactory::Instance(), true));
 
-    SMCSampler::NodeSamplerFactories().push_front(
+    ForwardSampler::NodeSamplerFactories().push_front(
         std::make_pair(DiscreteOptimalFactory::Instance(), true));
   }
 

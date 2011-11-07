@@ -238,7 +238,7 @@ void t_DirichletMultinomial(int argc, char* argv[])
         // C computation
         //--------------
         unary_param[0] = pi_gen;
-        C[t] = data_graph.AddStochasticNode(scalar_dim, "dcat", unary_param);
+        C[t] = data_graph.AddStochasticNode(scalar_dim, "dcat", unary_param, false);
 
         binary_params[0] = C[t];
         binary_params[1] = k_vec;
@@ -417,7 +417,7 @@ void t_DirichletMultinomial(int argc, char* argv[])
         // C computation
         //--------------
         unary_param[0] = pi_k[t];
-        C[t] = graph.AddStochasticNode(scalar_dim, "dcat", unary_param);
+        C[t] = graph.AddStochasticNode(scalar_dim, "dcat", unary_param, false);
 
         binary_params[0] = C[t];
         binary_params[1] = k_vec;
@@ -535,7 +535,7 @@ void t_DirichletMultinomial(int argc, char* argv[])
 
       // sampler
       //--------
-      SMCSampler sampler(nb_particles, &graph, &my_rng);
+      ForwardSampler sampler(nb_particles, &graph, &my_rng);
       sampler.SetResampleParams(SMC_RESAMPLE_STRATIFIED, rs_threshold);
 
       if (! prior_mutation_flag)

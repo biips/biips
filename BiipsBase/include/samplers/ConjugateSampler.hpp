@@ -1,12 +1,12 @@
 //                                               -*- C++ -*-
 /*! \file ConjugateSampler.hpp
- * \brief 
- * 
- * $LastChangedBy$
- * $LastChangedDate$
- * $LastChangedRevision$
- * $Id$
- */
+* \brief
+*
+* $LastChangedBy$
+* $LastChangedDate$
+* $LastChangedRevision$
+* $Id$
+*/
 
 #ifndef BIIPS_CONJUGATESAMPLER_HPP_
 #define BIIPS_CONJUGATESAMPLER_HPP_
@@ -43,23 +43,21 @@ namespace Biips
     friend class ConjugateSamplerFactory<SelfType>;
     friend class LikeFormVisitor<SelfType>;
 
-    explicit ConjugateSampler(const Graph * pGraph )
-     : NodeSampler(pGraph) {};
+    explicit ConjugateSampler(const Graph & graph)
+    : NodeSampler(graph) {};
 
     virtual MultiArray::Array initLikeParamContrib() const;
     virtual void formLikeParamContrib(NodeId likeId, MultiArray::Array & likeParamContribValues) = 0;
     virtual MultiArray::Array postParam(const MultiArray::Array & priorParamContribValues,
         const MultiArray::Array & likeParamContribValues) const = 0;
-    virtual Scalar computeLogWeight(const MultiArray & sampfedData,
+    virtual Scalar computeLogIncrementalWeight(const MultiArray & sampfedData,
         const MultiArray::Array & priorParamValues,
         const MultiArray::Array & postParamValues,
         const MultiArray::Array & LikeParamContrib = MultiArray::Array());
+    virtual void sample(const StochasticNode & node);
 
   public:
-    static Bool IsConjugate(const StochasticNode & node, NodeId priorId, const Graph * pGraph);
-
-    virtual void Visit(const StochasticNode & node);
-    virtual Scalar LogWeight() { return logWeight_; };
+    static Bool IsConjugate(const StochasticNode & node, NodeId priorId, const Graph & graph);
 
     virtual const String & Name() const = 0;
 
@@ -85,7 +83,7 @@ namespace Biips
 
   public:
     static BaseType::Ptr Instance() { return pConjugateSamplerFactoryInstance_; };
-    virtual Bool Create(const Graph * pGraph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
+    virtual Bool Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
     virtual ~ConjugateSamplerFactory() {};
   };
 
@@ -97,11 +95,11 @@ namespace Biips
     MultiArray::Array paramContribValues(PriorDist::Instance()->NParam());
 
     GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
-    boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(nodeId_);
+    boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
     Size i = 0;
     while(it_parents != it_parents_end)
     {
-      paramContribValues[i] = MultiArray(pGraph_->GetNode(*it_parents).DimPtr());
+      paramContribValues[i] = MultiArray(graph_.GetNode(*it_parents).DimPtr());
       ++it_parents;
       ++i;
     }
@@ -110,98 +108,112 @@ namespace Biips
 
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogWeight(const MultiArray & sampledData,
+  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogIncrementalWeight(const MultiArray & sampledData,
       const MultiArray::Array & priorParamValues,
       const MultiArray::Array & postParamValues,
       const MultiArray::Array & LikeParamContrib)
   {
-    Scalar logWeight = PriorDist::Instance()->LogPdf(sampledData, priorParamValues);
-    logWeight -= PriorDist::Instance()->LogPdf(sampledData, postParamValues);
+    // Prior
+    Scalar log_prior = PriorDist::Instance()->LogDensity(sampledData, priorParamValues, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    if (isNan(log_prior))
+      throw NodeError(nodeId_, "Failure to calculate log prior density.");
 
-    StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-    boost::tie(it_offspring, it_offspring_end) = pGraph_->GetStochasticChildren(nodeId_);
+    // Likelihood
+    Scalar log_like = getLogLikelihood(graph_, nodeId_, *this);
 
-    LogLikeVisitor log_like_vis(pGraph_, nodeId_, this);
+    // Posterior
+    Scalar log_post = PriorDist::Instance()->LogDensity(sampledData, postParamValues, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    if (isNan(log_post))
+      throw NodeError(nodeId_, "Failure to calculate log posterior density.");
 
-    while ( it_offspring != it_offspring_end )
+    // Incremental weight
+    Scalar log_incr_weight = log_prior + log_like - log_post;
+    if (isNan(log_incr_weight))
     {
-      pGraph_->VisitNode(*it_offspring, log_like_vis);
-      ++it_offspring;
+      if(!isFinite(log_prior))
+      {
+        if (!isFinite(log_like))
+          throw RuntimeError("Prior and likelihood are incompatible.");
+        if (!isFinite(log_post))
+          throw RuntimeError("Prior and posterior are incompatible.");
+      }
+
+      if(!isFinite(log_like))
+      {
+        if (!isFinite(log_post))
+          throw RuntimeError("Likelihood and posterior are incompatible.");
+      }
+
+      throw RuntimeError("Failure to calculate log incremental weight.");
     }
 
     // TODO optimize computation removing constant terms
-    return logWeight+log_like_vis.Value();
+    return log_incr_weight;
   }
 
 
 
   template<typename ConjugateSampler>
-  class LikeFormVisitor : public ConstNodeVisitor
+  class LikeFormVisitor : public ConstStochasticNodeVisitor
   {
   protected:
     typedef LikeFormVisitor<ConjugateSampler> SelfType;
     typedef typename Types<SelfType>::Ptr Ptr;
     typedef typename ConjugateSampler::PriorDistType PriorDistType;
 
-    const Graph * pGraph_;
-    ConjugateSampler * pNodeSampler_;
+    const Graph & graph_;
+    ConjugateSampler & nodeSampler_;
     MultiArray::Array paramContribValues_;
 
-  public:
-    virtual void Visit(const ConstantNode & node) {} // TODO throw exception
-    virtual void Visit(const LogicalNode & node) {} // TODO throw exception
-
-    virtual void Visit(const StochasticNode & node)
+    virtual void visit(const StochasticNode & node)
     {
-      if (nodeIdDefined_ && pGraph_->GetObserved()[nodeId_] ) // TODO manage else case : throw exception
-        pNodeSampler_->formLikeParamContrib(nodeId_, paramContribValues_);
+      if (graph_.GetObserved()[nodeId_] )
+        nodeSampler_.formLikeParamContrib(nodeId_, paramContribValues_);
     }
 
+  public:
     const MultiArray::Array & GetParamContribValues() const { return paramContribValues_; }
 
-    LikeFormVisitor(const Graph * pGraph, ConjugateSampler * pNodeSampler) :
-      pGraph_(pGraph), pNodeSampler_(pNodeSampler),
-      paramContribValues_(pNodeSampler->initLikeParamContrib())
+    LikeFormVisitor(const Graph & graph, ConjugateSampler & nodeSampler) :
+      graph_(graph), nodeSampler_(nodeSampler),
+      paramContribValues_(nodeSampler.initLikeParamContrib())
     {
     }
   };
 
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  void ConjugateSampler<PriorDist, LikeDist, paramIndex>::Visit(const StochasticNode & node)
+  void ConjugateSampler<PriorDist, LikeDist, paramIndex>::sample(const StochasticNode & node)
   {
-    if (nodeIdDefined_ && attributesDefined_) // TODO manage else case : throw exception
+    MultiArray::Array prior_param_values = getParamValues(nodeId_, graph_, *this);
+
+    StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
+    boost::tie(it_offspring, it_offspring_end)
+    = graph_.GetStochasticChildren(nodeId_);
+    LikeFormVisitor<SelfType> like_form_vis(graph_, *this);
+    while (it_offspring != it_offspring_end)
     {
-      MultiArray::Array prior_param_values = getParamValues(nodeId_, pGraph_, this);
-
-      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end)
-          = pGraph_->GetStochasticChildren(nodeId_);
-      LikeFormVisitor<SelfType> like_form_vis(pGraph_, this);
-      while (it_offspring != it_offspring_end)
-      {
-        pGraph_->VisitNode(*it_offspring, like_form_vis);
-        ++it_offspring;
-      }
-      MultiArray::Array like_param_contrib = like_form_vis.GetParamContribValues();
-
-      MultiArray::Array post_param_values = postParam(prior_param_values, like_param_contrib);
-
-      MultiArray sampled_data = PriorDist::Instance()->Sample(post_param_values, pRng_);
-      nodeValuesMap_[nodeId_] = sampled_data.ValuesPtr();
-
-      sampledFlagsMap_[nodeId_] = true;
-
-      logWeight_ = computeLogWeight(sampled_data,
-          prior_param_values, post_param_values, like_param_contrib);
+      graph_.VisitNode(*it_offspring, like_form_vis);
+      ++it_offspring;
     }
+    MultiArray::Array like_param_contrib = like_form_vis.GetParamContribValues();
+
+    MultiArray::Array post_param_values = postParam(prior_param_values, like_param_contrib);
+
+    MultiArray sampled_data = PriorDist::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_); // FIXME Boundaries
+    nodeValuesMap_[nodeId_] = sampled_data.ValuesPtr();
+
+    sampledFlagsMap_[nodeId_] = true;
+
+    logIncrementalWeight_ = computeLogIncrementalWeight(sampled_data,
+        prior_param_values, post_param_values, like_param_contrib);
   }
 
 
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
   Bool ConjugateSampler<PriorDist, LikeDist, paramIndex>::IsConjugate(const StochasticNode & node,
-      NodeId priorId, const Graph * pGraph)
+      NodeId priorId, const Graph & graph)
   {
     Bool conjugate = false;
     const Types<NodeId>::Array & params = node.Parents();
@@ -211,7 +223,7 @@ namespace Biips
       for (Size i = 0; i < params.size(); ++i)
       {
         if (i != paramIndex)
-          conjugate = ( nodesRelation(params[i], priorId, pGraph) == KNOWN );
+          conjugate = ( nodesRelation(params[i], priorId, graph) == KNOWN );
         if (!conjugate)
           break;
       }
@@ -221,96 +233,98 @@ namespace Biips
 
 
   template<typename ConjugateSampler>
-  class IsConjugateVisitor : public ConstNodeVisitor
+  class IsConjugateVisitor : public ConstStochasticNodeVisitor
   {
   protected:
-    const Graph * pGraph_;
+    const Graph & graph_;
     const NodeId priorId_;
     Bool conjugate_;
 
-  public:
-    void Visit(const ConstantNode & node) {}; // TODO throw exception
-    void Visit(const LogicalNode & node) {}; // TODO throw exception
-
-    void Visit(const StochasticNode & node)
+    void visit(const StochasticNode & node)
     {
-      if (nodeIdDefined_)
-        conjugate_ = ConjugateSampler::IsConjugate(node, priorId_, pGraph_);
+      conjugate_ = false;
+
+      // FIXME
+      if (node.IsBounded())
+        return;
+
+      conjugate_ = ConjugateSampler::IsConjugate(node, priorId_, graph_);
     }
 
+  public:
     Bool IsConjugate() const { return conjugate_; }
 
-    IsConjugateVisitor(const Graph * pGraph, NodeId myId) :
-      pGraph_(pGraph), priorId_(myId), conjugate_(false) {}
+    IsConjugateVisitor(const Graph & graph, NodeId myId) :
+      graph_(graph), priorId_(myId), conjugate_(false) {}
   };
 
 
   template<typename ConjugateSampler>
-  class CanSampleVisitor : public ConstNodeVisitor
+  class CanSampleVisitor : public ConstStochasticNodeVisitor
   {
+
   protected:
     typedef GraphTypes::StochasticChildrenNodeIdIterator
-        StochasticChildrenNodeIdIterator;
+    StochasticChildrenNodeIdIterator;
 
     typedef typename ConjugateSampler::PriorDistType PriorDistType;
 
-    const Graph * pGraph_;
+    const Graph & graph_;
     Bool canSample_;
 
-  public:
-    void Visit(const ConstantNode & node) {}; // TODO throw exception
-    void Visit(const LogicalNode & node) {}; // TODO throw exception
-
-    void Visit(const StochasticNode & node)
+    void visit(const StochasticNode & node)
     {
-      if (nodeIdDefined_)
+      canSample_ = false;
+
+      if (graph_.GetObserved()[nodeId_])
+        throw LogicError("CanSampleVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
+
+      if (node.PriorName() != PriorDistType::Instance()->Name())
+        return;
+
+      // FIXME
+      if (node.IsBounded())
+        return;
+
+      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
+      boost::tie(it_offspring, it_offspring_end)
+      = graph_.GetStochasticChildren(nodeId_);
+
+      IsConjugateVisitor<ConjugateSampler> child_vis(graph_, nodeId_);
+
+      while (it_offspring != it_offspring_end)
       {
-        canSample_ = false;
-          if (!pGraph_->GetObserved()[nodeId_]) // TODO throw exception
+        if ( graph_.GetObserved()[*it_offspring] )
         {
-          if (node.PriorName() == PriorDistType::Instance()->Name())
-          {
-            StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-            boost::tie(it_offspring, it_offspring_end)
-                = pGraph_->GetStochasticChildren(nodeId_);
-
-            IsConjugateVisitor<ConjugateSampler> child_vis(pGraph_, nodeId_);
-
-            while (it_offspring != it_offspring_end)
-            {
-              if ( pGraph_->GetObserved()[*it_offspring] )
-              {
-                pGraph_->VisitNode(*it_offspring, child_vis);
-                canSample_ = child_vis.IsConjugate();
-                if (!canSample_)
-                  break;
-              }
-              ++it_offspring;
-            }
-          }
+          graph_.VisitNode(*it_offspring, child_vis);
+          canSample_ = child_vis.IsConjugate();
+          if (!canSample_)
+            break;
         }
+        ++it_offspring;
       }
     }
 
+  public:
     Bool CanSample() const { return canSample_; }
 
-    CanSampleVisitor(const Graph * pGraph) :
-      pGraph_(pGraph), canSample_(false) {}
+    CanSampleVisitor(const Graph & graph) :
+      graph_(graph), canSample_(false) {}
   };
 
 
   template<typename ConjugateSampler>
-  Bool ConjugateSamplerFactory<ConjugateSampler>::Create(const Graph * pGraph, NodeId nodeId,
+  Bool ConjugateSamplerFactory<ConjugateSampler>::Create(const Graph & graph, NodeId nodeId,
       BaseType::CreatedPtr & pNodeSamplerInstance) const
   {
-    CanSampleVisitor<CreatedType> can_sample_vis(pGraph);
+    CanSampleVisitor<CreatedType> can_sample_vis(graph);
 
-    pGraph->VisitNode(nodeId, can_sample_vis);
+    graph.VisitNode(nodeId, can_sample_vis);
 
     Bool flag_created = can_sample_vis.CanSample();
 
     if (flag_created)
-      pNodeSamplerInstance = BaseType::CreatedPtr(new CreatedType(pGraph));
+      pNodeSamplerInstance = BaseType::CreatedPtr(new CreatedType(graph));
 
     return flag_created;
   }
@@ -319,7 +333,7 @@ namespace Biips
   template<typename ConjugateSampler>
   typename ConjugateSamplerFactory<ConjugateSampler>::Ptr
   ConjugateSamplerFactory<ConjugateSampler>::pConjugateSamplerFactoryInstance_(
-          new SelfType());
+      new SelfType());
 
 }
 

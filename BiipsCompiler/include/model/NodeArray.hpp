@@ -7,7 +7,7 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS NodeArray class
+ * COPY: Adapted from JAGS NodeArray class
  */
 
 #ifndef BIIPS_NODEARRAY_HPP_
@@ -32,7 +32,7 @@ namespace Biips
 
   protected:
     const String name_;
-    Graph * pGraph_;
+    Graph & graph_;
     IndexRange range_;
     Types<NodeId>::Array nodeIds_;
     Types<Size>::Array offsets_;
@@ -42,11 +42,11 @@ namespace Biips
     NodeArray(const NodeArray & from);
     NodeArray & operator=(const NodeArray & rhs);
 
-//    Bool findActiveIndices(Types<Size>::Array & ind, Size k,
-//        const IndexRange::Indices & lower, const DimArray & dim) const;
+    Bool findActiveIndices(Types<Size>::Array & ind, Size k,
+        const IndexRange::Indices & lower, const DimArray & dim) const;
 
   public:
-    NodeArray(const String & name, Graph * pGraph, const DimArray & dim);
+    NodeArray(const String & name, Graph & graph, const DimArray & dim);
 
     const String & Name() const { return name_; }
 
@@ -54,7 +54,7 @@ namespace Biips
 
     void Insert(NodeId nodeId, const IndexRange & targetRange);
 
-    NodeId GetSubset(const IndexRange & subsetRange);//, Model & model);
+    NodeId GetSubset(const IndexRange & subsetRange);
 
     // Accessors
     const IndexRange & Range() const { return range_; }

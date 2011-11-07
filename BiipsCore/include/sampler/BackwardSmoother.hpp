@@ -26,29 +26,39 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    const Graph::Ptr pGraph_;
+    const Graph & graph_;
     Types<Monitor::Ptr>::Array filterMonitors_;
     ValArray weights_;
-    Scalar sumOfweights_;
-    Size t_;
+    Scalar sumOfWeights_;
+    Scalar ess_;
+    Size iter_;
     Bool initialized_;
+    Types<Size>::Array nodeIterations_;
 
+    void sumOfWeightsAndEss();
+    
   public:
-    BackwardSmoother(const Graph::Ptr & pGraph, const Types<Monitor::Ptr>::Array & filterMonitors);
+    BackwardSmoother(const Graph & graph, const Types<Monitor::Ptr>::Array & filterMonitors,
+        const Types<Size>::Array & nodeIterations);
 
     void Initialize();
     void IterateBack();
 
-    Size Time() const { return t_; }
-    Bool AtEnd() const { return filterMonitors_.size()==1; }
-    Types<NodeId>::Array UpdatedNodes() const { return filterMonitors_.back()->GetNodes(); };
+    Bool Initialized() const { return initialized_; };
 
+    Size Iteration() const { return iter_; }
+    Bool AtEnd() const { return filterMonitors_.size()==1; }
+    const Types<NodeId>::Array & UpdatedNodes() const { return filterMonitors_.back()->GetSampledNodes(); };
+    Size GetNodeSamplingIteration(NodeId nodeId) const;
+
+    Scalar GetNodeESS(NodeId nodeId) const;
+    
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
 
-    void SetMonitorWeights(SmoothMonitor & monitor) const;
-    void SetMonitorNodeValues(NodeId nodeId, SmoothMonitor & monitor) const;
+    void InitMonitor(SmoothMonitor & monitor) const;
+    void MonitorNode(NodeId nodeId, SmoothMonitor & monitor) const;
   };
 
 }

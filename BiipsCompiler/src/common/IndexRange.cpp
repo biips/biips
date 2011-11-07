@@ -7,7 +7,7 @@
  * \version $LastChangedRevision$
  * Id:      $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Range class
+ * COPY: Adapted from JAGS Range class
  */
 
 

@@ -25,18 +25,21 @@ namespace Biips
   {
   protected:
     NodeId nodeId_;
-    Bool nodeIdDefined_;
 
-    NodeVisitor() : nodeId_(0), nodeIdDefined_(false)  {};
+    NodeVisitor() : nodeId_(NULL_NODEID) {}
+
+    virtual void visit(ConstantNode & node) = 0;
+    virtual void visit(StochasticNode & node) = 0;
+    virtual void visit(LogicalNode & node) = 0;
 
   public:
-    virtual void Visit(ConstantNode & node) = 0;
-    virtual void Visit(StochasticNode & node) = 0;
-    virtual void Visit(LogicalNode & node) = 0;
+    void Visit(ConstantNode & node);
+    void Visit(StochasticNode & node);
+    void Visit(LogicalNode & node);
 
-    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; nodeIdDefined_ = true; };
+    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; }
 
-    virtual ~NodeVisitor() {};
+    virtual ~NodeVisitor() {}
   };
 
 
@@ -44,20 +47,37 @@ namespace Biips
   {
   protected:
     NodeId nodeId_;
-    Bool nodeIdDefined_;
 
-    ConstNodeVisitor() : nodeId_(0), nodeIdDefined_(false)  {};
+    ConstNodeVisitor() : nodeId_(NULL_NODEID) {}
+
+    virtual void visit(const ConstantNode & node) = 0;
+    virtual void visit(const StochasticNode & node) = 0;
+    virtual void visit(const LogicalNode & node) = 0;
 
   public:
-    virtual void Visit(const ConstantNode & node) = 0;
-    virtual void Visit(const StochasticNode & node) = 0;
-    virtual void Visit(const LogicalNode & node) = 0;
+    void Visit(const ConstantNode & node);
+    void Visit(const StochasticNode & node);
+    void Visit(const LogicalNode & node);
 
-    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; nodeIdDefined_ = true; };
+    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; }
 
-    virtual ~ConstNodeVisitor() {};
+    virtual ~ConstNodeVisitor() {}
   };
 
+
+
+  class ConstStochasticNodeVisitor : public ConstNodeVisitor
+  {
+  protected:
+    ConstStochasticNodeVisitor() {}
+
+    virtual void visit(const ConstantNode & node) { throw LogicError("ConstantNode can not be visited by StochasticNodeVisitor."); }
+    virtual void visit(const StochasticNode & node) = 0;
+    virtual void visit(const LogicalNode & node) { throw LogicError("LogicalNode can not be visited by StochasticNodeVisitor."); };
+
+  public:
+    virtual ~ConstStochasticNodeVisitor() {}
+  };
 }
 
 
