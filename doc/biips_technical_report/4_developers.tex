@@ -1,0 +1,582 @@
+\chapter{Developers guide}
+\label{developers}
+
+\section{Required configuration}
+\biips{} is currently developed and has only been tested under Ubuntu 10.04 (Lucid lynx) 32 bits. The following instructions will only concern this configuration.
+
+\paragraph{}
+First, activate optional software repositories:
+\begin{quote}
+Click the Ubuntu menu \emph{System $\rightarrow$ Administration $\rightarrow$ Software sources}. \\
+Select the \emph{universe} and, \emph{multiverse} repositories.
+\end{quote}
+
+\subsection{Libraries}
+Then, install the following libraries:
+
+\begin{list}{}{}
+
+\item[\textbf{GSL:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install libgsl0-dev
+\end{verbatim}
+
+
+ \item[\textbf{Boost:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install libboost-all-dev
+\end{verbatim}
+
+
+\item[\textbf{Qt:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install libqtcore4
+sudo apt-get install libqtgui4
+\end{verbatim}
+
+
+\item[\textbf{QWT:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install libqwt5-qt4-dev
+\end{verbatim}
+
+\end{list}
+
+
+\subsection{Development tools}
+Finally, install the following development tools:
+
+\begin{list}{}{}
+
+\item[\textbf{JRE\footnote{Java Runtime Environment}:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install openjdk-6-jre
+\end{verbatim}
+
+
+\item [\textbf{Eclipse:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install eclipse
+\end{verbatim}
+The first launch of Eclipse will ask you for a workspace directory. You can accept the default one: \verb=~/workspace=.
+
+
+\item [\textbf{G++\footnote{GNU C++ Compiler}:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install g++
+\end{verbatim}
+
+
+\item [\textbf{CDT plugin:}] in Eclipse
+\begin{quote}
+Click the top menu \emph{Help $\rightarrow$ Install new software}. \\
+In the \emph{Work with} field, type: \verb=http://download.eclipse.org/tools/cdt/releases/galileo= \\
+Click \emph{Add} \\
+Select all the features (CDT Main Features, CDT Optional Features). \\
+Click \emph{Next}, \emph{Next}, \emph{Accept}, \emph{Finish}. \\
+Answer \emph{OK} to the \emph{Security warning} message. \\
+Restart Eclipse.
+\end{quote}
+To open the C/C++ perspective
+\begin{quote}
+Click the top center (curved arrow shaped) button on the welcome page to go to the workbench. \\
+Then, click the top menu \emph{Window $\rightarrow$ Open perspective $\rightarrow$ Other}. \\
+Select C/C++.
+\end{quote}
+You should also set the following option preference
+\begin{quote}
+Click the top menu\emph{ Window $\rightarrow$ Preferences $\rightarrow$ Run/Debug $\rightarrow$ Launching}. \\
+Unselect \emph{build (if required) before launching}.
+\end{quote}
+This will avoid long waiting times before launching an executable.
+
+
+\item [\textbf{SSH\footnote{Secure Shell}:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install ssh
+\end{verbatim}
+
+
+\item [\textbf{SVN\footnote{Subversion}:}] type the following command in a terminal
+\begin{verbatim}
+sudo apt-get install subversion
+sudo apt-get install subversion-tools
+\end{verbatim}
+
+
+\end{list}
+
+\section{Obtaining the source code}
+You must have registered your SSH public key in your GForge account.
+
+\paragraph{}
+Quoting the GForge FAQ\footnote{\href{http://siteadmin.gforge.inria.fr/FAQ.html\#Q6}{http://siteadmin.gforge.inria.fr/FAQ.html\#Q6}}:
+\begin{quote}
+\begin{itemize}
+\item Generate a pair of rsa public/private keys with the ssh-keygen command: \verb=ssh-keygen -t rsa= (make sure you enter a lengthy passphrase, ie non null, when asked to).\\
+\item Copy your public key in an easy-to access file: \verb=cp ~/.ssh/id_rsa.pub ~=.\\
+\item Paste your public key in the gforge website. To do this, you need to go to your account and then go to the Account maintainance tab. At the bottom of the Account maintainance tab, you should see a Shell Account Information section which contains an [Edit keys] link. Paste your public key(s) in the empty field below and click the Update button.\\
+\end{itemize}
+Please, be aware that uploading your ssh public key on the server will not allow you to connect to the server immediately through ssh. To do so, you will need to wait at most 24h. If your connection is impossible 24h later, please, contact the server administrators.
+\end{quote}
+
+You can now make a SVN checkout of the whole \biips{} repository into your workspace, typing the following commands in a terminal:
+\begin{quote}
+\verb=cd ~/workspace= \\
+\texttt{svn checkout svn+ssh://\textit{<Gforge login>}@scm.gforge.inria.fr/svn/biips}
+\end{quote}
+
+
+\paragraph{}
+Then, import the Eclipse trunk projects with the following instructions:
+\begin{quote}
+Click the top menu \emph{File $\rightarrow$ Import}. \\
+Select \emph{General $\rightarrow$ Existing Projects into Workspace}. \\
+Click \emph{Next}. \\
+In the \emph{Select root directory} field, select \verb=~/workspace/biips/trunk=.
+\end{quote}
+Four projects must appear and be selected (BiipsBase, BiipsCore, BiipsTest, smctc)
+\begin{quote}
+Click \emph{Finish}.
+\end{quote}
+
+
+\section{Compiling}
+For the first compilation, select the Debug or Release configurations for the three BiipsCore, BiipsBase, BiipsTest projects:
+\begin{quote}
+Select the projects in the \emph{Project Explorer} view.\\
+Click the top menu \emph{Project $\rightarrow$ Build Configurations $\rightarrow$ Set Active $\rightarrow$ Debug/Release}.
+\end{quote}
+Then build libraries and executables:
+\begin{quote}
+Click the top menu \emph{Project $\rightarrow$ Build all}.
+\end{quote}
+
+\paragraph{}
+For later quicker builds:
+\begin{quote}
+Select your project in the \emph{Project Explorer} view.\\
+Click the top menu \emph{Project $\rightarrow$ Make Targets $\rightarrow$ all $\rightarrow$ Build}.
+\end{quote}
+This will skip the checks of dependencies with other projects.
+
+\section{Testing}
+\label{biipstest}
+
+\texttt{BiipsTest} implements the testing procedure presented in section \ref{testing} of chapter \ref{architecture}. It uses \textbf{Boost.Test} test driver and it can take several command-line arguments.
+\begin{itemize}
+ \item \verb=BiipsTest --help= displays help concerning the \textbf{Boost.Test} test driver.
+ \item \verb=BiipsTest --help-test= or \verb=BiipsTest -h= displays help concerning \biips{} tests.
+\end{itemize}
+
+\paragraph{}
+The latter produces the following message:
+\begin{verbatim}
+Usage: BiipsTest [<option>]... --model-id=<id> [<option>]...
+  runs model <id> with default model parameters, with multiple <option> parameters.
+       BiipsTest [<option>]... <config_file> [<option>]...
+  runs test configuration from file <config_file>, with multiple <option> parameters.
+
+Options, denoted here by <option>, are parsed from the general syntax:     --<long_key>[=<value>]
+  or -<short_key>[=<value>]
+where the bracketed text [...] is optional
+and the angle bracketed text <...> must be replaced by the corresponding value.
+
+Allowed options:
+
+Generic options:
+  -h [ --help-test ]           produces help message.
+  --version                    prints version string.
+  -v [ --verbose ] arg (=1)    verbosity level.
+                               values:
+                                0: none.
+                                1: minimal.
+                                2: high.
+  --interactive                asks questions to the user.
+                               applies when verbose>0.
+  -s [ --show-plots ] arg (=0) shows plots, interrupting execution.
+                               applies when n-smc=1.
+                               values:
+                                0: no plots are shown.
+                                1: final results plots are shown.
+                                2: all plots are shown.
+  --step arg (=3)              execution step to be reached (if possible).
+                               values:
+                                0: samples or reads values of the graph.
+                                1: computes or reads benchmark values.
+                                2: runs SMC sampler, computes estimates and 
+                                   errors vs benchmarks.
+                                3: checks that errors vs benchmarks are 
+                                   distributed according to reference SMC errors, 
+                                   when n-smc>1. checks that error is lesser than a
+                                   1-(reject-level) quantile of the reference SMC 
+                                   errors, when n-smc=1.
+  --check-mode arg (=filter)   errors to be checked.
+                               values:
+                                filter: checks filtering errors only.
+                                smooth: checks smoothing errors only.
+                                all: checks both.
+
+Configuration:
+  --model-id arg              model identifier.
+                              values:
+                               1: HMM 1D linear gaussian.
+                               2: HMM 1D non linear gaussian.
+                               3: HMM multivariate Normal linear.
+                               4: HMM multivariate Normal linear 4D.
+  --data-rng-seed arg         data sampler rng seed. default=time().
+  --resampling arg (=2)       resampling method.
+                              values:
+                               0: MULTINOMIAL.
+                               1: RESIDUAL.
+                               2: STRATIFIED.
+                               3: SYSTEMATIC.
+  --ess-threshold arg (=0.5)  ESS resampling threshold.
+  --particles arg (=1000 )    numbers of particles.
+  --mutations arg (=optimal ) type of exploration used in the mutation step of 
+                              the SMC algorithm.
+                              values:
+                               optimal: use optimal mutation, when possible.
+                               prior: use prior mutation.
+                               <other>: possible model-specific mutation.
+  --n-smc arg (=1)            number of independent SMC executions for each 
+                              mutation and number of particles.
+  --smc-rng-seed arg          SMC sampler rng seed. default=time().
+                              applies when n-smc=1.
+  --prec-param                uses precision parameter instead of variance for 
+                              normal distributions.
+  --reject-level arg (=0.01)  accepted level of rejection in checks.
+  --plot-file arg             plots pdf file name.
+                              applies when n-smc=1.
+\end{verbatim}
+
+\paragraph{}
+\textbf{Generic options} can only been taken from command-line and \textbf{Configuration} ones can be taken both from command-line and from a configuration file. The general syntax is: \verb!--<option>! or \verb!--<option>=<value>!, where the text in angle brackets must be replaced with appropriate content.
+
+\paragraph{}
+\textbf{Unregistered options}\footnote{Options whose name can not be known until reading it.} can also be read from the configuration file:
+\begin{itemize}
+
+\item Model parameters:
+\begin{verbatim}
+[model]
+t.max = 20
+\end{verbatim}
+Matrix parameters are parsed from the following syntax
+\begin{verbatim}
+[model]
+A = value11 value21; value12 value22
+\end{verbatim}
+where \verb!;! is a column separator.
+
+\item Dimensions:
+\begin{verbatim}
+[dim]
+x = 1
+y = 2 2
+\end{verbatim}
+\verb!x! is scalar and \verb!y! is a $2 \times 2$ matrix
+
+\item Data, \ie{} observed (and optionally unobserved) values of the model:
+\begin{verbatim}
+[data]
+x = 1.01144 0.913546 -0.228905 0.493078 0.195882 -1.78846 0.611299 [...]
+\end{verbatim}
+Multi-dimensional values can be parsed from syntax:
+\begin{verbatim}
+[data]
+y.1 = 1.01144 0.913546 -0.228905 0.493078 0.195882 -1.78846 0.611299 [...]
+y.2 = 0 0.809148 0.886073 0.0694691 0.379583 0.245104 -1.24357 [...]
+y.3 = 1 0.4 0.368421 0.366197 0.366038 0.366026 0.366025 [...]
+y.4 = 0.386182 0.772364 0.680402 0.122153 0.26602 -0.044229 -0.8347 [...]
+\end{verbatim}
+where the dimensions are in row major order:
+ \begin{itemize}
+   \item \verb!y.1! line contains $y(1,1)$ values
+   \item \verb!y.2! line contains $y(2,1)$ values
+   \item \verb!y.3! line contains $y(1,2)$ values
+   \item \verb!y.4! line contains $y(2,2)$ values
+ \end{itemize}
+
+\item Benchmark values, \ie{} the true posterior mean and variance values:
+\begin{verbatim}
+[bench.filter]
+x = 0 0.809148 0.886073 0.0694691 0.379583 0.245104 -1.24357 [...]
+var.x = 1 0.4 0.368421 0.366197 0.366038 0.366026 0.366025 [...]
+[bench.smooth]
+x = 0.386182 0.772364 0.680402 0.122153 0.26602 -0.044229 -0.8347 [...]
+var.x = 0.57735 0.309401 0.290163 0.288782 0.288683 0.288676 0.288675 [...]
+\end{verbatim}
+
+\item Reference error samples, \ie{} obtained from a correct (under Matlab) SMC algorithm:
+\begin{verbatim}
+[errors.filter]
+prior.500 = 29.8718 39.0415 26.4701 35.337 23.9243 22.4974 43.9526 [...]
+optimal.500 = 40.0482 51.5672 26.4215 64.4748 21.4929 33.9718 38.2285 [...]
+prior.1000 = 34.5009 16.0078 42.007 23.0936 33.778 13.8802 22.679 [...]
+optimal.1000 = 19.6426 27.7204 28.2136 25.245 24.3569 34.7842 33.0246 [...]
+[errors.smooth]
+prior.500 = 39.9341 41.0893 24.1553 29.9975 21.479 27.6641 50.4908 [...]
+optimal.500 = 31.9834 44.6602 26.0642 68.4008 28.5624 27.6433 45.0351 [...]
+prior.1000 = 38.8716 14.5631 44.6106 23.2586 29.2144 20.7633 33.898 [...]
+optimal.1000 = 24.6405 21.5385 24.6629 27.2982 34.1979 41.2304 41.6266 [...]
+\end{verbatim}
+We defined filtering and smoothing errors for \verb!prior! and \verb!optimal! mutations, with \verb!500! and \verb!1000! particles.
+\end{itemize}
+
+\subsection{Running \biips Test program in a terminal}
+
+\paragraph{}
+\biips Core and \biips Base are the two shared libraries needed by \biips Test. Before launching \biips Test program in a terminal, you first have to specify the shared libraries path in an environment variable. Type in a terminal\footnote{The text between angle brackets \texttt{<...>} must be replaced by its value. The text between curly brackets \texttt{\{...\}} indicates a choice between several values.}:
+\begin{verbatim}
+cd <BIIPS_PATH>/BiipsTest
+export LD_LIBRARY_PATH=../BiipsCore/{Release|Debug}:../BiipsBase/{Release/Debug}
+\end{verbatim}
+
+\paragraph{}
+You have to choose between Debug and Release versions.
+
+\paragraph{}
+Then, to launch \biips Test using model \verb=ID=, type in a terminal\footnote{The bracketed text is optional: \texttt{[<OPTION>]...} stands for several options.}:
+\begin{verbatim}
+{Release|Debug}/BiipsTest --model-id=<ID> [<OPTION>]...
+\end{verbatim}
+
+\paragraph{}
+Several configuration files can be found in the folder \texttt{BiipsTest/bench}. They are generated by \texttt{run\_bench\_all} Matlab function located in the same folder. Type in a terminal:
+\begin{verbatim}
+{Release|Debug}/BiipsTest --cfg=bench/<CONFIG_FILE> --n-smc=<N> [<OPTION>]...
+\end{verbatim}
+
+\paragraph{}
+In addition, \texttt{BiipsTest.sh} shell script runs \biips Test for all \texttt{.cfg} files in \texttt{BiipsTest/bench} directory. You need not to specify the environment variable using the script. Type in a terminal:
+\begin{verbatim}
+cd <BIIPS_PATH>/BiipsTest
+./BiipsTest.sh {Debug|Release} <N> [<OPTION>]...
+\end{verbatim}
+to run Debug/Release \texttt{BiipsTest} binary executable with option \verb!--n-smc=N!.
+
+\paragraph{}
+Current \biips Test implementation can only check errors of \verb!model-id=1! or \verb!2!.
+
+\paragraph{}
+The program follows the general work-flow presented in figure \ref{fig:biipsttest}.
+
+
+\begin{figure}[htbp]
+%\centering
+\begin{center}
+\tikzstyle{every node}=[font=\footnotesize]
+\tikzstyle{input}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3.5cm,
+                                    draw=blue!80,
+                                    fill=blue!20,
+                                    text centered,
+                                    %font=\large,
+                                    ]
+\tikzstyle{processing}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3.5cm,
+                                    draw=green!80,
+                                    fill=green!20,
+                                    text centered,
+                                    %font=\large,
+                                    ]
+\tikzstyle{output}=[rectangle, rounded corners,
+                                                thick,
+                                                text width=3.5cm,
+                                                draw=orange!80,
+                                                fill=orange!25,
+                                                text centered,
+                                    %font=\large,
+]
+% Everything is drawn on underlying gray rectangles with
+% rounded corners.
+\tikzstyle{background}=[rectangle,
+                                                fill=gray!20,
+                                                inner sep=0.2cm,
+                                                rounded corners=5mm]
+\tikzstyle{background_dark}=[rectangle,
+                                                fill=gray!40,
+                                                inner sep=0.4cm,
+                                                rounded corners=5mm]
+\tikzstyle{background_out}=[rectangle,
+                                                fill=gray!20,
+                                                inner sep=0.6cm,
+                                                rounded corners=5mm]
+
+\begin{tikzpicture}[node distance=2.5cm,auto,>=latex']
+
+%Model
+\node (model) [] {\textbf{Model:}};
+\node (or1) [below of=model, node distance=0.8cm] {OR};
+\node (read_param) [input, left of=or1] {Read parameters\\in configuration file};
+\node (default_param) [processing, right of=or1] {Set default\\parameters};
+\begin{pgfonlayer}{background}
+\node (model_bg) [background, fit= (model) (read_param) (default_param)] {};
+\end{pgfonlayer}
+
+%Data
+\node (data) [below of = model_bg, node distance=2cm] {\textbf{Data:} \texttt{step=0}};
+\node (or2) [below of=data, node distance=0.8cm] {OR};
+\node (read_data) [input, left of=or2] {Read data\\in configuration file};
+\node (sample_data) [processing, right of=or2] {Sample data\\(using \texttt{data-rng-seed} option)};
+\begin{pgfonlayer}{background}
+\node (data_bg) [background, fit= (data) (read_data) (sample_data)] {};
+\end{pgfonlayer}
+\path[->] (model_bg) edge[thick] (data_bg);
+
+%Bench
+\node (bench) [below of=data_bg, node distance=2.1cm] {\textbf{Bench:} \texttt{step=1}};
+\node (or3) [below of=bench, node distance=0.8cm] {OR};
+\node (read_bench) [input, left of=or3] {Read benchmarks\\in configuration file\\(filtering/smoothing)};
+\node (compute_bench) [processing, right of=or3] {Compute benchmarks\\if bench implemented\\(filtering/smoothing)};
+\begin{pgfonlayer}{background}
+\node (bench_bg) [background, fit=(bench) (read_bench) (compute_bench)] {};
+\end{pgfonlayer}
+\path[->] (data_bg) edge[thick] (bench_bg);
+
+\node (particles) [below of=bench_bg, node distance=2.5cm] {\textbf{For each particles number in \texttt{particles} option}};
+
+\node (mutation) [below of=particles, node distance=1cm] {\textbf{For each mutation in \texttt{mutations} option}};
+
+%SMC
+\node (smc) [below of=mutation, node distance=0.8cm] {\textbf{SMC:} \texttt{step=2}};
+\node (run_smc) [processing, below of=smc, node distance=0.8cm] {Run \texttt{n-smc} SMC algorithms};
+\node (or4) [below of=run_smc, node distance=2cm] {OR};
+\node (smc_n_eq1) [output, left of=or4, text width=4.5cm, node distance=3cm] {\textbf{Case \texttt{n-smc=1}:}\\
+Use \texttt{interactive}, \texttt{show-plots}, \texttt{plot-file}, \texttt{smc-rng-seed} options\\
+-if \texttt{verbose=1}:\\
+~~Display progress bar of the run\\
+-if \texttt{verbose=2}:\\
+~~Complete display};
+\node (smc_n_gt1) [output, right of=or4, text width=4.5cm, node distance=3cm] {\textbf{Case \texttt{n-smc>1}:}\\
+Use time initialized seed\\
+-if \texttt{verbose=1}:\\
+~~Display global progress bar\\
+-if \texttt{verbose=2}:\\
+~~Display progress bar of each run};
+\node (smc_error) [processing, below of=or4, node distance=2.3cm, text width=4.5cm] {Compute errors vs benchmarks\\if available\\(filtering/smoothing)};
+\path[->] (run_smc) edge[thick,style={bend right}] (smc_n_eq1);
+\path[->] (run_smc) edge[thick,style={bend left}] (smc_n_gt1);
+\path[->] (smc_n_eq1) edge[thick,style={bend right=35}] (smc_error);
+\path[->] (smc_n_gt1) edge[thick,style={bend left=35}] (smc_error);
+
+%Check
+\node (check) [below of=smc_error, node distance=1.8cm] {\textbf{Check:} \texttt{step=3}};
+\node (read_errors) [input, below of=check, node distance=0.8cm] {Read reference errors\\in configuration file\\(filtering/smoothing)};
+\node (or5) [below of=read_errors, node distance=1.8cm] {OR};
+\node (check_n_eq1) [processing, left of=or5, text width=4.5cm, node distance=3cm] {\textbf{Case \texttt{n-smc=1}:}\\
+-Compute 1-(\texttt{reject-level})\\
+quantile of the errors\\
+(filtering/smoothing)\\
+-Check error < quantile};
+\node (check_n_gt1) [processing, right of=or5, text width=4.5cm, node distance=3cm] {\textbf{Case \texttt{n-smc>1}:}\\
+-Compute Kolmogorov-Smirnov statistic\\
+(filtering/smoothing)\\
+-Check p-value > \texttt{reject-level}};
+\path[->] (read_errors) edge[thick,style={bend right}] (check_n_eq1);
+\path[->] (read_errors) edge[thick,style={bend left}] (check_n_gt1);
+
+\begin{pgfonlayer}{background}
+\node (particles_bg) [background_out, fit= (particles) (smc_n_eq1) (smc_n_gt1) (check_n_eq1) (check_n_gt1)] {};
+\end{pgfonlayer}
+\path[->] (bench_bg) edge[thick] (particles_bg);
+\begin{pgfonlayer}{background}
+\node (mutation_bg) [background_dark, fit= (mutation) (smc_n_eq1) (smc_n_gt1) (check_n_eq1) (check_n_gt1)] {};
+\end{pgfonlayer}
+\begin{pgfonlayer}{background}
+\node (smc_bg) [background, fit=(smc) (smc_n_eq1) (smc_n_gt1) (smc_error)] {};
+\node (check_bg) [background, fit= (check) (check_n_eq1) (check_n_gt1)] {};
+\end{pgfonlayer}
+\path[->] (smc_bg) edge[thick] (check_bg);
+
+\end{tikzpicture}
+\caption{\biips Test program general flowchart. Inputs are in blue, processing in green and display in orange.}
+\label{fig:biipsttest}
+\end{center}
+\end{figure}
+
+
+% The \texttt{BiipsTest} executable program has command-line arguments:
+% \begin{itemize}
+% \item 1st argument: an integer identifying the test to be executed. Three tests are currently available:
+%   \begin{itemize}
+%   \item Test 1: a linear gaussian 1D HMM\footnote{Hidden Markov Model} model compared with Kalman filter estimates
+%   \item Test 2: a linear gaussian N-dimensional HMM model compared with Kalman filter estimates
+%   \item Test 3: a Binomial success probability parameter estimation with Beta prior
+%   \end{itemize}
+% 
+% \item 2nd argument: a data file name containing the inputs of the test. The data files must be in the \texttt{BiipsTest/data} subdirectory. Four template data files are provided:
+%   \begin{itemize}{}{}
+%   \item \texttt{data.dat} is for Test 1
+%   \item \texttt{data\_1d.dat} is a 1D model for Test 2 (the same as for Test 1)
+%   \item \texttt{data\_4d.dat} is a 4D model for Test 2 (representing 2 position dimensions and 2 velocity dimensions)
+%   \item \texttt{data\_beta.dat} is for Test 3
+%   \end{itemize}
+%   See annex \ref{testsinput} for the details of each file.
+% 
+% \item 3rd (optional) argument: the \texttt{\textminus\textminus noprompt} option. It removes questions to the user during the test.
+% 
+% \item 4th (optional) argument: the \texttt{\textminus\textminus noplot} option. It removes showing the plots during the test.
+% 
+% \item 5th (optional) argument: the \texttt{\textminus\textminus prior} option. It runs the SMC algorithm sampling the particles according to the prior, \ie{} no advanced conjugate sampling methods.
+% \end{itemize}
+% Just write any text (\eg{} \texttt{\textminus} alone) instead of the optional options not to use them.
+
+
+\subsection{Running/Debugging \biips Test in Eclipse}
+At the first launch of \biips Test program with the \emph{Run/Debug} button, in the \emph{Select Preferred Launcher} window:
+\begin{quote}
+Tick \emph{use configuration specific settings}.\\
+Select \emph{Standard Create Process Launcher}.\\
+Click \emph{OK}.
+\end{quote}
+To edit the command-line arguments afterwards, follow the instructions:
+\begin{quote}
+Select \biips Test project.\\
+Click the top menu \emph{Run/Debug $\rightarrow$ Run/Debug Configurations}.\\
+Edit the program arguments in the \emph{Arguments} tab.
+\end{quote}
+Debug mode opens the Debug perspective of Eclipse and allows you to define breakpoints, run the program step by step and watch variable values.
+
+% \paragraph{Example:} 
+%  \begin{itemize}
+%   \item \verb=1 data.dat --noprompt= will launch test 1 with input file \texttt{data.dat} and without prompting.
+%   \item \verb=2 data_4d.dat --noprompt - --prior= will launch test 2 with input file \verb=data_4d.dat=, without prompting and using the prior distribution sampling method.
+%  \end{itemize}
+% 
+% 
+% \paragraph{}
+% Ouput files are in the \texttt{BiipsTest/results} subdirectory.
+
+
+% \section{Synchronizing}
+% 
+% 
+% First, install the \textbf{Subclipse plugin:} by following the instructions in Eclipse:
+% \begin{quote}
+% Click the top menu \emph{Help $\rightarrow$ Install new software}. \\
+% In the \emph{Work with} field, type: \verb=http://subclipse.tigris.org/update_1.6.x= \\
+% Click \emph{Add} \\
+% Select all the features (Core SVNKit Library, Optional JNA library, Subclipse). \\
+% Click \emph{Next}, \emph{Next}, \emph{Accept}, \emph{Finish}. \\
+% Answer \emph{OK} to the \emph{Security warning} message. \\
+% Restart Eclipse.
+% Answer \emph{OK} to the messages.
+% \end{quote}
+% Then, edit the preferences
+% \begin{quote}
+% Click the top menu\emph{ Window $\rightarrow$ Preferences $\rightarrow$ Team $\rightarrow$ SVN}. \\
+% Select \emph{SVNKit} in \emph{SVN interface}.
+% \end{quote}
+
+% Window -> open Perspective -> team Synchronizing
+% Left view, click the synchronize button
+% Select SVN, Next, select all projects, finish
+% Enter SSH credentials
+% Use private key authentication, select the private key (<home>/.ssh/id\_rsa)
+% Yes, ok 
+
+% \section{Coding rules}

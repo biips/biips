@@ -23,10 +23,15 @@ namespace Biips
     typedef BinaryScalarFunction<std::divides<Scalar> > BaseType;
 
   protected:
-    Divide() : BaseType("/") {};
+    Divide() : BaseType("/") {}
+
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
 
   public:
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    virtual Bool IsInfix() const { return true; }
+    Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const;
+
+    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; }
   };
 
 }

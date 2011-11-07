@@ -70,7 +70,6 @@ namespace Biips
         mat_ref.released_ = true;
     }
 
-    // TODO put in cpp
     template<class AE>
     MatrixRef & operator = (const ublas::matrix_expression<AE> & ae) { BaseType::operator=(ae); pData_->Dim()[0] = size1(); pData_->Dim()[1] = size2(); return *this; }
 

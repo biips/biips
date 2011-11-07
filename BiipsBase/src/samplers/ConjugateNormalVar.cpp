@@ -28,11 +28,11 @@ namespace Biips
   void ConjugateNormalVar::formLikeParamContrib(NodeId likeId,
       MultiArray::Array & likeParamContribValues)
   {
-    GraphTypes::DirectParentNodeIdIterator it_parents = pGraph_->GetParents(likeId).first;
+    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId var_id = *(++it_parents);
-    Scalar like_var = getNodeValue(var_id, pGraph_, this).ScalarView();
-    likeParamContribValues[0].ScalarView() += pGraph_->GetValues()[likeId]->ScalarView() / like_var;
+    Scalar like_var = getNodeValue(var_id, graph_, *this).ScalarView();
+    likeParamContribValues[0].ScalarView() += graph_.GetValues()[likeId]->ScalarView() / like_var;
     likeParamContribValues[1].ScalarView() += 1.0 / like_var;
   }
 
@@ -50,7 +50,7 @@ namespace Biips
   }
 
 
-  Scalar ConjugateNormalVar::computeLogWeight(const MultiArray & sampledData,
+  Scalar ConjugateNormalVar::computeLogIncrementalWeight(const MultiArray & sampledData,
       const MultiArray::Array & priorParamValues,
       const MultiArray::Array & postParamValues,
       const MultiArray::Array & LikeParamContrib)
@@ -61,7 +61,12 @@ namespace Biips
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(like_mean_contrib / like_var_inv_contrib);
     norm_const_param_values[1] = MultiArray(prior_var + 1.0 / like_var_inv_contrib);
-    return DNormVar::Instance()->LogPdf(priorParamValues[0], norm_const_param_values);
+
+    Scalar log_incr_weight = DNormVar::Instance()->LogDensity(priorParamValues[0], norm_const_param_values, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    if (isNan(log_incr_weight))
+      throw RuntimeError("Failure to calculate log incremental weight.");
+
+    return log_incr_weight;
   }
 
 

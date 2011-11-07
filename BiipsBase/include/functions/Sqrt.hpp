@@ -33,6 +33,8 @@ namespace Biips
   protected:
     Sqrt() : BaseType("sqrt") {};
 
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+
   public:
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };

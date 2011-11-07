@@ -7,32 +7,13 @@
 * $LastChangedRevision$
 * $Id$
 *
-* Copied and pasted from TMath library:
+* COPY: Copied and pasted KolmogorovProb function from TMath library:
 * http://root.cern.ch/root/html/src/TMath.cxx.html#RDBIQ
-* http://root.cern.ch/root/html/src/TMath.cxx.html#ySJvAC
 *
 */
-// Authors: Rene Brun, Anna Kreshuk, Eddy Offermann, Fons Rademakers   29/07/95
-
-/*************************************************************************
-* Copyright (C) 1995-2004, Rene Brun and Fons Rademakers.               *
-* All rights reserved.                                                  *
-*                                                                       *
-* For the licensing terms see $ROOTSYS/LICENSE.                         *
-* For the list of contributors see $ROOTSYS/README/CREDITS.             *
-*************************************************************************/
-
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// TMath                                                                //
-//                                                                      //
-// Encapsulate most frequently used Math functions.                     //
-// NB. The basic functions Min, Max, Abs and Sign are defined           //
-// in TMathBase.                                                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 
 #include "kolmogorov.hpp"
+#include "common/Integer.hpp"
 
 namespace Biips
 {
@@ -44,28 +25,25 @@ namespace Biips
     inline Double_t Abs(Double_t d)
     { return std::fabs(d); }
 
-    Int_t Nint(Double_t x)
-    {
-      // Round to nearest integer. Rounds half integers to the nearest
-      // even integer.
-
-      int i;
-      if (x >= 0) {
-        i = int(x + 0.5);
-        if (x + 0.5 == Double_t(i) && i & 1) i--;
-      } else {
-        i = int(x - 0.5);
-        if (x - 0.5 == Double_t(i) && i & 1) i++;
-
-      }
-      return i;
-    }
+    inline Int_t Nint(Double_t x)
+    { return roundInteger(x); }
 
     inline Double_t Exp(Double_t x)
     { return std::exp(x); }
 
     inline Int_t Max(Int_t a, Int_t b)
     { return std::max(a,b); }
+
+    // COPY: ************ from here ********************
+    // Authors: Rene Brun, Anna Kreshuk, Eddy Offermann, Fons Rademakers   29/07/95
+
+    /*************************************************************************
+    * Copyright (C) 1995-2004, Rene Brun and Fons Rademakers.               *
+    * All rights reserved.                                                  *
+    *                                                                       *
+    * For the licensing terms see $ROOTSYS/LICENSE.                         *
+    * For the list of contributors see $ROOTSYS/README/CREDITS.             *
+    *************************************************************************/
 
     Double_t KolmogorovProb(Double_t z)
     {
@@ -126,6 +104,7 @@ namespace Biips
       }
       return p;
     }
+    // COPY: ************ to here ********************
   }
 
   Scalar ksProb(Scalar z)
@@ -134,4 +113,3 @@ namespace Biips
   }
 
 }
-

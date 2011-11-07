@@ -8,54 +8,76 @@
  * Id:      $Id$
  */
 
-#include <boost/random/binomial_distribution.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/math/distributions/binomial.hpp>
 
 #include "distributions/DBin.hpp"
+#include <boost/math/special_functions/binomial.hpp>
 
 namespace Biips
 {
 
-  Bool DBin::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  Bool DBin::checkParamValues(const MultiArray::Array & paramValues) const
   {
-    const DimArray & left = *paramDims[0];
-    const DimArray & right = *paramDims[1];
-    return left.IsScalar() && right.IsScalar();
-  }
+    Scalar success_fraction = paramValues[0].ScalarView();
+    Scalar trials = paramValues[1].ScalarView();
 
-  DimArray DBin::dim(const Types<DimArray::Ptr>::Array & paramDims) const
-  {
-    return *P_SCALAR_DIM;
-  }
-  
-  MultiArray DBin::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
-  {
-    // TODO check paramValues
-    Scalar trials = paramValues[0].ScalarView(); // TODO check dim
-    Scalar success_fraction = paramValues[1].ScalarView(); // TODO check dim
-
-    typedef boost::binomial_distribution<Scalar> DistType;
-    DistType dist(trials, success_fraction);
-
-    typedef boost::variate_generator<Rng::GenType&, DistType> GenType;
-    GenType gen(pRng->GetGen(), dist);
-
-    return MultiArray(gen());
+    return checkSize(trials) && (success_fraction >= 0.0) && (success_fraction <= 1.0);
   }
 
 
-  Scalar DBin::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  DBin::MathDistType DBin::mathDist(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
-    Scalar trials = paramValues[0].ScalarView(); // TODO check dim
-    Scalar success_fraction = paramValues[1].ScalarView(); // TODO check dim
-    Scalar my_point = x.ScalarView(); // TODO check dim
+    Scalar success_fraction = paramValues[0].ScalarView();
+    Scalar trials = paramValues[1].ScalarView();
 
-    typedef boost::math::binomial DistType;
-    DistType dist(trials, success_fraction);
+    return MathDistType(trials, success_fraction);
+  }
 
-    return log(boost::math::pdf(dist, my_point));
+
+  DBin::RandomDistType DBin::randomDist(const MultiArray::Array & paramValues) const
+  {
+    Scalar success_fraction = paramValues[0].ScalarView();
+    Scalar trials = paramValues[1].ScalarView();
+
+    return RandomDistType(trials, success_fraction);
+  }
+
+
+  Scalar DBin::d(Scalar x, const MultiArray::Array & paramValues,
+      Bool give_log) const
+  {
+    if (give_log)
+    {
+      Scalar success_fraction = paramValues[0].ScalarView();
+      Scalar trials = paramValues[1].ScalarView();
+      using std::log;
+      using boost::math::binomial_coefficient;
+      return log(binomial_coefficient<Scalar>(roundSize(trials), roundSize(x)))
+          +x*log(success_fraction)+(trials-x)*log(1.0-success_fraction);
+    }
+
+    MathDistType dist = mathDist(paramValues);
+
+    using boost::math::pdf;
+    return pdf(dist, x);
+  }
+
+
+  Scalar DBin::unboundedLower(const MultiArray::Array & paramValues) const
+  {
+    return 0.0;
+  }
+
+
+  Scalar DBin::unboundedUpper(const MultiArray::Array & paramValues) const
+  {
+    const Scalar trials = paramValues[1].ScalarView();
+    return trials;
+  }
+
+
+  Bool DBin::IsSupportFixed(const Flags & fixmask) const
+  {
+    return fixmask[1]; //trials number is fixed;
   }
 
 }

@@ -14,8 +14,16 @@
 namespace Biips
 {
 
-
   const String AggNode::NAME_ = "aggregate";
+
+
+  AggNode::AggNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets)
+    : LogicalNode(pDim, parameters), offsets_(offsets)
+  {
+    Size len = pDim->Length();
+    if (len != parameters.size() || len != offsets.size())
+      throw LogicError("Can not create aggregate node: dimensions mismatch.");
+  }
 
   MultiArray AggNode::Eval(const MultiArray::Array & paramValues) const
   // TODO checks

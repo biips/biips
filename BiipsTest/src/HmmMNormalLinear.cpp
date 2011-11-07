@@ -11,7 +11,6 @@
 #include "HmmMNormalLinear.hpp"
 
 #include "BiipsCore.hpp"
-#include "BiipsBase.hpp"
 
 #include "samplers/ConjugateMNormalLinear.hpp"
 #include "samplers/ConjugateMNormalVarLinear.hpp"
@@ -234,9 +233,7 @@ namespace Biips
   {
     // load Base module
     //-----------------
-    FunctionTable funcTab;
-    DistributionTable distTab;
-    loadBaseModule(funcTab, distTab);
+    loadBase();
 
     // graph
     //------
@@ -284,41 +281,41 @@ namespace Biips
     params[0] = mean_x0;
     params[1] = P0;
     if (precFlag_)
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnorm"], params);
+      x[0] = pModelGraph_->AddStochasticNode(distTab_["dmnorm"], params, false);
     else
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnormvar"], params);
+      x[0] = pModelGraph_->AddStochasticNode(distTab_["dmnormvar"], params, false);
 
     for (Size t=1; t<=t_max; ++t)
     {
       params[0] = F;
       params[1] = x[t-1];
-      prod_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["%*%"], params);
+      prod_x[t-1] = pModelGraph_->AddLogicalNode(funcTab_["%*%"], params);
 
       params[0] = B;
       params[1] = u[t-1];
-      prod_u[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["%*%"], params);
+      prod_u[t-1] = pModelGraph_->AddLogicalNode(funcTab_["%*%"], params);
 
       params[0] = prod_x[t-1];
       params[1] = prod_u[t-1];
-      sum_x[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["x"], funcTab["+"], params);
+      sum_x[t-1] = pModelGraph_->AddLogicalNode(funcTab_["+"], params);
 
       params[0] = sum_x[t-1];
       params[1] = Q;
       if (precFlag_)
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnorm"], params);
+        x[t] = pModelGraph_->AddStochasticNode(distTab_["dmnorm"], params, false);
       else
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dmnormvar"], params);
+        x[t] = pModelGraph_->AddStochasticNode(distTab_["dmnormvar"], params, false);
 
       params[0] = H;
       params[1] = x[t];
-      prod_y[t-1] = pModelGraph_->AddLogicalNode(dimArrayMap_["y"], funcTab["%*%"], params);
+      prod_y[t-1] = pModelGraph_->AddLogicalNode(funcTab_["%*%"], params);
 
       params[0] = prod_y[t-1];
       params[1] = R;
       if (precFlag_)
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dmnorm"], params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dmnorm"], params, true);
       else
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dmnormvar"], params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dmnormvar"], params, true);
     }
 
     // build graph

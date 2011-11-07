@@ -7,16 +7,13 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Compiler class
+ * COPY: Adapted from JAGS Compiler class
  */
 
 #include "compiler/Compiler.hpp"
 #include "compiler/ParseTree.h"
 #include "model/BUGSModel.hpp"
-#include "function/FunctionTable.hpp"
-#include "distribution/DistributionTable.hpp"
-#include "model/BUGSModel.hpp"
-#include "print/outputStream.hpp"
+#include "iostream/outStream.hpp"
 
 namespace Biips
 {
@@ -71,7 +68,9 @@ namespace Biips
           if ((*pvalues)[j] == BIIPS_REALNA)
             return NULL_NODEID;
         }
-        node_id = model_.GraphPtr()->AddConstantNode(subset_range.Dim(false), pvalues);
+
+        DimArray::Ptr p_dim(new DimArray(subset_range.Dim(false)));
+        node_id = model_.GraphPtr()->AddConstantNode(p_dim, pvalues);
       }
       else
       {
@@ -125,8 +124,8 @@ namespace Biips
 
     const ValArray::Ptr & pValues = model_.GraphPtr()->GetValues()[node_id];
 
-//    if (!pValues)
-//      throw NodeError(node_id, "Index value not defined.");
+    if (!pValues)
+      throw NodeError(node_id, "Index value not defined.");
 
     if (pValues->size() != 1)
       throw NodeError(node_id, String("Index expression evaluates to non-scalar value: ") + print(*pValues));
@@ -281,8 +280,6 @@ namespace Biips
     if (var->parameters().size() != 1)
       throw LogicError("Invalid counter expression");
 
-//    IndexRange range();
-
     ParseTree const *prange = var->parameters()[0];
     if (prange->treeClass() != P_RANGE)
       throw LogicError("Expecting range expression");
@@ -324,7 +321,6 @@ namespace Biips
       if (indexExpression_)
       {
         ValArray::Ptr pVal(new ValArray(1, Scalar(counter[0])));
-        // TODO use P_SCALAR_DIM pointer to save memory space
         node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
         indexNodeIds_.push_back(node_id);
       }
@@ -360,6 +356,7 @@ namespace Biips
           //A stochastic subset
           // FIXME getMixtureNode
           //node_id = getMixtureNode(pTree, this);
+          throw CompileError(pTree, String("Mixture nodes are not implemented yet."));
         }
       }
       else if (strictResolution_)
@@ -380,19 +377,17 @@ namespace Biips
   }
 
 
-  // FIXME FunctionPtr
-//  static FunctionPtr const &
-//  getFunction(ParseTree const * pTree, const FuncTab & functab)
-//  {
-//    if (pTree->treeClass() != P_FUNCTION)
-//      throw LogicError("Malformed parse tree: Expected function");
-//
-//    FunctionPtr const & func = functab.find(pTree->name());
-//    if (isNULL(func))
-//      throw CompileError(pTree, "Unknown function:", pTree->name());
-//
-//    return func;
-//  }
+  static const Function::Ptr & getFunctionPtr(ParseTree const * pTree, const FunctionTable & functab)
+  {
+    if (pTree->treeClass() != P_FUNCTION)
+      throw LogicError("Malformed parse tree: Expected function");
+
+    const Function::Ptr & p_func = functab.GetPtr(pTree->name());
+    if (!p_func)
+      throw CompileError(pTree, String("Unknown function: ") + pTree->name());
+
+    return p_func;
+  }
 
 
   NodeId Compiler::getLength(ParseTree const * pTree, const SymbolTable & symtab)
@@ -451,22 +446,22 @@ namespace Biips
       else
       {
         DimArray idim = subset_range.Dim(false);
-        ValArray::Ptr pVal(new ValArray(idim.size()));
+        ValArray::Ptr p_val(new ValArray(idim.size()));
         for (Size j = 0; j < idim.size(); ++j)
-          (*pVal)[j] = Scalar(idim[j]);
+          (*p_val)[j] = Scalar(idim[j]);
 
-        DimArray dim(1, idim.size());
+        DimArray::Ptr p_dim(new DimArray(1, idim.size()));
 
         if (indexExpression_)
         {
-          NodeId node_id = model_.GraphPtr()->AddConstantNode(dim, pVal);
+          NodeId node_id = model_.GraphPtr()->AddConstantNode(p_dim, p_val);
           indexNodeIds_.push_back(node_id);
           return node_id;
         }
         else
         {
           // TODO use a ConstantFactory
-          return model_.GraphPtr()->AddConstantNode(dim, pVal);
+          return model_.GraphPtr()->AddConstantNode(p_dim, p_val);
         }
       }
     }
@@ -508,8 +503,9 @@ namespace Biips
       case P_DIM:
         node_id = getDim(pTree, model_.GetSymbolTable());
         break;
+      case P_LINK:
         // FIXME LinkFunction
-//      case P_LINK:
+        throw LogicError("LinkFunctions are not implemented yet.");
 //        if (GetParameterVector(pTree, parents))
 //        {
 //          LinkFunction const *link = funcTab().findLink(pTree->name());
@@ -521,22 +517,17 @@ namespace Biips
       case P_FUNCTION:
         if (getParameterVector(pTree, parents))
         {
-          // FIXME FunctionPtr
-//          const FunctionPtr & func = getFunction(pTree, funcTab());
+          const Function::Ptr & p_func = getFunctionPtr(pTree, FuncTab());
           if (indexExpression_)
           {
             // TODO use LogicalFactory
-            if (!FuncTab().Contains(pTree->name()))
-              throw CompileError(pTree, String("Unknown function: ") + pTree->name());
-            node_id = model_.GraphPtr()->AddLogicalNode(FuncTab()[pTree->name()], parents);
+            node_id = model_.GraphPtr()->AddLogicalNode(p_func, parents);
             indexNodeIds_.push_back(node_id);
           }
           else
           {
             // TODO use LogicalFactory
-            if (!FuncTab().Contains(pTree->name()))
-              throw CompileError(pTree, String("Unknown function: ") + pTree->name());
-            node_id = model_.GraphPtr()->AddLogicalNode(FuncTab()[pTree->name()], parents);
+            node_id = model_.GraphPtr()->AddLogicalNode(p_func, parents);
           }
         }
         break;
@@ -599,41 +590,33 @@ namespace Biips
     if (!getParameterVector(p_distribution, parameters))
       return NULL_NODEID;
 
-    /*
-      vector<ParseTree*> const &param_list = distribution->parameters();
-      for (unsigned int i = 0; i < param_list.size(); ++i) {
-          Node *param = getParameter(param_list[i]);
-          if (param) {
-              parameters.push_back(param);
-          }
-          else {
-              return 0;
-          }
+    // Set upper and lower bounds
+    NodeId lower_bound_id = NULL_NODEID, upper_bound_id = NULL_NODEID;
+    if (pStochRelation->parameters().size() == 3)
+    {
+      //Truncated distribution
+      const ParseTree * truncated = pStochRelation->parameters()[2];
+      switch(truncated->treeClass()) {
+      case P_BOUNDS: // case P_INTERVAL: // FIXME: JAGS version > 3 seems to have a P_INTERVAL treeClass value
+          break;
+      default:
+          throw LogicError("Invalid parse tree");
       }
-     */
-
-    // FIXME Lower and Upper bounds
-//    // Set upper and lower bounds
-//    NodeId lBound = NULL_NODEID, uBound = NULL_NODEID;
-//    if (pStochRelation->parameters().size() == 3)
-//    {
-//      //Truncated distribution
-//      ParseTree const *truncated = pStochRelation->parameters()[2];
-//      ParseTree const *ll = truncated->parameters()[0];
-//      ParseTree const *ul = truncated->parameters()[1];
-//      if (ll)
-//      {
-//        lBound = getParameter(ll);
-//        if (lBound == NULL_NODEID)
-//          return NULL_NODEID;
-//      }
-//      if (ul)
-//      {
-//        uBound = getParameter(ul);
-//        if (uBound == NULL_NODEID)
-//          return NULL_NODEID;
-//      }
-//    }
+      const ParseTree * lower = truncated->parameters()[0];
+      const ParseTree * upper = truncated->parameters()[1];
+      if (lower)
+      {
+        lower_bound_id = GetParameter(lower);
+        if (lower_bound_id == NULL_NODEID)
+          return NULL_NODEID;
+      }
+      if (upper)
+      {
+        upper_bound_id = GetParameter(upper);
+        if (upper_bound_id == NULL_NODEID)
+          return NULL_NODEID;
+      }
+    }
 
     /*
          Check data table to see if this is an observed node.  If it is,
@@ -667,12 +650,12 @@ namespace Biips
       }
       if (nmissing == data_length)
       {
-        p_this_data = ValArray::Ptr();
+        p_this_data.reset();
         data_length = 0;
       }
       else if (nmissing != 0)
       {
-        p_this_data = ValArray::Ptr();
+        p_this_data.reset();
         throw CompileError(var, var->name() + print(target_range)
             + " has missing values");
       }
@@ -680,10 +663,9 @@ namespace Biips
 
     // Check that distribution exists
     const String & distname = p_distribution->name();
-    if (!DistTab().Contains(distname))
+    const Distribution::Ptr & p_dist = DistTab().GetPtr(distname);
+    if (!p_dist)
       throw CompileError(p_distribution, String("Unknown distribution: ") + distname);
-
-    const Distribution::Ptr & p_dist = DistTab().GetDistributionPtr(distname);
 
     // FIXME Observable Functions
 //    if (!p_this_data) {
@@ -702,32 +684,33 @@ namespace Biips
 //      }
 //    }
 
+
+    // FIXME: copied from JAGS 3.1.0 which has a P_INTERVAL treeClass value
+//    /*
+//       We allow BUGS-style interval censoring notation for
+//       compatibility but only allow it if there are no free parameters
+//       in the distribution
+//    */
+//    if (stoch_relation->parameters().size() == 3) {
+//        ParseTree const *t = stoch_relation->parameters()[2];
+//        if (t->treeClass() == P_INTERVAL) {
+//            for (unsigned int i = 0; i < parameters.size(); ++i) {
+//                if (!parameters[i]->isObserved()) {
+//                    CompileError(stoch_relation,
+//                                 "BUGS I(,) notation is not allowed unless",
+//                                 "all parameters are fixed");
+//                }
+//            }
+//        }
+//    }
+
     Bool obs = p_this_data;
 
-    // FIXME Add Lower and Upper bounds
-    NodeId snode_id = model_.GraphPtr()->AddStochasticNode(p_dist, parameters, obs);
-//    if (SCALAR(dist)) {
-//      snode_id = model_.GraphPtr()->AddStochasticNode(SCALAR(dist), p_dist, parameters,
-//          lBound, uBound);
-//    }
-//    else if (VECTOR(dist)) {
-//      snode_id = new VectorStochasticNode(VECTOR(dist), p_dist, parameters,
-//          lBound, uBound);
-//    }
-//    else if (ARRAY(dist)) {
-//      snode_id = new ArrayStochasticNode(ARRAY(dist), p_dist, parameters,
-//          lBound, uBound);
-//    }
-//    else {
-//      throw logic_error("Unable to classify distribution");
-//    }
-//    model_.addNode(snode_id);
+    NodeId snode_id = model_.GraphPtr()->AddStochasticNode(p_dist, parameters, obs, lower_bound_id, upper_bound_id);
 
      // If Node is observed, set the data
      if (obs)
-     {
        model_.GraphPtr()->SetObsValue(snode_id, p_this_data);
-     }
 
     return snode_id;
   }
@@ -745,7 +728,6 @@ namespace Biips
       {
         ValArray::Ptr pVal(new ValArray(1, Scalar(expression->value())));
         node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
-//        model_.addNode(cnode_id);
         /* The reason we aren't using a ConstantFactory here is to ensure
              that the nodes are correctly named */
         break;
@@ -816,6 +798,7 @@ namespace Biips
         symtab.AddVariable(var->name(), model_.GraphPtr()->GetNode(node_id).Dim());
         const NodeArray & array = symtab.GetNodeArray(var->name());
         symtab.InsertNode(node_id, var->name(), array.Range()); // TODO check this code
+        //array.Insert(node_id, array.Range());
       }
       else
       {
@@ -828,6 +811,7 @@ namespace Biips
               + var->name() + print(range));
         }
         symtab.InsertNode(node_id, var->name(), range); // TODO check this code
+        //array.Insert(node_id, range);
       }
       nResolved_++;
       isResolvedFlags_[nRelations_] = true;
@@ -937,8 +921,11 @@ namespace Biips
 
       //Create a temporary copy of the data table containing only
       //data for constant nodes
-      // FIXME: copy of MultiArray
       std::map<String, MultiArray> temp_data_table;
+      // Caution: the default MultiArray copy constructor is copying pointers.
+      // We do not want a direct copy of dataMap_ because we would obtain copies of the pointers
+      // and modifications of temp_data_table values would apply to dataMap_.
+      // We need to explicitly copy the values of MultiArrays.
       for(std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
           it != dataMap_.end(); ++it)
       {
@@ -962,7 +949,6 @@ namespace Biips
         }
       }
 
-      // FIXME: WriteData
       model_.GetSymbolTable().WriteData(temp_data_table);
   }
 
@@ -1153,15 +1139,15 @@ namespace Biips
 
   FunctionTable & Compiler::FuncTab()
   {
-    static FunctionTable * funcTab_ = new FunctionTable();
-    return *funcTab_;
+    static FunctionTable funcTab_;
+    return funcTab_;
   }
 
 
   DistributionTable & Compiler::DistTab()
   {
-    static DistributionTable * distTab_ = new DistributionTable();
-    return *distTab_;
+    static DistributionTable  distTab_;
+    return distTab_;
   }
 
 }

@@ -22,12 +22,41 @@ namespace Biips
 
   Bool DMNorm::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
   {
-    const DimArray & left = *paramDims[0];
-    const DimArray & right = *paramDims[1];
-    if ((left.IsVector() && right.IsSquared()))
-      return (left[0] == right[0]);
+    const DimArray & mean_dim = *paramDims[0];
+    const DimArray & prec_dim = *paramDims[1];
+    if ((mean_dim.IsVector() && prec_dim.IsSquared()))
+      return (mean_dim[0] == prec_dim[0]);
     else
       return false;
+  }
+
+  Bool DMNorm::checkParamValues(const MultiArray::Array & paramValues) const
+  {
+    const MultiArray & mean = paramValues[0];
+
+    for (Size i=0; i<mean.Length(); ++i)
+    {
+      if (!isFinite(mean.Values()[i]))
+        return false;
+    }
+
+    const MultiArray & prec = paramValues[1];
+
+    // symmetric and positive
+    Matrix prec_mat(prec);
+    for(Size i=0; i<prec_mat.size1(); ++i)
+    {
+      if (prec_mat(i,i) <= 0.0)
+        return false;
+      for(Size j=0; j<i; ++j)
+      {
+        if (prec_mat(i,j) < 0.0 || prec_mat(i,j) != prec_mat(j,i))
+          return false;
+      }
+    }
+    // TODO check semi-definite positive
+
+    return true;
   }
 
   DimArray DMNorm::dim(const Types<DimArray::Ptr>::Array & paramDims) const
@@ -35,11 +64,10 @@ namespace Biips
     return *paramDims[0];
   }
 
-  MultiArray DMNorm::Sample(const MultiArray::Array & paramValues, Rng * pRng) const
+  MultiArray DMNorm::sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const
   {
-    // TODO check paramValues
-    const MultiArray & mean = paramValues[0]; // TODO check dim
-    const MultiArray & prec = paramValues[1]; // TODO check dim
+    const MultiArray & mean = paramValues[0];
+    const MultiArray & prec = paramValues[1];
 
     Matrix var_chol(prec);
     ublas::cholesky_factorize(var_chol);
@@ -51,7 +79,7 @@ namespace Biips
     DistType dist(var_chol, Vector(mean));
 
     typedef boost::variate_generator<Rng::GenType&, DistType > GenType;
-    GenType gen(pRng->GetGen(), dist);
+    GenType gen(rng.GetGen(), dist);
 
     MultiArray sample(mean.DimPtr());
     for (Size i = 0; i < sample.Length(); ++i)
@@ -62,13 +90,12 @@ namespace Biips
   }
 
 
-  Scalar DMNorm::LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const
+  Scalar DMNorm::logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const
   {
-    // TODO check paramValues
-    const MultiArray & mean = paramValues[0]; // TODO check dim
-    const MultiArray & prec = paramValues[1]; // TODO check dim
+    const MultiArray & mean = paramValues[0];
+    const MultiArray & prec = paramValues[1];
 
-    Vector diff_vec(x.Length(), x.Values() - mean.Values()); // TODO check dim
+    Vector diff_vec(x.Length(), x.Values() - mean.Values());
 
     Matrix prec_chol(prec);
     ublas::cholesky_factorize(prec_chol);
@@ -78,4 +105,17 @@ namespace Biips
   }
 
 
+  MultiArray::Pair DMNorm::unboundedSupport(const MultiArray::Array & paramValues) const
+  {
+    const MultiArray & mean = paramValues[0];
+
+    const ValArray::Ptr p_lower_val(new ValArray(mean.Length(), BIIPS_NEGINF));
+    const ValArray::Ptr p_upper_val(new ValArray(mean.Length(), BIIPS_POSINF));
+
+    static MultiArray::Pair support;
+    support.first = MultiArray(mean.DimPtr(), p_lower_val);
+    support.second = MultiArray(mean.DimPtr(), p_upper_val);
+
+    return support;
+  }
 }

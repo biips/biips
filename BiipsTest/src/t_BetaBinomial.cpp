@@ -145,10 +145,10 @@ void t_BetaBinomial(int argc, char* argv[])
       Types<NodeId>::Array params(2);
       params[0] = alpha;
       params[1] = beta;
-      NodeId p = graph.AddStochasticNode(scalar_dim, "dbeta", params);
+      NodeId p = graph.AddStochasticNode(scalar_dim, "dbeta", params, false);
 
-      params[0] = n_trials;
-      params[1] = p;
+      params[0] = p;
+      params[1] = n_trials;
       for (Size t=0; t<t_max+1; ++t)
         y[t] = graph.AddStochasticNode(scalar_dim, "dbin", params, true);
 
@@ -200,7 +200,7 @@ void t_BetaBinomial(int argc, char* argv[])
 
       // sampler
       //--------
-      SMCSampler sampler(nb_particles, &graph, &my_rng);
+      ForwardSampler sampler(nb_particles, &graph, &my_rng);
       sampler.SetResampleParams(SMC_RESAMPLE_STRATIFIED, rs_threshold);
 
       if (! prior_mutation_flag)

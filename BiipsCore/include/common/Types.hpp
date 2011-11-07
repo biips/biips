@@ -112,7 +112,7 @@ namespace Biips
   typedef ublas::column_major ColumnMajorOrder;
 
   //! Storage order used in Biips is row-major
-  typedef RowMajorOrder StorageOrder;
+  typedef ColumnMajorOrder StorageOrder;
 
   const Size BIIPS_SIZEMIN = std::numeric_limits<Size>::min();
   const Size BIIPS_SIZEMAX = std::numeric_limits<Size>::max();

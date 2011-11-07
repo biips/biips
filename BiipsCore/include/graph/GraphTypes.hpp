@@ -47,6 +47,9 @@ namespace boost
 
   enum vertex_value_t { vertex_value = 104 }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, value);
+
+  enum vertex_discrete_t { vertex_discrete = 105 }; // a unique number
+  BOOST_INSTALL_PROPERTY(vertex, discrete);
 }
 
 namespace Biips
@@ -123,7 +126,8 @@ namespace Biips
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
     boost::property<boost::vertex_node_ptr_t, Node::Ptr,
     boost::property<boost::vertex_observed_t, Bool,
-    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > >,
+    boost::property<boost::vertex_discrete_t, Bool,
+    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > > >,
     boost::property<boost::edge_type_t, EdgeType>
     > FullGraph;
 
@@ -147,6 +151,9 @@ namespace Biips
      * \see NodeValuesMap
      */
     typedef boost::iterator_property_map<Flags::iterator, boost::identity_property_map> FlagsMap;
+    
+    typedef boost::iterator_property_map<Types<Size>::Array::iterator, boost::identity_property_map> IterationsMap;
+    
     //! Edge type boost property map
     /*!
      * Stores the 'type' (direct, stochastic parent/child) property of the edges.
@@ -158,9 +165,11 @@ namespace Biips
 
     typedef boost::property_map<FullGraph, boost::vertex_value_t>::type ValuesPropertyMap;
     typedef boost::property_map<FullGraph, boost::vertex_observed_t>::type ObservedPropertyMap;
+    typedef boost::property_map<FullGraph, boost::vertex_discrete_t>::type DiscretePropertyMap;
 
     typedef boost::property_map<FullGraph, boost::vertex_value_t>::const_type ConstValuesPropertyMap;
     typedef boost::property_map<FullGraph, boost::vertex_observed_t>::const_type ConstObservedPropertyMap;
+    typedef boost::property_map<FullGraph, boost::vertex_discrete_t>::const_type ConstDiscretePropertyMap;
 
     class DirectEdgePredicate
     {

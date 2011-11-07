@@ -15,13 +15,6 @@
 
 namespace Biips
 {
-  //! ConstantNode concrete class
-  /*!
-   * A ConstantNode is a top-level Node in a DAG representing known data.
-   *
-   * In the BUGS language. Constant nodes appear only on the right hand
-   * side of a relation.
-   */
   class ConstantNode : public Node
   {
   public:
@@ -36,7 +29,6 @@ namespace Biips
 
     explicit ConstantNode(const DimArray::Ptr & pDim) : Node(pDim) {}
   };
-
 
 }
 

@@ -7,7 +7,7 @@
  * \version $LastChangedRevision$
  * Id:      $Id$
  *
- * COPY: part of this file is copied and pasted from Boost.uBlas mailing list
+ * COPY: part of this file is copied and pasted from lists.boost.org uBlas mailing list
  */
 
 #ifndef BOOST_UBLAS_CHOLESKY_HPP_

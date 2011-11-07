@@ -15,12 +15,12 @@
 namespace Biips
 {
 
-  void Model::SetResampleParam(ResampleType rtMode, Scalar threshold)
+  void Model::SetResampleParam(const String & rsType, Scalar threshold)
   {
     if (!pSampler_)
-      throw LogicError("Can not set resampling parameters: no SMCSampler.");
+      throw LogicError("Can not set resampling parameters: no ForwardSampler.");
 
-    pSampler_->SetResampleParams(rtMode, threshold);
+    pSampler_->SetResampleParams(rsType, threshold);
   }
 
 
@@ -28,19 +28,25 @@ namespace Biips
   {
     for (NodeId id=0; id<pGraph_->GetSize(); ++id)
     {
-      if (pGraph_->GetNode(id).GetType() == STOCHASTIC)
-      {
-        if (!pGraph_->GetObserved()[id])
-        {
-          // Monitor all unobserved stochastic nodes
-          filterMonitorsMap_[id];
+      if (pGraph_->GetNode(id).GetType() != STOCHASTIC)
+        continue;
 
-          // and its direct parents
-          GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
-          boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(id);
-          for (; it_parents != it_parents_end; ++it_parents)
-            filterMonitorsMap_[*it_parents];
-        }
+      // !! Never add observed nodes, they won't be monitored !!
+      if (pGraph_->GetObserved()[id])
+        continue;
+
+      // Monitor all unobserved stochastic nodes
+      filterMonitorsMap_[id];
+
+      // and its unobserved direct parents
+      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(id);
+      for (; it_parents != it_parents_end; ++it_parents)
+      {
+        if (pGraph_->GetObserved()[*it_parents])
+          continue;
+
+        filterMonitorsMap_[*it_parents];
       }
     }
 
@@ -72,10 +78,21 @@ namespace Biips
   }
 
 
-  const SMCSampler & Model::Sampler() const
+  Bool Model::SetSmoothTreeMonitor(NodeId nodeId)
+  {
+    // it is no use monitoring observed nodes
+    if (pGraph_->GetObserved()[nodeId])
+      return false;
+
+    smoothTreeMonitoredNodeIds_.insert(nodeId);
+    return true;
+  }
+
+
+  const ForwardSampler & Model::Sampler() const
   {
     if (!pSampler_)
-      throw LogicError("Can not acces a Null SMCSampler.");
+      throw LogicError("Can not acces a Null ForwardSampler.");
 
     return *pSampler_;
   }
@@ -90,28 +107,28 @@ namespace Biips
   }
 
 
-  void Model::BuildSampler(Size nParticles, Rng::Ptr pRng)
+  void Model::BuildSampler(Size nParticles, const Rng::Ptr & pRng)
   {
-    pRng_ = pRng;
-
-    pSampler_ = SMCSampler::Ptr(new SMCSampler(nParticles, pGraph_.get(), pRng_.get()));
+    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(nParticles, *pGraph_, pRng));
 
     pSampler_->Build();
 
     // Clear Monitors
     filterMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator  it = filterMonitorsMap_.begin();
+    for (std::map<NodeId, Monitor::Ptr>::iterator it = filterMonitorsMap_.begin();
         it != filterMonitorsMap_.end(); ++it)
     {
-      it->second = Monitor::Ptr();
+      it->second.reset();
     }
 
     smoothMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator  it = smoothMonitorsMap_.begin();
+    for (std::map<NodeId, Monitor::Ptr>::iterator it = smoothMonitorsMap_.begin();
         it != smoothMonitorsMap_.end(); ++it)
     {
-      it->second = Monitor::Ptr();
+      it->second.reset();
     }
+
+    pSmoothTreeMonitor_.reset();
   }
 
 
@@ -119,52 +136,78 @@ namespace Biips
   {
     pSampler_->Initialize();
 
-    Size t = pSampler_->Time();
+    Size t = pSampler_->Iteration();
     const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
-    pSampler_->SetMonitorWeights(*p_monitor);
+    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->InitMonitor(*p_monitor);
     for (Size i=0; i<sampled_nodes.size(); ++i)
     {
       node_id = sampled_nodes[i];
       if(filterMonitorsMap_.count(node_id))
       {
-        pSampler_->SetMonitorNodeValues(node_id, *p_monitor);
+        pSampler_->MonitorNode(node_id, *p_monitor);
         filterMonitorsMap_[node_id] = p_monitor;
       }
     }
 
     filterMonitors_.push_back(p_monitor);
+
+    if (!pSampler_->AtEnd())
+      return;
+
+    // Smooth tree Monitors
+    p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->InitMonitor(*p_monitor);
+    for (std::set<NodeId>::const_iterator it_ids = smoothTreeMonitoredNodeIds_.begin();
+        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+    {
+      pSampler_->MonitorNode(*it_ids, *p_monitor);
+      pSmoothTreeMonitor_ = p_monitor;
+    }
   }
 
 
   void Model::IterateSampler()
   {
     if (!pSampler_)
-      throw LogicError("Can not iterate a Null SMCSampler.");
+      throw LogicError("Can not iterate a Null ForwardSampler.");
 
     pSampler_->Iterate();
 
-    Size t = pSampler_->Time();
+    Size t = pSampler_->Iteration();
     const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
-    pSampler_->SetMonitorWeights(*p_monitor);
+    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->InitMonitor(*p_monitor);
     for (Size i=0; i<sampled_nodes.size(); ++i)
     {
       node_id = sampled_nodes[i];
       if(filterMonitorsMap_.count(node_id))
       {
-        pSampler_->SetMonitorNodeValues(node_id, *p_monitor);
+        pSampler_->MonitorNode(node_id, *p_monitor);
         filterMonitorsMap_[node_id] = p_monitor;
       }
     }
 
     filterMonitors_.push_back(p_monitor);
+
+    if (!pSampler_->AtEnd())
+      return;
+
+    // Smooth tree Monitors
+    p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSampler_->InitMonitor(*p_monitor);
+    for (std::set<NodeId>::const_iterator it_ids = smoothTreeMonitoredNodeIds_.begin();
+        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+    {
+      pSampler_->MonitorNode(*it_ids, *p_monitor);
+      pSmoothTreeMonitor_ = p_monitor;
+    }
   }
 
 
@@ -173,23 +216,26 @@ namespace Biips
     if (!defaultMonitorsSet_)
       throw LogicError("Can not initiate backward smoother: default monitors not set.");
 
-    pSmoother_ = BackwardSmoother::Ptr(new BackwardSmoother(pGraph_, filterMonitors_));
+    if (!pSampler_)
+      throw LogicError("Can not initiate backward smoother: no ForwardSampler.");
+      
+    pSmoother_ = BackwardSmoother::Ptr(new BackwardSmoother(*pGraph_, filterMonitors_, pSampler_->GetNodeSamplingIterations()));
 
     pSmoother_->Initialize();
 
     Types<NodeId>::Array updated_nodes = pSmoother_->UpdatedNodes();
-    Size t = pSmoother_->Time();
+    Size t = pSmoother_->Iteration();
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
-    pSmoother_->SetMonitorWeights(*p_monitor);
+    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSmoother_->InitMonitor(*p_monitor);
     for (Size i=0; i<updated_nodes.size(); ++i)
     {
       node_id = updated_nodes[i];
       if(smoothMonitorsMap_.count(node_id))
       {
-        pSmoother_->SetMonitorNodeValues(node_id, *p_monitor);
+        pSmoother_->MonitorNode(node_id, *p_monitor);
         smoothMonitorsMap_[node_id] = p_monitor;
       }
     }
@@ -206,18 +252,18 @@ namespace Biips
     pSmoother_->IterateBack();
 
     Types<NodeId>::Array updated_nodes = pSmoother_->UpdatedNodes();
-    Size t = pSmoother_->Time();
+    Size t = pSmoother_->Iteration();
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes.front())); // FIXME Do we create monitor object even if no nodes are monitored ?
-    pSmoother_->SetMonitorWeights(*p_monitor);
+    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    pSmoother_->InitMonitor(*p_monitor);
     for (Size i=0; i<updated_nodes.size(); ++i)
     {
       node_id = updated_nodes[i];
       if(smoothMonitorsMap_.count(node_id))
       {
-        pSmoother_->SetMonitorNodeValues(node_id, *p_monitor);
+        pSmoother_->MonitorNode(node_id, *p_monitor);
         smoothMonitorsMap_[node_id] = p_monitor;
       }
     }
@@ -292,7 +338,7 @@ namespace Biips
   MultiArray Model::ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract filter statistic: no SMCSampler.");
+      throw LogicError("Can not extract filter statistic: no ForwardSampler.");
 
     return extractMonitorStat(nodeId, statFeature, filterMonitorsMap_);
   }
@@ -301,17 +347,17 @@ namespace Biips
   MultiArray Model::ExtractSmoothStat(NodeId nodeId, StatsTag statFeature) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract backward smoother statistic: no SMCSampler.");
+      throw LogicError("Can not extract backward smoother statistic: no ForwardSampler.");
 
     return extractMonitorStat(nodeId, statFeature, smoothMonitorsMap_);
   }
 
 
-  // TODO manage dicrete variable cases
+  // TODO manage discrete variable cases
   ScalarHistogram Model::extractMonitorPdf(NodeId nodeId, Size numBins, Scalar cacheFraction, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract filter pdf: no SMCSampler.");
+      throw LogicError("Can not extract filter pdf: no ForwardSampler.");
 
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
       throw LogicError("Can not extract filter pdf: node is not scalar.");
@@ -329,21 +375,21 @@ namespace Biips
   }
 
 
-  // TODO manage dicrete variable cases
+  // TODO manage discrete variable cases
   ScalarHistogram Model::ExtractFilterPdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract filter pdf: no SMCSampler.");
+      throw LogicError("Can not extract filter pdf: no ForwardSampler.");
 
     return extractMonitorPdf(nodeId, numBins, cacheFraction, filterMonitorsMap_);
   }
 
 
-  // TODO manage dicrete variable cases
+  // TODO manage discrete variable cases
   ScalarHistogram Model::ExtractSmoothPdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract backward smooth pdf: no SMCSampler.");
+      throw LogicError("Can not extract backward smooth pdf: no ForwardSampler.");
 
     return extractMonitorPdf(nodeId, numBins, cacheFraction, smoothMonitorsMap_);
   }
@@ -353,7 +399,7 @@ namespace Biips
   MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract smooth tree statistic: no SMCSampler.");
+      throw LogicError("Can not extract smooth tree statistic: no ForwardSampler.");
 
     ElementAccumulator elem_acc;
     elem_acc.AddFeature(statFeature);
@@ -418,7 +464,7 @@ namespace Biips
   ScalarHistogram Model::ExtractSmoothTreePdf(NodeId nodeId, Size numBins, Scalar cacheFraction) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract smooth tree pdf: no SMCSampler.");
+      throw LogicError("Can not extract smooth tree pdf: no ForwardSampler.");
 
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
       throw LogicError("Can not extract smooth tree pdf: node is not scalar.");

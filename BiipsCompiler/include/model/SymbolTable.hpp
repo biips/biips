@@ -7,7 +7,7 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS SymTab class
+ * COPY: Adapted from JAGS SymTab class
  */
 
 #ifndef BIIPS_SYMBOLTABLE_HPP_

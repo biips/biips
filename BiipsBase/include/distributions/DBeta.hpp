@@ -11,25 +11,30 @@
 #ifndef BIIPS_DBETA_HPP_
 #define BIIPS_DBETA_HPP_
 
-#include "distribution/Distribution.hpp"
+#include "distributions/BoostScalarDistribution.hpp"
+
+#include <boost/random/beta_distribution.hpp>
+#include <boost/math/distributions/beta.hpp>
 
 namespace Biips
 {
+  typedef boost::math::beta_distribution<Scalar> BetaMathDistType;
+  typedef boost::beta_distribution<Scalar> BetaRandomDistType;
 
-  class DBeta : public Distribution
+  class DBeta : public BoostScalarDistribution<BetaMathDistType, BetaRandomDistType>
   {
-  protected:
+  public:
     typedef DBeta SelfType;
+    typedef BoostScalarDistribution<BetaMathDistType, BetaRandomDistType> BaseType;
 
-    DBeta() : Distribution("dbeta", 2){};
+  protected:
+    DBeta() : BaseType("dbeta", 2, DIST_PROPORTION, false) {}
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MathDistType mathDist(const MultiArray::Array & paramValues) const;
+    virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Sample(const MultiArray::Array & paramValues, Rng * pRng) const;
-    virtual Scalar LogPdf(const MultiArray & x, const MultiArray::Array & paramValues) const;
-
     static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

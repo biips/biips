@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   //---------------------------------------
   params[0] = mean_x0;
   params[1] = var_x0;
-  x[0] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+  x[0] = graph.AddStochasticNode(dist_tab["dnormvar"], params, false);
 
   // Add the other stochastic nodes to the graph :
   //----------------------------------------------
@@ -90,12 +90,12 @@ int main(int argc, char* argv[])
     // Add X[t]
     params[0] = x[t-1];
     params[1] = var_x;
-    x[t] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+    x[t] = graph.AddStochasticNode(dist_tab["dnormvar"], params, false);
 
     // Add Y[t]
     params[0] = x[t];
     params[1] = var_y;
-    y[t-1] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, true);
+    y[t-1] = graph.AddStochasticNode(dist_tab["dnormvar"], params, true);
   }
 
   // Build the graph :
@@ -124,12 +124,12 @@ int main(int argc, char* argv[])
   //---------------------------------
   Size nb_particles = 1000;
 
-  // Declare the SMCSampler object :
+  // Declare the ForwardSampler object :
   //--------------------------------
-  SMCSampler sampler(nb_particles, &graph, &my_rng);
-  sampler.SetResampleParams(SMC_RESAMPLE_STRATIFIED, 0.5);
+  ForwardSampler sampler(nb_particles, &graph, &my_rng);
+  sampler.SetResampleParams("stratified", 0.5);
 
-  // Initialize the SMCSampler object :
+  // Initialize the ForwardSampler object :
   //-----------------------------------
   sampler.Initialize();
 

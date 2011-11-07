@@ -29,25 +29,28 @@ namespace Biips
 
     typedef MultiArray::StorageType StorageType;
 
-    const Graph * pGraph_;
+    const Graph & graph_;
     NodeId myId_;
-    NodeSampler * pNodeSampler_;
+    NodeSampler & nodeSampler_;
     Size dimNode_;
     Size dimObs_;
     Matrix A_;
     Vector b_;
 
+    virtual void visit(const ConstantNode & node)
+    {
+      throw LogicError("ConstantNode can not be visited by GetLinearTransformVisitor.");
+    }
+
+    virtual void visit(const StochasticNode & node);
+
+    virtual void visit(const LogicalNode & node);
+
   public:
-    virtual void Visit(const ConstantNode & node) {}; // TODO throw exception
-
-    virtual void Visit(const StochasticNode & node);
-
-    virtual void Visit(const LogicalNode & node);
-
     const Matrix & GetA() { return A_; };
     const Vector & GetB() { return b_; };
 
-    GetMLinearTransformVisitor(const Graph * pGraph, NodeId myId, NodeSampler * pSampleNodeVis, Size dimNode, Size dimObs);
+    GetMLinearTransformVisitor(const Graph & graph, NodeId myId, NodeSampler & nodeSampler, Size dimNode, Size dimObs);
   };
 
 

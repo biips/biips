@@ -7,7 +7,7 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Compiler class
+ * COPY: Adapted from JAGS Compiler class
  */
 
 #ifndef BIIPS_COMPILER_HPP_
@@ -16,6 +16,8 @@
 #include "common/Types.hpp"
 #include "common/MultiArray.hpp"
 #include "common/Counter.hpp"
+#include "distribution/Distribution.hpp"
+#include "function/Function.hpp"
 #include <map>
 
 class ParseTree;
@@ -26,8 +28,6 @@ namespace Biips
   class BUGSModel;
   class IndexRange;
   class SymbolTable;
-  class FunctionTable;
-  class DistributionTable;
 
 
   class Compiler;

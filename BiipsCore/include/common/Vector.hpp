@@ -68,7 +68,6 @@ namespace Biips
         vec_ref.released_ = true;
     }
 
-    // TODO put in cpp
     template<class AE>
     VectorRef & operator = (const ublas::vector_expression<AE> & ae) { BaseType::operator=(ae); pData_->Dim()[0] = size(); return *this; }
 

@@ -23,6 +23,7 @@ namespace Biips
     }
   };
 
+
   class Pow : public BinaryScalarFunction<PowScalar>
   {
   public:
@@ -30,12 +31,31 @@ namespace Biips
     typedef BinaryScalarFunction<PowScalar> BaseType;
 
   protected:
-    Pow() : BaseType("^") {};
+    Pow() : BaseType("pow") {};
+
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
 
   public:
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 
+
+  class PowInfix : public BinaryScalarFunction<PowScalar>
+  {
+  public:
+    typedef PowInfix SelfType;
+    typedef BinaryScalarFunction<PowScalar> BaseType;
+
+  protected:
+    PowInfix() : BaseType("^") {};
+
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+
+  public:
+    virtual Bool IsInfix() const { return true; }
+
+    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+  };
 }
 
 #endif /* BIIPS_POW_HPP_ */
