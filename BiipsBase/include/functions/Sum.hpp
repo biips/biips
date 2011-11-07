@@ -24,12 +24,12 @@ namespace Biips
     Sum() : Function("sum", 1) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; };
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; }
+    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-
+    virtual Bool IsDiscreteValued(const Flags & mask) const;
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

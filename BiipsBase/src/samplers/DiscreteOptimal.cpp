@@ -23,131 +23,124 @@ namespace Biips
   const String DiscreteOptimal::NAME_ = "Discrete Optimal";
 
 
-  void DiscreteOptimal::Visit(const StochasticNode & node)
+  void DiscreteOptimal::sample(const StochasticNode & node)
   {
-    if ( nodeIdDefined_ && attributesDefined_ ) // TODO manage else case : throw exception
+    NodeValues node_values(graph_.GetSize());
+    Flags sampled_flags(graph_.GetSize());
+
+    NodeSampler node_sampler(graph_);
+
+    MultiArray::Array prior_param_values = getParamValues(nodeId_, graph_, *this);
+
+    MultiArray post_param(prior_param_values[0].DimPtr());
+
+    ValArray::Ptr k_chosen(new ValArray(1));
+
+    for (Size k=1; k <= post_param.Length(); ++k)
     {
-      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-
-      NodeValues node_values(pGraph_->GetSize());
-      Flags sampled_flags(pGraph_->GetSize());
-
-      NodeSampler sample_node_vis(pGraph_);
-
-      MultiArray::Array prior_param_values = getParamValues(nodeId_, pGraph_, this);
-
-      MultiArray::Array post_param_values;
-      post_param_values.Alloc(prior_param_values);
-
-      ValArray::Ptr k_chosen(new ValArray(1));
-
-      for (Size k=1; k <= post_param_values[0].Length(); ++k)
+      for (NodeId id=0; id<graph_.GetSize(); ++id)
       {
-        for (NodeId id=0; id<pGraph_->GetSize(); ++id)
-        {
-          node_values[id] = nodeValuesMap_[id];
-          sampled_flags[id] = sampledFlagsMap_[id];
-        }
-        k_chosen->ScalarView() = Scalar(k);
-        node_values[nodeId_] = k_chosen;
-        sampled_flags[nodeId_] = true;
-
-        sample_node_vis.SetAttributes(node_values, sampled_flags, pRng_);
-
-        LogLikeVisitor like_form_vis(pGraph_, nodeId_, &sample_node_vis);
-
-        boost::tie(it_offspring, it_offspring_end) = pGraph_->GetStochasticChildren(nodeId_);
-        while ( it_offspring != it_offspring_end )
-        {
-          pGraph_->VisitNode(*it_offspring, like_form_vis);
-          ++it_offspring;
-        }
-        post_param_values[0].Values()[k-1] *= exp(like_form_vis.Value());
+        node_values[id] = nodeValuesMap_[id];
+        sampled_flags[id] = sampledFlagsMap_[id];
       }
+      k_chosen->ScalarView() = Scalar(k);
+      node_values[nodeId_] = k_chosen;
+      sampled_flags[nodeId_] = true;
 
-      nodeValuesMap_[nodeId_] = DCat::Instance()->Sample(post_param_values, pRng_).ValuesPtr(); // TODO GenerateValue( Numerical::Array, Rng ) to avoid use of pointer function
+      node_sampler.SetMembers(node_values, sampled_flags, pRng_);
 
-      sampledFlagsMap_[nodeId_] = true;
+      Scalar log_like = getLogLikelihood(graph_, nodeId_, node_sampler);
 
-      MultiArray sampled_data(node.DimPtr(), nodeValuesMap_[nodeId_]);
+      Scalar post_param_k = std::exp(std::log(prior_param_values[0].Values()[k-1]) + log_like);
+      if (isNan(post_param_k))
+        throw RuntimeError("Failure to calculate log posterior parameter.");
 
-      logWeight_ = log(post_param_values[0].Values().Sum());
+      post_param.Values()[k-1] = post_param_k;
     }
+
+    MultiArray::Array post_param_values(1);
+    post_param_values[0].SetPtr(post_param);
+
+    nodeValuesMap_[nodeId_] = DCat::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr(); // FIXME Boundaries
+
+    sampledFlagsMap_[nodeId_] = true;
+
+    logIncrementalWeight_ = std::log(post_param_values[0].Values().Sum());
+    if (isNan(logIncrementalWeight_))
+      throw RuntimeError("Failure to calculate log incremental weight.");
   }
 
 
-  class CanSampleDiscreteOptimalVisitor : public ConstNodeVisitor
+  class CanSampleDiscreteOptimalVisitor : public ConstStochasticNodeVisitor
   {
   protected:
     typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
     typedef GraphTypes::StochasticParentNodeIdIterator StochasticParentNodeIdIterator;
 
-    const Graph * pGraph_;
+    const Graph & graph_;
     Bool canSample_;
 
-  public:
-    void Visit(const ConstantNode & node) {}; // TODO throw exception
-    void Visit(const LogicalNode & node) {}; // TODO throw exception
-
-    void Visit(const StochasticNode & node)
+    virtual void visit(const StochasticNode & node)
     {
-      if ( nodeIdDefined_ )
+      canSample_ = false;
+
+      if ( graph_.GetObserved()[nodeId_] )
+        throw LogicError("CanSampleDiscreteOptimalVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
+
+      if ( node.PriorName() != DCat::Instance()->Name() )
+        return;
+
+      // FIXME
+      if (node.IsBounded())
+        return;
+
+      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
+      boost::tie(it_offspring, it_offspring_end) = graph_.GetStochasticChildren(nodeId_);
+
+      while ( ( it_offspring != it_offspring_end ) &&  (!canSample_) )
       {
-        canSample_ = false;
-        if ( !pGraph_->GetObserved()[nodeId_] ) // TODO throw exception
+        if ( graph_.GetObserved()[*it_offspring] )
         {
-          if ( node.PriorName() == DCat::Instance()->Name() )
+          StochasticParentNodeIdIterator it_sto_parents, it_sto_parents_end;
+          boost::tie(it_sto_parents, it_sto_parents_end) = graph_.GetStochasticParents(*it_offspring);
+
+          NodesRelationType parent_relation;
+          Bool have_like = true;
+          while ( (it_sto_parents != it_sto_parents_end) && have_like )
           {
-            StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-            boost::tie(it_offspring, it_offspring_end) = pGraph_->GetStochasticChildren(nodeId_);
-
-            canSample_ = false;
-            while ( ( it_offspring != it_offspring_end ) &&  (!canSample_) )
+            if ( *it_sto_parents != nodeId_ )
             {
-              if ( pGraph_->GetObserved()[*it_offspring] )
-              {
-                StochasticParentNodeIdIterator it_sto_parents, it_sto_parents_end;
-                boost::tie(it_sto_parents, it_sto_parents_end) = pGraph_->GetStochasticParents(*it_offspring);
-
-                NodesRelationType parent_relation;
-                Bool have_like = true;
-                while ( (it_sto_parents != it_sto_parents_end) && have_like )
-                {
-                  if ( *it_sto_parents != nodeId_ )
-                  {
-                    parent_relation = nodesRelation(*it_sto_parents, nodeId_, pGraph_);
-                    have_like = (parent_relation == KNOWN);
-                  }
-                  ++it_sto_parents;
-                }
-
-                canSample_ = have_like;
-              }
-              ++it_offspring;
+              parent_relation = nodesRelation(*it_sto_parents, nodeId_, graph_);
+              have_like = (parent_relation == KNOWN);
             }
+            ++it_sto_parents;
           }
-        }
-      }
-    };
 
+          canSample_ = have_like;
+        }
+        ++it_offspring;
+      }
+    }
+
+  public:
     Bool CanSample() const { return canSample_; }
 
-    CanSampleDiscreteOptimalVisitor(const Graph * pGraph) : pGraph_(pGraph), canSample_(false) {}
+    CanSampleDiscreteOptimalVisitor(const Graph & graph) : graph_(graph), canSample_(false) {}
   };
 
 
 
-  Bool DiscreteOptimalFactory::Create(const Graph * pGraph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const
+  Bool DiscreteOptimalFactory::Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const
   {
-    CanSampleDiscreteOptimalVisitor can_sample_vis(pGraph);
+    CanSampleDiscreteOptimalVisitor can_sample_vis(graph);
 
-    pGraph->VisitNode(nodeId, can_sample_vis);
+    graph.VisitNode(nodeId, can_sample_vis);
 
     Bool flag_created = can_sample_vis.CanSample();
 
     if ( flag_created )
     {
-      pNodeSamplerInstance = NodeSamplerFactory::CreatedPtr(new CreatedType(pGraph));
+      pNodeSamplerInstance = NodeSamplerFactory::CreatedPtr(new CreatedType(graph));
     }
 
     return flag_created;

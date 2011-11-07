@@ -19,14 +19,18 @@ namespace Biips
     return true;
   }
 
-  MultiArray Sum::Eval(const MultiArray::Array & paramValues) const
+  MultiArray Sum::eval(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
     const MultiArray & val = paramValues[0];
 
     MultiArray ans(DimArray(1,1));
     ans.ScalarView() = val.Values().Sum();
 
     return ans;
+  }
+
+  Bool Sum::IsDiscreteValued(const Flags & mask) const
+  {
+    return mask[0];
   }
 }

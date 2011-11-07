@@ -28,9 +28,8 @@ namespace Biips
       return false;
   }
 
-  MultiArray MatMult::Eval(const MultiArray::Array & paramValues) const
+  MultiArray MatMult::eval(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
     const MultiArray & left = paramValues[0];
     const MultiArray & right = paramValues[1];
 
@@ -50,7 +49,8 @@ namespace Biips
       Matrix ans_mat = ublas::prod(Matrix(left), Matrix(right));
       ans = MultiArray(ans_mat);
     }
-    // TODO throw exception
+    else
+      throw LogicError(String("Invalid dimensions in function ") + Name() + " evaluation.");
 
     return ans;
   }
@@ -67,5 +67,11 @@ namespace Biips
     if(right.IsMatrix())
       dim.push_back(right[1]);
     return dim;
+  }
+
+
+  Bool MatMult::IsScale(const Flags & scaleMask, const Flags & knownMask) const
+  {
+    return (knownMask[0] && scaleMask[1]) || (scaleMask[0] && knownMask[1]);
   }
 }

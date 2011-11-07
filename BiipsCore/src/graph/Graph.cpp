@@ -18,27 +18,43 @@
 #include "graph/AggNode.hpp"
 #include "graph/FuncNode.hpp"
 #include "graph/StochasticNode.hpp"
+#include "distribution/DistError.hpp"
 
 namespace Biips
 {
 
   NodeId Graph::AddConstantNode(const DimArray::Ptr & pDim, const Types<StorageType>::Ptr & pValue)
   {
+    if (!pDim)
+      throw LogicError("Can not add constant node: DimArray::Ptr is NULL.");
+
+    if (!pValue)
+      throw LogicError("Can not add constant node: value pointer is NULL.");
+
+    if (pDim->Length() != pValue->size())
+      throw LogicError("Can not add constant node: values size does not match dimension.");
+
     NodeId node_id = boost::add_vertex(fullGraph_);
     Node::Ptr new_node(new ConstantNode(pDim));
     boost::put(boost::vertex_node_ptr, fullGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, fullGraph_, node_id, true);
     boost::put(boost::vertex_value, fullGraph_, node_id, pValue);
 
+    // set dicreteness
+    Bool discrete = true;
+    for (Size i = 0; i < pValue->size(); ++i)
+    {
+      if (!checkInteger((*pValue)[i]))
+      {
+        discrete = false;
+        break;
+      }
+    }
+    boost::put(boost::vertex_discrete, fullGraph_, node_id, discrete);
+
     nodesSummaryMap_["Constant"] += 1;
     builtFlag_ = false; // TODO also set to false when SetParameter is called
     return node_id;
-  }
-
-  NodeId Graph::AddConstantNode(const DimArray & dim, const Types<StorageType>::Ptr & pValue)
-  {
-    DimArray::Ptr pDim(new DimArray(dim));
-    return AddConstantNode(pDim, pValue);
   }
 
 
@@ -80,15 +96,27 @@ namespace Biips
         node_values[id] = values_map[id];
         sampled_flags[id] = observed_map[id];
       }
-      NodeSampler sample_node_vis(this);
-      Rng * pRng = NULL;
-      sample_node_vis.SetAttributes(node_values, sampled_flags, pRng);
+      NodeSampler sample_node_vis(*this);
+      Rng::Ptr pRng;
+      sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
       VisitNode(node_id, sample_node_vis);
 
       boost::put(boost::vertex_value, fullGraph_, node_id, node_values[node_id]);
     }
 
     boost::put(boost::vertex_observed, fullGraph_, node_id, observed);
+
+    //set discreteness
+    Bool discrete = true;
+    for (Size i = 0; i < parameters.size(); ++i)
+    {
+      if (!GetDiscrete()[parameters[i]])
+      {
+        discrete = false;
+        break;
+      }
+    }
+    boost::put(boost::vertex_discrete, fullGraph_, node_id, discrete);
 
     nodesSummaryMap_["Logical"] += 1;
     if(!observed)
@@ -99,17 +127,24 @@ namespace Biips
   }
 
 
-  NodeId Graph::AddAggNode(const DimArray & dim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets)
+  Types<DimArray::Ptr>::Array Graph::getParamDims(const Types<NodeId>::Array parameters) const
   {
-    DimArray::Ptr pDim(new DimArray(dim));
-    return AddAggNode(pDim, parameters, offsets);
+    Types<DimArray::Ptr>::Array param_dims(parameters.size());
+    for (Size i = 0; i<parameters.size(); ++i)
+      param_dims[i] = GetNode(parameters[i]).DimPtr();
+
+    return param_dims;
   }
 
 
-  NodeId Graph::AddLogicalNode(const DimArray::Ptr & pDim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
+  NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
   {
+    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
+
     if (!pFunc)
-      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+      throw LogicError("Can not add logical node: Function::Ptr is NULL.");
+
+    DimArray::Ptr pDim(new DimArray(pFunc->Dim(param_dims)));
 
     NodeId node_id = boost::add_vertex(fullGraph_);
     Node::Ptr new_node(new FuncNode(pDim, pFunc, parameters));
@@ -145,15 +180,22 @@ namespace Biips
         node_values[id] = values_map[id];
         sampled_flags[id] = observed_map[id];
       }
-      NodeSampler sample_node_vis(this);
-      Rng * pRng = NULL;
-      sample_node_vis.SetAttributes(node_values, sampled_flags, pRng);
+      NodeSampler sample_node_vis(*this);
+      Rng::Ptr pRng;
+      sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
       VisitNode(node_id, sample_node_vis);
 
       boost::put(boost::vertex_value, fullGraph_, node_id, node_values[node_id]);
     }
 
     boost::put(boost::vertex_observed, fullGraph_, node_id, observed);
+
+    //set discreteness
+    Flags mask(parameters.size());
+    for (Size i = 0; i < parameters.size(); ++i)
+      mask[i] = GetDiscrete()[parameters[i]];
+
+    boost::put(boost::vertex_discrete, fullGraph_, node_id, pFunc->IsDiscreteValued(mask));
 
     nodesSummaryMap_["Logical"] += 1;
     if(!observed)
@@ -163,51 +205,57 @@ namespace Biips
     return node_id;
   }
 
-  NodeId Graph::AddLogicalNode(const DimArray & dim, const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
+
+  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
+      Bool observed, NodeId lower, NodeId upper)
   {
-    DimArray::Ptr pDim(new DimArray(dim));
-    return AddLogicalNode(pDim, pFunc, parameters);
-  }
-
-
-  Types<DimArray::Ptr>::Array Graph::getParamDims(const Types<NodeId>::Array parameters) const
-  {
-    Types<DimArray::Ptr>::Array param_dims(parameters.size());
-    for (Size i = 0; i<parameters.size(); ++i)
-      param_dims[i] = GetNode(parameters[i]).DimPtr();
-
-    return param_dims;
-  }
-
-
-  NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
-  {
-    if (!pFunc)
-      throw LogicError("Try to add LogicalNode with Null Function pointer.");
-
     Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
 
-    DimArray::Ptr pDim(new DimArray(pFunc->Dim(param_dims)));
-
-    return AddLogicalNode(pDim, pFunc, parameters);
-  }
-
-
-  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
-  {
     if (!pDist)
-      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+      throw LogicError("Can not add stochastic node: Distribution::Ptr is NULL.");
+
+    DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
 
     NodeId node_id = boost::add_vertex(fullGraph_);
 
-    Node::Ptr new_node(new StochasticNode(pDim, pDist, parameters));
+    Node::Ptr new_node(new StochasticNode(pDim, pDist, parameters, lower, upper));
     boost::put(boost::vertex_node_ptr, fullGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, fullGraph_, node_id, observed);
 
     for (Size i=0; i < parameters.size(); ++i)
     {
-      boost::add_edge(node_id, parameters[i], DIRECT_EDGE, fullGraph_); // TODO check parameters
+      boost::add_edge(node_id, parameters[i], DIRECT_EDGE, fullGraph_); // TODO check parameters (discreteness)
     }
+
+    //check boundaries
+    if (lower != NULL_NODEID)
+    {
+      if (!pDist->CanBound())
+        throw DistError(pDist, "Distribution cannot be bounded");
+      if (*(GetNode(lower).DimPtr()) != (*pDim))
+        throw DistError(pDist, "Dimension mismatch when setting lower bounds");
+
+      boost::add_edge(node_id, lower, DIRECT_EDGE, fullGraph_);
+    }
+    if (upper != NULL_NODEID)
+    {
+      if (!pDist->CanBound())
+        throw DistError(pDist, "Distribution cannot be bounded");
+      if (*(GetNode(lower).DimPtr()) != (*pDim))
+        throw DistError(pDist, "Dimension mismatch when setting upper bounds");
+
+      boost::add_edge(node_id, upper, DIRECT_EDGE, fullGraph_);
+    }
+
+    //check discreteness of parents
+    Flags mask(parameters.size());
+    for (Size i = 0; i < parameters.size(); ++i)
+      mask[i] = GetDiscrete()[parameters[i]];
+    if (!pDist->CheckParamDiscrete(mask))
+      throw DistError(pDist, "Failed check for discrete-valued parameters");
+
+    //set discreteness
+    boost::put(boost::vertex_discrete, fullGraph_, node_id, pDist->IsDiscreteValued(mask));
 
     nodesSummaryMap_["Stochastic"] += 1;
     if(!observed)
@@ -217,45 +265,21 @@ namespace Biips
     return node_id;
   }
 
-  NodeId Graph::AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
+
+  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
+    const Types<StorageType>::Ptr & pObsValue, NodeId lower, NodeId upper)
   {
-    DimArray::Ptr pDim(new DimArray(dim));
-    return AddStochasticNode(pDim, pDist, parameters, observed);
-  }
+    NodeId node_id = AddStochasticNode(pDist, parameters, Bool(pObsValue), lower, upper);
 
-  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, Bool observed)
-  {
-    if (!pDist)
-      throw LogicError("Try to add LogicalNode with Null Function pointer.");
+    if (!pObsValue)
+      throw LogicError("Can not add stochastic node: observed value pointer is NULL.");
 
-    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
-
-    DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
-
-    return AddStochasticNode(pDim, pDist, parameters, observed);
-  }
-
-
-  NodeId Graph::AddStochasticNode(const DimArray::Ptr & pDim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
-  {
-    NodeId node_id = AddStochasticNode(pDim, pDist, parameters, true);
+    if (pObsValue->size() != GetNode(node_id).Dim().Length())
+      throw LogicError("Can not add stochastic node: observed value size does not match dimension.");
 
     boost::put(boost::vertex_value, fullGraph_, node_id, pObsValue);
 
     return node_id;
-  }
-
-  NodeId Graph::AddStochasticNode(const DimArray & dim, const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters, const Types<StorageType>::Ptr & pObsValue)
-  {
-    if (!pDist)
-      throw LogicError("Try to add LogicalNode with Null Function pointer.");
-
-    Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
-
-    DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
-
-    // TODO check dimensions of pObsValue
-    return AddStochasticNode(pDim, pDist, parameters, pObsValue);
   }
 
 
@@ -498,7 +522,7 @@ namespace Biips
   }
 
 
-  NodeValues Graph::SampleValues(Rng * pRng) const
+  NodeValues Graph::SampleValues(const Rng::Ptr & pRng) const
   {
     const ConstValuesPropertyMap & values_map = boost::get(boost::vertex_value, fullGraph_);
     const ConstObservedPropertyMap & observed_map = boost::get(boost::vertex_observed, fullGraph_);
@@ -510,8 +534,8 @@ namespace Biips
       node_values[id] = values_map[id];
       sampled_flags[id] = observed_map[id];
     }
-    NodeSampler sample_node_vis(this);
-    sample_node_vis.SetAttributes(node_values, sampled_flags, pRng);
+    NodeSampler sample_node_vis(*this);
+    sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
     VisitGraph(sample_node_vis);
     return node_values;
   }
@@ -531,29 +555,29 @@ namespace Biips
   protected:
     typedef GraphTypes::ConstNodeValuesMap NodeValuesMap;
 
-    Graph * pGraph_;
+    Graph & graph_;
     NodeValuesMap nodeValuesMap_;
 
-  public:
-    virtual void Visit(ConstantNode & node) {};
+    virtual void visit(ConstantNode & node) {}
 
-    virtual void Visit(StochasticNode & node)
+    virtual void visit(StochasticNode & node)
     {
-      if ( nodeIdDefined_ && pGraph_->GetObserved()[nodeId_] ) // TODO manage else case : throw exception
-      {
-        pGraph_->setValue(nodeId_, nodeValuesMap_[nodeId_]);
-      }
-    };
-    virtual void Visit(LogicalNode & node) {};
+      if ( graph_.GetObserved()[nodeId_] )
+        graph_.setValue(nodeId_, nodeValuesMap_[nodeId_]);
+    }
 
-    explicit SetObsValuesVisitor(Graph * pGraph, const NodeValues & nodeValues)
-    : pGraph_(pGraph), nodeValuesMap_(boost::make_iterator_property_map(nodeValues.begin(), boost::identity_property_map())) {}
+    virtual void visit(LogicalNode & node) {}
+
+  public:
+
+    explicit SetObsValuesVisitor(Graph & graph, const NodeValues & nodeValues)
+    : graph_(graph), nodeValuesMap_(boost::make_iterator_property_map(nodeValues.begin(), boost::identity_property_map())) {}
   };
 
 
   void Graph::SetObsValues(const NodeValues & nodeValues)
   {
-    SetObsValuesVisitor set_obs_vis(this, nodeValues);
+    SetObsValuesVisitor set_obs_vis(*this, nodeValues);
     VisitGraph(set_obs_vis);
   }
 
@@ -621,21 +645,22 @@ namespace Biips
     const Graph & graph_;
     String label_;
 
-  public:
-    virtual void Visit(const ConstantNode & node)
+    virtual void visit(const ConstantNode & node)
     {
       label_.clear();
-    };
+    }
 
-    virtual void Visit(const StochasticNode & node)
+    virtual void visit(const StochasticNode & node)
     {
       label_ = node.PriorName() + "\\n";
-    };
+    }
 
-    virtual void Visit(const LogicalNode & node)
+    virtual void visit(const LogicalNode & node)
     {
       label_ = node.FuncName() + "\\n";
-    };
+    }
+
+  public:
 
     const String & GetLabel() const { return label_; }
 

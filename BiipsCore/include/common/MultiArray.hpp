@@ -25,6 +25,7 @@ namespace Biips
   class MatrixRef;
 
   class MultiArrayArray;
+  class MultiArrayPair;
 
   //! A n-dimensional data object class
   /*!
@@ -44,6 +45,8 @@ namespace Biips
     typedef MultiArray SelfType;
     //! An array of MultiArray
     typedef MultiArrayArray Array;
+    //! A pair of MultiArray
+    typedef MultiArrayPair Pair;
 
   protected:
     //! Shared pointer of the dimensions array of the data
@@ -274,9 +277,21 @@ namespace Biips
       pValues_ = pVal;
       return *this;
     } // TODO check dim
+
+    Bool IsNULL() const { return !(pDim_ || pValues_); }
   };
 
 
+  // -----------------------------------------------------------------------------
+  // NULL_MULTIARRAY
+  // -----------------------------------------------------------------------------
+
+  const MultiArray NULL_MULTIARRAY = MultiArray();
+
+
+  // -----------------------------------------------------------------------------
+  // MultiArrayArray
+  // -----------------------------------------------------------------------------
 
   class MultiArrayArray : public std::vector<MultiArray>
   {
@@ -332,6 +347,43 @@ namespace Biips
   };
 
 
+  // -----------------------------------------------------------------------------
+  // MultiArrayPair
+  // -----------------------------------------------------------------------------
+
+  class MultiArrayPair : public std::pair<MultiArray, MultiArray>
+  {
+  public:
+    typedef MultiArrayPair SelfType;
+    typedef std::pair<MultiArray, MultiArray> BaseType;
+
+  protected:
+    // forbid assign
+    MultiArrayPair & operator= (const MultiArrayPair & rhs);
+
+  public:
+    MultiArrayPair() {}
+
+    MultiArrayPair & Alloc(const MultiArrayPair & from)
+    {
+      first.Alloc(from.first);
+      second.Alloc(from.second);
+      return *this;
+    }
+
+    MultiArrayPair & SetPtr(const MultiArrayPair & from)
+    {
+      BaseType::operator=(from);
+      return *this;
+    }
+  };
+
+  const MultiArrayPair NULL_MULTIARRAYPAIR;
+
+  // -----------------------------------------------------------------------------
+  // MultiArray Types
+  // -----------------------------------------------------------------------------
+
   template<>
   struct Types<MultiArray>
   {
@@ -348,7 +400,7 @@ namespace Biips
 
     typedef std::vector<Ptr> PtrArray; //!< Array of pointers defined with a std::vector<boost::shared_ptr<> >
 
-    typedef std::pair<SelfType, SelfType> Pair;
+    typedef MultiArrayPair Pair;
     typedef std::pair<Iterator, Iterator> IteratorPair;
     typedef std::pair<ConstIterator, ConstIterator> ConstIteratorPair; //!< Pair of ConstIterators type, used to define a range
   };

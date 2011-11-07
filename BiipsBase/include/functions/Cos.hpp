@@ -34,6 +34,8 @@ namespace Biips
   protected:
     Cos() : BaseType("cos") {};
 
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+
   public:
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };

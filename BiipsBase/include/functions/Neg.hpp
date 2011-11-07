@@ -25,7 +25,13 @@ namespace Biips
   protected:
     Neg() : BaseType("NEG") {};
 
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+
   public:
+    virtual Bool IsPrefix() const { return true; }
+    virtual Bool IsDiscreteValued(const Flags & mask) const;
+    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const;
+
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

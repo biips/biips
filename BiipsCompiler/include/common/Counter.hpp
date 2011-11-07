@@ -7,7 +7,7 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Counter class
+ * COPY: Adapted from JAGS Counter class
  */
 
 #ifndef BIIPS_COUNTER_HPP_

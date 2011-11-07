@@ -10,7 +10,6 @@
 
 #include "HmmNormalLinear.hpp"
 #include "BiipsCore.hpp"
-#include "BiipsBase.hpp"
 
 #include "samplers/ConjugateNormal.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
@@ -131,9 +130,7 @@ namespace Biips
   {
     // load Base module
     //-----------------
-    FunctionTable funcTab;
-    DistributionTable distTab;
-    loadBaseModule(funcTab, distTab);
+    loadBase();
 
     // graph
     //------
@@ -183,34 +180,34 @@ namespace Biips
     {
       params[0] = mean_x0;
       params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], params);
+      x[0] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, false);
 
       for (Size t=1; t<t_max+1; ++t)
       {
         params[0] = x[t-1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnorm"], params);
+        x[t] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, false);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnorm"], params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, true);
       }
     }
     else
     {
       params[0] = mean_x0;
       params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], params);
+      x[0] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, false);
 
       for (Size t=1; t<t_max+1; ++t)
       {
         params[0] = x[t-1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(dimArrayMap_["x"], distTab["dnormvar"], params);
+        x[t] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, false);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(dimArrayMap_["y"], distTab["dnormvar"], params, true);
+        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, true);
       }
     }
 

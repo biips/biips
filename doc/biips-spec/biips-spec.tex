@@ -1,0 +1,649 @@
+% Marges
+% \setmarginsrb{leftmargin}{topmargin}{rightmargin}{bottommargin}{headheight}{headsep}{footheight}{footskip}
+%\lfoot{pied de page gauche}
+%\rfoot{pied de page droit}
+%\usepackage[Conny]{fncychap} %Lenny, Conny, Rejne
+%\ChTitleAsIs
+%\lhead{Rapport contrat EDF/INRIA v. 0.1}
+%%\chead{haut de page centre}
+%\rhead{Lot 1 - Approche prliminaire $T_{0}$}
+%\rfoot{\thepage}
+%\renewcommand{\headrulewidth}{0.4pt}
+%\renewcommand{\footrulewidth}{0.4pt}
+%\input{tcilatex}
+% Modification package algorithme en franais
+%\usepackage{vmargin}
+%\setmarginsrb{2cm}{2cm}{2.5cm}{4cm}{0cm}{1cm}{0cm}{1cm}
+%\pagestyle{fancy}
+%\cfoot{\footnotesize{INRIA - Centre de Bordeaux Sud-Ouest\\
+%Universit Bordeaux 1\\351, cours de la libration,
+%33405 Talence}}
+%\fancyhead[LO,RE]{\textbf{Contrat EDF/INRIA Bordeaux - Lot 1}}
+%\fancyhead[LE,RO]{\textbf{\thepage}}
+%\renewcommand{\headrulewidth}{.5pt}
+%\renewcommand{\footrulewidth}{.5pt}
+%\RRetitle{PHD filters for multitarget tracking}
+%\RRversion {0.2}
+%\RRdomaine{1}
+%\RRtheme{Modles et mthodes stochastiques}
+
+
+\documentclass[a4paper,11pt]{article}%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{algorithm}
+%\usepackage[french]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{fancybox}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+
+\usepackage{RR}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{LastRevised=Wednesday, September 30, 2009 17:46:24}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=BibTeX}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+%EndMSIPreambleData
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\newcommand{\rI}{\mathrm{I}}
+\newcommand{\dE}{\mathbb{E}}
+\newcommand{\dP}{\mathbb{P}}
+\newcommand{\dR}{\mathbb{R}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cN}{\mathcal{N}}
+
+\font\calcal=cmsy10 scaled\magstep1
+\def\build#1_#2^#3{\mathrel{\mathop{\kern 0pt#1}\limits_{#2}^{#3}}}
+\def\liml{\build{\longrightarrow}_{}^{{\mbox{\calcal L}}}}
+
+\def\videbox{\mathbin{\vbox{\hrule\hbox{\vrule height1ex \kern.5em\vrule height1ex}\hrule}}}
+\def\demend{\hfill $\videbox$\\}
+%\floatname{algorithm}{Algorithme}
+%\renewcommand{\listalgorithmname}{Liste des algorithmes}
+
+
+\graphicspath{{./},{./figures/},{./logos/}}
+\RRdate{\today}
+\RRauthor{Fran\c{c}ois Caron, Adrien Todeschini}
+\authorhead{Fran\c{c}ois Caron, Adrien Todeschini}
+\RRtitle{Projet BiiPS:\\Spécifications fonctionnelles}
+\RRetitle{BiiPS project:\\Functional specifications}
+\titlehead{BiiPS project: Functional specifications}
+\RRresume{Ce rapport décrit les spécifications fonctionnelles du projet BiiPS. Ce projet est porté par l'\href{http://alea.bordeaux.inria.fr/}{équipe ALEA} de l'\href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux Sud Ouest} et constitue une \textit{Action de développement Technologique} INRIA.}
+\RRmotcle{Inférence bayésienne, Méthodes de Monte Carlo séquentielles, Filtrage particulaire, Modèles graphiques, Calcul Générique sur un Processeur Graphique}
+\RRabstract{This report describes the functional specifications of the BiiPS project. This project is carried by the \href{http://alea.bordeaux.inria.fr/}{team ALEA} at \href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux} and supported by INRIA through an \textit{Action de développement Technologique}.}
+\RRkeyword{Bayesian Inference, Sequential Monte Carlo, Particle Filters, Graphical Models, General Purpose Graphics Processing Units}
+\RRprojet{ALEA}
+\RRdate{\today}
+\RCBordeaux
+\RRNo{2010-BiiPS-01}
+\RRdomaine{1}
+
+\begin{document}
+
+\makeRT
+
+\tableofcontents
+\newpage
+
+\section{Description}
+
+
+%\tikzstyle{int}=[draw, fill=blue!20, minimum size=2em]
+%\tikzstyle{init} = [pin edge={to-,thin,black}]
+\tikzstyle{every node}=[font=\footnotesize]
+
+\tikzstyle{state}=[circle,
+                                    thick,
+                                    minimum size=1cm,
+                                    draw=blue!80,
+                                    fill=blue!20
+                                    ]
+
+% The measurement vector is represented by an orange circle.
+\tikzstyle{measurement}=[circle,
+                                                thick,
+                                                minimum size=1cm,
+                                                draw=orange!80,
+                                                fill=orange!25]
+
+\tikzstyle{input}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3cm,
+                                    draw=blue!80,
+                                    fill=blue!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{processing}=[rectangle, rounded corners,
+                                    thick,
+                                    text width=3cm,
+                                    draw=green!80,
+                                    fill=green!20,
+                                    text centered,
+                                    font=\large,
+                                    ]
+\tikzstyle{output}=[rectangle, rounded corners,
+                                                thick,
+                                                text width=3cm,
+                                                draw=orange!80,
+                                                fill=orange!25,
+                                                text centered,
+                                    font=\large,]
+
+%\begin{tikzpicture}[node distance=2.5cm,auto,>=latex']
+%    \node [int, pin={[init]above:$v_0$}] (a) {$\frac{1}{s}$};
+%    \node (b) [left of=a,node distance=2cm, coordinate] {a};
+%    \node [int, pin={[init]above:$p_0$}] (c) [right of=a] {$\frac{1}{s}$};
+%    \node [coordinate] (end) [right of=c, node distance=2cm]{};
+%    \path[->] (b) edge node {$a$} (a);
+%    \path[->] (a) edge node {$v$} (c);
+%    \draw[->] (c) edge node {$p$} (end) ;
+%\end{tikzpicture}\bigskip
+%
+%\begin{tikzpicture}[node distance=2.5cm,auto,>=latex']
+%\matrix[row sep=0.5cm,column sep=0.5cm] {
+%\node (X_t-1)   [state] {$\mathbf{X}_{t-1}$};&
+%\node (X_t)   [state] {$\mathbf{X}_t$};&
+%\node (X_t+1)   [state] {$\mathbf{X}_{t+1}$};\\
+% \node (Y_t-1) [measurement] {$\mathbf{Y}_{t-1}$}; &
+% \node (Y_t)   [measurement] {$\mathbf{Y}_t$};&
+% \node (Y_t+1) [measurement] {$\mathbf{Y}_{t+1}$};\\};
+% \path[->] (X_t) edge[thick] (Y_t);
+% \path[->] (X_t-1) edge[thick] (Y_t-1);
+% \path[->] (X_t+1) edge[thick] (Y_t+1);
+%  \path[->] (X_t-1) edge[thick] (X_t);
+% \path[->] (X_t) edge[thick] (X_t+1);
+% %\path[->] {} edge[thick] (X_t-1);
+% \node (b) [left of=X_t-1,node distance=2cm, coordinate] {};
+% \path[->] (b) edge[thick] (X_t-1);
+% \end{tikzpicture}
+
+
+
+
+Bayesian inference consists in approximating the conditional probability law of an unknown parameter $X$ given some observations $Y$. Several problems such as signal filtering or clustering can be cast into this framework. This conditional probability law is in general not analytically tractable. Markov Chain Monte Carlo (MCMC) methods~\cite{Gilks1995,Robert2004} have been introduced about 20 years ago and provide samples asymptotically distributed from the target distribution.
+As stated in~\cite{Cappe2000}
+\begin{quote}
+%\begin{textit}
+\textit{``The main factor in the success of MCMC algorithms is that they can be implemented with little effort in a large variety of settings. This is obviously true of the Gibbs sampler, which, provided some conditional distributions are available, simply runs by generating from these conditions, as shown by the BUGS software.''}
+%\end{textit}
+\end{quote}
+
+The BUGS (which stands for Bayesian Inference Using Gibbs Sampling) software has actually greatly contributed to the development of Bayesian and MCMC techniques among applied fields~\cite{Gilks1994,Lunn2000}. BUGS allows the user to define statistical models in a natural language or under a graphical form, then evaluates the posterior distribution of the parameter $X$ given the data using MCMC methods and provides some summary statistics. It is easy to use even for people not aware of MCMC methods and works as a black box.\bigskip
+
+A new generation of algorithms, based on interacting particle systems, has appeared over the last 12 years. Those methods are known under the names of \textit{interacting MCMC, particle filtering, sequential Monte Carlo methods}, etc. For numerous problems, those methods have shown to be more appropriate than MCMC methods, in particular for time series or highly correlated variables~\cite{Doucet2001,DelMoral2004}. Contrary to MCMC methods, those methods do not require convergence of the algorithm and are suited to dynamical estimation problems such as signal filtering or target tracking.
+
+
+\subsection{Statistical Models}
+
+A statistical model is represented by a joint distribution $\mathcal{L}(X,Y)$ over the parameters $X$ and the observations $Y$. The joint distribution decomposes as $\mathcal{L}(X,Y)=\mathcal{L}(Y|X)\mathcal{L}(X)$ where the two terms of the right-hand side are respectively named \textit{likelihood} and \textit{prior}. As stated above, the objective of Bayesian Inference is to approximate the posterior distribution $\mathcal{L}(X|Y=y)$ after having observed some data $y$.
+
+A convenient way of representing a statistical model is through a directed acyclic graph~\cite{Lauritzen1996,Murphy2002,Koller2009}. Such a graph provides at a glance the conditional independencies between variables and displays the decomposition of the joint distribution. An example of graph is given in Figure~\ref{fig:graph}.
+
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tikzpicture}[node distance=1.5cm,auto,>=latex']
+\node (X_3)   [state] {$X_3$};
+\node (X_2)   [state,above right of=X_3] {$X_{2}$};
+\node (X_1)   [state,above left of=X_3] {$X_1$};
+\node (Y_1)   [measurement,below of=X_3] {$Y_1$};
+ \path[->] (X_1) edge[thick] (X_3);
+ \path[->] (X_2) edge[thick] (X_3);
+ \path[->] (X_3) edge[thick] (Y_1);
+ \end{tikzpicture}
+ \caption{Example of a Graphical model. An arrow from node $A$ to node $B$ indicates that ``$A$ is a parent of $B$''. Let $Z=(X,Y)$ and $n$ the number of elements in $Z$. Then the joint distribution decomposes as $\pi(z)=\prod_{i=1}^n \pi(z_i|\text{pa}(z_i))$ where $\text{pa}(z_i)$ is the set of parents of node $Z_i$. In the example, the joint distribution decomposes as $\pi(x_1,x_2,x_3,y_1)=\pi(x_1)\pi(x_2)\pi(x_3|x_1,x_2)\pi(y_1|x_3)$. }
+ \label{fig:graph}
+ \end{center}
+ \end{figure}
+
+\bigskip\noindent\shadowbox{\begin{minipage}{4.8in}
+\begin{example}{Hidden Markov Model}
+\vskip .05in \hrule\vskip .1in
+Consider the following model known as an hidden Markov Model, or dynamic model, where we have the following decomposition of the joint distribution of $(X,Y)=(X_0,\ldots,X_n,Y_1,\ldots,Y_n)$
+$$
+\pi(x,y)=\pi(x_0)\prod_{t=1}^{n}\left [\pi(x_t|x_{t-1})\pi(y_t|x_{t})\right ]
+$$
+The model can be represented as the directed acyclic graph in Figure~\ref{fig:hmm}.
+\end{example}\end{minipage} }\bigskip
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tikzpicture}[node distance=1.5cm,auto,>=latex']
+\node (X_t-2)   [] {\ldots};
+\node (X_t-1)   [state,right of=X_t-2] {$X_{t-1}$};
+\node (X_t)   [state,right of=X_t-1] {$X_t$};
+\node (X_t+1)   [state,right of=X_t] {$X_{t+1}$};
+\node (X_t+2)   [right of=X_t+1] {\ldots};
+ \node (Y_t)   [measurement,below of=X_t] {$Y_t$};
+ \node (Y_t-1)   [measurement,below of=X_t-1] {$Y_{t-1}$};
+ \node (Y_t+1)   [measurement,below of=X_t+1] {$Y_{t+1}$};
+ \path[->] (X_t-1) edge[thick] (X_t);
+ \path[->] (X_t-2) edge[thick] (X_t-1);
+ \path[->] (X_t) edge[thick] (X_t+1);
+ \path[->] (X_t+1) edge[thick] (X_t+2);
+ \path[->] (X_t) edge[thick] (Y_t);
+ \path[->] (X_t-1) edge[thick] (Y_t-1);
+ \path[->] (X_t+1) edge[thick] (Y_t+1);
+ \end{tikzpicture}
+ \caption{Graphical representation of a hidden Markov Model as a directed acyclic graph.}
+ \label{fig:hmm}
+ \end{center}
+ \end{figure}
+
+
+For later notational convenience, a graphical model will be rearranged in the following manner.
+\begin{enumerate}
+\item Sort the nodes of the graphical model according to a topological order (node after all his parents), by giving priority to measurement nodes compared to state nodes (the sort is not unique)
+\item Group successive measurement or state nodes
+\item We then obtain an ordering $(X_0,Y_0,X_1,Y_1,\ldots,X_n,Y_n)$
+\end{enumerate}
+Figure \ref{fig:graphorder} gives an example of rearrangement of a graphical model.
+
+\begin{figure}[h!]
+\begin{center}
+\subfigure[Graphical model before rearrangement]{
+\begin{tikzpicture}[node distance=1.5cm,auto,>=latex',scale=.2]
+\node (X_1)   [state] {$X_1$};
+\node (Y_1)   [measurement,right of=X_1] {$Y_{1}$};
+\node (X_2)   [state,right of=Y_1] {$X_2$};
+\node (Y_4)   [measurement,right of=X_2] {$Y_4$};
+\node (Y_3)   [measurement,below of=X_1] {$Y_3$};
+ \node (X_3)   [state,above of=X_2] {$X_3$};
+ \node (Y_4)   [measurement,right of=X_2] {$Y_{4}$};
+ \node (Y_2)   [measurement,below of=X_2] {$Y_2$};
+ \path[->] (X_1) edge[thick] (Y_3);
+ \path[->] (X_1) edge[thick,style={bend left}] (X_3);
+ \path[->] (X_1) edge[thick] (Y_1);
+ \path[->] (Y_1) edge[thick] (X_2);
+ \path[->] (X_3) edge[thick] (X_2);
+ \path[->] (X_2) edge[thick] (Y_2);
+ \path[->] (X_2) edge[thick] (Y_4);
+ \end{tikzpicture}}\hskip 1cm
+ \subfigure[Topological sort (with priority to measurement nodes): $(X_1,Y_1,Y_3,X_3,X_2,Y_4,Y_2)$]{
+\begin{tikzpicture}[node distance=1.5cm,auto,>=latex',scale=.2]
+\node (X_1)   [state] {1};
+\node (Y_1)   [measurement,right of=X_1] {2};
+\node (X_2)   [state,right of=Y_1] {5};
+\node (Y_3)   [measurement,below of=X_1] {3};
+ \node (X_3)   [state,above of=X_2] {4};
+ \node (Y_4)   [measurement,right of=X_2] {6};
+ \node (Y_2)   [measurement,below of=X_2] {7};
+ \path[->] (X_1) edge[thick] (Y_3);
+ \path[->] (X_1) edge[thick,style={bend left}] (X_3);
+ \path[->] (X_1) edge[thick] (Y_1);
+ \path[->] (Y_1) edge[thick] (X_2);
+ \path[->] (X_3) edge[thick] (X_2);
+ \path[->] (X_2) edge[thick] (Y_2);
+ \path[->] (X_2) edge[thick] (Y_4);
+ \end{tikzpicture}}\hskip 1cm
+\subfigure[Graphical model after rearrangement]{
+\begin{tikzpicture}[node distance=1.5cm,auto,>=latex']
+\node (X_0)   [state] {$X_0'$};
+\node (Y_0)   [measurement,right of=X_0] {$Y_{0}'$};
+\node (X_1)   [state,right of=Y_0] {$X_1'$};
+\node (Y_1)   [measurement,below of=X_1] {$Y_1'$};
+%\node (X_1)   [state,above of=X_2] {$X_1'$};
+ \path[->] (X_0) edge[thick] (Y_0);
+ \path[->] (X_0) edge[thick,style={bend left=60}] (X_1);
+ \path[->] (Y_0) edge[thick] (X_1);
+ \path[->] (X_1) edge[thick] (Y_1);
+% \path[->] (X_2) edge[thick] (Y_2);
+ \end{tikzpicture}}
+ \caption{Rearrangement of a directed acyclic graph. $X_0'=X_1$, $Y_0'=\{Y_1,Y_3\}$, $X_1'=(X_3,X_2)$ and $Y_1'=\{Y_2,Y_4\}$.}
+ \label{fig:graphorder}
+ \end{center}
+ \end{figure}
+
+
+\subsection{Sequential Monte Carlo algorithm}
+
+Assume that we have variables $(X,Y)$ which are sorted as described above. By convention, let $x_{a:b}=(x_a,\ldots,x_b)$, $a\leq b$. Sequential Monte Carlo methods~\cite{Doucet2001,DelMoral2004,Doucet2010} proceed by sequentially approximating conditional distributions $\pi_t(x_{0:t}|y_{0:t})$, $t=0,\ldots,n$ by a weighted set of $N$ particles $(x_{0:t}^{(i)},w_t^{(i)})$ that evolve according to two mechanisms
+\begin{itemize}
+\item \textbf{Mutation/Exploration}: Each particle $i$ is randomly updated from $x_{0:t}^{(i)}$ to $x_{0:t+1}^{(i)}$
+\item \textbf{Selection}: Each particle is associated a new weight $w_t^{(i)}$. High weight particles are duplicated while low weight particles are deleted.
+\end{itemize}
+
+From the weighted approximation, several statistics (mean, variance, quantiles, etc.) can be extracted on the variables. The vanilla sequential Monte Carlo algorithm is given in Algorithm 1 where `$\sim$' means `statistically distributed from'.
+
+\begin{algorithm}
+\caption{Classical Sequential Monte Carlo algorithm}
+\label{algo}
+$\bullet$ For $t=0,\ldots,n$
+
+$\qquad \bullet$ For $i=1,\ldots,N$, Sample $\widetilde{x}_t^{(i)}\sim q_t$
+
+
+$\qquad \bullet$ For $i=1,\ldots,N$, set
+$$
+\widetilde{w}_t^{(i)}\propto\frac{\pi(y_t|\text{pa}(y_t))\pi(\widetilde{x}_t^{(i)}|\text{pa}(\widetilde{x}_t^{(i)}))}{q_t(\widetilde{x}_t^{(i)})}
+$$
+with $\sum_{i=1}^N \widetilde{w}_t^{(i)}=1$.
+
+$\qquad \bullet$ Duplicate particles of high weight and delete particles of low weight. Let $x_{0:t}^{(i)}$ be the resulting set of particles with weights $\frac{1}{N}$.
+\end{algorithm}
+
+$q_t$ is the proposal/importance density function and is used for exploration. Several choices can be made. The simplest is to use the conditional distribution $\pi(x_t|\text{pa}(x_t))$, which is directly given by the statistical model, as a proposal distribution. A better choice is to use the distribution $\pi(x_t|\text{pa}(x_t), y_t)$, or any approximation of this distribution.
+
+
+\subsection{Graphics Processing Units}
+
+Graphics Processing Units (GPU) are dedicated numerical microprocessors that were originally designed to for rendering 3D computer graphics. The current generation of GPUs have hundreds of processor cores on a single chip and are specifically designed to perform data-parallel computation~\cite{Lee2009}.
+
+General purpose computing on GPUs (GPGPU) is currently capturing the attention of researchers in many fields, in particular in computational statistics~\cite{Lee2009,Suchard2010,Suchard2010a}. Sequential Monte Carlo are particularly suited to GPGPU as some parts of the algorithm (exploration step and computation of the weights) can be easily parallelized. Recent experiments~\cite{Lee2009} have shown improvements of the order of ten to hundred times over serial implementations of the algorithm.
+
+For NVIDIA GPUs, CUDA is a parallel computing technology, and programming language that enables access to GPU computing~\cite{Suchard2010}. Flexible high level interfaces for GPU programming are currently under development, such as Thrust~\cite{Thrust2010}.
+
+\subsection{Users}
+
+Targeted users are researchers in fields outside statistics, industrials and students that want to apply Sequential Monte Carlo methods in an `automatic' manner, i.e. roughly as a black box, with default choice of the tuning parameters of the algorithm.
+
+\subsection{Existing softwares}
+
+SMCTC~\cite{Johansen2009} is C++ template class library for the efficient and convenient implementation of very general Sequential Monte Carlo algorithms. The user has to define the mutation and weighting procedures. Based on that, SMCTC provides SMC estimates.
+
+\section{Functional specifications}
+
+Figure~\ref{fig:specgen} shows the input/output flow of the BiiPS software.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tikzpicture}[node distance=4cm,auto,>=latex']
+\node[input] (stat)   {Statistical\\ Model};
+\node[input] (data)   [below of= stat,node distance=1.5cm] {Data\\~};
+\node (param)   [input,below of=data,node distance=1.5cm] {Parameters\\~};
+\node (biips)   [processing,right of=data] {BiiPS\\Core};
+\node (out)   [output,right of=biips] {Summary\\Statistics};
+%\node (X_t)   [state,right of=X_t-1] {$X_t$};
+%\node (X_t+1)   [state,right of=X_t] {$X_{t+1}$};
+%\node (X_t+2)   [right of=X_t+1] {\ldots};
+% \node (Y_t)   [measurement,below of=X_t] {$Y_t$};
+% \node (Y_t-1)   [measurement,below of=X_t-1] {$Y_{t-1}$};
+% \node (Y_t+1)   [measurement,below of=X_t+1] {$Y_{t+1}$};
+ \path[->] (stat) edge[thick,shorten <=2pt,
+           shorten >=2pt] (biips);
+ \path[->] (data) edge[thick] (biips);
+ \path[->] (param) edge[thick] (biips);
+ \path[->] (biips) edge[thick] (out);
+% \path[->] (X_t+1) edge[thick] (X_t+2);
+% \path[->] (X_t) edge[thick] (Y_t);
+% \path[->] (X_t-1) edge[thick] (Y_t-1);
+% \path[->] (X_t+1) edge[thick] (Y_t+1);
+ \end{tikzpicture}
+ \caption{Input/output flow. Inputs are in blue and output in orange.}
+ \label{fig:specgen}
+ \end{center}
+ \end{figure}
+
+
+\begin{itemize}
+
+
+\item Input: Statistical model
+
+\begin{enumerate}
+\item Graphical interface. The software will allow the user to define the statistical model as a graphical model through a graphical interface. Conditional independencies will be defined as in Fig.~\ref{fig:graph} and the user will specify conditional distributions on the graph for each node. The user will have the possibility to define his graphical model from scratch, or to use a template. The following templates will be proposed, where the user will only specify conditional distributions:
+    \begin{itemize}
+    \item Hidden Markov Model
+    \item Switching State Space model (Jump Markov Model)
+    \item Hierarchical Mixture Model
+    \end{itemize}
+\item Text interface. Alternatively to the graphical interface, the user will be able to define its model with a text interface using a natural language, e.g.
+ \begin{algorithm}[h!]
+\caption{Example of text code entered by the user to define the statistical model.}
+\tt For i=1:3
+
+y[i] $\sim$ normal(x[0],x[1]);
+
+End
+
+
+x[0] $\sim$ normal(0,1)
+
+x[1] $\sim$ gamma(1,1)
+\end{algorithm}
+
+
+\item For both interfaces, each node can be multidimensional and continuous or discrete. The interface should handle up to 100 nodes. Common deterministic operations should be handled ($\log$, $\exp$, etc.). The following distributions can be used to define the statistical model
+
+\begin{itemize}
+\item Continuous: Univariate/multivariate Gaussian, Wishart/Inverse Wishart, Student, Chi square, Gamma/Inverse Gamma, Laplace, Beta, Dirichlet.
+
+\item Discrete: Bernoulli, Multinomial, Poisson, Binomial, Negative Binomial, general finite discrete distribution.
+\end{itemize}
+
+
+
+
+\end{enumerate}
+
+\item Input: Data
+\begin{enumerate}
+\item The user can use a text interface to define his data (cf. example) or load them in txt, xls or csv formats.
+\end{enumerate}
+\begin{algorithm}[h!]
+\caption{Example of input data}
+y[1] = 5.28;
+
+y[2] = -2.14;
+
+y[3] = 0.25;
+\end{algorithm}
+
+\item Input: Parameters
+
+\begin{enumerate}
+\item Choice of the importance distribution: prior/optimal/defined by the user (using standard distributions defined above)
+\item Number of particles
+\item Adaptive resampling/resampling at each step
+\item SMC filter/SMC smoother
+\end{enumerate}
+
+\item Algorithm
+\begin{enumerate}
+\item The algorithm should check the consistency of the statistical model defined by the user (no loops) and define a sequence of conditional distributions from which the algorithm will sample from
+
+\item A Kalman filter/smoother should be implemented for comparison with SMC on tests
+
+\item The SMC algorithm should be partially parallelized using GPU
+
+\end{enumerate}
+
+\item Output
+\begin{enumerate}
+\item Weighted particles for the sequence of conditional distributions
+\item Summary statistics on the posterior distributions: mean, variance, empirical pdf/cdf, quantiles. The software will provide graphical output and text files.
+\item Indication on the quality of the SMC estimate (based on degenracy of the ancestral tree, Effective Sample Size, etc.)
+\end{enumerate}
+
+\item Tutorial: The software will include tutorials on Sequential Monte Carlo techniques. The tutorials will consist of several videos.
+\begin{enumerate}
+\item Quick introduction for medias, general people (communication)
+\item Advanced introduction to SMC
+\item Tracking example
+\item Theoretical Results
+\item Step by step explanation of the software (cf. BUGS)
+\end{enumerate}
+
+\item Other specifications on the software
+\begin{enumerate}
+\item The software will be standalone and run on Linux Ubuntu, Windows XP/Vista/7 and MacOS
+\item It will be installed on standard desktop computers.
+\item Data input/output should be made possible with Matlab, R and Scilab
+\item The software should be able to load statistical models defined with the BUGS software.
+\item A model defined in graphical mode can be converted and saved in a text format.
+\end{enumerate}
+
+\item Future Extensions:
+\begin{enumerate}
+\item Integrate out automatically some of the variables -> exemple with conditionally linear Gaussian models
+\item Implementation of the particle MCMC~\cite{Andrieu2010}.
+\item Extension to Bayesian nonparametric models (Dirichlet Processes, etc.)
+\end{enumerate}
+\end{itemize}
+
+
+\section{Tests}
+
+The models 3.1-3.3 correspond to the graphical model in Figure~\ref{fig:hmm}.
+
+\subsection{Linear Gaussian state space model 1D}
+
+\begin{itemize}
+\item Statistical model ($n=20$)
+$$
+X_0\sim \mathcal{N}(0,1)
+$$
+For $t=1,\ldots,20$
+$$
+X_t|X_{t-1}\sim \mathcal{N}(X_{t-1},1)
+$$
+$$
+Y_t|X_{t}\sim \mathcal{N}(X_{t},0.5)
+$$
+
+\item For the test, sample data from the above model. Then run the particle filter/smoother and compare to the Kalman filter/smoother. As the number of particles increases, the second should converge to the first.
+\end{itemize}
+
+
+\subsection{Linear Gaussian state space model 4D}
+
+\begin{itemize}
+\item Statistical model ($n=20$)
+$$
+X_0\sim \mathcal{N}(\mathbf{0}_4,I_4)
+$$
+For $t=1,\ldots,20$
+$$
+X_t|X_{t-1}\sim \mathcal{N}(FX_{t-1},G G^T)
+$$
+$$
+Y_t|X_{t}\sim \mathcal{N}(HX_{t},0.5 I_2)
+$$
+where\\
+$F=\left (\begin{array}{cccc}
+       1 & 0 & T & 0 \\
+       0 & 1 & 0 & T \\
+       0 & 0 & 1 & 0 \\
+       0 & 0 & 0 & 1
+     \end{array}\right )$, $G=\left(    \begin{array}{cc}
+                                                T^2/2 & 0 \\
+                                                0 & T^2/2 \\
+                                                T & 0 \\
+                                                0 & T \\
+                                              \end{array}
+                                            \right)$ and $H=\left(
+                                                              \begin{array}{cccc}
+                                                                1 & 0 & 0 & 0 \\
+                                                                0 & 1 & 0 & 0 \\
+                                                              \end{array}
+                                                            \right)$.\\
+$\mathbf{0}_p$ and $I_p$ resp. correspond to the $p$ null vector and the $p\times p$ identity matrices.
+
+
+\item For the test, sample data from the above model. Then run the particle filter/smoother and compare to the Kalman filter/smoother. As the number of particles increases, the second should converge to the first.
+\end{itemize}
+
+\subsection{Non-linear Gaussian state space model 1D}
+
+\begin{itemize}
+\item Statistical model ($n=20$)
+$$
+X_0\sim \mathcal{N}(0,5)
+$$
+For $t=1,\ldots,20$
+$$
+X_t|X_{t-1}\sim \mathcal{N}(f(X_{t-1},t),10)
+$$
+$$
+Y_t|X_{t}\sim \mathcal{N}(g(X_{t}),1)
+$$
+where $f(x,t)=\frac{1}{2}x+25\frac{x}{1+x^2}+8\cos(1.2t)$ and $g(x)=\frac{x^2}{20}$.
+\end{itemize}
+
+
+\subsection{Simplified Dirichlet Multinomial mixture model}
+
+\begin{itemize}
+\item Statistical model ($n=20$, $K=4$, $\alpha=1$)\\
+$\forall t=1,\ldots,n, ~ \forall k=1,\ldots,K$
+$$
+\Pr(C_{t}=k|\pi) = \pi_k
+$$
+$$
+Y_{t}|C_{t}=k\sim \mathcal{N}(\mu_{k},\sigma_{k}^2) 
+$$
+where $\pi$ prior distribution is
+$$
+\pi \sim \mathcal{D}(\frac{\alpha}{K}, \ldots ,\frac{\alpha}{K})
+$$
+\item We want to estimate $\pi$ parameter assuming that $\mu_k$ is known but $\sigma_k$ is unknown $\forall k$. Let us consider the following iterative statistical model:\\
+For $t=0,\ldots,n-1$
+$$
+\Pr(C_{t+1}=k|C_{1:t})= \pi_{k,t} = \frac{n_{k,t}+\alpha/K}{t+\alpha}
+$$
+$$
+Y_{t+1}|C_{t+1}=k,Y_{1:t},C_{1:t}\sim \mathcal{N}(\mu_{k},\sigma_{k,t}^2)
+$$
+where $n_{k,t}$ is the number of elements in $C_{1:t}$ that take the value $k$, initialized with $n_{k,0} = 0$, $\sigma_{k,t}^2=\sigma^2+\frac{\sigma^2}{\sigma^2+n_{k,t}}$ and $\sigma=.5$.
+\item For the test, sample data from the first hierarchal model and run the particle filter/smoother according to the iterative model.
+\end{itemize}
+
+\subsection{Dirichlet Multinomial mixture model}
+
+\begin{itemize}
+\item Statistical model ($n=20$, $K=4$, $\alpha=1$)\\
+Considering the previous statistical model, assume now that $\mu_k$ is unknown $\forall k$. The iterative model becomes:\\
+For $t=0,\ldots,n-1$
+$$
+\Pr(C_{t+1}=k|C_{1:t})= \pi_{k,t} = \frac{n_{k,t}+\alpha/K}{t+\alpha}
+$$
+$$
+Y_{t+1}|C_{t+1}=k,Y_{1:t},C_{1:t}\sim \mathcal{N}(\mu_{k,t},\sigma_{k,t}^2)
+$$
+where $n_{k,t}$ is the number of elements in $C_{1:t}$ that take the value $k$, initialized with $n_{k,0} = 0$, $\mu_{k,t}=\frac{\sigma_{k,t}^2}{\sigma^2}\sum_{t|C_{t}=k}Y_t$ and $\sigma_{k,t}^2=\sigma^2+\frac{\sigma^2}{\sigma^2+n_{k,t}}$ and $\sigma=.5$.
+
+\end{itemize}
+
+
+\appendix
+
+\bibliographystyle{plain}
+\bibliography{biipsbib}
+
+\end{document} 

@@ -12,6 +12,7 @@
 #define BIIPS_UTILITY_HPP_
 
 #include <utility>
+#include <sstream>
 
 #include "Types.hpp"
 
@@ -38,6 +39,18 @@ namespace Biips
     std::ostringstream ostr;
     ostr << val;
     return ostr.str();
+  }
+
+
+  inline Bool allTrue(const Flags & mask)
+  {
+    return std::find(mask.begin(), mask.end(), false) == mask.end();
+  }
+
+
+  inline Bool anyTrue(const Flags & mask)
+  {
+    return std::find(mask.begin(), mask.end(), true) != mask.end();
   }
 
 }

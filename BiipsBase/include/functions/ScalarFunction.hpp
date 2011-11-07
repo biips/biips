@@ -28,11 +28,11 @@ namespace Biips
     UnaryScalarFunction(const String & name) : BaseType(name, 1) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const { return true; }
-
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
 
-  public:virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-
+  public:
     virtual ~UnaryScalarFunction() {};
   };
 
@@ -49,12 +49,11 @@ namespace Biips
     BinaryScalarFunction(const String & name) : BaseType(name, 2) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-
     virtual ~BinaryScalarFunction() {};
   };
 
@@ -71,12 +70,11 @@ namespace Biips
     VariableScalarFunction(const String & name) : BaseType(name, 0) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-
     virtual ~VariableScalarFunction() {};
   };
 
@@ -84,7 +82,7 @@ namespace Biips
 
 
   template<typename UnaryOperator>
-  MultiArray UnaryScalarFunction<UnaryOperator>::Eval(const MultiArray::Array & paramValues) const
+  MultiArray UnaryScalarFunction<UnaryOperator>::eval(const MultiArray::Array & paramValues) const
   {
     const MultiArray & val = paramValues[0];
 
@@ -124,9 +122,8 @@ namespace Biips
 
 
   template<typename BinaryOperator>
-  MultiArray BinaryScalarFunction<BinaryOperator>::Eval(const MultiArray::Array & paramValues) const
+  MultiArray BinaryScalarFunction<BinaryOperator>::eval(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
     const MultiArray & left = paramValues[0];
     const MultiArray & right = paramValues[1];
 
@@ -183,9 +180,8 @@ namespace Biips
 
 
   template<typename BinaryOperator>
-  MultiArray VariableScalarFunction<BinaryOperator>::Eval(const MultiArray::Array & paramValues) const
+  MultiArray VariableScalarFunction<BinaryOperator>::eval(const MultiArray::Array & paramValues) const
   {
-    // TODO check paramValues
     static BinaryOperator op;
 
     MultiArray ans;

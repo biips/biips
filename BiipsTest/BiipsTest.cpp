@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "config.hpp"
+#include "version.hpp"
 #include "storeUnregistered.hpp"
 #include "TestIO.hpp"
 #include "ModelTest.hpp"
@@ -38,21 +39,9 @@
 namespace Biips
 {
   const String BIIPSTEST_CONFIG_FILE_NAME = "biipstest.cfg";
-  const String BIIPSTEST_VERSION = "BiipsTest, version 0.04";
 
   const Size INDENT_SIZE = 4;
   const String INDENT_STRING(INDENT_SIZE, ' ');
-
-  static const map<String, ResampleType> & resampleTypeMap()
-  {
-    static map<String, ResampleType> resample_type_map;
-    resample_type_map["multinomial"] = SMC_RESAMPLE_MULTINOMIAL;
-    resample_type_map["residual"] = SMC_RESAMPLE_RESIDUAL;
-    resample_type_map["stratified"] = SMC_RESAMPLE_STRATIFIED;
-    resample_type_map["systematic"] = SMC_RESAMPLE_SYSTEMATIC;
-
-    return resample_type_map;
-  }
 }
 
 
@@ -223,7 +212,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
     if (vm.count("version"))
     {
-      cout << BIIPSTEST_VERSION << endl;
+      cout << "BiipsTest, version " << BIIPS_VERSION << endl;
       return;
     }
 
@@ -485,7 +474,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (n_smc==1 && verbosity>0)
             cout << INDENT_STRING << "rng seed: " << smc_rng_seed << endl;
 
-          p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", ess_threshold, resampleTypeMap().at(resample_type), n_smc==1, num_bins);
+          p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", resample_type, ess_threshold, n_smc==1, num_bins);
 
           if (verbosity==1 && n_smc>1)
             ++(*p_show_progress);
@@ -563,7 +552,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           cout << INDENT_STRING << "SMC sample log-norm-const mean = " << log(mean(norm_const_smc_acc)) << endl;
 
-          Scalar student_stat = (mean(norm_const_smc_acc) - exp(log_norm_const_bench)) / sqrt(variance(norm_const_smc_acc)) * sqrt(double(n_smc));
+          Scalar student_stat = (mean(norm_const_smc_acc) - exp(log_norm_const_bench)) / sqrt(variance(norm_const_smc_acc)) * sqrt(Scalar(n_smc));
           boost::math::students_t student_dist(n_smc-1);
 
           Scalar t_p_value = 2*cdf(complement(student_dist, fabs(student_stat)));

@@ -25,7 +25,13 @@ namespace Biips
   protected:
     Subtract() : BaseType("-") {};
 
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+
   public:
+    virtual Bool IsInfix() const { return true; }
+    virtual Bool IsDiscreteValued(const Flags & mask) const;
+    virtual Bool IsLinear(const Flags & linearMask, const Flags & knownMask) const;
+
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

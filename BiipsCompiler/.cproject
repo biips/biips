@@ -20,7 +20,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactExtension="so" artifactName="BiipsCompiler" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.713408452" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug">
+<configuration artifactExtension="so" artifactName="BiipsCompiler" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.713408452" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug" postbuildStep="">
 <folderInfo id="cdt.managedbuild.config.gnu.so.debug.713408452." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1063936176" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1996265808" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
@@ -30,6 +30,7 @@
 <option id="gnu.cpp.compiler.so.debug.option.optimization.level.1991058337" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.so.debug.option.debugging.level.863446877" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.996213257" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCompiler/include}&quot;"/>
@@ -41,6 +42,7 @@
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.214839742" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.so.debug.option.debugging.level.1570168851" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.include.paths.1638778139" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1691730917" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -51,6 +53,7 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1346368251" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 <option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.433096227" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
 <option id="gnu.cpp.link.option.paths.1347923372" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/Debug}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/Debug}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1040040574" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -60,6 +63,7 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.704766869" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
 <option id="gnu.both.asm.option.include.paths.1251513324" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.766031790" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -490,7 +494,12 @@
 <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsBase/Debug"/>
 </externalSetting>
 </externalSettings>
-<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+<externalSetting>
+<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsCore"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCore/Debug"/>
+</externalSetting>
+</externalSettings>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
@@ -524,7 +533,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactExtension="so" artifactName="BiipsCompiler" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.194922081" name="Release" parent="cdt.managedbuild.config.gnu.so.release">
+<configuration artifactExtension="so" artifactName="BiipsCompiler" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.194922081" name="Release" parent="cdt.managedbuild.config.gnu.so.release" postbuildStep="">
 <folderInfo id="cdt.managedbuild.config.gnu.so.release.194922081." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.so.release.885777235" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.567867627" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>

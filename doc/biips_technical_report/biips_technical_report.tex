@@ -1,0 +1,271 @@
+%% Entête du modèle de rapport INRIA
+%% ---------------------------------
+\documentclass[a4paper]{report}
+\usepackage[latin1]{inputenc} %
+\usepackage[T1]{fontenc} %
+\usepackage{RRA4indus}
+\usepackage[colorlinks=true]{hyperref}
+% \usepackage[frenchb]{babel} % optionnel
+
+%% packages persos
+%%----------------
+\usepackage{lmodern} % polices latin vectorielles
+%\usepackage{geometry}
+%\geometry{ hmargin=2.5cm, vmargin=1.5cm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\usepackage{here} % place la figure ICI \begin{figure}[H]. Obsolete !!
+%\usepackage{algorithm,algorithmic}
+%\floatname{algorithm}{Algorithme}
+%\renewcommand{\listalgorithmname}{Liste des algorithmes} 
+\usepackage{bm} % bold maths, pour les lettres grecques minuscules : $\bm{theta}$
+\usepackage[nottoc, notlof, notlot]{tocbibind} % Entrer la bibliographie dans la table des matières, mais pas tableofcontents, listoffigures, listoftables
+\usepackage{alltt} % sorte de verbatim qui interprète les commandes latex : \begin{alltt}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[bottom]{footmisc} % permet de placer les footnotes en bas de la page quel que soit le remplissage de la page
+\graphicspath{{./logos/},{./figures/}}
+\usepackage{listings} % code highlights
+
+%% Commandes persos
+%% ----------------
+\newcommand{\biips}{%\bsifamily
+\textsl{BiiPS}}
+% \newcommand{\bugs}{%\bsifamily
+% {BUGS}}
+% \newcommand{\jags}{%\bsifamily
+% {JAGS}}
+% \newcommand{\smctc}{%\bsifamily
+% {SMCTC}}
+\newcommand{\biipslogo}{biips_logo_tests6d_shadow}
+\newcommand{\biipslogomini}{biips_logo_tests6d}
+
+% \newcommand{\aprio}{\textit{a priori}}
+% \newcommand{\apost}{\textit{a posteriori}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\noeud}{n\oe{}ud}
+
+
+%%
+%% date de publication du rapport
+\RRdate{\today}
+%%
+%% Cas d'une version deux
+%% \RRversion{2}
+%% date de publication de la version 2
+%% \RRdater{Novembre  2006}
+
+%%
+\RRauthor{% les auteurs
+ % Premier auteur, avec une note
+Adrien Todeschini, François Caron%\thanks{Footnote for first author}%
+  % note partag\'ee (optionnelle)
+%  \thanks[sfn]{Shared foot note}%
+ % \and entre chaque auteur s'il y en a plusieurs
+%  \and
+%Philippe Louarn\thanks{Footnote for second author}%
+ % r\'ef\'erence \`a la note partag\'ee
+%\thanksref{sfn}
+}
+%%
+%% Ceci apparait sur chaque page paire.
+%\authorhead{Grimm \& Louarn}
+%%
+\RRtitle{\includegraphics[height = 4cm]{\biipslogo}\\
+%\vspace{11pt}
+Projet \biips{} :\\
+Rapport de conception}
+%% English title
+\RRetitle{\includegraphics[height = 4cm]{\biipslogo}\\
+%\vspace{11pt}
+\biips{} project:\\
+Software design report}
+
+% \RRtitle{
+% Projet \biips{} :\\
+% Rapport technique (brouillon)\\
+% \vspace{1cm}
+% \includegraphics[height = 4cm]{\biipslogo}}
+% %% English title
+% \RRetitle{
+% \biips{} Project:\\
+% Technical report (draft)\\
+% \vspace{1cm}
+% \includegraphics[height = 4cm]{\biipslogo}}
+%%
+\titlehead{\includegraphics[height = 11pt]{\biipslogomini} ~ \biips{} Project: Software design report}
+%%
+%\RRnote{This is a note}
+%\RRnote{This is a second note}
+%%
+\RRresume{Ce rapport décrit les aspects techniques du projet \biips tels que la conception du logiciel. Ce projet est porté par l'\href{http://alea.bordeaux.inria.fr/}{équipe ALEA} de l'\href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux - Sud-Ouest} et constitue une \textit{Action de développement Technologique} INRIA.}
+
+\RRabstract{This report describes the technical aspects of the \biips{} project including software design. This project is carried out by the \href{http://alea.bordeaux.inria.fr/}{team ALEA} at \href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux} and supported by INRIA through an \textit{Action de développement Technologique}.}
+
+%%
+\RRmotcle{Inférence bayésienne, Méthodes de Monte Carlo séquentielles, Filtrage particulaire, Modèles graphiques, Calcul Générique sur un Processeur Graphique}
+
+\RRkeyword{Bayesian Inference, Sequential Monte Carlo, Particle Filters, Graphical Models, General Purpose Graphics Processing Units}
+%%
+\RRprojet{ALEA}  % cas d'un seul projet
+%% \RRprojets{Apics et Op\'era}
+%\RRequipe{Alea}
+\RRdomaine{1} % cas du domaine numero 1
+\RRtheme{Modèles et méthodes stochastiques}
+
+\RCBordeaux % centre de recherche Bordeaux - Sud Ouest
+\RRNo{2010-BiiPS-02}
+
+
+%% Tikz
+%%%%%%%%%%%%
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{fit}					% fitting shapes to coordinates
+\usetikzlibrary{backgrounds}	% drawing the background after the foreground
+
+
+
+%% Macro pour numéroter les figures en fonction des sections
+%\makeatletter
+%\renewcommand{\thefigure}{\ifnum \c@section>\z@ \thesection.\fi
+% \@arabic\c@figure}
+%\@addtoreset{figure}{section}
+%\makeatother
+
+%%
+\begin{document}
+%%
+%% \makeRR   % cas d'un rapport de recherche
+\makeRT % cas d'un rapport technique.
+
+\tableofcontents
+\clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Nomenclature
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{nomenclature}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Introduction
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+This report describes the technical aspects of the \biips{}\footnote{Bayesian inference with interacting Particle Systems} project including software design. It follows a previous functional specifications report \cite{biips_specifications_2010}, which only deals with \textbf{what} the software is expected to do, from the users point of view. In this report, we try to address the question: \textbf{how} it actually does it.
+
+\paragraph{}
+Chapter \ref{architecture} presents the development aspects including the software architecture, to understand what \biips{} software is composed of, and to understand the technical choices in terms of programming language and used libraries.
+
+% \paragraph{}
+% Chapter \ref{reference} is a short reference guide presenting the most important classes and design concepts of \biips Core library and the module \biips Base.
+
+\paragraph{}
+In chapter \ref{examples}, we present a simple example in order to understand how to write C++ code using \biips{} to instantiate a graphical model and run a SMC\footnote{Sequential Monte Carlo} algorithm.
+
+\paragraph{}
+Chapter \ref{developers} is a quick developers guide dealing with how to obtain the source code, compile and test \biips{} in a Linux environment. 
+
+\paragraph{}
+In chapter \ref{todo}, we sum up the remaining tasks, focusing on the BUGS language compiler.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Chapter : Architecture
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{1_architecture}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Chapter : Reference Manual
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \input{2_reference}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Chapter : Applications Examples
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{3_examples}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Chapter : Developers Manual
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{4_developers}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Chapter : Tasks
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{5_tasks}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%--------------------------------------------------------------------------------------------------------
+%% Appendices
+%%--------------------------------------------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\input{bison_flex}
+
+\input{codes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Glossary
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{glossary}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%--------------------------------------------------------------------------------------------------------
+%% Listes des figures, tableaux, algorithmes
+%%--------------------------------------------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \listoffigures
+% \addcontentsline{toc}{chapter}{Table des figures}
+% \addcontentsline{toc}{chapter}{List of Figures}
+
+% \listoftables
+% \addcontentsline{toc}{chapter}{Liste des tableaux}
+% \addcontentsline{toc}{chapter}{Liste of Tables}
+
+%\listofalgorithms
+%\addcontentsline{toc}{chapter}{Liste des algorithmes}
+%\addcontentsline{toc}{chapter}{List of Algorithms}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%--------------------------------------------------------------------------------------------------------
+%% Bibliographie
+%%--------------------------------------------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nocite{}
+\bibliographystyle{plain}
+\bibliography{biips_technical_report}
+
+
+\end{document}
+\endinput

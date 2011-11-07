@@ -7,7 +7,7 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS RangeIterator class
+ * COPY: Adapted from JAGS RangeIterator class
  */
 
 #ifndef BIIPS_INDEXRANGEITERATOR_HPP_

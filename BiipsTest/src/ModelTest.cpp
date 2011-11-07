@@ -9,6 +9,7 @@
 */
 
 #include "ModelTest.hpp"
+#include "BiipsBase.hpp"
 #include "TestIO.hpp"
 #include "common/cholesky.hpp"
 #include <boost/progress.hpp>
@@ -86,6 +87,12 @@ namespace Biips
   }
 
 
+  void ModelTest::loadBase()
+  {
+    loadBaseModule(funcTab_, distTab_);
+  }
+  
+  
   void ModelTest::BuildDataGraph()
   {
     BuildModelGraph();
@@ -96,9 +103,9 @@ namespace Biips
 
   void ModelTest::SampleData(Size rngSeed)
   {
-    Rng my_rng(rngSeed);
+    Rng::Ptr p_rng(new Rng(rngSeed));
 
-    NodeValues gen_node_values = pDataGraph_->SampleValues(&my_rng);
+    NodeValues gen_node_values = pDataGraph_->SampleValues(p_rng);
 
     for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
     {
@@ -221,18 +228,18 @@ namespace Biips
     smcSmoothValuesMap_.clear();
   }
 
-  void ModelTest::RunSMC(Size nParticles, Size rngSeed, Bool prior, Scalar essThreshold, ResampleType rsType, Bool showProgress, Size numBins)
+  void ModelTest::RunSMC(Size nParticles, Size rngSeed, Bool prior, const String & rsType, Scalar essThreshold, Bool showProgress, Size numBins)
   {
-    Rng my_rng(rngSeed);
+    Rng::Ptr p_rng(new Rng(rngSeed));
 
     // sampler
     //--------
-    pSampler_ = SMCSampler::Ptr(new SMCSampler(nParticles, pModelGraph_.get(), &my_rng));
+    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(nParticles, *pModelGraph_, p_rng));
     pSampler_->SetResampleParams(rsType, essThreshold);
 
     std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact
-    = SMCSampler::NodeSamplerFactories().begin();
-    for (; it_sampler_fact != SMCSampler::NodeSamplerFactories().end();
+    = ForwardSampler::NodeSamplerFactories().begin();
+    for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end();
         ++it_sampler_fact)
     {
       if (prior)
@@ -250,7 +257,13 @@ namespace Biips
     if (verbose_>=2)
     {
       os_ << "Node sampler's sequence: " << std::endl;
-      pSampler_->PrintSamplersSequence(os_);
+      Types<std::pair<NodeId, String> >::Array samplers_seq = pSampler_->GetSamplersSequence();
+      for (Size i=0; i<samplers_seq.size(); ++i)
+      {
+        NodeId node_id = samplers_seq[i].first;
+        const String & name = samplers_seq[i].second;
+        os_ << i << ": node " << node_id << ", " << name << std::endl;
+      }
       os_ << std::endl;
     }
 
@@ -269,7 +282,7 @@ namespace Biips
     if (verbose_ == 1 && showProgress)
       ++(*p_show_progress);
     else if (verbose_>=2)
-      pSampler_->PrintSamplerState();
+      printSamplerState(*pSampler_, os_);
 
     Size t_max = pSampler_->NIterations();
 
@@ -279,7 +292,7 @@ namespace Biips
       if (verbose_ == 1 && showProgress)
         ++(*p_show_progress);
       else if (verbose_>=2)
-        pSampler_->PrintSamplerState();
+        printSamplerState(*pSampler_, os_);
 
       filterAccumulate(t);
     }

@@ -10,7 +10,6 @@
 
 #include "HmmMNormalLinear4D.hpp"
 
-#include "BiipsBase.hpp"
 #include "common/cholesky.hpp"
 
 

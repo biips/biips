@@ -7,13 +7,11 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS Console class
+ * COPY: Adapted from JAGS Console class
  */
 
 #ifndef BIIPS_CONSOLE_HPP_
 #define BIIPS_CONSOLE_HPP_
-
-#include <cstdio>
 
 #include "model/BUGSModel.hpp"
 #include "compiler/ParseTree.h"
@@ -34,7 +32,7 @@ namespace Biips
     ParseTree * pData_;
     ParseTree * pRelations_;
     Types<ParseTree*>::Array * pVariables_;
-    Types<String>::Array names_;
+    Types<String>::Array nodeArrayNames_;
 
     void clearParseTrees();
 
@@ -47,7 +45,6 @@ namespace Biips
      * @param err Output stream to which error messages will be printed.
      *
      */
-    Console();
     Console(std::ostream & out, std::ostream & err);
 
     ~Console();
@@ -59,7 +56,7 @@ namespace Biips
      *
      * @return true on success or false on error.
      */
-    Bool CheckModel(std::FILE * file, Bool verbose = true);
+    Bool CheckModel(const String & modelFileName, Bool verbose = true);
 
     // FIXME add module manager and a load module by name function
     Bool LoadBaseModule(Bool verbose = true);
@@ -80,6 +77,11 @@ namespace Biips
     Bool Compile(std::map<String, MultiArray> & dataMap, Bool genData, Size dataRngSeed, Bool verbose = true);
 
     Bool PrintGraphviz(std::ostream & os);
+    /*!
+     * Returns a vector of variable names used by the model. This vector
+     * excludes any counters used by the model within a for loop.
+     */
+    Types<String>::Array const & VariableNames() const { return nodeArrayNames_; }
 
     /*! Clears the model */
     void ClearModel(Bool verbose = true);
@@ -87,6 +89,7 @@ namespace Biips
     Bool SetDefaultFilterMonitors();
 
     Bool SetFilterMonitor(const String & name);
+    Bool SetSmoothTreeMonitor(const String & name);
     Bool SetSmoothMonitor(const String & name);
 
     /*!
@@ -99,19 +102,22 @@ namespace Biips
      */
     Bool BuildSampler(Size nParticles, Size rng_seed, Bool prior, Size verbose = 1);
 
-    Bool RunSMCSampler(ResampleType rsType, Scalar ess_threshold, Scalar & log_norm_const, Bool verbose = true);
+    Bool RunForwardSampler(const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose = true, Bool progressBar = true);
 
-    Bool RunBackwardSmoother(Bool verbose = true);
+    Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
     Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
     Bool ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
+    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
 
     Bool ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
     Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
-  };
+    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
 
+    Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+  };
 }
 
 #endif /* BIIPS_CONSOLE_HPP_ */

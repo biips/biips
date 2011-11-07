@@ -23,5 +23,4 @@ namespace Biips
   {
     vis.Visit(*this);
   };
-
 }

@@ -1,0 +1,289 @@
+\chapter{Codes}
+
+\section{Simple example}
+\label{miniex}
+
+\lstset{language = C++, %
+ basicstyle=\small\ttfamily, %
+keywordstyle=\bfseries\color{RedViolet}, %
+identifierstyle=,%
+ commentstyle=\color{ForestGreen},%
+stringstyle=\color{blue},%
+%column=fixed,%
+basewidth={0.5em,0.45em},%
+numbers=left, numberfirstline=false, numberstyle=\tiny, stepnumber=10, numbersep=5pt}
+
+\begin{lstlisting}
+//                                               -*- C++ -*-
+/*! \file t_Hmm1D_mini.cpp
+ * \brief BiiPS minimal example
+ * 
+ * \author  $LastChangedBy: todeschi $
+ * \date    $LastChangedDate: 2011-03-23 17:23:46 +0100 (mer. 23 mars 2011) $
+ * \version $LastChangedRevision: 126 $
+ * Id:      $Id: t_Hmm1D_mini.cpp 126 2011-03-23 16:23:46Z todeschi $
+ *
+ *
+ * BiiPS example : Hidden Markov Model linear gaussian 1D
+ * ======================================================
+ * x[0] --> x[1] --> ... --> x[t] --> ...
+ *           |                |
+ *           v                v
+ *          y[1]     ...     y[t]     ...
+ *
+ *          x[0] ~ Normal(mean_x0, var_x0)
+ * x[t] | x[t-1] ~ Normal(x[t-1], var_x) for all t>0
+ *   y[t] | x[t] ~ Normal(x[t], var_y)  for all t>0
+ *
+ */
+
+#include "BiipsCore.hpp"
+#include "BiipsBase.hpp"
+
+int main(int argc, char* argv[])
+{
+
+  using namespace Biips;
+
+ /*==================================*
+  *                                  *
+  * Instantiate the model with BiiPS *
+  *                                  *
+  *==================================*/
+
+  // Define the data :
+  //------------------
+  // Final time :
+  Size t_max = 20;
+  // Initial mean of X[0]
+  Scalar mean_x0_val = 0;
+  // Variance of X[0] :
+  Scalar var_x0_val = 1;
+  // Variance of X[t] | X[t-1] :
+  Scalar var_x_val = 1;
+  // Variance of Y[t] | Y[t] :
+  Scalar var_y_val = 0.5;
+
+  // Declare FunctionTable and a DistributionTable :
+  //------------------------------------------------
+  FunctionTable func_tab;
+  DistributionTable dist_tab;
+
+  // Load the Base module :
+  //-----------------------
+  loadBaseModule(func_tab, dist_tab);
+
+  // Declare the Graph object :
+  //---------------------------
+  Graph graph;
+
+  // Add the constant nodes to the graph :
+  //--------------------------------------
+  NodeId mean_x0 = graph.AddConstantNode(MultiArray(mean_x0_val));
+  NodeId var_x0 = graph.AddConstantNode(MultiArray(var_x0_val));
+  NodeId var_x = graph.AddConstantNode(MultiArray(var_x_val));
+  NodeId var_y = graph.AddConstantNode(MultiArray(var_y_val));
+
+  // Create stochastic NodeId collections to store X and Y's components identifiers :
+  //---------------------------------------------------------------------------------
+  Types<NodeId>::Array x(t_max+1);
+  Types<NodeId>::Array y(t_max);
+
+  // Create a NodeId array to handle the parents of each stochastic node :
+  //----------------------------------------------------------------------
+  Types<NodeId>::Array params(2);
+
+  // Add X_0 stochastic node to the graph :
+  //---------------------------------------
+  params[0] = mean_x0;
+  params[1] = var_x0;
+  x[0] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+
+  // Add the other stochastic nodes to the graph :
+  //----------------------------------------------
+  for (Size t=1; t<t_max+1; ++t)
+  {
+    // Add X[t]
+    params[0] = x[t-1];
+    params[1] = var_x;
+    x[t] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, false);
+
+    // Add Y[t]
+    params[0] = x[t];
+    params[1] = var_y;
+    y[t-1] = graph.AddStochasticNode(P_SCALAR_DIM, dist_tab["dnormvar"], params, true);
+  }
+
+  // Build the graph :
+  //------------------
+  graph.Build();
+
+  // Generate data :
+  //----------------
+  // Declare a random number generator, initialized with an integer seed
+  Rng my_rng(0);
+
+  // Sample values according to the stochastic nodes prior distribution
+  NodeValues gen_values = graph.SampleValues(&my_rng);
+
+  // Set the observations values according to the generated values
+  graph.SetObsValues(gen_values);
+
+
+ /*==================================*
+  *                                  *
+  *     Run the SMC algorithm        *
+  *                                  *
+  *==================================*/
+
+  // Define the number of particles :
+  //---------------------------------
+  Size nb_particles = 1000;
+
+  // Declare the SMCSampler object :
+  //--------------------------------
+  SMCSampler sampler(nb_particles, &graph, &my_rng);
+  sampler.SetResampleParams(SMC_RESAMPLE_STRATIFIED, 0.5);
+
+  // Initialize the SMCSampler object :
+  //-----------------------------------
+  sampler.Initialize();
+
+  // Declare and configure a ScalarAccumulator object :
+  //---------------------------------------------------
+  ScalarAccumulator stats_acc;
+  stats_acc.AddFeature(MEAN);
+  stats_acc.AddFeature(VARIANCE);
+
+  // Declare Scalar arrays to store the posterior mean and variance estimates :
+  //---------------------------------------------------------------------------
+  Types<Scalar>::Array x_est_PF(t_max+1);
+  Types<Scalar>::Array x_var_PF(t_max+1);
+
+  // Iterate the SMC algorithm and extract summary statistics :
+  //-----------------------------------------------------------
+  for (Size t=0; t<t_max+1; ++t)
+  {
+    // Iterate the SMC algorithm : resample (if needed) and sample one node of the sequence
+    sampler.Iterate();
+
+    // Accumulate particles corresponding to the last updated node
+    sampler.Accumulate(x[t], stats_acc);
+
+    // extract summary statistics of the filtering density
+    x_est_PF[t] = stats_acc.Mean();
+    x_var_PF[t] = stats_acc.Variance();
+  }
+
+  return 0;
+
+}
+\end{lstlisting}
+% 
+% \chapter{Tests input files}
+% \label{testsinput}
+% \section{Test 1}
+% 
+% \begin{table*}[h!]
+% \begin{tabular}{l|l}
+% 20         & Final time : t\_max \\
+% 0         &  Initial mean of x[0] : mu\_x0 \\
+% 1        &   Variance of x[0] : sig\_x0 \\
+% 1        &   Mean multiplicator of x[t] | x[t-1] : a\_x \\
+% 0        &   Mean second member of x[t] | x[t-1] : b\_x \\
+% 1        &   Variance of x[t] | x[t-1] : sig\_x \\
+% 1         &  Mean multiplicator of y[t] | x[t] : a\_y \\
+% 1         &  Variance of y[t] | x[t] : sig\_y \\
+% 4589      &  Random number generator seed : rng\_seed \\
+% 1000      &  Number of particles : N \\
+% results.dat & Results data file \\
+% plot.pdf   & Plot file \\
+% gnuplot.plt & Gnuplot file
+% \end{tabular}
+% \caption{\texttt{data.dat}}
+% \end{table*}
+% 
+% \section{Test 2}
+% 
+% \begin{table*}[h!]
+% \begin{tabular}{l|l}
+% 1                 & State x dimension : dim\_x \\
+% 1                & Control u dimension : dim\_u \\
+% 1                 & Observation y dimension : dim\_y \\
+% 20                & Final time : t\_max \\
+% 0                & Initial state mean vector : mu\_x0 \\
+% 1                & Initial state covariance matrix : P0 \\
+% 1                & State transition matrix : F \\
+% 0                & Control transition matrix : B \\
+% 0                & Control vector : u \\
+% 1                & State covariance matrix : Q \\
+% 1                & Observation transition matrix : H \\
+% 1                & Observation covariance matrix : R \\
+% 4589            &         Random number generator seed : rng\_seed   \\          
+% 1000              &     Number of particles : N     \\          
+% results\_1d.dat  & Results data file      \\             
+% plot\_1d.pdf     & Plot file \\
+% gnuplot\_1d.plt   & Gnuplot file
+% \end{tabular}
+% \caption{\texttt{data\_1d.dat}}
+% \end{table*}
+% 
+% 
+% \begin{table*}[h!]
+% \begin{tabular}{l|l}
+% 4   &   State x dimension : dim\_x\\
+% 1  & Control u dimension : dim\_u\\
+% 2  & Observation y dimension : dim\_y\\
+% 10 &  Final time : t\_max \\
+% 0  & Initial state mean vector : mu\_x0\\
+% 0 & \\
+% 1 & \\
+% 1 & \\
+% 1 0 0 0   &Initial state covariance matrix : P0\\
+% 0 1 0 0 & \\
+% 0 0 1 0 & \\
+% 0 0 0 1 & \\
+% 1 0 1 0  & State transition matrix : F\\
+% 0 1 0 1 & \\
+% 0 0 1 0 & \\
+% 0 0 0 1&  \\
+% 0  & Control transition matrix : B \\
+% 0 & \\
+% 0 & \\
+% 0 & \\
+% 0  & Control vector : u \\
+% 1 0 0 0  & State covariance matrix : Q \\
+% 0 1 0 0 & \\
+% 0 0 1 0 & \\
+% 0 0 0 1 & \\
+% 1 0 0 0  & Observation transition matrix : H \\
+% 0 1 0 0 & \\
+% 1 0  & Observation covariance matrix : R \\
+% 0 1 & \\
+% 4535  & Random number generator seed : rng\_seed    \\
+% 1000 &  Number of particles : N           \\    
+% results\_4d.dat &  Results data file     \\              
+% plot\_4d.pdf &  Plot file \\
+% gnuplot\_4d.plt   & Gnuplot file
+% \end{tabular}
+% \caption{\texttt{data\_4d.dat}}
+% \end{table*}
+% 
+% \section{Test 3}
+% 
+% \begin{table*}[h!]
+% \begin{tabular}{l|l}
+% 20   &   Final time : t\_max \\
+% 2     &   Prior parameter alpha : alpha \\
+% 2     &  Prior parameter beta : beta \\
+% 10        &   Number of trials : n \\
+% 4589       &          Random number generator seed : rng\_seed   \\
+% 1000              &   Number of particles : N   \\            
+% results\_beta.dat   &  Results data file  \\                 
+% plot\_beta.pdf      &  Plot file \\
+% gnuplot\_beta.plt   &  Gnuplot file
+% \end{tabular}
+% \caption{\texttt{data\_beta.dat}}
+% \end{table*}
+
+

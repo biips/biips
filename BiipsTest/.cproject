@@ -25,6 +25,7 @@
 <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.955485677" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1055815362" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.371926597" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="/usr/include/qwt-qt4"/>
@@ -41,6 +42,7 @@
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.2075834757" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.exe.debug.option.debugging.level.1491054740" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.include.paths.1835895020" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.723133123" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -68,6 +70,7 @@
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1233726062" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 <option id="gnu.both.asm.option.include.paths.366076305" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1881836962" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -86,7 +89,12 @@
 <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsBase/Debug"/>
 </externalSetting>
 </externalSettings>
-<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+<externalSettings containerId="BiipsCore;cdt.managedbuild.config.gnu.lib.debug.819531800" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+<externalSetting>
+<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/BiipsCore"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/BiipsCore/Debug"/>
+</externalSetting>
+</externalSettings>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="scannerConfiguration">

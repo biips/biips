@@ -7,12 +7,13 @@
  * $LastChangedRevision$
  * $Id$
  *
- * COPY: Nearly copied and pasted from JAGS SymTab class
+ * COPY: Adapted from JAGS SymTab class
  */
 
 #include "model/SymbolTable.hpp"
 #include "model/Model.hpp"
-#include "print/outputStream.hpp"
+#include "iostream/outStream.hpp"
+#include "model/DeparseVisitor.hpp"
 
 namespace Biips
 {
@@ -27,7 +28,7 @@ namespace Biips
     if (nodeArraysMap_.count(name))
       throw RuntimeError(String("Name ") + name + " already in use in symbol table");
 
-    NodeArray::Ptr p_node_array(new NodeArray(name, model_.GraphPtr(), dim));
+    NodeArray::Ptr p_node_array(new NodeArray(name, *(model_.GraphPtr()), dim));
     nodeArraysMap_[name] = p_node_array;
   }
 
@@ -95,24 +96,23 @@ namespace Biips
       }
     }
 
-//    //Name not in symbol table: calculate name from parents
-//    typedef GraphTypes::DirectParentNodeIdIterator DirectParentNodeIdIterator;
-//    DirectParentNodeIdIterator it_parents, it_parents_end;
+    //Name not in symbol table: calculate name from parents
+    typedef GraphTypes::DirectParentNodeIdIterator DirectParentNodeIdIterator;
+    DirectParentNodeIdIterator it_parents, it_parents_end;
+
+    boost::tie(it_parents, it_parents_end) = model_.GraphPtr()->GetParents(nodeId);
+    Size n_par = std::distance(it_parents, it_parents_end);
+    Types<String>::Array par_names(n_par);
+    for (Size i=0; it_parents != it_parents_end; ++it_parents, ++i)
+      par_names[i] = GetName(*it_parents);
+
+    return deparse(nodeId, *(model_.GraphPtr()), par_names);
+
+    // FIXME
+//    if (it_table == nodeArraysMap_.end())
+//      throw RuntimeError(String("Unable to find Node ") + print(nodeId) + " in the symbol table.");
 //
-//    boost::tie(it_parents, it_parents_end) = model_.GraphPtr()->GetParents(nodeId);
-//    Size n_par = std::distance(it_parents, it_parents_end);
-//    Types<String>::Array par_names(n_par);
-//    for (; it_parents != it_parents_end; ++it_parents)
-//    {
-//      parnames[i] = GetName(*it_parents);
-//    }
-//    // FIXME
-//    return node->deparse(par_names);
-
-    if (it_table == nodeArraysMap_.end())
-      throw RuntimeError(String("Unable to find Node ") + print(nodeId) + " in the symbol table.");
-
-    return String();
+//    return String();
   }
 
 

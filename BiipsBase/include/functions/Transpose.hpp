@@ -24,12 +24,12 @@ namespace Biips
     Transpose() : Function("t", 1) {};
 
     virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-
+    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
 
   public:
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-
+    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const { return true; }
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 

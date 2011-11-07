@@ -14,13 +14,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include "config.hpp"
+#include "version.hpp"
 #include "storeUnregistered.hpp"
 #include "TestIO.hpp"
 #include "Console.hpp"
 #include "kolmogorov.hpp"
 #include "common/cholesky.hpp"
 #include "Plot.hpp"
-#include "print/outputStream.hpp"
+#include "iostream/outStream.hpp"
 
 #include <fstream>
 #include <ctime>
@@ -35,18 +36,6 @@
 namespace Biips
 {
   const String BIIPSTEST_CONFIG_FILE_NAME = "biipstest.cfg";
-  const String BIIPSTEST_VERSION = "BiipsTestCompiler, version 0.05";
-
-  static const map<String, ResampleType> & resampleTypeMap()
-  {
-    static map<String, ResampleType> resample_type_map;
-    resample_type_map["multinomial"] = SMC_RESAMPLE_MULTINOMIAL;
-    resample_type_map["residual"] = SMC_RESAMPLE_RESIDUAL;
-    resample_type_map["stratified"] = SMC_RESAMPLE_STRATIFIED;
-    resample_type_map["systematic"] = SMC_RESAMPLE_SYSTEMATIC;
-
-    return resample_type_map;
-  }
 
   std::map<String, std::map<IndexRange, MultiArray> > extractStat(Console & console, StatsTag tag,
       const Types<String>::Array & monitoredVar, const String & statName, Bool verbose, Bool smooth = false);
@@ -109,8 +98,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     vector<String> mutations;
     Size verbosity;
     Size num_bins;
-
-    const map<String, ResampleType> & resample_type_map = resampleTypeMap();
 
     // Declare a group of options that will be
     // allowed only on command line
@@ -237,7 +224,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
     if (vm.count("version"))
     {
-      cout << BIIPSTEST_VERSION << endl;
+      cout << "BiipsTestCompiler, version " << BIIPS_VERSION << endl;
       return;
     }
 
@@ -288,12 +275,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     else
       boost::throw_exception(po::invalid_syntax("smooth", do_smooth_str + " is not a valid value."));
 
-    // Open model file
-    // ------------------
-    FILE * model_file = fopen(model_file_name.c_str(), "r");
-
-    if (!model_file)
-      throw RuntimeError(String("Failed to open file: ") + model_file_name);
 
     Console console(cout, cerr);
 
@@ -305,7 +286,7 @@ BOOST_AUTO_TEST_CASE( my_test )
       cout << INDENT_STRING << "model-file = " << model_file_name << endl;
     }
 
-    if (!console.CheckModel(model_file, verbosity>0))
+    if (!console.CheckModel(model_file_name, verbosity>0))
       throw RuntimeError("Model syntax is incorrect.");
 
     if (verbosity>0 && interactive)
@@ -482,7 +463,9 @@ BOOST_AUTO_TEST_CASE( my_test )
           // Run sampler
           //----------------------
           Scalar log_norm_const;
-          console.RunSMCSampler(resample_type_map.at(resample_type), ess_threshold, log_norm_const, (verbosity>1 || (verbosity>0 && n_smc==1)));
+          Bool verbose_run_smc = verbosity>1 || (verbosity>0 && n_smc==1);
+          if (!console.RunForwardSampler(resample_type, ess_threshold, log_norm_const, verbose_run_smc, verbose_run_smc))
+            throw RuntimeError("Failed to run SMC sampler.");
 
           if (verbosity==1 && n_smc>1 && !do_smooth)
             ++(*p_show_progress);
@@ -560,7 +543,9 @@ BOOST_AUTO_TEST_CASE( my_test )
           //-------------------------------------------------
           if (do_smooth)
           {
-            console.RunBackwardSmoother((verbosity>1 || (verbosity>0 && n_smc==1)));
+            Bool verbose_run_back = verbosity>1 || (verbosity>0 && n_smc==1);
+            if (!console.RunBackwardSmoother(verbose_run_back, verbose_run_back))
+              throw RuntimeError("Failed to run backward smoother.");
 
             if (verbosity==1 && n_smc>1)
               ++(*p_show_progress);
@@ -659,7 +644,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           cout << INDENT_STRING << "SMC sample log-norm-const mean = " << log(mean(norm_const_smc_acc)) << endl;
 
-          Scalar student_stat = (mean(norm_const_smc_acc) - exp(log_norm_const_bench)) / sqrt(variance(norm_const_smc_acc)) * sqrt(double(n_smc));
+          Scalar student_stat = (mean(norm_const_smc_acc) - exp(log_norm_const_bench)) / sqrt(variance(norm_const_smc_acc)) * sqrt(Scalar(n_smc));
           boost::math::students_t student_dist(n_smc-1);
 
           Scalar t_p_value = 2*cdf(complement(student_dist, fabs(student_stat)));
@@ -781,7 +766,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             Scalar ks_filter_prob = ksProb(sqrt(n_err*n_err_ref/(n_err+n_err_ref)) * ks_filter_stat);
 
             if (verbosity>0)
-              cout << INDENT_STRING << "Kolmogorov-Smirnov test: D = " << ks_filter_stat << ", p-value = " << ks_filter_prob << endl;
+              cout << INDENT_STRING << "K-S test: D = " << ks_filter_stat << ", p-value = " << ks_filter_prob << endl;
 
             BOOST_CHECK_GT(ks_filter_prob, reject_level);
 
@@ -804,7 +789,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             Scalar ks_smooth_prob = ksProb(sqrt(n_err*n_err_ref/(n_err+n_err_ref)) * ks_smooth_stat);
 
             if (verbosity>0)
-              cout << INDENT_STRING << "Kolmogorov-Smirnov test: D = " << ks_smooth_stat << ", p-value = " << ks_smooth_prob << endl;
+              cout << INDENT_STRING << "K-S test: D = " << ks_smooth_stat << ", p-value = " << ks_smooth_prob << endl;
 
             BOOST_CHECK_GT(ks_smooth_prob, reject_level);
           }
