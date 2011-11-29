@@ -66,7 +66,7 @@ namespace Biips
       dim.push_back(left[0]);
     if(right.IsMatrix())
       dim.push_back(right[1]);
-    return dim;
+    return dim.Drop();
   }
 
 

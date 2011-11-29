@@ -175,6 +175,18 @@ namespace Biips
   }
 
 
+  Bool BoundedScalarDistribution::CheckDensityParamValues(const MultiArray & x, const MultiArray::Array & paramValues) const
+  {
+    return checkDensityParamValues(x.ScalarView(), paramValues);
+  }
+
+
+  Bool BoundedScalarDistribution::checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const
+  {
+    return checkParamValues(paramValues);
+  }
+
+
   Bool BoundedScalarDistribution::IsSupportFixed(const Flags & fixmask) const
   {
     if (support_ == DIST_SPECIAL)

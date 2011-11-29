@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file Cos.hpp
+/*! \file Step.hpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,38 +8,39 @@
  * $Id$
  */
 
-#ifndef BIIPS_COS_HPP_
-#define BIIPS_COS_HPP_
+#ifndef BIIPS_STEP_HPP_
+#define BIIPS_STEP_HPP_
 
 #include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  struct CosScalar : public std::unary_function<Scalar, Scalar>
+  struct StepScalar : public std::unary_function<Scalar, Scalar>
   {
     Scalar operator() (Scalar val) const
     {
-      return std::cos(val);
+      return val >= 0.0 ? 1.0 : 0.0;
     }
   };
 
 
-  class Cos : public UnaryScalarFunction<CosScalar>
+  class Step : public UnaryScalarFunction<StepScalar>
   {
   public:
-    typedef Cos SelfType;
-    typedef UnaryScalarFunction<CosScalar> BaseType;
+    typedef Step SelfType;
+    typedef UnaryScalarFunction<StepScalar> BaseType;
 
   protected:
-    Cos() : BaseType("cos") {};
+    Step() : BaseType("step") {};
 
     virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
 
   public:
+    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
     static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
   };
 
 }
 
-#endif /* BIIPS_COS_HPP_ */
+#endif /* BIIPS_STEP_HPP_ */

@@ -67,9 +67,9 @@ namespace Biips
   }
 
 
-  ForwardSampler::ForwardSampler(Size nbParticles, Graph & graph, const Rng::Ptr & pRng)
-  : nParticles_(nbParticles), graph_(graph), pRng_(pRng),
-    resampleThreshold_(0.5 * nbParticles),
+  ForwardSampler::ForwardSampler(Graph & graph)
+  : graph_(graph), nParticles_(1),
+    resampleThreshold_(BIIPS_POSINF),
     sampledFlagsBefore_(graph.GetSize()),
     nodeIterations_(graph.GetSize(), BIIPS_SIZENA),
     built_(false), initialized_(false)
@@ -132,25 +132,26 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node)
     {
-      if ( !graph_.GetObserved()[nodeId_] )
-      {
-        // push a new array whose first element is the stochastic node
-        nodeIdSequence_.push_back(Types<NodeId>::Array(1, nodeId_));
-        nodeIterationsMap_[nodeId_] = nodeIdSequence_.size()-1;
-      }
+      if ( graph_.GetObserved()[nodeId_] )
+        return;
+
+      // push a new array whose first element is the stochastic node
+      nodeIdSequence_.push_back(Types<NodeId>::Array(1, nodeId_));
+      nodeIterationsMap_[nodeId_] = nodeIdSequence_.size()-1;
     }
 
     virtual void visit(const LogicalNode & node)
     {
-      if ( !graph_.GetObserved()[nodeId_] )
-      {
-        if (nodeIdSequence_.empty())
-          throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in node id sequence: unobserved LogicalNode can not appear before any StochasticNode in the topological order.");
+      if ( graph_.GetObserved()[nodeId_] )
+        return;
 
-        // push all the logical children back in the last array
-        nodeIdSequence_.back().push_back(nodeId_);
-        nodeIterationsMap_[nodeId_] = nodeIdSequence_.size()-1;
-      }
+      if (nodeIdSequence_.empty())
+        throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in empty node id sequence.");
+
+      // push all the logical children back in the last array
+      nodeIdSequence_.back().push_back(nodeId_);
+      nodeIterationsMap_[nodeId_] = nodeIdSequence_.size()-1;
+
     }
 
   public:
@@ -159,7 +160,7 @@ namespace Biips
         Types<Types<NodeId>::Array>::Array & nodeIdSequence,
         Types<Size>::Array & nodeIterations)
     : graph_(graph), nodeIdSequence_(nodeIdSequence),
-      nodeIterationsMap_(boost::make_iterator_property_map(nodeIterations.begin(), boost::identity_property_map())) {};
+      nodeIterationsMap_(boost::make_iterator_property_map(nodeIterations.begin(), boost::identity_property_map())) {}
   };
 
 
@@ -205,18 +206,6 @@ namespace Biips
       throw LogicError("Can't get node sampling iterations: sampler not built!");
 
     return nodeIterations_;
-  }
-  
-  
-  void ForwardSampler::SetResampleParams(const String & rsType, Scalar threshold)
-  {
-    if (!resamplerTable().Contains(rsType))
-      throw LogicError(rsType+" Resampler not found in the ResamplerTable.");
-    pResampler_ = resamplerTable()[rsType];
-    if (!pResampler_)
-      throw LogicError("Resampler::Ptr is Null.");
-
-    resampleThreshold_ = threshold < 1.0 ? threshold * nParticles_ : threshold;
   }
 
 
@@ -282,10 +271,26 @@ namespace Biips
   }
 
 
-  void ForwardSampler::Initialize()
+  void ForwardSampler::setResampleParams(const String & rsType, Scalar threshold)
+  {
+    if (!resamplerTable().Contains(rsType))
+      throw LogicError(rsType+" Resampler not found in the ResamplerTable.");
+    pResampler_ = resamplerTable()[rsType];
+    if (!pResampler_)
+      throw LogicError("Resampler::Ptr is Null.");
+
+    resampleThreshold_ = threshold < 1.0 ? threshold * nParticles_ : threshold;
+  }
+
+
+  void ForwardSampler::Initialize(Size nbParticles, const Rng::Ptr & pRng, const String & rsType, Scalar threshold)
   {
     if (!built_)
       throw LogicError("Can not initialize ForwardSampler: not built.");
+
+    nParticles_ = nbParticles;
+    pRng_ = pRng;
+    setResampleParams(rsType, threshold);
 
     iter_ = 0;
 
@@ -337,7 +342,7 @@ namespace Biips
     ++iterNodeId_;
     ++iterNodeSampler_;
 
-    sampledFlagsBefore_ = sampledFlagsAfter_;
+    sampledFlagsBefore_.swap(sampledFlagsAfter_);
 
     // Resample if necessary.
     if (resampled_)
@@ -415,7 +420,7 @@ namespace Biips
     if (iter > Iteration())
       throw LogicError("Can't SetMonitorNodeValues: node has not been sampled yet!");
 
-    monitor.AddNode(nodeId, particles_, iter);
+    monitor.AddNode(nodeId, particles_, iter, graph_.GetDiscrete()[nodeId]);
 
     if (!monitor.HasIterationESS(iter))
       monitor.SetIterationESS(iter, GetNodeESS(nodeId));
@@ -438,6 +443,14 @@ namespace Biips
       os << std::endl;
       os.precision(old_prec);
     }
+  }
+
+
+  Size ForwardSampler::NParticles() const
+  {
+    if (!initialized_)
+      throw LogicError("Can not get number of particles: sampler not initialized.");
+    return nParticles_;
   }
 
 

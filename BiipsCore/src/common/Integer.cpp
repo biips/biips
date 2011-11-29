@@ -10,6 +10,7 @@
 
 #include "common/Integer.hpp"
 
+#include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/converter.hpp>
 #include <cmath>
 
@@ -24,15 +25,10 @@ namespace Biips
     return std::modf(s, pIntPart) <= std::numeric_limits<Scalar>::round_error();
   }
 
-  typedef boost::numeric::converter<Int, Scalar,
-    boost::numeric::conversion_traits<Int, Scalar>,
-    boost::numeric::def_overflow_handler,
-    boost::numeric::RoundEven<boost::numeric::conversion_traits<Int, Scalar>::source_type>
-    > Scalar2IntRounder;
 
   Int roundInteger(Scalar s)
   {
-    return Scalar2IntRounder::convert(s);
+    return boost::math::round(s);
   }
 
 

@@ -10,6 +10,8 @@
  * COPY: Adapted from JAGS Console class
  */
 
+//#define BIIPS_COMPILER_DEBUG_ON
+
 #include "Console.hpp"
 #include "compiler/Compiler.hpp"
 #include "iostream/outStream.hpp"
@@ -234,19 +236,6 @@ namespace Biips
   }
 
 
-  static Bool allMissing(const MultiArray & marray)
-  {
-    Size N = marray.Length();
-    const ValArray & v = marray.Values();
-    for (Size i = 0; i < N; ++i)
-    {
-      if (v[i] != BIIPS_REALNA)
-        return false;
-    }
-    return true;
-  }
-
-
   Bool Console::Compile(std::map<String, MultiArray> & dataMap, Bool genData, Size dataRngSeed, Bool verbose)
   {
     if (pModel_)
@@ -288,7 +277,7 @@ namespace Biips
 
         /* Check validity of data generating model */
         Types<NodeId>::ConstIterator it_node_id, it_node_id_end;
-        boost::tie(it_node_id, it_node_id_end) = data_graph.GetNodes();
+        boost::tie(it_node_id, it_node_id_end) = data_graph.GetSortedNodes();
         for (; it_node_id != it_node_id_end; ++it_node_id)
         {
           if (data_graph.GetObserved()[*it_node_id])
@@ -350,7 +339,7 @@ namespace Biips
             //Replace any existing entry
             // FIXME: observed variables are replaced by themselves. Unnecessary !
             dataMap.erase(name);
-            err_ << "Warning: replacing values of variable " << name << " by sampled ones." << endl;
+//            err_ << "Warning: replacing values of variable " << name << " by sampled ones." << endl;
           }
           dataMap.insert(std::make_pair(name, sampled_values));
         }
@@ -425,7 +414,7 @@ namespace Biips
   }
 
 
-  Bool Console::BuildSampler(Size nParticles, Size smcRngSeed, Bool prior, Size verbose)
+  Bool Console::BuildSampler(Bool prior, Size verbose)
   {
     if (!pModel_)
     {
@@ -458,9 +447,8 @@ namespace Biips
         out_ << endl;
       }
 
-      Rng::Ptr p_smc_rng(new Rng(smcRngSeed));
 
-      pModel_->BuildSampler(nParticles, p_smc_rng);
+      pModel_->BuildSampler();
 
       if (verbose >1)
       {
@@ -474,7 +462,13 @@ namespace Biips
   }
 
 
-  Bool Console::RunForwardSampler(const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose, Bool progressBar)
+  Bool Console::SamplerBuilt()
+  {
+    return (pModel_ && pModel_->SamplerBuilt());
+  }
+
+
+  Bool Console::RunForwardSampler(Size nParticles, Size smcRngSeed, const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose, Bool progressBar)
   {
     if (!pModel_)
     {
@@ -489,8 +483,6 @@ namespace Biips
 
     try
     {
-      pModel_->SetResampleParam(rsType, essThreshold);
-
       Size n_iter = pModel_->Sampler().NIterations();
 
       if (verbose)
@@ -501,7 +493,10 @@ namespace Biips
         p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter, out_, ""));
 
       // filtering
-      pModel_->InitSampler();
+
+      Rng::Ptr p_smc_rng(new Rng(smcRngSeed));
+      pModel_->InitSampler(nParticles, p_smc_rng, rsType, essThreshold);
+
       if (p_show_progress)
         ++(*p_show_progress);
       else if (verbose)
@@ -887,6 +882,29 @@ namespace Biips
   }
 
 
+  Bool Console::DumpData(std::map<String, MultiArray> & dataMap)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump data. No model!" << endl;
+      return false;
+    }
+
+    try
+    {
+      Bool ok = pModel_->DumpData(dataMap);
+      if (!ok)
+      {
+        err_ << "Failed to dump data" << endl;
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
   {
 
@@ -989,7 +1007,6 @@ namespace Biips
 
   Bool Console::PrintGraphviz(std::ostream & os)
   {
-
     if (!pModel_)
     {
       err_ << "Can't print graphviz. No model!" << endl;
@@ -1004,4 +1021,177 @@ namespace Biips
     return true;
   }
 
+
+  Bool Console::DumpNodeIds(Types<NodeId>::Array & nodeIds)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node ids. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeIds.assign(it_nodes, it_nodes_end);
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpNodeNames(Types<String>::Array & nodeNames)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node names. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeNames.resize(std::distance(it_nodes, it_nodes_end));
+
+      for (Size i=0; it_nodes != it_nodes_end; ++it_nodes, ++i)
+        nodeNames[i] = pModel_->GetSymbolTable().GetName(*it_nodes);
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpNodeTypes(Types<NodeType>::Array & nodeTypes)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node types. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeTypes.resize(std::distance(it_nodes, it_nodes_end));
+
+      for (Size i=0; it_nodes != it_nodes_end; ++it_nodes, ++i)
+        nodeTypes[i] = pModel_->GraphPtr()->GetNode(*it_nodes).GetType();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpNodeObserved(Flags & nodeObserved)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node observed boolean. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeObserved.resize(std::distance(it_nodes, it_nodes_end));
+
+      for (Size i=0; it_nodes != it_nodes_end; ++it_nodes, ++i)
+        nodeObserved[i] = pModel_->GraphPtr()->GetObserved()[*it_nodes];
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpNodeIterations(Types<Size>::Array & nodeIterations)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node sampling iterations. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't dump node sampling iterations. SMC sampler not built!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeIterations.resize(std::distance(it_nodes, it_nodes_end));
+
+      for (Size i=0; it_nodes != it_nodes_end; ++it_nodes, ++i)
+      {
+        if (pModel_->GraphPtr()->GetObserved()[*it_nodes])
+          nodeIterations[i] = BIIPS_SIZENA;
+        else
+          nodeIterations[i] = pModel_->Sampler().GetNodeSamplingIteration(*it_nodes);
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::DumpNodeSamplers(Types<String>::Array & nodeSamplers)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump node samplers. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't dump node samplers. SMC sampler not built!" << endl;
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
+
+      nodeSamplers.clear();
+      nodeSamplers.resize(std::distance(it_nodes, it_nodes_end));
+
+      Types<std::pair<NodeId, String> >::Array samplers_sequence = pModel_->Sampler().GetSamplersSequence();
+      for (Size i=0; i<samplers_sequence.size(); ++i)
+      {
+        NodeId id = samplers_sequence[i].first;
+        Size rank = pModel_->GraphPtr()->GetRank(id);
+        const String & sampler_name = samplers_sequence[i].second;
+        nodeSamplers[rank] = sampler_name;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::GraphSize(Size & s)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't get graph size. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      s = pModel_->GraphPtr()->GetSize();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
 }

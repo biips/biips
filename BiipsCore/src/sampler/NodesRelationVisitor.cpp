@@ -55,7 +55,7 @@ namespace Biips
       return;
     }
     Types<NodeId>::ConstIterator it_node_id_1, it_node_id_2, it_node_id_end;
-    boost::tie(it_node_id_1, it_node_id_end) = graph_.GetNodes();
+    boost::tie(it_node_id_1, it_node_id_end) = graph_.GetSortedNodes();
     it_node_id_2 = it_node_id_1;
     if ( std::find(it_node_id_1, it_node_id_end, nodeId_) < std::find(it_node_id_2, it_node_id_end, myId_) )
     {

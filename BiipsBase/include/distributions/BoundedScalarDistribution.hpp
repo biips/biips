@@ -47,6 +47,7 @@ namespace Biips
     Scalar calPlower(Scalar lower, const MultiArray::Array & paramValues) const;
     Scalar calPupper(Scalar upper, const MultiArray::Array & paramValues) const;
 
+    virtual Bool checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const;
     Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; }
     virtual MultiArray sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const;
@@ -91,6 +92,7 @@ namespace Biips
     */
     virtual Scalar r(const MultiArray::Array & paramValues, Rng & rng) const = 0;
 
+    virtual Bool CheckDensityParamValues(const MultiArray & x, const MultiArray::Array & paramValues) const;
     virtual Bool CanBound() const { return true; }
     virtual Bool IsDiscreteValued(const Flags & mask) const { return discrete_; }
     virtual Bool IsSupportFixed(const Flags & fixmask) const;

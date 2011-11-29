@@ -31,7 +31,7 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    Size t_;
+    Size iter_;
     ValArray weights_;
     Scalar ess_;
     Scalar sumOfWeights_;
@@ -40,6 +40,7 @@ namespace Biips
     std::map<NodeId, ParticleValues> particleValuesMap_;
     std::map<NodeId, Size> nodeIterationMap_;
     std::map<Size, Scalar> iterationEssMap_;
+    std::map<NodeId, Bool> nodeDiscreteMap_;
 
     Bool weightsSet_;
     Bool weightsSwapped_;
@@ -47,21 +48,22 @@ namespace Biips
     void checkSwapped() const;
 
   public:
-    Monitor(Size t, const Types<NodeId>::Array & sampledNodes)
-    	: t_(t), sampledNodes_(sampledNodes), weightsSet_(false), weightsSwapped_(false) {}
+    Monitor(Size iter, const Types<NodeId>::Array & sampledNodes)
+    	: iter_(iter), sampledNodes_(sampledNodes), weightsSet_(false), weightsSwapped_(false) {}
     virtual ~Monitor() {}
 
     Bool Contains(NodeId nodeId) const;
     Types<NodeId>::Array GetNodes() const;
 
     Size NParticles() const { checkWeights(); checkSwapped(); return weights_.size(); }
-    Size GetIteration() const { return t_; }
+    Size GetIteration() const { return iter_; }
     const Types<NodeId>::Array & GetSampledNodes() const { return sampledNodes_; }
     Scalar GetESS() const { checkWeights(); return ess_; }
     Size GetNodeSamplingIteration(NodeId id) const;
     Bool HasIterationESS(Size iter) const;
     void SetIterationESS(Size iter, Scalar ess);
     Scalar GetNodeESS(NodeId id) const;
+    Bool GetNodeDiscrete(NodeId id) const;
     Scalar GetSumOfWeights() const { checkWeights(); return sumOfWeights_; }
     const ValArray & GetUnnormWeights() const { checkWeights(); checkSwapped(); return weights_; }
     ValArray GetWeights() const { checkWeights(); checkSwapped(); return weights_/sumOfWeights_; }
@@ -91,11 +93,11 @@ namespace Biips
     Scalar logNormConst_;
 
   public:
-    FilterMonitor(Size t, const Types<NodeId>::Array & sampledNodes) : BaseType(t, sampledNodes) {};
+    FilterMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) : BaseType(iter, sampledNodes) {};
     virtual ~FilterMonitor() {};
 
     void Init(const Types<Particle>::Array & particles, Scalar ess, Scalar sumOfWeights, Bool resampled, Scalar logNormConst);
-    void AddNode(NodeId nodeId, const Types<Particle>::Array & particles, Size iter);
+    void AddNode(NodeId nodeId, const Types<Particle>::Array & particles, Size iter, Bool discrete);
 
     Bool GetResampled() const { checkWeights(); return resampled_; }
     Scalar GetLogNormConst() const { checkWeights(); return logNormConst_; }
@@ -109,7 +111,7 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
     typedef Monitor BaseType;
 
-    SmoothMonitor(Size t, const Types<NodeId>::Array & sampledNodes) : BaseType(t, sampledNodes) {};
+    SmoothMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) : BaseType(iter, sampledNodes) {};
     virtual ~SmoothMonitor() {};
 
     void Init(const ValArray & weights, Scalar ess, Scalar sumOfWeights);

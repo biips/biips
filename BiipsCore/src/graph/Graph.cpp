@@ -323,9 +323,132 @@ namespace Biips
   }
 
 
+
+  class TopologicalSortVisitor : public ConstNodeVisitor
+  {
+  protected:
+    typedef TopologicalSortVisitor SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+
+    const Graph & graph_;
+    Flags insertedMask_;
+    Types<NodeId>::Array & topoSort_;
+    Size offspringLevel_;
+    Size ancestorLevel_;
+
+    virtual void visit(const ConstantNode & node)
+    {
+      if (insertedMask_[nodeId_])
+        return;
+
+      topoSort_.push_back(nodeId_);
+      insertedMask_[nodeId_] = true;
+
+      // visit the logical children
+      GraphTypes::DirectChildrenNodeIdIterator it_children, it_children_end;
+      boost::tie(it_children, it_children_end) = graph_.GetChildren(nodeId_);
+
+      ++offspringLevel_;
+      for (; it_children != it_children_end; ++it_children)
+        graph_.VisitNode(*it_children, *this);
+      --offspringLevel_;
+    }
+
+    virtual void visit(const StochasticNode & node)
+    {
+      if (offspringLevel_  && !graph_.GetObserved()[nodeId_])
+        return;
+
+      if (insertedMask_[nodeId_])
+        return;
+
+      if (!parentsInserted(nodeId_))
+        return;
+
+      topoSort_.push_back(nodeId_);
+      insertedMask_[nodeId_] = true;
+
+      // visit the logical children
+      GraphTypes::DirectChildrenNodeIdIterator it_children, it_children_end;
+      boost::tie(it_children, it_children_end) = graph_.GetChildren(nodeId_);
+
+      ++offspringLevel_;
+      for (; it_children != it_children_end; ++it_children)
+        graph_.VisitNode(*it_children, *this);
+      --offspringLevel_;
+    }
+
+
+    Bool parentsInserted(NodeId nodeId)
+    {
+      GraphTypes::DirectParentNodeIdIterator it_parent, it_parent_end;
+      boost::tie(it_parent, it_parent_end) = graph_.GetParents(nodeId);
+      for (; it_parent != it_parent_end; ++it_parent)
+      {
+        if (!insertedMask_[*it_parent])
+        {
+          ++ancestorLevel_;
+          graph_.VisitNode(*it_parent, *this);
+          --ancestorLevel_;
+        }
+        if (!insertedMask_[*it_parent])
+          return false;
+      }
+      return true;
+    }
+
+
+    virtual void visit(const LogicalNode & node)
+    {
+      if (!offspringLevel_)
+        return;
+
+      if (ancestorLevel_)
+        return;
+
+      if (topoSort_.empty())
+        throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in empty node id sequence.");
+
+      if (insertedMask_[nodeId_])
+        return;
+
+      // push the logical children back
+      // if its parents have been inserted
+      if (!parentsInserted(nodeId_))
+        return;
+
+      topoSort_.push_back(nodeId_);
+      insertedMask_[nodeId_] = true;
+
+      // visit the logical children
+      GraphTypes::DirectChildrenNodeIdIterator it_children, it_children_end;
+      boost::tie(it_children, it_children_end) = graph_.GetChildren(nodeId_);
+
+      ++offspringLevel_;
+      for (; it_children != it_children_end; ++it_children)
+        graph_.VisitNode(*it_children, *this);
+      --offspringLevel_;
+    }
+
+  public:
+
+    TopologicalSortVisitor(const Graph & graph,
+        Types<NodeId>::Array & topoSort)
+    : graph_(graph), insertedMask_(graph.GetSize(), false), topoSort_(topoSort),
+      offspringLevel_(0), ancestorLevel_(0) {}
+  };
+
+
   void Graph::topologicalSort()
   {
-    boost::topological_sort(directParentGraph_, std::back_inserter(topoOrder_));
+    // TODO : optimize
+    topoSort_.clear();
+    boost::topological_sort(directParentGraph_, std::back_inserter(topoSort_));
+
+    Types<NodeId>::Array temp_sort;
+    TopologicalSortVisitor topo_vis(*this, temp_sort);
+    VisitGraph(topo_vis);
+    topoSort_.swap(temp_sort);
   }
 
 
@@ -338,7 +461,7 @@ namespace Biips
     Types<EdgeId>::Array parent_out_edges;
 
     // the following algorithm relies on the fact that GetNodes() gives a topological order
-    for (Types<NodeId>::ConstIterator it_nodes = topoOrder_.begin(); it_nodes != topoOrder_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
     {
       boost::tie(it_direct_parents, it_direct_parents_end) = boost::adjacent_vertices(*it_nodes, directParentGraph_);
       // copy parents ids into another vector, because iterators can be invalidated by modifications of the graph
@@ -380,7 +503,7 @@ namespace Biips
     OutEdgeIdIterator it_child_out_edge_id, it_child_out_edge_id_end;
     Types<EdgeId>::Array child_out_edges;
 
-    for (Types<NodeId>::Array::const_reverse_iterator rit_nodes = topoOrder_.rbegin(); rit_nodes != topoOrder_.rend(); ++rit_nodes)
+    for (Types<NodeId>::Array::const_reverse_iterator rit_nodes = topoSort_.rbegin(); rit_nodes != topoSort_.rend(); ++rit_nodes)
     {
       boost::tie(it_direct_children, it_direct_children_end) = boost::adjacent_vertices(*rit_nodes, directChildrenGraph_);
       // copy children ids into another vector, because iterators can be invalidated by modifications of the graph
@@ -480,12 +603,12 @@ namespace Biips
   };
 
 
-  Types<NodeId>::ConstIteratorPair Graph::GetNodes() const
+  Types<NodeId>::ConstIteratorPair Graph::GetSortedNodes() const
   {
     if (!builtFlag_)
       throw LogicError("Can not access a graph that is not built.");
 
-    return iterRange(topoOrder_);
+    return iterRange(topoSort_);
   };
 
 
@@ -506,7 +629,7 @@ namespace Biips
 
   void Graph::VisitGraph(NodeVisitor & vis)
   {
-    for (Types<NodeId>::ConstIterator it_nodes = topoOrder_.begin(); it_nodes != topoOrder_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
     {
       VisitNode(*it_nodes, vis);
     }
@@ -515,7 +638,7 @@ namespace Biips
 
   void Graph::VisitGraph(ConstNodeVisitor & vis) const
   {
-    for (Types<NodeId>::ConstIterator it_nodes = topoOrder_.begin(); it_nodes != topoOrder_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
     {
       VisitNode(*it_nodes, vis);
     }
@@ -586,23 +709,6 @@ namespace Biips
   {
     boost::print_graph(directParentGraph_);
   };
-
-
-  void Graph::PrintTopoOrder(std::ostream & os) const
-  {
-    if (!builtFlag_)
-    {
-      os << "Can not print topological order: graph is not built." << std::endl;
-      return;
-    }
-
-    Types<NodeId>::ConstIterator it_node, it_node_end;
-    boost::tie(it_node, it_node_end) = GetNodes();
-    os << *it_node;
-    for (++it_node; it_node != it_node_end; ++it_node)
-      os << ", "<< *it_node;
-    os << std::endl;
-  }
 
 
   Graph::Graph() : directParentGraph_(fullGraph_, DirectEdgePredicate(boost::get(boost::edge_type, fullGraph_))),
@@ -747,4 +853,12 @@ namespace Biips
     return ans;
   }
 
+
+  Size Graph::GetRank(NodeId nodeId) const
+  {
+    Types<NodeId>::ConstIterator it_node_id = std::find(topoSort_.begin(), topoSort_.end(), nodeId);
+    if (it_node_id == topoSort_.end())
+      throw LogicError("Can not get node rank: node is not sorted.");
+    return std::distance(topoSort_.begin(), it_node_id);
+  }
 }

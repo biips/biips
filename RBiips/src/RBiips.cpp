@@ -23,12 +23,16 @@ static inline void checkConsole(SEXP ptr)
 }
 
 
-static std::map<String, MultiArray> read_data_list(SEXP data)
+template<typename StorageOrderType>
+static std::map<String, MultiArray> writeDataTable(SEXP data);
+
+template<>
+std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
 {
   std::map<String, MultiArray> data_map;
 
   if (verbosity>0)
-    rbiips_cout << PROMPT_STRING << "Reading data in the list" << endl;
+    rbiips_cout << PROMPT_STRING << "Writing data table" << endl;
 
   Rcpp::List data_list(data);
   if (!data_list.hasAttribute("names"))
@@ -50,7 +54,6 @@ static std::map<String, MultiArray> read_data_list(SEXP data)
     Rcpp::NumericVector r_vec = data_list[var_name];
     MultiArray marray;
 
-    // TODO: check MultiArray::StorageOrder
     if (!r_vec.hasAttribute("dim"))
     {
       DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
@@ -73,6 +76,49 @@ static std::map<String, MultiArray> read_data_list(SEXP data)
     rbiips_cout << endl;
 
   return data_map;
+}
+
+
+template<typename StorageOrderType>
+static SEXP readDataTable(const std::map<String, MultiArray> & dataMap);
+
+template<>
+SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap)
+{
+  if (verbosity>0)
+    rbiips_cout << PROMPT_STRING << "Reading data table" << endl;
+
+  Rcpp::List data_list;
+
+  if (verbosity>0)
+    rbiips_cout << INDENT_STRING << "Variables:";
+
+  Rcpp::CharacterVector names;
+  std::map<String, MultiArray>::const_iterator it_table = dataMap.begin();
+  for (; it_table!=dataMap.end(); ++it_table)
+  {
+    const String & var_name = it_table->first;
+    const MultiArray & values_array = it_table->second;
+
+    // dim
+    Rcpp::IntegerVector dim(values_array.Dim().begin(), values_array.Dim().end());
+
+    Size len = values_array.Dim().Length();
+    Rcpp::NumericVector values(len);
+
+    std::replace_copy(values_array.Values().begin(), values_array.Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
+
+    values.attr("dim") = dim;
+
+    data_list[var_name] = values;
+
+    if (verbosity>0)
+      rbiips_cout << " " << var_name;
+  }
+  if (verbosity>0)
+    rbiips_cout << endl;
+
+  return data_list;
 }
 
 
@@ -148,7 +194,7 @@ RcppExport void compile_model(SEXP pConsole, SEXP data, SEXP sampleData, SEXP da
   Rcpp::XPtr<Console> p_console(pConsole);
 
   // Read data
-  std::map<String, MultiArray> data_map = read_data_list(data);
+  std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
 
   Bool sample_data = Rcpp::as<Bool>(sampleData);
   Size data_rng_seed = 0;
@@ -165,6 +211,22 @@ RcppExport void compile_model(SEXP pConsole, SEXP data, SEXP sampleData, SEXP da
     throw RuntimeError("Failed to compile model.");
 
   VOID_END_RBIIPS
+}
+
+
+RcppExport SEXP get_data(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  std::map<String, MultiArray> data_table;
+
+  if (! p_console->DumpData(data_table))
+    throw RuntimeError("Failed to read data.");
+
+  return readDataTable<MultiArray::StorageOrderType>(data_table);
+  END_RBIIPS
 }
 
 
@@ -288,14 +350,12 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames)
 }
 
 
-RcppExport void build_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP prior)
+RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  Size n_part = Rcpp::as<Size>(nParticles);
-  Size smc_rng_seed = Rcpp::as<Size>(smcRngSeed);
   Bool prior_flag = Rcpp::as<Size>(prior);
 
   if (verbosity>0)
@@ -304,23 +364,23 @@ RcppExport void build_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSee
     if (prior_flag)
       rbiips_cout << " with prior mutation";
     rbiips_cout << endl;
-    rbiips_cout << INDENT_STRING << "n.part = " << n_part << endl;
-    rbiips_cout << INDENT_STRING << "smc.rng.seed = " << smc_rng_seed << endl;
   }
 
-  if (!p_console->BuildSampler(n_part, smc_rng_seed, prior_flag, false))
+  if (!p_console->BuildSampler(prior_flag, false))
     throw RuntimeError("Failed to build sampler.");
 
   VOID_END_RBIIPS
 }
 
 
-RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP essThreshold, SEXP resampleType)
+RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP essThreshold, SEXP resampleType)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
+  Size n_part = Rcpp::as<Size>(nParticles);
+  Size smc_rng_seed = Rcpp::as<Size>(smcRngSeed);
   String resample_type = Rcpp::as<String>(resampleType);
   Scalar ess_threshold = Rcpp::as<Scalar>(essThreshold);
   Scalar log_norm_const;
@@ -328,11 +388,13 @@ RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP essThreshold, SEXP resampleT
   if (verbosity>0)
   {
     rbiips_cout << PROMPT_STRING << "Running SMC sampler" << endl;
+    rbiips_cout << INDENT_STRING << "n.part = " << n_part << endl;
+    rbiips_cout << INDENT_STRING << "smc.rng.seed = " << smc_rng_seed << endl;
     rbiips_cout << INDENT_STRING << "rs.thres = " << ess_threshold << endl;
     rbiips_cout << INDENT_STRING << "rs.type = " << resample_type << endl;
   }
 
-  if (!p_console->RunForwardSampler(resample_type, ess_threshold, log_norm_const, false, verbosity>0))
+  if (!p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, log_norm_const, false, verbosity>0))
     throw RuntimeError("Failed to run SMC sampler.");
 
   if (verbosity>0)
@@ -344,7 +406,11 @@ RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP essThreshold, SEXP resampleT
 }
 
 
-static SEXP get_monitors(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type)
+template<typename StorageOrderType>
+static SEXP getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type);
+
+template<>
+SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type)
 {
   Rcpp::List monitors_list;
 
@@ -372,6 +438,7 @@ static SEXP get_monitors(const std::map<String, NodeArrayMonitor> & monitorsMap,
       Rcpp::NumericVector values(len);
       Rcpp::NumericVector weights(len);
       Rcpp::NumericVector ess(len_ess);
+      Rcpp::LogicalVector discrete(len_ess);
 
       std::replace_copy(monitor.GetValues().Values().begin(), monitor.GetValues().Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
       std::copy(monitor.GetWeights().Values().begin(), monitor.GetWeights().Values().end(), weights.begin());
@@ -387,6 +454,7 @@ static SEXP get_monitors(const std::map<String, NodeArrayMonitor> & monitorsMap,
       particles["ess"] = ess;
       particles["variable.name"] = Rcpp::wrap(name);
       particles["type"] = Rcpp::wrap(type);
+      particles["discrete"] = discrete;
 
       particles_list[type] = particles;
     }
@@ -409,7 +477,8 @@ RcppExport SEXP get_filter_monitors(SEXP pConsole)
   if (!p_console->DumpFilterMonitors(monitors_map))
     throw RuntimeError("Failed to dump filter monitors.");
 
-  return get_monitors(monitors_map, "filtering");
+  return getMonitors<MultiArray::StorageOrderType>(monitors_map, "filtering");
+
   END_RBIIPS
 }
 
@@ -425,7 +494,7 @@ RcppExport SEXP get_smooth_tree_monitors(SEXP pConsole)
   if (!p_console->DumpSmoothTreeMonitors(monitors_map))
     throw RuntimeError("Failed to dump smooth tree monitors.");
 
-  return get_monitors(monitors_map, "smoothing");
+  return getMonitors<MultiArray::StorageOrderType>(monitors_map, "smoothing");
   END_RBIIPS
 }
 
@@ -441,7 +510,7 @@ RcppExport SEXP get_smooth_monitors(SEXP pConsole)
   if (!p_console->DumpSmoothMonitors(monitors_map))
     throw RuntimeError("Failed to dump filter monitors.");
 
-  return get_monitors(monitors_map, "backward.smoothing");
+  return getMonitors<MultiArray::StorageOrderType>(monitors_map, "backward.smoothing");
   END_RBIIPS
 }
 
@@ -473,3 +542,113 @@ RcppExport SEXP get_variable_names(SEXP pConsole)
   END_RBIIPS
 }
 
+
+RcppExport SEXP get_sorted_nodes(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::DataFrame nodes_data_frame;
+
+  Size graph_size;
+  if (!p_console->GraphSize(graph_size))
+    throw RuntimeError("Failed to get graph size.");
+
+  {
+    Rcpp::IntegerVector node_ids(graph_size);
+    Types<Size>::Array node_ids_vec;
+    if (!p_console->DumpNodeIds(node_ids_vec))
+      throw RuntimeError("Failed to dump node ids.");
+    std::replace_copy(node_ids_vec.begin(), node_ids_vec.end(), node_ids.begin(), int(NULL_NODEID), NA_INTEGER);
+    nodes_data_frame["id"] = node_ids;
+  }
+  {
+    Rcpp::StringVector node_names(graph_size);
+    Types<String>::Array node_names_vec;
+    if (!p_console->DumpNodeNames(node_names_vec))
+      throw RuntimeError("Failed to dump node names.");
+    std::copy(node_names_vec.begin(), node_names_vec.end(), node_names.begin());
+    nodes_data_frame["name"] = node_names;
+  }
+  {
+    Rcpp::StringVector node_types(graph_size);
+    Types<NodeType>::Array node_types_vec;
+    if (!p_console->DumpNodeTypes(node_types_vec))
+      throw RuntimeError("Failed to dump node types.");
+    for (Size i=0; i<graph_size; ++i)
+    {
+      switch (node_types_vec[i])
+      {
+        case CONSTANT:
+          node_types[i] = "Constant";
+          break;
+        case Biips::LOGICAL:
+          node_types[i] = "Logical";
+          break;
+        case STOCHASTIC:
+          node_types[i] = "Stochastic";
+          break;
+        default:
+          break;
+      }
+    }
+    nodes_data_frame["type"] = node_types;
+  }
+  {
+    Rcpp::LogicalVector node_observed(graph_size);
+    Flags node_obs_vec;
+    if (!p_console->DumpNodeObserved(node_obs_vec))
+      throw RuntimeError("Failed to dump node observed boolean.");
+    std::copy(node_obs_vec.begin(), node_obs_vec.end(), node_observed.begin());
+    nodes_data_frame["observed"] = node_observed;
+  }
+
+  return nodes_data_frame;
+  END_RBIIPS
+}
+
+
+RcppExport SEXP is_sampler_built(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  return Rcpp::wrap(p_console->SamplerBuilt());
+  END_RBIIPS
+}
+
+
+RcppExport SEXP get_node_samplers(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::DataFrame nodes_data_frame;
+
+  Size graph_size;
+  if (!p_console->GraphSize(graph_size))
+    throw RuntimeError("Failed to get graph size.");
+
+  {
+    Rcpp::IntegerVector node_iterations(graph_size);
+    Types<Size>::Array node_iterations_vec;
+    if (!p_console->DumpNodeIterations(node_iterations_vec))
+      throw RuntimeError("Failed to dump node iterations.");
+    std::replace_copy(node_iterations_vec.begin(), node_iterations_vec.end(), node_iterations.begin(), int(BIIPS_SIZENA), NA_INTEGER);
+    nodes_data_frame["iteration"] = node_iterations;
+  }
+  {
+    Rcpp::StringVector node_samplers(graph_size);
+    Types<String>::Array node_samplers_vec;
+    if (!p_console->DumpNodeSamplers(node_samplers_vec))
+      throw RuntimeError("Failed to dump node samplers.");
+    std::copy(node_samplers_vec.begin(), node_samplers_vec.end(), node_samplers.begin());
+    nodes_data_frame["sampler"] = node_samplers;
+  }
+
+  return nodes_data_frame;
+  END_RBIIPS
+}

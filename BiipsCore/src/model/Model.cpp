@@ -15,15 +15,6 @@
 namespace Biips
 {
 
-  void Model::SetResampleParam(const String & rsType, Scalar threshold)
-  {
-    if (!pSampler_)
-      throw LogicError("Can not set resampling parameters: no ForwardSampler.");
-
-    pSampler_->SetResampleParams(rsType, threshold);
-  }
-
-
   void Model::SetDefaultFilterMonitors()
   {
     for (NodeId id=0; id<pGraph_->GetSize(); ++id)
@@ -31,7 +22,7 @@ namespace Biips
       if (pGraph_->GetNode(id).GetType() != STOCHASTIC)
         continue;
 
-      // !! Never add observed nodes, they won't be monitored !!
+      // FIXME: Never add observed nodes, they won't be monitored !!
       if (pGraph_->GetObserved()[id])
         continue;
 
@@ -43,6 +34,7 @@ namespace Biips
       boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(id);
       for (; it_parents != it_parents_end; ++it_parents)
       {
+        // FIXME: Never add observed nodes, they won't be monitored !!
         if (pGraph_->GetObserved()[*it_parents])
           continue;
 
@@ -56,7 +48,7 @@ namespace Biips
 
   Bool Model::SetFilterMonitor(NodeId nodeId)
   {
-    // it is no use monitoring observed nodes
+    // FIXME: it is no use monitoring observed nodes
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
@@ -69,7 +61,7 @@ namespace Biips
   {
     SetFilterMonitor(nodeId);
 
-    // it is no use monitoring observed nodes
+    // FIXME: it is no use monitoring observed nodes
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
@@ -80,7 +72,7 @@ namespace Biips
 
   Bool Model::SetSmoothTreeMonitor(NodeId nodeId)
   {
-    // it is no use monitoring observed nodes
+    // FIXME: it is no use monitoring observed nodes
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
@@ -107,9 +99,9 @@ namespace Biips
   }
 
 
-  void Model::BuildSampler(Size nParticles, const Rng::Ptr & pRng)
+  void Model::BuildSampler()
   {
-    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(nParticles, *pGraph_, pRng));
+    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(*pGraph_));
 
     pSampler_->Build();
 
@@ -132,9 +124,9 @@ namespace Biips
   }
 
 
-  void Model::InitSampler()
+  void Model::InitSampler(Size nParticles, const Rng::Ptr & pRng, const String & rsType, Scalar threshold)
   {
-    pSampler_->Initialize();
+    pSampler_->Initialize(nParticles, pRng, rsType, threshold);
 
     Size t = pSampler_->Iteration();
     const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();

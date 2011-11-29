@@ -228,14 +228,12 @@ namespace Biips
     smcSmoothValuesMap_.clear();
   }
 
-  void ModelTest::RunSMC(Size nParticles, Size rngSeed, Bool prior, const String & rsType, Scalar essThreshold, Bool showProgress, Size numBins)
-  {
-    Rng::Ptr p_rng(new Rng(rngSeed));
 
+  void ModelTest::BuildSMC(Bool prior)
+  {
     // sampler
     //--------
-    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(nParticles, *pModelGraph_, p_rng));
-    pSampler_->SetResampleParams(rsType, essThreshold);
+    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(*pModelGraph_));
 
     std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact
     = ForwardSampler::NodeSamplerFactories().begin();
@@ -254,6 +252,13 @@ namespace Biips
     }
 
     pSampler_->Build();
+  }
+
+
+  void ModelTest::RunSMC(Size nParticles, Size rngSeed, const String & rsType, Scalar essThreshold, Bool showProgress, Size numBins)
+  {
+    Rng::Ptr p_rng(new Rng(rngSeed));
+
     if (verbose_>=2)
     {
       os_ << "Node sampler's sequence: " << std::endl;
@@ -274,7 +279,7 @@ namespace Biips
       os_ << "SMC sampler's progress: " << std::endl;
 
     // filtering
-    pSampler_->Initialize();
+    pSampler_->Initialize(nParticles, p_rng, rsType, essThreshold);
 
     initFilterAccumulators(nParticles, numBins);
     filterAccumulate(0);

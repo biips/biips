@@ -24,7 +24,7 @@ namespace Biips
   {
     const DimArray & mean_dim = *paramDims[0];
     const DimArray & prec_dim = *paramDims[1];
-    if ((mean_dim.IsVector() && prec_dim.IsSquared()))
+    if ((mean_dim.Drop().IsVector() && prec_dim.IsSquared()))
       return (mean_dim[0] == prec_dim[0]);
     else
       return false;

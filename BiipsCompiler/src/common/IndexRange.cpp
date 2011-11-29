@@ -12,6 +12,7 @@
 
 
 #include "common/IndexRange.hpp"
+#include "common/Error.hpp"
 
 namespace Biips
 {
@@ -29,6 +30,9 @@ namespace Biips
   template<>
   Types<IndexRange::IndexType>::Array IndexRange::getIndex<RowMajorOrder> (SizeType offset) const
   {
+    if (offset >= length_)
+      throw LogicError("IndexRange::getIndex. Offset exceeds length of range");
+
     Types<IndexType>::Array indices(lower_);
     for (Int i = lower_.size()-1; i >= 0; --i) // loop index is Int instead of Size because Size is unsigned int so --0 >= 0 (bad!)
     {
@@ -41,6 +45,9 @@ namespace Biips
   template<>
   Types<IndexRange::IndexType>::Array IndexRange::getIndex<ColumnMajorOrder> (SizeType offset) const
   {
+    if (offset >= length_)
+      throw LogicError("IndexRange::getIndex. Offset exceeds length of range");
+
     Types<IndexType>::Array indices(lower_);
     for (Size i = 0; i < lower_.size(); ++i)
     {
@@ -58,6 +65,9 @@ namespace Biips
     Size step = 1;
     for (Int i = indices.size()-1; i >= 0; --i) // loop index is Int instead of Size because Size is unsigned int so --0 >= 0 (bad!)
     {
+      if (indices[i] < lower_[i] || indices[i] > upper_[i])
+        throw LogicError("IndexRange::getOffset. Index outside of allowed range");
+
       offset += step * (indices[i] - lower_[i]);
       step *= dim_[i];
     }
@@ -71,6 +81,9 @@ namespace Biips
     Size step = 1;
     for (Size i = 0; i < indices.size(); ++i)
     {
+      if (indices[i] < lower_[i] || indices[i] > upper_[i])
+        throw LogicError("IndexRange::getOffset. Index outside of allowed range");
+
       offset += step * (indices[i] - lower_[i]);
       step *= dim_[i];
     }
