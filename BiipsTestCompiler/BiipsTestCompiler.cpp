@@ -35,7 +35,7 @@
 
 namespace Biips
 {
-  const String BIIPSTEST_CONFIG_FILE_NAME = "biipstest.cfg";
+  const String BIIPSTEST_CONFIG_FILE_NAME = "biipstestcompiler.cfg";
 
   std::map<String, std::map<IndexRange, MultiArray> > extractStat(Console & console, StatsTag tag,
       const Types<String>::Array & monitoredVar, const String & statName, Bool verbose, Bool smooth = false);
