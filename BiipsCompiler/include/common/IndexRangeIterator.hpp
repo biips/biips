@@ -29,13 +29,17 @@ namespace Biips
     typedef IndexRange::StorageOrderType StorageOrder;
   protected:
     const IndexRange range_;
-    Size offset_;
+    Size atend_;
+
+    template<typename StorageOrderType>
+    IndexRangeIterator & next(Size increment = 1);
+
+    //Forbid assignment
+    IndexRangeIterator & operator=(const IndexRange::Indices &);
 
   public:
     explicit IndexRangeIterator(const IndexRange & range)
-      : BaseType(range.GetIndex(0)), range_(range), offset_(0)
-    {
-    }
+      : BaseType(range.GetIndex(0)), range_(range), atend_(0) {}
 
     IndexRangeIterator & Next(Size increment = 1);
 

@@ -37,11 +37,11 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
+    const Graph & graph_;
     ///Number of particles
     Size nParticles_;
     ///The current iteration
     Size iter_;
-    const Graph & graph_;
     Rng::Ptr pRng_;
     Resampler::Ptr pResampler_;
 
@@ -70,6 +70,7 @@ namespace Biips
 
     void buildNodeIdSequence();
     void buildNodeSamplers();
+    void setResampleParams(const String & rsType, Scalar threshold);
     void mutateParticle(Particle & lastParticle);
     Scalar rescaleWeights();
     Scalar sumOfWeightsAndEss();
@@ -78,21 +79,21 @@ namespace Biips
     ForwardSampler(const ForwardSampler & from);
     ForwardSampler & operator= (const ForwardSampler & rhs);
 
-    static ResamplerTable & resamplerTable() { static ResamplerTable tab; return tab; };
+    static ResamplerTable & resamplerTable() { static ResamplerTable tab; return tab; }
 
   public:
     static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & NodeSamplerFactories();
 
-    ForwardSampler(Size nbParticles, Graph & graph, const Rng::Ptr & pRng);
+    explicit ForwardSampler(Graph & graph);
     virtual ~ForwardSampler() {}
 
-    Size NParticles() const { return nParticles_; };
-    Bool AtEnd() const { return iterNodeId_+1 == nodeIdSequence_.end(); };
+    Size NParticles() const;
+    Bool AtEnd() const { return iterNodeId_+1 == nodeIdSequence_.end(); }
     Size Iteration() const { return iter_; }
-    Size NIterations() const { return nodeSamplerSequence_.size(); };
+    Size NIterations() const { return nodeSamplerSequence_.size(); }
     Scalar ESS() const { return ess_; }
     Scalar LogNormConst() const { return logNormConst_; }
-    const Types<NodeId>::Array & SampledNodes() { return *iterNodeId_; };
+    const Types<NodeId>::Array & SampledNodes() { return *iterNodeId_; }
 
     Scalar GetNodeESS(NodeId nodeId) const;
 
@@ -103,12 +104,11 @@ namespace Biips
     void Build() { buildNodeIdSequence(); buildNodeSamplers(); built_ = true; }
     Bool Built() const { return built_; }
 
-    void SetResampleParams(const String & rsType, Scalar threshold);
-    void Initialize();
+    void Initialize(Size nbParticles, const Rng::Ptr & pRng, const String & rsType="stratified", Scalar threshold=0.5);
     void Iterate();
 
-    Bool Initialized() const { return initialized_; };
-    Bool Resampled() const { return resampled_; };
+    Bool Initialized() const { return initialized_; }
+    Bool Resampled() const { return resampled_; }
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;

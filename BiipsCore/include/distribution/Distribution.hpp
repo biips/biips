@@ -50,6 +50,8 @@ namespace Biips
 
     Bool CheckParamValues(const MultiArray::Array & paramValues) const;
 
+    virtual Bool CheckDensityParamValues(const MultiArray & x, const MultiArray::Array & paramValues) const;
+
     DimArray Dim(const Types<DimArray::Ptr>::Array & paramDims) const;
 
     MultiArray Sample(const MultiArray::Array & paramValues,

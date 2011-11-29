@@ -49,14 +49,12 @@ namespace Biips
     Bool SetSmoothTreeMonitor(NodeId nodeId);
     Bool SetSmoothMonitor(NodeId nodeId);
 
-    void SetResampleParam(const String & rsType, Scalar threshold);
-
     Bool SamplerBuilt() const { return pSampler_ && pSampler_->Built(); }
     const ForwardSampler & Sampler() const;
 
-    void BuildSampler(Size nParticles, const Rng::Ptr & pRng);
+    void BuildSampler();
 
-    void InitSampler();
+    void InitSampler(Size nParticles, const Rng::Ptr & pRng, const String & rsType, Scalar threshold);
     void IterateSampler();
 
     Bool SmootherInitialized() const { return pSmoother_ && pSmoother_->Initialized(); }

@@ -18,27 +18,36 @@
 namespace Biips
 {
   class NodeArray;
+  class Graph;
 
   class NodeArrayMonitor
   {
   protected:
     String name_;
     IndexRange range_;
+    Size nParticles_;
     MultiArray values_;
     MultiArray weights_;
     MultiArray ess_;
     MultiArray iterations_;
     MultiArray nodeIds_;
+    MultiArray discrete_;
+
+    template <typename StorageOrderType>
+    void addObservedNode(NodeId id, const IndexRange & subRange, const Graph & graph);
+    template <typename StorageOrderType>
+    void addMonitoredNode(NodeId id, const IndexRange & subRange, const Monitor::Ptr & pMonitor);
 
   public:
-    NodeArrayMonitor(const NodeArray & nodeArray, const std::map<NodeId, Monitor::Ptr> & monitorsMap);
-    NodeArrayMonitor(const NodeArray & nodeArray, const Monitor::Ptr & pMonitor);
+    NodeArrayMonitor(const NodeArray & nodeArray, const std::map<NodeId, Monitor::Ptr> & monitorsMap, Size nParticles, const Graph & graph);
+    NodeArrayMonitor(const NodeArray & nodeArray, const Monitor::Ptr & pMonitor, Size nParticles, const Graph & graph);
 
     const MultiArray & GetNodeIds() const { return nodeIds_; }
     const MultiArray & GetIterations() const { return iterations_; }
     const MultiArray & GetESS() const { return ess_; }
     const MultiArray & GetWeights() const { return weights_; }
     const MultiArray & GetValues() const { return values_; }
+    const MultiArray & GetDiscrete() const { return discrete_; }
   };
 
 }

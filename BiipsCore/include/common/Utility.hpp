@@ -53,6 +53,9 @@ namespace Biips
     return std::find(mask.begin(), mask.end(), true) != mask.end();
   }
 
+
+  String expandFileName(const char * s);
+
 }
 
 #endif /* BIIPS_UTILITY_HPP_ */

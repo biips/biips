@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     // Configuration file options parsing
     ifstream ifs(config_file_name.c_str());
     if (ifs.fail())
-      throw RuntimeError(String("Failed to open file ")+dot_file_name);
+      throw RuntimeError(String("Failed to open file ")+config_file_name);
 
     parsed_sources.push_back(po::parse_config_file(ifs, config_file_options, true));
     sources_names.push_back(config_file_name);
@@ -442,6 +442,12 @@ BOOST_AUTO_TEST_CASE( my_test )
         vector<Scalar> errors_smooth_new;
         vector<Scalar> log_norm_const_smc;
 
+        if (!console.BuildSampler(mut=="prior", verbosity * (n_smc==1 || verbosity>1)))
+          throw RuntimeError("Failed to build sampler.");
+
+        if (verbosity>0 && interactive && n_smc==1)
+          pressEnterToContinue();
+
         for (Size i_smc=0; i_smc<n_smc; ++i_smc)
         {
           // Build sampler
@@ -454,17 +460,11 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
-          if (!console.BuildSampler(n_part, smc_rng_seed, mut=="prior", verbosity * (n_smc==1 || verbosity>1)))
-            throw RuntimeError("Failed to build sampler.");
-
-          if (verbosity>0 && interactive && n_smc==1)
-            pressEnterToContinue();
-
           // Run sampler
           //----------------------
           Scalar log_norm_const;
           Bool verbose_run_smc = verbosity>1 || (verbosity>0 && n_smc==1);
-          if (!console.RunForwardSampler(resample_type, ess_threshold, log_norm_const, verbose_run_smc, verbose_run_smc))
+          if (!console.RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, log_norm_const, verbose_run_smc, verbose_run_smc))
             throw RuntimeError("Failed to run SMC sampler.");
 
           if (verbosity==1 && n_smc>1 && !do_smooth)

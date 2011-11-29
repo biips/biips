@@ -63,6 +63,8 @@ namespace Biips
     Bool ExtractSmoothTreePdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25) const;
     Bool ExtractSmoothPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
+    Bool DumpData(std::map<String, MultiArray> & dataMap) const;
+
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;

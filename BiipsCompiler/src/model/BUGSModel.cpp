@@ -384,6 +384,14 @@ namespace Biips
   }
 
 
+  Bool BUGSModel::DumpData(std::map<String, MultiArray> & dataMap) const
+  {
+    symbolTable_.ReadData(dataMap);
+
+    return true;
+  }
+
+
   Bool BUGSModel::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
@@ -398,7 +406,7 @@ namespace Biips
         throw LogicError(String("Monitored array ") + name + " does not exist in the symbol table.");
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(name), filterMonitorsMap_)
+          NodeArrayMonitor(symbolTable_.GetNodeArray(name), filterMonitorsMap_, pSampler_->NParticles(), *pGraph_)
       ));
     }
 
@@ -420,7 +428,7 @@ namespace Biips
         throw LogicError(String("Monitored array ") + name + " does not exist in the symbol table.");
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(name), pSmoothTreeMonitor_)
+          NodeArrayMonitor(symbolTable_.GetNodeArray(name), pSmoothTreeMonitor_, pSampler_->NParticles(), *pGraph_)
       ));
     }
 
@@ -442,7 +450,7 @@ namespace Biips
         throw LogicError(String("Monitored array ") + name + " does not exist in the symbol table.");
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(name), smoothMonitorsMap_)
+          NodeArrayMonitor(symbolTable_.GetNodeArray(name), smoothMonitorsMap_, pSampler_->NParticles(), *pGraph_)
       ));
     }
 
@@ -481,9 +489,16 @@ namespace Biips
       {
         ans += symTab_.GetName(id);
         ans += "\\n";
+        ans += BaseType::label(id);
+      }
+      else
+      {
+        ans += symTab_.GetName(id);
+        ans += "\\n";
+        ans += print(id);
       }
 
-      ans += BaseType::label(id);
+
 
       return ans;
     }

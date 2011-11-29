@@ -24,15 +24,22 @@ namespace Biips
 
   Bool Distribution::CheckParamValues(const MultiArray::Array & paramValues) const
   {
-    Types<DimArray::Ptr>::Array param_dims(paramValues.size());
-    for (Size i = 0; i<paramValues.size(); ++i)
-      param_dims[i] = paramValues[i].DimPtr();
-
-    if (!CheckParamDims(param_dims))
-      throw LogicError(String("Non-conforming parameters dimensions for distribution ") + name_);
+//    Types<DimArray::Ptr>::Array param_dims(paramValues.size());
+//    for (Size i = 0; i<paramValues.size(); ++i)
+//      param_dims[i] = paramValues[i].DimPtr();
+//
+//    if (!CheckParamDims(param_dims))
+//      throw LogicError(String("Non-conforming parameters dimensions for distribution ") + name_);
 
     return checkParamValues(paramValues);
   }
+
+
+  Bool Distribution::CheckDensityParamValues(const MultiArray & x, const MultiArray::Array & paramValues) const
+  {
+    return CheckParamValues(paramValues);
+  }
+
 
   DimArray Distribution::Dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
@@ -54,7 +61,7 @@ namespace Biips
   Scalar Distribution::LogDensity(const MultiArray & x, const MultiArray::Array & paramValues,
       const MultiArray::Pair & boundValues) const
   {
-    if (!CheckParamValues(paramValues))
+    if (!CheckDensityParamValues(x, paramValues))
       throw RuntimeError(String("Invalid parameters values in LogDensity method for distribution ") + name_);
 
     return logDensity(x, paramValues, boundValues);

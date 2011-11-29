@@ -58,6 +58,8 @@ namespace Biips
      */
     Bool CheckModel(const String & modelFileName, Bool verbose = true);
 
+    Bool GraphSize(Size & s);
+
     // FIXME add module manager and a load module by name function
     Bool LoadBaseModule(Bool verbose = true);
 
@@ -100,9 +102,10 @@ namespace Biips
      *
      * @returns true on success, false on failure
      */
-    Bool BuildSampler(Size nParticles, Size rng_seed, Bool prior, Size verbose = 1);
+    Bool BuildSampler(Bool prior, Size verbose = 1);
+    Bool SamplerBuilt();
 
-    Bool RunForwardSampler(const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose = true, Bool progressBar = true);
+    Bool RunForwardSampler(Size nParticles, Size smcRngSeed, const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose = true, Bool progressBar = true);
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
@@ -114,9 +117,18 @@ namespace Biips
     Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
     Bool ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
 
+    Bool DumpData(std::map<String, MultiArray> & dataMap);
+
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+
+    Bool DumpNodeIds(Types<NodeId>::Array & nodeIds);
+    Bool DumpNodeNames(Types<String>::Array & nodeNames);
+    Bool DumpNodeTypes(Types<NodeType>::Array & nodeTypes);
+    Bool DumpNodeObserved(Flags & nodeObserved);
+    Bool DumpNodeIterations(Types<Size>::Array & nodeIterations);
+    Bool DumpNodeSamplers(Types<String>::Array & nodeSamplers);
   };
 }
 

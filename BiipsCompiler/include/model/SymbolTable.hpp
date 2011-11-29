@@ -54,16 +54,27 @@ namespace Biips
 
     Bool Empty() const { return nodeArraysMap_.empty(); }
 
-    /*!
-     * Writes values from the given data table to the NodeArrays in the
-     * symbol table. All nodes whose values are set are considered as
-     * observed nodes and have the same value in all chains.
+    /**
+     * Creates constant nodes in all the NodeArrays in symbol table
+     * with values from the given data table.
      *
-     * @param data_table Data table from which values will be read.
+     * @param dataMap Data table from which values will be read.
      *
-     * @see NodeArray#setData
+     * @see NodeArray#SetData
      */
     void WriteData(std::map<String, MultiArray> const & dataMap);
+
+    /**
+     * Reads the current value of selected nodes in the symbol table and
+     * writes the result to the data table.
+     *
+     * @param data_table Data table to which results will be written.
+     * New entries will be created for the selected nodes.  However, a
+     * new entry is not created if, in the symbol table, all nodes
+     * corresponding to the selection are missing. Existing entries in
+     * the data table will be overwritten.
+     */
+    void ReadData(std::map<String, MultiArray> & dataMap) const;
   };
 
 }

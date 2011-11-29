@@ -14,12 +14,8 @@
 #include "sampler/NodesRelationVisitor.hpp"
 #include "graph/StochasticNode.hpp"
 #include "graph/LogicalNode.hpp"
-#include "functions/Multiply.hpp"
-#include "functions/Add.hpp"
+#include "functions/ArithmeticOperators.hpp"
 #include "functions/MatMult.hpp"
-#include "functions/Subtract.hpp"
-#include "functions/Divide.hpp"
-#include "functions/Neg.hpp"
 
 namespace Biips
 {

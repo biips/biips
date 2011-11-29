@@ -11,18 +11,17 @@
 #include "BiipsBase.hpp"
 #include "sampler/ForwardSampler.hpp"
 
-#include "functions/Multiply.hpp"
-#include "functions/Add.hpp"
+#include "functions/LogicalOperators.hpp"
+#include "functions/ComparisonOperators.hpp"
+#include "functions/ArithmeticOperators.hpp"
 #include "functions/MatMult.hpp"
-#include "functions/Subtract.hpp"
-#include "functions/Divide.hpp"
-#include "functions/Neg.hpp"
 #include "functions/Pow.hpp"
-#include "functions/Cos.hpp"
-#include "functions/Sqrt.hpp"
+#include "functions/IfElse.hpp"
+#include "functions/TrigonometricFunctions.hpp"
+#include "functions/UsualFunctions.hpp"
+#include "functions/Step.hpp"
 #include "functions/Transpose.hpp"
 #include "functions/Sum.hpp"
-#include "functions/Equal.hpp"
 
 #include "distributions/DNorm.hpp"
 #include "distributions/DNormVar.hpp"
@@ -58,19 +57,53 @@ namespace Biips
   void loadBaseModule(FunctionTable & funcTab, DistributionTable & distTab)
   {
     // TODO check returned boolean
-    funcTab.Insert(Multiply::Instance());
+    funcTab.Insert(And::Instance());
+    funcTab.Insert(Or::Instance());
+    funcTab.Insert(Not::Instance());
+
+    funcTab.Insert(GreaterThan::Instance());
+    funcTab.Insert(GreaterOrEqual::Instance());
+    funcTab.Insert(LessThan::Instance());
+    funcTab.Insert(LessOrEqual::Instance());
+    funcTab.Insert(Equal::Instance());
+    funcTab.Insert(NotEqual::Instance());
+
     funcTab.Insert(Add::Instance());
-    funcTab.Insert(MatMult::Instance());
     funcTab.Insert(Subtract::Instance());
+    funcTab.Insert(Multiply::Instance());
     funcTab.Insert(Divide::Instance());
+    funcTab.Insert(MatMult::Instance());
     funcTab.Insert(Neg::Instance());
-    funcTab.Insert(Pow::Instance());
+
     funcTab.Insert(PowInfix::Instance());
+    funcTab.Insert(Pow::Instance());
+
+    funcTab.Insert(IfElse::Instance());
+
     funcTab.Insert(Cos::Instance());
+    funcTab.Insert(Sin::Instance());
+    funcTab.Insert(Tan::Instance());
+    funcTab.Insert(ArcCos::Instance());
+    funcTab.Insert(ArcSin::Instance());
+    funcTab.Insert(ArcTan::Instance());
+    funcTab.Insert(Cosh::Instance());
+    funcTab.Insert(Sinh::Instance());
+    funcTab.Insert(Tanh::Instance());
+    funcTab.Insert(ArcCosh::Instance());
+    funcTab.Insert(ArcSinh::Instance());
+    funcTab.Insert(ArcTanh::Instance());
+
+    funcTab.Insert(Abs::Instance());
     funcTab.Insert(Sqrt::Instance());
+    funcTab.Insert(Exp::Instance());
+    funcTab.Insert(Log::Instance());
+    funcTab.Insert(Round::Instance());
+    funcTab.Insert(Trunc::Instance());
+
+    funcTab.Insert(Step::Instance());
+
     funcTab.Insert(Transpose::Instance());
     funcTab.Insert(Sum::Instance());
-    funcTab.Insert(Equal::Instance());
 
     // TODO check returned boolean
     distTab.Insert(DNorm::Instance());

@@ -24,12 +24,12 @@ namespace Biips
 
   Bool Function::CheckParamValues(const MultiArray::Array & paramValues) const
   {
-    Types<DimArray::Ptr>::Array param_dims(paramValues.size());
-    for (Size i = 0; i<paramValues.size(); ++i)
-      param_dims[i] = paramValues[i].DimPtr();
-
-    if (!CheckParamDims(param_dims))
-      throw LogicError(String("Non-conforming parameters dimensions for function ") + name_);
+//    Types<DimArray::Ptr>::Array param_dims(paramValues.size());
+//    for (Size i = 0; i<paramValues.size(); ++i)
+//      param_dims[i] = paramValues[i].DimPtr();
+//
+//    if (!CheckParamDims(param_dims))
+//      throw LogicError(String("Non-conforming parameters dimensions for function ") + name_);
 
     return checkParamValues(paramValues);
   };

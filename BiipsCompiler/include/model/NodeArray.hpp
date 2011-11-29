@@ -45,6 +45,8 @@ namespace Biips
     Bool findActiveIndices(Types<Size>::Array & ind, Size k,
         const IndexRange::Indices & lower, const DimArray & dim) const;
 
+    Bool allNodesMissing() const;
+
   public:
     NodeArray(const String & name, Graph & graph, const DimArray & dim);
 
@@ -59,7 +61,7 @@ namespace Biips
     // Accessors
     const IndexRange & Range() const { return range_; }
 
-    const IndexRange & GetRange(NodeId nodeId) const;
+    IndexRange GetRange(NodeId nodeId) const;
 
     NodeId GetNode(const IndexRange & targetRange) const;
 
@@ -67,12 +69,18 @@ namespace Biips
 
     Bool Contains(NodeId nodeId) const;
 
-    /*!
-     * Set data. If a value is
-     * given for an index with no node, then a new ConstantNode is created
-     * with that value.
+    /**
+     * Set data, creating a constant node for any non-missing value.  An
+     * exception is thrown if any of the non-missing values corresponds
+     * to an existing node in the array.
      */
-    void SetData(const MultiArray & value);//, Model & model);
+    void SetData(const MultiArray & value);
+
+    /**
+     * Gets the values of nodes that have been inserted into
+     * the array.
+     */
+    MultiArray GetData() const;
   };
 
 }
