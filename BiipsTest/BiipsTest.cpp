@@ -465,6 +465,8 @@ BOOST_AUTO_TEST_CASE( my_test )
         vector<Scalar> errors_smooth_new;
         vector<Scalar> log_norm_const_smc;
 
+        p_model_test->BuildSMC(mut=="prior");
+
         for (Size i_smc=0; i_smc<n_smc; ++i_smc)
         {
           p_model_test->ClearSMC();
@@ -474,7 +476,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (n_smc==1 && verbosity>0)
             cout << INDENT_STRING << "rng seed: " << smc_rng_seed << endl;
 
-          p_model_test->RunSMC(n_part, smc_rng_seed, mut=="prior", resample_type, ess_threshold, n_smc==1, num_bins);
+          p_model_test->RunSMC(n_part, smc_rng_seed, resample_type, ess_threshold, n_smc==1, num_bins);
 
           if (verbosity==1 && n_smc>1)
             ++(*p_show_progress);

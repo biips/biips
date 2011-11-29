@@ -215,7 +215,29 @@ namespace Biips
       }
     }
 
-    //FIXME: Give informative error message if we request invalid range
+    for (Size i = 0; i < size; ++i)
+    {
+      if (lower[i] > upper[i])
+      {
+        //Invalid range. We can't use the print method for Range
+        //objects to print it as we can't construct a Range object.
+        //So do it by hand
+        std::ostringstream ostr;
+        ostr << "[";
+        for (Size j = 0; j < size; ++j)
+        {
+          if (j > 0)
+            ostr << ",";
+          if (lower[j] == upper[j])
+            ostr << lower[j];
+          else
+            ostr << lower[j] << ":" << upper[j];
+        }
+        ostr << "]";
+        throw CompileError(pTree, String("Invalid range: ") + ostr.str());
+      }
+    }
+
     return IndexRange(lower, upper);
   }
 

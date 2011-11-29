@@ -50,7 +50,7 @@ namespace Biips
     if (nodeId == NULL_NODEID)
       throw LogicError(String("Attempt to insert NULL node at ") + name_ +
           print(targetRange));
-    if (graph_.GetNode(nodeId).Dim() != targetRange.Dim(true))
+    if (graph_.GetNode(nodeId).Dim().Drop() != targetRange.Dim(true))
       throw RuntimeError(String("Cannot insert node into ") + name_ +
           print(targetRange) + ". Dimension mismatch");
     if (!range_.Contains(targetRange))
@@ -197,7 +197,7 @@ namespace Biips
   }
 
 
-  const IndexRange & NodeArray::GetRange(NodeId nodeId) const
+  IndexRange NodeArray::GetRange(NodeId nodeId) const
   {
     //Look in the generated nodes first
     boost::bimap<NodeId, IndexRange>::left_const_iterator it = nodeIdRangeBimap_.left.find(nodeId);
@@ -240,19 +240,42 @@ namespace Biips
     // COPY: ********** to here **********
   }
 
-  void NodeArray::SetData(const MultiArray & value)//, Model & model)
+
+  Bool NodeArray::allNodesMissing() const
   {
-    // COPY: Copied an pasted from NodeArray::setData function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    for (Size i = 0; i < range_.Length(); ++i)
+    {
+      if(nodeIds_[i] != NULL_NODEID)
+        return false;
+    }
+    return true;
+  }
+
+
+  void NodeArray::SetData(const MultiArray & value)
+  {
     if (!(range_ == IndexRange(value.Dim())))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ") + Name());
 
-    Size N = value.Length();
+
+    // first if all values are not missing
+    // and no node have been inserted yet
+    if (!anyMissing(value) && allNodesMissing())
+    {
+      //Insert a new unique constant node holding
+      // all the values
+      NodeId cnode_id = graph_.AddConstantNode(value);
+      Insert(cnode_id, range_);
+      return;
+    }
+
+    // COPY: Copied an pasted from NodeArray::setData function of JAGS
+    // and then modified to fit Biips code
+    // COPY: ********** from here **********
     const ValArray & x = value.Values();
 
     //Gather all the nodes for which a data value is supplied
-    std::set<NodeId> set_nodes;
+//    std::set<NodeId> set_nodes; // from JAGS 2.1
     for (Size i = 0; i < range_.Length(); ++i)
     {
       if (x[i] != BIIPS_REALNA)
@@ -262,49 +285,66 @@ namespace Biips
           //Insert a new constant node
           ValArray::Ptr p_val(new ValArray(1, x[i]));
           NodeId cnode_id = graph_.AddConstantNode(P_SCALAR_DIM, p_val);
-          //model.addNode(cnode_id);
           Insert(cnode_id, IndexRange(range_.GetIndex(i)));
         }
         else
         {
-          //Existing node for which we must set value
-          set_nodes.insert(nodeIds_[i]);
+          // from JAGS 2.1
+//          //Existing node for which we must set value
+//          set_nodes.insert(nodeIds_[i]);
+          throw LogicError("Error in NodeArray::SetData"); // from JAGS 3.1
         }
       }
     }
 
-    for (std::set<NodeId>::const_iterator p = set_nodes.begin();
-        p != set_nodes.end(); ++p)
-    {
-      //Step through each node
-      NodeId node_id = *p;
-      Size len = graph_.GetNode(node_id).Dim().Length();
-      ValArray::Ptr p_node_value(new ValArray(len));
-
-      //Get vector of values for this node
-      for (Size i = 0; i < N; ++i)
-      {
-        if (nodeIds_[i] == node_id)
-        {
-          if (offsets_[i] > len)
-            throw LogicError("Invalid offset in NodeArray::setValue");
-          else
-            (*p_node_value)[offsets_[i]] = x[i];
-        }
-      }
-      // If there are any missing values, they must all be missing
-      Bool missing = ((*p_node_value)[0] == BIIPS_REALNA);
-      for (Size j = 1; j < len; ++j)
-      {
-        if (((*p_node_value)[j] == BIIPS_REALNA) != missing)
-          throw NodeError(node_id, "Values supplied for node are partially missing");
-      }
-      if (!missing)
-      {
-        graph_.SetObsValue(node_id, p_node_value);
-      }
-    }
+    // from JAGS 2.1
+//    Size N = value.Length();
+//    for (std::set<NodeId>::const_iterator p = set_nodes.begin();
+//        p != set_nodes.end(); ++p)
+//    {
+//      //Step through each node
+//      NodeId node_id = *p;
+//      Size len = graph_.GetNode(node_id).Dim().Length();
+//      ValArray::Ptr p_node_value(new ValArray(len));
+//
+//      //Get vector of values for this node
+//      for (Size i = 0; i < N; ++i)
+//      {
+//        if (nodeIds_[i] == node_id)
+//        {
+//          if (offsets_[i] > len)
+//            throw LogicError("Invalid offset in NodeArray::setValue");
+//          else
+//            (*p_node_value)[offsets_[i]] = x[i];
+//        }
+//      }
+//      // If there are any missing values, they must all be missing
+//      Bool missing = ((*p_node_value)[0] == BIIPS_REALNA);
+//      for (Size j = 1; j < len; ++j)
+//      {
+//        if (((*p_node_value)[j] == BIIPS_REALNA) != missing)
+//          throw NodeError(node_id, "Values supplied for node are partially missing");
+//      }
+//      if (!missing)
+//      {
+//        graph_.SetObsValue(node_id, p_node_value);
+//      }
+//    }
     // COPY: ********** to here **********
   }
 
+
+  MultiArray NodeArray::GetData() const
+  {
+    Size len = range_.Length();
+    ValArray::Ptr p_array_value(new ValArray(len, BIIPS_REALNA));
+    for (Size j = 0; j < len; ++j)
+    {
+      NodeId node_id = nodeIds_[j];
+      if (node_id != NULL_NODEID && graph_.GetObserved()[node_id])
+        (*p_array_value)[j] = (*(graph_.GetValues()[node_id]))[offsets_[j]];
+    }
+
+    return MultiArray(range_.Dim(false), p_array_value);
+  }
 }

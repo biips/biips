@@ -380,6 +380,10 @@ namespace Biips
 
   const MultiArrayPair NULL_MULTIARRAYPAIR;
 
+
+  Bool allMissing(const MultiArray & marray);
+  Bool anyMissing(const MultiArray & marray);
+
   // -----------------------------------------------------------------------------
   // MultiArray Types
   // -----------------------------------------------------------------------------

@@ -132,7 +132,8 @@ namespace Biips
     void PrintModelGraphviz() { pModelGraph_->PrintGraphviz(os_); };
 
     void ClearSMC();
-    virtual void RunSMC(Size nParticles, Size rngSeed, Bool prior = false, const String & rsType = "stratified", Scalar essThreshold = 0.5, Bool showProgress = true, Size numBins = 40);
+    virtual void BuildSMC(Bool prior = false);
+    virtual void RunSMC(Size nParticles, Size rngSeed, const String & rsType = "stratified", Scalar essThreshold = 0.5, Bool showProgress = true, Size numBins = 40);
 
     virtual void PlotResults(const String & plotFileName = "") const = 0;
 

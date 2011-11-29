@@ -13,7 +13,7 @@ data <- list(t.max = t.max,
              var.y = var.y)
 
 # model
-biips <- biips.model("/home/adrien-inria/workspace/biips/branches/0.06/RBiips/hmm_1d_non_lin.bug", data)
+biips <- biips.model("/home/adrien-inria/workspace/biips/trunk/RBiips/hmm_1d_non_lin.bug", data)
 
 # monitor
 type <- c("filtering", "smoothing", "backward.smoothing")

@@ -30,6 +30,7 @@ namespace Biips
   protected:
     DBeta() : BaseType("dbeta", 2, DIST_PROPORTION, false) {}
     virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const;
 
     virtual MathDistType mathDist(const MultiArray::Array & paramValues) const;
     virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const;

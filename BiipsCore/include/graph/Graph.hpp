@@ -71,7 +71,7 @@ namespace Biips
     StochasticParentGraph stochasticParentGraph_;
     StochasticChildrenGraph stochasticChildrenGraph_;
 
-    Types<NodeId>::Array topoOrder_;
+    Types<NodeId>::Array topoSort_;
 
     Bool builtFlag_;
 
@@ -106,7 +106,7 @@ namespace Biips
     Types<StochasticParentNodeIdIterator>::Pair GetStochasticParents(NodeId nodeId) const;
     Types<StochasticChildrenNodeIdIterator>::Pair GetStochasticChildren(NodeId nodeId) const;
 
-    Types<NodeId>::ConstIteratorPair GetNodes() const;
+    Types<NodeId>::ConstIteratorPair GetSortedNodes() const;
 
     Size GetSize() const { return boost::num_vertices(fullGraph_); };
     Bool Empty() const { return boost::num_vertices(fullGraph_) == 0; };
@@ -131,9 +131,10 @@ namespace Biips
     Node const & GetNode(NodeId nodeId) const { return *boost::get(boost::vertex_node_ptr, fullGraph_, nodeId); };
     Node const & operator[] (NodeId nodeId) const { return GetNode(nodeId); };
 
+    Size GetRank(NodeId nodeId) const;
+
     // TODO remove from the class
     void PrintGraph(std::ostream & os = std::cout) const;
-    void PrintTopoOrder(std::ostream & os = std::cout) const;
 
     template<typename VertexWriter>
     void PrintGraphviz(std::ostream & os, VertexWriter vw) const;

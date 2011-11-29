@@ -73,6 +73,15 @@ namespace Biips
   }
 
 
+  Bool Monitor::GetNodeDiscrete(NodeId id) const
+  {
+    if (!Contains(id))
+      throw LogicError("Can not get node ess: Node is not monitored.");
+
+    return nodeDiscreteMap_.at(id);
+  }
+
+
   Types<NodeId>::Array Monitor::GetNodes() const
   {
     Types<NodeId>::Array nodes(particleValuesMap_.size());
@@ -148,7 +157,7 @@ namespace Biips
   }
 
 
-  void FilterMonitor::AddNode(NodeId nodeId, const Types<Particle>::Array & particles, Size iter)
+  void FilterMonitor::AddNode(NodeId nodeId, const Types<Particle>::Array & particles, Size iter, Bool discrete)
   {
     if (Contains(nodeId))
       throw LogicError("Can not add node: it has already been added in the Monitor.");
@@ -158,6 +167,7 @@ namespace Biips
       particleValuesMap_[nodeId][i] = particles[i].GetValue()[nodeId];
 
     nodeIterationMap_[nodeId] = iter;
+    nodeDiscreteMap_[nodeId] = discrete;
   }
 
 
@@ -177,5 +187,6 @@ namespace Biips
     particleValuesMap_[nodeId].assign(filterMonitor.GetNodeValues(nodeId).begin(), filterMonitor.GetNodeValues(nodeId).end());
 
     nodeIterationMap_[nodeId] = filterMonitor.GetNodeSamplingIteration(nodeId);
+    nodeDiscreteMap_[nodeId] = filterMonitor.GetNodeDiscrete(nodeId);
   };
 }

@@ -23,6 +23,19 @@ namespace Biips
   }
 
 
+  Bool DBeta::checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const
+  {
+    if (checkParamValues(paramValues))
+    {
+      Scalar alpha = paramValues[0].ScalarView();
+      Scalar beta = paramValues[1].ScalarView();
+      return !(x==0 && alpha<1) && !(x==1 && beta<1);
+    }
+    else
+      return false;
+  }
+
+
   DBeta::MathDistType DBeta::mathDist(const MultiArray::Array & paramValues) const
   {
     Scalar alpha = paramValues[0].ScalarView();

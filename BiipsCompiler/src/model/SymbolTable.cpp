@@ -107,12 +107,6 @@ namespace Biips
       par_names[i] = GetName(*it_parents);
 
     return deparse(nodeId, *(model_.GraphPtr()), par_names);
-
-    // FIXME
-//    if (it_table == nodeArraysMap_.end())
-//      throw RuntimeError(String("Unable to find Node ") + print(nodeId) + " in the symbol table.");
-//
-//    return String();
   }
 
 
@@ -129,6 +123,29 @@ namespace Biips
           throw RuntimeError(String("Dimension mismatch in values supplied for ") + name);
 
         array.SetData(p->second);
+      }
+    }
+  }
+
+
+  void SymbolTable::ReadData(std::map<String, MultiArray> & dataMap) const
+  {
+    std::map<String, NodeArray::Ptr>::const_iterator it_table;
+    for (it_table = nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
+    {
+      /* Create a new MultiArray to hold the values from the symbol table */
+      MultiArray read_values = it_table->second->GetData();
+      /* Only write to the data table if we can find at least one
+             non-missing value */
+      if (!allMissing(read_values))
+      {
+        const String & name = it_table->first;
+        if (dataMap.find(name) != dataMap.end())
+        {
+          //Replace any existing entry
+          dataMap.erase(name);
+        }
+        dataMap.insert(std::make_pair(name, read_values));
       }
     }
   }

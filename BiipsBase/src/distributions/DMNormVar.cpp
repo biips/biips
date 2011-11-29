@@ -24,7 +24,7 @@ namespace Biips
   {
     const DimArray & left = *paramDims[0];
     const DimArray & right = *paramDims[1];
-    if ((left.IsVector() && right.IsSquared()))
+    if ((left.Drop().IsVector() && right.IsSquared()))
       return (left[0] == right[0]);
     else
       return false;
