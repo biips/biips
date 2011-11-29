@@ -1,4 +1,4 @@
-# COPY: Nearly copied and pasted from rjags module file: jags.R
+# COPY: Adapted from rjags module file: jags.R
 
 set.verbosity <- function(level=1)
 {
@@ -81,9 +81,37 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
   
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
 
+  model.data <- .Call("get_data", p, PACKAGE="RBiips")
   model.code <- readLines(file, warn=FALSE)
   model <- list("ptr" = function() {p},
                 "model" = function() {model.code},
+                "dot" = function(dot.file) {
+                  .Call("print_graphviz", p, dot.file, PACKAGE="RBiips")
+                  invisible(NULL)
+                },
+                "data" = function() {model.data},
+                "nodes" = function(type, observed) {
+                   sorted.nodes <- data.frame(.Call("get_sorted_nodes", p, PACKAGE="RBiips"))
+                   
+                   if(.Call("is_sampler_built", p, PACKAGE="RBiips")) {
+                     samplers <- data.frame(.Call("get_node_samplers", p, PACKAGE="RBiips"))
+                     sorted.nodes <- cbind(sorted.nodes, samplers)
+                   }
+                   if(!missing(type)) {
+                     if(!is.character(type) || !is.atomic(type)) {
+                       stop("Invalid type argument.");
+                     }
+                     type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
+                     sorted.nodes <- sorted.nodes[sorted.nodes["type"]==type,]
+                   }
+                   if(!missing(observed)) {
+                     if(!is.logical(observed) || !is.atomic(observed)) {
+                       stop("Invalid observed argument.");
+                     }
+                     sorted.nodes <- sorted.nodes[sorted.nodes["observed"]==observed,]
+                   }
+                   return(sorted.nodes);
+                  },
                 "recompile" = function() {
                   ## Clear the console
                   .Call("clear_console", p, PACKAGE="RBiips")
@@ -119,17 +147,17 @@ print.biips <- function(x, ...)
   model <- x$model()
   for (i in 1:length(model)) {
     cat(model[i],"\n",sep="")
-}
+  }
 
-#   data <- x$data()
-#   full <- !sapply(lapply(data, is.na), any)
-#   if (any(full)) {
-#     cat("Fully observed variables:\n", names(data)[full], "\n")
-#   }
-#   part <- !full & !sapply(lapply(data, is.na), all)
-#   if (any(part)) {
-#     cat("Partially observed variables:\n", names(data)[part], "\n")
-#   }
+  data <- x$data()
+  full <- !sapply(lapply(data, is.na), any)
+  if (any(full)) {
+    cat("\n\nFully observed variables:\n", names(data)[full], "\n")
+  }
+  part <- !full & !sapply(lapply(data, is.na), all)
+  if (any(part)) {
+    cat("\nPartially observed variables:\n", names(data)[part], "\n")
+  }
 }
 
 
@@ -201,9 +229,9 @@ parse.varnames <- function(varnames)
 }
 
 
-monitor.biips <- function(model, variable.names, type="backward.smoothing")
+monitor.biips <- function(obj, variable.names, type="backward.smoothing")
 {
-  if (!is.biips(model))
+  if (!is.biips(obj))
     stop("Invalid BIIPS model.")
   
   if (!is.character(variable.names) || length(variable.names) == 0)
@@ -214,28 +242,46 @@ monitor.biips <- function(model, variable.names, type="backward.smoothing")
   type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
   if ("filtering" %in% type)
   {
-#     .Call("set_filter_monitors", model$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_filter_monitors", model$ptr(), pn$names, PACKAGE="RBiips")
+#     .Call("set_filter_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    .Call("set_filter_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
   }
   if ("smoothing" %in% type)
   {
-#     .Call("set_smooth_tree_monitors", model$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_smooth_tree_monitors", model$ptr(), pn$names, PACKAGE="RBiips")
+#     .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
   }
   if ("backward.smoothing" %in% type)
   {
-#     .Call("set_smooth_monitors", model$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_smooth_monitors", model$ptr(), pn$names, PACKAGE="RBiips")
+#     .Call("set_smooth_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    .Call("set_smooth_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
   }
   invisible(NULL)
 }
 
 
-run.biips <- function(model, n.part, backward=TRUE,
-                      rs.thres = 0.5, rs.type = "stratified",
-                      smc.rng.seed, proposal= "auto")
+build.biips <- function(obj, proposal= "auto")
 {
-  if (!is.biips(model))
+  if (!is.biips(obj))
+    stop("Invalid BIIPS model")
+      
+  if (!is.character(proposal) || !is.atomic(proposal)) {
+    stop("Invalid proposal argument")
+  }
+  proposal <- match.arg(proposal, c("auto",
+                                  "prior"))
+    
+  ## build smc sampler
+  .Call("build_smc_sampler", obj$ptr(), proposal=="prior", PACKAGE="RBiips")
+  
+  invisible(NULL)
+}
+
+
+run.biips <- function(obj, n.part, backward=TRUE,
+                      rs.thres = 0.5, rs.type = "stratified",
+                      smc.rng.seed)
+{
+  if (!is.biips(obj))
     stop("Invalid BIIPS model")
       
   if (!is.numeric(n.part) || !is.atomic(n.part) || n.part < 1) {
@@ -260,41 +306,38 @@ run.biips <- function(model, n.part, backward=TRUE,
   if (!is.integer(smc.rng.seed) || !is.atomic(smc.rng.seed) || smc.rng.seed < 0) {
     stop("Invalid smc.rng.seed argument")
   }
-  if (!is.character(proposal) || !is.atomic(proposal)) {
-    stop("Invalid proposal argument")
-  }
-  proposal <- match.arg(proposal, c("auto",
-                                  "prior"))
                                     
   if (backward)
   {
-    .Call("set_default_monitors", model$ptr(), PACKAGE="RBiips")
+    .Call("set_default_monitors", obj$ptr(), PACKAGE="RBiips")
   }
   ## build smc sampler
-  .Call("build_smc_sampler", model$ptr(), as.integer(n.part), smc.rng.seed, proposal=="prior", PACKAGE="RBiips")
+  if (!.Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")) {
+    .Call("build_smc_sampler", obj$ptr(), "auto", PACKAGE="RBiips")
+  }
   
   ## run smc sampler
-  log.norm.const <- .Call("run_smc_sampler", model$ptr(), rs.thres, rs.type, PACKAGE="RBiips")
+  log.norm.const <- .Call("run_smc_sampler", obj$ptr(), as.integer(n.part), smc.rng.seed, rs.thres, rs.type, PACKAGE="RBiips")
   
-  results <- .Call("get_filter_monitors", model$ptr(), PACKAGE="RBiips")
+  results <- .Call("get_filter_monitors", obj$ptr(), PACKAGE="RBiips")
   
   results[["log.norm.const"]] <- log.norm.const
   
-  mon <- .Call("get_smooth_tree_monitors", model$ptr(), PACKAGE="RBiips")
+  mon <- .Call("get_smooth_tree_monitors", obj$ptr(), PACKAGE="RBiips")
   for (n in names(mon))
     results[[n]] <- c(results[[n]], mon[[n]])
   
   if (backward)
   {
     ## run backward smoother
-    .Call("run_backward_smoother", model$ptr(), PACKAGE="RBiips")
-    mon <- .Call("get_smooth_monitors", model$ptr(), PACKAGE="RBiips")
+    .Call("run_backward_smoother", obj$ptr(), PACKAGE="RBiips")
+    mon <- .Call("get_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
     for (n in names(mon))
       results[[n]] <- c(results[[n]], mon[[n]])
   }
   
 #   for (i in seq(along=variable.names)) {
-#     .Call("clear_monitor", model$ptr(), pn$names[i], pn$lower[[i]],
+#     .Call("clear_monitor", obj$ptr(), pn$names[i], pn$lower[[i]],
 #           pn$upper[[i]], type, PACKAGE="RBiips")
 #   }
 

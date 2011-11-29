@@ -39,7 +39,11 @@ mean.particles <- function(x, ...)
       by <- len
       to <- len*(n.part-1)+d
       indvec <- seq(from,to,by)
-      m[d] <- weighted.mean(x[[t]]$values[indvec], x[[t]]$weights[indvec], ...)
+#       if (x[[t]]$discrete) {
+#         m[d] <- NA
+#       } else {
+        m[d] <- weighted.mean(x[[t]]$values[indvec], x[[t]]$weights[indvec], ...)
+#       }
     }
     ans[[names(x)[t]]] <- list("Mean"=m)
   }
@@ -47,13 +51,22 @@ mean.particles <- function(x, ...)
 }
 
 
-weighted.var <- function(x, w, na.rm = FALSE)
+weighted.var <- function(x, w = NULL, norm.w = FALSE, na.rm = FALSE)
 {
-  if (na.rm) {
-      w <- w[i <- !is.na(x)]
-      x <- x[i]
+  if (!length(w)) {
+    if (na.rm) 
+      x <- x[!is.na(x)]
+    return(var(x))
   }
-  sum.w <- sum(w)
+  if (na.rm) {
+    w <- w[i <- !is.na(x)]
+    x <- x[i]
+  }
+  if (norm.w) {
+    sum.w <- sum(w)
+  } else {
+    sum.w <- 1
+  }
   sum.w2 <- sum(w^2)
   mean.w <- sum(x * w) / sum.w
   
@@ -80,61 +93,11 @@ var.particles <- function(x, ...)
       by <- len
       to <- len*(n.part-1)+d
       indvec <- seq(from,to,by)
-      mean.var <- weighted.var(x[[t]]$values[indvec], x[[t]]$weights[indvec], ...)
+      mean.var <- weighted.var(x[[t]]$values[indvec], x[[t]]$weights[indvec], norm.w = FALSE, ...)
       m[d] <- mean.var[["Mean"]]
       v[d] <- mean.var[["Var."]]
     }
     ans[[names(x)[t]]] <- list("Mean"=m, "Var."=v)
-  }
-  return(ans)
-}
-
-
-min.particles <- function(x, ...)
-{
-  ans <- list()
-  for (t in seq(along=x))
-  {
-    ndim <- length(dim(x[[t]]$values))
-    n.part <- dim(x[[t]]$values)[ndim]
-    len <- length(x[[t]]$values) / n.part
-    
-    m <- array(dim=dim(x[[t]]$values)[-ndim])
-    
-    for (d in 1:len)
-    {
-      from <- d
-      by <- len
-      to <- len*(n.part-1)+d
-      indvec <- seq(from,to,by)
-      m[d] <- min(x[[t]]$values[indvec], ...)
-    }
-    ans[[names(x)[t]]] <- list("Min."=m)
-  }
-  return(ans)
-}
-
-
-max.particles <- function(x, ...)
-{
-  ans <- list()
-  for (t in seq(along=x))
-  {
-    ndim <- length(dim(x[[t]]$values))
-    n.part <- dim(x[[t]]$values)[ndim]
-    len <- length(x[[t]]$values) / n.part
-    
-    m <- array(dim=dim(x[[t]]$values)[-ndim])
-    
-    for (d in 1:len)
-    {
-      from <- d
-      by <- len
-      to <- len*(n.part-1)+d
-      indvec <- seq(from,to,by)
-      m[d] <- max(x[[t]]$values[indvec], ...)
-    }
-    ans[[names(x)[t]]] <- list("Max."=m)
   }
   return(ans)
 }
@@ -243,11 +206,11 @@ diagnostic.particles <- function(x, ess.min=30)
 get.index <- function(offset, dim)
 {
   ind <- rep(1, length(dim))
-  
-  for (i in length(dim):1)
+  offset <- offset-1
+  for (i in 1:length(dim))
   {
-    ind[i] <- ind[i] + (offset-1) %% dim[i];
-    offset <- (offset-1) %/% dim[i];
+    ind[i] <- ind[i] + (offset) %% dim[i];
+    offset <- offset %/% dim[i];
   }
   return(ind)
 }
