@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [[ -s $LD_LIBRARY_PATH ]]
-then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../BiipsCore/$1:../BiipsBase/$1
-else export LD_LIBRARY_PATH=../BiipsCore/$1:../BiipsBase/$1
-fi
-
 ntests=0
 nfailed=0
 start_time=`date +%s`
@@ -12,7 +7,7 @@ start_time=`date +%s`
 for cfg in bench/*.cfg; do
 	ntests=`expr $ntests + 1`
 	
-	$1/BiipsTest $cfg --repeat-smc=$2 $3 $4 $5
+	bin/BiipsTest $cfg $1 $2 $3 $4 $5
 	
 	if [ $? -ne 0 ]; then
 	{

@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         ;
 
     // Hidden options, will be allowed both on command line and
-    // in config file, but will not be show to the user.
+    // in config file, but will not be shown to the user.
     po::options_description hidden("Hidden options");
     hidden.add_options()
         ("cfg", po::value<String>(&config_file_name)->default_value(BIIPSTEST_CONFIG_FILE_NAME), "configuration file name.")
@@ -217,14 +217,19 @@ BOOST_AUTO_TEST_CASE( my_test )
     }
 
     // Configuration file options parsing
-    ifstream ifs(config_file_name.c_str());
-    parsed_sources.push_back(po::parse_config_file(ifs, config_file_options, true));
-    sources_names.push_back(config_file_name);
+    if (vm.count("cfg"))
+    {
+      ifstream ifs(config_file_name.c_str());
+      if (ifs.fail())
+        boost::throw_exception(po::error(String("Failed not open file: ")+config_file_name));
+      parsed_sources.push_back(po::parse_config_file(ifs, config_file_options, true));
+      sources_names.push_back(config_file_name);
 
-    const po::parsed_options & parsed = parsed_sources.back();
+      const po::parsed_options & parsed = parsed_sources.back();
 
-    store(parsed, vm);
-    notify(vm);
+      store(parsed, vm);
+      notify(vm);
+    }
 
 #ifdef BIIPS_DEBUG_ON
     if (parsed.options.size()>0)
