@@ -229,17 +229,20 @@ BOOST_AUTO_TEST_CASE( my_test )
     }
 
     // Configuration file options parsing
-    ifstream ifs(config_file_name.c_str());
-    if (ifs.fail())
-      throw RuntimeError(String("Failed to open file ")+config_file_name);
+    if (vm.count("cfg"))
+    {
+      ifstream ifs(config_file_name.c_str());
+      if (ifs.fail())
+        throw RuntimeError(String("Failed to open file ")+config_file_name);
 
-    parsed_sources.push_back(po::parse_config_file(ifs, config_file_options, true));
-    sources_names.push_back(config_file_name);
+      parsed_sources.push_back(po::parse_config_file(ifs, config_file_options, true));
+      sources_names.push_back(config_file_name);
 
-    const po::parsed_options & parsed = parsed_sources.back();
+      const po::parsed_options & parsed = parsed_sources.back();
 
-    store(parsed, vm);
-    notify(vm);
+      store(parsed, vm);
+      notify(vm);
+    }
 
     // Store unregistered
     vector<String> monitored_var;
