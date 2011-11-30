@@ -356,7 +356,7 @@ RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  Bool prior_flag = Rcpp::as<Size>(prior);
+  Bool prior_flag = Rcpp::as<Bool>(prior);
 
   if (verbosity>0)
   {
@@ -370,6 +370,16 @@ RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
     throw RuntimeError("Failed to build sampler.");
 
   VOID_END_RBIIPS
+}
+
+
+RcppExport SEXP is_sampler_built(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+  return Rcpp::wrap(p_console->SamplerBuilt());
+  END_RBIIPS
 }
 
 
@@ -605,17 +615,6 @@ RcppExport SEXP get_sorted_nodes(SEXP pConsole)
   }
 
   return nodes_data_frame;
-  END_RBIIPS
-}
-
-
-RcppExport SEXP is_sampler_built(SEXP pConsole)
-{
-  BEGIN_RBIIPS
-  checkConsole(pConsole);
-  Rcpp::XPtr<Console> p_console(pConsole);
-
-  return Rcpp::wrap(p_console->SamplerBuilt());
   END_RBIIPS
 }
 

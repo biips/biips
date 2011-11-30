@@ -313,7 +313,7 @@ run.biips <- function(obj, n.part, backward=TRUE,
   }
   ## build smc sampler
   if (!.Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")) {
-    .Call("build_smc_sampler", obj$ptr(), "auto", PACKAGE="RBiips")
+    .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
   }
   
   ## run smc sampler
