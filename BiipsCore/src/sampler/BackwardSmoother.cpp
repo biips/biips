@@ -225,7 +225,7 @@ namespace Biips
 
     featuresAcc.Init(graph_.GetNode(nodeId).DimPtr());
     for(Size i=0; i < last_monitor.NParticles(); i++)
-      featuresAcc.Push(last_monitor.GetNodeValues(nodeId)[i], weights_[i]);
+      featuresAcc.Push(*(last_monitor.GetNodeValues(nodeId)[i]), weights_[i]);
   }
 
 
