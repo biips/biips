@@ -136,7 +136,7 @@ namespace Biips
     featuresAcc.Init(pDim);
 
     for(Size i=0; i < particleValuesMap_.at(nodeId).size(); ++i)
-      featuresAcc.Push(particleValuesMap_.at(nodeId)[i], weights_[i]);
+      featuresAcc.Push(*(particleValuesMap_.at(nodeId)[i]), weights_[i]);
   }
 
 

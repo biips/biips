@@ -1,12 +1,12 @@
 //                                               -*- C++ -*-
 /*! \file Accumulator.hpp
- * \brief
- *
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
- */
+* \brief
+*
+* \author  $LastChangedBy$
+* \date    $LastChangedDate$
+* \version $LastChangedRevision$
+* Id:      $Id$
+*/
 
 #ifndef BIIPS_ACCUMULATOR_HPP_
 #define BIIPS_ACCUMULATOR_HPP_
@@ -81,7 +81,7 @@ namespace Biips
     PDF,
     QUANTILES,
     CDF,
-    MAX_PDF
+    MODE
   };
 
 
@@ -137,6 +137,7 @@ namespace Biips
     void Push(Scalar position, Scalar value);
     void Normalize();
   };
+
 
   class ScalarAccumulator
   {
@@ -207,60 +208,6 @@ namespace Biips
   };
 
 
-  class ElementAccumulator
-  {
-  public:
-    typedef MultiArray::StorageType StorageType;
-
-    typedef ElementAccumulator SelfType;
-    typedef Types<SelfType>::Ptr Ptr;
-    typedef acc::accumulator_set<StorageType,
-    acc::features<Tags::Count, Tags::Sum, Tags::SumOfWeights,
-    Tags::Mean, Tags::Variance, Tags::Skewness, Tags::Kurtosis,
-    Tags::Moment2, Tags::Moment3, Tags::Moment4, Tags::Moment5>,
-    Scalar> AccType;
-
-  protected:
-    AccType acc_;
-    DimArray::Ptr pDim_;
-    Bool dimDefined_;
-
-    std::map<StatsTag, Bool> featuresMap_;
-
-    void drop(StatsTag tag);
-
-  public:
-    ElementAccumulator();
-
-    void ClearFeatures();
-    template<typename InputIterator>
-    void AddFeatures(InputIterator first, InputIterator last)
-    {
-      for (InputIterator it_feat = first; it_feat != last; ++it_feat)
-        AddFeature(*it_feat);
-    }
-    void AddFeature(StatsTag feat) { if (featuresMap_.find(feat) != featuresMap_.end()) featuresMap_[feat] = true; }
-    void RemoveFeature(StatsTag feat) { if (featuresMap_.find(feat) != featuresMap_.end()) featuresMap_[feat] = false; }
-
-    void Init(const DimArray::Ptr & pDim);
-
-    void Push(const StorageType & value, Scalar weight) { acc_(value, acc::weight = weight); }
-    void Push(const Types<StorageType>::Ptr & pValue, Scalar weight) { acc_(*pValue, acc::weight = weight); }
-
-    Size Count() const { return acc::count(acc_); }; // TODO throw exception
-    Scalar SumOfWeights() const { return acc::sum_of_weights(acc_); }; // TODO throw exception
-    MultiArray Sum() const { return MultiArray(pDim_, acc::weighted_sum(acc_)); }; // TODO check dimDefined_  // TODO throw exception
-    MultiArray Mean() const { return MultiArray(pDim_, acc::weighted_mean(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    MultiArray Variance() const { return MultiArray(pDim_, acc::weighted_variance(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    template<Size Order>
-    MultiArray Moment() const { return MultiArray(pDim_, acc::weighted_moment<Order>(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    MultiArray Skewness() const { return MultiArray(pDim_, acc::weighted_skewness(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-    MultiArray Kurtosis() const { return MultiArray(pDim_, acc::weighted_kurtosis(acc_)); }; // TODO check dimDefined_ // TODO throw exception
-  };
-
-
-
-
   class DiscreteScalarAccumulator
   {
   public:
@@ -304,9 +251,59 @@ namespace Biips
     Scalar Max() const { return acc::max(acc_); }; // TODO throw exception
     const DiscreteScalarHistogram & Pdf(); // TODO throw exception
     DiscreteScalarHistogram Cdf(); // TODO throw exception
-    Scalar MaxPdf() const { return hist_.MaxFreq(); }; // TODO throw exception
+    Scalar Mode() const { return hist_.MaxFreq(); }; // TODO throw exception
   };
 
+
+  class ElementAccumulator
+  {
+  public:
+    typedef MultiArray::StorageType StorageType;
+
+    typedef ElementAccumulator SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+    typedef acc::accumulator_set<StorageType,
+    acc::features<Tags::Count, Tags::Sum, Tags::SumOfWeights,
+    Tags::Mean, Tags::Variance, Tags::Skewness, Tags::Kurtosis,
+    Tags::Moment2, Tags::Moment3, Tags::Moment4, Tags::Moment5>,
+    Scalar> AccType;
+
+  protected:
+    AccType acc_;
+    DimArray::Ptr pDim_;
+    Bool dimDefined_;
+
+    std::map<StatsTag, Bool> featuresMap_;
+
+    void drop(StatsTag tag);
+
+  public:
+    ElementAccumulator();
+
+    void ClearFeatures();
+    template<typename InputIterator>
+    void AddFeatures(InputIterator first, InputIterator last)
+    {
+      for (InputIterator it_feat = first; it_feat != last; ++it_feat)
+        AddFeature(*it_feat);
+    }
+    void AddFeature(StatsTag feat) { if (featuresMap_.find(feat) != featuresMap_.end()) featuresMap_[feat] = true; }
+    void RemoveFeature(StatsTag feat) { if (featuresMap_.find(feat) != featuresMap_.end()) featuresMap_[feat] = false; }
+
+    void Init(const DimArray::Ptr & pDim);
+
+    void Push(const StorageType & value, Scalar weight) { acc_(value, acc::weight = weight); }
+
+    Size Count() const { return acc::count(acc_); }; // TODO throw exception
+    Scalar SumOfWeights() const { return acc::sum_of_weights(acc_); }; // TODO throw exception
+    MultiArray Sum() const { return MultiArray(pDim_, acc::weighted_sum(acc_)); }; // TODO check dimDefined_  // TODO throw exception
+    MultiArray Mean() const { return MultiArray(pDim_, acc::weighted_mean(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Variance() const { return MultiArray(pDim_, acc::weighted_variance(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    template<Size Order>
+    MultiArray Moment() const { return MultiArray(pDim_, acc::weighted_moment<Order>(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Skewness() const { return MultiArray(pDim_, acc::weighted_skewness(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+    MultiArray Kurtosis() const { return MultiArray(pDim_, acc::weighted_kurtosis(acc_)); }; // TODO check dimDefined_ // TODO throw exception
+  };
 
 }
 
