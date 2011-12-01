@@ -202,6 +202,106 @@ namespace Biips
   }
 
 
+  DiscreteScalarAccumulator::DiscreteScalarAccumulator()
+  {
+    featuresMap_[SUM_OF_WEIGHTS] = false;
+    featuresMap_[MIN] = false;
+    featuresMap_[MAX] = false;
+    featuresMap_[PDF] = false;
+    featuresMap_[CDF] = false;
+    featuresMap_[MODE] = false;
+
+    droppableFeatures_.insert(SUM_OF_WEIGHTS);
+    droppableFeatures_.insert(MIN);
+    droppableFeatures_.insert(MAX);
+  }
+
+
+  void DiscreteScalarAccumulator::ClearFeatures()
+  {
+    for (std::map<StatsTag, Bool>::iterator it_feat = featuresMap_.begin(); it_feat != featuresMap_.end(); ++it_feat )
+      it_feat->second = false;
+    hist_ = DiscreteScalarHistogram();
+  }
+
+
+  void DiscreteScalarAccumulator::drop(StatsTag tag)
+   {
+     switch(tag)
+     {
+       case SUM_OF_WEIGHTS:
+         acc_.drop<Tags::SumOfWeights>();
+         break;
+       case MIN:
+         acc_.drop<Tags::Min>();
+         break;
+       case MAX:
+         acc_.drop<Tags::Max>();
+         break;
+       default:
+         break;
+     }
+   }
+
+
+  void DiscreteScalarAccumulator::AddFeature(StatsTag feat)
+  {
+    if (featuresMap_.find(feat) != featuresMap_.end())
+      featuresMap_[feat] = true;
+    if (feat == CDF || feat == MODE)
+      featuresMap_[PDF] = true;
+  }
+
+
+  void DiscreteScalarAccumulator::RemoveFeature(StatsTag feat)
+  {
+    if ( feat == PDF )
+    {
+      if ( (!featuresMap_[CDF]) && (!featuresMap_[MODE]) )
+      {
+        featuresMap_[PDF] = false;
+        hist_ = DiscreteScalarHistogram();
+      }
+    }
+    else if (featuresMap_.find(feat) != featuresMap_.end())
+      featuresMap_[feat] = false;
+  }
+
+
+  void DiscreteScalarAccumulator::Init()
+  {
+    acc_ = AccType();
+    hist_ = DiscreteScalarHistogram();
+    for ( std::map<StatsTag, Bool>::iterator it_feat = featuresMap_.begin(); it_feat != featuresMap_.end(); ++it_feat )
+      if ( (!it_feat->second) && std::binary_search(droppableFeatures_.begin(), droppableFeatures_.end(), it_feat->first) )
+        drop(it_feat->first);
+  }
+
+  void DiscreteScalarAccumulator::Push(Scalar value, Scalar weight)
+  {
+    acc_(value, acc::weight = weight);
+    if ( featuresMap_[PDF] )
+    {
+      hist_.Push(value, weight);
+    }
+  }
+
+  const DiscreteScalarHistogram & DiscreteScalarAccumulator::Pdf()
+  {
+    hist_.Normalize();
+    return hist_;
+  } // TODO throw exception
+
+
+  DiscreteScalarHistogram DiscreteScalarAccumulator::Cdf()
+  {
+    DiscreteScalarHistogram cdf_hist = Pdf();
+    for (Size i=1; i<cdf_hist.size(); ++i)
+      cdf_hist.Push(cdf_hist[i].first, cdf_hist[i-1].second);
+    return cdf_hist;
+  } // TODO throw exception
+
+
   ElementAccumulator::ElementAccumulator()
   : dimDefined_(false)
   {
@@ -275,102 +375,4 @@ namespace Biips
         drop(it_feat->first);
   }
 
-
-  DiscreteScalarAccumulator::DiscreteScalarAccumulator()
-  {
-    featuresMap_[SUM_OF_WEIGHTS] = false;
-    featuresMap_[MIN] = false;
-    featuresMap_[MAX] = false;
-    featuresMap_[PDF] = false;
-    featuresMap_[CDF] = false;
-    featuresMap_[MAX_PDF] = false;
-
-    droppableFeatures_.insert(SUM_OF_WEIGHTS);
-    droppableFeatures_.insert(MIN);
-    droppableFeatures_.insert(MAX);
-  }
-
-
-  void DiscreteScalarAccumulator::ClearFeatures()
-  {
-    for (std::map<StatsTag, Bool>::iterator it_feat = featuresMap_.begin(); it_feat != featuresMap_.end(); ++it_feat )
-      it_feat->second = false;
-    hist_ = DiscreteScalarHistogram();
-  }
-
-
-  void DiscreteScalarAccumulator::drop(StatsTag tag)
-   {
-     switch(tag)
-     {
-       case SUM_OF_WEIGHTS:
-         acc_.drop<Tags::SumOfWeights>();
-         break;
-       case MIN:
-         acc_.drop<Tags::Min>();
-         break;
-       case MAX:
-         acc_.drop<Tags::Max>();
-         break;
-       default:
-         break;
-     }
-   }
-
-
-  void DiscreteScalarAccumulator::AddFeature(StatsTag feat)
-  {
-    if (featuresMap_.find(feat) != featuresMap_.end())
-      featuresMap_[feat] = true;
-    if (feat == CDF || feat == MAX_PDF)
-      featuresMap_[PDF] = true;
-  }
-
-
-  void DiscreteScalarAccumulator::RemoveFeature(StatsTag feat)
-  {
-    if ( feat == PDF )
-    {
-      if ( (!featuresMap_[CDF]) && (!featuresMap_[MAX_PDF]) )
-      {
-        featuresMap_[PDF] = false;
-        hist_ = DiscreteScalarHistogram();
-      }
-    }
-    else if (featuresMap_.find(feat) != featuresMap_.end())
-      featuresMap_[feat] = false;
-  }
-
-
-  void DiscreteScalarAccumulator::Init()
-  {
-    acc_ = AccType();
-    hist_ = DiscreteScalarHistogram();
-    for ( std::map<StatsTag, Bool>::iterator it_feat = featuresMap_.begin(); it_feat != featuresMap_.end(); ++it_feat )
-      if ( (!it_feat->second) && std::binary_search(droppableFeatures_.begin(), droppableFeatures_.end(), it_feat->first) )
-        drop(it_feat->first);
-  }
-
-  void DiscreteScalarAccumulator::Push(Scalar value, Scalar weight)
-  {
-    acc_(value, acc::weight = weight);
-    if ( featuresMap_[PDF] )
-    {
-      hist_.Push(value, weight);
-    }
-  }
-
-  const DiscreteScalarHistogram & DiscreteScalarAccumulator::Pdf()
-  {
-    hist_.Normalize();
-    return hist_;
-  } // TODO throw exception
-
-  DiscreteScalarHistogram DiscreteScalarAccumulator::Cdf()
-  {
-    DiscreteScalarHistogram cdf_hist = Pdf();
-    for (Size i=1; i<cdf_hist.size(); ++i)
-      cdf_hist.Push(cdf_hist[i].first, cdf_hist[i-1].second);
-    return cdf_hist;
-  } // TODO throw exception
 }

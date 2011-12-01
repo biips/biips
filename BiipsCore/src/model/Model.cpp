@@ -274,7 +274,7 @@ namespace Biips
 
     switch (statFeature)
     {
-      case MIN: case MAX: case PDF: case QUANTILES: case CDF: case MAX_PDF:
+      case MIN: case MAX: case PDF: case QUANTILES: case CDF: case MODE:
         throw LogicError("Can not extract statistic in Model::extractMonitorStat.");
         break;
       default:
@@ -398,7 +398,7 @@ namespace Biips
 
     switch (statFeature)
     {
-      case MIN: case MAX: case PDF: case QUANTILES: case CDF: case MAX_PDF:
+      case MIN: case MAX: case PDF: case QUANTILES: case CDF: case MODE:
         throw LogicError("Can not extract statistic in Model::ExtractSmoothTreeStat.");
         break;
       default:

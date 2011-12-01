@@ -404,7 +404,7 @@ namespace Biips
   
     featuresAcc.Init(graph_.GetNode(nodeId).DimPtr());
     for(Size i=0; i < nParticles_; i++)
-      featuresAcc.Push(particles_[i].GetValue()[nodeId], particles_[i].Weight());
+      featuresAcc.Push(*(particles_[i].GetValue()[nodeId]), particles_[i].Weight());
   }
 
 
