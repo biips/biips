@@ -11,6 +11,7 @@
 #include "Console.hpp"
 #include "RBiipsCommon.h"
 #include <fstream>
+#include "iostream/outStream.hpp"
 
 using namespace Biips;
 using std::endl;
@@ -269,13 +270,33 @@ RcppExport void set_default_monitors(SEXP pConsole)
 }
 
 
-RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames)
+static IndexRange makeRange(const Rcpp::RObject & lower, const Rcpp::RObject & upper)
+{
+  if (lower.isNULL() || upper.isNULL())
+    return IndexRange();
+
+  Rcpp::IntegerVector il(lower);
+  Rcpp::IntegerVector iu(upper);
+  if (il.size() != iu.size())
+    throw LogicError("length mismatch between lower and upper limits");
+
+  IndexRange::Indices lind(il.begin(), il.end());
+  IndexRange::Indices uind(iu.begin(), iu.end());
+
+  IndexRange r = IndexRange(lind, uind);
+  return r;
+}
+
+
+RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
   Rcpp::StringVector monitored_var(varNames);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
 
   if (verbosity>0)
     rbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
@@ -283,11 +304,15 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames)
   for (Size i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetFilterMonitor(name))
+    if (p_console->SetFilterMonitor(name, range))
     {
-      if (verbosity>0)
-        rbiips_cout << " " << name;
+      if (verbosity == 0)
+        continue;
+      rbiips_cout << " " << name;
+      if (!range.IsNull())
+        rbiips_cout << range;
     }
   }
   rbiips_cout << endl;
@@ -296,13 +321,15 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames)
 }
 
 
-RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames)
+RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
   Rcpp::StringVector monitored_var(varNames);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
 
   if (verbosity>0)
     rbiips_cout << PROMPT_STRING << "Smooth tree monitoring variables:";
@@ -310,11 +337,15 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames)
   for (Size i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetSmoothTreeMonitor(name))
+    if (p_console->SetSmoothTreeMonitor(name, range))
     {
-      if (verbosity>0)
-        rbiips_cout << " " << name;
+      if (verbosity == 0)
+        continue;
+      rbiips_cout << " " << name;
+      if (!range.IsNull())
+        rbiips_cout << range;
     }
   }
   rbiips_cout << endl;
@@ -323,11 +354,13 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames)
 }
 
 
-RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames)
+RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
 
   if (verbosity>0)
     rbiips_cout << PROMPT_STRING << "Smoother monitoring variables:";
@@ -337,11 +370,15 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames)
   for (Size i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetSmoothMonitor(name))
+    if (p_console->SetSmoothMonitor(name, range))
     {
-      if (verbosity>0)
-        rbiips_cout << " " << name;
+      if (verbosity == 0)
+        continue;
+      rbiips_cout << " " << name;
+      if (!range.IsNull())
+        rbiips_cout << range;
     }
   }
   rbiips_cout << endl;
@@ -422,7 +459,7 @@ static SEXP getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap, 
 template<>
 SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type)
 {
-  Rcpp::List monitors_list;
+  Rcpp::List particles_list;
 
   std::map<String, NodeArrayMonitor>::const_iterator it_map;
   for (it_map = monitorsMap.begin(); it_map != monitorsMap.end(); ++it_map)
@@ -430,49 +467,56 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const String & name = it_map->first;
     const NodeArrayMonitor & monitor = it_map->second;
 
-    Rcpp::List particles_list;
+    // dim
+    Rcpp::IntegerVector dim_particles(monitor.GetValues().Dim().begin(), monitor.GetValues().Dim().end());
+    Rcpp::IntegerVector dim_array(monitor.GetRange().Dim().begin(), monitor.GetRange().Dim().end());
 
-    {
-      // dim
-      Rcpp::IntegerVector dim(monitor.GetValues().Dim().begin(), monitor.GetValues().Dim().end());
-      Rcpp::IntegerVector dim_ess(monitor.GetESS().Dim().begin(), monitor.GetESS().Dim().end());
+    // names(dim)
+    Rcpp::CharacterVector dim_names(dim_particles.size(), "");
+    dim_names[dim_names.size()-1] = "particle";
 
-      // names(dim)
-      Rcpp::CharacterVector dim_names(dim.size(), "");
-      dim_names[dim_names.size()-1] = "particle";
+    dim_particles.attr("names") = dim_names;
 
-      dim.attr("names") = dim_names;
+    Size len = monitor.GetValues().Dim().Length();
+    Rcpp::NumericVector values(len);
+    const ValArray & values_val = monitor.GetValues().Values();
+    std::replace_copy(values_val.begin(), values_val.end(), values.begin(), BIIPS_REALNA, NA_REAL);
+    values.attr("dim") = dim_particles;
 
-      Size len = monitor.GetValues().Dim().Length();
-      Size len_ess = monitor.GetESS().Dim().Length();
-      Rcpp::NumericVector values(len);
-      Rcpp::NumericVector weights(len);
-      Rcpp::NumericVector ess(len_ess);
-      Rcpp::LogicalVector discrete(len_ess);
+    const ValArray & weight_val = monitor.GetWeights().Values();
+    Rcpp::NumericVector weights(weight_val.begin(), weight_val.end());
+    weights.attr("dim") = dim_particles;
 
-      std::replace_copy(monitor.GetValues().Values().begin(), monitor.GetValues().Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
-      std::copy(monitor.GetWeights().Values().begin(), monitor.GetWeights().Values().end(), weights.begin());
-      std::copy(monitor.GetESS().Values().begin(), monitor.GetESS().Values().end(), ess.begin());
+    const ValArray & ess_val(monitor.GetESS().Values());
+    Rcpp::NumericVector ess(ess_val.begin(), ess_val.end());
+    ess.attr("dim") = dim_array;
 
-      values.attr("dim") = dim;
-      weights.attr("dim") = dim;
-      ess.attr("dim") = dim_ess;
+    const ValArray & discrete_val(monitor.GetDiscrete().Values());
+    Rcpp::LogicalVector discrete(discrete_val.begin(), discrete_val.end());
+    discrete.attr("dim") = dim_array;
 
-      Rcpp::List particles;
-      particles["values"] = values;
-      particles["weights"] = weights;
-      particles["ess"] = ess;
-      particles["variable.name"] = Rcpp::wrap(name);
-      particles["type"] = Rcpp::wrap(type);
-      particles["discrete"] = discrete;
+    const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
+    Rcpp::IntegerVector lower(lower_ind.begin(), lower_ind.end());
 
-      particles_list[type] = particles;
-    }
+    const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
+    Rcpp::IntegerVector upper(upper_ind.begin(), upper_ind.end());
 
-    monitors_list[name] = particles_list;
+    Rcpp::List particles;
+    particles["values"] = values;
+    particles["weights"] = weights;
+    particles["ess"] = ess;
+    particles["discrete"] = discrete;
+    particles["name"] = Rcpp::wrap(monitor.GetName());
+    particles["lower"] = lower;
+    particles["upper"] = upper;
+    particles["type"] = Rcpp::wrap(type);
+
+    particles.attr("class") = "particles";
+
+    particles_list[name] = particles;
   }
 
-  return monitors_list;
+  return particles_list;
 }
 
 

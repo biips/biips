@@ -84,13 +84,16 @@ namespace Biips
 
     if (precFlag_)
     {
-      ublas::cholesky_factorize(P0_mat);
+      if (!ublas::cholesky_factorize(P0_mat))
+        throw RuntimeError("HmmMNormalLinear4D: matrix P0 is not positive-semidefinite.");
       ublas::cholesky_invert(P0_mat);
 
-      ublas::cholesky_factorize(Q_mat);
+      if (!ublas::cholesky_factorize(Q_mat))
+        throw RuntimeError("HmmMNormalLinear4D: matrix Q is not positive-semidefinite.");
       ublas::cholesky_invert(Q_mat);
 
-      ublas::cholesky_factorize(R_mat);
+      if (!ublas::cholesky_factorize(R_mat))
+        throw RuntimeError("HmmMNormalLinear4D: matrix R is not positive-semidefinite.");
       ublas::cholesky_invert(R_mat);
     }
 

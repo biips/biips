@@ -35,69 +35,50 @@ namespace Biips
   Types<Scalar>::Array ScalarHistogram::GetPositions() const
   {
     Types<Scalar>::Array positions(size());
-    for (Size i = 0; i<size(); ++i)
-      positions[i] = operator[](i).first;
+    const_iterator it = begin();
+    for (Size i=0; it!=end(); ++it, ++i)
+      positions[i] = it->first;
     return positions;
   }
 
   Types<Scalar>::Array ScalarHistogram::GetFrequencies() const
   {
     Types<Scalar>::Array freq(size());
-    for (Size i = 0; i<size(); ++i)
-      freq[i] = operator[](i).second;
+    const_iterator it = begin();
+    for (Size i=0; it!=end(); ++it, ++i)
+      freq[i] = it->second;
     return freq;
   }
 
+  struct ScalarPairSecondCompare
+  {
+    typedef ScalarHistogram::value_type PairType;
+    Bool operator() (const PairType & lhs, const PairType & rhs) const
+    {
+      return lhs.second < rhs.second;
+    }
+  };
+
   Scalar DiscreteScalarHistogram::MaxFreq() const
   {
-    const_iterator it_max_value = std::max_element(begin(), end(), ScalarPairCompare());
+    const_iterator it_max_value = std::max_element(begin(), end(), ScalarPairSecondCompare());
     return it_max_value->first;
   }
 
   void DiscreteScalarHistogram::Push(Scalar position, Scalar value)
   {
     Size u_position = roundSize(position);
-    if ( empty() )
-    {
-      // insert intermediate 0
-      for (Size pos = 1; pos < u_position; pos ++)
-        push_back(PairType(Scalar(pos), 0.0));
-      // push new value
-      push_back(PairType(Scalar(u_position), value));
-      normConst_ += value;
-    }
-    else
-    {
-      Size u_back_pos = roundSize(back().first);
-      if ( u_position > u_back_pos )
-      {
-        // insert intermediate 0
-        for (Size pos = u_back_pos + 1; pos < u_position; pos ++)
-          push_back(PairType(Scalar(pos), 0.0));
-        // push new value
-        push_back(PairType(Scalar(u_position), value));
-        normConst_ += value;
-      }
-      else
-      {
-        Size u_front_pos = roundSize(front().first);
-        if ( (u_position >= u_front_pos) )
-        {
-          iterator it_position = std::find_if(begin(), end(), ScalarPairEqualPredicate(u_position));
-          // increment correct value
-          it_position->second += value;
-          normConst_ += value;
-        }
-        // TODO else throw exception
-      }
-    }
+    operator[](Scalar(u_position)) += value;
+    normConst_ += value;
   }
+
 
   void DiscreteScalarHistogram::Normalize()
   {
-    if (normConst_ != 1.0 && normConst_ != 0.0)
-      for (Size i =0; i<size(); ++i)
-        operator[](i).second /= normConst_;
+    if (normConst_ == 1.0 && normConst_ == 0.0)
+      return;
+    for (iterator it = begin(); it!=end(); ++it)
+      it->second /= normConst_;
     normConst_ = 1.0;
   }
 
@@ -296,8 +277,9 @@ namespace Biips
   DiscreteScalarHistogram DiscreteScalarAccumulator::Cdf()
   {
     DiscreteScalarHistogram cdf_hist = Pdf();
-    for (Size i=1; i<cdf_hist.size(); ++i)
-      cdf_hist.Push(cdf_hist[i].first, cdf_hist[i-1].second);
+    DiscreteScalarHistogram::iterator it = cdf_hist.begin();
+    for (Size i=0; it!=cdf_hist.end(); ++it, ++i)
+      cdf_hist.Push(it->first, it->second);
     return cdf_hist;
   } // TODO throw exception
 

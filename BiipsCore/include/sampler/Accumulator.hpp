@@ -85,12 +85,11 @@ namespace Biips
   };
 
 
-  class ScalarHistogram : public Types<Types<Scalar>::Pair>::Array
+  class ScalarHistogram : public std::map<Scalar, Scalar>
   {
   protected:
-    typedef Types<Scalar>::Pair PairType;
-    typedef Types<PairType>::Array BaseType;
-    typedef boost::iterator_range<Types<PairType>::Iterator> HistogramType; // TODO replace by my own iterator range type when it is done
+    typedef std::map<Scalar, Scalar> BaseType;
+    typedef boost::iterator_range<Types<Types<Scalar>::Pair >::Iterator> HistogramType;
 
   public:
     ScalarHistogram() {};
@@ -98,6 +97,8 @@ namespace Biips
 
     Types<Scalar>::Array GetPositions() const;
     Types<Scalar>::Array GetFrequencies() const;
+    Scalar Min() const { return begin()->first; }
+    Scalar Max() const { return (--end())->first; }
   };
 
 
@@ -108,27 +109,6 @@ namespace Biips
 
   protected:
     Scalar normConst_;
-
-    struct ScalarPairCompare
-    {
-      Bool operator() (const PairType & lhs, const PairType & rhs) const
-      {
-        return lhs.second < rhs.second;
-      }
-    };
-
-    class ScalarPairEqualPredicate
-    {
-    protected:
-      Size rhs_;
-    public:
-      ScalarPairEqualPredicate(Scalar rhs) : rhs_(roundSize(rhs)) {}
-      ScalarPairEqualPredicate(Size rhs) : rhs_(rhs) {}
-      Bool operator() (const PairType & lhs) const
-      {
-        return roundSize(lhs.first) == rhs_;
-      }
-    };
 
   public:
     DiscreteScalarHistogram() {};

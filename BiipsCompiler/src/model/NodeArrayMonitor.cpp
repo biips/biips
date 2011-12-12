@@ -12,6 +12,7 @@
 #include "model/NodeArray.hpp"
 #include "common/IndexRangeIterator.hpp"
 #include "graph/Graph.hpp"
+#include "iostream/outStream.hpp"
 
 namespace Biips
 {
@@ -59,6 +60,8 @@ namespace Biips
     // iterate the elements of the subrange
     for (IndexRangeIterator it_sub_range(subRange); !it_sub_range.AtEnd(); it_sub_range.Next())
     {
+      if (!range_.Contains(IndexRange(it_sub_range)))
+        continue;
       // compute the offset of the new larger array
       Size offset = range_.GetOffset(it_sub_range);
 
@@ -73,7 +76,6 @@ namespace Biips
       // iterate all the particles
       for (Size i=0; i<nParticles_; ++i)
       {
-        // TODO: check StorageOrder
         values_.Values()[i*len+offset] = (*(graph.GetValues()[id]))[sub_offset];
         weights_.Values()[i*len+offset] = 1.0/nParticles_;
       }
@@ -97,6 +99,8 @@ namespace Biips
     // iterate the elements of the subrange
     for (IndexRangeIterator it_sub_range(subRange); !it_sub_range.AtEnd(); it_sub_range.Next())
     {
+      if (!range_.Contains(IndexRange(it_sub_range)))
+        continue;
       // compute the offset of the new larger array
       Size offset = range_.GetOffset(it_sub_range);
 
@@ -111,7 +115,6 @@ namespace Biips
       // iterate all the particles
       for (Size i=0; i<nParticles_; ++i)
       {
-        // TODO: check StorageOrder
         values_.Values()[i*len+offset] = (*(node_monitor.GetNodeValues()[i]))[sub_offset];
         weights_.Values()[i*len+offset] = (node_monitor.GetWeights()[i]);
       }
@@ -119,14 +122,16 @@ namespace Biips
   }
 
 
-  // TODO: check StorageOrder, check monitors
-  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray, const std::map<NodeId, Monitor::Ptr> & monitorsMap, Size nParticles, const Graph & graph)
-  : name_(nodeArray.Name()), range_(nodeArray.Range()), nParticles_(nParticles),
-    ess_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    iterations_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    nodeIds_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    discrete_(nodeArray.Range().Dim(), Scalar(false))
+  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray, const IndexRange & range, const std::map<NodeId, Monitor::Ptr> & monitorsMap, Size nParticles, const Graph & graph)
+  : name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
+    ess_(range.Dim(), BIIPS_REALNA),
+    iterations_(range.Dim(), BIIPS_REALNA),
+    nodeIds_(range.Dim(), BIIPS_REALNA),
+    discrete_(range.Dim(), Scalar(false))
   {
+    if (!nodeArray.Range().Contains(range_))
+      throw LogicError(String("NodeArrayMonitor: range ") + print(range_) +" is not contained in variable " + name_);
+
     // dimensions
     DimArray dim_particles = range_.Dim();
     dim_particles.push_back(nParticles_);
@@ -141,6 +146,8 @@ namespace Biips
     {
       NodeId id = it_bimap->left;
       const IndexRange & sub_range = it_bimap->right;
+      if (!range_.Overlaps(sub_range))
+        continue;
 
       if (graph.GetObserved()[id])
         addObservedNode<StorageOrder>(id, sub_range, graph);
@@ -154,14 +161,15 @@ namespace Biips
   }
 
 
-  // TODO: check StorageOrder, check monitor
-  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray, const Monitor::Ptr & pMonitor, Size nParticles, const Graph & graph)
-  : name_(nodeArray.Name()), range_(nodeArray.Range()), nParticles_(nParticles),
-    ess_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    iterations_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    nodeIds_(nodeArray.Range().Dim(), BIIPS_REALNA),
-    discrete_(nodeArray.Range().Dim(), Scalar(false))
+  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray, const IndexRange & range, const Monitor::Ptr & pMonitor, Size nParticles, const Graph & graph)
+  : name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
+    ess_(range.Dim(), BIIPS_REALNA),
+    iterations_(range.Dim(), BIIPS_REALNA),
+    nodeIds_(range.Dim(), BIIPS_REALNA),
+    discrete_(range.Dim(), Scalar(false))
   {
+    if (!nodeArray.Range().Contains(range_))
+      throw LogicError(String("NodeArrayMonitor: range ") + print(range_) +" is not contained in variable " + name_);
     // dimensions
     DimArray dim_particles = range_.Dim();
     dim_particles.push_back(nParticles_);
@@ -177,6 +185,8 @@ namespace Biips
     {
       NodeId id = it_bimap->left;
       const IndexRange & sub_range = it_bimap->right;
+      if (!range_.Overlaps(sub_range))
+        continue;
 
       if (graph.GetObserved()[id])
         addObservedNode<StorageOrder>(id, sub_range, graph);

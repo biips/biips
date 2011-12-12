@@ -19,8 +19,15 @@ namespace Biips
 
   DimArray IndexRange::makeDim(const Types<IndexType>::Array & lower, const Types<IndexType>::Array & upper)
   {
-    // TODO check arrays
-    DimArray dim(lower.size());
+    Size ndim = upper.size();
+    if (lower.size() != ndim)
+       throw LogicError("IndexRange: Length mismatch in constructor");
+    for (Size i = 0; i < ndim; i++)
+    {
+      if (upper[i] < lower[i])
+        throw LogicError("IndexRange: upper < lower bound in constructor");
+    }
+    DimArray dim(ndim);
     for (Size i = 0; i < lower.size(); ++i)
       dim[i] = upper[i] - lower[i] + 1;
     return dim;
@@ -105,11 +112,25 @@ namespace Biips
 
   Bool IndexRange::Contains(const IndexRange & range) const
   {
+    if (range.NDim() != NDim())
+      throw LogicError("IndexRange::Contains. Dimension mismatch");
     for (Size i = 0; i < upper_.size(); ++i)
       if (range.lower_[i] < lower_[i] || range.upper_[i] > upper_[i])
         return false;
     return true;
   }
+
+
+  Bool IndexRange::Overlaps(const IndexRange & range) const
+  {
+    if (range.NDim() != NDim())
+      throw LogicError("IndexRange::Contains. Dimension mismatch");
+    for (Size i = 0; i < upper_.size(); ++i)
+      if (range.upper_[i] < lower_[i] || range.lower_[i] > upper_[i])
+        return false;
+    return true;
+  }
+
 
   Bool IndexRange::operator==(const IndexRange & rhs) const
   {

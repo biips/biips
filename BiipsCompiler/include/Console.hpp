@@ -90,9 +90,9 @@ namespace Biips
 
     Bool SetDefaultFilterMonitors();
 
-    Bool SetFilterMonitor(const String & name);
-    Bool SetSmoothTreeMonitor(const String & name);
-    Bool SetSmoothMonitor(const String & name);
+    Bool SetFilterMonitor(const String & name, const IndexRange & range = NULL_RANGE);
+    Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range = NULL_RANGE);
+    Bool SetSmoothMonitor(const String & name, const IndexRange & range = NULL_RANGE);
 
     /*!
      * @short Builds the SMC sampler.

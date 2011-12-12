@@ -111,17 +111,20 @@ namespace Biips
     const Vector & obs = like_form_vis.GetObs();
 
     Matrix prior_cov(getNodeValue(prior_prec_id, graph_, *this));
-    ublas::cholesky_factorize(prior_cov);
+    if (!ublas::cholesky_factorize(prior_cov))
+      throw LogicError("ConjugateMNormalLinear::sample: matrix prior_cov is not positive-semidefinite.");
     ublas::cholesky_invert(prior_cov);
 
     Matrix like_cov(like_prec);
-    ublas::cholesky_factorize(like_cov);
+    if (!ublas::cholesky_factorize(like_cov))
+      throw LogicError("ConjugateMNormalLinear::sample: matrix like_cov is not positive-semidefinite.");
     ublas::cholesky_invert(like_cov);
 
 
     Matrix kalman_gain = ublas::prod(prior_cov, ublas::trans(like_A));
     Matrix inn_prec = ublas::prod(like_A, kalman_gain) + like_cov;
-    ublas::cholesky_factorize(inn_prec);
+    if (!ublas::cholesky_factorize(inn_prec))
+      throw LogicError("ConjugateMNormalLinear::sample: matrix inn_prec is not positive-semidefinite.");
     ublas::cholesky_invert(inn_prec);
     kalman_gain = ublas::prod(kalman_gain, inn_prec);
 
@@ -133,7 +136,8 @@ namespace Biips
     prior_mean.Release();
 
     Matrix post_prec = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node, dim_node) - Matrix(ublas::prod(kalman_gain, like_A))), prior_cov);
-    ublas::cholesky_factorize(post_prec);
+    if (!ublas::cholesky_factorize(post_prec))
+      throw LogicError("ConjugateMNormalLinear::sample: matrix post_prec is not positive-semidefinite.");
     ublas::cholesky_invert(post_prec);
 
     MultiArray::Array post_param_values(2);

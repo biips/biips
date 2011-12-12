@@ -87,8 +87,9 @@ namespace Biips
 
     SizeType GetOffset (const Types<IndexType>::Array indices) const;
 
-    // TODO throw exception
     Bool Contains(const IndexRange & range) const;
+
+    Bool Overlaps(const IndexRange & range) const;
 
     //! Equality operator
     Bool operator == (const IndexRange & rhs) const;
