@@ -32,8 +32,11 @@ namespace Biips
   protected:
     SymbolTable symbolTable_;
     Types<String>::Array filterMonitorsNames_;
+    Types<IndexRange>::Array filterMonitorsRanges_;
     Types<String>::Array smoothTreeMonitorsNames_;
+    Types<IndexRange>::Array smoothTreeMonitorsRanges_;
     Types<String>::Array smoothMonitorsNames_;
+    Types<IndexRange>::Array smoothMonitorsRanges_;
 
   public:
     BUGSModel() : symbolTable_(*this) {}
@@ -42,13 +45,13 @@ namespace Biips
 
     SymbolTable & GetSymbolTable() { return symbolTable_; }
 
-    Bool SetFilterMonitor(const String & name);
-    Bool SetSmoothTreeMonitor(const String & name);
-    Bool SetSmoothMonitor(const String & name);
+    Bool SetFilterMonitor(const String & name, IndexRange range = NULL_RANGE);
+    Bool SetSmoothTreeMonitor(const String & name, IndexRange range = NULL_RANGE);
+    Bool SetSmoothMonitor(const String & name, IndexRange range = NULL_RANGE);
 
-    Bool IsFilterMonitored(const String & name) const;
-    Bool IsSmoothTreeMonitored(const String & name) const;
-    Bool IsSmoothMonitored(const String & name) const;
+    Bool IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    Bool IsSmoothTreeMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    Bool IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
 

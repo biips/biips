@@ -128,6 +128,11 @@ namespace Biips
   {
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
 
+    // lock SmoothTree monitored nodes
+    for (std::set<NodeId>::const_iterator it_nodes = smoothTreeMonitoredNodeIds_.begin();
+        it_nodes != smoothTreeMonitoredNodeIds_.end(); ++it_nodes )
+      pSampler_->LockNode(*it_nodes);
+
     Size t = pSampler_->Iteration();
     const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
 
@@ -148,7 +153,11 @@ namespace Biips
     filterMonitors_.push_back(p_monitor);
 
     if (!pSampler_->AtEnd())
+    {
+      // release memory
+      pSampler_->ReleaseNodes();
       return;
+    }
 
     // Smooth tree Monitors
     p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
@@ -157,8 +166,12 @@ namespace Biips
         it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
-      pSmoothTreeMonitor_ = p_monitor;
+      pSampler_->UnlockNode(*it_ids);
     }
+    pSmoothTreeMonitor_ = p_monitor;
+
+    // release memory
+    pSampler_->ReleaseNodes();
   }
 
 
@@ -189,7 +202,11 @@ namespace Biips
     filterMonitors_.push_back(p_monitor);
 
     if (!pSampler_->AtEnd())
+    {
+      // release memory
+      pSampler_->ReleaseNodes();
       return;
+    }
 
     // Smooth tree Monitors
     p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
@@ -198,8 +215,12 @@ namespace Biips
         it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
-      pSmoothTreeMonitor_ = p_monitor;
+      pSampler_->UnlockNode(*it_ids);
     }
+    pSmoothTreeMonitor_ = p_monitor;
+
+    // release memory
+    pSampler_->ReleaseNodes();
   }
 
 

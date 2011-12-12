@@ -48,7 +48,8 @@ namespace Biips
     post_prec += Matrix(likeParamContribValues[1]);
 
     Matrix post_cov = post_prec;
-    ublas::cholesky_factorize(post_cov);
+    if (!ublas::cholesky_factorize(post_cov))
+      throw LogicError("ConjugateMNormal::postParam: matrix post_cov is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
     post_mean = ublas::prod(post_cov, post_mean);
@@ -66,17 +67,20 @@ namespace Biips
       const MultiArray::Array & LikeParamContrib)
   {
     Matrix norm_const_prec(LikeParamContrib[1]);
-    ublas::cholesky_factorize(norm_const_prec);
+    if (!ublas::cholesky_factorize(norm_const_prec))
+      throw LogicError("ConjugateMNormal::computeLogIncrementalWeight: matrix norm_const_prec is not positive-semidefinite.");
     ublas::cholesky_invert(norm_const_prec);
 
     Vector norm_const_mean = ublas::prod(norm_const_prec, Vector(LikeParamContrib[0]));
 
     Matrix prior_prec(priorParamValues[1]);
-    ublas::cholesky_factorize(prior_prec);
+    if (!ublas::cholesky_factorize(prior_prec))
+      throw LogicError("ConjugateMNormal::computeLogIncrementalWeight: matrix prior_prec is not positive-semidefinite.");
     ublas::cholesky_invert(prior_prec);
 
     norm_const_prec += prior_prec;
-    ublas::cholesky_factorize(norm_const_prec);
+    if (!ublas::cholesky_factorize(norm_const_prec))
+      throw LogicError("ConjugateMNormal::computeLogIncrementalWeight: matrix norm_const_prec is not positive-semidefinite.");
     ublas::cholesky_invert(norm_const_prec);
 
     MultiArray::Array norm_const_param_values(2);

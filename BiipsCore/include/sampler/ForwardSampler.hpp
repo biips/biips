@@ -49,16 +49,20 @@ namespace Biips
     Scalar resampleThreshold_;
 
     Types<Types<NodeId>::Array>::Iterator iterNodeId_;
+    Types<Types<NodeId>::Array>::Iterator iterObsNodes_;
     Types<NodeSampler::Ptr>::Iterator iterNodeSampler_;
     Flags sampledFlagsBefore_;
     Flags sampledFlagsAfter_;
 
     Types<Types<NodeId>::Array>::Array nodeIdSequence_;
+    Types<Types<NodeId>::Array>::Array obsNodeIdSequence_;
     Types<NodeSampler::Ptr>::Array nodeSamplerSequence_;
 
     Types<Particle>::Array particles_;
 
     Types<Size>::Array nodeIterations_;
+
+    Types<Int>::Array nodeLocks_;
     
     Bool resampled_;
 
@@ -68,6 +72,8 @@ namespace Biips
     Scalar ess_;
     Scalar logNormConst_;
 
+    void initLocks();
+    void unlockSampledParents();
     void buildNodeIdSequence();
     void buildNodeSamplers();
     void setResampleParams(const String & rsType, Scalar threshold);
@@ -84,7 +90,7 @@ namespace Biips
   public:
     static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & NodeSamplerFactories();
 
-    explicit ForwardSampler(Graph & graph);
+    explicit ForwardSampler(const Graph & graph);
     virtual ~ForwardSampler() {}
 
     Size NParticles() const;
@@ -104,6 +110,9 @@ namespace Biips
     void Build() { buildNodeIdSequence(); buildNodeSamplers(); built_ = true; }
     Bool Built() const { return built_; }
 
+    void LockNode(NodeId id) { nodeLocks_[id]++; }
+    void UnlockNode(NodeId id) { nodeLocks_[id]--; }
+
     void Initialize(Size nbParticles, const Rng::Ptr & pRng, const String & rsType="stratified", Scalar threshold=0.5);
     void Iterate();
 
@@ -116,6 +125,8 @@ namespace Biips
 
     void InitMonitor(FilterMonitor & monitor) const;
     void MonitorNode(NodeId nodeId, FilterMonitor & monitor) const;
+
+    void ReleaseNodes();
   };
 
 

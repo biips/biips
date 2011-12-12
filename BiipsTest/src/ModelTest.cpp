@@ -362,7 +362,8 @@ namespace Biips
           Size dim = smc_values[k].Length(); // TODO check dim
           Vector diff_vec(dim, smc_values[k].Values() - bench_values[k].Values());
           Matrix var_chol(dim, dim, bench_var_values[k].Values());
-          ublas::cholesky_factorize(var_chol);
+          if (!ublas::cholesky_factorize(var_chol))
+            throw RuntimeError("ModelTest::error: matrix is not positive-semidefinite.");
           ublas::inplace_solve(var_chol, diff_vec, ublas::lower_tag());
           error += ublas::inner_prod(diff_vec, diff_vec);
         }

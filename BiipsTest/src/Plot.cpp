@@ -90,20 +90,20 @@ namespace Biips
     QwtArray<Scalar> x_data(hist.size()+1);
     QwtArray<Scalar> y_data(hist.size()+1);
 
-    x_data[0] = hist[0].first;
+    x_data[0] = hist.begin()->first;
     y_data[0] = 0.0;
+    ScalarHistogram::const_iterator it = hist.begin();
     for (Size i=1; i<hist_size; ++i)
     {
-      x_data[i] = hist[i].first;
-      y_data[i] = hist[i-1].second;
+      y_data[i] = it->second;
+      x_data[i] = (++it)->first;
     }
-    Scalar bin_size;
-    if ( hist_size > 1 )
-      bin_size = hist.back().first - hist[hist_size-2].first;
-    else
-      bin_size = 1.0;
-    x_data[hist_size] = hist.back().first + bin_size;
-    y_data[hist_size] = hist.back().second;
+    --it;
+    x_data[hist_size] = it->first;
+    y_data[hist_size] = it->second;
+
+    Scalar bin_size = (hist_size>1) ? (it->first - (--it)->first) : 1.0;
+    x_data[hist_size] += bin_size;
 
     // add histogram
     addHistogramCore(x_data, y_data, name, color);

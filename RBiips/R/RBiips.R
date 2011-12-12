@@ -240,20 +240,14 @@ monitor.biips <- function(obj, variable.names, type="backward.smoothing")
   pn <- parse.varnames(variable.names)
   
   type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
-  if ("filtering" %in% type)
-  {
-#     .Call("set_filter_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_filter_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
+  if ("filtering" %in% type) {
+    .Call("set_filter_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
-  if ("smoothing" %in% type)
-  {
-#     .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
+  if ("smoothing" %in% type) {
+    .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
-  if ("backward.smoothing" %in% type)
-  {
-#     .Call("set_smooth_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-    .Call("set_smooth_monitors", obj$ptr(), pn$names, PACKAGE="RBiips")
+  if ("backward.smoothing" %in% type) {
+    .Call("set_smooth_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
   invisible(NULL)
 }
@@ -319,30 +313,38 @@ run.biips <- function(obj, n.part, backward=TRUE,
   ## run smc sampler
   log.norm.const <- .Call("run_smc_sampler", obj$ptr(), as.integer(n.part), smc.rng.seed, rs.thres, rs.type, PACKAGE="RBiips")
   
-  results <- .Call("get_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+  
+  mon <- .Call("get_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+  results <- list()
+  for (n in names(mon)) {
+    results[[n]][["filtering"]] <- mon[[n]]
+  }
   
   results[["log.norm.const"]] <- log.norm.const
   
   mon <- .Call("get_smooth_tree_monitors", obj$ptr(), PACKAGE="RBiips")
-  for (n in names(mon))
-    results[[n]] <- c(results[[n]], mon[[n]])
+  for (n in names(mon)) {
+    results[[n]][["smoothing"]] <- mon[[n]]
+  }
   
   if (backward)
   {
     ## run backward smoother
     .Call("run_backward_smoother", obj$ptr(), PACKAGE="RBiips")
     mon <- .Call("get_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
-    for (n in names(mon))
-      results[[n]] <- c(results[[n]], mon[[n]])
+    for (n in names(mon)) {
+      results[[n]][["backward.smoothing"]] <- mon[[n]]
+    }
+  }
+  
+  for (n in names(results)) {
+    class(results[[n]]) <- "particles.list"
   }
   
 #   for (i in seq(along=variable.names)) {
 #     .Call("clear_monitor", obj$ptr(), pn$names[i], pn$lower[[i]],
 #           pn$upper[[i]], type, PACKAGE="RBiips")
 #   }
-
-  for (i in seq(alog=results))
-    class(results[[i]]) <- "particles"
 
   return(results)
 }
