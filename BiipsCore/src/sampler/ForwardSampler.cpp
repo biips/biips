@@ -67,11 +67,57 @@ namespace Biips
   }
 
 
-  ForwardSampler::ForwardSampler(Graph & graph)
+  void ForwardSampler::initLocks()
+  {
+    std::fill(nodeLocks_.begin(), nodeLocks_.end(), 0);
+    Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+    boost::tie(it_nodes, it_nodes_end) = graph_.GetSortedNodes();
+    for (; it_nodes != it_nodes_end; ++it_nodes)
+    {
+      if ( graph_.GetObserved()[*it_nodes] )
+      {
+        nodeLocks_[*it_nodes] = -1;
+
+        if ( graph_.GetNode(*it_nodes).GetType() != STOCHASTIC)
+          continue;
+      }
+
+      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_nodes);
+      for (; it_parents != it_parents_end; ++it_parents)
+        if ( !graph_.GetObserved()[*it_parents] )
+          LockNode(*it_parents);
+    }
+  }
+
+
+  void ForwardSampler::unlockSampledParents()
+  {
+    Types<NodeId>::ConstIterator it_sampled_nodes = iterNodeId_->begin();
+    for (; it_sampled_nodes != iterNodeId_->end(); ++it_sampled_nodes)
+    {
+      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_sampled_nodes);
+      for (; it_parents != it_parents_end; ++it_parents)
+        UnlockNode(*it_parents);
+    }
+    Types<NodeId>::ConstIterator it_obs_nodes = iterObsNodes_->begin();
+    for (; it_obs_nodes != iterObsNodes_->end(); ++it_obs_nodes)
+    {
+      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_obs_nodes);
+      for (; it_parents != it_parents_end; ++it_parents)
+        UnlockNode(*it_parents);
+    }
+  }
+
+
+  ForwardSampler::ForwardSampler(const Graph & graph)
   : graph_(graph), nParticles_(1),
     resampleThreshold_(BIIPS_POSINF),
     sampledFlagsBefore_(graph.GetSize()),
     nodeIterations_(graph.GetSize(), BIIPS_SIZENA),
+    nodeLocks_(graph.GetSize(), 0),
     built_(false), initialized_(false)
   {
     if (!resamplerTable().Contains("stratified"))
@@ -126,18 +172,25 @@ namespace Biips
 
     const Graph & graph_;
     Types<Types<NodeId>::Array>::Array & nodeIdSequence_;
+    Types<Types<NodeId>::Array>::Array & obsNodeIdSequence_;
     GraphTypes::IterationsMap nodeIterationsMap_;
 
     virtual void visit(const ConstantNode & node) {}
 
     virtual void visit(const StochasticNode & node)
     {
-      if ( graph_.GetObserved()[nodeId_] )
+      if ( graph_.GetObserved()[nodeId_])
+      {
+        // if obsNodeIdSequence_ is empty the observed node is not informative
+        if (!obsNodeIdSequence_.empty())
+          obsNodeIdSequence_.back().push_back(nodeId_);
         return;
+      }
 
       // push a new array whose first element is the stochastic node
       nodeIdSequence_.push_back(Types<NodeId>::Array(1, nodeId_));
       nodeIterationsMap_[nodeId_] = nodeIdSequence_.size()-1;
+      obsNodeIdSequence_.push_back(Types<NodeId>::Array());
     }
 
     virtual void visit(const LogicalNode & node)
@@ -158,8 +211,9 @@ namespace Biips
 
     BuildNodeIdSequenceVisitor(const Graph & graph,
         Types<Types<NodeId>::Array>::Array & nodeIdSequence,
+        Types<Types<NodeId>::Array>::Array & obsNodeIdSequence,
         Types<Size>::Array & nodeIterations)
-    : graph_(graph), nodeIdSequence_(nodeIdSequence),
+    : graph_(graph), nodeIdSequence_(nodeIdSequence), obsNodeIdSequence_(obsNodeIdSequence),
       nodeIterationsMap_(boost::make_iterator_property_map(nodeIterations.begin(), boost::identity_property_map())) {}
   };
 
@@ -170,7 +224,7 @@ namespace Biips
     // element are the unobserved stochastic nodes
     // followed by their logical children
     // in topological order
-    BuildNodeIdSequenceVisitor build_node_id_sequence_vis(graph_, nodeIdSequence_, nodeIterations_);
+    BuildNodeIdSequenceVisitor build_node_id_sequence_vis(graph_, nodeIdSequence_, obsNodeIdSequence_, nodeIterations_);
     graph_.VisitGraph(build_node_id_sequence_vis);
   }
 
@@ -292,9 +346,13 @@ namespace Biips
     pRng_ = pRng;
     setResampleParams(rsType, threshold);
 
+    //locks
+    initLocks();
+
     iter_ = 0;
 
     iterNodeId_ = nodeIdSequence_.begin();
+    iterObsNodes_ = obsNodeIdSequence_.begin();
     iterNodeSampler_ = nodeSamplerSequence_.begin();
 
     for(NodeId id = 0; id < graph_.GetSize(); ++id)
@@ -302,8 +360,6 @@ namespace Biips
 
     //Initialize the particle set.
     NodeValues init_node_values(graph_.GetSize());
-    for(NodeId id = 0; id < graph_.GetSize(); ++id)
-      init_node_values[id] = graph_.GetValues()[id];
     particles_.assign(nParticles_, Particle(init_node_values, 0.0));
 
     //Move the particle set.
@@ -327,6 +383,8 @@ namespace Biips
       throw NumericalError(String("Failure to calculate log normalizing constant."));
 
     initialized_ = true;
+
+    unlockSampledParents();
   }
 
 
@@ -340,6 +398,7 @@ namespace Biips
 
     ++iter_;
     ++iterNodeId_;
+    ++iterObsNodes_;
     ++iterNodeSampler_;
 
     sampledFlagsBefore_.swap(sampledFlagsAfter_);
@@ -369,6 +428,8 @@ namespace Biips
       throw NumericalError("Failure to calculate log normalizing constant.");
 
     sumOfWeights_ = sum;
+
+    unlockSampledParents();
   }
 
 
@@ -451,6 +512,24 @@ namespace Biips
     if (!initialized_)
       throw LogicError("Can not get number of particles: sampler not initialized.");
     return nParticles_;
+  }
+
+
+  void ForwardSampler::ReleaseNodes()
+  {
+    Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+    boost::tie(it_nodes, it_nodes_end) = graph_.GetSortedNodes();
+//    std::cout << "released:";
+    for (; it_nodes != it_nodes_end; ++it_nodes)
+    {
+      NodeId id = *it_nodes;
+      if ( nodeLocks_[id] != 0 )
+        continue;
+      for (Size i=0; i<nParticles_; ++i)
+        particles_[i].Value()[id].reset();
+      nodeLocks_[id] = -1;
+//      std::cout << " " << id;
+    }
   }
 
 

@@ -603,7 +603,7 @@ namespace Biips
   }
 
 
-  Bool Console::SetFilterMonitor(const String & name)
+  Bool Console::SetFilterMonitor(const String & name, const IndexRange & range)
   {
     if (!pModel_)
     {
@@ -614,11 +614,14 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->SetFilterMonitor(name);
+      Bool ok = pModel_->SetFilterMonitor(name, range);
       if (!ok)
       {
         err_ << "Failed to set filter monitor for variable " <<
-            name << endl;
+            name;
+        if (!range.IsNull())
+          err_ << range;
+        err_ << endl;
         return false;
       }
     }
@@ -628,7 +631,7 @@ namespace Biips
   }
 
 
-  Bool Console::SetSmoothTreeMonitor(const String & name)
+  Bool Console::SetSmoothTreeMonitor(const String & name, const IndexRange & range)
   {
     if (!pModel_)
     {
@@ -639,11 +642,14 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->SetSmoothTreeMonitor(name);
+      Bool ok = pModel_->SetSmoothTreeMonitor(name, range);
       if (!ok)
       {
         err_ << "Failed to set smooth tree monitor for variable " <<
-            name << endl;
+            name;
+        if (!range.IsNull())
+          err_ << range;
+        err_ << endl;
         return false;
       }
     }
@@ -653,7 +659,7 @@ namespace Biips
   }
 
 
-  Bool Console::SetSmoothMonitor(const String & name)
+  Bool Console::SetSmoothMonitor(const String & name, const IndexRange & range)
   {
     if (!pModel_)
     {
@@ -664,11 +670,14 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->SetSmoothMonitor(name);
+      Bool ok = pModel_->SetSmoothMonitor(name, range);
       if (!ok)
       {
         err_ << "Failed to set smooth monitor for variable " <<
-            name << endl;
+            name;
+        if (!range.IsNull())
+          err_ << range;
+        err_ << endl;
         return false;
       }
     }

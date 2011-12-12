@@ -116,7 +116,8 @@ namespace Biips
     Matrix kalman_gain = ublas::prod(prior_var, ublas::trans(like_A));
     Matrix inn_cov = ublas::prod(like_A, kalman_gain) + like_cov;
     Matrix inn_cov_inv = inn_cov;
-    ublas::cholesky_factorize(inn_cov_inv);
+    if (!ublas::cholesky_factorize(inn_cov_inv))
+      throw LogicError("ConjugateMNormalVarLinear::sample: matrix inn_cov_inv is not positive-semidefinite.");
     ublas::cholesky_invert(inn_cov_inv);
     kalman_gain = ublas::prod(kalman_gain, inn_cov_inv);
 

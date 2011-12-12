@@ -8,11 +8,11 @@
  * $Id$
  */
 
-#include <Rcpp.h>
-#include "Rostream.h"
-
 #ifndef RBIIPSCOMMON_H_
 #define RBIIPSCOMMON_H_
+
+#include <Rcpp.h>
+#include "Rostream.h"
 
 #ifndef BEGIN_RBIIPS
 #define BEGIN_RBIIPS BEGIN_RCPP

@@ -42,7 +42,7 @@ namespace Biips
 
     const MultiArray & prec = paramValues[1];
 
-    // symmetric and positive
+    // symmetric and positive diagonal
     Matrix prec_mat(prec);
     for(Size i=0; i<prec_mat.size1(); ++i)
     {
@@ -50,7 +50,7 @@ namespace Biips
         return false;
       for(Size j=0; j<i; ++j)
       {
-        if (prec_mat(i,j) < 0.0 || prec_mat(i,j) != prec_mat(j,i))
+        if (prec_mat(i,j) != prec_mat(j,i))
           return false;
       }
     }
@@ -70,12 +70,14 @@ namespace Biips
     const MultiArray & prec = paramValues[1];
 
     Matrix var_chol(prec);
-    ublas::cholesky_factorize(var_chol);
+    if (!ublas::cholesky_factorize(var_chol))
+      throw RuntimeError("DMNorm::sample: matrix is not positive-semidefinite.");
     ublas::cholesky_invert(var_chol);
-    ublas::cholesky_factorize(var_chol);
 
     typedef boost::multivariate_normal_distribution<Scalar> DistType;
 
+    if (!ublas::cholesky_factorize(var_chol))
+      throw LogicError("DMNorm::sample: matrix is not positive-semidefinite.");
     DistType dist(var_chol, Vector(mean));
 
     typedef boost::variate_generator<Rng::GenType&, DistType > GenType;
@@ -98,7 +100,8 @@ namespace Biips
     Vector diff_vec(x.Length(), x.Values() - mean.Values());
 
     Matrix prec_chol(prec);
-    ublas::cholesky_factorize(prec_chol);
+    if (!ublas::cholesky_factorize(prec_chol))
+      throw LogicError("DMNorm::logDensity: matrix is not positive-semidefinite.");
 
     diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,ublas::lower>(prec_chol));
     return log(ublas::cholesky_det(prec_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));

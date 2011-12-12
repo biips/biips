@@ -30,7 +30,8 @@ namespace Biips
 
     Matrix prec_i_mat(getNodeValue(var_id, graph_, *this));
 
-    ublas::cholesky_factorize(prec_i_mat);
+    if (!ublas::cholesky_factorize(prec_i_mat))
+      throw LogicError("ConjugateMNormalVar::formLikeParamContrib: matrix prec_i_mat is not positive-semidefinite.");
     ublas::cholesky_invert(prec_i_mat);
 
     MultiArray obs_i(graph_.GetNode(likeId).DimPtr(), graph_.GetValues()[likeId]);
@@ -46,13 +47,15 @@ namespace Biips
   {
     Matrix post_cov(priorParamValues[1]);
 
-    ublas::cholesky_factorize(post_cov);
+    if (!ublas::cholesky_factorize(post_cov))
+      throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
     Vector post_mean = ublas::prod(post_cov, Vector(priorParamValues[0])) + Vector(likeParamContribValues[0]);
 
     post_cov += Matrix(likeParamContribValues[1]);
-    ublas::cholesky_factorize(post_cov);
+    if (!ublas::cholesky_factorize(post_cov))
+      throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
     post_mean = ublas::prod(post_cov, post_mean);
@@ -70,7 +73,8 @@ namespace Biips
       const MultiArray::Array & LikeParamContrib)
   {
     Matrix norm_const_cov(LikeParamContrib[1]);
-    ublas::cholesky_factorize(norm_const_cov);
+    if (!ublas::cholesky_factorize(norm_const_cov))
+      throw LogicError("ConjugateMNormalVar::computeLogIncrementalWeight: matrix norm_const_cov is not positive-semidefinite.");
     ublas::cholesky_invert(norm_const_cov);
 
     Vector norm_const_mean = ublas::prod(norm_const_cov, Vector(LikeParamContrib[0]));

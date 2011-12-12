@@ -5,9 +5,8 @@ which.type <- function(x, type=NULL)
   
   type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
   
-  ind <- NULL
-  for (p in seq(along=x))
-  {      
+  ind <- c()
+  for (p in seq(along=x)) {      
     if (is.null(type) || x[[p]]$type %in% type)
       ind <- c(ind, p)
   }
@@ -16,130 +15,141 @@ which.type <- function(x, type=NULL)
 }
 
 
-print.particles <- function(x, ...)
+print.particles <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75),...)
 {
-  print(summary(x, ...))
+  print(summary(x, fun, probs), ...)
 }
 
 
-mean.particles <- function(x, ...)
+print.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75), ...)
 {
-  ans <- list()
-  for (t in seq(along=x))
-  {
-    ndim <- length(dim(x[[t]]$values))
-    n.part <- dim(x[[t]]$values)[ndim]
-    len <- length(x[[t]]$values) / n.part
-    
-    m <- array(dim=dim(x[[t]]$values)[-ndim])
-    
-    for (d in 1:len)
-    {
-      from <- d
-      by <- len
-      to <- len*(n.part-1)+d
-      indvec <- seq(from,to,by)
-#       if (x[[t]]$discrete) {
-#         m[d] <- NA
-#       } else {
-        m[d] <- weighted.mean(x[[t]]$values[indvec], x[[t]]$weights[indvec], ...)
-#       }
-    }
-    ans[[names(x)[t]]] <- list("Mean"=m)
-  }
-  return(ans)
+  for (n in names(x))
+    print(summary(x[[n]], fun, probs), ...)
 }
 
 
-weighted.var <- function(x, w = NULL, norm.w = FALSE, na.rm = FALSE)
+stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
 {
-  if (!length(w)) {
-    if (na.rm) 
-      x <- x[!is.na(x)]
-    return(var(x))
-  }
-  if (na.rm) {
-    w <- w[i <- !is.na(x)]
-    x <- x[i]
-  }
-  if (norm.w) {
-    sum.w <- sum(w)
-  } else {
-    sum.w <- 1
-  }
-  sum.w2 <- sum(w^2)
-  mean.w <- sum(x * w) / sum.w
+  if (!is.character(fun))
+    stop("invalid fun argument.")
   
-  var.w <- (sum.w / (sum.w^2 - sum.w2)) * sum(w * (x - mean.w)^2, na.rm = na.rm)
-  return(list("Mean"=mean.w, "Var."=var.w))
-}
-
-
-var.particles <- function(x, ...)
-{
-  ans <- list()
-  for (t in seq(along=x))
-  {
-    ndim <- length(dim(x[[t]]$values))
-    n.part <- dim(x[[t]]$values)[ndim]
-    len <- length(x[[t]]$values) / n.part
-    
-    m <- array(dim=dim(x[[t]]$values)[-ndim])
-    v <- array(dim=dim(x[[t]]$values)[-ndim])
-    
-    for (d in 1:len)
-    {
-      from <- d
-      by <- len
-      to <- len*(n.part-1)+d
-      indvec <- seq(from,to,by)
-      mean.var <- weighted.var(x[[t]]$values[indvec], x[[t]]$weights[indvec], norm.w = FALSE, ...)
-      m[d] <- mean.var[["Mean"]]
-      v[d] <- mean.var[["Var."]]
-    }
-    ans[[names(x)[t]]] <- list("Mean"=m, "Var."=v)
+  fun <- match.arg(fun, c("mean",
+                          "var",
+                          "skew",
+                          "kurt",
+                          "median",
+                          "quantiles",
+                          "mode"), several.ok = TRUE)
+  if (any(fun == "quantiles")) {
+    if (!is.numeric(probs) || any(probs<=0) || any(probs>=1))
+      stop("invalid probs argument.")
+    probs <- sort(probs)
   }
-  return(ans)
-}
-
-
-summary.particles <- function(x, ...)
-{
-  ans <- var.particles(x);
   
-  class(ans) <- "summary.particles"
-  return(ans)
-}
-
-
-print.summary.particles <- function(x)
-{
-  tab <- list()
-  for (t in names(x))
-  {
-    values <- NULL
-    varnames <- NULL
-    for (i in seq(along=x[[t]]))
-    {
-      if (i == 1)
-      {
-        len <- length(x[[t]][[i]])
-        for (d in 1:len)
-        {
-          varname <- deparse.varname("", get.index(d, dim(x[[t]][[i]])))
-          varnames <- c(varnames, varname)
+  n.part <- dim(x$values)["particle"]
+  drop.dims <- names(dim(x$values)) %in% c("particle")
+  dim.stat <- dim(x$values)[!drop.dims]
+  len <- prod(dim.stat)
+  
+  stat <- list()
+  for (d in 1:len) {
+    indvec <- seq(d, len*(n.part-1)+d,len)
+    for (f in fun) {
+      if (f == "quantiles")
+        d.stat <- .Call("weighted_quantiles", x$values[indvec], n.part*x$weights[indvec], probs, package="RBiips")
+      else
+        d.stat <- .Call(paste("weighted_",f,sep=""), x$values[indvec], n.part*x$weights[indvec], package="RBiips")
+      stat.names <- names(d.stat)[names(d.stat) != "Table"]
+      if (d==1) {
+        for (n in stat.names) {
+          if (is.null(stat[[n]]))
+            stat[[n]] <- array(dim=dim.stat)
         }
       }
-      values <- c(values, x[[t]][[i]])
+      for (n in stat.names)
+        stat[[n]][d] <- d.stat[[n]]
     }
-    tab[[t]] <- matrix(values, nrow=len, ncol=length(x[[t]]), dimnames=list(varnames, names(x[[t]])))
   }
-  print(tab)
+  return(stat)
 }
 
 
-plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="linear array index",
-                                   ylab="estimates", main="estimates", leg.args=list(), ...)
+summary.particles <- function(x, fun, probs = c(0.25,0.5,0.75))
+{
+  if (is.null(x$values) || is.null(x$weights) || is.null(x$discrete)) {
+    NextMethod()
+  }
+  
+  if (all(x$discrete)) {
+    if (missing(fun))
+      fun <- "mode"
+    else
+      fun <- match.arg(fun, c("mode",
+                              "mean",
+                              "var",
+                              "skew",
+                              "kurt",
+                              "median",
+                              "quantiles"), several.ok = TRUE)
+  } else {
+    if (missing(fun))
+      fun <- "mean"
+    else
+      fun <- match.arg(fun, c("mean",
+                              "var",
+                              "skew",
+                              "kurt",
+                              "median",
+                              "quantiles"), several.ok = TRUE)
+  }
+
+  drop.dims <- names(dim(x$values)) %in% c("particle")
+  
+  stat <- stat.particles(x, fun, probs)
+  stat[["drop.dims"]] <- dim(x$values)[drop.dims]
+  class(stat) <- "summary.particles"
+
+  return(stat)
+}
+
+
+summary.particles.list <- function(x, ...)
+{
+  ans <- list()
+  for (n in names(x))
+    ans[[n]] <- summary(x[[n]], ...)
+  
+  class(ans) <- "summary.particles.list"
+
+  return(ans)
+}
+
+
+print.summary.particles <- function(x, ...)
+{
+  cat("particles:\n")
+  print(x[!(names(x) %in% c("drop.dims"))], ...)
+  if (length(x$drop.dims) > 0) {
+    cat("Marginalizing over:", 
+      paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
+        collapse=","),"\n")
+  }
+  invisible()
+}
+
+
+print.summary.particles.list <- function(x, ...)
+{
+  for (n in names(x)) {
+    cat("$", n, "\n", sep="")
+    print(x[[n]], ...)
+  }
+  invisible()
+}
+
+
+plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="flat array index",
+                                   ylab="estimates", main, sub, leg.args=list(), ...)
 {
   ltyy <- lty
   lwdd <- lwd
@@ -151,39 +161,56 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="l
     return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
   }
   
-  tab <- list()
-  for (t in names(x))
-  {
-    values <- NULL
-    varnames <- NULL
-    have.var = 0
-    for (i in seq(along=x[[t]]))
-    {
-      if (names(x[[t]])[i] == "Var.")
-      {
-        have.var = 1
-        next
-      }
-      if (i == 1)
-      {
-        len <- length(x[[t]][[i]])
-        for (d in 1:len)
-        {
-          varname <- deparse.varname("", get.index(d, dim(x[[t]][[i]])))
-          varnames <- c(varnames, varname)
-        }
-      }
-      values <- c(values, x[[t]][[i]])
-    }
-    
-    leg <- names(x[[t]])[names(x[[t]]) != "Var."]
-    tab[[t]] <- matrix(values, nrow=len, ncol=length(x[[t]])-have.var, dimnames=list(varnames, leg))
-    main.title <- paste(t, main, sep=" ")
-    matplot(tab[[t]], type=type, xlab=xlab, ylab=ylab, main=main.title, lty=lty, lwd=lwd, col=col, ...)
-    
-    leg.args[["legend"]] <- leg
-    do.call("legend.summary.particles", leg.args)
+  stat.names <- names(x)[!(names(x) %in% c("2nd mt.",
+                                           "Var.",
+                                           "SD",
+                                           "3rd mt.",
+                                           "Skew.",
+                                           "4th mt.",
+                                           "Kurt.",
+                                           "drop.dims",
+                                           "type"))]
+  
+  values <- c()
+  for (n in stat.names) {
+    values <- c(values, x[[n]])
   }
+  
+  mat <- matrix(values, ncol=length(stat.names))
+  n.part <- x$drop.dims[["particle"]]
+  if (missing(main))
+    main <- "Summary statistics"
+  if (missing(sub))
+    sub <- paste("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
+        collapse=","))
+  matplot(mat, type=type, xlab=xlab, ylab=ylab, main=main, lty=lty, lwd=lwd, col=col, ...)
+  
+  leg.args[["legend"]] <- stat.names
+  do.call("legend.summary.particles", leg.args)
+  invisible()
+}
+
+
+plot.summary.particles.list <- function(x, ...)
+{
+  for (n in names(x))
+    plot(x[[n]], ...)
+  invisible()
+}
+
+plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), main, ...)
+{
+  if (missing(main))
+    main <- paste(deparse.varname(x$name, x$lower, x$upper), x$type, "estimates")
+  plot(summary(x, fun, probs), main=main, ...)
+  invisible()
+}
+
+
+plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
+{
+  for (n in names(x))
+    plot(x[[n]], fun, probs, ...)
 }
 
 
@@ -191,21 +218,45 @@ diagnostic <- function(x, ...)
   UseMethod("diagnostic")
 
 
-diagnostic.particles <- function(x, ess.min=30)
+diagnostic.particles <- function(x, ess.thres=30)
 {
-  ans <- list()
-  for (t in names(x))
-  {
-    ess.min <- min(x[[t]]$ess)
-    ans[[t]] <- list("ESS min."=ess.min)
-  }
+  ess.min <- min(x$ess)
+  ans <- list("ESS min."=ess.min, "valid"=ess.min>ess.thres)
+  class(ans) <- "diagnostic.particles"
   return(ans)
 }
 
- 
-get.index <- function(offset, dim)
+
+print.diagnostic.particles <- function(x, ...)
 {
-  ind <- rep(1, length(dim))
+  if (x$valid)
+    cat("diagnostic: GOOD\n")
+  else {
+    cat("diagnostic: POOR\n")
+    cat("   The minimum effective sample size is too low: ", x$ESS, "\n", sep="")
+    cat("   Estimates must be poor for some variables.\n")
+    cat("   You should increase n.part.")
+  }
+}
+
+
+diagnostic.particles.list <- function(x, ...)
+{
+  ans <- list()
+  for (n in names(x))
+    ans[[n]] <- diagnostic(x[[n]], ...)
+  return(ans)
+}
+
+
+get.index <- function(offset, lower, upper)
+{
+  if (length(lower) != length(upper))
+    stop("lower and upper dimension mismatch.")
+  dim <- upper-lower+1
+  if (any(dim <= 0))
+    stop("incorrect lower and upper values.")
+  ind <- lower
   offset <- offset-1
   for (i in 1:length(dim))
   {
@@ -216,94 +267,141 @@ get.index <- function(offset, dim)
 }
 
 
-deparse.varname <- function(name, indices)
+deparse.varname <- function(name, lower=NULL, upper=lower)
 {
-  varname <- name
-  if (length(indices) > 0)
-  {
-    varname <- paste(varname, "[", sep="")
-    for (i in seq(along=indices))
-    {
-      if (i>1)
-        varname <- paste(varname, ", ", sep="")
-      varname <- paste(varname, indices[[i]] , sep="")
-    }
-    varname <- paste(varname, "]", sep="")
+  v <- parse(text=name, n=1)
+  if (!is.expression(v) || length(v) != 1 || !is.name(v[[1]]))
+    stop("invalid variable name.")
+  varname <- deparse(v[[1]])
+  
+  if (length(lower) == 0)
+    return(varname)
+  
+  varname <- paste(varname, "[", sep="")
+  if (length(upper) != length(lower))
+    stop("lower and upper lengths mismatch.")
+  if (any(upper<lower))
+    stop("incorrect lower and upper values.")
+  sep <- ""
+  for (i in seq(along=lower)) {
+    varname <- paste(varname, lower[[i]] , sep=sep)
+    if (upper[[i]] > lower[[i]])
+      varname <- paste(varname, upper[[i]] , sep=":")
+    sep <- ","
   }
+  varname <- paste(varname, "]", sep="")
   return(varname)
 }
 
- 
-density.particles <- function(x, bw="nrd0", adjust=1, ...)
+
+density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
 {
-  densities <- list()
+  ans <- list()
+  bww <- bw
   
-  density.particles.atomic <- function(xx, bw, adjust, ...)
-  {
-    densities <- list()
+  n.part <- dim(x$values)["particle"]
   
-    ndim <- length(dim(xx$values))
-    n.part <- dim(xx$values)[ndim]
-    len <- length(xx$values) / n.part
+  if (!missing(subset)) {
+    if(!is.character(subset) || !is.atomic(subset))
+      stop("invalid subset argument.")
+    pn <- parse.varname(subset)
+    if(pn$name != x$name)
+      stop("invalid subset argument: wrong variable name.")
+    if(any(pn$lower < x$lower) || any(pn$upper > x$upper))
+      stop("invalid subset argument: index out of range.")
+    lower <- pn$lower
+    upper <- pn$upper
+    subset.dim <- upper-lower+1
+    len <- prod(subset.dim)
+  } else {
+    lower <- x$lower
+    upper <- x$upper
+    drop.dim <- names(dim(x$values)) %in% c("particle")
+    subset.dim <- dim(x$values)[!drop.dim]
+    len <- prod(subset.dim)
+  }
+  
+  for (d in 1:len) {
+    ind <- get.index(d, lower, upper)
+    varname <- deparse.varname(x$name, ind)
     
-    bww <- bw
-    adj <- adjust
-    for (d in 1:len)
-    {
-      from <- d
-      by <- len
-      to <- len*(n.part-1)+d
-      indvec <- seq(from,to,by)
-      varname <- deparse.varname(xx$variable.name, get.index(d, dim(xx$values)[-ndim]))
-      
-      if (xx$type == "smoothing")
-      {
-        if (!is.null(parent.env(environment())$densities[[varname]]))
-        {
-          bww <- parent.env(environment())$densities[[varname]][[1]]$density$bw
-          adj <- 1
-        }
-      }
-      
-      dens <- density(xx$values[indvec], weights=xx$weights[indvec], bw=bww, adjust=adj, ...)
-      
-      densities[[varname]] <- list(list(density=dens, variable.name=varname, type=xx$type, n.part=n.part, ess=xx$ess[d]))
-      names(densities[[varname]]) <- c(xx$type)
+    if (!missing(subset)) {
+      ind.mat <- array(c(rep(ind, each=n.part), 1:n.part), dim=c(n.part, length(dim(x$values))))
+      values <- x$values[ind.mat]
+      weights <- x$weights[ind.mat]
+      ind2 <- array(ind, dim=c(1, length(ind)))
+      ess <- x$ess[ind2]
+      discrete <- x$discrete[ind2]
+    } else {
+      ind.vec <- seq(d, len*(n.part-1)+d, len)
+      values <- x$values[ind.vec]
+      weights <- x$weights[ind.vec]
+      ess <- x$ess[d]
+      discrete <- x$discrete[d]
     }
-    return(densities)
+    
+    if (!is.atomic(bw))
+      bww <- bw[[d]]
+    
+    if (discrete) {
+      table <- .Call("weighted_table", values, weights, package="RBiips")
+      dens <- list(x=table[["Table"]]$x, y=table[["Table"]]$y, bw=1)
+    } else {
+      dens <- density(values, weights=weights, bw=bww, adjust=adjust, ...)
+    }
+    
+    ans[[varname]] <- list(density=dens, name=varname, type=x$type, n.part=n.part, ess=ess, discrete=discrete)
+    class(ans[[varname]]) <- "density.particles.atomic"
   }
   
-  # first treat filtering and backward.smoothing
-  if (!is.null(x[["filtering"]]))
-  {
-    densities <- density.particles.atomic(x[["filtering"]], bw, adjust, ...)
-  }
-  if (!is.null(x[["backward.smoothing"]]))
-  {
-    dens <- density.particles.atomic(x[["backward.smoothing"]], bw, adjust, ...)
-    for (n in names(dens))
-      densities[[n]] <- c(densities[[n]], dens[[n]])
-  }
-
-  
-  # then treat smoothing
-  if (!is.null(x[["smoothing"]]))
-  {
-    dens <- density.particles.atomic(x[["smoothing"]], bw, adjust, ...)
-    for (n in names(dens))
-      densities[[n]] <- c(densities[[n]], dens[[n]])
-  }
-
-  class(densities) <- "density.particles"
-  return(densities)
+  class(ans) <- "density.particles"
+  return(ans)
 }
 
 
+density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
+{
+  ans <- list()
+  bw.s <- bw
+  
+  # first treat filtering and backward.smoothing
+  if (!is.null(x[["filtering"]])) {
+    dens <- density.particles(x[["filtering"]], bw, adjust, subset, ...)
+    bw.s <- list()
+    for (n in names(dens)) {
+      ans[[n]][["filtering"]] <- dens[[n]]
+      bw.s[[n]] <- dens[[n]]$density$bw
+    }
+  }
+  if (!is.null(x[["backward.smoothing"]])) {
+    dens <- density.particles(x[["backward.smoothing"]], bw, adjust, subset, ...)
+    bw.s <- list()
+    for (n in names(dens)) {
+      ans[[n]][["backward.smoothing"]] <- dens[[n]]
+      bw.s[[n]] <- dens[[n]]$density$bw
+    }
+  }
+  
+  # then treat smoothing (applying previous bandwidth if any)
+  if (!is.null(x[["smoothing"]])) {
+    if (is.list(bw.s))
+      adjust <- 1
+    dens <- density.particles(x[["smoothing"]], bw.s, adjust, subset, ...)
+    for (n in names(dens))
+      ans[[n]][["smoothing"]] <- dens[[n]]
+  }
+  
+  for (n in names(ans))
+    class(ans[[n]]) <- "density.particles.atomic.list"
 
-plot.density.particles <- function(x, leg.args=list(),
-                                   type="l", lty=1:5, lwd=2,
-                                   col=1:6,
-                                   ylab="density", main="kernel density estimates", ...)
+  class(ans) <- "density.particles.list"
+  return(ans)
+}
+
+
+plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
+                                          ylab="density", main="kernel density estimates",
+                                          leg.args=list(), ...)
 {
   ltyy <- lty
   lwdd <- lwd
@@ -315,36 +413,121 @@ plot.density.particles <- function(x, leg.args=list(),
     return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
   }
   
-  for (n in seq(along=x))
-  {
-    xx <- NULL
-    yy <- NULL
-    ncol <- 0
-    leg <- NULL
-    
-    varname <- names(x)[n]
-    
-    for (t in seq(along=x[[n]]))
-    { 
-      xx <- c(xx, x[[n]][[t]]$density$x)
-      yy <- c(yy, x[[n]][[t]]$density$y)
-      ncol <- ncol+1
-      leg <- c(leg, paste(x[[n]][[t]]$type, ", ess=", round(x[[n]][[t]]$ess)))
-      bw <- x[[n]][[t]]$density$bw
-    }
-    
-    xx <- matrix(xx, ncol=ncol)
-    yy <- matrix(yy, ncol=ncol)
-    
-    xlab <- paste("n.part = ", x[[n]][[1]]$n.part, ", bw = ", signif(bw, digits = 2))
-    main.title <- paste(varname, " ", main)
-  
-    matplot(xx, yy, type=type, lty=lty, lwd=lwd, col=col, xlab=xlab, ylab=ylab, main=main.title, ...)
-    
-    leg.args[["legend"]] <- leg
+  leg <- paste(x$type, ", ess=", round(x$ess))
+  main.title <- paste(x$name, main)
 
+  if (x$discrete) {
+    xlab <- paste("n.part=", x$n.part)
+    
+    barplot(x$density$y, names.arg=x$density$x,
+            col=col, xlab=xlab, ylab=ylab, main=main.title,
+            legend=leg, ...)
+  } else {
+    bw <- x$density$bw
+    xlab <- paste("n.part=", x$n.part, ", bw=", signif(bw, digits = 2))
+    
+    plot(x$density$x, x$density$y,
+         type=type, lty=lty, lwd=lwd, col=col,
+         xlab=xlab, ylab=ylab, main=main.title, ...)
+    leg.args[["legend"]] <- leg
+  
     do.call(legend.density.particles, leg.args)
   }
       
-  invisible(NULL)
+  invisible()
+}
+
+
+plot.density.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
+                                   ylab="density", main="kernel density estimates",
+                                   leg.args=list(), ...)
+{
+  for (n in names(x)) {
+    plot(x[[n]], type=type, lty=lty, lwd=lwd, col=col, ylab=ylab, main=main, leg.args=leg.args, ...)
+  }
+  invisible()
+}
+
+
+plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
+                                          ylab="density", main="kernel density estimates",
+                                          leg.args=list(), density=NULL, angle=NULL, ...)
+{
+  ltyy <- lty
+  lwdd <- lwd
+  coll <- col
+  
+  legend.density.particles <- function(x="topright", y=NULL,
+                                       lty=ltyy, lwd=lwdd, col=coll, bty="n", inset=c(0.01,0.01), ...)
+  {
+    return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
+  }
+  
+  main.title <- paste(x[[1]]$name, main)
+
+  leg <- c()
+  for (t in names(x)) {
+    leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess)))
+  }
+  
+  if (x[[1]]$discrete) {
+    #get table locations
+    xx <- c()
+    for (t in names(x))
+      xx <- c(xx, x[[t]]$density$x)
+    xx <- sort(unique(xx))
+    
+    yy <- c()
+    for (t in names(x)) {
+      # resize values with missing 0 to empty locations
+      y <- rep(0, length(xx))
+      y[xx %in% x[[t]]$density$x] <- x[[t]]$density$y
+      yy <- c(yy, y)
+    }
+    yy <- matrix(yy, nrow=length(x), byrow=TRUE)
+    
+    xlab <- paste("n.part=", x[[1]]$n.part)
+    if (length(col)>length(x))
+      col <- col[1:length(x)]
+    if (length(density)>length(x))
+      density <- density[1:length(x)]
+    if (length(angle)>length(x))
+      angle <- angle[1:length(x)]
+    barplot(yy, names.arg=xx,
+            col=col, xlab=xlab, ylab=ylab, main=main.title,
+            legend=leg, beside=TRUE, density=density, angle=angle, ...)
+  } else {
+    xx <- c()
+    yy <- c()
+    
+    for (t in names(x)) { 
+      xx <- c(xx, x[[t]]$density$x)
+      yy <- c(yy, x[[t]]$density$y)
+    }
+    xx <- matrix(xx, ncol=length(x))
+    yy <- matrix(yy, ncol=length(x))
+    
+    bw <- x[[1]]$density$bw
+    xlab <- paste("n.part=", x[[1]]$n.part, ", bw=", signif(bw, digits = 2))
+  
+    matplot(xx, yy,
+         type=type, lty=lty, lwd=lwd, col=col,
+         xlab=xlab, ylab=ylab, main=main.title, ...)
+    
+    leg.args[["legend"]] <- leg
+    do.call(legend.density.particles, leg.args)
+  }
+      
+  invisible()
+}
+
+
+plot.density.particles.list <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
+                                        ylab="density", main="kernel density estimates",
+                                        leg.args=list(), ...)
+{
+  for (n in names(x)) {
+    plot(x[[n]], type=type, lty=lty, lwd=lwd, col=col, ylab=ylab, main=main, leg.args=leg.args, ...)
+  }
+  invisible()
 }

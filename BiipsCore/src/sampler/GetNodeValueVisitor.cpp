@@ -26,6 +26,7 @@ namespace Biips
   class GetNodeValueVisitor : public ConstNodeVisitor
   {
   protected:
+    const Graph & graph_;
     NodeSampler & nodeSampler_;
     MultiArray value_;
 
@@ -37,13 +38,14 @@ namespace Biips
 
     const MultiArray & GetValue() const { return value_; };
 
-    explicit GetNodeValueVisitor(NodeSampler & nodeSampler) : nodeSampler_(nodeSampler) {};
+    GetNodeValueVisitor(const Graph & graph, NodeSampler & nodeSampler)
+      : graph_(graph), nodeSampler_(nodeSampler) {};
   };
 
 
   void GetNodeValueVisitor::visit(const ConstantNode & node)
   {
-     value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
+     value_ = MultiArray(node.DimPtr(), graph_.GetValues()[nodeId_]);
   }
 
 
@@ -52,7 +54,10 @@ namespace Biips
     if ( !nodeSampler_.sampledFlagsMap_[nodeId_] )
       throw LogicError("GetNodeValueVisitor can not visit StochasticNode: node has not been sampled.");
 
-    value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
+    if (graph_.GetObserved()[nodeId_])
+      value_ = MultiArray(node.DimPtr(), graph_.GetValues()[nodeId_]);
+    else
+      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
   }
 
 
@@ -66,13 +71,16 @@ namespace Biips
       nodeSampler_.SetNodeId(backup_node_id);
     }
 
-    value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
+    if (graph_.GetObserved()[nodeId_])
+      value_ = MultiArray(node.DimPtr(), graph_.GetValues()[nodeId_]);
+    else
+      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
   }
 
 
   MultiArray getNodeValue(NodeId nodeId, const Graph & graph, NodeSampler & nodeSampler)
   {
-    GetNodeValueVisitor get_val_vis(nodeSampler);
+    GetNodeValueVisitor get_val_vis(graph, nodeSampler);
     graph.VisitNode(nodeId, get_val_vis);
     return get_val_vis.GetValue();
   }

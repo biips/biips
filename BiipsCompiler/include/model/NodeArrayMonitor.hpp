@@ -39,9 +39,11 @@ namespace Biips
     void addMonitoredNode(NodeId id, const IndexRange & subRange, const Monitor::Ptr & pMonitor);
 
   public:
-    NodeArrayMonitor(const NodeArray & nodeArray, const std::map<NodeId, Monitor::Ptr> & monitorsMap, Size nParticles, const Graph & graph);
-    NodeArrayMonitor(const NodeArray & nodeArray, const Monitor::Ptr & pMonitor, Size nParticles, const Graph & graph);
+    NodeArrayMonitor(const NodeArray & nodeArray, const IndexRange & range, const std::map<NodeId, Monitor::Ptr> & monitorsMap, Size nParticles, const Graph & graph);
+    NodeArrayMonitor(const NodeArray & nodeArray, const IndexRange & range, const Monitor::Ptr & pMonitor, Size nParticles, const Graph & graph);
 
+    const String & GetName() const { return name_; }
+    const IndexRange & GetRange() const { return range_; }
     const MultiArray & GetNodeIds() const { return nodeIds_; }
     const MultiArray & GetIterations() const { return iterations_; }
     const MultiArray & GetESS() const { return ess_; }

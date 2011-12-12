@@ -31,7 +31,8 @@ namespace Biips
     Matrix temp(ublas::prod(PtPred_, ublas::trans(Ht_)));
     StPred_ = ublas::prod(Ht_, temp) + Rt_;
 
-    ublas::cholesky_factorize(StPred_);
+    if (!ublas::cholesky_factorize(StPred_))
+      throw LogicError("KalmanFilter::updateCore: matrix StPred_ is not positive-semidefinite.");
     ublas::cholesky_invert(StPred_);
 
     Kt_ = ublas::prod(temp, StPred_);

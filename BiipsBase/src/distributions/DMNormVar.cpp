@@ -48,7 +48,7 @@ namespace Biips
 
     const MultiArray & var = paramValues[1];
 
-    // symmetric and positive
+    // symmetric and positive diagonal
     Matrix var_mat(var);
     for(Size i=0; i<var_mat.size1(); ++i)
     {
@@ -56,11 +56,11 @@ namespace Biips
         return false;
       for(Size j=0; j<i; ++j)
       {
-        if (var_mat(i,j) < 0.0 || var_mat(i,j) != var_mat(j,i))
+        if (var_mat(i,j) != var_mat(j,i))
           return false;
       }
     }
-    // TODO check semi-definite positive
+    // TODO check positive-semidefinite
 
     return true;
   }
@@ -71,7 +71,8 @@ namespace Biips
     const MultiArray & var = paramValues[1];
 
     Matrix var_chol(var);
-    ublas::cholesky_factorize(var_chol);
+    if (!ublas::cholesky_factorize(var_chol))
+      throw RuntimeError("DMNormVar::sample: matrix is not positive-semidefinite.");
 
     typedef boost::multivariate_normal_distribution<Scalar> DistType;
 
@@ -97,7 +98,8 @@ namespace Biips
     Vector diff_vec(x.Length(), x.Values() - mean.Values());
 
     Matrix var_chol(var);
-    ublas::cholesky_factorize(var_chol);
+    if (!ublas::cholesky_factorize(var_chol))
+      throw RuntimeError("DMNormVar::logDensity: matrix is not positive-semidefinite.");
 
     ublas::inplace_solve(var_chol, diff_vec, ublas::lower_tag());
     return -log(ublas::cholesky_det(var_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));

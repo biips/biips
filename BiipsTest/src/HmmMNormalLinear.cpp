@@ -67,15 +67,18 @@ namespace Biips
     if (precFlag_)
     {
       MatrixRef P0_prec_mat(dataTypeParamMap_["P.0"]);
-      ublas::cholesky_factorize(P0_prec_mat);
+      if (!ublas::cholesky_factorize(P0_prec_mat))
+        throw RuntimeError("HmmMNormalLinear: matrix P0 is not positive-semidefinite.");
       ublas::cholesky_invert(P0_prec_mat);
 
       MatrixRef Q_prec_mat(dataTypeParamMap_["Q"]);
-      ublas::cholesky_factorize(Q_prec_mat);
+      if (!ublas::cholesky_factorize(Q_prec_mat))
+        throw RuntimeError("HmmMNormalLinear: matrix Q is not positive-semidefinite.");
       ublas::cholesky_invert(Q_prec_mat);
 
       MatrixRef R_prec_mat(dataTypeParamMap_["R"]);
-      ublas::cholesky_factorize(R_prec_mat);
+      if (!ublas::cholesky_factorize(R_prec_mat))
+        throw RuntimeError("HmmMNormalLinear: matrix R is not positive-semidefinite.");
       ublas::cholesky_invert(R_prec_mat);
     }
 
@@ -215,15 +218,18 @@ namespace Biips
 //    if (precFlag_)
 //    {
 //      MatrixRef P0_prec_mat = dataTypeParamMap_["P.0"].MatrixView();
-//      ublas::cholesky_factorize(P0_prec_mat);
+//      if (!ublas::cholesky_factorize(P0_prec_mat))
+//        throw RuntimeError("HmmMNormalLinear: matrix P0 is not positive-semidefinite.");
 //      ublas::cholesky_invert(P0_prec_mat);
 //
 //      MatrixRef Q_prec_mat = dataTypeParamMap_["Q"].MatrixView();
-//      ublas::cholesky_factorize(Q_prec_mat);
+//      if (!ublas::cholesky_factorize(Q_prec_mat))
+//        throw RuntimeError("HmmMNormalLinear: matrix Q is not positive-semidefinite.");
 //      ublas::cholesky_invert(Q_prec_mat);
 //
 //      MatrixRef R_prec_mat = dataTypeParamMap_["R"].MatrixView();
-//      ublas::cholesky_factorize(R_prec_mat);
+//      if (!ublas::cholesky_factorize(R_prec_mat))
+//        throw RuntimeError("HmmMNormalLinear: matrix R is not positive-semidefinite.");
 //      ublas::cholesky_invert(R_prec_mat);
 //    }
 //  }
