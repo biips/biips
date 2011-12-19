@@ -10,7 +10,7 @@
 
 #define _USE_MATH_DEFINES
 
-#include <boost/random/multivariate_normal_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 
 #include "distributions/DMNorm.hpp"
@@ -69,25 +69,29 @@ namespace Biips
     const MultiArray & mean = paramValues[0];
     const MultiArray & prec = paramValues[1];
 
-    Matrix var_chol(prec);
-    if (!ublas::cholesky_factorize(var_chol))
+    Size n_dim = mean.Values().size();
+
+    Matrix prec_chol(prec);
+    if (!ublas::cholesky_factorize(prec_chol))
       throw RuntimeError("DMNorm::sample: matrix is not positive-semidefinite.");
-    ublas::cholesky_invert(var_chol);
+//    ublas::cholesky_invert(var_chol);
+//
+//    if (!ublas::cholesky_factorize(var_chol))
+//      throw LogicError("DMNorm::sample: matrix is not positive-semidefinite.");
 
-    typedef boost::multivariate_normal_distribution<Scalar> DistType;
-
-    if (!ublas::cholesky_factorize(var_chol))
-      throw LogicError("DMNorm::sample: matrix is not positive-semidefinite.");
-    DistType dist(var_chol, Vector(mean));
-
-    typedef boost::variate_generator<Rng::GenType&, DistType > GenType;
-    GenType gen(rng.GetGen(), dist);
+    typedef boost::normal_distribution<Scalar> DistType;
+    boost::variate_generator<Rng::GenType&, DistType> gen(rng.GetGen(), DistType());
 
     MultiArray sample(mean.DimPtr());
-    for (Size i = 0; i < sample.Length(); ++i)
-    {
-      sample.Values()[i] = gen();
-    }
+    std::generate(sample.Values().begin(), sample.Values().end(), gen);
+
+    VectorRef sample_vec(sample);
+    ublas::inplace_solve(ublas::trans(prec_chol), sample_vec, ublas::upper_tag());
+    sample_vec.Release();
+
+    for (Size i=0; i<n_dim; ++i)
+      sample.Values()[i] += mean.Values()[i];
+
     return sample;
   }
 
@@ -104,7 +108,7 @@ namespace Biips
       throw LogicError("DMNorm::logDensity: matrix is not positive-semidefinite.");
 
     diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,ublas::lower>(prec_chol));
-    return log(ublas::cholesky_det(prec_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));
+    return -0.5 * (diff_vec.size()*std::log(2*M_PI) - std::log(ublas::cholesky_det(prec_chol)) + ublas::inner_prod(diff_vec, diff_vec));
   }
 
 

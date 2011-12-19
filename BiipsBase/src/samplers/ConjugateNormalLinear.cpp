@@ -41,9 +41,6 @@ namespace Biips
       mean_ = 0.0;
       prec_ = 0.0;
 
-      if ( !graph_.GetObserved()[nodeId_] )
-        return;
-
       NodeId mean_id = node.Parents()[0];
       NodeId prec_id = node.Parents()[1];
 
@@ -91,9 +88,9 @@ namespace Biips
     Scalar like_prec = 0.0;
     Scalar like_mean = 0.0;
 
-    StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
+    GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
     boost::tie(it_offspring, it_offspring_end)
-    = graph_.GetStochasticChildren(nodeId_);
+    = graph_.GetLikelihoodChildren(nodeId_);
     NormalLinearLikeFormVisitor like_form_vis(graph_, nodeId_, *this);
     while (it_offspring != it_offspring_end)
     {
@@ -110,7 +107,7 @@ namespace Biips
     MultiArray::Array post_param_values(2);
     post_param_values[0] = MultiArray(post_mean);
     post_param_values[1] = MultiArray(post_prec);
-    nodeValuesMap_[nodeId_] = DNorm::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr();
+    nodeValuesMap()[nodeId_] = DNorm::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr();
 
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(like_mean);
@@ -121,7 +118,7 @@ namespace Biips
 
     // TODO optimize computation removing constant terms
 
-    sampledFlagsMap_[nodeId_] = true;
+    sampledFlagsMap()[nodeId_] = true;
   }
 
 
@@ -164,9 +161,6 @@ namespace Biips
   class CanSampleNormalLinearVisitor : public ConstStochasticNodeVisitor
   {
   protected:
-    typedef GraphTypes::StochasticChildrenNodeIdIterator
-        StochasticChildrenNodeIdIterator;
-
     const Graph & graph_;
     Bool canSample_;
 
@@ -184,24 +178,20 @@ namespace Biips
       if (node.IsBounded())
         return;
 
-      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
+      GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
       boost::tie(it_offspring, it_offspring_end)
-      = graph_.GetStochasticChildren(nodeId_);
+      = graph_.GetLikelihoodChildren(nodeId_);
 
       IsConjugateNormalLinearVisitor child_vis(graph_, nodeId_);
 
-      while (it_offspring != it_offspring_end)
+      for (; it_offspring != it_offspring_end; ++it_offspring)
       {
-        if ( graph_.GetObserved()[*it_offspring] )
-        {
-          graph_.VisitNode(*it_offspring, child_vis);
+        graph_.VisitNode(*it_offspring, child_vis);
 
-          canSample_ = child_vis.IsConjugate();
+        canSample_ = child_vis.IsConjugate();
 
-          if (!canSample_)
-            break;
-        }
-        ++it_offspring;
+        if (!canSample_)
+          break;
       }
     }
 

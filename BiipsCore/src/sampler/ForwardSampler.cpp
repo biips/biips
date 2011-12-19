@@ -82,7 +82,7 @@ namespace Biips
           continue;
       }
 
-      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      GraphTypes::ParentIterator it_parents, it_parents_end;
       boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_nodes);
       for (; it_parents != it_parents_end; ++it_parents)
         if ( !graph_.GetObserved()[*it_parents] )
@@ -96,7 +96,7 @@ namespace Biips
     Types<NodeId>::ConstIterator it_sampled_nodes = iterNodeId_->begin();
     for (; it_sampled_nodes != iterNodeId_->end(); ++it_sampled_nodes)
     {
-      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      GraphTypes::ParentIterator it_parents, it_parents_end;
       boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_sampled_nodes);
       for (; it_parents != it_parents_end; ++it_parents)
         UnlockNode(*it_parents);
@@ -104,7 +104,7 @@ namespace Biips
     Types<NodeId>::ConstIterator it_obs_nodes = iterObsNodes_->begin();
     for (; it_obs_nodes != iterObsNodes_->end(); ++it_obs_nodes)
     {
-      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      GraphTypes::ParentIterator it_parents, it_parents_end;
       boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_obs_nodes);
       for (; it_parents != it_parents_end; ++it_parents)
         UnlockNode(*it_parents);
@@ -173,7 +173,7 @@ namespace Biips
     const Graph & graph_;
     Types<Types<NodeId>::Array>::Array & nodeIdSequence_;
     Types<Types<NodeId>::Array>::Array & obsNodeIdSequence_;
-    GraphTypes::IterationsMap nodeIterationsMap_;
+    Types<Size>::Array & nodeIterationsMap_;
 
     virtual void visit(const ConstantNode & node) {}
 
@@ -214,7 +214,7 @@ namespace Biips
         Types<Types<NodeId>::Array>::Array & obsNodeIdSequence,
         Types<Size>::Array & nodeIterations)
     : graph_(graph), nodeIdSequence_(nodeIdSequence), obsNodeIdSequence_(obsNodeIdSequence),
-      nodeIterationsMap_(boost::make_iterator_property_map(nodeIterations.begin(), boost::identity_property_map())) {}
+      nodeIterationsMap_(nodeIterations) {}
   };
 
 
@@ -515,11 +515,21 @@ namespace Biips
   }
 
 
+  void ForwardSampler::UnlockAllNodes()
+  {
+    for(Types<Int>::Iterator it_locks = nodeLocks_.begin();
+        it_locks != nodeLocks_.end(); ++it_locks)
+    {
+      if(*it_locks > 0)
+        *it_locks = 0;
+    }
+  }
+
+
   void ForwardSampler::ReleaseNodes()
   {
     Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
     boost::tie(it_nodes, it_nodes_end) = graph_.GetSortedNodes();
-//    std::cout << "released:";
     for (; it_nodes != it_nodes_end; ++it_nodes)
     {
       NodeId id = *it_nodes;
@@ -528,7 +538,6 @@ namespace Biips
       for (Size i=0; i<nParticles_; ++i)
         particles_[i].Value()[id].reset();
       nodeLocks_[id] = -1;
-//      std::cout << " " << id;
     }
   }
 

@@ -23,8 +23,7 @@ print.particles <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75
 
 print.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75), ...)
 {
-  for (n in names(x))
-    print(summary(x[[n]], fun, probs), ...)
+  print(summary(x, fun, probs), ...)
 }
 
 
@@ -107,6 +106,8 @@ summary.particles <- function(x, fun, probs = c(0.25,0.5,0.75))
   
   stat <- stat.particles(x, fun, probs)
   stat[["drop.dims"]] <- dim(x$values)[drop.dims]
+  stat[["name"]] <- deparse.varname(x$name, x$lower, x$upper)
+  stat[["type"]] <- x$type
   class(stat) <- "summary.particles"
 
   return(stat)
@@ -127,8 +128,8 @@ summary.particles.list <- function(x, ...)
 
 print.summary.particles <- function(x, ...)
 {
-  cat("particles:\n")
-  print(x[!(names(x) %in% c("drop.dims"))], ...)
+  cat(x$name, x$type, "particles:\n")
+  print(x[!(names(x) %in% c("drop.dims", "name", "type"))], ...)
   if (length(x$drop.dims) > 0) {
     cat("Marginalizing over:", 
       paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
@@ -141,8 +142,8 @@ print.summary.particles <- function(x, ...)
 print.summary.particles.list <- function(x, ...)
 {
   for (n in names(x)) {
-    cat("$", n, "\n", sep="")
     print(x[[n]], ...)
+    cat("\n")
   }
   invisible()
 }
@@ -169,6 +170,7 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="f
                                            "4th mt.",
                                            "Kurt.",
                                            "drop.dims",
+                                           "name",
                                            "type"))]
   
   values <- c()
@@ -179,7 +181,7 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="f
   mat <- matrix(values, ncol=length(stat.names))
   n.part <- x$drop.dims[["particle"]]
   if (missing(main))
-    main <- "Summary statistics"
+    main <- paste(x$name, x$type, "estimates")
   if (missing(sub))
     sub <- paste("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
         collapse=","))
@@ -198,11 +200,10 @@ plot.summary.particles.list <- function(x, ...)
   invisible()
 }
 
-plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), main, ...)
+
+plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
 {
-  if (missing(main))
-    main <- paste(deparse.varname(x$name, x$lower, x$upper), x$type, "estimates")
-  plot(summary(x, fun, probs), main=main, ...)
+  plot(summary(x, fun, probs), ...)
   invisible()
 }
 
@@ -211,6 +212,7 @@ plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.
 {
   for (n in names(x))
     plot(x[[n]], fun, probs, ...)
+  invisible()
 }
 
 
@@ -234,7 +236,7 @@ print.diagnostic.particles <- function(x, ...)
   else {
     cat("diagnostic: POOR\n")
     cat("   The minimum effective sample size is too low: ", x$ESS, "\n", sep="")
-    cat("   Estimates must be poor for some variables.\n")
+    cat("   Estimates may be poor for some variables.\n")
     cat("   You should increase n.part.")
   }
 }

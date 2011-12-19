@@ -24,7 +24,7 @@ namespace Biips
     typedef NodesRelationVisitor SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef GraphTypes::StochasticParentNodeIdIterator StochasticParentNodeIdIterator;
+    typedef GraphTypes::StochasticParentIterator StochasticParentNodeIdIterator;
 
     const Graph & graph_;
     NodeId myId_;
@@ -57,7 +57,7 @@ namespace Biips
     Types<NodeId>::ConstIterator it_node_id_1, it_node_id_2, it_node_id_end;
     boost::tie(it_node_id_1, it_node_id_end) = graph_.GetSortedNodes();
     it_node_id_2 = it_node_id_1;
-    if ( std::find(it_node_id_1, it_node_id_end, nodeId_) < std::find(it_node_id_2, it_node_id_end, myId_) )
+    if ( graph_.GetRanks()[nodeId_] < graph_.GetRanks()[myId_] )
     {
       ans_ = KNOWN;
       // Its value is KNOWN if it has been computed before, i.e. if nodeID_ is before myId_
@@ -99,12 +99,27 @@ namespace Biips
   }
 
 
-  // nodeB is expected to be a StochasticNode from the nodeSequence
   NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph & graph)
   {
+    // nodeB is expected to be a StochasticNode from the nodeSequence
+    if (graph.GetNode(nodeB).GetType() != STOCHASTIC)
+      throw LogicError("nodesRelation: nodeB must be stochastic.");
     NodesRelationVisitor vis(graph, nodeB);
     graph.VisitNode(nodeA, vis);
     return vis.GetRelation();
+  }
+
+
+  Bool anyUnknownParent(NodeId id, NodeId sampledId, const Graph & graph)
+  {
+    GraphTypes::StochasticParentIterator it_parent, it_parent_end;
+    boost::tie(it_parent, it_parent_end) = graph.GetStochasticParents(id);
+    for (; it_parent != it_parent_end; ++it_parent)
+    {
+      if (nodesRelation(*it_parent, sampledId, graph) == UNKNOWN)
+        return true;
+    }
+    return false;
   }
 
 

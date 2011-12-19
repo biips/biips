@@ -46,9 +46,6 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
     {
-      if ( !graph_.GetObserved()[nodeId_] )
-        return;
-
       MultiArray prec_i_dat(getNodeValue(node.Parents()[1], graph_, nodeSampler_));
       MatrixRef prec_i(prec_i_dat);
       Size dim_obs = prec_i.size1();
@@ -95,8 +92,8 @@ namespace Biips
     NodeId prior_prec_id = node.Parents()[1];
     Size dim_node = graph_.GetNode(prior_mean_id).Dim()[0];
 
-    StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-    boost::tie(it_offspring, it_offspring_end) = graph_.GetStochasticChildren(nodeId_);
+    GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
+    boost::tie(it_offspring, it_offspring_end) = graph_.GetLikelihoodChildren(nodeId_);
 
     MNormalLinearLikeFormVisitor like_form_vis(graph_, nodeId_, *this, dim_node);
     while ( it_offspring != it_offspring_end )
@@ -143,7 +140,7 @@ namespace Biips
     MultiArray::Array post_param_values(2);
     post_param_values[0] = MultiArray(post_mean);
     post_param_values[1] = MultiArray(post_prec);
-    nodeValuesMap_[nodeId_] = DMNorm::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr(); // FIXME Boundaries
+    nodeValuesMap()[nodeId_] = DMNorm::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr(); // FIXME Boundaries
 
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(obs_pred);
@@ -153,7 +150,7 @@ namespace Biips
       throw RuntimeError("Failure to calculate log incremental weight.");
     // TODO optimize computation removing constant terms
 
-    sampledFlagsMap_[nodeId_] = true;
+    sampledFlagsMap()[nodeId_] = true;
   }
 
 
@@ -175,9 +172,9 @@ namespace Biips
         return;
 
       NodeId mean_id = node.Parents()[0];
-      NodeId var_id = node.Parents()[1];
-      conjugate_ = ( (nodesRelation(var_id, myId_, graph_) == KNOWN )
-          && isLinear(mean_id, myId_, graph_) ) ? true : false;
+      NodeId prec_id = node.Parents()[1];
+      conjugate_ = ( (nodesRelation(prec_id, myId_, graph_) == KNOWN )
+          && isLinear(mean_id, myId_, graph_) );
 
     }
 
@@ -188,13 +185,15 @@ namespace Biips
   };
 
 
+
+
+
   class CanSampleMNormalLinearVisitor : public ConstStochasticNodeVisitor
   {
   protected:
-    typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
-
     const Graph & graph_;
     Bool canSample_;
+
 
     void visit(const StochasticNode & node)
     {
@@ -210,23 +209,18 @@ namespace Biips
       if (node.IsBounded())
         return;
 
-      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end) = graph_.GetStochasticChildren(nodeId_);
-
       IsConjugateMNormalLinearVisitor child_vis(graph_, nodeId_);
 
-      while ( it_offspring != it_offspring_end )
+      GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
+      boost::tie(it_offspring, it_offspring_end) = graph_.GetLikelihoodChildren(nodeId_);
+      for (; it_offspring != it_offspring_end; ++it_offspring)
       {
-        if ( graph_.GetObserved()[*it_offspring] )
-        {
-          graph_.VisitNode(*it_offspring, child_vis);
+        graph_.VisitNode(*it_offspring, child_vis);
 
-          canSample_ = child_vis.IsConjugate();
+        canSample_ = child_vis.IsConjugate();
 
-          if ( !canSample_ )
-            break;
-        }
-        ++it_offspring;
+        if ( !canSample_ )
+          break;
       }
     }
 

@@ -40,8 +40,8 @@ namespace Biips
     {
       for (NodeId id=0; id<graph_.GetSize(); ++id)
       {
-        node_values[id] = nodeValuesMap_[id];
-        sampled_flags[id] = sampledFlagsMap_[id];
+        node_values[id] = nodeValuesMap()[id];
+        sampled_flags[id] = sampledFlagsMap()[id];
       }
       k_chosen->ScalarView() = Scalar(k);
       node_values[nodeId_] = k_chosen;
@@ -61,9 +61,9 @@ namespace Biips
     MultiArray::Array post_param_values(1);
     post_param_values[0].SetPtr(post_param);
 
-    nodeValuesMap_[nodeId_] = DCat::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr(); // FIXME Boundaries
+    nodeValuesMap()[nodeId_] = DCat::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr(); // FIXME Boundaries
 
-    sampledFlagsMap_[nodeId_] = true;
+    sampledFlagsMap()[nodeId_] = true;
 
     logIncrementalWeight_ = std::log(post_param_values[0].Values().Sum());
     if (isNan(logIncrementalWeight_))
@@ -74,11 +74,11 @@ namespace Biips
   class CanSampleDiscreteOptimalVisitor : public ConstStochasticNodeVisitor
   {
   protected:
-    typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
-    typedef GraphTypes::StochasticParentNodeIdIterator StochasticParentNodeIdIterator;
+    typedef GraphTypes::StochasticParentIterator StochasticParentNodeIdIterator;
 
     const Graph & graph_;
     Bool canSample_;
+    
 
     virtual void visit(const StochasticNode & node)
     {
@@ -94,31 +94,13 @@ namespace Biips
       if (node.IsBounded())
         return;
 
-      StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end) = graph_.GetStochasticChildren(nodeId_);
+      GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
+      boost::tie(it_offspring, it_offspring_end) = graph_.GetLikelihoodChildren(nodeId_);
 
-      while ( ( it_offspring != it_offspring_end ) &&  (!canSample_) )
+      for (; it_offspring != it_offspring_end; ++it_offspring )
       {
-        if ( graph_.GetObserved()[*it_offspring] )
-        {
-          StochasticParentNodeIdIterator it_sto_parents, it_sto_parents_end;
-          boost::tie(it_sto_parents, it_sto_parents_end) = graph_.GetStochasticParents(*it_offspring);
-
-          NodesRelationType parent_relation;
-          Bool have_like = true;
-          while ( (it_sto_parents != it_sto_parents_end) && have_like )
-          {
-            if ( *it_sto_parents != nodeId_ )
-            {
-              parent_relation = nodesRelation(*it_sto_parents, nodeId_, graph_);
-              have_like = (parent_relation == KNOWN);
-            }
-            ++it_sto_parents;
-          }
-
-          canSample_ = have_like;
-        }
-        ++it_offspring;
+        canSample_ = true;
+        break;
       }
     }
 

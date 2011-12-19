@@ -27,13 +27,13 @@ namespace Biips
     if (!membersSet_)
       throw LogicError("NodeSampler can not visit LogicalNode: members not set.");
 
-    if (sampledFlagsMap_[nodeId_])
+    if (sampledFlagsMap()[nodeId_])
       return;
 
     MultiArray::Array params = getParamValues(nodeId_, graph_, *this);
-    nodeValuesMap_[nodeId_] = node.Eval(params).ValuesPtr();
+    nodeValuesMap()[nodeId_] = node.Eval(params).ValuesPtr();
 
-    sampledFlagsMap_[nodeId_] = true;
+    sampledFlagsMap()[nodeId_] = true;
   }
 
 
@@ -58,8 +58,8 @@ namespace Biips
   {
     MultiArray::Array param_values = getParamValues(nodeId_, graph_, *this);
     MultiArray::Pair bound_values = getBoundValues(nodeId_, graph_, *this);
-    nodeValuesMap_[nodeId_] = node.Sample(param_values, bound_values, *pRng_).ValuesPtr();
-    sampledFlagsMap_[nodeId_] = true;
+    nodeValuesMap()[nodeId_] = node.Sample(param_values, bound_values, *pRng_).ValuesPtr();
+    sampledFlagsMap()[nodeId_] = true;
     logIncrementalWeight_ = getLogLikelihood(graph_, nodeId_, *this);
   }
 

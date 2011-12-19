@@ -75,14 +75,14 @@ namespace Biips
   {
     ans_ = false;
 
-    GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+    GraphTypes::ParentIterator it_parents, it_parents_end;
     boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
 
     Size n_par = std::distance(it_parents, it_parents_end);
     Flags parents_linear(n_par, false);
     Flags parents_known(n_par, false);
 
-    for (Size i=0; i<n_par; ++i)
+    for (Size i=0; it_parents != it_parents_end; ++it_parents, ++i)
     {
       SelfType is_linear_vis(graph_, myId_);
       graph_.VisitNode(*it_parents, is_linear_vis);
@@ -145,14 +145,14 @@ namespace Biips
     {
       ans_ = false;
 
-      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      GraphTypes::ParentIterator it_parents, it_parents_end;
       boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
 
       Size n_par = std::distance(it_parents, it_parents_end);
       Flags parents_scale(n_par, false);
       Flags parents_known(n_par, false);
 
-      for (Size i=0; i<n_par; ++i)
+      for (Size i=0; it_parents != it_parents_end; ++it_parents, ++i)
       {
         SelfType is_scale_vis(graph_, myId_);
         graph_.VisitNode(*it_parents, is_scale_vis);

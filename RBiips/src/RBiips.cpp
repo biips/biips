@@ -562,10 +562,49 @@ RcppExport SEXP get_smooth_monitors(SEXP pConsole)
   std::map<String, NodeArrayMonitor> monitors_map;
 
   if (!p_console->DumpSmoothMonitors(monitors_map))
-    throw RuntimeError("Failed to dump filter monitors.");
+    throw RuntimeError("Failed to dump smooth monitors.");
 
   return getMonitors<MultiArray::StorageOrderType>(monitors_map, "backward.smoothing");
   END_RBIIPS
+}
+
+
+RcppExport void clear_filter_monitors(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  if (!p_console->ClearFilterMonitors())
+    throw RuntimeError("Failed to clear filter monitors.");
+
+  VOID_END_RBIIPS
+}
+
+
+RcppExport void clear_smooth_tree_monitors(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  if (!p_console->ClearSmoothTreeMonitors())
+    throw RuntimeError("Failed to clear smooth tree monitors.");
+
+  VOID_END_RBIIPS
+}
+
+
+RcppExport void clear_smooth_monitors(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  if (!p_console->ClearSmoothMonitors())
+    throw RuntimeError("Failed to clear smooth monitors.");
+
+  VOID_END_RBIIPS
 }
 
 

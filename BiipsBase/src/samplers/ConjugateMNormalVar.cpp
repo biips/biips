@@ -24,7 +24,7 @@ namespace Biips
     VectorRef like_mean(likeParamContribValues[0]);
     MatrixRef like_prec(likeParamContribValues[1]);
 
-    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
+    GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId var_id = *(++it_parents);
 
