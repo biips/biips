@@ -21,7 +21,7 @@ namespace Biips
   }
 
   Node::Node(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parents)
-    : pDim_(pDim), parents_(parents)
+    : pDim_(pDim), directParents_(parents)
   {
     if (!pDim)
       throw LogicError("Can not create node: DimArray::Ptr is NULL.");

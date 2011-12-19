@@ -282,7 +282,7 @@ namespace Biips
         {
           if (data_graph.GetObserved()[*it_node_id])
           {
-            GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+            GraphTypes::ParentIterator it_parents, it_parents_end;
             boost::tie(it_parents, it_parents_end) = data_graph.GetParents(*it_node_id);
             for (; it_parents != it_parents_end; ++it_parents)
             {
@@ -1014,6 +1014,90 @@ namespace Biips
   }
 
 
+  Bool Console::ClearFilterMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear filter monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't clear filter monitors. Sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't clear filter monitors. Sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearFilterMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::ClearSmoothTreeMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth tree monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't clear smooth tree monitors. Sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't clear smooth tree monitors. Sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearSmoothTreeMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::ClearSmoothMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't clear smooth monitors. Smoother not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't clear smooth monitors. Smoother still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearSmoothMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
   Bool Console::PrintGraphviz(std::ostream & os)
   {
     if (!pModel_)
@@ -1167,17 +1251,14 @@ namespace Biips
     }
     try
     {
-      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end) = pModel_->GraphPtr()->GetSortedNodes();
-
       nodeSamplers.clear();
-      nodeSamplers.resize(std::distance(it_nodes, it_nodes_end));
+      nodeSamplers.resize(pModel_->GraphPtr()->GetSize());
 
       Types<std::pair<NodeId, String> >::Array samplers_sequence = pModel_->Sampler().GetSamplersSequence();
       for (Size i=0; i<samplers_sequence.size(); ++i)
       {
         NodeId id = samplers_sequence[i].first;
-        Size rank = pModel_->GraphPtr()->GetRank(id);
+        Size rank = pModel_->GraphPtr()->GetRanks()[id];
         const String & sampler_name = samplers_sequence[i].second;
         nodeSamplers[rank] = sampler_name;
       }

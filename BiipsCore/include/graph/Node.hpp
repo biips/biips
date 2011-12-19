@@ -32,7 +32,7 @@ namespace Biips
   {
   protected:
     DimArray::Ptr pDim_;
-    Types<NodeId>::Array parents_;
+    Types<NodeId>::Array directParents_;
 
   public:
     typedef Node SelfType;
@@ -45,7 +45,7 @@ namespace Biips
     DimArray & Dim() { return *pDim_; }
     const DimArray::Ptr & DimPtr() const { return pDim_; }
     DimArray::Ptr & DimPtr() { return pDim_; }
-    const Types<NodeId>::Array & Parents() const { return parents_; }
+    const Types<NodeId>::Array & Parents() const { return directParents_; }
 //    NodeId Parents(Size n) const { return parents_.at(n); }
     virtual NodeType GetType() const = 0; // FIXME useless with visitor pattern ?
 

@@ -129,6 +129,10 @@ namespace Biips
     Bool DumpNodeObserved(Flags & nodeObserved);
     Bool DumpNodeIterations(Types<Size>::Array & nodeIterations);
     Bool DumpNodeSamplers(Types<String>::Array & nodeSamplers);
+
+    Bool ClearFilterMonitors();
+    Bool ClearSmoothTreeMonitors();
+    Bool ClearSmoothMonitors();
   };
 }
 

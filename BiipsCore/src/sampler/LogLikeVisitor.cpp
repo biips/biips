@@ -44,33 +44,20 @@ namespace Biips
     if ( !graph_.GetObserved()[nodeId_] )
       return;
 
-    GraphTypes::StochasticParentNodeIdIterator it_sto_parents, it_sto_parents_end;
-    boost::tie(it_sto_parents, it_sto_parents_end) = graph_.GetStochasticParents(nodeId_);
-    NodesRelationType parent_relation;
-    Bool compute_log_like = true;
-    while ( it_sto_parents != it_sto_parents_end && compute_log_like)
-    {
-      //        if ( *it_sto_parents != myId_ )
-      //        {
-      parent_relation = nodesRelation(*it_sto_parents, myId_, graph_);
-      compute_log_like = (parent_relation != UNKNOWN);
-      //        }
-      ++it_sto_parents;
-    }
+    //TODO: remove this check ?
+    if (anyUnknownParent(nodeId_, myId_, graph_))
+      return;
 
-    if (compute_log_like)
-    {
-      MultiArray x_value(node.DimPtr(), graph_.GetValues()[nodeId_]);
-      MultiArray::Array param_values = getParamValues(nodeId_, graph_, nodeSampler_);
-      MultiArray::Pair bound_values = getBoundValues(nodeId_, graph_, nodeSampler_);
-      Scalar log_like = node.LogPriorDensity(x_value, param_values, bound_values);
-      if(isNan(log_like))
-        throw NodeError(nodeId_, "Failure to calculate log density.");
+    MultiArray x_value(node.DimPtr(), graph_.GetValues()[nodeId_]);
+    MultiArray::Array param_values = getParamValues(nodeId_, graph_, nodeSampler_);
+    MultiArray::Pair bound_values = getBoundValues(nodeId_, graph_, nodeSampler_);
+    Scalar log_like = node.LogPriorDensity(x_value, param_values, bound_values);
+    if(isNan(log_like))
+      throw NodeError(nodeId_, "Failure to calculate log density.");
 
-      logLikelihood_ += log_like;
-      if(isNan(logLikelihood_))
-        throw RuntimeError("Failure to calculate log likelihood.");
-    }
+    logLikelihood_ += log_like;
+    if(isNan(logLikelihood_))
+      throw RuntimeError("Failure to calculate log likelihood.");
   }
 
 
@@ -81,8 +68,8 @@ namespace Biips
   Scalar getLogLikelihood(const Graph & graph, NodeId myId, NodeSampler & nodeSampler)
   {
     LogLikeVisitor log_like_vis(graph, myId, nodeSampler);
-    GraphTypes::StochasticChildrenNodeIdIterator it_offspring, it_offspring_end;
-    boost::tie(it_offspring, it_offspring_end) = graph.GetStochasticChildren(myId);
+    GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
+    boost::tie(it_offspring, it_offspring_end) = graph.GetLikelihoodChildren(myId);
     while ( it_offspring != it_offspring_end )
     {
       graph.VisitNode(*it_offspring, log_like_vis);

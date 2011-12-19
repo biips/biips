@@ -40,6 +40,7 @@ namespace Biips
   public:
 
     Model() : pGraph_(new Graph()), defaultMonitorsSet_(false) {}
+    virtual ~Model() {};
 
     const Graph::Ptr & GraphPtr() { return pGraph_; }
 
@@ -74,7 +75,11 @@ namespace Biips
     ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
     ScalarHistogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
-    virtual ~Model() {};
+    // only release monitor objects
+    // but keep nodeIds
+    void virtual ClearFilterMonitors();
+    void virtual ClearSmoothTreeMonitors();
+    void virtual ClearSmoothMonitors();
   };
 
 }

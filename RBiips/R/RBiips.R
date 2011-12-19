@@ -319,6 +319,9 @@ run.biips <- function(obj, n.part, backward=TRUE,
   for (n in names(mon)) {
     results[[n]][["filtering"]] <- mon[[n]]
   }
+  if (!backward) {
+    .Call("clear_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+  }
   
   results[["log.norm.const"]] <- log.norm.const
   
@@ -326,15 +329,20 @@ run.biips <- function(obj, n.part, backward=TRUE,
   for (n in names(mon)) {
     results[[n]][["smoothing"]] <- mon[[n]]
   }
+  .Call("clear_smooth_tree_monitors", obj$ptr(), PACKAGE="RBiips")
   
   if (backward)
   {
     ## run backward smoother
     .Call("run_backward_smoother", obj$ptr(), PACKAGE="RBiips")
+    
+    .Call("clear_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+    
     mon <- .Call("get_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
     for (n in names(mon)) {
       results[[n]][["backward.smoothing"]] <- mon[[n]]
     }
+    .Call("clear_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
   }
   
   for (n in names(results)) {

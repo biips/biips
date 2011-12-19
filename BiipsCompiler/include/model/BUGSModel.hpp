@@ -71,6 +71,7 @@ namespace Biips
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+
   };
 
 }

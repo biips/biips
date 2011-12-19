@@ -29,7 +29,7 @@ namespace Biips
   void ConjugateNormal::formLikeParamContrib(NodeId likeId,
       MultiArray::Array & likeParamContribValues)
   {
-    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
+    GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId prec_id = *(++it_parents);
     Scalar like_prec = getNodeValue(prec_id, graph_, *this).ScalarView();

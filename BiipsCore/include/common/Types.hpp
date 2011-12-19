@@ -31,7 +31,7 @@ namespace Biips
   //! Boolean type
   typedef bool Bool;
 
-  typedef std::deque<Bool> Flags;
+  typedef std::vector<Bool> Flags;
 
   //! Positive integers type
   /*!

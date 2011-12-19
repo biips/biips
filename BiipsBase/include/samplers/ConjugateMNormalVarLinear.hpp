@@ -24,8 +24,6 @@ namespace Biips
     typedef NodeSampler BaseType;
 
   protected:
-    typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
-
     static const String NAME_;
 
     friend class ConjugateMNormalVarLinearFactory;

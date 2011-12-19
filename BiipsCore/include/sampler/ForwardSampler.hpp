@@ -22,8 +22,6 @@ namespace Biips
 {
   class Graph;
 
-  class NodeValuesMap;
-
   class ScalarAccumulator;
   class DiscreteScalarAccumulator;
   class ElementAccumulator;
@@ -112,6 +110,7 @@ namespace Biips
 
     void LockNode(NodeId id) { nodeLocks_[id]++; }
     void UnlockNode(NodeId id) { nodeLocks_[id]--; }
+    void UnlockAllNodes();
 
     void Initialize(Size nbParticles, const Rng::Ptr & pRng, const String & rsType="stratified", Scalar threshold=0.5);
     void Iterate();

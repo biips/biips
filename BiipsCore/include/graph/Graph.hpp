@@ -33,29 +33,15 @@ namespace Biips
   protected:
     typedef MultiArray::StorageType StorageType;
 
-    typedef GraphTypes::FullGraph FullGraph;
+    typedef GraphTypes::ParentsGraph ParentsGraph;
+    typedef GraphTypes::ChildrenGraph ChildrenGraph;
 
-    typedef boost::graph_traits<FullGraph>::edge_descriptor EdgeId;
-    typedef boost::graph_traits<FullGraph>::vertex_iterator NodeIdIterator;
-    typedef boost::graph_traits<FullGraph>::in_edge_iterator InEdgeIdIterator;
-    typedef boost::graph_traits<FullGraph>::out_edge_iterator OutEdgeIdIterator;
+    typedef GraphTypes::ParentIterator ParentIterator;
+    typedef GraphTypes::ChildIterator ChildIterator;
+    typedef GraphTypes::StochasticParentIterator StochasticParentIterator;
+    typedef GraphTypes::StochasticChildIterator StochasticChildIterator;
+    typedef GraphTypes::LikelihoodChildIterator LikelihoodChildIterator;
 
-    typedef GraphTypes::DirectEdgePredicate DirectEdgePredicate;
-    typedef GraphTypes::DirectParentGraph DirectParentGraph;
-    typedef GraphTypes::DirectParentNodeIdIterator DirectParentNodeIdIterator;
-
-    typedef GraphTypes::DirectChildrenGraph DirectChildrenGraph;
-    typedef GraphTypes::DirectChildrenNodeIdIterator DirectChildrenNodeIdIterator;
-
-    typedef GraphTypes::StochasticParentEdgePredicate StochasticParentEdgePredicate;
-    typedef GraphTypes::StochasticParentGraph StochasticParentGraph;
-    typedef GraphTypes::StochasticParentNodeIdIterator StochasticParentNodeIdIterator;
-
-    typedef GraphTypes::StochasticChildEdgePredicate StochasticChildEdgePredicate;
-    typedef GraphTypes::StochasticChildrenGraph StochasticChildrenGraph;
-    typedef GraphTypes::StochasticChildrenNodeIdIterator StochasticChildrenNodeIdIterator;
-
-    typedef GraphTypes::EdgeTypePropertyMap EdgeTypePropertyMap;
     typedef GraphTypes::ValuesPropertyMap ValuesPropertyMap;
     typedef GraphTypes::ObservedPropertyMap ObservedPropertyMap;
     typedef GraphTypes::DiscretePropertyMap DiscretePropertyMap;
@@ -65,13 +51,15 @@ namespace Biips
 
     friend class SetObsValuesVisitor;
 
-    FullGraph fullGraph_;
-    DirectParentGraph directParentGraph_;
-    DirectChildrenGraph directChildrenGraph_;
-    StochasticParentGraph stochasticParentGraph_;
-    StochasticChildrenGraph stochasticChildrenGraph_;
+    ParentsGraph parentsGraph_;
+    ChildrenGraph childrenGraph_;
+
+    Types<std::set<NodeId> >::Array stochasticParents_;
+    Types<std::set<NodeId> >::Array stochasticChildren_;
+    Types<std::set<NodeId> >::Array likelihoodChildren_;
 
     Types<NodeId>::Array topoSort_;
+    Types<Size>::Array ranks_;
 
     Bool builtFlag_;
 
@@ -79,9 +67,10 @@ namespace Biips
     std::map<String, Size> unobsNodesSummaryMap_;
 
     void topologicalSort();
-    void buildStochasticParentEdges();
-    void buildStochasticChildrenEdges();
-    void setValue(NodeId nodeId, const ValArray::Ptr & pVal) { boost::put(boost::vertex_value, fullGraph_, nodeId, pVal); }
+    void buildStochasticParents();
+    void buildStochasticChildren();
+    void buildLikelihoodChildren();
+    void setValue(NodeId nodeId, const ValArray::Ptr & pVal) { boost::put(boost::vertex_value, parentsGraph_, nodeId, pVal); }
     Types<DimArray::Ptr>::Array getParamDims(const Types<NodeId>::Array parameters) const;
 
   public:
@@ -101,15 +90,16 @@ namespace Biips
 
     void PopNode();
 
-    Types<DirectParentNodeIdIterator>::Pair GetParents(NodeId nodeId) const;
-    Types<DirectChildrenNodeIdIterator>::Pair GetChildren(NodeId nodeId) const;
-    Types<StochasticParentNodeIdIterator>::Pair GetStochasticParents(NodeId nodeId) const;
-    Types<StochasticChildrenNodeIdIterator>::Pair GetStochasticChildren(NodeId nodeId) const;
+    Types<ParentIterator>::Pair GetParents(NodeId nodeId) const;
+    Types<ChildIterator>::Pair GetChildren(NodeId nodeId) const;
+    Types<StochasticParentIterator>::Pair GetStochasticParents(NodeId nodeId) const;
+    Types<StochasticChildIterator>::Pair GetStochasticChildren(NodeId nodeId) const;
+    Types<LikelihoodChildIterator>::Pair GetLikelihoodChildren(NodeId nodeId) const;
 
     Types<NodeId>::ConstIteratorPair GetSortedNodes() const;
 
-    Size GetSize() const { return boost::num_vertices(fullGraph_); };
-    Bool Empty() const { return boost::num_vertices(fullGraph_) == 0; };
+    Size GetSize() const { return boost::num_vertices(parentsGraph_); };
+    Bool Empty() const { return boost::num_vertices(parentsGraph_) == 0; };
     Bool IsBuilt() const { return builtFlag_; };
 
     const std::map<String, Size> & NodesSummary() const { return nodesSummaryMap_; };
@@ -121,17 +111,17 @@ namespace Biips
     void VisitGraph(NodeVisitor & vis);
     void VisitGraph(ConstNodeVisitor & vis) const;
     NodeValues SampleValues(const Rng::Ptr & pRng) const;
-    ConstValuesPropertyMap GetValues() const { return boost::get(boost::vertex_value, fullGraph_); }
-    ConstObservedPropertyMap GetObserved() const { return boost::get(boost::vertex_observed, fullGraph_); }
-    ConstDiscretePropertyMap GetDiscrete() const { return boost::get(boost::vertex_discrete, fullGraph_); }
+    ConstValuesPropertyMap GetValues() const { return boost::get(boost::vertex_value, parentsGraph_); }
+    ConstObservedPropertyMap GetObserved() const { return boost::get(boost::vertex_observed, parentsGraph_); }
+    ConstDiscretePropertyMap GetDiscrete() const { return boost::get(boost::vertex_discrete, parentsGraph_); }
     void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
     void SetObsValues(const NodeValues & nodeValues);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
-    Node const & GetNode(NodeId nodeId) const { return *boost::get(boost::vertex_node_ptr, fullGraph_, nodeId); };
+    Node const & GetNode(NodeId nodeId) const { return *boost::get(boost::vertex_node_ptr, parentsGraph_, nodeId); };
     Node const & operator[] (NodeId nodeId) const { return GetNode(nodeId); };
 
-    Size GetRank(NodeId nodeId) const;
+    const Types<Size>::Array & GetRanks() const;
 
     // TODO remove from the class
     void PrintGraph(std::ostream & os = std::cout) const;
@@ -145,7 +135,7 @@ namespace Biips
   template<typename VertexWriter>
   void Graph::PrintGraphviz(std::ostream & os, VertexWriter vw) const
   {
-    boost::write_graphviz(os, directChildrenGraph_, vw);
+    boost::write_graphviz(os, childrenGraph_, vw);
   }
 
 
