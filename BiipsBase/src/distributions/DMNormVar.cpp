@@ -10,7 +10,7 @@
 
 #define _USE_MATH_DEFINES
 
-#include <boost/random/multivariate_normal_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 
 #include "distributions/DMNormVar.hpp"
@@ -70,22 +70,25 @@ namespace Biips
     const MultiArray & mean = paramValues[0];
     const MultiArray & var = paramValues[1];
 
+    Size n_dim = mean.Values().size();
+
     Matrix var_chol(var);
     if (!ublas::cholesky_factorize(var_chol))
       throw RuntimeError("DMNormVar::sample: matrix is not positive-semidefinite.");
 
-    typedef boost::multivariate_normal_distribution<Scalar> DistType;
+    typedef boost::normal_distribution<Scalar> DistType;
+    boost::variate_generator<Rng::GenType&, DistType> gen(rng.GetGen(), DistType());
 
-    DistType dist(var_chol, Vector(mean));
-
-    typedef boost::variate_generator<Rng::GenType&, DistType > GenType;
-    GenType gen(rng.GetGen(), dist);
-    
     MultiArray sample(mean.DimPtr());
-    for (Size i = 0; i < sample.Length(); ++i)
-    {
-      sample.Values()[i] = gen();
-    }
+    std::generate(sample.Values().begin(), sample.Values().end(), gen);
+
+    VectorRef sample_vec(sample);
+    sample_vec = ublas::prod(var_chol, sample_vec);
+    sample_vec.Release();
+
+    for (Size i=0; i<n_dim; ++i)
+      sample.Values()[i] += mean.Values()[i];
+    
     return sample;
   }
 
@@ -102,7 +105,7 @@ namespace Biips
       throw RuntimeError("DMNormVar::logDensity: matrix is not positive-semidefinite.");
 
     ublas::inplace_solve(var_chol, diff_vec, ublas::lower_tag());
-    return -log(ublas::cholesky_det(var_chol)) - 0.5 * (diff_vec.size()*log(2*M_PI) + ublas::inner_prod(diff_vec, diff_vec));
+    return -0.5 * (diff_vec.size()*std::log(2*M_PI) + std::log(ublas::cholesky_det(var_chol)) + ublas::inner_prod(diff_vec, diff_vec));
   }
 
 

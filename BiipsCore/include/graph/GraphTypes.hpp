@@ -13,7 +13,6 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
-#include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/reverse_graph.hpp>
 
 #include "Node.hpp"
@@ -27,21 +26,7 @@ namespace boost
    */
   enum vertex_node_ptr_t { vertex_node_ptr = 101 }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, node_ptr);
-  //! Edge type graph property
-  /*!
-   * The edges have a 'type' property, stored in an edge property map of the graph.
-   * This property map is stored by the boost graph object.
-   * \see EdgeType
-   */
-  enum edge_type_t { edge_type = 102 }; // a unique number
-  BOOST_INSTALL_PROPERTY(edge, type);
 
-  //! Edge type graph property
-  /*!
-   * The edges have a 'type' property, stored in an edge property map of the graph.
-   * This property map is stored by the boost graph object.
-   * \see EdgeType
-   */
   enum vertex_observed_t { vertex_observed = 103 }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, observed);
 
@@ -54,15 +39,6 @@ namespace boost
 
 namespace Biips
 {
-
-  //! Edge type
-  enum EdgeType
-  {
-    DIRECT_EDGE, //!< Direct edge in a DAG
-    STOCHASTIC_PARENT_EDGE, //!< Stochastic Parent edge in a DAG
-    STOCHASTIC_CHILD_EDGE //!< Stochastic Child edge in a DAG
-  };
-
 
   //! Nodes relation type
   /*!
@@ -119,7 +95,7 @@ namespace Biips
      * of pointed vertices for each vertex, stored in a vector. The edges are bidirectional,
      * i.e. one node can access its targets as well as its sources.
      *
-     * The node pointers, and edge 'types' properties are internally stored.
+     * The node pointers properties are internally stored.
      * Other vertices or edges properties have to be stored in external property maps
      * \see NodeValuesMap
      */
@@ -127,93 +103,47 @@ namespace Biips
     boost::property<boost::vertex_node_ptr_t, Node::Ptr,
     boost::property<boost::vertex_observed_t, Bool,
     boost::property<boost::vertex_discrete_t, Bool,
-    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > > >,
-    boost::property<boost::edge_type_t, EdgeType>
-    > FullGraph;
+    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > > >
+    > ParentsGraph;
 
-    //! Node values boost property map
+    //! Node values property map
     /*!
      * Property maps associate properties, here the node values, to the vertices, or the edges
      * of the graph. This object exposes a common interface to property maps, whatever
      * is the underlying structure of the graph.
      * Those property maps can be a simple access to an existing array, here A NodeValues object.
      */
-    typedef boost::iterator_property_map<NodeValues::iterator, boost::identity_property_map> NodeValuesMap;
+    typedef NodeValues NodeValuesMap;
     //! Constant node values boost property map
     /*!
      * \see NodeValuesMap
      */
-    typedef boost::iterator_property_map<NodeValues::const_iterator, boost::identity_property_map> ConstNodeValuesMap;
-    //! Flags boost property map
+    typedef const NodeValues ConstNodeValuesMap;
+    //! Flags property map
     /*!
      * Stores flags (booleans) (direct, stochastic parent/child) properties of the vertices.
      * For instance: true if the node has been computed.
      * \see NodeValuesMap
      */
-    typedef boost::iterator_property_map<Flags::iterator, boost::identity_property_map> FlagsMap;
-    
-    typedef boost::iterator_property_map<Types<Size>::Array::iterator, boost::identity_property_map> IterationsMap;
-    
-    //! Edge type boost property map
-    /*!
-     * Stores the 'type' (direct, stochastic parent/child) property of the edges.
-     * \see NodeValuesMap
-     * \see edge_type_t
-     * \see EdgeType
-     */
-    typedef boost::property_map<FullGraph, boost::edge_type_t>::type EdgeTypePropertyMap;
+    typedef Flags FlagsMap;
 
-    typedef boost::property_map<FullGraph, boost::vertex_value_t>::type ValuesPropertyMap;
-    typedef boost::property_map<FullGraph, boost::vertex_observed_t>::type ObservedPropertyMap;
-    typedef boost::property_map<FullGraph, boost::vertex_discrete_t>::type DiscretePropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::type ValuesPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::type ObservedPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::type DiscretePropertyMap;
 
-    typedef boost::property_map<FullGraph, boost::vertex_value_t>::const_type ConstValuesPropertyMap;
-    typedef boost::property_map<FullGraph, boost::vertex_observed_t>::const_type ConstObservedPropertyMap;
-    typedef boost::property_map<FullGraph, boost::vertex_discrete_t>::const_type ConstDiscretePropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::const_type ConstValuesPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::const_type ConstObservedPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::const_type ConstDiscretePropertyMap;
 
-    class DirectEdgePredicate
-    {
-    protected:
-      EdgeTypePropertyMap edgeTypeMap_;
-    public:
-      template<typename Edge>
-      Bool operator() (const Edge & e) const { return (boost::get(edgeTypeMap_, e) == DIRECT_EDGE); }
-      DirectEdgePredicate() {};
-      DirectEdgePredicate(const EdgeTypePropertyMap & edgeTypeMap) : edgeTypeMap_(edgeTypeMap) {};
-    };
+    typedef boost::graph_traits<ParentsGraph>::adjacency_iterator ParentIterator;
+    typedef boost::reverse_graph<ParentsGraph> ChildrenGraph;
+    typedef boost::graph_traits<ChildrenGraph>::adjacency_iterator ChildIterator;
 
-    typedef boost::filtered_graph<FullGraph, DirectEdgePredicate> DirectParentGraph;
-    typedef boost::graph_traits<DirectParentGraph>::adjacency_iterator DirectParentNodeIdIterator;
-    typedef boost::reverse_graph<DirectParentGraph> DirectChildrenGraph;
-    typedef boost::graph_traits<DirectChildrenGraph>::adjacency_iterator DirectChildrenNodeIdIterator;
+    typedef std::set<NodeId>::const_iterator StochasticParentIterator;
 
-    class StochasticParentEdgePredicate
-    {
-    protected:
-      EdgeTypePropertyMap edgeTypeMap_;
-    public:
-      template<typename Edge>
-      Bool operator() (const Edge & e) const { return (boost::get(edgeTypeMap_, e) == STOCHASTIC_PARENT_EDGE); }
-      StochasticParentEdgePredicate() {};
-      StochasticParentEdgePredicate(const EdgeTypePropertyMap & edgeTypeMap) : edgeTypeMap_(edgeTypeMap) {};
-    };
+    typedef std::set<NodeId>::const_iterator StochasticChildIterator;
 
-    typedef boost::filtered_graph<FullGraph, StochasticParentEdgePredicate> StochasticParentGraph;
-    typedef boost::graph_traits<StochasticParentGraph>::adjacency_iterator StochasticParentNodeIdIterator;
-
-    class StochasticChildEdgePredicate
-    {
-    protected:
-      EdgeTypePropertyMap edgeTypeMap_;
-    public:
-      template<typename Edge>
-      Bool operator() (const Edge & e) const { return (boost::get(edgeTypeMap_, e) == STOCHASTIC_CHILD_EDGE); }
-      StochasticChildEdgePredicate() {};
-      StochasticChildEdgePredicate(const EdgeTypePropertyMap & edgeTypeMap) : edgeTypeMap_(edgeTypeMap) {};
-    };
-
-    typedef boost::filtered_graph<FullGraph, StochasticChildEdgePredicate> StochasticChildrenGraph;
-    typedef boost::graph_traits<StochasticChildrenGraph>::adjacency_iterator StochasticChildrenNodeIdIterator;
+    typedef std::set<NodeId>::const_iterator LikelihoodChildIterator;
   };
 
 }

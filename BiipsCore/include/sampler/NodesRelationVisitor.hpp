@@ -32,6 +32,9 @@ namespace Biips
    */
   NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph & graph);
 
+
+  Bool anyUnknownParent(NodeId id, NodeId sampledId, const Graph & graph);
+
 //  Types<NodesRelationType>::Array getParentnodesRelations(NodeId nodeId, const Graph & graph);
 }
 

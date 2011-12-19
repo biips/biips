@@ -97,7 +97,7 @@ namespace Biips
     }
 
     //Name not in symbol table: calculate name from parents
-    typedef GraphTypes::DirectParentNodeIdIterator DirectParentNodeIdIterator;
+    typedef GraphTypes::ParentIterator DirectParentNodeIdIterator;
     DirectParentNodeIdIterator it_parents, it_parents_end;
 
     boost::tie(it_parents, it_parents_end) = model_.GraphPtr()->GetParents(nodeId);

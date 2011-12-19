@@ -51,19 +51,19 @@ namespace Biips
 
   void GetNodeValueVisitor::visit(const StochasticNode & node)
   {
-    if ( !nodeSampler_.sampledFlagsMap_[nodeId_] )
+    if ( !nodeSampler_.sampledFlagsMap()[nodeId_] )
       throw LogicError("GetNodeValueVisitor can not visit StochasticNode: node has not been sampled.");
 
     if (graph_.GetObserved()[nodeId_])
       value_ = MultiArray(node.DimPtr(), graph_.GetValues()[nodeId_]);
     else
-      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
+      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap()[nodeId_]);
   }
 
 
   void GetNodeValueVisitor::visit(const LogicalNode & node)
   {
-    if ( !nodeSampler_.sampledFlagsMap_[nodeId_] )
+    if ( !nodeSampler_.sampledFlagsMap()[nodeId_] )
     {
       NodeId backup_node_id = nodeSampler_.nodeId_;
       nodeSampler_.SetNodeId(nodeId_);
@@ -74,7 +74,7 @@ namespace Biips
     if (graph_.GetObserved()[nodeId_])
       value_ = MultiArray(node.DimPtr(), graph_.GetValues()[nodeId_]);
     else
-      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap_[nodeId_]);
+      value_ = MultiArray(node.DimPtr(), nodeSampler_.nodeValuesMap()[nodeId_]);
   }
 
 
@@ -156,7 +156,7 @@ namespace Biips
 
   void GetParamValuesVisitor::visit(const StochasticNode & node)
   {
-    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    GraphTypes::ParentIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = graph_.GetParents(nodeId_);
 
     if (node.IsUpperBounded())
@@ -179,7 +179,7 @@ namespace Biips
 
   void GetParamValuesVisitor::visit(const LogicalNode & node)
   {
-    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    GraphTypes::ParentIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = graph_.GetParents(nodeId_);
 
     MultiArray::Array param_values(std::distance(it_param, it_param_end));
@@ -204,7 +204,7 @@ namespace Biips
 
   MultiArray::Array getParamValues(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex)
   {
-    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    GraphTypes::ParentIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = graph.GetParents(nodeId);
 
     IsBoundedVisitor is_bounded_vis;
@@ -249,7 +249,7 @@ namespace Biips
 
   void GetBoundValuesVisitor::visit(const StochasticNode & node)
   {
-    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    GraphTypes::ParentIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = graph_.GetParents(nodeId_);
 
     if (node.IsUpperBounded())
@@ -275,7 +275,7 @@ namespace Biips
 
   MultiArray::Pair getBoundValues(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex)
   {
-    GraphTypes::DirectParentNodeIdIterator it_param, it_param_end;
+    GraphTypes::ParentIterator it_param, it_param_end;
     boost::tie(it_param, it_param_end) = graph.GetParents(nodeId);
 
     MultiArray::Pair bound_values;
@@ -439,7 +439,7 @@ namespace Biips
 
   void IsSupportFixedVisitor::visit(const StochasticNode & node)
   {
-    GraphTypes::DirectParentNodeIdIterator it_parent, it_parent_end;
+    GraphTypes::ParentIterator it_parent, it_parent_end;
     boost::tie(it_parent, it_parent_end) = graph_.GetParents(nodeId_);
     if (node.IsUpperBounded())
     {

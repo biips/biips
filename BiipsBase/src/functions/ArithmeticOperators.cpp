@@ -24,7 +24,7 @@ namespace Biips
     for (Size i=0; i<linearMask.size(); ++i)
     {
       n_lin += linearMask[i];
-      if (!linearMask[i] && !knownMask[i])
+      if (!(linearMask[i] || knownMask[i]))
         return false;
     }
 
@@ -40,16 +40,13 @@ namespace Biips
 
   Bool Subtract::IsLinear(const Flags & linearMask, const Flags & knownMask) const
   {
-    Size n_lin = 0;
-
     for (Size i=0; i<linearMask.size(); ++i)
     {
-      n_lin += linearMask[i];
-      if (!linearMask[i] && !knownMask[i])
+      if (!(linearMask[i] || knownMask[i]))
         return false;
     }
 
-    return n_lin>0;
+    return linearMask[0] || linearMask[1];
   }
 
 
@@ -59,14 +56,14 @@ namespace Biips
   }
 
 
-  // TODO: valid with element wise operation ?
+  // FIXME: valid with element wise operation ?
   Bool Multiply::IsScale(const Flags & scaleMask, const Flags & knownMask) const
   {
     Size n_factor = 0;
     for (Size i=0; i<scaleMask.size(); ++i)
     {
       n_factor += scaleMask[i];
-      if (!scaleMask[i] && !knownMask[i])
+      if (!(scaleMask[i] || knownMask[i]))
         return false;
     }
 
@@ -86,7 +83,7 @@ namespace Biips
   }
 
 
-  // TODO: valid with element wise operation ?
+  // FIXME: valid with element wise operation ?
   Bool Divide::IsScale(const Flags & scaleMask, const Flags & knownMask) const
   {
     return scaleMask[0] && knownMask[1];

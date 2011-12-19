@@ -30,7 +30,7 @@ namespace Biips
       filterMonitorsMap_[id];
 
       // and its unobserved direct parents
-      GraphTypes::DirectParentNodeIdIterator it_parents, it_parents_end;
+      GraphTypes::ParentIterator it_parents, it_parents_end;
       boost::tie(it_parents, it_parents_end) = pGraph_->GetParents(id);
       for (; it_parents != it_parents_end; ++it_parents)
       {
@@ -78,6 +78,34 @@ namespace Biips
 
     smoothTreeMonitoredNodeIds_.insert(nodeId);
     return true;
+  }
+
+
+  void Model::ClearFilterMonitors()
+  {
+    filterMonitors_.clear();
+    for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors = filterMonitorsMap_.begin();
+        it_monitors != filterMonitorsMap_.end(); ++it_monitors)
+    {
+      it_monitors->second.reset();
+    }
+  }
+
+
+  void Model::ClearSmoothTreeMonitors()
+  {
+    pSmoothTreeMonitor_.reset();
+  }
+
+
+  void Model::ClearSmoothMonitors()
+  {
+    smoothMonitors_.clear();
+    for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors = smoothMonitorsMap_.begin();
+        it_monitors != smoothMonitorsMap_.end(); ++it_monitors)
+    {
+      it_monitors->second.reset();
+    }
   }
 
 
@@ -171,6 +199,7 @@ namespace Biips
     pSmoothTreeMonitor_ = p_monitor;
 
     // release memory
+    pSampler_->UnlockAllNodes();
     pSampler_->ReleaseNodes();
   }
 
@@ -220,6 +249,7 @@ namespace Biips
     pSmoothTreeMonitor_ = p_monitor;
 
     // release memory
+    pSampler_->UnlockAllNodes();
     pSampler_->ReleaseNodes();
   }
 

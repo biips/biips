@@ -31,13 +31,16 @@ namespace Biips
     friend class GetNodeValueVisitor;
 
     const Graph & graph_;
-    NodeValuesMap nodeValuesMap_;
-    FlagsMap sampledFlagsMap_;
+    NodeValuesMap * pNodeValuesMap_;
+    FlagsMap * pSampledFlagsMap_;
     Rng::Ptr pRng_;
     Scalar logIncrementalWeight_;
     Bool membersSet_;
 
     static const String NAME_;
+
+    inline NodeValuesMap & nodeValuesMap() { return *pNodeValuesMap_; }
+    inline FlagsMap & sampledFlagsMap() { return *pSampledFlagsMap_; }
 
     virtual void visit(const ConstantNode & node) {}
     virtual void visit(const LogicalNode & node);
@@ -82,8 +85,8 @@ namespace Biips
   template <typename NodeValuesMapType, typename FlagsMapType>
   void NodeSampler::SetMembers(NodeValuesMapType & nodeValues, FlagsMapType & sampledFlags, const Rng::Ptr & pRng)
   {
-    nodeValuesMap_ = boost::make_iterator_property_map(nodeValues.begin(), boost::identity_property_map());
-    sampledFlagsMap_ = boost::make_iterator_property_map(/*Flags::iterator(*/sampledFlags.begin()/*)*/, boost::identity_property_map());
+    pNodeValuesMap_ = &nodeValues;
+    pSampledFlagsMap_ = &sampledFlags;
     pRng_ = pRng;
     logIncrementalWeight_ = 0.0; // FIXME
     membersSet_ = true;

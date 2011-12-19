@@ -28,7 +28,7 @@ namespace Biips
   void ConjugateNormalVar::formLikeParamContrib(NodeId likeId,
       MultiArray::Array & likeParamContribValues)
   {
-    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
+    GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId var_id = *(++it_parents);
     Scalar like_var = getNodeValue(var_id, graph_, *this).ScalarView();

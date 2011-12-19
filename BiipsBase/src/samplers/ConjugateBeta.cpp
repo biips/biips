@@ -20,7 +20,7 @@ namespace Biips
   void ConjugateBeta::formLikeParamContrib(NodeId likeId,
       MultiArray::Array & likeParamContribValues)
   {
-    GraphTypes::DirectParentNodeIdIterator it_parents = graph_.GetParents(likeId).first;
+    GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
     NodeId trials_id = *(it_parents);
 
