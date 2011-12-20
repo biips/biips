@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file version.hpp
+/*! \file version.cpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,14 +8,13 @@
  * $Id$
  */
 
-#ifndef BIIPS_VERSION_HPP_
-#define BIIPS_VERSION_HPP_
-
-#include "common/Types.hpp"
+#include "version.hpp"
 
 namespace Biips
 {
-  const String & BIIPS_VERSION();
+  const String & BIIPS_VERSION()
+  {
+    static const String VERSION = "0.6.2";
+    return VERSION;
+  }
 }
-
-#endif /* BIIPS_VERSION_HPP_ */
