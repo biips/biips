@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
     if (vm.count("version"))
     {
-      cout << "BiipsTest, version " << BIIPS_VERSION << endl;
+      cout << "BiipsTest, version " << BIIPS_VERSION() << endl;
       return;
     }
 
