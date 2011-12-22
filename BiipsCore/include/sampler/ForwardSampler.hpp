@@ -17,7 +17,6 @@
 #include "Particle.hpp"
 #include "Resampler.hpp"
 
-
 namespace Biips
 {
   class Graph;
@@ -61,7 +60,7 @@ namespace Biips
     Types<Size>::Array nodeIterations_;
 
     Types<Int>::Array nodeLocks_;
-    
+
     Bool resampled_;
 
     Bool built_;
@@ -81,23 +80,48 @@ namespace Biips
 
     // Forbid copying
     ForwardSampler(const ForwardSampler & from);
-    ForwardSampler & operator= (const ForwardSampler & rhs);
+    ForwardSampler & operator=(const ForwardSampler & rhs);
 
-    static ResamplerTable & resamplerTable() { static ResamplerTable tab; return tab; }
+    static ResamplerTable & resamplerTable()
+    {
+      static ResamplerTable tab;
+      return tab;
+    }
 
   public:
-    static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> > & NodeSamplerFactories();
+    static std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >
+    & NodeSamplerFactories();
 
     explicit ForwardSampler(const Graph & graph);
-    virtual ~ForwardSampler() {}
+    virtual ~ForwardSampler()
+    {
+    }
 
     Size NParticles() const;
-    Bool AtEnd() const { return iterNodeId_+1 == nodeIdSequence_.end(); }
-    Size Iteration() const { return iter_; }
-    Size NIterations() const { return nodeSamplerSequence_.size(); }
-    Scalar ESS() const { return ess_; }
-    Scalar LogNormConst() const { return logNormConst_; }
-    const Types<NodeId>::Array & SampledNodes() { return *iterNodeId_; }
+    Bool AtEnd() const
+    {
+      return iterNodeId_ + 1 == nodeIdSequence_.end();
+    }
+    Size Iteration() const
+    {
+      return iter_;
+    }
+    Size NIterations() const
+    {
+      return nodeSamplerSequence_.size();
+    }
+    Scalar ESS() const
+    {
+      return ess_;
+    }
+    Scalar LogNormConst() const
+    {
+      return logNormConst_;
+    }
+    const Types<NodeId>::Array & SampledNodes()
+    {
+      return *iterNodeId_;
+    }
 
     Scalar GetNodeESS(NodeId nodeId) const;
 
@@ -105,21 +129,46 @@ namespace Biips
     const Types<Size>::Array & GetNodeSamplingIterations() const;
     Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
 
-    void Build() { buildNodeIdSequence(); buildNodeSamplers(); built_ = true; }
-    Bool Built() const { return built_; }
+    void Build()
+    {
+      buildNodeIdSequence();
+      buildNodeSamplers();
+      built_ = true;
+    }
+    Bool Built() const
+    {
+      return built_;
+    }
 
-    void LockNode(NodeId id) { nodeLocks_[id]++; }
-    void UnlockNode(NodeId id) { nodeLocks_[id]--; }
+    void LockNode(NodeId id)
+    {
+      nodeLocks_[id]++;
+    }
+    void UnlockNode(NodeId id)
+    {
+      nodeLocks_[id]--;
+    }
     void UnlockAllNodes();
 
-    void Initialize(Size nbParticles, const Rng::Ptr & pRng, const String & rsType="stratified", Scalar threshold=0.5);
+    void Initialize(Size nbParticles,
+                    const Rng::Ptr & pRng,
+                    const String & rsType = "stratified",
+                    Scalar threshold = 0.5);
     void Iterate();
 
-    Bool Initialized() const { return initialized_; }
-    Bool Resampled() const { return resampled_; }
+    Bool Initialized() const
+    {
+      return initialized_;
+    }
+    Bool Resampled() const
+    {
+      return resampled_;
+    }
 
     void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
-    void Accumulate(NodeId nodeId, DiscreteScalarAccumulator & featuresAcc, Size n = 0) const;
+    void Accumulate(NodeId nodeId,
+                    DiscreteScalarAccumulator & featuresAcc,
+                    Size n = 0) const;
     void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
 
     void InitMonitor(FilterMonitor & monitor) const;
@@ -128,11 +177,8 @@ namespace Biips
     void ReleaseNodes();
   };
 
-
   void printSamplerState(const ForwardSampler & sampler, std::ostream & os);
 
 } /* namespace Biips */
-
-
 
 #endif /* BIIPS_FORWARDSAMPLER_HPP_ */

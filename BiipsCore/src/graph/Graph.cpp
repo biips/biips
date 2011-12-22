@@ -24,7 +24,8 @@
 namespace Biips
 {
 
-  NodeId Graph::AddConstantNode(const DimArray::Ptr & pDim, const Types<StorageType>::Ptr & pValue)
+  NodeId Graph::AddConstantNode(const DimArray::Ptr & pDim, const Types<
+      StorageType>::Ptr & pValue)
   {
     if (!pDim)
       throw LogicError("Can not add constant node: DimArray::Ptr is NULL.");
@@ -58,8 +59,9 @@ namespace Biips
     return node_id;
   }
 
-
-  NodeId Graph::AddAggNode(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets)
+  NodeId Graph::AddAggNode(const DimArray::Ptr & pDim,
+                           const Types<NodeId>::Array & parameters,
+                           const Types<Size>::Array & offsets)
   {
     NodeId node_id = boost::add_vertex(parentsGraph_);
 
@@ -67,15 +69,15 @@ namespace Biips
 
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
 
-    for (Size i=0; i < parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
     {
       boost::add_edge(node_id, parameters[i], parentsGraph_); // TODO check parameters
     }
 
     Bool observed = false;
-    for (Size i=0; i < parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
     {
-      if ( GetObserved()[parameters[i]] )
+      if (GetObserved()[parameters[i]])
         observed = true;
       else
       {
@@ -87,22 +89,26 @@ namespace Biips
     if (observed)
     {
       boost::put(boost::vertex_observed, parentsGraph_, node_id, false);
-      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value, parentsGraph_);
-      const ObservedPropertyMap & observed_map = boost::get(boost::vertex_observed, parentsGraph_);
+      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                        parentsGraph_);
+      const ObservedPropertyMap & observed_map =
+          boost::get(boost::vertex_observed, parentsGraph_);
 
       NodeValues node_values(GetSize());
       Flags sampled_flags(GetSize());
-      for (NodeId id= 0; id<GetSize(); ++id)
+      for (NodeId id = 0; id < GetSize(); ++id)
       {
         node_values[id] = values_map[id];
         sampled_flags[id] = observed_map[id];
       }
       NodeSampler sample_node_vis(*this);
-      Rng::Ptr pRng;
-      sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
+      sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
       VisitNode(node_id, sample_node_vis);
 
-      boost::put(boost::vertex_value, parentsGraph_, node_id, node_values[node_id]);
+      boost::put(boost::vertex_value,
+                 parentsGraph_,
+                 node_id,
+                 node_values[node_id]);
     }
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
@@ -120,25 +126,24 @@ namespace Biips
     boost::put(boost::vertex_discrete, parentsGraph_, node_id, discrete);
 
     nodesSummaryMap_["Logical"] += 1;
-    if(!observed)
+    if (!observed)
       unobsNodesSummaryMap_["Logical"] += 1;
 
     builtFlag_ = false;
     return node_id;
   }
 
-
   Types<DimArray::Ptr>::Array Graph::getParamDims(const Types<NodeId>::Array parameters) const
   {
     Types<DimArray::Ptr>::Array param_dims(parameters.size());
-    for (Size i = 0; i<parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
       param_dims[i] = GetNode(parameters[i]).DimPtr();
 
     return param_dims;
   }
 
-
-  NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters)
+  NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc,
+                               const Types<NodeId>::Array & parameters)
   {
     Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
 
@@ -151,15 +156,15 @@ namespace Biips
     Node::Ptr new_node(new FuncNode(pDim, pFunc, parameters));
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
 
-    for (Size i=0; i < parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
     {
       boost::add_edge(node_id, parameters[i], parentsGraph_); // TODO check parameters
     }
 
     Bool observed = false;
-    for (Size i=0; i < parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
     {
-      if ( GetObserved()[parameters[i]] )
+      if (GetObserved()[parameters[i]])
         observed = true;
       else
       {
@@ -171,22 +176,26 @@ namespace Biips
     if (observed)
     {
       boost::put(boost::vertex_observed, parentsGraph_, node_id, false);
-      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value, parentsGraph_);
-      const ObservedPropertyMap & observed_map = boost::get(boost::vertex_observed, parentsGraph_);
+      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                        parentsGraph_);
+      const ObservedPropertyMap & observed_map =
+          boost::get(boost::vertex_observed, parentsGraph_);
 
       NodeValues node_values(GetSize());
       Flags sampled_flags(GetSize());
-      for (NodeId id= 0; id<GetSize(); ++id)
+      for (NodeId id = 0; id < GetSize(); ++id)
       {
         node_values[id] = values_map[id];
         sampled_flags[id] = observed_map[id];
       }
       NodeSampler sample_node_vis(*this);
-      Rng::Ptr pRng;
-      sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
+      sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
       VisitNode(node_id, sample_node_vis);
 
-      boost::put(boost::vertex_value, parentsGraph_, node_id, node_values[node_id]);
+      boost::put(boost::vertex_value,
+                 parentsGraph_,
+                 node_id,
+                 node_values[node_id]);
     }
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
@@ -196,19 +205,21 @@ namespace Biips
     for (Size i = 0; i < parameters.size(); ++i)
       mask[i] = GetDiscrete()[parameters[i]];
 
-    boost::put(boost::vertex_discrete, parentsGraph_, node_id, pFunc->IsDiscreteValued(mask));
+    boost::put(boost::vertex_discrete,
+               parentsGraph_,
+               node_id,
+               pFunc->IsDiscreteValued(mask));
 
     nodesSummaryMap_["Logical"] += 1;
-    if(!observed)
+    if (!observed)
       unobsNodesSummaryMap_["Logical"] += 1;
 
     builtFlag_ = false;
     return node_id;
   }
 
-
-  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
-      Bool observed, NodeId lower, NodeId upper)
+  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<
+      NodeId>::Array & parameters, Bool observed, NodeId lower, NodeId upper)
   {
     Types<DimArray::Ptr>::Array param_dims = getParamDims(parameters);
 
@@ -219,11 +230,12 @@ namespace Biips
 
     NodeId node_id = boost::add_vertex(parentsGraph_);
 
-    Node::Ptr new_node(new StochasticNode(pDim, pDist, parameters, lower, upper));
+    Node::Ptr
+        new_node(new StochasticNode(pDim, pDist, parameters, lower, upper));
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
 
-    for (Size i=0; i < parameters.size(); ++i)
+    for (Size i = 0; i < parameters.size(); ++i)
     {
       boost::add_edge(node_id, parameters[i], parentsGraph_); // TODO check parameters (discreteness)
     }
@@ -256,21 +268,30 @@ namespace Biips
       throw DistError(pDist, "Failed check for discrete-valued parameters");
 
     //set discreteness
-    boost::put(boost::vertex_discrete, parentsGraph_, node_id, pDist->IsDiscreteValued(mask));
+    boost::put(boost::vertex_discrete,
+               parentsGraph_,
+               node_id,
+               pDist->IsDiscreteValued(mask));
 
     nodesSummaryMap_["Stochastic"] += 1;
-    if(!observed)
+    if (!observed)
       unobsNodesSummaryMap_["Stochastic"] += 1;
 
     builtFlag_ = false;
     return node_id;
   }
 
-
-  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
-    const Types<StorageType>::Ptr & pObsValue, NodeId lower, NodeId upper)
+  NodeId Graph::AddStochasticNode(const Distribution::Ptr & pDist,
+                                  const Types<NodeId>::Array & parameters,
+                                  const Types<StorageType>::Ptr & pObsValue,
+                                  NodeId lower,
+                                  NodeId upper)
   {
-    NodeId node_id = AddStochasticNode(pDist, parameters, Bool(pObsValue), lower, upper);
+    NodeId node_id = AddStochasticNode(pDist,
+                                       parameters,
+                                       Bool(pObsValue),
+                                       lower,
+                                       upper);
 
     if (!pObsValue)
       throw LogicError("Can not add stochastic node: observed value pointer is NULL.");
@@ -283,13 +304,12 @@ namespace Biips
     return node_id;
   }
 
-
   void Graph::PopNode()
   {
     if (Empty())
       throw LogicError("Can not pop node: the graph is empty.");
 
-    NodeId last_node_id = GetSize()-1;
+    NodeId last_node_id = GetSize() - 1;
 
     ChildIterator it_children, it_children_end;
     boost::tie(it_children, it_children_end) = GetChildren(last_node_id);
@@ -298,7 +318,7 @@ namespace Biips
 
     boost::clear_vertex(last_node_id, parentsGraph_);
 
-    switch(GetNode(last_node_id).GetType())
+    switch (GetNode(last_node_id).GetType())
     {
       case CONSTANT:
         nodesSummaryMap_["Constant"] -= 1;
@@ -323,9 +343,7 @@ namespace Biips
     builtFlag_ = false;
   }
 
-
-
-  class TopologicalSortVisitor : public ConstNodeVisitor
+  class TopologicalSortVisitor: public ConstNodeVisitor
   {
   protected:
     typedef TopologicalSortVisitor SelfType;
@@ -360,7 +378,7 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node)
     {
-      if (offspringLevel_  && !graph_.GetObserved()[nodeId_])
+      if (offspringLevel_ && !graph_.GetObserved()[nodeId_])
         return;
 
       if (insertedMask_[nodeId_])
@@ -383,7 +401,6 @@ namespace Biips
       --offspringLevel_;
     }
 
-
     Bool parentsInserted(NodeId nodeId)
     {
       GraphTypes::ParentIterator it_parent, it_parent_end;
@@ -401,7 +418,6 @@ namespace Biips
       }
       return true;
     }
-
 
     virtual void visit(const LogicalNode & node)
     {
@@ -439,12 +455,14 @@ namespace Biips
   public:
 
     TopologicalSortVisitor(const Graph & graph,
-        Types<NodeId>::Array & topoSort,
-        Types<Size>::Array & ranks)
-    : graph_(graph), insertedMask_(graph.GetSize(), false), topoSort_(topoSort), ranks_(ranks),
-      offspringLevel_(0), ancestorLevel_(0), rank_(0) {}
+                           Types<NodeId>::Array & topoSort,
+                           Types<Size>::Array & ranks) :
+      graph_(graph), insertedMask_(graph.GetSize(), false),
+          topoSort_(topoSort), ranks_(ranks), offspringLevel_(0),
+          ancestorLevel_(0), rank_(0)
+    {
+    }
   };
-
 
   void Graph::topologicalSort()
   {
@@ -459,7 +477,6 @@ namespace Biips
     topoSort_.swap(temp_sort);
   }
 
-
   void Graph::buildStochasticParents()
   {
     ParentIterator it_direct_parents, it_direct_parents_end;
@@ -467,20 +484,21 @@ namespace Biips
     stochasticParents_.clear();
     stochasticParents_.resize(GetSize());
 
-    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes
+        != topoSort_.end(); ++it_nodes)
     {
-      boost::tie(it_direct_parents, it_direct_parents_end) = boost::adjacent_vertices(*it_nodes, parentsGraph_);
+      boost::tie(it_direct_parents, it_direct_parents_end)
+          = boost::adjacent_vertices(*it_nodes, parentsGraph_);
       for (; it_direct_parents != it_direct_parents_end; ++it_direct_parents)
       {
         if (GetNode(*it_direct_parents).GetType() == STOCHASTIC)
           stochasticParents_[*it_nodes].insert(*it_direct_parents);
         else
           stochasticParents_[*it_nodes].insert(stochasticParents_[*it_direct_parents].begin(),
-              stochasticParents_[*it_direct_parents].end());
+                                               stochasticParents_[*it_direct_parents].end());
       }
     }
   }
-
 
   void Graph::buildStochasticChildren()
   {
@@ -489,32 +507,37 @@ namespace Biips
     stochasticChildren_.clear();
     stochasticChildren_.resize(GetSize());
 
-    for (Types<NodeId>::Array::const_reverse_iterator rit_nodes = topoSort_.rbegin(); rit_nodes != topoSort_.rend(); ++rit_nodes)
+    for (Types<NodeId>::Array::const_reverse_iterator rit_nodes =
+        topoSort_.rbegin(); rit_nodes != topoSort_.rend(); ++rit_nodes)
     {
-      boost::tie(it_direct_children, it_direct_children_end) = boost::adjacent_vertices(*rit_nodes, childrenGraph_);
+      boost::tie(it_direct_children, it_direct_children_end)
+          = boost::adjacent_vertices(*rit_nodes, childrenGraph_);
       for (; it_direct_children != it_direct_children_end; ++it_direct_children)
       {
         if (GetNode(*it_direct_children).GetType() == STOCHASTIC)
-            stochasticChildren_[*rit_nodes].insert(*it_direct_children);
+          stochasticChildren_[*rit_nodes].insert(*it_direct_children);
         else
           stochasticChildren_[*rit_nodes].insert(stochasticChildren_[*it_direct_children].begin(),
-              stochasticChildren_[*it_direct_children].end());
+                                                 stochasticChildren_[*it_direct_children].end());
       }
     }
   }
 
-
-  struct cycle_detector : public boost::dfs_visitor<>
+  struct cycle_detector: public boost::dfs_visitor<>
   {
-    cycle_detector(bool& has_cycle)
-            : m_has_cycle(has_cycle) { }
+    cycle_detector(bool& has_cycle) :
+      m_has_cycle(has_cycle)
+    {
+    }
 
-    template <class Edge, class Graph>
-    void back_edge(Edge, Graph&) { m_has_cycle = true; }
+    template<class Edge, class Graph>
+    void back_edge(Edge, Graph&)
+    {
+      m_has_cycle = true;
+    }
   protected:
     bool& m_has_cycle;
   };
-
 
   Bool Graph::HasCycle() const
   {
@@ -525,21 +548,21 @@ namespace Biips
     return has_cycle;
   }
 
-
   void Graph::buildLikelihoodChildren()
   {
     likelihoodChildren_.clear();
     likelihoodChildren_.resize(GetSize());
 
-    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin();
-        it_nodes != topoSort_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes
+        != topoSort_.end(); ++it_nodes)
     {
       if (GetNode(*it_nodes).GetType() != STOCHASTIC)
         continue;
 
       StochasticChildIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end) = GetStochasticChildren(*it_nodes);
-      for(; it_offspring != it_offspring_end; ++it_offspring)
+      boost::tie(it_offspring, it_offspring_end)
+          = GetStochasticChildren(*it_nodes);
+      for (; it_offspring != it_offspring_end; ++it_offspring)
       {
         if (!GetObserved()[*it_offspring])
           continue;
@@ -549,7 +572,6 @@ namespace Biips
       }
     }
   }
-
 
   void Graph::Build()
   {
@@ -570,41 +592,41 @@ namespace Biips
     buildLikelihoodChildren();
   }
 
-
   Types<Graph::ParentIterator>::Pair Graph::GetParents(NodeId nodeId) const
   {
     return boost::adjacent_vertices(nodeId, parentsGraph_);
-  };
+  }
 
   Types<Graph::ChildIterator>::Pair Graph::GetChildren(NodeId nodeId) const
   {
     return boost::adjacent_vertices(nodeId, childrenGraph_);
-  };
+  }
 
   Types<Graph::StochasticParentIterator>::Pair Graph::GetStochasticParents(NodeId nodeId) const
   {
     if (!builtFlag_)
       throw LogicError("Can not access a graph that is not built.");
 
-    return std::make_pair(stochasticParents_.at(nodeId).begin(), stochasticParents_.at(nodeId).end());
-  };
+    return std::make_pair(stochasticParents_.at(nodeId).begin(),
+                          stochasticParents_.at(nodeId).end());
+  }
 
   Types<Graph::StochasticChildIterator>::Pair Graph::GetStochasticChildren(NodeId nodeId) const
   {
     if (!builtFlag_)
       throw LogicError("Can not access a graph that is not built.");
 
-    return std::make_pair(stochasticChildren_.at(nodeId).begin(), stochasticChildren_.at(nodeId).end());
-  };
-
+    return std::make_pair(stochasticChildren_.at(nodeId).begin(),
+                          stochasticChildren_.at(nodeId).end());
+  }
 
   Types<Graph::LikelihoodChildIterator>::Pair Graph::GetLikelihoodChildren(NodeId nodeId) const
   {
     if (!builtFlag_)
       throw LogicError("Can not access a graph that is not built.");
-    return std::make_pair(likelihoodChildren_.at(nodeId).begin(), likelihoodChildren_.at(nodeId).end());
+    return std::make_pair(likelihoodChildren_.at(nodeId).begin(),
+                          likelihoodChildren_.at(nodeId).end());
   }
-
 
   Types<NodeId>::ConstIteratorPair Graph::GetSortedNodes() const
   {
@@ -612,50 +634,76 @@ namespace Biips
       throw LogicError("Can not access a graph that is not built.");
 
     return iterRange(topoSort_);
-  };
-
+  }
 
   void Graph::VisitNode(NodeId nodeId, NodeVisitor & vis)
   {
     vis.SetNodeId(nodeId);
-    Node::Ptr pNode = boost::get(boost::vertex_node_ptr, parentsGraph_, nodeId);
-    pNode->AcceptVisitor(vis);
+    Node & node = *boost::get(boost::vertex_node_ptr, parentsGraph_, nodeId);
+    switch (node.GetType())
+    {
+      case CONSTANT:
+        vis.Visit(static_cast<ConstantNode &> (node));
+        break;
+      case LOGICAL:
+        vis.Visit(static_cast<LogicalNode &> (node));
+        break;
+      case STOCHASTIC:
+        vis.Visit(static_cast<StochasticNode &> (node));
+        break;
+      default:
+        break;
+    }
   }
-
 
   void Graph::VisitNode(NodeId nodeId, ConstNodeVisitor & vis) const
   {
     vis.SetNodeId(nodeId);
-    GetNode(nodeId).AcceptVisitor(vis);
+    const Node & node = GetNode(nodeId);
+    switch (node.GetType())
+    {
+      case CONSTANT:
+        vis.Visit(static_cast<const ConstantNode &> (node));
+        break;
+      case LOGICAL:
+        vis.Visit(static_cast<const LogicalNode &> (node));
+        break;
+      case STOCHASTIC:
+        vis.Visit(static_cast<const StochasticNode &> (node));
+        break;
+      default:
+        break;
+    }
   }
-
 
   void Graph::VisitGraph(NodeVisitor & vis)
   {
-    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes
+        != topoSort_.end(); ++it_nodes)
     {
       VisitNode(*it_nodes, vis);
     }
   }
-
 
   void Graph::VisitGraph(ConstNodeVisitor & vis) const
   {
-    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes != topoSort_.end(); ++it_nodes)
+    for (Types<NodeId>::ConstIterator it_nodes = topoSort_.begin(); it_nodes
+        != topoSort_.end(); ++it_nodes)
     {
       VisitNode(*it_nodes, vis);
     }
   }
 
-
-  NodeValues Graph::SampleValues(const Rng::Ptr & pRng) const
+  NodeValues Graph::SampleValues(Rng * pRng) const
   {
-    const ConstValuesPropertyMap & values_map = boost::get(boost::vertex_value, parentsGraph_);
-    const ConstObservedPropertyMap & observed_map = boost::get(boost::vertex_observed, parentsGraph_);
+    const ConstValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                           parentsGraph_);
+    const ConstObservedPropertyMap & observed_map =
+        boost::get(boost::vertex_observed, parentsGraph_);
 
     NodeValues node_values(GetSize());
     Flags sampled_flags(GetSize());
-    for (NodeId id= 0; id<GetSize(); ++id)
+    for (NodeId id = 0; id < GetSize(); ++id)
     {
       node_values[id] = values_map[id];
       sampled_flags[id] = observed_map[id];
@@ -666,17 +714,15 @@ namespace Biips
     return node_values;
   }
 
-
   void Graph::SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue)
   {
-    if ( GetObserved()[nodeId] ) // TODO manage else case : throw exception
+    if (GetObserved()[nodeId]) // TODO manage else case : throw exception
     {
       setValue(nodeId, pObsValue);
     }
   }
 
-
-  class SetObsValuesVisitor : public NodeVisitor
+  class SetObsValuesVisitor: public NodeVisitor
   {
   protected:
     typedef GraphTypes::ConstNodeValuesMap NodeValuesMap;
@@ -684,22 +730,27 @@ namespace Biips
     Graph & graph_;
     const NodeValuesMap & nodeValuesMap_;
 
-    virtual void visit(ConstantNode & node) {}
+    virtual void visit(ConstantNode & node)
+    {
+    }
 
     virtual void visit(StochasticNode & node)
     {
-      if ( graph_.GetObserved()[nodeId_] )
+      if (graph_.GetObserved()[nodeId_])
         graph_.setValue(nodeId_, nodeValuesMap_[nodeId_]);
     }
 
-    virtual void visit(LogicalNode & node) {}
+    virtual void visit(LogicalNode & node)
+    {
+    }
 
   public:
 
-    explicit SetObsValuesVisitor(Graph & graph, const NodeValues & nodeValues)
-    : graph_(graph), nodeValuesMap_(nodeValues) {}
+    explicit SetObsValuesVisitor(Graph & graph, const NodeValues & nodeValues) :
+      graph_(graph), nodeValuesMap_(nodeValues)
+    {
+    }
   };
-
 
   void Graph::SetObsValues(const NodeValues & nodeValues)
   {
@@ -707,29 +758,26 @@ namespace Biips
     VisitGraph(set_obs_vis);
   }
 
-
   void Graph::PrintGraph(std::ostream & os) const
   {
     boost::print_graph(parentsGraph_);
-  };
+  }
 
-
-  Graph::Graph() : childrenGraph_(parentsGraph_), builtFlag_(false)
+  Graph::Graph() :
+    childrenGraph_(parentsGraph_), builtFlag_(false)
   {
     nodesSummaryMap_["Constant"] = 0;
     nodesSummaryMap_["Stochastic"] = 0;
     nodesSummaryMap_["Logical"] = 0;
     unobsNodesSummaryMap_["Stochastic"] = 0;
     unobsNodesSummaryMap_["Logical"] = 0;
-  };
-
+  }
 
   void Graph::PrintGraphviz(std::ostream & os) const
   {
     VertexPropertyWriter vpw(*this);
     PrintGraphviz(os, vpw);
   }
-
 
   void VertexPropertyWriter::operator()(std::ostream & out, NodeId id) const
   {
@@ -742,9 +790,7 @@ namespace Biips
     out << "]";
   }
 
-
-
-  class GetLabelVisitor : public ConstNodeVisitor
+  class GetLabelVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -767,12 +813,16 @@ namespace Biips
 
   public:
 
-    const String & GetLabel() const { return label_; }
+    const String & GetLabel() const
+    {
+      return label_;
+    }
 
-    explicit GetLabelVisitor(const Graph & graph)
-    : graph_(graph) {}
+    explicit GetLabelVisitor(const Graph & graph) :
+      graph_(graph)
+    {
+    }
   };
-
 
   String VertexPropertyWriter::label(NodeId id) const
   {
@@ -787,11 +837,10 @@ namespace Biips
     return ans;
   }
 
-
   String VertexPropertyWriter::shape(NodeId id) const
   {
     String ans;
-    switch(graph_.GetNode(id).GetType())
+    switch (graph_.GetNode(id).GetType())
     {
       case CONSTANT:
         ans = "box";
@@ -808,11 +857,10 @@ namespace Biips
     return ans;
   }
 
-
   String VertexPropertyWriter::color(NodeId id) const
   {
     String ans;
-    switch(graph_.GetNode(id).GetType())
+    switch (graph_.GetNode(id).GetType())
     {
       case CONSTANT:
         ans += "gray";
@@ -827,11 +875,10 @@ namespace Biips
     return ans;
   }
 
-
   String VertexPropertyWriter::style(NodeId id) const
   {
     String ans;
-    switch(graph_.GetNode(id).GetType())
+    switch (graph_.GetNode(id).GetType())
     {
       case CONSTANT:
         break;
@@ -851,7 +898,6 @@ namespace Biips
 
     return ans;
   }
-
 
   const Types<Size>::Array & Graph::GetRanks() const
   {

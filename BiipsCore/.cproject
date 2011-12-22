@@ -338,8 +338,8 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1715101781;cdt.managedbuild.tool.gnu.c.compiler.input.721247756">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1729385654;cdt.managedbuild.tool.gnu.cpp.compiler.input.401587553">
+<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -421,8 +421,8 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1729385654;cdt.managedbuild.tool.gnu.cpp.compiler.input.401587553">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1715101781;cdt.managedbuild.tool.gnu.c.compiler.input.721247756">
+<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -915,8 +915,8 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1715101781;cdt.managedbuild.tool.gnu.c.compiler.input.721247756">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1729385654;cdt.managedbuild.tool.gnu.cpp.compiler.input.401587553">
+<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -998,8 +998,8 @@
 </scannerInfoProvider>
 </profile>
 </scannerConfigBuildInfo>
-<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1729385654;cdt.managedbuild.tool.gnu.cpp.compiler.input.401587553">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.819531800;cdt.managedbuild.config.gnu.lib.debug.819531800.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1715101781;cdt.managedbuild.tool.gnu.c.compiler.input.721247756">
+<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>

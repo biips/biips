@@ -20,65 +20,82 @@ namespace Biips
   class StochasticNode;
   class LogicalNode;
 
-
   class NodeVisitor
   {
   protected:
     NodeId nodeId_;
 
-    NodeVisitor() : nodeId_(NULL_NODEID) {}
+    NodeVisitor() :
+      nodeId_(NULL_NODEID)
+    {
+    }
 
-    virtual void visit(ConstantNode & node) = 0;
-    virtual void visit(StochasticNode & node) = 0;
-    virtual void visit(LogicalNode & node) = 0;
+    virtual void visit(ConstantNode & node)
+    {
+      throw LogicError("NodeVisitor: can not visit ConstantNode.");
+    }
+    virtual void visit(StochasticNode & node)
+    {
+      throw LogicError("NodeVisitor: can not visit StochasticNode.");
+    }
+    virtual void visit(LogicalNode & node)
+    {
+      throw LogicError("NodeVisitor: can not visit LogicalNode.");
+    }
 
   public:
     void Visit(ConstantNode & node);
     void Visit(StochasticNode & node);
     void Visit(LogicalNode & node);
 
-    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; }
+    void SetNodeId(NodeId nodeId)
+    {
+      nodeId_ = nodeId;
+    }
 
-    virtual ~NodeVisitor() {}
+    virtual ~NodeVisitor()
+    {
+    }
   };
-
 
   class ConstNodeVisitor
   {
   protected:
     NodeId nodeId_;
 
-    ConstNodeVisitor() : nodeId_(NULL_NODEID) {}
+    ConstNodeVisitor() :
+      nodeId_(NULL_NODEID)
+    {
+    }
 
-    virtual void visit(const ConstantNode & node) = 0;
-    virtual void visit(const StochasticNode & node) = 0;
-    virtual void visit(const LogicalNode & node) = 0;
+    virtual void visit(const ConstantNode & node)
+    {
+      throw LogicError("ConstNodeVisitor: can not visit ConstantNode.");
+    }
+    virtual void visit(const StochasticNode & node)
+    {
+      throw LogicError("ConstNodeVisitor: can not visit StochasticNode.");
+    }
+    virtual void visit(const LogicalNode & node)
+    {
+      throw LogicError("ConstNodeVisitor: can not visit LogicalNode.");
+    }
 
   public:
     void Visit(const ConstantNode & node);
     void Visit(const StochasticNode & node);
     void Visit(const LogicalNode & node);
 
-    void SetNodeId(NodeId nodeId) { nodeId_ = nodeId; }
+    void SetNodeId(NodeId nodeId)
+    {
+      nodeId_ = nodeId;
+    }
 
-    virtual ~ConstNodeVisitor() {}
+    virtual ~ConstNodeVisitor()
+    {
+    }
   };
 
-
-
-  class ConstStochasticNodeVisitor : public ConstNodeVisitor
-  {
-  protected:
-    ConstStochasticNodeVisitor() {}
-
-    virtual void visit(const ConstantNode & node) { throw LogicError("ConstantNode can not be visited by StochasticNodeVisitor."); }
-    virtual void visit(const StochasticNode & node) = 0;
-    virtual void visit(const LogicalNode & node) { throw LogicError("LogicalNode can not be visited by StochasticNodeVisitor."); };
-
-  public:
-    virtual ~ConstStochasticNodeVisitor() {}
-  };
 }
-
 
 #endif /* BIIPS_NODEVISITOR_HPP_ */
