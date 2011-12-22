@@ -15,7 +15,7 @@
 namespace Biips
 {
 
-  std::map<String, MultiArray> BUGSModel::Sample(const Rng::Ptr & pRng) const
+  std::map<String, MultiArray> BUGSModel::Sample(Rng * pRng) const
   {
     // Sample values
     NodeValues sampled_values = pGraph_->SampleValues(pRng);
@@ -24,14 +24,14 @@ namespace Biips
     std::map<String, MultiArray> data_table;
 
     // Put sampled values into a data map
-    for (NodeId node_id=0; node_id <sampled_values.size(); ++node_id)
+    for (NodeId node_id = 0; node_id < sampled_values.size(); ++node_id)
     {
       // check if the node is named, i.e. is in the symbol table
-      if(!symbolTable_.Contains(node_id))
+      if (!symbolTable_.Contains(node_id))
         continue;
 
       // check if the node is not constant
-      if(pGraph_->GetNode(node_id).GetType() == CONSTANT)
+      if (pGraph_->GetNode(node_id).GetType() == CONSTANT)
         continue;
 
       // search the name of the node corresponding to the id
@@ -43,13 +43,15 @@ namespace Biips
       // initialized with BIIPS_REALNA
       const NodeArray & node_array = symbolTable_.GetNodeArray(var_name);
       if (!data_table.count(var_name))
-        data_table[var_name] = MultiArray(node_array.Range().Dim(), BIIPS_REALNA);
+        data_table[var_name] = MultiArray(node_array.Range().Dim(),
+                                          BIIPS_REALNA);
 
       // get the subrange in the NodeArray
       IndexRange range = node_array.GetRange(node_id);
 
       if (range.Length() != sampled_values[node_id]->size())
-        throw RuntimeError(String("Dimension of sampled values for Node ") + print(node_id) + " mismatch.");
+        throw RuntimeError(String("Dimension of sampled values for Node ")
+            + print(node_id) + " mismatch.");
 
       // then copy values into the corresponding range of the MultiArray
       Size k = 0;
@@ -58,7 +60,8 @@ namespace Biips
         // compute the offset
         Size offset = node_array.Range().GetOffset(it_range);
         // copy the value
-        data_table.at(var_name).Values()[offset] = (*sampled_values[node_id])[k];
+        data_table.at(var_name).Values()[offset]
+            = (*sampled_values[node_id])[k];
       }
     }
 
@@ -75,15 +78,14 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        return false;
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (range.Overlaps(it->right))
         BaseType::SetFilterMonitor(it->left);
@@ -105,15 +107,14 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        return false;
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (range.Overlaps(it->right))
         BaseType::SetSmoothTreeMonitor(it->left);
@@ -135,15 +136,14 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        return false;
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for (boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (range.Overlaps(it->right))
         BaseType::SetSmoothMonitor(it->left);
@@ -163,23 +163,22 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        throw LogicError(String("SetSmoothMonitor: range ") + print(range) +" is not contained in variable " + name);
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      throw LogicError(String("SetSmoothMonitor: range ") + print(range)
+          + " is not contained in variable " + name);
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (!range.Overlaps(it->right))
         continue;
       if (!filterMonitorsMap_.count(it->left))
         return false;
       Size iter = pSampler_->GetNodeSamplingIteration(it->left);
-      if (filterMonitors_.size()<iter+1
-          && !filterMonitors_[iter]
+      if (filterMonitors_.size() < iter + 1 && !filterMonitors_[iter]
           && !filterMonitors_[iter]->Contains(it->left))
         return false;
     }
@@ -195,15 +194,15 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        throw LogicError(String("SetSmoothMonitor: range ") + print(range) +" is not contained in variable " + name);
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      throw LogicError(String("SetSmoothMonitor: range ") + print(range)
+          + " is not contained in variable " + name);
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (!range.Overlaps(it->right))
         continue;
@@ -224,23 +223,23 @@ namespace Biips
 
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
-    else
-      if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-        throw LogicError(String("SetSmoothMonitor: range ") + print(range) +" is not contained in variable " + name);
+    else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
+      throw LogicError(String("SetSmoothMonitor: range ") + print(range)
+          + " is not contained in variable " + name);
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::const_iterator it = node_id_range_bimap.begin();
-        it != node_id_range_bimap.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (!range.Overlaps(it->right))
         continue;
       if (!smoothMonitorsMap_.count(it->left))
         return false;
-      Size iter = pSampler_->NIterations() - 1 - pSampler_->GetNodeSamplingIteration(it->left);
-      if (smoothMonitors_.size()<iter+1
-          && !smoothMonitors_[iter]
+      Size iter = pSampler_->NIterations() - 1
+          - pSampler_->GetNodeSamplingIteration(it->left);
+      if (smoothMonitors_.size() < iter + 1 && !smoothMonitors_[iter]
           && !smoothMonitors_[iter]->Contains(it->left))
         return false;
     }
@@ -249,7 +248,9 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractFilterStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractFilterStat(String name,
+                                    StatsTag statFeature,
+                                    std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -257,11 +258,12 @@ namespace Biips
     if (!IsFilterMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
@@ -273,7 +275,9 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractSmoothTreeStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractSmoothTreeStat(String name,
+                                        StatsTag statFeature,
+                                        std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract smooth tree statistic: statistics map is not empty.");
@@ -281,15 +285,17 @@ namespace Biips
     if (!IsSmoothTreeMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      MultiArray stat_marray(BaseType::ExtractSmoothTreeStat(node_id, statFeature));
+      MultiArray stat_marray(BaseType::ExtractSmoothTreeStat(node_id,
+                                                             statFeature));
       statMap.insert(std::make_pair(index_range, stat_marray));
     }
 
@@ -297,7 +303,9 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractSmoothStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractSmoothStat(String name,
+                                    StatsTag statFeature,
+                                    std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -305,11 +313,12 @@ namespace Biips
     if (!IsSmoothMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
@@ -321,7 +330,8 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange,
+      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -329,25 +339,29 @@ namespace Biips
     if (!IsFilterMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
     // check that all the nodes are scalar
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       if (index_range.Length() != 1)
         return false;
     }
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id, numBins, cacheFraction);
+      ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id,
+                                                            numBins,
+                                                            cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -355,7 +369,8 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractSmoothTreePdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  Bool BUGSModel::ExtractSmoothTreePdf(String name, std::map<IndexRange,
+      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract smooth tree pdf: pdf map is not empty.");
@@ -363,25 +378,29 @@ namespace Biips
     if (!IsSmoothTreeMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
     // check that all the nodes are scalar
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       if (index_range.Length() != 1)
         return false;
     }
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id, numBins, cacheFraction);
+      ScalarHistogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id,
+                                                                numBins,
+                                                                cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -389,7 +408,8 @@ namespace Biips
   }
 
 
-  Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange,
+      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -397,25 +417,29 @@ namespace Biips
     if (!IsSmoothMonitored(name, NULL_RANGE))
       return false;
 
-    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap
-    = symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
+    const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
+        symbolTable_.GetNodeArray(name).NodeIdRangeBimap();
 
     // check that all the nodes are scalar
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       if (index_range.Length() != 1)
         return false;
     }
 
-    for(boost::bimap<NodeId, IndexRange>::right_const_iterator it = node_id_range_bimap.right.begin();
-        it != node_id_range_bimap.right.end(); ++it)
+    for (boost::bimap<NodeId, IndexRange>::right_const_iterator it =
+        node_id_range_bimap.right.begin(); it
+        != node_id_range_bimap.right.end(); ++it)
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractSmoothPdf(node_id, numBins, cacheFraction);
+      ScalarHistogram pdf_hist = BaseType::ExtractSmoothPdf(node_id,
+                                                            numBins,
+                                                            cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -438,11 +462,12 @@ namespace Biips
     if (!pSampler_->AtEnd())
       return false;
 
-    for (Size i=0; i<filterMonitorsNames_.size(); ++i)
+    for (Size i = 0; i < filterMonitorsNames_.size(); ++i)
     {
       const String & var_name = filterMonitorsNames_[i];
       if (!symbolTable_.Contains(var_name))
-        throw LogicError(String("Monitored array ") + var_name + " does not exist in the symbol table.");
+        throw LogicError(String("Monitored array ") + var_name
+            + " does not exist in the symbol table.");
 
       String name = var_name;
       const IndexRange & range = filterMonitorsRanges_[i];
@@ -450,8 +475,11 @@ namespace Biips
         name.append(print(range));
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(var_name), range, filterMonitorsMap_, pSampler_->NParticles(), *pGraph_)
-      ));
+                                        NodeArrayMonitor(symbolTable_.GetNodeArray(var_name),
+                                                         range,
+                                                         filterMonitorsMap_,
+                                                         pSampler_->NParticles(),
+                                                         *pGraph_)));
     }
 
     return true;
@@ -465,11 +493,12 @@ namespace Biips
     if (!pSampler_->AtEnd())
       return false;
 
-    for (Size i=0; i<smoothTreeMonitorsNames_.size(); ++i)
+    for (Size i = 0; i < smoothTreeMonitorsNames_.size(); ++i)
     {
       const String & var_name = smoothTreeMonitorsNames_[i];
       if (!symbolTable_.Contains(var_name))
-        throw LogicError(String("Monitored array ") + var_name + " does not exist in the symbol table.");
+        throw LogicError(String("Monitored array ") + var_name
+            + " does not exist in the symbol table.");
 
       String name = var_name;
       const IndexRange & range = smoothTreeMonitorsRanges_[i];
@@ -477,8 +506,11 @@ namespace Biips
         name.append(print(range));
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(var_name), range, pSmoothTreeMonitor_, pSampler_->NParticles(), *pGraph_)
-      ));
+                                        NodeArrayMonitor(symbolTable_.GetNodeArray(var_name),
+                                                         range,
+                                                         pSmoothTreeMonitor_,
+                                                         pSampler_->NParticles(),
+                                                         *pGraph_)));
     }
 
     return true;
@@ -492,11 +524,12 @@ namespace Biips
     if (!pSampler_->AtEnd())
       return false;
 
-    for (Size i=0; i<smoothMonitorsNames_.size(); ++i)
+    for (Size i = 0; i < smoothMonitorsNames_.size(); ++i)
     {
       const String & var_name = smoothMonitorsNames_[i];
       if (!symbolTable_.Contains(var_name))
-        throw LogicError(String("Monitored array ") + var_name + " does not exist in the symbol table.");
+        throw LogicError(String("Monitored array ") + var_name
+            + " does not exist in the symbol table.");
 
       String name = var_name;
       const IndexRange & range = smoothMonitorsRanges_[i];
@@ -504,8 +537,11 @@ namespace Biips
         name.append(print(range));
 
       monitorsMap.insert(std::make_pair(name,
-          NodeArrayMonitor(symbolTable_.GetNodeArray(var_name), range, smoothMonitorsMap_, pSampler_->NParticles(), *pGraph_)
-      ));
+                                        NodeArrayMonitor(symbolTable_.GetNodeArray(var_name),
+                                                         range,
+                                                         smoothMonitorsMap_,
+                                                         pSampler_->NParticles(),
+                                                         *pGraph_)));
     }
 
     return true;
@@ -514,15 +550,16 @@ namespace Biips
 
   void BUGSModel::PrintSamplersSequence(std::ostream & out) const
   {
-    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq = pSampler_->GetSamplersSequence();
-    for (Size i=0; i<node_id_samplers_seq.size(); ++i)
+    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
+        pSampler_->GetSamplersSequence();
+    for (Size i = 0; i < node_id_samplers_seq.size(); ++i)
     {
       NodeId node_id = node_id_samplers_seq[i].first;
       const String & name = node_id_samplers_seq[i].second;
-      out << i+1 << ": " << symbolTable_.GetName(node_id) << " (id=" << node_id << "), " << name << std::endl;
+      out << i + 1 << ": " << symbolTable_.GetName(node_id) << " (id="
+          << node_id << "), " << name << std::endl;
     }
   }
-
 
 
   class VarNamePropertyWriter: public VertexPropertyWriter
@@ -531,7 +568,10 @@ namespace Biips
     typedef VertexPropertyWriter BaseType;
     typedef VarNamePropertyWriter SelfType;
 
-    VarNamePropertyWriter(const Graph & graph, const SymbolTable & symTab) : BaseType(graph), symTab_(symTab) {}
+    VarNamePropertyWriter(const Graph & graph, const SymbolTable & symTab) :
+      BaseType(graph), symTab_(symTab)
+    {
+    }
 
   protected:
     const SymbolTable & symTab_;
@@ -551,8 +591,6 @@ namespace Biips
         ans += "\\n";
         ans += print(id);
       }
-
-
 
       return ans;
     }

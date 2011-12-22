@@ -17,12 +17,10 @@
 
 #include <boost/graph/graphviz.hpp>
 
-
 namespace Biips
 {
 
   class NodeVisitor;
-
 
   class Graph
   {
@@ -70,56 +68,107 @@ namespace Biips
     void buildStochasticParents();
     void buildStochasticChildren();
     void buildLikelihoodChildren();
-    void setValue(NodeId nodeId, const ValArray::Ptr & pVal) { boost::put(boost::vertex_value, parentsGraph_, nodeId, pVal); }
-    Types<DimArray::Ptr>::Array getParamDims(const Types<NodeId>::Array parameters) const;
+    void setValue(NodeId nodeId, const ValArray::Ptr & pVal)
+    {
+      boost::put(boost::vertex_value, parentsGraph_, nodeId, pVal);
+    }
+    Types<DimArray::Ptr>::Array
+        getParamDims(const Types<NodeId>::Array parameters) const;
 
   public:
     Graph();
 
-    NodeId AddConstantNode(const DimArray::Ptr & pDim, const Types<StorageType>::Ptr & pValue);
-    NodeId AddConstantNode(const MultiArray & data) { return AddConstantNode(data.DimPtr(), data.ValuesPtr()); }
+    NodeId AddConstantNode(const DimArray::Ptr & pDim,
+                           const Types<StorageType>::Ptr & pValue);
+    NodeId AddConstantNode(const MultiArray & data)
+    {
+      return AddConstantNode(data.DimPtr(), data.ValuesPtr());
+    }
 
-    NodeId AddAggNode(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);
+    NodeId AddAggNode(const DimArray::Ptr & pDim,
+                      const Types<NodeId>::Array & parameters,
+                      const Types<Size>::Array & offsets);
 
-    NodeId AddLogicalNode(const Function::Ptr & pFunc, const Types<NodeId>::Array & parameters);
+    NodeId AddLogicalNode(const Function::Ptr & pFunc,
+                          const Types<NodeId>::Array & parameters);
 
-    NodeId AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
-        Bool observed, NodeId lower = NULL_NODEID, NodeId upper = NULL_NODEID);
-    NodeId AddStochasticNode(const Distribution::Ptr & pDist, const Types<NodeId>::Array & parameters,
-        const Types<StorageType>::Ptr & pObsValue, NodeId lower = NULL_NODEID, NodeId upper = NULL_NODEID);
+    NodeId AddStochasticNode(const Distribution::Ptr & pDist,
+                             const Types<NodeId>::Array & parameters,
+                             Bool observed,
+                             NodeId lower = NULL_NODEID,
+                             NodeId upper = NULL_NODEID);
+    NodeId AddStochasticNode(const Distribution::Ptr & pDist,
+                             const Types<NodeId>::Array & parameters,
+                             const Types<StorageType>::Ptr & pObsValue,
+                             NodeId lower = NULL_NODEID,
+                             NodeId upper = NULL_NODEID);
 
     void PopNode();
 
     Types<ParentIterator>::Pair GetParents(NodeId nodeId) const;
     Types<ChildIterator>::Pair GetChildren(NodeId nodeId) const;
-    Types<StochasticParentIterator>::Pair GetStochasticParents(NodeId nodeId) const;
-    Types<StochasticChildIterator>::Pair GetStochasticChildren(NodeId nodeId) const;
-    Types<LikelihoodChildIterator>::Pair GetLikelihoodChildren(NodeId nodeId) const;
+    Types<StochasticParentIterator>::Pair
+        GetStochasticParents(NodeId nodeId) const;
+    Types<StochasticChildIterator>::Pair
+        GetStochasticChildren(NodeId nodeId) const;
+    Types<LikelihoodChildIterator>::Pair
+        GetLikelihoodChildren(NodeId nodeId) const;
 
     Types<NodeId>::ConstIteratorPair GetSortedNodes() const;
 
-    Size GetSize() const { return boost::num_vertices(parentsGraph_); };
-    Bool Empty() const { return boost::num_vertices(parentsGraph_) == 0; };
-    Bool IsBuilt() const { return builtFlag_; };
+    Size GetSize() const
+    {
+      return boost::num_vertices(parentsGraph_);
+    }
+    Bool Empty() const
+    {
+      return boost::num_vertices(parentsGraph_) == 0;
+    }
+    ;
+    Bool IsBuilt() const
+    {
+      return builtFlag_;
+    }
 
-    const std::map<String, Size> & NodesSummary() const { return nodesSummaryMap_; };
-    const std::map<String, Size> & UnobsNodesSummary() const { return unobsNodesSummaryMap_; };
+    const std::map<String, Size> & NodesSummary() const
+    {
+      return nodesSummaryMap_;
+    }
+    const std::map<String, Size> & UnobsNodesSummary() const
+    {
+      return unobsNodesSummaryMap_;
+    }
     Bool HasCycle() const;
     void Build();
     void VisitNode(NodeId nodeId, NodeVisitor & vis);
     void VisitNode(NodeId nodeId, ConstNodeVisitor & vis) const;
     void VisitGraph(NodeVisitor & vis);
     void VisitGraph(ConstNodeVisitor & vis) const;
-    NodeValues SampleValues(const Rng::Ptr & pRng) const;
-    ConstValuesPropertyMap GetValues() const { return boost::get(boost::vertex_value, parentsGraph_); }
-    ConstObservedPropertyMap GetObserved() const { return boost::get(boost::vertex_observed, parentsGraph_); }
-    ConstDiscretePropertyMap GetDiscrete() const { return boost::get(boost::vertex_discrete, parentsGraph_); }
+    NodeValues SampleValues(Rng * pRng) const;
+    ConstValuesPropertyMap GetValues() const
+    {
+      return boost::get(boost::vertex_value, parentsGraph_);
+    }
+    ConstObservedPropertyMap GetObserved() const
+    {
+      return boost::get(boost::vertex_observed, parentsGraph_);
+    }
+    ConstDiscretePropertyMap GetDiscrete() const
+    {
+      return boost::get(boost::vertex_discrete, parentsGraph_);
+    }
     void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
     void SetObsValues(const NodeValues & nodeValues);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
-    Node const & GetNode(NodeId nodeId) const { return *boost::get(boost::vertex_node_ptr, parentsGraph_, nodeId); };
-    Node const & operator[] (NodeId nodeId) const { return GetNode(nodeId); };
+    Node const & GetNode(NodeId nodeId) const
+    {
+      return *boost::get(boost::vertex_node_ptr, parentsGraph_, nodeId);
+    }
+    Node const & operator[](NodeId nodeId) const
+    {
+      return GetNode(nodeId);
+    }
 
     const Types<Size>::Array & GetRanks() const;
 
@@ -147,8 +196,13 @@ namespace Biips
   public:
     typedef VertexPropertyWriter SelfType;
 
-    VertexPropertyWriter(const Graph & graph): graph_(graph) {}
-    virtual ~VertexPropertyWriter() {}
+    VertexPropertyWriter(const Graph & graph) :
+      graph_(graph)
+    {
+    }
+    virtual ~VertexPropertyWriter()
+    {
+    }
 
     virtual void operator()(std::ostream & out, NodeId id) const;
 
@@ -162,10 +216,6 @@ namespace Biips
     virtual String style(NodeId id) const;
   };
 
-
 }
-
-
-
 
 #endif /* BIIPS_GRAPH_HPP_ */

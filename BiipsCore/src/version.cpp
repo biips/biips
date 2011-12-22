@@ -14,7 +14,7 @@ namespace Biips
 {
   const String & BIIPS_VERSION()
   {
-    static const String VERSION = "0.6.2";
+    static const String VERSION = "0.6.3";
     return VERSION;
   }
 }

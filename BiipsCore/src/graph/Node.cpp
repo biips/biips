@@ -9,21 +9,25 @@
  */
 
 #include "graph/Node.hpp"
+#include "graph/NodeVisitor.hpp"
 
 namespace Biips
 {
 
-  Node::Node(const DimArray::Ptr & pDim)
-    : pDim_(pDim)
+  Node::Node(NodeType type, const DimArray::Ptr & pDim) :
+    nodeType_(type), pDim_(pDim)
   {
     if (!pDim)
       throw LogicError("Can not create node: DimArray::Ptr is NULL.");
   }
 
-  Node::Node(const DimArray::Ptr & pDim, const Types<NodeId>::Array & parents)
-    : pDim_(pDim), directParents_(parents)
+  Node::Node(NodeType type,
+             const DimArray::Ptr & pDim,
+             const Types<NodeId>::Array & parents) :
+    nodeType_(type), pDim_(pDim), directParents_(parents)
   {
     if (!pDim)
       throw LogicError("Can not create node: DimArray::Ptr is NULL.");
   }
+
 }

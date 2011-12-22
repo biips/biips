@@ -17,7 +17,7 @@
 namespace Biips
 {
 
-  class StochasticNode : public Node
+  class StochasticNode: public Node
   {
   public:
     typedef StochasticNode SelfType;
@@ -32,24 +32,54 @@ namespace Biips
     NodeId upperNodeId_;
 
   public:
-    virtual NodeType GetType() const { return STOCHASTIC; };
-    virtual void AcceptVisitor(NodeVisitor & vis);
-    virtual void AcceptVisitor(ConstNodeVisitor & vis) const;
+    const Distribution::Ptr & PriorPtr() const
+    {
+      return pPrior_;
+    }
+    const String & PriorName() const
+    {
+      return pPrior_->Name();
+    }
 
-    const Distribution::Ptr & PriorPtr() const { return pPrior_; };
-    const String & PriorName() const { return pPrior_->Name(); };
+    MultiArray Sample(const MultiArray::Array & paramValues,
+                      const MultiArray::Pair & boundValues,
+                      Rng & rng) const
+    {
+      return pPrior_->Sample(paramValues, boundValues, rng);
+    }
+    Scalar LogPriorDensity(const MultiArray & x,
+                           const MultiArray::Array & paramValues,
+                           const MultiArray::Pair & boundValues) const
+    {
+      return pPrior_->LogDensity(x, paramValues, boundValues);
+    }
+    MultiArray::Pair UnboundedSupport(const MultiArray::Array & paramValues) const
+    {
+      return pPrior_->UnboundedSupport(paramValues);
+    }
 
-    MultiArray Sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const { return pPrior_->Sample(paramValues, boundValues, rng); }
-    Scalar LogPriorDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const { return pPrior_->LogDensity(x, paramValues, boundValues); }
-    MultiArray::Pair UnboundedSupport(const MultiArray::Array & paramValues) const { return pPrior_->UnboundedSupport(paramValues); }
+    Bool IsLowerBounded() const
+    {
+      return lowerNodeId_ != NULL_NODEID;
+    }
+    Bool IsUpperBounded() const
+    {
+      return upperNodeId_ != NULL_NODEID;
+    }
+    Bool IsBounded() const
+    {
+      return IsLowerBounded() || IsUpperBounded();
+    }
 
-    Bool IsLowerBounded() const { return lowerNodeId_ != NULL_NODEID; }
-    Bool IsUpperBounded() const { return upperNodeId_ != NULL_NODEID; }
-    Bool IsBounded() const { return IsLowerBounded() || IsUpperBounded(); }
+    StochasticNode(const DimArray::Ptr pDim,
+                   const Distribution::Ptr & pPrior,
+                   const Types<NodeId>::Array & parameters,
+                   NodeId lower = NULL_NODEID,
+                   NodeId upper = NULL_NODEID);
 
-    StochasticNode(const DimArray::Ptr pDim, const Distribution::Ptr & pPrior, const Types<NodeId>::Array & parameters, NodeId lower = NULL_NODEID, NodeId upper = NULL_NODEID);
-
-    virtual ~StochasticNode() {};
+    virtual ~StochasticNode()
+    {
+    }
   };
 
 } /* namespace Biips */
