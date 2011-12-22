@@ -22,7 +22,7 @@
 namespace Biips
 {
 
-  class BUGSModel : public Model
+  class BUGSModel: public Model
   {
   public:
     typedef Model BaseType;
@@ -39,32 +39,54 @@ namespace Biips
     Types<IndexRange>::Array smoothMonitorsRanges_;
 
   public:
-    BUGSModel() : symbolTable_(*this) {}
+    BUGSModel() :
+      symbolTable_(*this)
+    {
+    }
 
-    std::map<String, MultiArray> Sample(const Rng::Ptr & pRng) const;
+    std::map<String, MultiArray> Sample(Rng * pRng) const;
 
-    SymbolTable & GetSymbolTable() { return symbolTable_; }
+    SymbolTable & GetSymbolTable()
+    {
+      return symbolTable_;
+    }
 
     Bool SetFilterMonitor(const String & name, IndexRange range = NULL_RANGE);
-    Bool SetSmoothTreeMonitor(const String & name, IndexRange range = NULL_RANGE);
+    Bool SetSmoothTreeMonitor(const String & name, IndexRange range =
+        NULL_RANGE);
     Bool SetSmoothMonitor(const String & name, IndexRange range = NULL_RANGE);
 
-    Bool IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
-    Bool IsSmoothTreeMonitored(const String & name, IndexRange range = NULL_RANGE) const;
-    Bool IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    Bool
+        IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    Bool IsSmoothTreeMonitored(const String & name, IndexRange range =
+        NULL_RANGE) const;
+    Bool
+        IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
 
     void PrintGraphviz(std::ostream & out) const;
 
     // TODO manage multi statFeature
-    Bool ExtractFilterStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothTreeStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothStat(String name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractFilterStat(String name, StatsTag statFeature, std::map<
+        IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothTreeStat(String name, StatsTag statFeature, std::map<
+        IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothStat(String name, StatsTag statFeature, std::map<
+        IndexRange, MultiArray> & statMap) const;
 
-    Bool ExtractFilterPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothTreePdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothPdf(String name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    Bool ExtractFilterPdf(String name,
+                          std::map<IndexRange, ScalarHistogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25) const;
+    Bool ExtractSmoothTreePdf(String name,
+                              std::map<IndexRange, ScalarHistogram> & pdfMap,
+                              Size numBins = 40,
+                              Scalar cacheFraction = 0.25) const;
+    Bool ExtractSmoothPdf(String name,
+                          std::map<IndexRange, ScalarHistogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
 

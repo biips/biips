@@ -1,12 +1,12 @@
 //                                               -*- C++ -*-
 /*! \file ModelTest.cpp
-* \brief
-*
-* $LastChangedBy$
-* $LastChangedDate$
-* $LastChangedRevision$
-* $Id$
-*/
+ * \brief
+ *
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
+ */
 
 #include "ModelTest.hpp"
 #include "BiipsBase.hpp"
@@ -17,47 +17,52 @@
 namespace Biips
 {
 
-  void ModelTest::printValues(std::ostream & os, const String & name, const MultiArray::Array & dataArray, Size len, char separator) const
+  void ModelTest::printValues(std::ostream & os,
+                              const String & name,
+                              const MultiArray::Array & dataArray,
+                              Size len,
+                              char separator) const
   {
-    for (Size dim=0; dim<len; ++dim)
+    for (Size dim = 0; dim < len; ++dim)
     {
       os << name;
       if (len > 1)
-        os << "." << dim+1;
+        os << "." << dim + 1;
       os << " = ";
       printLine(os, dataArray, dim, separator);
     }
   }
 
-
-  void ModelTest::printLine(std::ostream & os, const MultiArray::Array & dataArray, Size dim, char separator) const
+  void ModelTest::printLine(std::ostream & os,
+                            const MultiArray::Array & dataArray,
+                            Size dim,
+                            char separator) const
   {
-    for (Size k=0; k<dataArray.size(); ++k)
+    for (Size k = 0; k < dataArray.size(); ++k)
       os << dataArray[k].Values()[dim] << separator;
     os << std::endl;
   }
 
-
   void ModelTest::setObsValues()
   {
     NodeValues obs_values(pModelGraph_->GetSize());
-    for (Size i_var=0; i_var<obsVarNames_.size(); ++i_var)
+    for (Size i_var = 0; i_var < obsVarNames_.size(); ++i_var)
     {
       const String & var_name = obsVarNames_[i_var];
       MultiArray::Array & gen_val = dataValuesMap_[var_name];
-      for (Size k=0; k<gen_val.size(); ++k)
+      for (Size k = 0; k < gen_val.size(); ++k)
         obs_values[modelNodeIdMap_[var_name][k]] = gen_val[k].ValuesPtr();
     }
     pModelGraph_->SetObsValues(obs_values);
   }
 
-
   void ModelTest::SetModelParam(const std::map<String, MultiArray> & model_param_map)
   {
     String var;
 
-    std::map<String, MultiArray>::const_iterator it_param_map = model_param_map.begin();
-    while(it_param_map != model_param_map.end())
+    std::map<String, MultiArray>::const_iterator it_param_map =
+        model_param_map.begin();
+    while (it_param_map != model_param_map.end())
     {
       String var = it_param_map->first;
       if (sizeParamMap_.count(var))
@@ -75,24 +80,24 @@ namespace Biips
     dimArrayMap_ = dim_map;
   }
 
-
-  void ModelTest::setDataArrayMap(const std::map<String, std::vector<MultiArray> > & from, std::map<String, MultiArray::Array> & to)
+  void ModelTest::setDataArrayMap(const std::map<String,
+                                      std::vector<MultiArray> > & from,
+                                  std::map<String, MultiArray::Array> & to)
   {
-    std::map<String, std::vector<MultiArray> >::const_iterator it_from = from.begin();
-    while(it_from != from.end())
+    std::map<String, std::vector<MultiArray> >::const_iterator it_from =
+        from.begin();
+    while (it_from != from.end())
     {
       to[it_from->first].SetPtr(it_from->second.begin(), it_from->second.end());
       ++it_from;
     }
   }
 
-
   void ModelTest::loadBase()
   {
     loadBaseModule(funcTab_, distTab_);
   }
-  
-  
+
   void ModelTest::BuildDataGraph()
   {
     BuildModelGraph();
@@ -100,126 +105,129 @@ namespace Biips
     dataNodeIdMap_ = modelNodeIdMap_;
   }
 
-
   void ModelTest::SampleData(Size rngSeed)
   {
     Rng::Ptr p_rng(new Rng(rngSeed));
 
-    NodeValues gen_node_values = pDataGraph_->SampleValues(p_rng);
+    NodeValues gen_node_values = pDataGraph_->SampleValues(p_rng.get());
 
-    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
+    for (Size i_var = 0; i_var < inDataVarNames_.size(); ++i_var)
     {
       const String & var_name = inDataVarNames_[i_var];
       Size var_len = dataNodeIdMap_[var_name].size();
       dataValuesMap_[var_name].SetPtr(MultiArray::Array(var_len));
       MultiArray::Array & gen_values = dataValuesMap_[var_name];
-      for (Size k=0; k<gen_values.size(); ++k)
-        gen_values[k] = MultiArray(dimArrayMap_[var_name], gen_node_values[dataNodeIdMap_[var_name][k]]);
+      for (Size k = 0; k < gen_values.size(); ++k)
+        gen_values[k]
+            = MultiArray(dimArrayMap_[var_name],
+                         gen_node_values[dataNodeIdMap_[var_name][k]]);
     }
-    if (verbose_>=2)
+    if (verbose_ >= 2)
     {
       os_ << "Generated values: " << std::endl;
 
-      for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
+      for (Size i_var = 0; i_var < inDataVarNames_.size(); ++i_var)
       {
         const String & var_name = inDataVarNames_[i_var];
-        printValues(os_, var_name, dataValuesMap_[var_name], dimArrayMap_.at(var_name)->Length());
+        printValues(os_,
+                    var_name,
+                    dataValuesMap_[var_name],
+                    dimArrayMap_.at(var_name)->Length());
       }
       os_ << std::endl;
     }
   }
 
+  //  void ModelTest::OutputData(std::ostream & os) const
+  //  {
+  //    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inDataVarNames_[i_var];
+  //      const MultiArray::Array & gen_values = dataValuesMap_.at(var_name);
+  //      printValues(os, var_name, gen_values, dimArrayMap_.at(var_name)->Length());
+  //    }
+  //  }
 
-//  void ModelTest::OutputData(std::ostream & os) const
-//  {
-//    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inDataVarNames_[i_var];
-//      const MultiArray::Array & gen_values = dataValuesMap_.at(var_name);
-//      printValues(os, var_name, gen_values, dimArrayMap_.at(var_name)->Length());
-//    }
-//  }
 
-
-//  void ModelTest::InputData(std::istream & is)
-//  {
-//    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inDataVarNames_[i_var];
-//      Size var_len = dataNodeIdMap_[var_name].size();
-//      inputValues(genValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
-//    }
-//
-//    if (verbose_)
-//    {
-//      os_ << "Input values: " << std::endl;
-//
-//      for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
-//      {
-//        const String & var_name = inDataVarNames_[i_var];
-//        printValues(os_, var_name, genValuesMap_[var_name], dimArrayMap_[var_name]->Length());
-//      }
-//    }
-//  }
+  //  void ModelTest::InputData(std::istream & is)
+  //  {
+  //    for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inDataVarNames_[i_var];
+  //      Size var_len = dataNodeIdMap_[var_name].size();
+  //      inputValues(genValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
+  //    }
+  //
+  //    if (verbose_)
+  //    {
+  //      os_ << "Input values: " << std::endl;
+  //
+  //      for (Size i_var=0; i_var<inDataVarNames_.size(); ++i_var)
+  //      {
+  //        const String & var_name = inDataVarNames_[i_var];
+  //        printValues(os_, var_name, genValuesMap_[var_name], dimArrayMap_[var_name]->Length());
+  //      }
+  //    }
+  //  }
 
 
   void ModelTest::RunBench()
   {
     os_ << "WARNING: no bench implemented." << std::endl;
-  };
+  }
+  ;
+
+  //  void ModelTest::OutputBench(std::ostream & os) const
+  //  {
+  //    for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inBenchFilterVarNames_[i_var];
+  //      printValues(os, var_name, benchFilterValuesMap_.at(var_name), dimArrayMap_.at(var_name)->Length());
+  //    }
+  //    for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inBenchSmoothVarNames_[i_var];
+  //      printValues(os, var_name, benchSmoothValuesMap_.at(var_name), dimArrayMap_.at(var_name)->Length());
+  //    }
+  //  }
 
 
-//  void ModelTest::OutputBench(std::ostream & os) const
-//  {
-//    for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inBenchFilterVarNames_[i_var];
-//      printValues(os, var_name, benchFilterValuesMap_.at(var_name), dimArrayMap_.at(var_name)->Length());
-//    }
-//    for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inBenchSmoothVarNames_[i_var];
-//      printValues(os, var_name, benchSmoothValuesMap_.at(var_name), dimArrayMap_.at(var_name)->Length());
-//    }
-//  }
-
-
-//  void ModelTest::InputBench(std::istream & is)
-//  {
-//    for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inBenchFilterVarNames_[i_var];
-//      Size var_len = modelNodeIdMap_[var_name].size();
-//      inputValues(benchFilterValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
-//    }
-//    for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
-//    {
-//      const String & var_name = inBenchSmoothVarNames_[i_var];
-//      Size var_len = modelNodeIdMap_[var_name].size();
-//      inputValues(benchSmoothValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
-//    }
-//
-//    if (verbose_)
-//    {
-//      if (! inBenchFilterVarNames_.empty() )
-//        os_ << "Input Filtering benchmark values: " << std::endl;
-//
-//      for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
-//      {
-//        const String & var_name = inBenchFilterVarNames_[i_var];
-//        printValues(os_, var_name, benchFilterValuesMap_[var_name], dimArrayMap_[var_name]->Length());
-//      }
-//
-//      if (! inBenchSmoothVarNames_.empty() )
-//        os_ << "Input Smoothing benchmark values: " << std::endl;
-//
-//      for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
-//      {
-//        const String & var_name = inBenchSmoothVarNames_[i_var];
-//        printValues(os_, var_name, benchSmoothValuesMap_[var_name], dimArrayMap_[var_name]->Length());
-//      }
-//    }
-//  }
+  //  void ModelTest::InputBench(std::istream & is)
+  //  {
+  //    for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inBenchFilterVarNames_[i_var];
+  //      Size var_len = modelNodeIdMap_[var_name].size();
+  //      inputValues(benchFilterValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
+  //    }
+  //    for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
+  //    {
+  //      const String & var_name = inBenchSmoothVarNames_[i_var];
+  //      Size var_len = modelNodeIdMap_[var_name].size();
+  //      inputValues(benchSmoothValuesMap_[var_name], var_len, dimArrayMap_[var_name], is);
+  //    }
+  //
+  //    if (verbose_)
+  //    {
+  //      if (! inBenchFilterVarNames_.empty() )
+  //        os_ << "Input Filtering benchmark values: " << std::endl;
+  //
+  //      for (Size i_var=0; i_var<inBenchFilterVarNames_.size(); ++i_var)
+  //      {
+  //        const String & var_name = inBenchFilterVarNames_[i_var];
+  //        printValues(os_, var_name, benchFilterValuesMap_[var_name], dimArrayMap_[var_name]->Length());
+  //      }
+  //
+  //      if (! inBenchSmoothVarNames_.empty() )
+  //        os_ << "Input Smoothing benchmark values: " << std::endl;
+  //
+  //      for (Size i_var=0; i_var<inBenchSmoothVarNames_.size(); ++i_var)
+  //      {
+  //        const String & var_name = inBenchSmoothVarNames_[i_var];
+  //        printValues(os_, var_name, benchSmoothValuesMap_[var_name], dimArrayMap_[var_name]->Length());
+  //      }
+  //    }
+  //  }
 
 
   void ModelTest::ClearSMC()
@@ -228,17 +236,15 @@ namespace Biips
     smcSmoothValuesMap_.clear();
   }
 
-
   void ModelTest::BuildSMC(Bool prior)
   {
     // sampler
     //--------
     pSampler_ = ForwardSampler::Ptr(new ForwardSampler(*pModelGraph_));
 
-    std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact
-    = ForwardSampler::NodeSamplerFactories().begin();
-    for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end();
-        ++it_sampler_fact)
+    std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator
+        it_sampler_fact = ForwardSampler::NodeSamplerFactories().begin();
+    for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end(); ++it_sampler_fact)
     {
       if (prior)
       {
@@ -246,24 +252,30 @@ namespace Biips
         continue;
       }
       Bool active = std::find(nodeSamplerFactoryInvOrder_.begin(),
-          nodeSamplerFactoryInvOrder_.end(),
-          it_sampler_fact->first) != nodeSamplerFactoryInvOrder_.end();
+                              nodeSamplerFactoryInvOrder_.end(),
+                              it_sampler_fact->first)
+          != nodeSamplerFactoryInvOrder_.end();
       it_sampler_fact->second = active;
     }
 
     pSampler_->Build();
   }
 
-
-  void ModelTest::RunSMC(Size nParticles, Size rngSeed, const String & rsType, Scalar essThreshold, Bool showProgress, Size numBins)
+  void ModelTest::RunSMC(Size nParticles,
+                         Size rngSeed,
+                         const String & rsType,
+                         Scalar essThreshold,
+                         Bool showProgress,
+                         Size numBins)
   {
     Rng::Ptr p_rng(new Rng(rngSeed));
 
-    if (verbose_>=2)
+    if (verbose_ >= 2)
     {
       os_ << "Node sampler's sequence: " << std::endl;
-      Types<std::pair<NodeId, String> >::Array samplers_seq = pSampler_->GetSamplersSequence();
-      for (Size i=0; i<samplers_seq.size(); ++i)
+      Types<std::pair<NodeId, String> >::Array samplers_seq =
+          pSampler_->GetSamplersSequence();
+      for (Size i = 0; i < samplers_seq.size(); ++i)
       {
         NodeId node_id = samplers_seq[i].first;
         const String & name = samplers_seq[i].second;
@@ -274,8 +286,11 @@ namespace Biips
 
     Types<boost::progress_display>::Ptr p_show_progress;
     if (verbose_ == 1 && showProgress)
-      p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(pSampler_->NIterations(), os_, ""));
-    else if (verbose_>=2)
+      p_show_progress
+          = Types<boost::progress_display>::Ptr(new boost::progress_display(pSampler_->NIterations(),
+                                                                            os_,
+                                                                            ""));
+    else if (verbose_ >= 2)
       os_ << "SMC sampler's progress: " << std::endl;
 
     // filtering
@@ -286,30 +301,33 @@ namespace Biips
 
     if (verbose_ == 1 && showProgress)
       ++(*p_show_progress);
-    else if (verbose_>=2)
+    else if (verbose_ >= 2)
       printSamplerState(*pSampler_, os_);
 
     Size t_max = pSampler_->NIterations();
 
-    for (Size t=1; t<t_max; ++t)
+    for (Size t = 1; t < t_max; ++t)
     {
       pSampler_->Iterate();
       if (verbose_ == 1 && showProgress)
         ++(*p_show_progress);
-      else if (verbose_>=2)
+      else if (verbose_ >= 2)
         printSamplerState(*pSampler_, os_);
 
       filterAccumulate(t);
     }
 
-    if (verbose_>=2)
+    if (verbose_ >= 2)
     {
       os_ << std::endl;
       os_ << "Particle Filter estimates: " << std::endl;
-      for (Size i_var=0; i_var<printResultsVarNames_.size(); ++i_var)
+      for (Size i_var = 0; i_var < printResultsVarNames_.size(); ++i_var)
       {
         const String & var_name = printResultsVarNames_[i_var];
-        printValues(os_, var_name, smcFilterValuesMap_[var_name], dimArrayMap_[var_name]->Length());
+        printValues(os_,
+                    var_name,
+                    smcFilterValuesMap_[var_name],
+                    dimArrayMap_[var_name]->Length());
       }
       os_ << std::endl;
     }
@@ -321,46 +339,54 @@ namespace Biips
     initSmoothAccumulators(nParticles, numBins);
 
     // smoothing
-    for (Size t=0; t<t_max; ++t)
+    for (Size t = 0; t < t_max; ++t)
     {
       smoothAccumulate(t);
     }
 
-    if (verbose_>=2)
+    if (verbose_ >= 2)
     {
       os_ << "Particle Smoother estimates: " << std::endl;
-      for (Size i_var=0; i_var<printResultsVarNames_.size(); ++i_var)
+      for (Size i_var = 0; i_var < printResultsVarNames_.size(); ++i_var)
       {
         const String & var_name = printResultsVarNames_[i_var];
-        printValues(os_, var_name, smcSmoothValuesMap_[var_name], dimArrayMap_[var_name]->Length());
+        printValues(os_,
+                    var_name,
+                    smcSmoothValuesMap_[var_name],
+                    dimArrayMap_[var_name]->Length());
       }
       os_ << std::endl;
     }
 
   }
 
-
-  Bool ModelTest::error(Scalar & error, const Types<String>::Array & varNames,
-      const std::map<String, MultiArray::Array> & smcValuesMap,
-      const std::map<String, MultiArray::Array> & benchValuesMap) const
+  Bool ModelTest::error(Scalar & error,
+                        const Types<String>::Array & varNames,
+                        const std::map<String, MultiArray::Array> & smcValuesMap,
+                        const std::map<String, MultiArray::Array> & benchValuesMap) const
   {
     Bool valid = false;
     error = 0.0;
 
-    for (Size i_var=0; i_var<varNames.size(); ++i_var)
+    for (Size i_var = 0; i_var < varNames.size(); ++i_var)
     {
       const String & var_name = varNames[i_var];
 
-      if (smcValuesMap.count(var_name) && benchValuesMap.count(var_name) && benchValuesMap.count("var."+var_name))
+      if (smcValuesMap.count(var_name) && benchValuesMap.count(var_name)
+          && benchValuesMap.count("var." + var_name))
       {
-        const MultiArray::Array & smc_values = smcValuesMap.find(var_name)->second;
-        const MultiArray::Array & bench_values = benchValuesMap.find(var_name)->second;
-        const MultiArray::Array & bench_var_values = benchValuesMap.find("var."+var_name)->second;
+        const MultiArray::Array & smc_values =
+            smcValuesMap.find(var_name)->second;
+        const MultiArray::Array & bench_values =
+            benchValuesMap.find(var_name)->second;
+        const MultiArray::Array & bench_var_values = benchValuesMap.find("var."
+            + var_name)->second;
 
-        for (Size k=0; k<smc_values.size(); ++k)
+        for (Size k = 0; k < smc_values.size(); ++k)
         {
           Size dim = smc_values[k].Length(); // TODO check dim
-          Vector diff_vec(dim, smc_values[k].Values() - bench_values[k].Values());
+          Vector diff_vec(dim, smc_values[k].Values()
+              - bench_values[k].Values());
           Matrix var_chol(dim, dim, bench_var_values[k].Values());
           if (!ublas::cholesky_factorize(var_chol))
             throw RuntimeError("ModelTest::error: matrix is not positive-semidefinite.");
@@ -378,6 +404,5 @@ namespace Biips
 
     return valid;
   }
-
 
 }

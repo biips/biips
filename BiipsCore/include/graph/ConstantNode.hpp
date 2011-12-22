@@ -15,7 +15,7 @@
 
 namespace Biips
 {
-  class ConstantNode : public Node
+  class ConstantNode: public Node
   {
   public:
     typedef ConstantNode SelfType;
@@ -23,14 +23,12 @@ namespace Biips
 
     typedef Types<SelfType>::IteratorPair IteratorPair;
 
-    virtual NodeType GetType() const { return CONSTANT; };
-    virtual void AcceptVisitor(NodeVisitor & vis);
-    virtual void AcceptVisitor(ConstNodeVisitor & vis) const;
-
-    explicit ConstantNode(const DimArray::Ptr & pDim) : Node(pDim) {}
+    explicit ConstantNode(const DimArray::Ptr & pDim) :
+      Node(CONSTANT, pDim)
+    {
+    }
   };
 
 }
-
 
 #endif /* BIIPS_CONSTANTNODE_HPP_ */

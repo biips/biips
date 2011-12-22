@@ -21,10 +21,10 @@
 namespace Biips
 {
 
-  const String ConjugateNormalLinear::NAME_ = "Conjugate Normal (with known precision and linear mean function)";
+  const String ConjugateNormalLinear::NAME_ =
+      "Conjugate Normal (with known precision and linear mean function)";
 
-
-  class NormalLinearLikeFormVisitor : public ConstStochasticNodeVisitor
+  class NormalLinearLikeFormVisitor: public ConstNodeVisitor
   {
   protected:
     typedef NormalLinearLikeFormVisitor SelfType;
@@ -44,15 +44,13 @@ namespace Biips
       NodeId mean_id = node.Parents()[0];
       NodeId prec_id = node.Parents()[1];
 
-      Scalar prec =
-          getNodeValue(prec_id, graph_, nodeSampler_).ScalarView();
-      GetLinearTransformVisitor get_lin_trans_vis(graph_, myId_,
-          nodeSampler_);
+      Scalar prec = getNodeValue(prec_id, graph_, nodeSampler_).ScalarView();
+      GetLinearTransformVisitor get_lin_trans_vis(graph_, myId_, nodeSampler_);
       graph_.VisitNode(mean_id, get_lin_trans_vis);
 
       prec_ = get_lin_trans_vis.GetA() * prec;
-      mean_ = (graph_.GetValues()[nodeId_]->ScalarView() - get_lin_trans_vis.GetB())
-                  * prec_;
+      mean_ = (graph_.GetValues()[nodeId_]->ScalarView()
+          - get_lin_trans_vis.GetB()) * prec_;
       prec_ *= get_lin_trans_vis.GetA();
     }
 
@@ -67,22 +65,21 @@ namespace Biips
       return prec_;
     }
 
-    NormalLinearLikeFormVisitor(const Graph & graph, NodeId myId,
-        ConjugateNormalLinear & nodeSampler) :
+    NormalLinearLikeFormVisitor(const Graph & graph,
+                                NodeId myId,
+                                ConjugateNormalLinear & nodeSampler) :
       graph_(graph), myId_(myId), nodeSampler_(nodeSampler), mean_(0.0),
           prec_(0.0)
     {
     }
   };
 
-
   void ConjugateNormalLinear::sample(const StochasticNode & node)
   {
     NodeId prior_mean_id = node.Parents()[0];
     NodeId prior_prec_id = node.Parents()[1];
 
-    Scalar prior_mean =
-        getNodeValue(prior_mean_id, graph_, *this).ScalarView();
+    Scalar prior_mean = getNodeValue(prior_mean_id, graph_, *this).ScalarView();
     Scalar prior_prec = getNodeValue(prior_prec_id, graph_, *this).ScalarView();
 
     Scalar like_prec = 0.0;
@@ -90,7 +87,7 @@ namespace Biips
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
     boost::tie(it_offspring, it_offspring_end)
-    = graph_.GetLikelihoodChildren(nodeId_);
+        = graph_.GetLikelihoodChildren(nodeId_);
     NormalLinearLikeFormVisitor like_form_vis(graph_, nodeId_, *this);
     while (it_offspring != it_offspring_end)
     {
@@ -107,12 +104,18 @@ namespace Biips
     MultiArray::Array post_param_values(2);
     post_param_values[0] = MultiArray(post_mean);
     post_param_values[1] = MultiArray(post_prec);
-    nodeValuesMap()[nodeId_] = DNorm::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr();
+    nodeValuesMap()[nodeId_] = DNorm::Instance()->Sample(post_param_values,
+                                                         NULL_MULTIARRAYPAIR,
+                                                         *pRng_).ValuesPtr();
 
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(like_mean);
-    norm_const_param_values[1] = MultiArray(1.0 / (1.0 / prior_prec + 1.0 / like_prec) );
-    logIncrementalWeight_ = DNorm::Instance()->LogDensity(MultiArray(prior_mean), norm_const_param_values, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    norm_const_param_values[1] = MultiArray(1.0 / (1.0 / prior_prec + 1.0
+        / like_prec));
+    logIncrementalWeight_
+        = DNorm::Instance()->LogDensity(MultiArray(prior_mean),
+                                        norm_const_param_values,
+                                        NULL_MULTIARRAYPAIR); // FIXME Boundaries
     if (isNan(logIncrementalWeight_))
       throw RuntimeError("Failure to calculate log incremental weight.");
 
@@ -121,8 +124,7 @@ namespace Biips
     sampledFlagsMap()[nodeId_] = true;
   }
 
-
-  class IsConjugateNormalLinearVisitor : public ConstStochasticNodeVisitor
+  class IsConjugateNormalLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -157,8 +159,7 @@ namespace Biips
     }
   };
 
-
-  class CanSampleNormalLinearVisitor : public ConstStochasticNodeVisitor
+  class CanSampleNormalLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -168,7 +169,7 @@ namespace Biips
     {
       canSample_ = false;
 
-      if ( graph_.GetObserved()[nodeId_] )
+      if (graph_.GetObserved()[nodeId_])
         throw LogicError("CanSampleNormalLinearVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
 
       if (node.PriorName() != "dnorm")
@@ -180,7 +181,7 @@ namespace Biips
 
       GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
       boost::tie(it_offspring, it_offspring_end)
-      = graph_.GetLikelihoodChildren(nodeId_);
+          = graph_.GetLikelihoodChildren(nodeId_);
 
       IsConjugateNormalLinearVisitor child_vis(graph_, nodeId_);
 
@@ -207,9 +208,9 @@ namespace Biips
     }
   };
 
-
-  Bool ConjugateNormalLinearFactory::Create(const Graph & graph, NodeId nodeId,
-      BaseType::CreatedPtr & pNodeSamplerInstance) const
+  Bool ConjugateNormalLinearFactory::Create(const Graph & graph,
+                                            NodeId nodeId,
+                                            BaseType::CreatedPtr & pNodeSamplerInstance) const
   {
     CanSampleNormalLinearVisitor can_sample_vis(graph);
 
@@ -219,16 +220,15 @@ namespace Biips
 
     if (flag_created)
     {
-      pNodeSamplerInstance = NodeSamplerFactory::CreatedPtr(new CreatedType(
-          graph));
+      pNodeSamplerInstance
+          = NodeSamplerFactory::CreatedPtr(new CreatedType(graph));
     }
 
     return flag_created;
   }
 
   ConjugateNormalLinearFactory::Ptr
-  ConjugateNormalLinearFactory::pConjugateNormalLinearFactoryInstance_(
-          new ConjugateNormalLinearFactory());
+      ConjugateNormalLinearFactory::pConjugateNormalLinearFactoryInstance_(new ConjugateNormalLinearFactory());
 
 }
 

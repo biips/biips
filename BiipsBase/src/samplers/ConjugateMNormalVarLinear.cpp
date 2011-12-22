@@ -26,10 +26,11 @@
 namespace Biips
 {
 
-  const String ConjugateMNormalVarLinear::NAME_ = "Conjugate Multivariate Normal (with known covariance matrix and linear mean function)";
+  const String
+      ConjugateMNormalVarLinear::NAME_ =
+          "Conjugate Multivariate Normal (with known covariance matrix and linear mean function)";
 
-
-  class MNormalVarLinearLikeFormVisitor : public ConstStochasticNodeVisitor
+  class MNormalVarLinearLikeFormVisitor: public ConstNodeVisitor
   {
   protected:
     typedef MNormalVarLinearLikeFormVisitor SelfType;
@@ -46,21 +47,30 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
     {
-      MultiArray cov_i_dat(getNodeValue(node.Parents()[1], graph_, nodeSampler_));
+      MultiArray
+          cov_i_dat(getNodeValue(node.Parents()[1], graph_, nodeSampler_));
       MatrixRef cov_i(cov_i_dat);
       Size dim_obs = cov_i.size1();
       Size cov_old_dim = cov_.size1();
       cov_.resize(cov_old_dim + dim_obs, cov_old_dim + dim_obs);
-      ublas::project(cov_, ublas::range(cov_old_dim, cov_.size1()), ublas::range(cov_old_dim, cov_.size2())) = cov_i;
+      ublas::project(cov_,
+                     ublas::range(cov_old_dim, cov_.size1()),
+                     ublas::range(cov_old_dim, cov_.size2())) = cov_i;
       cov_i.Release();
 
-      GetMLinearTransformVisitor get_lin_trans_vis(graph_, myId_, nodeSampler_, dimNode_, dim_obs);
+      GetMLinearTransformVisitor get_lin_trans_vis(graph_,
+                                                   myId_,
+                                                   nodeSampler_,
+                                                   dimNode_,
+                                                   dim_obs);
       graph_.VisitNode(node.Parents()[0], get_lin_trans_vis);
 
       const Matrix & A_i = get_lin_trans_vis.GetA();
       Size a_old_size1 = A_.size1();
       A_.resize(a_old_size1 + A_i.size1(), A_.size2());
-      ublas::project(A_, ublas::range(a_old_size1, A_.size1()), ublas::range(0, A_.size2())) = A_i;  // FIXME
+      ublas::project(A_,
+                     ublas::range(a_old_size1, A_.size1()),
+                     ublas::range(0, A_.size2())) = A_i; // FIXME
 
       const Vector & b_i = get_lin_trans_vis.GetB();
       Size b_old_size = b_.size();
@@ -76,15 +86,38 @@ namespace Biips
     }
 
   public:
-    const Matrix & GetA() { return A_; };
-    const Vector & GetB() { return b_; };
-    const Matrix & GetCov() { return cov_; };
-    const Vector & GetObs() { return obs_; };
+    const Matrix & GetA()
+    {
+      return A_;
+    }
+    ;
+    const Vector & GetB()
+    {
+      return b_;
+    }
+    ;
+    const Matrix & GetCov()
+    {
+      return cov_;
+    }
+    ;
+    const Vector & GetObs()
+    {
+      return obs_;
+    }
+    ;
 
-    MNormalVarLinearLikeFormVisitor(const Graph & graph, NodeId myId, NodeSampler & nodeSampler, Size dimNode) // TODO manage dimension
-    : graph_(graph), myId_(myId), nodeSampler_(nodeSampler), dimNode_(dimNode), A_(0, dimNode), b_(0), cov_(0,0), obs_ (0) {};
+    MNormalVarLinearLikeFormVisitor(const Graph & graph,
+                                    NodeId myId,
+                                    NodeSampler & nodeSampler,
+                                    Size dimNode) // TODO manage dimension
+    :
+      graph_(graph), myId_(myId), nodeSampler_(nodeSampler), dimNode_(dimNode),
+          A_(0, dimNode), b_(0), cov_(0, 0), obs_(0)
+    {
+    }
+    ;
   };
-
 
   void ConjugateMNormalVarLinear::sample(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
   {
@@ -93,10 +126,14 @@ namespace Biips
     Size dim_node = graph_.GetNode(prior_mean_id).Dim()[0];
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
-    boost::tie(it_offspring, it_offspring_end) = graph_.GetLikelihoodChildren(nodeId_);
+    boost::tie(it_offspring, it_offspring_end)
+        = graph_.GetLikelihoodChildren(nodeId_);
 
-    MNormalVarLinearLikeFormVisitor like_form_vis(graph_, nodeId_, *this, dim_node);
-    while ( it_offspring != it_offspring_end )
+    MNormalVarLinearLikeFormVisitor like_form_vis(graph_,
+                                                  nodeId_,
+                                                  *this,
+                                                  dim_node);
+    while (it_offspring != it_offspring_end)
     {
       graph_.VisitNode(*it_offspring, like_form_vis);
       ++it_offspring;
@@ -125,18 +162,26 @@ namespace Biips
     Vector post_mean = prior_mean + ublas::prod(kalman_gain, (obs - obs_pred));
     prior_mean.Release();
 
-    Matrix post_var = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node, dim_node) - Matrix(ublas::prod(kalman_gain, like_A))), prior_var);
+    Matrix post_var =
+        ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node, dim_node)
+            - Matrix(ublas::prod(kalman_gain, like_A))), prior_var);
     prior_var.Release();
 
     MultiArray::Array post_param_values(2);
     post_param_values[0] = MultiArray(post_mean);
     post_param_values[1] = MultiArray(post_var);
-    nodeValuesMap()[nodeId_] = DMNormVar::Instance()->Sample(post_param_values, NULL_MULTIARRAYPAIR, *pRng_).ValuesPtr();
+    nodeValuesMap()[nodeId_]
+        = DMNormVar::Instance()->Sample(post_param_values,
+                                        NULL_MULTIARRAYPAIR,
+                                        *pRng_).ValuesPtr();
 
     MultiArray::Array norm_const_param_values(2);
     norm_const_param_values[0] = MultiArray(obs_pred);
     norm_const_param_values[1] = MultiArray(inn_cov);
-    logIncrementalWeight_ = DMNormVar::Instance()->LogDensity(MultiArray(obs), norm_const_param_values, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    logIncrementalWeight_
+        = DMNormVar::Instance()->LogDensity(MultiArray(obs),
+                                            norm_const_param_values,
+                                            NULL_MULTIARRAYPAIR); // FIXME Boundaries
     if (isNan(logIncrementalWeight_))
       throw RuntimeError("Failure to calculate log incremental weight.");
     // TODO optimize computation removing constant terms
@@ -144,8 +189,7 @@ namespace Biips
     sampledFlagsMap()[nodeId_] = true;
   }
 
-
-  class IsConjugateMNormalVarLinearVisitor : public ConstStochasticNodeVisitor
+  class IsConjugateMNormalVarLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -156,7 +200,7 @@ namespace Biips
     {
       conjugate_ = false;
 
-      if ( node.PriorName() != "dmnormvar" )
+      if (node.PriorName() != "dmnormvar")
         return;
 
       // FIXME
@@ -165,33 +209,36 @@ namespace Biips
 
       NodeId mean_id = node.Parents()[0];
       NodeId var_id = node.Parents()[1];
-      conjugate_ = ( (nodesRelation(var_id, myId_, graph_) == KNOWN )
-          && isLinear(mean_id, myId_, graph_) );
+      conjugate_ = ((nodesRelation(var_id, myId_, graph_) == KNOWN)
+          && isLinear(mean_id, myId_, graph_));
     }
 
   public:
-    Bool IsConjugate() const { return conjugate_; }
+    Bool IsConjugate() const
+    {
+      return conjugate_;
+    }
 
-    IsConjugateMNormalVarLinearVisitor(const Graph & graph, NodeId myId) : graph_(graph), myId_(myId), conjugate_(false) {}
+    IsConjugateMNormalVarLinearVisitor(const Graph & graph, NodeId myId) :
+      graph_(graph), myId_(myId), conjugate_(false)
+    {
+    }
   };
 
-
-
-  class CanSampleMNormalVarLinearVisitor : public ConstStochasticNodeVisitor
+  class CanSampleMNormalVarLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
     Bool canSample_;
 
-
     void visit(const StochasticNode & node)
     {
       canSample_ = false;
 
-      if ( graph_.GetObserved()[nodeId_] )
+      if (graph_.GetObserved()[nodeId_])
         throw LogicError("CanSampleMNormalVarLinearVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
 
-      if ( node.PriorName() != "dmnormvar" )
+      if (node.PriorName() != "dmnormvar")
         return;
 
       // FIXME
@@ -201,27 +248,34 @@ namespace Biips
       IsConjugateMNormalVarLinearVisitor child_vis(graph_, nodeId_);
 
       GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end) = graph_.GetLikelihoodChildren(nodeId_);
+      boost::tie(it_offspring, it_offspring_end)
+          = graph_.GetLikelihoodChildren(nodeId_);
       for (; it_offspring != it_offspring_end; ++it_offspring)
       {
         graph_.VisitNode(*it_offspring, child_vis);
 
         canSample_ = child_vis.IsConjugate();
 
-        if ( !canSample_ )
+        if (!canSample_)
           break;
       }
     }
 
   public:
-    Bool CanSample() const { return canSample_; }
+    Bool CanSample() const
+    {
+      return canSample_;
+    }
 
-    CanSampleMNormalVarLinearVisitor(const Graph & graph) : graph_(graph), canSample_(false) {}
+    CanSampleMNormalVarLinearVisitor(const Graph & graph) :
+      graph_(graph), canSample_(false)
+    {
+    }
   };
 
-
-
-  Bool ConjugateMNormalVarLinearFactory::Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const
+  Bool ConjugateMNormalVarLinearFactory::Create(const Graph & graph,
+                                                NodeId nodeId,
+                                                BaseType::CreatedPtr & pNodeSamplerInstance) const
   {
     CanSampleMNormalVarLinearVisitor can_sample_vis(graph);
 
@@ -229,16 +283,16 @@ namespace Biips
 
     Bool flag_created = can_sample_vis.CanSample();
 
-    if ( flag_created )
+    if (flag_created)
     {
-      pNodeSamplerInstance = NodeSamplerFactory::CreatedPtr(new CreatedType(graph));
+      pNodeSamplerInstance
+          = NodeSamplerFactory::CreatedPtr(new CreatedType(graph));
     }
 
     return flag_created;
   }
 
-
-  ConjugateMNormalVarLinearFactory::Ptr ConjugateMNormalVarLinearFactory::pConjugateMNormalVarLinearFactoryInstance_(new ConjugateMNormalVarLinearFactory());
-
+  ConjugateMNormalVarLinearFactory::Ptr
+      ConjugateMNormalVarLinearFactory::pConjugateMNormalVarLinearFactoryInstance_(new ConjugateMNormalVarLinearFactory());
 
 }

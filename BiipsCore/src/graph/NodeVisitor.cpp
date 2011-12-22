@@ -13,7 +13,6 @@
 namespace Biips
 {
 
-
   void NodeVisitor::Visit(ConstantNode & node)
   {
     if (nodeId_ == NULL_NODEID)
@@ -21,7 +20,6 @@ namespace Biips
 
     visit(node);
   }
-
 
   void NodeVisitor::Visit(StochasticNode & node)
   {
@@ -31,7 +29,6 @@ namespace Biips
     visit(node);
   }
 
-
   void NodeVisitor::Visit(LogicalNode & node)
   {
     if (nodeId_ == NULL_NODEID)
@@ -39,7 +36,6 @@ namespace Biips
 
     visit(node);
   }
-
 
   void ConstNodeVisitor::Visit(const ConstantNode & node)
   {
@@ -49,7 +45,6 @@ namespace Biips
     visit(node);
   }
 
-
   void ConstNodeVisitor::Visit(const StochasticNode & node)
   {
     if (nodeId_ == NULL_NODEID)
@@ -58,7 +53,6 @@ namespace Biips
     visit(node);
   }
 
-
   void ConstNodeVisitor::Visit(const LogicalNode & node)
   {
     if (nodeId_ == NULL_NODEID)
@@ -66,6 +60,5 @@ namespace Biips
 
     visit(node);
   }
-
 
 }

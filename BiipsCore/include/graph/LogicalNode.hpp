@@ -17,26 +17,34 @@
 namespace Biips
 {
 
-  class LogicalNode : public Node
+  class LogicalNode: public Node
   {
   public:
     typedef LogicalNode SelfType;
     typedef Types<SelfType>::Ptr Ptr;
     typedef Types<SelfType>::IteratorPair IteratorPair;
 
-    virtual NodeType GetType() const { return LOGICAL; };
-    virtual void AcceptVisitor(NodeVisitor & vis);
-    virtual void AcceptVisitor(ConstNodeVisitor & vis) const;
-
     virtual const String & FuncName() const = 0;
     virtual MultiArray Eval(const MultiArray::Array & paramValues) const = 0;
-    virtual Bool IsFunction() const { return true; }
-    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const = 0;
-    virtual Bool IsLinear(const Flags & linearMask, const Flags & knownMask) const = 0;
+    virtual Bool IsFunction() const
+    {
+      return true;
+    }
+    virtual Bool
+        IsScale(const Flags & scaleMask, const Flags & knownMask) const = 0;
+    virtual Bool
+        IsLinear(const Flags & linearMask, const Flags & knownMask) const = 0;
 
-    LogicalNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters) : Node(pDim, parameters) {}
+    LogicalNode(const DimArray::Ptr pDim,
+                const Types<NodeId>::Array & parameters) :
+      Node(LOGICAL, pDim, parameters)
+    {
+    }
 
-    virtual ~LogicalNode() {};
+    virtual ~LogicalNode()
+    {
+    }
+    ;
   };
 
 }
