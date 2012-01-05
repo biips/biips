@@ -1,15 +1,14 @@
 //                                               -*- C++ -*-
 /*! \file Sum.cpp
-* \brief
-*
-* $LastChangedBy$
-* $LastChangedDate$
-* $LastChangedRevision$
-* $Id$
-*/
+ * \brief
+ *
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
+ */
 
 #include "functions/Sum.hpp"
-
 
 namespace Biips
 {
@@ -19,14 +18,11 @@ namespace Biips
     return true;
   }
 
-  MultiArray Sum::eval(const MultiArray::Array & paramValues) const
+  void Sum::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const MultiArray & val = paramValues[0];
+    const NumArray & val = paramValues[0];
 
-    MultiArray ans(DimArray(1,1));
-    ans.ScalarView() = val.Values().Sum();
-
-    return ans;
+    values[0] = val.Values().Sum();
   }
 
   Bool Sum::IsDiscreteValued(const Flags & mask) const

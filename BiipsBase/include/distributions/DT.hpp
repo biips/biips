@@ -43,7 +43,7 @@ namespace Biips
     Scalar quantile(Scalar p) const;
 
     template<class Engine>
-    Scalar operator() (Engine& eng)
+    Scalar operator()(Engine& eng)
     {
       return mu_ + randomDist_(eng) / sqrtTau_;
     }
@@ -51,64 +51,74 @@ namespace Biips
 
 }
 
-
-namespace boost{ namespace math {
-
-  template <class RealType>
-  inline RealType pdf(const Biips::TDistType& dist, const RealType& t)
+namespace boost
+{
+  namespace math
   {
-    return dist.pdf(t);
-  }
 
-  template <class RealType>
-  inline RealType cdf(const Biips::TDistType& dist, const RealType& t)
-  {
-    return dist.cdf(t);
-  }
+    template<class RealType>
+    inline RealType pdf(const Biips::TDistType& dist, const RealType& t)
+    {
+      return dist.pdf(t);
+    }
 
-  template <class RealType>
-  inline RealType quantile(const Biips::TDistType& dist, const RealType& p)
-  {
-    return dist.quantile(p);
-  }
+    template<class RealType>
+    inline RealType cdf(const Biips::TDistType& dist, const RealType& t)
+    {
+      return dist.cdf(t);
+    }
 
-  template <class RealType>
-  inline RealType cdf(const complemented2_type<Biips::TDistType, RealType>& c)
-  {
-     return cdf(c.dist, -c.param);
-  }
+    template<class RealType>
+    inline RealType quantile(const Biips::TDistType& dist, const RealType& p)
+    {
+      return dist.quantile(p);
+    }
 
-  template <class RealType>
-  inline RealType quantile(const complemented2_type<Biips::TDistType, RealType>& c)
-  {
-     return -quantile(c.dist, c.param);
-  }
-}}
+    template<class RealType>
+    inline RealType cdf(const complemented2_type<Biips::TDistType, RealType>& c)
+    {
+      return cdf(c.dist, -c.param);
+    }
 
+    template<class RealType>
+    inline RealType quantile(const complemented2_type<Biips::TDistType,
+        RealType>& c)
+    {
+      return -quantile(c.dist, c.param);
+    }
+  }
+}
 
 namespace Biips
 {
 
-  class DT : public BoostScalarDistribution<TDistType, TDistType>
+  class DT: public BoostScalarDistribution<TDistType, TDistType>
   {
   public:
     typedef DT SelfType;
     typedef BoostScalarDistribution<TDistType, TDistType> BaseType;
 
   protected:
-    DT() : BaseType("dt", 3, DIST_UNBOUNDED, false) {}
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    DT() :
+      BaseType("dt", 3, DIST_UNBOUNDED, false)
+    {
+    }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
-    virtual MathDistType mathDist(const MultiArray::Array & paramValues) const;
-    virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const;
+    virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
+    virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;
 
   public:
-    virtual Scalar d(Scalar x, const MultiArray::Array & paramValues,
-        Bool give_log) const;
-    static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; }
+    virtual Scalar d(Scalar x,
+                     const NumArray::Array & paramValues,
+                     Bool give_log) const;
+    static Distribution::Ptr Instance()
+    {
+      static Distribution::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
 }
-
 
 #endif /* BIIPS_DT_HPP_ */

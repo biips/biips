@@ -24,15 +24,15 @@ namespace Biips
 }
 
 void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
-    const vector<string> & sources_names,
-    vector<string> & monitor,
-    StoredDimMap & dim_map,
-    StoredDataMap & data_map,
-    Scalar & log_norm_const_bench,
-    StoredDataMap & bench_filter_map,
-    StoredDataMap & bench_smooth_map,
-    StoredErrorsMap & errors_filter_map,
-    StoredErrorsMap & errors_smooth_map)
+                       const vector<string> & sources_names,
+                       vector<string> & monitor,
+                       StoredDimMap & dim_map,
+                       StoredDataMap & data_map,
+                       Scalar & log_norm_const_bench,
+                       StoredDataMap & bench_filter_map,
+                       StoredDataMap & bench_smooth_map,
+                       StoredErrorsMap & errors_filter_map,
+                       StoredErrorsMap & errors_smooth_map)
 {
   using namespace Biips;
 
@@ -43,13 +43,13 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
 
   DimArray::Ptr p_scalar_dim(new DimArray(1, 1));
 
-  for(Size i_src = 0; i_src<parsed_sources.size(); ++i_src)
+  for (Size i_src = 0; i_src < parsed_sources.size(); ++i_src)
   {
     const String & source = sources_names[i_src];
     const po::parsed_options & parsed = parsed_sources[i_src];
-    for (Size op=0; op<parsed.options.size(); ++op)
+    for (Size op = 0; op < parsed.options.size(); ++op)
     {
-      if (! parsed.options[op].unregistered)
+      if (!parsed.options[op].unregistered)
         continue;
 
       string key = parsed.options[op].string_key;
@@ -57,16 +57,19 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       if (key == "monitor")
       {
         string var_name;
-        for (Size v=0; v<parsed.options[op].value.size(); ++v)
+        for (Size v = 0; v < parsed.options[op].value.size(); ++v)
         {
           istringstream iss(parsed.options[op].value[v]);
           while (iss.good())
           {
             getline(iss, var_name, BIIPSTEST_INPUT_VALUES_SEPARATOR);
-            if (var_name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._") != string::npos)
-              boost::throw_exception(po::invalid_syntax(key, var_name + " is not a valid variable name."));
+            if (var_name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._")
+                != string::npos)
+              boost::throw_exception(po::invalid_syntax(key, var_name
+                  + " is not a valid variable name."));
             if (var_name.find_first_of("0123456789._") == 0)
-              boost::throw_exception(po::invalid_syntax(key, var_name + " is not a valid variable name."));
+              boost::throw_exception(po::invalid_syntax(key, var_name
+                  + " is not a valid variable name."));
             monitor.push_back(var_name);
           }
         }
@@ -86,7 +89,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       }
 
       string section = key.substr(0, pos);
-      string var = key.substr(pos+1);
+      string var = key.substr(pos + 1);
 
       // dim section
       if (section == "dim")
@@ -101,7 +104,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           String value_str;
           Size value;
           vector<Size> dim_vec;
-          for (Size v=0; v<parsed.options[op].value.size(); ++v)
+          for (Size v = 0; v < parsed.options[op].value.size(); ++v)
           {
             istringstream iss(parsed.options[op].value[v]);
             while (iss.good())
@@ -110,7 +113,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
               istringstream(value_str) >> value;
               dim_vec.push_back(value);
             }
-            dim_map[var] = DimArray::Ptr(new DimArray(dim_vec.begin(), dim_vec.end()));
+            dim_map[var] = DimArray::Ptr(new DimArray(dim_vec.begin(),
+                                                      dim_vec.end()));
           }
         }
         continue;
@@ -143,7 +147,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           boost::throw_exception(po::unknown_option(key));
         }
         string sub_section = var.substr(0, pos);
-        var = var.substr(pos+1);
+        var = var.substr(pos + 1);
 
         if (sub_section == "filter")
         {
@@ -181,18 +185,18 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         boost::throw_exception(po::unknown_option(key));
       }
 
-
       // data and bench sections
-      if(section == "data" || section == "bench")
+      if (section == "data" || section == "bench")
       {
         map<string, Flags> & dim_defined_map = *p_dim_defined_map;
         map<string, vector<MultiArray> > & datatype_map = *p_datatype_map;
 
         Size dim = 1;
-        if (((pos = var.rfind('.')) != string::npos) && var.find_last_not_of("0123456789") == pos)
+        if (((pos = var.rfind('.')) != string::npos)
+            && var.find_last_not_of("0123456789") == pos)
         {
-          istringstream(var.substr(pos+1)) >> dim;
-          var = var.substr(0,pos);
+          istringstream(var.substr(pos + 1)) >> dim;
+          var = var.substr(0, pos);
         }
 
         if (dim < 1)
@@ -206,24 +210,25 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         if (dim > len)
         {
           cerr << "in source: " << source << ". ";
-          boost::throw_exception(po::invalid_syntax(key, "data exceeds dimension"));
+          boost::throw_exception(po::invalid_syntax(key,
+                                                    "data exceeds dimension"));
         }
 
         Bool allocate = datatype_map[var].empty();
         if (allocate)
-          dim_defined_map[var] = Flags(len,false);
+          dim_defined_map[var] = Flags(len, false);
 
-        if (dim_defined_map[var][dim-1])
+        if (dim_defined_map[var][dim - 1])
         {
           cerr << "in source: " << source << ". ";
           cerr << "Warning: option " << key << " already has value." << endl;
         }
         else
         {
-          dim_defined_map[var][dim-1] = true;
+          dim_defined_map[var][dim - 1] = true;
           String value_str;
           Scalar value;
-          for (Size v=0; v<parsed.options[op].value.size(); ++v)
+          for (Size v = 0; v < parsed.options[op].value.size(); ++v)
           {
             istringstream iss(parsed.options[op].value[v]);
             Size t = 0;
@@ -234,11 +239,13 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
               if (allocate)
               {
                 if (dim_map.count(var))
-                  datatype_map[var].push_back(MultiArray(dim_map[var]));
+                  datatype_map[var].push_back(MultiArray(dim_map[var],
+                                                         ValArray::Ptr(new ValArray(dim_map[var]->Length()))));
                 else
-                  datatype_map[var].push_back(MultiArray(p_scalar_dim));
+                  datatype_map[var].push_back(MultiArray(p_scalar_dim,
+                                                         ValArray::Ptr(new ValArray(1))));
               }
-              datatype_map[var][t].Values()[dim-1] = value;
+              datatype_map[var][t].Values()[dim - 1] = value;
               ++t;
             }
           }
@@ -253,9 +260,10 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
 
         string mutation;
         Size n_particles;
-        if (((pos = var.rfind('.')) != string::npos) && var.find_last_not_of("0123456789") == pos)
+        if (((pos = var.rfind('.')) != string::npos)
+            && var.find_last_not_of("0123456789") == pos)
         {
-          istringstream(var.substr(pos+1)) >> n_particles;
+          istringstream(var.substr(pos + 1)) >> n_particles;
           mutation = var.substr(0, pos);
         }
         else
@@ -264,7 +272,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           boost::throw_exception(po::unknown_option(key));
         }
 
-        if (errors_map.count(mutation) && errors_map.at(mutation).count(n_particles))
+        if (errors_map.count(mutation)
+            && errors_map.at(mutation).count(n_particles))
         {
           cerr << "in source: " << source << ". ";
           cerr << "Warning: option " << key << " already has value." << endl;
@@ -273,7 +282,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         {
           string value_str;
           Scalar value;
-          for (Size v=0; v<parsed.options[op].value.size(); ++v)
+          for (Size v = 0; v < parsed.options[op].value.size(); ++v)
           {
             istringstream iss(parsed.options[op].value[v]);
             while (iss.good())
@@ -289,19 +298,18 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
   }
 }
 
-
 #include "common/IndexRangeIterator.hpp"
 
 map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataMap)
-    {
+{
   using namespace Biips;
 
   // create a return data map
   map<String, MultiArray> data_map;
 
   // iterate on all variables in storedDataMap
-  for(StoredDataMap::const_iterator it_stored = storedDataMap.begin();
-      it_stored != storedDataMap.end(); ++it_stored)
+  for (StoredDataMap::const_iterator it_stored = storedDataMap.begin(); it_stored
+      != storedDataMap.end(); ++it_stored)
   {
     // name of the variable
     const String & name = it_stored->first;
@@ -324,14 +332,15 @@ map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataM
     Size ndim_first = dim_first.NDim();
 
     // compute dimension of the bigger MultiArray holding all values
-    Size ndim_big = ndim_first+1;
+    Size ndim_big = ndim_first + 1;
     DimArray::Ptr p_dim_big(new DimArray(ndim_big));
-    for (Size i= 0; i<ndim_first; ++i)
+    for (Size i = 0; i < ndim_first; ++i)
       (*p_dim_big)[i] = dim_first[i];
     p_dim_big->back() = it_stored->second.size();
 
     // create a bigger MultiArray holding all values
-    MultiArray marray_big(p_dim_big);
+    MultiArray marray_big(p_dim_big,
+                          ValArray::Ptr(new ValArray(p_dim_big->Length())));
     IndexRange range_big(marray_big.Dim());
 
     IndexRange::Indices lower = range_big.Lower();
@@ -340,22 +349,22 @@ map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataM
     IndexRange range_small(dim_first);
 
     // copy all sub MultiArray of storedDataMap in the big one
-    for (Size i= 0; i<p_dim_big->back(); ++i)
+    for (Size i = 0; i < p_dim_big->back(); ++i)
     {
       const MultiArray & marray_small = it_stored->second[i];
 
       if (marray_small.Dim() != dim_first)
-        throw LogicError(String("ERROR: dimension of stored data is inconsistent in variable ") + name);
+        throw LogicError(String("ERROR: dimension of stored data is inconsistent in variable ")
+            + name);
 
       // create a IndexRange where we are storing each sub MultiArray values
-      lower.back() = i+1;
-      upper.back() = i+1;
+      lower.back() = i + 1;
+      upper.back() = i + 1;
       IndexRange sub_range_big(lower, upper);
       IndexRangeIterator it_big(sub_range_big);
 
       // iterate on all values of the sub MultiArray
-      for(IndexRangeIterator it_small(range_small); !it_small.AtEnd();
-          it_small.Next(), it_big.Next())
+      for (IndexRangeIterator it_small(range_small); !it_small.AtEnd(); it_small.Next(), it_big.Next())
       {
         Size offset_small = range_small.GetOffset(it_small);
         Size offset_big = range_big.GetOffset(it_big);
@@ -368,4 +377,4 @@ map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataM
   }
 
   return data_map;
-    }
+}

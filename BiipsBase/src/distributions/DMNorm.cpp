@@ -16,7 +16,6 @@
 #include "distributions/DMNorm.hpp"
 #include "common/cholesky.hpp"
 
-
 namespace Biips
 {
 
@@ -30,27 +29,27 @@ namespace Biips
       return false;
   }
 
-  Bool DMNorm::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DMNorm::checkParamValues(const NumArray::Array & paramValues) const
   {
-    const MultiArray & mean = paramValues[0];
+    const NumArray & mean = paramValues[0];
 
-    for (Size i=0; i<mean.Length(); ++i)
+    for (Size i = 0; i < mean.Length(); ++i)
     {
       if (!isFinite(mean.Values()[i]))
         return false;
     }
 
-    const MultiArray & prec = paramValues[1];
+    const NumArray & prec = paramValues[1];
 
     // symmetric and positive diagonal
     Matrix prec_mat(prec);
-    for(Size i=0; i<prec_mat.size1(); ++i)
+    for (Size i = 0; i < prec_mat.size1(); ++i)
     {
-      if (prec_mat(i,i) <= 0.0)
+      if (prec_mat(i, i) <= 0.0)
         return false;
-      for(Size j=0; j<i; ++j)
+      for (Size j = 0; j < i; ++j)
       {
-        if (prec_mat(i,j) != prec_mat(j,i))
+        if (prec_mat(i, j) != prec_mat(j, i))
           return false;
       }
     }
@@ -64,42 +63,43 @@ namespace Biips
     return *paramDims[0];
   }
 
-  MultiArray DMNorm::sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const
+  void DMNorm::sample(ValArray & values,
+                      const NumArray::Array & paramValues,
+                      const NumArray::Pair & boundValues,
+                      Rng & rng) const
   {
-    const MultiArray & mean = paramValues[0];
-    const MultiArray & prec = paramValues[1];
+    const NumArray & mean = paramValues[0];
+    const NumArray & prec = paramValues[1];
 
     Size n_dim = mean.Values().size();
 
     Matrix prec_chol(prec);
     if (!ublas::cholesky_factorize(prec_chol))
       throw RuntimeError("DMNorm::sample: matrix is not positive-semidefinite.");
-//    ublas::cholesky_invert(var_chol);
-//
-//    if (!ublas::cholesky_factorize(var_chol))
-//      throw LogicError("DMNorm::sample: matrix is not positive-semidefinite.");
 
     typedef boost::normal_distribution<Scalar> DistType;
-    boost::variate_generator<Rng::GenType&, DistType> gen(rng.GetGen(), DistType());
+    boost::variate_generator<Rng::GenType&, DistType> gen(rng.GetGen(),
+                                                          DistType());
 
-    MultiArray sample(mean.DimPtr());
-    std::generate(sample.Values().begin(), sample.Values().end(), gen);
+    std::generate(values.begin(), values.end(), gen);
 
-    VectorRef sample_vec(sample);
-    ublas::inplace_solve(ublas::trans(prec_chol), sample_vec, ublas::upper_tag());
-    sample_vec.Release();
+    ublas::vector<Scalar, ValArray> sample_vec(values.size(), ValArray());
+    sample_vec.data().swap(values);
+    ublas::inplace_solve(ublas::trans(prec_chol),
+                         sample_vec,
+                         ublas::upper_tag());
+    values.swap(sample_vec.data());
 
-    for (Size i=0; i<n_dim; ++i)
-      sample.Values()[i] += mean.Values()[i];
-
-    return sample;
+    for (Size i = 0; i < n_dim; ++i)
+      values[i] += mean.Values()[i];
   }
 
-
-  Scalar DMNorm::logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const
+  Scalar DMNorm::logDensity(const NumArray & x,
+                            const NumArray::Array & paramValues,
+                            const NumArray::Pair & boundValues) const
   {
-    const MultiArray & mean = paramValues[0];
-    const MultiArray & prec = paramValues[1];
+    const NumArray & mean = paramValues[0];
+    const NumArray & prec = paramValues[1];
 
     Vector diff_vec(x.Length(), x.Values() - mean.Values());
 
@@ -107,22 +107,18 @@ namespace Biips
     if (!ublas::cholesky_factorize(prec_chol))
       throw LogicError("DMNorm::logDensity: matrix is not positive-semidefinite.");
 
-    diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,ublas::lower>(prec_chol));
-    return -0.5 * (diff_vec.size()*std::log(2*M_PI) - std::log(ublas::cholesky_det(prec_chol)) + ublas::inner_prod(diff_vec, diff_vec));
+    diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,
+        ublas::lower>(prec_chol));
+    return -0.5 * (diff_vec.size() * std::log(2 * M_PI)
+        - std::log(ublas::cholesky_det(prec_chol))
+        + ublas::inner_prod(diff_vec, diff_vec));
   }
 
-
-  MultiArray::Pair DMNorm::unboundedSupport(const MultiArray::Array & paramValues) const
+  void DMNorm::unboundedSupport(ValArray & lower,
+                                ValArray & upper,
+                                const NumArray::Array & paramValues) const
   {
-    const MultiArray & mean = paramValues[0];
-
-    const ValArray::Ptr p_lower_val(new ValArray(mean.Length(), BIIPS_NEGINF));
-    const ValArray::Ptr p_upper_val(new ValArray(mean.Length(), BIIPS_POSINF));
-
-    static MultiArray::Pair support;
-    support.first = MultiArray(mean.DimPtr(), p_lower_val);
-    support.second = MultiArray(mean.DimPtr(), p_upper_val);
-
-    return support;
+    std::fill(lower.begin(), lower.end(), BIIPS_NEGINF);
+    std::fill(upper.begin(), upper.end(), BIIPS_POSINF);
   }
 }

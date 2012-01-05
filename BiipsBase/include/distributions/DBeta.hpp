@@ -21,22 +21,33 @@ namespace Biips
   typedef boost::math::beta_distribution<Scalar> BetaMathDistType;
   typedef boost::beta_distribution<Scalar> BetaRandomDistType;
 
-  class DBeta : public BoostScalarDistribution<BetaMathDistType, BetaRandomDistType>
+  class DBeta: public BoostScalarDistribution<BetaMathDistType,
+      BetaRandomDistType>
   {
   public:
     typedef DBeta SelfType;
-    typedef BoostScalarDistribution<BetaMathDistType, BetaRandomDistType> BaseType;
+    typedef BoostScalarDistribution<BetaMathDistType, BetaRandomDistType>
+        BaseType;
 
   protected:
-    DBeta() : BaseType("dbeta", 2, DIST_PROPORTION, false) {}
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
-    virtual Bool checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const;
+    DBeta() :
+      BaseType("dbeta", 2, DIST_PROPORTION, false)
+    {
+    }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
+    virtual Bool
+        checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const;
 
-    virtual MathDistType mathDist(const MultiArray::Array & paramValues) const;
-    virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const;
+    virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
+    virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;
 
   public:
-    static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; };
+    static Distribution::Ptr Instance()
+    {
+      static Distribution::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+    ;
   };
 
 }

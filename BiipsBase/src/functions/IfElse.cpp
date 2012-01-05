@@ -17,7 +17,7 @@ namespace Biips
   {
     DimArray ref_dim;
 
-    for (Size i=0; i<paramDims.size(); ++i)
+    for (Size i = 0; i < paramDims.size(); ++i)
     {
       if (!paramDims[i]->IsScalar())
       {
@@ -26,7 +26,7 @@ namespace Biips
       }
     }
 
-    for (Size i=0; i<paramDims.size(); ++i)
+    for (Size i = 0; i < paramDims.size(); ++i)
     {
       if (paramDims[i]->IsScalar())
         continue;
@@ -36,39 +36,26 @@ namespace Biips
     return true;
   }
 
-
   DimArray IfElse::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
-    for (Size i=0; i<paramDims.size(); ++i)
+    for (Size i = 0; i < paramDims.size(); ++i)
     {
-      if ( !paramDims[i]->IsScalar() )
+      if (!paramDims[i]->IsScalar())
         return *paramDims[i];
     }
 
     return *paramDims[0];
   }
 
-
-  MultiArray IfElse::eval(const MultiArray::Array & paramValues) const
+  void IfElse::eval(ValArray & values,const NumArray::Array & paramValues) const
   {
-    DimArray::Ptr p_dim = P_SCALAR_DIM;
-    for (Size i=0; i<paramValues.size(); ++i)
-    {
-      if (!paramValues[i].IsScalar())
-      {
-        p_dim = paramValues[i].DimPtr();
-        break;
-      }
-    }
-    MultiArray ans(p_dim);
+    const NumArray & x = paramValues[0];
+    const NumArray & a = paramValues[1];
+    const NumArray & b = paramValues[2];
 
-    const MultiArray & x = paramValues[0];
-    const MultiArray & a = paramValues[1];
-    const MultiArray & b = paramValues[2];
-
-    for (Size i=0, j=0, k=0, l=0; i<ans.Length(); ++i)
+    for (Size i = 0, j = 0, k = 0, l = 0; i < values.size(); ++i)
     {
-      ans.Values()[i] = x.Values()[j] ? a.Values()[k] : b.Values()[l];
+      values[i] = x.Values()[j] ? a.Values()[k] : b.Values()[l];
 
       if (!x.IsScalar())
         ++j;
@@ -77,10 +64,7 @@ namespace Biips
       if (!b.IsScalar())
         ++l;
     }
-
-    return ans;
   }
-
 
   Bool IfElse::IsDiscreteValued(const Flags & mask) const
   {

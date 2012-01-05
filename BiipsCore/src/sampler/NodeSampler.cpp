@@ -30,8 +30,13 @@ namespace Biips
     if (sampledFlagsMap()[nodeId_])
       return;
 
-    MultiArray::Array params = getParamValues(nodeId_, graph_, *this);
-    nodeValuesMap()[nodeId_] = node.Eval(params).ValuesPtr();
+    NumArray::Array params = getParamValues(nodeId_, graph_, *this);
+
+    // allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+
+    // evaluate
+    node.Eval(*nodeValuesMap()[nodeId_], params);
 
     sampledFlagsMap()[nodeId_] = true;
   }
@@ -56,9 +61,15 @@ namespace Biips
 
   void NodeSampler::sample(const StochasticNode & node)
   {
-    MultiArray::Array param_values = getParamValues(nodeId_, graph_, *this);
-    MultiArray::Pair bound_values = getBoundValues(nodeId_, graph_, *this);
-    nodeValuesMap()[nodeId_] = node.Sample(param_values, bound_values, *pRng_).ValuesPtr();
+    NumArray::Array param_values = getParamValues(nodeId_, graph_, *this);
+    NumArray::Pair bound_values = getBoundValues(nodeId_, graph_, *this);
+
+    // allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+
+    // sample
+    node.Sample(*nodeValuesMap()[nodeId_], param_values, bound_values, *pRng_);
+
     sampledFlagsMap()[nodeId_] = true;
     logIncrementalWeight_ = getLogLikelihood(graph_, nodeId_, *this);
   }

@@ -45,19 +45,19 @@ namespace Biips
     {
     }
 
-    virtual MultiArray::Array initLikeParamContrib() const;
+    virtual NumArray::Array initLikeParamContrib() const;
     virtual void
-        formLikeParamContrib(NodeId likeId,
-                             MultiArray::Array & likeParamContribValues) = 0;
-    virtual MultiArray::Array
-        postParam(const MultiArray::Array & priorParamContribValues,
-                  const MultiArray::Array & likeParamContribValues) const = 0;
+    formLikeParamContrib(NodeId likeId,
+                         NumArray::Array & likeParamContribValues) = 0;
+    virtual NumArray::Array
+    postParam(const NumArray::Array & priorParamContribValues,
+              const NumArray::Array & likeParamContribValues) const = 0;
     virtual Scalar
-        computeLogIncrementalWeight(const MultiArray & sampfedData,
-                                    const MultiArray::Array & priorParamValues,
-                                    const MultiArray::Array & postParamValues,
-                                    const MultiArray::Array & LikeParamContrib =
-                                        MultiArray::Array());
+    computeLogIncrementalWeight(const NumArray & sampfedData,
+                                const NumArray::Array & priorParamValues,
+                                const NumArray::Array & postParamValues,
+                                const NumArray::Array & LikeParamContrib =
+                                    NumArray::Array());
     virtual void sample(const StochasticNode & node);
 
   public:
@@ -103,32 +103,37 @@ namespace Biips
   };
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  MultiArray::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
+  NumArray::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
   {
-    MultiArray::Array paramContribValues(PriorDist::Instance()->NParam());
+    Size n_par = PriorDist::Instance()->NParam();
+    static NumArray::Array paramContribValues;
+    paramContribValues.resize(n_par);
+    static Types<DimArray *>::Array dim_ptrs;
+    dim_ptrs.resize(n_par);
+    static Types<ValArray>::Array vals;
+    vals.resize(n_par);
 
     GraphTypes::ParentIterator it_parents, it_parents_end;
     boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
-    Size i = 0;
-    while (it_parents != it_parents_end)
+    for (Size i = 0; i < n_par; ++it_parents, ++i)
     {
-      paramContribValues[i] = MultiArray(graph_.GetNode(*it_parents).DimPtr());
-      ++it_parents;
-      ++i;
+      dim_ptrs[i] = graph_.GetNode(*it_parents).DimPtr().get();
+      vals[i] = ValArray(dim_ptrs[i]->Length());
+      paramContribValues[i] = NumArray(dim_ptrs[i], &vals[i]);
     }
     return paramContribValues;
   }
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogIncrementalWeight(const MultiArray & sampledData,
-                                                                                        const MultiArray::Array & priorParamValues,
-                                                                                        const MultiArray::Array & postParamValues,
-                                                                                        const MultiArray::Array & LikeParamContrib)
+  Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogIncrementalWeight(const NumArray & sampledData,
+                                                                                        const NumArray::Array & priorParamValues,
+                                                                                        const NumArray::Array & postParamValues,
+                                                                                        const NumArray::Array & LikeParamContrib)
   {
     // Prior
     Scalar log_prior = PriorDist::Instance()->LogDensity(sampledData,
                                                          priorParamValues,
-                                                         NULL_MULTIARRAYPAIR); // FIXME Boundaries
+                                                         NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(log_prior))
       throw NodeError(nodeId_, "Failure to calculate log prior density.");
 
@@ -138,7 +143,7 @@ namespace Biips
     // Posterior
     Scalar log_post = PriorDist::Instance()->LogDensity(sampledData,
                                                         postParamValues,
-                                                        NULL_MULTIARRAYPAIR); // FIXME Boundaries
+                                                        NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(log_post))
       throw NodeError(nodeId_, "Failure to calculate log posterior density.");
 
@@ -177,7 +182,7 @@ namespace Biips
 
     const Graph & graph_;
     ConjugateSampler & nodeSampler_;
-    MultiArray::Array paramContribValues_;
+    NumArray::Array paramContribValues_;
 
     virtual void visit(const StochasticNode & node)
     {
@@ -185,7 +190,7 @@ namespace Biips
     }
 
   public:
-    const MultiArray::Array & GetParamContribValues() const
+    const NumArray::Array & GetParamContribValues() const
     {
       return paramContribValues_;
     }
@@ -200,9 +205,7 @@ namespace Biips
   template<typename PriorDist, typename LikeDist, Size paramIndex>
   void ConjugateSampler<PriorDist, LikeDist, paramIndex>::sample(const StochasticNode & node)
   {
-    MultiArray::Array prior_param_values = getParamValues(nodeId_,
-                                                          graph_,
-                                                          *this);
+    NumArray::Array prior_param_values = getParamValues(nodeId_, graph_, *this);
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
     boost::tie(it_offspring, it_offspring_end)
@@ -212,19 +215,22 @@ namespace Biips
     {
       graph_.VisitNode(*it_offspring, like_form_vis);
     }
-    MultiArray::Array like_param_contrib =
-        like_form_vis.GetParamContribValues();
+    NumArray::Array like_param_contrib = like_form_vis.GetParamContribValues();
 
-    MultiArray::Array post_param_values = postParam(prior_param_values,
-                                                    like_param_contrib);
+    NumArray::Array post_param_values = postParam(prior_param_values,
+                                                  like_param_contrib);
 
-    MultiArray sampled_data =
-        PriorDist::Instance()->Sample(post_param_values,
-                                      NULL_MULTIARRAYPAIR,
-                                      *pRng_); // FIXME Boundaries
-    nodeValuesMap()[nodeId_] = sampled_data.ValuesPtr();
+    // allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
 
+    // sample
+    PriorDist::Instance()->Sample(*nodeValuesMap()[nodeId_],
+                                  post_param_values,
+                                  NULL_NUMARRAYPAIR,
+                                  *pRng_); // FIXME Boundaries
     sampledFlagsMap()[nodeId_] = true;
+
+    NumArray sampled_data(node.DimPtr().get(), nodeValuesMap()[nodeId_].get());
 
     logIncrementalWeight_ = computeLogIncrementalWeight(sampled_data,
                                                         prior_param_values,

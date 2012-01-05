@@ -29,9 +29,8 @@ namespace Biips
   class IndexRange;
   class SymbolTable;
 
-
   class Compiler;
-  typedef void (Compiler::*CompilerMemFn) (ParseTree const *);
+  typedef void (Compiler::*CompilerMemFn)(ParseTree const *);
 
   class Compiler
   {
@@ -50,9 +49,11 @@ namespace Biips
     NodeId getArraySubset(ParseTree const * pTree);
     IndexRange variableSubsetRange(ParseTree const *var);
     IndexRange counterRange(ParseTree const *var);
-    IndexRange getRange(ParseTree const * pTree, const IndexRange & defaultRange);
+    IndexRange getRange(ParseTree const * pTree,
+                        const IndexRange & defaultRange);
 
-    void traverseTree(ParseTree const * pRelations, CompilerMemFn fun,
+    void traverseTree(ParseTree const * pRelations,
+                      CompilerMemFn fun,
                       Bool resetCounter = true);
     void allocate(ParseTree const *pRelations);
     NodeId allocateStochastic(ParseTree const *pStochRelation);
@@ -62,7 +63,8 @@ namespace Biips
     NodeId getLength(ParseTree const * pTree, const SymbolTable & symtab);
     NodeId getDim(ParseTree const * pTree, const SymbolTable & symtab);
     void getArrayDim(ParseTree const * pTree);
-    Bool getParameterVector(ParseTree const * pTree, Types<NodeId>::Array & parents);
+    Bool getParameterVector(ParseTree const * pTree,
+                            Types<NodeId>::Array & parents);
     NodeId constFromTable(ParseTree const * pTree);
 
   public:

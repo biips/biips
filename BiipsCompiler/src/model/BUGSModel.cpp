@@ -43,8 +43,11 @@ namespace Biips
       // initialized with BIIPS_REALNA
       const NodeArray & node_array = symbolTable_.GetNodeArray(var_name);
       if (!data_table.count(var_name))
-        data_table[var_name] = MultiArray(node_array.Range().Dim(),
-                                          BIIPS_REALNA);
+      {
+        DimArray::Ptr p_dim = node_array.Range().DimPtr();
+        ValArray::Ptr p_val(new ValArray(p_dim->Length(), BIIPS_REALNA));
+        data_table[var_name] = MultiArray(p_dim, p_val);
+      }
 
       // get the subrange in the NodeArray
       IndexRange range = node_array.GetRange(node_id);
@@ -64,10 +67,8 @@ namespace Biips
             = (*sampled_values[node_id])[k];
       }
     }
-
     return data_table;
   }
-
 
   Bool BUGSModel::SetFilterMonitor(const String & name, IndexRange range)
   {
@@ -97,7 +98,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::SetSmoothTreeMonitor(const String & name, IndexRange range)
   {
     // TODO use Monitor Factory
@@ -126,7 +126,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::SetSmoothMonitor(const String & name, IndexRange range)
   {
     // TODO use Monitor Factory
@@ -154,7 +153,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::IsFilterMonitored(const String & name, IndexRange range) const
   {
@@ -186,7 +184,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::IsSmoothTreeMonitored(const String & name, IndexRange range) const
   {
     if (!symbolTable_.Contains(name))
@@ -214,7 +211,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::IsSmoothMonitored(const String & name, IndexRange range) const
   {
@@ -247,7 +243,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::ExtractFilterStat(String name,
                                     StatsTag statFeature,
                                     std::map<IndexRange, MultiArray> & statMap) const
@@ -273,7 +268,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::ExtractSmoothTreeStat(String name,
                                         StatsTag statFeature,
@@ -302,7 +296,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::ExtractSmoothStat(String name,
                                     StatsTag statFeature,
                                     std::map<IndexRange, MultiArray> & statMap) const
@@ -328,7 +321,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
@@ -368,7 +360,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::ExtractSmoothTreePdf(String name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
@@ -406,7 +397,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
@@ -446,14 +436,12 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::DumpData(std::map<String, MultiArray> & dataMap) const
   {
     symbolTable_.ReadData(dataMap);
 
     return true;
   }
-
 
   Bool BUGSModel::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
@@ -485,7 +473,6 @@ namespace Biips
     return true;
   }
 
-
   Bool BUGSModel::DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
@@ -515,7 +502,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool BUGSModel::DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
@@ -547,7 +533,6 @@ namespace Biips
     return true;
   }
 
-
   void BUGSModel::PrintSamplersSequence(std::ostream & out) const
   {
     Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
@@ -560,7 +545,6 @@ namespace Biips
           << node_id << "), " << name << std::endl;
     }
   }
-
 
   class VarNamePropertyWriter: public VertexPropertyWriter
   {
@@ -595,7 +579,6 @@ namespace Biips
       return ans;
     }
   };
-
 
   void BUGSModel::PrintGraphviz(std::ostream & out) const
   {

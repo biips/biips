@@ -21,7 +21,7 @@ namespace Biips
   class Graph;
   class NodeSampler;
 
-  class GetMLinearTransformVisitor : public ConstNodeVisitor
+  class GetMLinearTransformVisitor: public ConstNodeVisitor
   {
   protected:
     typedef GetMLinearTransformVisitor SelfType;
@@ -47,12 +47,21 @@ namespace Biips
     virtual void visit(const LogicalNode & node);
 
   public:
-    const Matrix & GetA() { return A_; };
-    const Vector & GetB() { return b_; };
+    const Matrix & GetA()
+    {
+      return A_;
+    }
+    const Vector & GetB()
+    {
+      return b_;
+    }
 
-    GetMLinearTransformVisitor(const Graph & graph, NodeId myId, NodeSampler & nodeSampler, Size dimNode, Size dimObs);
+    GetMLinearTransformVisitor(const Graph & graph,
+                               NodeId myId,
+                               NodeSampler & nodeSampler,
+                               Size dimNode,
+                               Size dimObs);
   };
-
 
 }
 

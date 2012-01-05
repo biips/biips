@@ -14,13 +14,18 @@
 #include "distributions/BoundedScalarDistribution.hpp"
 #include <boost/random/variate_generator.hpp>
 
-namespace boost{ namespace math{} }
+namespace boost
+{
+  namespace math
+  {
+  }
+}
 
 namespace Biips
 {
 
   template<typename MathDist, typename RandomDist>
-  class BoostScalarDistribution : public BoundedScalarDistribution
+  class BoostScalarDistribution: public BoundedScalarDistribution
   {
   public:
     typedef BoundedScalarDistribution BaseType;
@@ -28,25 +33,36 @@ namespace Biips
     typedef RandomDist RandomDistType;
 
   protected:
-    virtual Scalar d(Scalar x, const MultiArray::Array & paramValues,
-        Bool give_log) const;
-    virtual Scalar p(Scalar x, const MultiArray::Array & paramValues,
-        Bool lower, Bool give_log) const;
-    virtual Scalar q(Scalar p, const MultiArray::Array & paramValues,
-        Bool lower, Bool give_log) const;
-    virtual Scalar r(const MultiArray::Array & paramValues, Rng & rng) const;
+    virtual Scalar d(Scalar x,
+                     const NumArray::Array & paramValues,
+                     Bool give_log) const;
+    virtual Scalar p(Scalar x,
+                     const NumArray::Array & paramValues,
+                     Bool lower,
+                     Bool give_log) const;
+    virtual Scalar q(Scalar p,
+                     const NumArray::Array & paramValues,
+                     Bool lower,
+                     Bool give_log) const;
+    virtual Scalar r(const NumArray::Array & paramValues, Rng & rng) const;
 
-    virtual MathDistType mathDist(const MultiArray::Array & paramValues) const = 0;
-    virtual RandomDistType randomDist(const MultiArray::Array & paramValues) const = 0;
+    virtual MathDistType mathDist(const NumArray::Array & paramValues) const = 0;
+    virtual RandomDistType
+        randomDist(const NumArray::Array & paramValues) const = 0;
 
-    BoostScalarDistribution(const String & name, Size nParam, Support support, Bool discrete=false)
-      : BaseType(name, nParam, support, discrete) {}
+    BoostScalarDistribution(const String & name,
+                            Size nParam,
+                            Support support,
+                            Bool discrete = false) :
+      BaseType(name, nParam, support, discrete)
+    {
+    }
   };
 
-
   template<typename MathDist, typename RandomDist>
-  Scalar BoostScalarDistribution<MathDist, RandomDist>::d(Scalar x, const MultiArray::Array & paramValues,
-      Bool give_log) const
+  Scalar BoostScalarDistribution<MathDist, RandomDist>::d(Scalar x,
+                                                          const NumArray::Array & paramValues,
+                                                          Bool give_log) const
   {
     MathDistType dist = mathDist(paramValues);
 
@@ -57,10 +73,11 @@ namespace Biips
     return pdf(dist, x);
   }
 
-
   template<typename MathDist, typename RandomDist>
-  Scalar BoostScalarDistribution<MathDist, RandomDist>::p(Scalar x, const MultiArray::Array & paramValues,
-      Bool lower, Bool give_log) const
+  Scalar BoostScalarDistribution<MathDist, RandomDist>::p(Scalar x,
+                                                          const NumArray::Array & paramValues,
+                                                          Bool lower,
+                                                          Bool give_log) const
   {
     MathDistType dist = mathDist(paramValues);
 
@@ -77,10 +94,11 @@ namespace Biips
       return p;
   }
 
-
   template<typename MathDist, typename RandomDist>
-  Scalar BoostScalarDistribution<MathDist, RandomDist>::q(Scalar p, const MultiArray::Array & paramValues,
-      Bool lower, Bool give_log) const
+  Scalar BoostScalarDistribution<MathDist, RandomDist>::q(Scalar p,
+                                                          const NumArray::Array & paramValues,
+                                                          Bool lower,
+                                                          Bool give_log) const
   {
     MathDistType dist = mathDist(paramValues);
 
@@ -97,9 +115,9 @@ namespace Biips
       return q;
   }
 
-
   template<typename MathDist, typename RandomDist>
-  Scalar BoostScalarDistribution<MathDist, RandomDist>::r(const MultiArray::Array & paramValues, Rng & rng) const
+  Scalar BoostScalarDistribution<MathDist, RandomDist>::r(const NumArray::Array & paramValues,
+                                                          Rng & rng) const
   {
     typedef boost::variate_generator<Rng::GenType&, RandomDistType> GenType;
     GenType gen(rng.GetGen(), randomDist(paramValues));

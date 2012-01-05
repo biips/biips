@@ -16,24 +16,39 @@
 namespace Biips
 {
 
-  class MatMult : public Function
+  class MatMult: public Function
   {
   protected:
     typedef MatMult SelfType;
     typedef Function BaseType;
 
-    MatMult() : BaseType("%*%", 2) {}
+    MatMult() :
+      BaseType("%*%", 2)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool
+        checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual void
+    eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
-    virtual Bool IsInfix() const { return true; }
+    virtual Bool IsInfix() const
+    {
+      return true;
+    }
     virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const;
 
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
 }

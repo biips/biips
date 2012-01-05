@@ -15,46 +15,61 @@
 
 namespace Biips
 {
-  struct PowScalar : public std::binary_function<Scalar, Scalar, Scalar>
+  struct PowScalar: public std::binary_function<Scalar, Scalar, Scalar>
   {
-    Scalar operator() (Scalar base, Scalar exponent) const
+    Scalar operator()(Scalar base, Scalar exponent) const
     {
       return std::pow(base, exponent);
     }
   };
 
-
-  class Pow : public BinaryScalarFunction<PowScalar>
+  class Pow: public BinaryScalarFunction<PowScalar>
   {
   public:
     typedef Pow SelfType;
     typedef BinaryScalarFunction<PowScalar> BaseType;
 
   protected:
-    Pow() : BaseType("pow") {};
+    Pow() :
+      BaseType("pow")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
   public:
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
-
-  class PowInfix : public BinaryScalarFunction<PowScalar>
+  class PowInfix: public BinaryScalarFunction<PowScalar>
   {
   public:
     typedef PowInfix SelfType;
     typedef BinaryScalarFunction<PowScalar> BaseType;
 
   protected:
-    PowInfix() : BaseType("^") {};
+    PowInfix() :
+      BaseType("^")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
   public:
-    virtual Bool IsInfix() const { return true; }
+    virtual Bool IsInfix() const
+    {
+      return true;
+    }
 
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 }
 

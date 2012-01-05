@@ -25,7 +25,8 @@ namespace Biips
     typedef Types<SelfType>::IteratorPair IteratorPair;
 
     virtual const String & FuncName() const = 0;
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const = 0;
+    virtual void
+        Eval(ValArray & values, const NumArray::Array & paramValues) const = 0;
     virtual Bool IsFunction() const
     {
       return true;
@@ -44,7 +45,6 @@ namespace Biips
     virtual ~LogicalNode()
     {
     }
-    ;
   };
 
 }

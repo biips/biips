@@ -42,15 +42,20 @@ namespace Biips
     NodeArray(const NodeArray & from);
     NodeArray & operator=(const NodeArray & rhs);
 
-    Bool findActiveIndices(Types<Size>::Array & ind, Size k,
-        const IndexRange::Indices & lower, const DimArray & dim) const;
+    Bool findActiveIndices(Types<Size>::Array & ind,
+                           Size k,
+                           const IndexRange::Indices & lower,
+                           const DimArray & dim) const;
 
     Bool allNodesMissing() const;
 
   public:
     NodeArray(const String & name, Graph & graph, const DimArray & dim);
 
-    const String & Name() const { return name_; }
+    const String & Name() const
+    {
+      return name_;
+    }
 
     Bool IsEmpty(const IndexRange & targetRange) const;
 
@@ -59,13 +64,19 @@ namespace Biips
     NodeId GetSubset(const IndexRange & subsetRange);
 
     // Accessors
-    const IndexRange & Range() const { return range_; }
+    const IndexRange & Range() const
+    {
+      return range_;
+    }
 
     IndexRange GetRange(NodeId nodeId) const;
 
     NodeId GetNode(const IndexRange & targetRange) const;
 
-    const boost::bimap<NodeId, IndexRange> & NodeIdRangeBimap() const { return nodeIdRangeBimap_; };
+    const boost::bimap<NodeId, IndexRange> & NodeIdRangeBimap() const
+    {
+      return nodeIdRangeBimap_;
+    }
 
     Bool Contains(NodeId nodeId) const;
 
