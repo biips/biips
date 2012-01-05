@@ -23,7 +23,7 @@
 namespace Biips
 {
 
-  class DeparseVisitor : public ConstNodeVisitor
+  class DeparseVisitor: public ConstNodeVisitor
   {
   public:
     typedef DeparseVisitor SelfType;
@@ -40,10 +40,19 @@ namespace Biips
 
   public:
 
-    const String & GetName() const { return name_; }
+    const String & GetName() const
+    {
+      return name_;
+    }
 
-    DeparseVisitor(const Graph & graph, const Types<String>::Array & parentNames) : graph_(graph), parentNames_(parentNames) {}
-    virtual ~DeparseVisitor() {}
+    DeparseVisitor(const Graph & graph,
+                   const Types<String>::Array & parentNames) :
+      graph_(graph), parentNames_(parentNames)
+    {
+    }
+    virtual ~DeparseVisitor()
+    {
+    }
   };
 
   void DeparseVisitor::visit(const ConstantNode & node)
@@ -54,17 +63,18 @@ namespace Biips
     else
     {
       const ValArray & val = *(graph_.GetValues()[nodeId_]);
-      oss << "c(" << val.front() << "..."  << val.back() << ")";
+      oss << "c(" << val.front() << "..." << val.back() << ")";
     }
     name_ = oss.str();
   }
 
-
   void DeparseVisitor::visit(const StochasticNode & node)
   {
     Size npar = parentNames_.size();
-    if (node.IsUpperBounded()) --npar;
-    if (node.IsLowerBounded()) --npar;
+    if (node.IsUpperBounded())
+      --npar;
+    if (node.IsLowerBounded())
+      --npar;
     Distribution::Ptr p_dist = Compiler::DistTab().GetPtr(node.PriorName());
     if (!p_dist->CheckNParam(npar))
     {
@@ -78,7 +88,7 @@ namespace Biips
 
     oss << node.PriorName() << "(";
     Size i = 0;
-    for ( ; i < npar; ++i)
+    for (; i < npar; ++i)
     {
       if (i != 0)
         oss << ",";
@@ -99,12 +109,12 @@ namespace Biips
     name_ = oss.str();
   }
 
-
   void DeparseVisitor::visit(const LogicalNode & node)
   {
     if (!node.IsFunction())
     {
-      name_ = String("aggregate(") + parentNames_.front() + "..." + parentNames_.back() + ")";
+      name_ = String("aggregate(") + parentNames_.front() + "..."
+          + parentNames_.back() + ")";
       return;
     }
 
@@ -112,7 +122,12 @@ namespace Biips
     oss << "(";
 
     if (Compiler::FuncTab()[node.FuncName()]->IsPrefix())
-      oss << node.FuncName() << parentNames_[0];
+    {
+      if (node.FuncName() == "NEG")
+        oss << "-" << parentNames_[0];
+      else
+        oss << node.FuncName() << parentNames_[0];
+    }
 
     else if (Compiler::FuncTab()[node.FuncName()]->IsInfix())
     {
@@ -142,8 +157,9 @@ namespace Biips
     name_ = oss.str();
   }
 
-
-  String deparse(NodeId nodeId, const Graph & graph, const Types<String>::Array & parentNames)
+  String deparse(NodeId nodeId,
+                 const Graph & graph,
+                 const Types<String>::Array & parentNames)
   {
     DeparseVisitor deparse_vis(graph, parentNames);
     graph.VisitNode(nodeId, deparse_vis);

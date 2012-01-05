@@ -98,19 +98,19 @@ namespace Biips
     Size n_particles = weights_.size();
     ublas::matrix<Scalar> P_mat(n_particles, n_particles);
 
-    MultiArray::Array param_values_i;
-    MultiArray last_particle_value_j;
-    MultiArray::Pair bound_values_i;
+    NumArray::Array param_values_i;
+    NumArray last_particle_value_j;
+    NumArray::Pair bound_values_i;
 
     // Computing matrix P
     for (Size i=0; i<n_particles; ++i)
     {
       for (Size j=0; j<n_particles; ++j)
       {
-        param_values_i.SetPtr(getParamValues(last_node_id, graph_, new_monitor, i));
-        bound_values_i.SetPtr(getBoundValues(last_node_id, graph_, new_monitor, i));
+        param_values_i = getParamValues(last_node_id, graph_, new_monitor, i);
+        bound_values_i = getBoundValues(last_node_id, graph_, new_monitor, i);
 
-        last_particle_value_j.SetPtr(getNodeValue(last_node_id, graph_, *p_last_monitor, j));
+        last_particle_value_j = getNodeValue(last_node_id, graph_, *p_last_monitor, j);
 
         P_mat(i,j) = std::exp(last_node.LogPriorDensity(last_particle_value_j, param_values_i, bound_values_i));
         if (isNan(P_mat(i,j)))

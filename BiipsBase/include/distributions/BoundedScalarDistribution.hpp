@@ -31,33 +31,51 @@ namespace Biips
    * DIST_SPECIAL for other distributions, e.g. distributions where the
    * support depends on the parameter values.
    */
-  enum Support {DIST_UNBOUNDED, DIST_POSITIVE, DIST_PROPORTION, DIST_SPECIAL};
+  enum Support
+  {
+    DIST_UNBOUNDED, DIST_POSITIVE, DIST_PROPORTION, DIST_SPECIAL
+  };
 
-
-  class BoundedScalarDistribution : public Distribution
+  class BoundedScalarDistribution: public Distribution
   {
   public:
     typedef Distribution BaseType;
     typedef BoundedScalarDistribution SelfType;
 
-
   protected:
     const Support support_;
     const Bool discrete_;
-    Scalar calPlower(Scalar lower, const MultiArray::Array & paramValues) const;
-    Scalar calPupper(Scalar upper, const MultiArray::Array & paramValues) const;
+    Scalar calPlower(Scalar lower, const NumArray::Array & paramValues) const;
+    Scalar calPupper(Scalar upper, const NumArray::Array & paramValues) const;
 
-    virtual Bool checkDensityParamValues(Scalar x, const MultiArray::Array & paramValues) const;
+    virtual Bool
+    checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const;
     Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; }
-    virtual MultiArray sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const;
-    virtual Scalar logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const;
-    virtual Scalar unboundedLower(const MultiArray::Array & paramValues) const;
-    virtual Scalar unboundedUpper(const MultiArray::Array & paramValues) const;
-    virtual MultiArray::Pair unboundedSupport(const MultiArray::Array & paramValues) const;
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return *P_SCALAR_DIM;
+    }
+    virtual void sample(ValArray & values,
+                        const NumArray::Array & paramValues,
+                        const NumArray::Pair & boundValues,
+                        Rng & rng) const;
+    virtual Scalar logDensity(const NumArray & x,
+                              const NumArray::Array & paramValues,
+                              const NumArray::Pair & boundValues) const;
+    virtual Scalar unboundedLower(const NumArray::Array & paramValues) const;
+    virtual Scalar unboundedUpper(const NumArray::Array & paramValues) const;
+    virtual void
+    unboundedSupport(ValArray & lower,
+                     ValArray & upper,
+                     const NumArray::Array & paramValues) const;
 
-    BoundedScalarDistribution(const String & name, Size nParam, Support support, Bool discrete=false)
-      : BaseType(name, nParam), support_(support), discrete_(discrete) {}
+    BoundedScalarDistribution(const String & name,
+                              Size nParam,
+                              Support support,
+                              Bool discrete = false) :
+      BaseType(name, nParam), support_(support), discrete_(discrete)
+    {
+    }
 
   public:
     /**
@@ -66,39 +84,58 @@ namespace Biips
      * @param paramValues Array of paramValues
      * @param give_log Indicates whether to return log density.
      */
-    virtual Scalar d(Scalar x, const MultiArray::Array & paramValues,
-        Bool give_log) const = 0;
+    virtual Scalar d(Scalar x,
+                     const NumArray::Array & paramValues,
+                     Bool give_log) const = 0;
     /**
-    * Distribution function, ignoring bounds
-    * @param x quantile at which to evaluate the distribution function
-    * @param paramValues Array of parameters
-    * @param lower If true, return value is P[X <= x]. Otherwise
-    * P[X > x]
-    * @param give_log Indicates whether to return log probability
-    */
-    virtual Scalar p(Scalar x, const MultiArray::Array & paramValues,
-        Bool lower, Bool give_log) const = 0;
+     * Distribution function, ignoring bounds
+     * @param x quantile at which to evaluate the distribution function
+     * @param paramValues Array of parameters
+     * @param lower If true, return value is P[X <= x]. Otherwise
+     * P[X > x]
+     * @param give_log Indicates whether to return log probability
+     */
+    virtual Scalar p(Scalar x,
+                     const NumArray::Array & paramValues,
+                     Bool lower,
+                     Bool give_log) const = 0;
     /**
-    * Quantile function, ignoring bounds
-    * @param p probability for which to evaluate quantile
-    * @param parameters Array of parameters
-    * @param give_log Indicates whether p is given as log(p).
-    */
-    virtual Scalar q(Scalar p, const MultiArray::Array & paramValues,
-        Bool lower, Bool give_log) const = 0;
+     * Quantile function, ignoring bounds
+     * @param p probability for which to evaluate quantile
+     * @param parameters Array of parameters
+     * @param give_log Indicates whether p is given as log(p).
+     */
+    virtual Scalar q(Scalar p,
+                     const NumArray::Array & paramValues,
+                     Bool lower,
+                     Bool give_log) const = 0;
     /**
-    * Random number generation, ignoring bounds
-    * @param parameters Array of parameters
-    */
-    virtual Scalar r(const MultiArray::Array & paramValues, Rng & rng) const = 0;
+     * Random number generation, ignoring bounds
+     * @param parameters Array of parameters
+     */
+    virtual Scalar r(const NumArray::Array & paramValues, Rng & rng) const = 0;
 
-    virtual Bool CheckDensityParamValues(const MultiArray & x, const MultiArray::Array & paramValues) const;
-    virtual Bool CanBound() const { return true; }
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return discrete_; }
+    virtual Bool
+    CheckDensityParamValues(const NumArray & x,
+                            const NumArray::Array & paramValues) const;
+    virtual Bool CanBound() const
+    {
+      return true;
+    }
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return discrete_;
+    }
     virtual Bool IsSupportFixed(const Flags & fixmask) const;
-    virtual Size DegreeOfFreedom(const Types<DimArray::Ptr>::Array & paramDims) const { return 1; }
+    virtual Size DegreeOfFreedom(const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return 1;
+    }
 
-    virtual ~BoundedScalarDistribution() {};
+    virtual ~BoundedScalarDistribution()
+    {
+    }
+    ;
   };
 
 }

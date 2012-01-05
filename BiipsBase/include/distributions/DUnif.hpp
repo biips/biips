@@ -16,23 +16,39 @@
 namespace Biips
 {
 
-  class DUnif : public Distribution
+  class DUnif: public Distribution
   {
   protected:
     typedef DUnif SelfType;
 
-    DUnif() : Distribution("dunif", 2) {};
+    DUnif() :
+      Distribution("dunif", 2)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const;
-    virtual Scalar logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const;
-    virtual MultiArray::Pair unboundedSupport(const MultiArray::Array & paramValues) const;
+    virtual void sample(ValArray & values,
+                        const NumArray::Array & paramValues,
+                        const NumArray::Pair & boundValues,
+                        Rng & rng) const;
+    virtual Scalar logDensity(const NumArray & x,
+                              const NumArray::Array & paramValues,
+                              const NumArray::Pair & boundValues) const;
+    virtual void
+    unboundedSupport(ValArray & lower,
+                     ValArray & upper,
+                     const NumArray::Array & paramValues) const;
 
   public:
     virtual Bool IsSupportFixed(const Flags & fixmask) const;
-    static Distribution::Ptr Instance() { static Distribution::Ptr p_instance(new SelfType()); return p_instance; }
+    static Distribution::Ptr Instance()
+    {
+      static Distribution::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
 }

@@ -57,11 +57,11 @@ namespace Biips
     Bool SetSmoothMonitor(const String & name, IndexRange range = NULL_RANGE);
 
     Bool
-        IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
     Bool IsSmoothTreeMonitored(const String & name, IndexRange range =
         NULL_RANGE) const;
     Bool
-        IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
 
@@ -90,9 +90,12 @@ namespace Biips
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
 
-    Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
-    Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
-    Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    Bool
+        DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    Bool
+        DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    Bool
+        DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
   };
 

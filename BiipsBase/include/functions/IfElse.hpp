@@ -15,7 +15,7 @@
 
 namespace Biips
 {
-  class IfElse : public Function
+  class IfElse: public Function
   {
   public:
     typedef Function BaseType;
@@ -23,18 +23,29 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
-    IfElse() : BaseType("ifelse", 3) {};
+    IfElse() :
+      BaseType("ifelse", 3)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual void
+        eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
     virtual Bool IsDiscreteValued(const Flags & mask) const;
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
-
 
 }
 

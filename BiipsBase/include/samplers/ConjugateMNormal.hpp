@@ -17,7 +17,7 @@
 namespace Biips
 {
 
-  class ConjugateMNormal : public ConjugateSampler<DMNorm, DMNorm, 0>
+  class ConjugateMNormal: public ConjugateSampler<DMNorm, DMNorm, 0>
   {
   public:
     typedef ConjugateMNormal SelfType;
@@ -26,24 +26,31 @@ namespace Biips
     static const String NAME_;
 
   protected:
-    friend class ConjugateSamplerFactory<SelfType>;
+    friend class ConjugateSamplerFactory<SelfType> ;
 
-    explicit ConjugateMNormal(const Graph & graph) : BaseType(graph) {}
+    explicit ConjugateMNormal(const Graph & graph) :
+      BaseType(graph)
+    {
+    }
 
     virtual void formLikeParamContrib(NodeId likeId,
-        MultiArray::Array & likeParamContribValues);
-    virtual MultiArray::Array postParam(const MultiArray::Array & priorParamContribValues,
-        const MultiArray::Array & likeParamContribValues) const;
-    virtual Scalar computeLogIncrementalWeight(const MultiArray & sampledData,
-        const MultiArray::Array & priorParamValues,
-        const MultiArray::Array & postParamValues,
-        const MultiArray::Array & LikeParamContrib);
+                                      NumArray::Array & likeParamContribValues);
+    virtual NumArray::Array
+        postParam(const NumArray::Array & priorParamContribValues,
+                  const NumArray::Array & likeParamContribValues) const;
+    virtual Scalar
+        computeLogIncrementalWeight(const NumArray & sampledData,
+                                    const NumArray::Array & priorParamValues,
+                                    const NumArray::Array & postParamValues,
+                                    const NumArray::Array & LikeParamContrib);
 
   public:
-    virtual const String & Name() const { return NAME_; };
+    virtual const String & Name() const
+    {
+      return NAME_;
+    }
 
   };
-
 
   typedef ConjugateSamplerFactory<ConjugateMNormal> ConjugateMNormalFactory;
 

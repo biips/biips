@@ -16,21 +16,36 @@
 namespace Biips
 {
 
-  class Sum : public Function
+  class Sum: public Function
   {
   protected:
     typedef Sum SelfType;
 
-    Sum() : Function("sum", 1) {};
+    Sum() :
+      Function("sum", 1)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const { return *P_SCALAR_DIM; }
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual Bool
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
+    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return *P_SCALAR_DIM;
+    }
+    virtual void
+        eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
     virtual Bool IsDiscreteValued(const Flags & mask) const;
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
 }

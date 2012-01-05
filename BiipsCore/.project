@@ -3,6 +3,7 @@
 	<name>BiipsCore</name>
 	<comment></comment>
 	<projects>
+		<project>smctc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

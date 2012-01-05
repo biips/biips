@@ -20,22 +20,45 @@ namespace Biips
   class NodeSampler;
   class Monitor;
 
-  MultiArray getNodeValue(NodeId nodeId, const Graph & graph, NodeSampler & nodeSampler);
-  MultiArray getNodeValue(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex);
+  NumArray getNodeValue(NodeId nodeId,
+                        const Graph & graph,
+                        NodeSampler & nodeSampler);
+  NumArray getNodeValue(NodeId nodeId,
+                        const Graph & graph,
+                        const Monitor & monitor,
+                        Size particleIndex);
 
-//  Bool isBounded(NodeId nodeId, const Graph & graph);
+  //  Bool isBounded(NodeId nodeId, const Graph & graph);
 
-  MultiArray::Array getParamValues(NodeId nodeId, const Graph & graph, NodeSampler & nodeSampler);
-  MultiArray::Array getParamValues(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex);
+  NumArray::Array getParamValues(NodeId nodeId,
+                                 const Graph & graph,
+                                 NodeSampler & nodeSampler);
+  NumArray::Array getParamValues(NodeId nodeId,
+                                 const Graph & graph,
+                                 const Monitor & monitor,
+                                 Size particleIndex);
 
-  MultiArray::Pair getBoundValues(NodeId nodeId, const Graph & graph, NodeSampler & nodeSampler);
-  MultiArray::Pair getBoundValues(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex);
+  NumArray::Pair getBoundValues(NodeId nodeId,
+                                const Graph & graph,
+                                NodeSampler & nodeSampler);
+  NumArray::Pair getBoundValues(NodeId nodeId,
+                                const Graph & graph,
+                                const Monitor & monitor,
+                                Size particleIndex);
 
-  MultiArray::Pair getSupportValues(NodeId nodeId, const Graph & graph, NodeSampler & nodeSampler);
-  MultiArray::Pair getSupportValues(NodeId nodeId, const Graph & graph, const Monitor & monitor, Size particleIndex);
+  void getSupportValues(ValArray & lower,
+                        ValArray & upper,
+                        NodeId nodeId,
+                        const Graph & graph,
+                        NodeSampler & nodeSampler);
+  void getSupportValues(ValArray & lower,
+                        ValArray & upper,
+                        NodeId nodeId,
+                        const Graph & graph,
+                        const Monitor & monitor,
+                        Size particleIndex);
 
   Bool isSupportFixed(NodeId nodeId, const Graph & graph);
 }
-
 
 #endif /* BIIPS_GETNODEVALUEVISITOR_HPP_ */

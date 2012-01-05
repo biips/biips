@@ -13,12 +13,12 @@
 namespace Biips
 {
 
-  Bool Pow::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool Pow::checkParamValues(const NumArray::Array & paramValues) const
   {
-    const MultiArray & base = paramValues[0];
-    const MultiArray & exponent = paramValues[1];
+    const NumArray & base = paramValues[0];
+    const NumArray & exponent = paramValues[1];
 
-    for (Size i=0, j=0; i<base.Values().size(); ++i)
+    for (Size i = 0, j = 0; i < base.Values().size(); ++i)
     {
       if ((base.Values()[i] < 0.0) && !checkInteger(exponent.Values()[j]))
         return false;
@@ -32,13 +32,12 @@ namespace Biips
     return true;
   }
 
-
-  Bool PowInfix::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool PowInfix::checkParamValues(const NumArray::Array & paramValues) const
   {
-    const MultiArray & base = paramValues[0];
-    const MultiArray & exponent = paramValues[1];
+    const NumArray & base = paramValues[0];
+    const NumArray & exponent = paramValues[1];
 
-    for (Size i=0, j=0; i<base.Values().size(); ++i)
+    for (Size i = 0, j = 0; i < base.Values().size(); ++i)
     {
       if ((base.Values()[i] < 0.0) && !checkInteger(exponent.Values()[j]))
         return false;

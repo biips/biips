@@ -16,7 +16,7 @@
 namespace Biips
 {
 
-  class AggNode : public LogicalNode
+  class AggNode: public LogicalNode
   {
   public:
     typedef AggNode SelfType;
@@ -28,15 +28,33 @@ namespace Biips
     static const String NAME_;
 
   public:
-    static const String & Name() { return NAME_; }
+    static const String & Name()
+    {
+      return NAME_;
+    }
 
-    virtual const String & FuncName() const { return Name(); };
-    virtual MultiArray Eval(const MultiArray::Array & paramValues) const;
-    virtual Bool IsFunction() const { return false; }
-    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const { return false; }
-    virtual Bool IsLinear(const Flags & linearMask, const Flags & knownMask) const { return false; }
+    virtual const String & FuncName() const
+    {
+      return Name();
+    }
+    virtual void
+    Eval(ValArray & values, const NumArray::Array & paramValues) const;
+    virtual Bool IsFunction() const
+    {
+      return false;
+    }
+    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const
+    {
+      return false;
+    }
+    virtual Bool IsLinear(const Flags & linearMask, const Flags & knownMask) const
+    {
+      return false;
+    }
 
-    AggNode(const DimArray::Ptr pDim, const Types<NodeId>::Array & parameters, const Types<Size>::Array & offsets);
+    AggNode(const DimArray::Ptr pDim,
+            const Types<NodeId>::Array & parameters,
+            const Types<Size>::Array & offsets);
   };
 
 }

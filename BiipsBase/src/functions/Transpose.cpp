@@ -10,7 +10,6 @@
 
 #include "functions/Transpose.hpp"
 
-
 namespace Biips
 {
   Bool Transpose::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
@@ -18,13 +17,13 @@ namespace Biips
     return paramDims[0]->IsMatrix();
   }
 
-
-  MultiArray Transpose::eval(const MultiArray::Array & paramValues) const
+  void Transpose::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const MultiArray & val = paramValues[0];
+    const NumArray & val = paramValues[0];
 
-    MultiArray ans(ublas::trans(Matrix(val)));
-    return ans;
+    Matrix t = ublas::trans(Matrix(val));
+
+    values.swap(t.data());
   }
 
   DimArray Transpose::dim(const Types<DimArray::Ptr>::Array & paramDims) const

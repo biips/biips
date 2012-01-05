@@ -16,7 +16,7 @@
 namespace Biips
 {
 
-  class ConjugateMNormalVarLinear : public NodeSampler
+  class ConjugateMNormalVarLinear: public NodeSampler
   {
   public:
     typedef ConjugateMNormalVarLinear SelfType;
@@ -28,18 +28,25 @@ namespace Biips
 
     friend class ConjugateMNormalVarLinearFactory;
 
-    explicit ConjugateMNormalVarLinear(const Graph & graph) : BaseType(graph) {}
+    explicit ConjugateMNormalVarLinear(const Graph & graph) :
+      BaseType(graph)
+    {
+    }
 
     virtual void sample(const StochasticNode & node);
 
   public:
-    virtual const String & Name() const { return NAME_; };
+    virtual const String & Name() const
+    {
+      return NAME_;
+    }
 
-    virtual ~ConjugateMNormalVarLinear() {};
+    virtual ~ConjugateMNormalVarLinear()
+    {
+    }
   };
 
-
-  class ConjugateMNormalVarLinearFactory : public NodeSamplerFactory
+  class ConjugateMNormalVarLinearFactory: public NodeSamplerFactory
   {
   public:
     typedef ConjugateMNormalVarLinearFactory SelfType;
@@ -49,14 +56,20 @@ namespace Biips
 
   protected:
     static Ptr pConjugateMNormalVarLinearFactoryInstance_;
-    ConjugateMNormalVarLinearFactory() {};
+    ConjugateMNormalVarLinearFactory()
+    {
+    }
 
   public:
-    static BaseType::Ptr Instance() { return pConjugateMNormalVarLinearFactoryInstance_; };
-    virtual Bool Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
+    static BaseType::Ptr Instance()
+    {
+      return pConjugateMNormalVarLinearFactoryInstance_;
+    }
+    virtual Bool Create(const Graph & graph,
+                        NodeId nodeId,
+                        BaseType::CreatedPtr & pNodeSamplerInstance) const;
   };
 
 }
-
 
 #endif /* BIIPS_CONJUGATEMNORMALVARLINEAR_HPP_ */

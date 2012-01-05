@@ -14,34 +14,30 @@
 namespace Biips
 {
 
-  Bool DGamma::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DGamma::checkParamValues(const NumArray::Array & paramValues) const
   {
     Scalar shape = paramValues[0].ScalarView();
     Scalar inv_scale = paramValues[1].ScalarView();
     return (shape > 0.0) && (inv_scale > 0.0);
   }
 
-
-  DGamma::MathDistType DGamma::mathDist(const MultiArray::Array & paramValues) const
+  DGamma::MathDistType DGamma::mathDist(const NumArray::Array & paramValues) const
   {
     Scalar shape = paramValues[0].ScalarView();
     Scalar inv_scale = paramValues[1].ScalarView();
 
-    return MathDistType(shape, 1.0/inv_scale);
+    return MathDistType(shape, 1.0 / inv_scale);
   }
 
-
-  DGamma::RandomDistType DGamma::randomDist(const MultiArray::Array & paramValues) const
+  DGamma::RandomDistType DGamma::randomDist(const NumArray::Array & paramValues) const
   {
     Scalar shape = paramValues[0].ScalarView();
     Scalar inv_scale = paramValues[1].ScalarView();
 
-    return RandomDistType(shape, 1.0/inv_scale);
+    return RandomDistType(shape, 1.0 / inv_scale);
   }
 
-
-  Scalar DGamma::d(Scalar x, const MultiArray::Array & paramValues,
-      Bool give_log) const
+  Scalar DGamma::d(Scalar x, const NumArray::Array & paramValues, Bool give_log) const
   {
     if (x < 0.0)
       return give_log ? BIIPS_NEGINF : 0.0;
@@ -52,7 +48,8 @@ namespace Biips
       Scalar inv_scale = paramValues[1].ScalarView();
       using std::log;
       using boost::math::tgamma;
-      return shape*log(inv_scale)+(shape-1.0)*log(x)-inv_scale*x-log(tgamma(shape));
+      return shape * log(inv_scale) + (shape - 1.0) * log(x) - inv_scale * x
+          - log(tgamma(shape));
     }
 
     MathDistType dist = mathDist(paramValues);

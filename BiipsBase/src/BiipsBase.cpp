@@ -123,28 +123,28 @@ namespace Biips
     distTab.Insert(DWeib::Instance());
     distTab.Insert(DPar::Instance());
 
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateMNormalLinearFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateMNormalVarLinearFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateNormalLinearFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateNormalVarLinearFactory::Instance(), true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalVarLinearFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalLinearFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalVarLinearFactory::Instance(),
+                                                                     true));
 
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateMNormalFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateMNormalVarFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateBetaFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateNormalFactory::Instance(), true));
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(ConjugateNormalVarFactory::Instance(), true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalVarFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateBetaFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalFactory::Instance(),
+                                                                     true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalVarFactory::Instance(),
+                                                                     true));
 
-    ForwardSampler::NodeSamplerFactories().push_front(
-        std::make_pair(DiscreteOptimalFactory::Instance(), true));
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(DiscreteOptimalFactory::Instance(),
+                                                                     true));
   }
 
 }

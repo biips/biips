@@ -13,7 +13,7 @@
 namespace Biips
 {
 
-  Bool DPar::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DPar::checkParamValues(const NumArray::Array & paramValues) const
   {
     Scalar alpha = paramValues[0].ScalarView();
     Scalar c = paramValues[1].ScalarView();
@@ -21,8 +21,7 @@ namespace Biips
     return (alpha >= 0.0) && (c <= 1.0);
   }
 
-
-  DPar::MathDistType DPar::mathDist(const MultiArray::Array & paramValues) const
+  DPar::MathDistType DPar::mathDist(const NumArray::Array & paramValues) const
   {
     Scalar alpha = paramValues[0].ScalarView();
     Scalar c = paramValues[1].ScalarView();
@@ -30,8 +29,7 @@ namespace Biips
     return MathDistType(alpha, c);
   }
 
-
-  DPar::RandomDistType DPar::randomDist(const MultiArray::Array & paramValues) const
+  DPar::RandomDistType DPar::randomDist(const NumArray::Array & paramValues) const
   {
     Scalar alpha = paramValues[0].ScalarView();
     Scalar c = paramValues[1].ScalarView();
@@ -39,9 +37,7 @@ namespace Biips
     return RandomDistType(c, alpha);
   }
 
-
-  Scalar DPar::d(Scalar x, const MultiArray::Array & paramValues,
-      Bool give_log) const
+  Scalar DPar::d(Scalar x, const NumArray::Array & paramValues, Bool give_log) const
   {
     Scalar c = paramValues[1].ScalarView();
     if (x < c)
@@ -51,7 +47,7 @@ namespace Biips
     {
       Scalar alpha = paramValues[0].ScalarView();
       using std::log;
-      return log(alpha)+alpha*log(c)-(alpha+1)*log(x);
+      return log(alpha) + alpha * log(c) - (alpha + 1) * log(x);
     }
 
     MathDistType dist = mathDist(paramValues);
@@ -60,19 +56,16 @@ namespace Biips
     return pdf(dist, x);
   }
 
-
-  Scalar DPar::unboundedLower(const MultiArray::Array & paramValues) const
+  Scalar DPar::unboundedLower(const NumArray::Array & paramValues) const
   {
     Scalar c = paramValues[1].ScalarView();
     return c;
   }
 
-
-  Scalar DPar::unboundedUpper(const MultiArray::Array & paramValues) const
+  Scalar DPar::unboundedUpper(const NumArray::Array & paramValues) const
   {
     return BIIPS_POSINF;
   }
-
 
   Bool DPar::IsSupportFixed(const Flags & fixmask) const
   {

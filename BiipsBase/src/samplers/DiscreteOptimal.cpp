@@ -29,15 +29,13 @@ namespace Biips
 
     NodeSampler node_sampler(graph_);
 
-    MultiArray::Array prior_param_values = getParamValues(nodeId_,
-                                                          graph_,
-                                                          *this);
+    NumArray::Array prior_param_values = getParamValues(nodeId_, graph_, *this);
 
-    MultiArray post_param(prior_param_values[0].DimPtr());
+    ValArray post_param(prior_param_values[0].Dim().Length());
 
     ValArray::Ptr k_chosen(new ValArray(1));
 
-    for (Size k = 1; k <= post_param.Length(); ++k)
+    for (Size k = 1; k <= post_param.size(); ++k)
     {
       for (NodeId id = 0; id < graph_.GetSize(); ++id)
       {
@@ -57,15 +55,19 @@ namespace Biips
       if (isNan(post_param_k))
         throw RuntimeError("Failure to calculate log posterior parameter.");
 
-      post_param.Values()[k - 1] = post_param_k;
+      post_param[k - 1] = post_param_k;
     }
 
-    MultiArray::Array post_param_values(1);
-    post_param_values[0].SetPtr(post_param);
+    NumArray::Array post_param_values(1);
+    post_param_values[0].SetPtr(prior_param_values[0].DimPtr(), &post_param);
 
-    nodeValuesMap()[nodeId_] = DCat::Instance()->Sample(post_param_values,
-                                                        NULL_MULTIARRAYPAIR,
-                                                        *pRng_).ValuesPtr(); // FIXME Boundaries
+    //allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(1));
+    //sample
+    DCat::Instance()->Sample(*nodeValuesMap()[nodeId_],
+                             post_param_values,
+                             NULL_NUMARRAYPAIR,
+                             *pRng_); // FIXME Boundaries
 
     sampledFlagsMap()[nodeId_] = true;
 

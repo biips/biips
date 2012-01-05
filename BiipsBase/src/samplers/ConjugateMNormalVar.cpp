@@ -15,11 +15,11 @@
 namespace Biips
 {
 
-  const String ConjugateMNormalVar::NAME_ = "Conjugate Multivariate Normal (with known covariance matrix)";
-
+  const String ConjugateMNormalVar::NAME_ =
+      "Conjugate Multivariate Normal (with known covariance matrix)";
 
   void ConjugateMNormalVar::formLikeParamContrib(NodeId likeId,
-      MultiArray::Array & likeParamContribValues)
+                                                 NumArray::Array & likeParamContribValues)
   {
     VectorRef like_mean(likeParamContribValues[0]);
     MatrixRef like_prec(likeParamContribValues[1]);
@@ -34,24 +34,27 @@ namespace Biips
       throw LogicError("ConjugateMNormalVar::formLikeParamContrib: matrix prec_i_mat is not positive-semidefinite.");
     ublas::cholesky_invert(prec_i_mat);
 
-    MultiArray obs_i(graph_.GetNode(likeId).DimPtr(), graph_.GetValues()[likeId]);
+    NumArray obs_i(graph_.GetNode(likeId).DimPtr().get(),
+                   graph_.GetValues()[likeId].get());
     VectorRef obs_i_vec(obs_i);
 
     like_mean += ublas::prod(prec_i_mat, obs_i_vec);
     like_prec += prec_i_mat;
   }
 
-
-  MultiArray::Array ConjugateMNormalVar::postParam(const MultiArray::Array & priorParamValues,
-      const MultiArray::Array & likeParamContribValues) const
+  NumArray::Array ConjugateMNormalVar::postParam(const NumArray::Array & priorParamValues,
+                                                 const NumArray::Array & likeParamContribValues) const
   {
-    Matrix post_cov(priorParamValues[1]);
+    static Matrix post_cov;
+    post_cov = Matrix(priorParamValues[1]);
 
     if (!ublas::cholesky_factorize(post_cov))
       throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
-    Vector post_mean = ublas::prod(post_cov, Vector(priorParamValues[0])) + Vector(likeParamContribValues[0]);
+    static Vector post_mean;
+    post_mean = ublas::prod(post_cov, Vector(priorParamValues[0]))
+        + Vector(likeParamContribValues[0]);
 
     post_cov += Matrix(likeParamContribValues[1]);
     if (!ublas::cholesky_factorize(post_cov))
@@ -60,37 +63,51 @@ namespace Biips
 
     post_mean = ublas::prod(post_cov, post_mean);
 
-    MultiArray::Array post_param_values(2);
-    post_param_values[0] = MultiArray(post_mean);
-    post_param_values[1] = MultiArray(post_cov);
+    static NumArray::Array post_param_values(2);
+    static DimArray dim_mean(1);
+    dim_mean[0] = post_mean.size();
+    post_param_values[0] = NumArray(&dim_mean, &post_mean.data());
+    static DimArray dim_prec(2);
+    dim_prec[0] = post_cov.size1();
+    dim_prec[1] = post_cov.size2();
+    post_param_values[1] = NumArray(&dim_prec, &post_cov.data());
     return post_param_values;
   }
 
-
-  Scalar ConjugateMNormalVar::computeLogIncrementalWeight(const MultiArray & sampledData,
-      const MultiArray::Array & priorParamValues,
-      const MultiArray::Array & postParamValues,
-      const MultiArray::Array & LikeParamContrib)
+  Scalar ConjugateMNormalVar::computeLogIncrementalWeight(const NumArray & sampledData,
+                                                          const NumArray::Array & priorParamValues,
+                                                          const NumArray::Array & postParamValues,
+                                                          const NumArray::Array & LikeParamContrib)
   {
-    Matrix norm_const_cov(LikeParamContrib[1]);
+    static Matrix norm_const_cov;
+    norm_const_cov = Matrix(LikeParamContrib[1]);
     if (!ublas::cholesky_factorize(norm_const_cov))
       throw LogicError("ConjugateMNormalVar::computeLogIncrementalWeight: matrix norm_const_cov is not positive-semidefinite.");
     ublas::cholesky_invert(norm_const_cov);
 
-    Vector norm_const_mean = ublas::prod(norm_const_cov, Vector(LikeParamContrib[0]));
+    static Vector norm_const_mean;
+    norm_const_mean = ublas::prod(norm_const_cov,
+                                         Vector(LikeParamContrib[0]));
     norm_const_cov += Matrix(priorParamValues[1]);
 
-    MultiArray::Array norm_const_param_values(2);
-    norm_const_param_values[0] = MultiArray(norm_const_mean);
-    norm_const_param_values[1] = MultiArray(norm_const_cov);
+    static NumArray::Array norm_const_param_values(2);
+    static DimArray dim_mean(1);
+    dim_mean[0] = norm_const_mean.size();
+    norm_const_param_values[0] = NumArray(&dim_mean, &norm_const_mean.data());
+    static DimArray dim_cov(2);
+    dim_cov[0] = norm_const_cov.size1();
+    dim_cov[1] = norm_const_cov.size2();
+    norm_const_param_values[1] = NumArray(&dim_cov, &norm_const_cov.data());
 
-    Scalar log_incr_weight = DMNormVar::Instance()->LogDensity(priorParamValues[0], norm_const_param_values, NULL_MULTIARRAYPAIR); // FIXME Boundaries
+    Scalar log_incr_weight =
+        DMNormVar::Instance()->LogDensity(priorParamValues[0],
+                                          norm_const_param_values,
+                                          NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(log_incr_weight))
       throw RuntimeError("Failure to calculate log incremental weight.");
 
     return log_incr_weight;
   }
-
 
 }
 

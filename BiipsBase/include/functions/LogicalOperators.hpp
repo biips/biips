@@ -16,60 +16,106 @@
 namespace Biips
 {
 
-  class And : public BinaryScalarFunction<std::logical_and<Scalar> >
+  class And: public BinaryScalarFunction<std::logical_and<Scalar> >
   {
   public:
     typedef And SelfType;
     typedef BinaryScalarFunction<std::logical_and<Scalar> > BaseType;
 
   protected:
-    And() : BaseType("&&") {};
+    And() :
+      BaseType("&&")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsInfix() const { return true; }
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
+    virtual Bool IsInfix() const
+    {
+      return true;
+    }
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return true;
+    }
 
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
-
-  class Or : public BinaryScalarFunction<std::logical_or<Scalar> >
+  class Or: public BinaryScalarFunction<std::logical_or<Scalar> >
   {
   public:
     typedef Or SelfType;
     typedef BinaryScalarFunction<std::logical_or<Scalar> > BaseType;
 
   protected:
-    Or() : BaseType("||") {};
+    Or() :
+      BaseType("||")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsInfix() const { return true; }
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
+    virtual Bool IsInfix() const
+    {
+      return true;
+    }
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return true;
+    }
 
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
-
-  class Not : public UnaryScalarFunction<std::logical_not<Scalar> >
+  class Not: public UnaryScalarFunction<std::logical_not<Scalar> >
   {
   public:
     typedef Not SelfType;
     typedef UnaryScalarFunction<std::logical_not<Scalar> > BaseType;
 
   protected:
-    Not() : BaseType("!") {};
+    Not() :
+      BaseType("!")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsPrefix() const { return true; }
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
+    virtual Bool IsPrefix() const
+    {
+      return true;
+    }
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return true;
+    }
 
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
   };
 
 }

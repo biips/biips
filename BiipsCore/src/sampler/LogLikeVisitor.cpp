@@ -50,11 +50,11 @@ namespace Biips
     if (anyUnknownParent(nodeId_, myId_, graph_))
       return;
 
-    MultiArray x_value(node.DimPtr(), graph_.GetValues()[nodeId_]);
-    MultiArray::Array param_values = getParamValues(nodeId_,
+    NumArray x_value(node.DimPtr().get(), graph_.GetValues()[nodeId_].get());
+    NumArray::Array param_values = getParamValues(nodeId_,
                                                     graph_,
                                                     nodeSampler_);
-    MultiArray::Pair bound_values = getBoundValues(nodeId_,
+    NumArray::Pair bound_values = getBoundValues(nodeId_,
                                                    graph_,
                                                    nodeSampler_);
     Scalar log_like = node.LogPriorDensity(x_value, param_values, bound_values);
