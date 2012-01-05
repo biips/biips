@@ -43,13 +43,6 @@ namespace Biips
 
   void LogLikeVisitor::visit(const StochasticNode & node)
   {
-    if (!graph_.GetObserved()[nodeId_])
-      return;
-
-    //TODO: remove this check ?
-    if (anyUnknownParent(nodeId_, myId_, graph_))
-      return;
-
     NumArray x_value(node.DimPtr().get(), graph_.GetValues()[nodeId_].get());
     NumArray::Array param_values = getParamValues(nodeId_,
                                                     graph_,
