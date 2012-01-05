@@ -75,8 +75,11 @@ namespace Biips
     {
       if (graph_.GetObserved()[*it_nodes])
       {
+        // we don't want to release observed nodes
         nodeLocks_[*it_nodes] = -1;
 
+        // we need to lock parents of stochastic observed nodes to calculate likelihood
+        // but we don't need to lock parents of deterministic observed nodes
         if (graph_.GetNode(*it_nodes).GetType() != STOCHASTIC)
           continue;
       }
@@ -277,6 +280,7 @@ namespace Biips
     lastParticle.AddToLogWeight(log_incr_weight);
 
     // compute all logical children
+    // TODO only update nodes which have a monitored children
     Types<NodeId>::Iterator it_logical_children = iterNodeId_->begin() + 1;
     while (it_logical_children != iterNodeId_->end())
     {
