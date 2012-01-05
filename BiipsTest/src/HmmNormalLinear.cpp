@@ -1,12 +1,12 @@
 //                                               -*- C++ -*-
 /*! \file HmmNormalLinear.cpp
-* \brief
-*
-* $LastChangedBy$
-* $LastChangedDate$
-* $LastChangedRevision$
-* $Id$
-*/
+ * \brief
+ *
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
+ */
 
 #include "HmmNormalLinear.hpp"
 #include "BiipsCore.hpp"
@@ -23,8 +23,13 @@ namespace Biips
 
   const String HmmNormalLinear::NAME_ = "HMM Normal Linear 1D";
 
-  HmmNormalLinear::HmmNormalLinear(int argc, char** argv, Size verbose, Size showMode, Bool precFlag, std::ostream & os)
-  : BaseType(argc, argv, NAME_, verbose, showMode, os), precFlag_(precFlag)
+  HmmNormalLinear::HmmNormalLinear(int argc,
+                                   char** argv,
+                                   Size verbose,
+                                   Size showMode,
+                                   Bool precFlag,
+                                   std::ostream & os) :
+    BaseType(argc, argv, NAME_, verbose, showMode, os), precFlag_(precFlag)
   {
     // Default model parameters
     sizeParamMap_["t.max"] = 20;
@@ -34,7 +39,7 @@ namespace Biips
     scalarParamMap_["var.x"] = 1.0;
     scalarParamMap_["var.y"] = 0.5;
 
-    DimArray::Ptr scalar_dim(new DimArray(1,1));
+    DimArray::Ptr scalar_dim(new DimArray(1, 1));
 
     inDataVarNames_.push_back("x");
     dimArrayMap_["x"] = scalar_dim;
@@ -54,7 +59,6 @@ namespace Biips
       nodeSamplerFactoryInvOrder_.push_back(ConjugateNormalVarFactory::Instance());
   }
 
-
   void HmmNormalLinear::PrintIntro() const
   {
     using namespace std;
@@ -72,18 +76,16 @@ namespace Biips
     os_ << endl;
   }
 
-
-//  void Hmm1D::InputModelParam(std::istream & is)
-//  {
-//    using namespace std;
-//
-//    if (verbose_)
-//      os_ << "Final time: ";
-//    is >> sizeParamMap_["t.max"];
-//    if (verbose_)
-//      os_ << endl << "t_max = " << sizeParamMap_["t.max"] << endl << endl;
-//  }
-
+  //  void Hmm1D::InputModelParam(std::istream & is)
+  //  {
+  //    using namespace std;
+  //
+  //    if (verbose_)
+  //      os_ << "Final time: ";
+  //    is >> sizeParamMap_["t.max"];
+  //    if (verbose_)
+  //      os_ << endl << "t_max = " << sizeParamMap_["t.max"] << endl << endl;
+  //  }
 
 
   void HmmNormalLinear::RunBench()
@@ -102,29 +104,30 @@ namespace Biips
     kalman_filter.SetEvolutionModel(1.0, 0.0, var_x_val);
     kalman_filter.SetObservationModel(1.0, var_y_val);
 
-    benchFilterValuesMap_["x"].SetPtr(MultiArray::Array(t_max+1));
-    benchFilterValuesMap_["var.x"].SetPtr(MultiArray::Array(t_max+1));
+    benchFilterValuesMap_["x"] = MultiArray::Array(t_max + 1);
+    benchFilterValuesMap_["var.x"] = MultiArray::Array(t_max + 1);
     MultiArray::Array & x_est_KF = benchFilterValuesMap_["x"];
     MultiArray::Array & x_var_KF = benchFilterValuesMap_["var.x"];
 
-    x_est_KF[0] = MultiArray(mean_x0_val);
-    x_var_KF[0] = MultiArray(var_x0_val);
+    x_est_KF[0] = MultiArray(P_SCALAR_DIM,
+                             ValArray::Ptr(new ValArray(1, mean_x0_val)));
+    x_var_KF[0] = MultiArray(P_SCALAR_DIM,
+                             ValArray::Ptr(new ValArray(1, var_x0_val)));
 
-    for (Size t = 1; t < t_max+1; ++t)
+    for (Size t = 1; t < t_max + 1; ++t)
     {
-      kalman_filter.Update(y_obs[t-1]);
+      kalman_filter.Update(y_obs[t - 1]);
       x_est_KF[t] = kalman_filter.GetPosteriorEstimate();
       x_var_KF[t] = kalman_filter.GetPosteriorCovariance();
     }
 
-    if (verbose_>=2)
+    if (verbose_ >= 2)
     {
       os_ << "Kalman Filter estimate E[x(t|0:t)]:" << std::endl;
       printValues(os_, "x", x_est_KF);
       os_ << std::endl;
     }
   }
-
 
   void HmmNormalLinear::BuildModelGraph()
   {
@@ -143,7 +146,11 @@ namespace Biips
     Scalar var_x_val = scalarParamMap_["var.x"];
     Scalar var_y_val = scalarParamMap_["var.y"];
 
-    NodeId mean_x0 = pModelGraph_->AddConstantNode(MultiArray(mean_x0_val));
+    NodeId
+        mean_x0 =
+            pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                mean_x0_val))));
 
     NodeId prec_or_var_x0;
     NodeId prec_or_var_x;
@@ -151,22 +158,43 @@ namespace Biips
 
     if (precFlag_)
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(1.0 / var_y_val));
+      prec_or_var_x0
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                1.0
+                                                                                    / var_x0_val))));
+      prec_or_var_x
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                1.0
+                                                                                    / var_x_val))));
+      prec_or_var_y
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                1.0
+                                                                                    / var_y_val))));
     }
     else
     {
-      prec_or_var_x0 = pModelGraph_->AddConstantNode(MultiArray(var_x0_val));
-      prec_or_var_x = pModelGraph_->AddConstantNode(MultiArray(var_x_val));
-      prec_or_var_y = pModelGraph_->AddConstantNode(MultiArray(var_y_val));
+      prec_or_var_x0
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                var_x0_val))));
+      prec_or_var_x
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                var_x_val))));
+      prec_or_var_y
+          = pModelGraph_->AddConstantNode(MultiArray(P_SCALAR_DIM,
+                                                     ValArray::Ptr(new ValArray(1,
+                                                                                var_y_val))));
     }
 
     Size t_max = sizeParamMap_["t.max"];
 
     // create Stochastic nodeId collections
     //-----------------------------------
-    modelNodeIdMap_["x"] = Types<NodeId>::Array(t_max+1);
+    modelNodeIdMap_["x"] = Types<NodeId>::Array(t_max + 1);
     modelNodeIdMap_["y"] = Types<NodeId>::Array(t_max);
 
     Types<NodeId>::Array & x = modelNodeIdMap_["x"];
@@ -182,38 +210,47 @@ namespace Biips
       params[1] = prec_or_var_x0;
       x[0] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, false);
 
-      for (Size t=1; t<t_max+1; ++t)
+      for (Size t = 1; t < t_max + 1; ++t)
       {
-        params[0] = x[t-1];
+        params[0] = x[t - 1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, false);
+        x[t]
+            = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, false);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dnorm"], params, true);
+        y[t - 1] = pModelGraph_->AddStochasticNode(distTab_["dnorm"],
+                                                   params,
+                                                   true);
       }
     }
     else
     {
       params[0] = mean_x0;
       params[1] = prec_or_var_x0;
-      x[0] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, false);
+      x[0] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"],
+                                             params,
+                                             false);
 
-      for (Size t=1; t<t_max+1; ++t)
+      for (Size t = 1; t < t_max + 1; ++t)
       {
-        params[0] = x[t-1];
+        params[0] = x[t - 1];
         params[1] = prec_or_var_x;
-        x[t] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, false);
+        x[t] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"],
+                                               params,
+                                               false);
 
         params[0] = x[t];
         params[1] = prec_or_var_y;
-        y[t-1] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"], params, true);
+        y[t - 1] = pModelGraph_->AddStochasticNode(distTab_["dnormvar"],
+                                                   params,
+                                                   true);
       }
     }
 
     // build graph
     //------------
-    if (verbose_>=2)
+    if (verbose_ >= 2)
       os_ << "The graph has a cycle? " << pModelGraph_->HasCycle() << std::endl;
 
     pModelGraph_->Build();
@@ -221,23 +258,25 @@ namespace Biips
     setObsValues();
   }
 
-
-  void HmmNormalLinear::initAccumulators(Size nParticles, Size numBins, std::map<String, MultiArray::Array> & statsValuesMap)
+  void HmmNormalLinear::initAccumulators(Size nParticles,
+                                         Size numBins,
+                                         std::map<String, MultiArray::Array> & statsValuesMap)
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
     scalarAcc_.AddFeature(QUANTILES);
-    Scalar probs[] = {0.05, 0.95};
+    Scalar probs[] =
+      { 0.05, 0.95 };
     scalarAcc_.SetQuantileProbs(probs, probs + sizeof(probs) / sizeof(probs[0]));
     scalarAcc_.AddFeature(PDF);
-    scalarAcc_.SetPdfParam(floor(nParticles*0.25), numBins);
+    scalarAcc_.SetPdfParam(floor(nParticles * 0.25), numBins);
 
     Size t_max = sizeParamMap_["t.max"];
 
-    statsValuesMap["x"].SetPtr(MultiArray::Array(t_max+1));
-    statsValuesMap["x.var"].SetPtr(MultiArray::Array(t_max+1));
-    statsValuesMap["x.q05"].SetPtr(MultiArray::Array(t_max+1));
-    statsValuesMap["x.q95"].SetPtr(MultiArray::Array(t_max+1));
+    statsValuesMap["x"] = MultiArray::Array(t_max + 1);
+    statsValuesMap["x.var"] = MultiArray::Array(t_max + 1);
+    statsValuesMap["x.q05"] = MultiArray::Array(t_max + 1);
+    statsValuesMap["x.q95"] = MultiArray::Array(t_max + 1);
   }
 
   void HmmNormalLinear::initFilterAccumulators(Size nParticles, Size numBins)
@@ -245,7 +284,9 @@ namespace Biips
     initAccumulators(nParticles, numBins, smcFilterValuesMap_);
   }
 
-  void HmmNormalLinear::accumulate(Size t, std::map<String, MultiArray::Array> & statsValuesMap, const String & title)
+  void HmmNormalLinear::accumulate(Size t,
+                                   std::map<String, MultiArray::Array> & statsValuesMap,
+                                   const String & title)
   {
     Types<NodeId>::Array & x = modelNodeIdMap_["x"];
 
@@ -255,17 +296,21 @@ namespace Biips
     MultiArray::Array & x_quant_95 = statsValuesMap["x.q95"];
 
     pSampler_->Accumulate(x[t], scalarAcc_);
-    x_est[t].Alloc(scalarAcc_.Mean());
-    x_var[t].Alloc(scalarAcc_.Variance());
-    x_quant_05[t].Alloc(scalarAcc_.Quantile(0));
-    x_quant_95[t].Alloc(scalarAcc_.Quantile(1));
+    x_est[t].SetPtr(P_SCALAR_DIM,
+                    ValArray::Ptr(new ValArray(1, scalarAcc_.Mean())));
+    x_var[t].SetPtr(P_SCALAR_DIM,
+                    ValArray::Ptr(new ValArray(1, scalarAcc_.Variance())));
+    x_quant_05[t].SetPtr(P_SCALAR_DIM,
+                         ValArray::Ptr(new ValArray(1, scalarAcc_.Quantile(0))));
+    x_quant_95[t].SetPtr(P_SCALAR_DIM,
+                         ValArray::Ptr(new ValArray(1, scalarAcc_.Quantile(1))));
 
     if (showMode_ >= 2)
     {
       ScalarHistogram pdf_hist = scalarAcc_.Pdf();
       Plot pdf_plot_PF(argc_, argv_);
       pdf_plot_PF.AddHistogram(pdf_hist, "", Qt::blue);
-      pdf_plot_PF.SetTitle(title+" x pdf estimates, t = "+toString(t));
+      pdf_plot_PF.SetTitle(title + " x pdf estimates, t = " + toString(t));
       pdf_plot_PF.SetBackgroundColor(Qt::white);
       pdf_plot_PF.Show();
     }
@@ -286,7 +331,6 @@ namespace Biips
     accumulate(t, smcSmoothValuesMap_, "Smoothing");
   }
 
-
   void HmmNormalLinear::PlotResults(const String & plotFileName) const
   {
     const MultiArray::Array & x_gen = dataValuesMap_.at("x");
@@ -297,25 +341,59 @@ namespace Biips
     const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
 
     Size t_max = sizeParamMap_.at("t.max");
-    MultiArray::Array time_x(t_max+1);
+    MultiArray::Array time_x(t_max + 1);
     MultiArray::Array time_y(t_max);
-    time_x[0] = MultiArray(0.0);
-    for (Size t=1; t<t_max+1; ++t)
+    time_x[0] = MultiArray(P_SCALAR_DIM, ValArray::Ptr(new ValArray(1, 0.0)));
+    for (Size t = 1; t < t_max + 1; ++t)
     {
-      time_x[t] = MultiArray(Scalar(t));
-      time_y[t-1] = MultiArray(Scalar(t));
+      time_x[t] = MultiArray(P_SCALAR_DIM,
+                             ValArray::Ptr(new ValArray(1, Scalar(t))));
+      time_y[t - 1] = MultiArray(P_SCALAR_DIM,
+                                 ValArray::Ptr(new ValArray(1, Scalar(t))));
     }
 
     Plot results_plot(argc_, argv_);
-    results_plot.AddCurve(time_x, x_gen, "hidden state", Qt::black, 2, Qt::NoPen, 9, QwtSymbol::Cross);
-    results_plot.AddCurve(time_y, y_obs, "observation", Qt::darkGray, 2, Qt::NoPen, 8, QwtSymbol::XCross);
-    if(benchFilterValuesMap_.count("x"))
-      results_plot.AddCurve(time_x, benchFilterValuesMap_.at("x"), "KF estimate", Qt::green, 2);
+    results_plot.AddCurve(time_x,
+                          x_gen,
+                          "hidden state",
+                          Qt::black,
+                          2,
+                          Qt::NoPen,
+                          9,
+                          QwtSymbol::Cross);
+    results_plot.AddCurve(time_y,
+                          y_obs,
+                          "observation",
+                          Qt::darkGray,
+                          2,
+                          Qt::NoPen,
+                          8,
+                          QwtSymbol::XCross);
+    if (benchFilterValuesMap_.count("x"))
+      results_plot.AddCurve(time_x,
+                            benchFilterValuesMap_.at("x"),
+                            "KF estimate",
+                            Qt::green,
+                            2);
     results_plot.AddCurve(time_x, x_est_PF, "PF estimate", Qt::blue, 2);
-    results_plot.AddCurve(time_x, x_quant_05_PF, "PF 5% quantile", Qt::blue, 0.5, Qt::DashLine);
-    results_plot.AddCurve(time_x, x_quant_95_PF, "PF 95% quantile", Qt::blue, 0.5, Qt::DashLine);
-    if(benchSmoothValuesMap_.count("x"))
-      results_plot.AddCurve(time_x, benchSmoothValuesMap_.at("x"), "KS estimate", Qt::magenta, 2);
+    results_plot.AddCurve(time_x,
+                          x_quant_05_PF,
+                          "PF 5% quantile",
+                          Qt::blue,
+                          0.5,
+                          Qt::DashLine);
+    results_plot.AddCurve(time_x,
+                          x_quant_95_PF,
+                          "PF 95% quantile",
+                          Qt::blue,
+                          0.5,
+                          Qt::DashLine);
+    if (benchSmoothValuesMap_.count("x"))
+      results_plot.AddCurve(time_x,
+                            benchSmoothValuesMap_.at("x"),
+                            "KS estimate",
+                            Qt::magenta,
+                            2);
     results_plot.AddCurve(time_x, x_est_PS, "PS estimate", Qt::cyan, 2);
     results_plot.SetTitle("");
     results_plot.SetAxesLabels("time", "state");
@@ -325,9 +403,8 @@ namespace Biips
     if (!plotFileName.empty())
       results_plot.PrintPdf(plotFileName);
 
-    if( showMode_ >= 1 )
+    if (showMode_ >= 1)
       results_plot.Show();
   }
-
 
 }

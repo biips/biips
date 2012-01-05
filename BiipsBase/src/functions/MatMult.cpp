@@ -12,7 +12,6 @@
 
 #include "functions/MatMult.hpp"
 
-
 namespace Biips
 {
 
@@ -20,7 +19,8 @@ namespace Biips
   {
     const DimArray & left = *paramDims[0];
     const DimArray & right = *paramDims[1];
-    if ((left.IsMatrix() && right.IsVector()) || (left.IsMatrix() && right.IsMatrix()))
+    if ((left.IsMatrix() && right.IsVector()) || (left.IsMatrix()
+        && right.IsMatrix()))
       return (left[1] == right[0]);
     else if (left.IsVector() && right.IsMatrix())
       return (left[0] == right[0]);
@@ -28,33 +28,31 @@ namespace Biips
       return false;
   }
 
-  MultiArray MatMult::eval(const MultiArray::Array & paramValues) const
+  void MatMult::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const MultiArray & left = paramValues[0];
-    const MultiArray & right = paramValues[1];
+    const NumArray & left = paramValues[0];
+    const NumArray & right = paramValues[1];
 
-    MultiArray ans;
     if (left.IsMatrix() && right.IsVector())
     {
       Vector ans_vec = ublas::prod(Matrix(left), Vector(right));
-      ans = MultiArray(ans_vec);
+      values.swap(ans_vec.data());
     }
     else if (left.IsVector() && right.IsMatrix())
     {
       Vector ans_vec = ublas::prod(Vector(left), Matrix(right));
-      ans = MultiArray(ans_vec);
+      values.swap(ans_vec.data());
     }
     else if (left.IsMatrix() && right.IsMatrix())
     {
       Matrix ans_mat = ublas::prod(Matrix(left), Matrix(right));
-      ans = MultiArray(ans_mat);
+      values.swap(ans_mat.data());
     }
     else
-      throw LogicError(String("Invalid dimensions in function ") + Name() + " evaluation.");
+      throw LogicError(String("Invalid dimensions in function ") + Name()
+          + " evaluation.");
 
-    return ans;
   }
-
 
   DimArray MatMult::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
@@ -62,13 +60,12 @@ namespace Biips
     const DimArray & right = *paramDims[1];
 
     DimArray dim;
-    if(left.IsMatrix())
+    if (left.IsMatrix())
       dim.push_back(left[0]);
-    if(right.IsMatrix())
+    if (right.IsMatrix())
       dim.push_back(right[1]);
     return dim.Drop();
   }
-
 
   Bool MatMult::IsScale(const Flags & scaleMask, const Flags & knownMask) const
   {

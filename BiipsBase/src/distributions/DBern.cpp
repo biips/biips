@@ -21,22 +21,22 @@ namespace Biips
     return p.IsScalar();
   }
 
-
-  Bool DBern::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DBern::checkParamValues(const NumArray::Array & paramValues) const
   {
     Scalar p = paramValues[0].ScalarView();
 
     return (p > 0.0) && (p < 1.0);
   }
 
-
   DimArray DBern::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     return *P_SCALAR_DIM;
   }
 
-
-  MultiArray DBern::sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const
+  void DBern::sample(ValArray & values,
+                     const NumArray::Array & paramValues,
+                     const NumArray::Pair & boundValues,
+                     Rng & rng) const
   {
     Scalar p = paramValues[0].ScalarView();
 
@@ -45,30 +45,26 @@ namespace Biips
     typedef boost::variate_generator<Rng::GenType&, DistType> GenType;
     GenType gen(rng.GetGen(), dist);
 
-    return MultiArray(gen());
+    values[0] = gen();
   }
 
-
-  Scalar DBern::logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const
+  Scalar DBern::logDensity(const NumArray & x,
+                           const NumArray::Array & paramValues,
+                           const NumArray::Pair & boundValues) const
   {
     Scalar p = paramValues[0].ScalarView();
     Scalar my_point = x.ScalarView();
 
     using std::log;
-    return my_point * log(p) + (1.0-my_point) * log(1.0-p);
+    return my_point * log(p) + (1.0 - my_point) * log(1.0 - p);
   }
 
-
-  MultiArray::Pair DBern::unboundedSupport(const MultiArray::Array & paramValues) const
+  void DBern::unboundedSupport(ValArray & lower,
+                               ValArray & upper,
+                               const NumArray::Array & paramValues) const
   {
-    static const MultiArray lower(0.0);
-    static const MultiArray upper(1.0);
-
-    static MultiArray::Pair support;
-    support.first = lower;
-    support.second = upper;
-
-    return support;
+    lower[0] = 0.0;
+    upper[0] = 1.0;
   }
 
 }

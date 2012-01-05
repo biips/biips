@@ -13,11 +13,11 @@
 namespace Biips
 {
 
-  Bool Sqrt::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool Sqrt::checkParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
 
-    for (Size i=0; i<x.size(); ++i)
+    for (Size i = 0; i < x.size(); ++i)
     {
       if (x[i] < 0.0)
         return false;
@@ -26,11 +26,11 @@ namespace Biips
     return true;
   }
 
-  Bool Log::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool Log::checkParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
 
-    for (Size i=0; i<x.size(); ++i)
+    for (Size i = 0; i < x.size(); ++i)
     {
       if (x[i] <= 0.0)
         return false;

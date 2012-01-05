@@ -73,7 +73,7 @@ namespace Biips
    * node_values[5] stores the ValArray pointer of node 5.
    * NodeValues objects have the size of the Graph object.
    */
-  typedef Types<Types<MultiArray::StorageType>::Ptr>::Array NodeValues;
+  typedef Types<Types<NumArray::StorageType>::Ptr>::Array NodeValues;
 
 
   //! Graph related types

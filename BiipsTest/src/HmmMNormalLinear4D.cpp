@@ -12,14 +12,18 @@
 
 #include "common/cholesky.hpp"
 
-
 namespace Biips
 {
 
   const String HmmMNormalLinear4D::NAME_ = "HMM multivariate Normal linear 4D";
 
-  HmmMNormalLinear4D::HmmMNormalLinear4D(int argc, char** argv, Size verbose, Size showMode, Bool precFlag, std::ostream & os)
-  : BaseType(argc, argv, verbose, showMode, precFlag_, os)
+  HmmMNormalLinear4D::HmmMNormalLinear4D(int argc,
+                                         char** argv,
+                                         Size verbose,
+                                         Size showMode,
+                                         Bool precFlag,
+                                         std::ostream & os) :
+    BaseType(argc, argv, verbose, showMode, precFlag_, os)
   {
     setName(NAME_);
 
@@ -28,81 +32,128 @@ namespace Biips
 
     Scalar T = 1.0;
 
-    dimArrayMap_["x"] = DimArray::Ptr(new DimArray(1,4));;
-    dimArrayMap_["u"] = DimArray::Ptr(new DimArray(1,1));;
-    dimArrayMap_["y"] = DimArray::Ptr(new DimArray(1,2));;
+    dimArrayMap_["x"] = DimArray::Ptr(new DimArray(1, 4));
+    ;
+    dimArrayMap_["u"] = DimArray::Ptr(new DimArray(1, 1));
+    ;
+    dimArrayMap_["y"] = DimArray::Ptr(new DimArray(1, 2));
+    ;
 
     Size dim_x = (*dimArrayMap_["x"])[0];
     Size dim_u = (*dimArrayMap_["u"])[0];
     Size dim_y = (*dimArrayMap_["y"])[0];
 
-    dimArrayMap_["P.0"] = DimArray::Ptr(new DimArray(2,dim_x));
-    dimArrayMap_["F"] = DimArray::Ptr(new DimArray(2,dim_x));
+    dimArrayMap_["P.0"] = DimArray::Ptr(new DimArray(2, dim_x));
+    dimArrayMap_["F"] = DimArray::Ptr(new DimArray(2, dim_x));
     dimArrayMap_["B"] = DimArray::Ptr(new DimArray(2));
     (*dimArrayMap_["B"])[0] = dim_x;
     (*dimArrayMap_["B"])[1] = dim_u;
-    dimArrayMap_["Q"] = DimArray::Ptr(new DimArray(2,dim_x));
+    dimArrayMap_["Q"] = DimArray::Ptr(new DimArray(2, dim_x));
     dimArrayMap_["H"] = DimArray::Ptr(new DimArray(2));
     (*dimArrayMap_["H"])[0] = dim_y;
     (*dimArrayMap_["H"])[1] = dim_x;
-    dimArrayMap_["R"] = DimArray::Ptr(new DimArray(2,dim_y));
+    dimArrayMap_["R"] = DimArray::Ptr(new DimArray(2, dim_y));
 
-    dataTypeParamMap_["mean.x.0"].SetPtr(dimArrayMap_["x"]).AllocValue(0.0);
+    dataTypeParamMap_["mean.x.0"].SetPtr(dimArrayMap_["x"],
+                                         ValArray::Ptr(new ValArray(dimArrayMap_["x"]->Length(),
+                                                                    0.0)));
 
-    dataTypeParamMap_["P.0"].SetPtr(dimArrayMap_["P.0"]).AllocValue(0.0);
-    MatrixRef P0_mat(dataTypeParamMap_["P.0"]);
-    for (Size i=0; i<dim_x; ++i)
-      P0_mat(i,i) = 1.0;
-
-    dataTypeParamMap_["F"].SetPtr(dimArrayMap_["F"]).AllocValue(0.0);
-    MatrixRef F_mat(dataTypeParamMap_["F"]);
-    for (Size i=0; i<dim_x; ++i)
-      F_mat(i,i) = 1.0;
-    F_mat(0,2) = T;
-    F_mat(1,3) = T;
-
-    dataTypeParamMap_["B"].SetPtr(dimArrayMap_["B"]).AllocValue(0.0);
-
-    Matrix G_mat(dim_x, 2, 0.0);
-    G_mat(0,0) = T*T/2;
-    G_mat(1,1) = T*T/2;
-    G_mat(2,0) = T;
-    G_mat(3,1) = T;
-    dataTypeParamMap_["Q"].SetPtr(dimArrayMap_["Q"]).AllocValue(0.0);
-    MatrixRef Q_mat(dataTypeParamMap_["Q"]);
-    Q_mat = ublas::prod(G_mat, ublas::trans(G_mat));
-
-    dataTypeParamMap_["H"].SetPtr(dimArrayMap_["H"]).AllocValue(0.0);
-    MatrixRef H_mat(dataTypeParamMap_["H"]);
-    H_mat(0,0) = 1.0;
-    H_mat(1,1) = 1.0;
-
-    dataTypeParamMap_["R"].SetPtr(dimArrayMap_["R"]).AllocValue(0.0);
-    MatrixRef R_mat(dataTypeParamMap_["R"]);
-    for (Size i=0; i<dim_y; ++i)
-      R_mat(i,i) = 0.5;
+    dataTypeParamMap_["P.0"].SetPtr(dimArrayMap_["P.0"],
+                                    ValArray::Ptr(new ValArray(dimArrayMap_["P.0"]->Length(),
+                                                               0.0)));
+    typedef ublas::matrix<Scalar, StorageOrder, ValArray> MatrixType;
+    MatrixType P0_mat(dataTypeParamMap_["P.0"].Dim()[0],
+                      dataTypeParamMap_["P.0"].Dim()[1],
+                      ValArray());
+    P0_mat.data().swap(dataTypeParamMap_["P.0"].Values());
+    for (Size i = 0; i < dim_x; ++i)
+      P0_mat(i, i) = 1.0;
 
     if (precFlag_)
     {
       if (!ublas::cholesky_factorize(P0_mat))
         throw RuntimeError("HmmMNormalLinear4D: matrix P0 is not positive-semidefinite.");
       ublas::cholesky_invert(P0_mat);
+    }
+    P0_mat.data().swap(dataTypeParamMap_["P.0"].Values());
 
+    dataTypeParamMap_["F"].SetPtr(dimArrayMap_["F"],
+                                  ValArray::Ptr(new ValArray(dimArrayMap_["F"]->Length(),
+                                                             0.0)));
+    MatrixType F_mat(dataTypeParamMap_["F"].Dim()[0],
+                     dataTypeParamMap_["F"].Dim()[1],
+                     ValArray());
+    F_mat.data().swap(dataTypeParamMap_["F"].Values());
+    for (Size i = 0; i < dim_x; ++i)
+      F_mat(i, i) = 1.0;
+    F_mat(0, 2) = T;
+    F_mat(1, 3) = T;
+    F_mat.data().swap(dataTypeParamMap_["F"].Values());
+
+    dataTypeParamMap_["B"].SetPtr(dimArrayMap_["B"],
+                                  ValArray::Ptr(new ValArray(dimArrayMap_["B"]->Length(),
+                                                             0.0)));
+
+    Matrix G_mat(dim_x, 2, 0.0);
+    G_mat(0, 0) = T * T / 2;
+    G_mat(1, 1) = T * T / 2;
+    G_mat(2, 0) = T;
+    G_mat(3, 1) = T;
+    dataTypeParamMap_["Q"].SetPtr(dimArrayMap_["Q"],
+                                  ValArray::Ptr(new ValArray(dimArrayMap_["Q"]->Length(),
+                                                             0.0)));
+    MatrixType Q_mat(dataTypeParamMap_["Q"].Dim()[0],
+                     dataTypeParamMap_["Q"].Dim()[1],
+                     ValArray());
+    Q_mat.data().swap(dataTypeParamMap_["Q"].Values());
+    Q_mat = ublas::prod(G_mat, ublas::trans(G_mat));
+
+    if (precFlag_)
+    {
       if (!ublas::cholesky_factorize(Q_mat))
         throw RuntimeError("HmmMNormalLinear4D: matrix Q is not positive-semidefinite.");
       ublas::cholesky_invert(Q_mat);
+    }
+    Q_mat.data().swap(dataTypeParamMap_["Q"].Values());
 
+    dataTypeParamMap_["H"].SetPtr(dimArrayMap_["H"],
+                                  ValArray::Ptr(new ValArray(dimArrayMap_["H"]->Length(),
+                                                             0.0)));
+    MatrixType H_mat(dataTypeParamMap_["H"].Dim()[0],
+                     dataTypeParamMap_["H"].Dim()[1],
+                     ValArray());
+    H_mat.data().swap(dataTypeParamMap_["H"].Values());
+    H_mat(0, 0) = 1.0;
+    H_mat(1, 1) = 1.0;
+    H_mat.data().swap(dataTypeParamMap_["H"].Values());
+
+    dataTypeParamMap_["R"].SetPtr(dimArrayMap_["R"],
+                                  ValArray::Ptr(new ValArray(dimArrayMap_["R"]->Length(),
+                                                             0.0)));
+    MatrixType R_mat(dataTypeParamMap_["R"].Dim()[0],
+                     dataTypeParamMap_["R"].Dim()[1],
+                     ValArray());
+    R_mat.data().swap(dataTypeParamMap_["R"].Values());
+    for (Size i = 0; i < dim_y; ++i)
+      R_mat(i, i) = 0.5;
+
+    if (precFlag_)
+    {
       if (!ublas::cholesky_factorize(R_mat))
         throw RuntimeError("HmmMNormalLinear4D: matrix R is not positive-semidefinite.");
       ublas::cholesky_invert(R_mat);
     }
 
+    R_mat.data().swap(dataTypeParamMap_["R"].Values());
+
     Size t_max = sizeParamMap_.at("t.max");
-    std::vector<MultiArray> u_vec(t_max, MultiArray(dimArrayMap_["u"]));
-    dataValuesMap_["u"].SetPtr(u_vec.begin(), u_vec.end());
-
+    dataValuesMap_["u"].resize(t_max);
+    for (Size i = 0; i < t_max; ++i)
+    {
+      ValArray::Ptr p_val(new ValArray(dimArrayMap_["u"]->Length()));
+      dataValuesMap_["u"][i] = MultiArray(dimArrayMap_["u"], p_val);
+    }
   }
-
 
   void HmmMNormalLinear4D::PrintIntro() const
   {
@@ -126,7 +177,6 @@ namespace Biips
     os_ << "and I_p to the pxp identity matrix" << endl;
     os_ << endl;
   }
-
 
 //  void HmmMNormalLinear4D::InputModelParam(std::istream & is)
 //  {

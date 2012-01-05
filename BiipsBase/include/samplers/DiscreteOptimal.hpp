@@ -16,7 +16,7 @@
 namespace Biips
 {
 
-  class DiscreteOptimal : public NodeSampler
+  class DiscreteOptimal: public NodeSampler
   {
   public:
     typedef DiscreteOptimal SelfType;
@@ -27,18 +27,25 @@ namespace Biips
 
     friend class DiscreteOptimalFactory;
 
-    explicit DiscreteOptimal(const Graph & graph) : NodeSampler(graph) {};
+    explicit DiscreteOptimal(const Graph & graph) :
+      NodeSampler(graph)
+    {
+    }
 
     virtual void sample(const StochasticNode & node);
 
   public:
-    virtual const String & Name() const { return NAME_; };
+    virtual const String & Name() const
+    {
+      return NAME_;
+    }
 
-    virtual ~DiscreteOptimal() {};
+    virtual ~DiscreteOptimal()
+    {
+    }
   };
 
-
-  class DiscreteOptimalFactory : public NodeSamplerFactory
+  class DiscreteOptimalFactory: public NodeSamplerFactory
   {
   public:
     typedef DiscreteOptimalFactory SelfType;
@@ -48,11 +55,18 @@ namespace Biips
 
   protected:
     static Ptr pDiscreteOptimalFactoryInstance_;
-    DiscreteOptimalFactory() {};
+    DiscreteOptimalFactory()
+    {
+    }
 
   public:
-    static BaseType::Ptr Instance() { return pDiscreteOptimalFactoryInstance_; };
-    virtual Bool Create(const Graph & graph, NodeId nodeId, BaseType::CreatedPtr & pNodeSamplerInstance) const;
+    static BaseType::Ptr Instance()
+    {
+      return pDiscreteOptimalFactoryInstance_;
+    }
+    virtual Bool Create(const Graph & graph,
+                        NodeId nodeId,
+                        BaseType::CreatedPtr & pNodeSamplerInstance) const;
   };
 
 }

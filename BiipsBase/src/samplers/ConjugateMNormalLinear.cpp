@@ -46,9 +46,8 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
     {
-      MultiArray prec_i_dat(getNodeValue(node.Parents()[1],
-                                         graph_,
-                                         nodeSampler_));
+      NumArray
+          prec_i_dat(getNodeValue(node.Parents()[1], graph_, nodeSampler_));
       MatrixRef prec_i(prec_i_dat);
       Size dim_obs = prec_i.size1();
       Size prec_old_dim = prec_.size1();
@@ -77,36 +76,32 @@ namespace Biips
       b_.resize(b_old_size + b_i.size());
       ublas::project(b_, ublas::range(b_old_size, b_.size())) = b_i;
 
-      MultiArray obs_i_dat(node.DimPtr(), graph_.GetValues()[nodeId_]);
+      NumArray
+          obs_i_dat(node.DimPtr().get(), graph_.GetValues()[nodeId_].get());
 
       VectorRef obs_i(obs_i_dat);
       Size obs_old_size = obs_.size();
       obs_.resize(obs_old_size + obs_i.size());
       ublas::project(obs_, ublas::range(obs_old_size, obs_.size())) = obs_i;
     }
-    ;
 
   public:
     const Matrix & GetA()
     {
       return A_;
     }
-    ;
     const Vector & GetB()
     {
       return b_;
     }
-    ;
     const Matrix & GetPrec()
     {
       return prec_;
     }
-    ;
-    const Vector & GetObs()
+    Vector & GetObs()
     {
       return obs_;
     }
-    ;
 
     MNormalLinearLikeFormVisitor(const Graph & graph,
                                  NodeId myId,
@@ -117,7 +112,6 @@ namespace Biips
           A_(0, dimNode), b_(0), prec_(0, 0), obs_(0)
     {
     }
-    ;
   };
 
   void ConjugateMNormalLinear::sample(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
@@ -141,7 +135,7 @@ namespace Biips
     const Matrix & like_A = like_form_vis.GetA();
     const Vector & like_b = like_form_vis.GetB();
     const Matrix & like_prec = like_form_vis.GetPrec();
-    const Vector & obs = like_form_vis.GetObs();
+    Vector & obs = like_form_vis.GetObs();
 
     Matrix prior_cov(getNodeValue(prior_prec_id, graph_, *this));
     if (!ublas::cholesky_factorize(prior_cov))
@@ -154,40 +148,58 @@ namespace Biips
     ublas::cholesky_invert(like_cov);
 
     Matrix kalman_gain = ublas::prod(prior_cov, ublas::trans(like_A));
-    Matrix inn_prec = ublas::prod(like_A, kalman_gain) + like_cov;
+    static Matrix inn_prec;
+    inn_prec = ublas::prod(like_A, kalman_gain) + like_cov;
     if (!ublas::cholesky_factorize(inn_prec))
       throw LogicError("ConjugateMNormalLinear::sample: matrix inn_prec is not positive-semidefinite.");
     ublas::cholesky_invert(inn_prec);
     kalman_gain = ublas::prod(kalman_gain, inn_prec);
 
-    MultiArray prior_mean_dat(getNodeValue(prior_mean_id, graph_, *this));
+    NumArray prior_mean_dat(getNodeValue(prior_mean_id, graph_, *this));
     VectorRef prior_mean(prior_mean_dat);
 
-    Vector obs_pred = ublas::prod(like_A, prior_mean) + like_b;
-    Vector post_mean = prior_mean + ublas::prod(kalman_gain, (obs - obs_pred));
+    static Vector obs_pred;
+    obs_pred = ublas::prod(like_A, prior_mean) + like_b;
+    static Vector post_mean;
+    post_mean = prior_mean + ublas::prod(kalman_gain, (obs - obs_pred));
     prior_mean.Release();
 
-    Matrix post_prec =
-        ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node, dim_node)
-            - Matrix(ublas::prod(kalman_gain, like_A))), prior_cov);
+    static Matrix post_prec;
+    post_prec = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node,
+                                                                  dim_node)
+        - Matrix(ublas::prod(kalman_gain, like_A))), prior_cov);
     if (!ublas::cholesky_factorize(post_prec))
       throw LogicError("ConjugateMNormalLinear::sample: matrix post_prec is not positive-semidefinite.");
     ublas::cholesky_invert(post_prec);
 
-    MultiArray::Array post_param_values(2);
-    post_param_values[0] = MultiArray(post_mean);
-    post_param_values[1] = MultiArray(post_prec);
-    nodeValuesMap()[nodeId_] = DMNorm::Instance()->Sample(post_param_values,
-                                                          NULL_MULTIARRAYPAIR,
-                                                          *pRng_).ValuesPtr(); // FIXME Boundaries
+    static NumArray::Array post_param_values(2);
+    static DimArray dim_mean(1);
+    dim_mean[0] = post_mean.size();
+    post_param_values[0] = NumArray(&dim_mean, &post_mean.data());
+    static DimArray dim_prec(2);
+    dim_prec[0] = post_prec.size1();
+    dim_prec[1] = post_prec.size2();
+    post_param_values[1] = NumArray(&dim_prec, &post_prec.data());
 
-    MultiArray::Array norm_const_param_values(2);
-    norm_const_param_values[0] = MultiArray(obs_pred);
-    norm_const_param_values[1] = MultiArray(inn_prec);
+    //allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+    //sample
+    DMNorm::Instance()->Sample(*nodeValuesMap()[nodeId_],
+                               post_param_values,
+                               NULL_NUMARRAYPAIR,
+                               *pRng_); // FIXME Boundaries
+
+    static NumArray::Array norm_const_param_values(2);
+    dim_mean[0] = obs_pred.size();
+    norm_const_param_values[0] = NumArray(&dim_mean, &obs_pred.data());
+    dim_prec[0] = inn_prec.size1();
+    dim_prec[1] = inn_prec.size2();
+    norm_const_param_values[1] = NumArray(&dim_prec, &inn_prec.data());
+
     logIncrementalWeight_
-        = DMNorm::Instance()->LogDensity(MultiArray(obs),
+        = DMNorm::Instance()->LogDensity(NumArray(&dim_mean, &obs.data()),
                                          norm_const_param_values,
-                                         NULL_MULTIARRAYPAIR); // FIXME Boundaries
+                                         NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(logIncrementalWeight_))
       throw RuntimeError("Failure to calculate log incremental weight.");
     // TODO optimize computation removing constant terms

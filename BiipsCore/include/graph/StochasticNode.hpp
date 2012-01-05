@@ -25,7 +25,7 @@ namespace Biips
     typedef Types<SelfType>::IteratorPair IteratorPair;
 
   protected:
-    typedef MultiArray::StorageType StorageType;
+    typedef NumArray::StorageType StorageType;
 
     Distribution::Ptr pPrior_;
     NodeId lowerNodeId_;
@@ -41,21 +41,24 @@ namespace Biips
       return pPrior_->Name();
     }
 
-    MultiArray Sample(const MultiArray::Array & paramValues,
-                      const MultiArray::Pair & boundValues,
+    void Sample(ValArray & values, const NumArray::Array & paramValues,
+                      const NumArray::Pair & boundValues,
                       Rng & rng) const
     {
-      return pPrior_->Sample(paramValues, boundValues, rng);
+      values = ValArray(pDim_->Length());
+      pPrior_->Sample(values, paramValues, boundValues, rng);
     }
-    Scalar LogPriorDensity(const MultiArray & x,
-                           const MultiArray::Array & paramValues,
-                           const MultiArray::Pair & boundValues) const
+    Scalar LogPriorDensity(const NumArray & x,
+                           const NumArray::Array & paramValues,
+                           const NumArray::Pair & boundValues) const
     {
       return pPrior_->LogDensity(x, paramValues, boundValues);
     }
-    MultiArray::Pair UnboundedSupport(const MultiArray::Array & paramValues) const
+    void UnboundedSupport(ValArray & lower, ValArray & upper, const NumArray::Array & paramValues) const
     {
-      return pPrior_->UnboundedSupport(paramValues);
+      lower = ValArray(pDim_->Length());
+      upper = ValArray(pDim_->Length());
+      pPrior_->UnboundedSupport(lower, upper, paramValues);
     }
 
     Bool IsLowerBounded() const

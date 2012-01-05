@@ -8,10 +8,8 @@
  * $Id$
  */
 
-
 #include "storeUnregistered.hpp"
 #include <iostream>
-
 
 namespace Biips
 {
@@ -20,15 +18,15 @@ namespace Biips
 }
 
 void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
-    const vector<string> & sources_names,
-    StoredModelMap & model_map,
-    StoredDimMap & dim_map,
-    StoredDataMap & data_map,
-    Scalar & log_norm_const_bench,
-    StoredDataMap & bench_filter_map,
-    StoredDataMap & bench_smooth_map,
-    StoredErrorsMap & errors_filter_map,
-    StoredErrorsMap & errors_smooth_map)
+                       const vector<string> & sources_names,
+                       StoredModelMap & model_map,
+                       StoredDimMap & dim_map,
+                       StoredDataMap & data_map,
+                       Scalar & log_norm_const_bench,
+                       StoredDataMap & bench_filter_map,
+                       StoredDataMap & bench_smooth_map,
+                       StoredErrorsMap & errors_filter_map,
+                       StoredErrorsMap & errors_smooth_map)
 {
   using namespace std;
   using namespace Biips;
@@ -40,13 +38,13 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
 
   DimArray::Ptr p_scalar_dim(new DimArray(1, 1));
 
-  for(Size i_src = 0; i_src<parsed_sources.size(); ++i_src)
+  for (Size i_src = 0; i_src < parsed_sources.size(); ++i_src)
   {
     const String & source = sources_names[i_src];
     const po::parsed_options & parsed = parsed_sources[i_src];
-    for (Size op=0; op<parsed.options.size(); ++op)
+    for (Size op = 0; op < parsed.options.size(); ++op)
     {
-      if (! parsed.options[op].unregistered)
+      if (!parsed.options[op].unregistered)
         continue;
 
       string key = parsed.options[op].string_key;
@@ -63,7 +61,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       }
 
       string section = key.substr(0, pos);
-      string var = key.substr(pos+1);
+      string var = key.substr(pos + 1);
 
       // model section
       if (section == "model")
@@ -78,7 +76,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           string column_str;
           string value_str;
           Scalar value;
-          for (Size v=0; v<parsed.options[op].value.size(); ++v)
+          for (Size v = 0; v < parsed.options[op].value.size(); ++v)
           {
             istringstream iss(parsed.options[op].value[v]);
             ValArray::Ptr p_val_array(new ValArray());
@@ -98,12 +96,12 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
               }
               if (n_columns == 0)
                 n_rows = n_rows_current;
-              else
-                if (n_rows_current != n_rows)
-                {
-                  cerr << "in source: " << source << ". ";
-                  boost::throw_exception(po::invalid_syntax(key, "columns have different lengths."));
-                }
+              else if (n_rows_current != n_rows)
+              {
+                cerr << "in source: " << source << ". ";
+                boost::throw_exception(po::invalid_syntax(key,
+                                                          "columns have different lengths."));
+              }
               n_columns++;
             }
             DimArray::Ptr p_dim_array;
@@ -133,7 +131,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           String value_str;
           Size value;
           vector<Size> dim_vec;
-          for (Size v=0; v<parsed.options[op].value.size(); ++v)
+          for (Size v = 0; v < parsed.options[op].value.size(); ++v)
           {
             istringstream iss(parsed.options[op].value[v]);
             while (iss.good())
@@ -142,7 +140,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
               istringstream(value_str) >> value;
               dim_vec.push_back(value);
             }
-            dim_map[var] = DimArray::Ptr(new DimArray(dim_vec.begin(), dim_vec.end()));
+            dim_map[var] = DimArray::Ptr(new DimArray(dim_vec.begin(),
+                                                      dim_vec.end()));
           }
         }
       }
@@ -176,7 +175,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
             boost::throw_exception(po::unknown_option(key));
           }
           string sub_section = var.substr(0, pos);
-          var = var.substr(pos+1);
+          var = var.substr(pos + 1);
 
           if (sub_section == "filter")
           {
@@ -214,13 +213,14 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         map<string, map<Size, vector<Scalar> > > & errors_map = *p_errors_map;
 
         // data and bench sections
-        if(section == "data" || section == "bench")
+        if (section == "data" || section == "bench")
         {
           Size dim = 1;
-          if (((pos = var.rfind('.')) != string::npos) && var.find_last_not_of("0123456789") == pos)
+          if (((pos = var.rfind('.')) != string::npos)
+              && var.find_last_not_of("0123456789") == pos)
           {
-            istringstream(var.substr(pos+1)) >> dim;
-            var = var.substr(0,pos);
+            istringstream(var.substr(pos + 1)) >> dim;
+            var = var.substr(0, pos);
           }
 
           if (dim < 1)
@@ -234,24 +234,25 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           if (dim > len)
           {
             cerr << "in source: " << source << ". ";
-            boost::throw_exception(po::invalid_syntax(key, "data exceeds dimension"));
+            boost::throw_exception(po::invalid_syntax(key,
+                                                      "data exceeds dimension"));
           }
 
           Bool allocate = datatype_map[var].empty();
           if (allocate)
-            dim_defined_map[var] = Flags(len,false);
+            dim_defined_map[var] = Flags(len, false);
 
-          if (dim_defined_map[var][dim-1])
+          if (dim_defined_map[var][dim - 1])
           {
             cerr << "in source: " << source << ". ";
             cerr << "Warning: option " << key << " already has value." << endl;
           }
           else
           {
-            dim_defined_map[var][dim-1] = true;
+            dim_defined_map[var][dim - 1] = true;
             String value_str;
             Scalar value;
-            for (Size v=0; v<parsed.options[op].value.size(); ++v)
+            for (Size v = 0; v < parsed.options[op].value.size(); ++v)
             {
               istringstream iss(parsed.options[op].value[v]);
               Size t = 0;
@@ -262,11 +263,17 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
                 if (allocate)
                 {
                   if (dim_map.count(var))
-                    datatype_map[var].push_back(MultiArray(dim_map[var]));
+                  {
+                    datatype_map[var].push_back(MultiArray(dim_map[var],
+                                                           ValArray::Ptr(new ValArray(dim_map[var]->Length()))));
+                  }
                   else
-                    datatype_map[var].push_back(MultiArray(p_scalar_dim));
+                  {
+                    datatype_map[var].push_back(MultiArray(p_scalar_dim,
+                                                           ValArray::Ptr(new ValArray(1))));
+                  }
                 }
-                datatype_map[var][t].Values()[dim-1] = value;
+                datatype_map[var][t].Values()[dim - 1] = value;
                 ++t;
               }
             }
@@ -278,9 +285,10 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         {
           string mutation;
           Size n_particles;
-          if (((pos = var.rfind('.')) != string::npos) && var.find_last_not_of("0123456789") == pos)
+          if (((pos = var.rfind('.')) != string::npos)
+              && var.find_last_not_of("0123456789") == pos)
           {
-            istringstream(var.substr(pos+1)) >> n_particles;
+            istringstream(var.substr(pos + 1)) >> n_particles;
             mutation = var.substr(0, pos);
           }
           else
@@ -289,7 +297,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
             boost::throw_exception(po::unknown_option(key));
           }
 
-          if (errors_map.count(mutation) && errors_map.at(mutation).count(n_particles))
+          if (errors_map.count(mutation)
+              && errors_map.at(mutation).count(n_particles))
           {
             cerr << "in source: " << source << ". ";
             cerr << "Warning: option " << key << " already has value." << endl;
@@ -298,7 +307,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           {
             string value_str;
             Scalar value;
-            for (Size v=0; v<parsed.options[op].value.size(); ++v)
+            for (Size v = 0; v < parsed.options[op].value.size(); ++v)
             {
               istringstream iss(parsed.options[op].value[v]);
               while (iss.good())

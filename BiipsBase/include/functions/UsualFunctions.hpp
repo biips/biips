@@ -18,151 +18,214 @@
 namespace Biips
 {
 
-  struct AbsScalar : public std::unary_function<Scalar, Scalar>
+  struct AbsScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return std::fabs(val);
     }
   };
 
-  struct SqrtScalar : public std::unary_function<Scalar, Scalar>
+  struct SqrtScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return std::sqrt(val);
     }
   };
 
-  struct LogScalar : public std::unary_function<Scalar, Scalar>
+  struct LogScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return std::log(val);
     }
   };
 
-  struct ExpScalar : public std::unary_function<Scalar, Scalar>
+  struct ExpScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return std::exp(val);
     }
   };
 
-  struct RoundScalar : public std::unary_function<Scalar, Scalar>
+  struct RoundScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return boost::math::round(val);
     }
   };
 
-  struct TruncScalar : public std::unary_function<Scalar, Scalar>
+  struct TruncScalar: public std::unary_function<Scalar, Scalar>
   {
-    Scalar operator() (Scalar val) const
+    Scalar operator()(Scalar val) const
     {
       return boost::math::trunc(val);
     }
   };
 
-
-  class Abs : public UnaryScalarFunction<AbsScalar>
+  class Abs: public UnaryScalarFunction<AbsScalar>
   {
   public:
     typedef Abs SelfType;
     typedef UnaryScalarFunction<AbsScalar> BaseType;
 
   protected:
-    Abs() : BaseType("abs") {};
+    Abs() :
+      BaseType("abs")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return mask[0]; }
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return mask[0];
+    }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
-
-  class Sqrt : public UnaryScalarFunction<SqrtScalar>
+  class Sqrt: public UnaryScalarFunction<SqrtScalar>
   {
   public:
     typedef Sqrt SelfType;
     typedef UnaryScalarFunction<SqrtScalar> BaseType;
 
   protected:
-    Sqrt() : BaseType("sqrt") {};
+    Sqrt() :
+      BaseType("sqrt")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
   public:
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
-
-  class Log : public UnaryScalarFunction<LogScalar>
+  class Log: public UnaryScalarFunction<LogScalar>
   {
   public:
     typedef Log SelfType;
     typedef UnaryScalarFunction<LogScalar> BaseType;
 
   protected:
-    Log() : BaseType("log") {};
+    Log() :
+      BaseType("log")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
   public:
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
-
-  class Exp : public UnaryScalarFunction<ExpScalar>
+  class Exp: public UnaryScalarFunction<ExpScalar>
   {
   public:
     typedef Exp SelfType;
     typedef UnaryScalarFunction<ExpScalar> BaseType;
 
   protected:
-    Exp() : BaseType("exp") {};
+    Exp() :
+      BaseType("exp")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
-
-  class Round : public UnaryScalarFunction<RoundScalar>
+  class Round: public UnaryScalarFunction<RoundScalar>
   {
   public:
     typedef Round SelfType;
     typedef UnaryScalarFunction<RoundScalar> BaseType;
 
   protected:
-    Round() : BaseType("round") {};
+    Round() :
+      BaseType("round")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return true;
+    }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
-
-  class Trunc : public UnaryScalarFunction<TruncScalar>
+  class Trunc: public UnaryScalarFunction<TruncScalar>
   {
   public:
     typedef Trunc SelfType;
     typedef UnaryScalarFunction<TruncScalar> BaseType;
 
   protected:
-    Trunc() : BaseType("trunc") {};
+    Trunc() :
+      BaseType("trunc")
+    {
+    }
 
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const { return true; }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
 
   public:
-    virtual Bool IsDiscreteValued(const Flags & mask) const { return true; }
-    static Function::Ptr Instance() { static Function::Ptr p_instance(new SelfType()); return p_instance; };
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return true;
+    }
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+
   };
 
 }

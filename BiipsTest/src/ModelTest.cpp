@@ -70,7 +70,11 @@ namespace Biips
       else if (scalarParamMap_.count(var))
         scalarParamMap_[var] = it_param_map->second.ScalarView();
       else
-        dataTypeParamMap_[var].Alloc(it_param_map->second);
+      {
+        DimArray::Ptr p_dim(new DimArray(it_param_map->second.Dim()));
+        ValArray::Ptr p_val(new ValArray(it_param_map->second.Values()));
+        dataTypeParamMap_[var].SetPtr(p_dim, p_val);
+      }
       ++it_param_map;
     }
   }
@@ -88,7 +92,7 @@ namespace Biips
         from.begin();
     while (it_from != from.end())
     {
-      to[it_from->first].SetPtr(it_from->second.begin(), it_from->second.end());
+      to[it_from->first].assign(it_from->second.begin(), it_from->second.end());
       ++it_from;
     }
   }
@@ -115,7 +119,7 @@ namespace Biips
     {
       const String & var_name = inDataVarNames_[i_var];
       Size var_len = dataNodeIdMap_[var_name].size();
-      dataValuesMap_[var_name].SetPtr(MultiArray::Array(var_len));
+      dataValuesMap_[var_name] = MultiArray::Array(var_len);
       MultiArray::Array & gen_values = dataValuesMap_[var_name];
       for (Size k = 0; k < gen_values.size(); ++k)
         gen_values[k]

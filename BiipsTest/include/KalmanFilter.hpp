@@ -21,8 +21,7 @@ namespace Biips
   public:
     enum StateType
     {
-      PREDICTED,
-      UPDATED
+      PREDICTED, UPDATED
     };
 
   protected:
@@ -54,9 +53,13 @@ namespace Biips
     void updateCore();
 
   public:
-    void Init(const MultiArray & xtminus1, const MultiArray & Ptminus1, StateType stateType = UPDATED);
+    void Init(const MultiArray & xtminus1,
+              const MultiArray & Ptminus1,
+              StateType stateType = UPDATED);
 
-    void SetEvolutionModel(const MultiArray & Ft, const MultiArray & Bt, const MultiArray & Qt);
+    void SetEvolutionModel(const MultiArray & Ft,
+                           const MultiArray & Bt,
+                           const MultiArray & Qt);
     void SetObservationModel(const MultiArray & Ht, const MultiArray & Rt);
 
     void Init(Scalar xtminus1, Scalar Ptminus1, StateType stateType = UPDATED);
@@ -70,14 +73,40 @@ namespace Biips
     void Update(Scalar zt);
     void Update(Scalar zt, Scalar ut);
 
-    MultiArray GetPriorEstimate() const { return MultiArray(xtPred_); }
-    MultiArray GetPriorCovariance() const { return MultiArray(PtPred_); }
-    MultiArray GetPosteriorEstimate() const { return MultiArray(xt_); }
-    MultiArray GetPosteriorCovariance() const { return MultiArray(Pt_); }
+    MultiArray GetPriorEstimate() const
+    {
+      DimArray::Ptr p_dim(new DimArray(1, xtPred_.size()));
+      ValArray::Ptr p_val(new ValArray(xtPred_.data()));
+      return MultiArray(p_dim, p_val);
+    }
+    MultiArray GetPriorCovariance() const
+    {
+      DimArray::Ptr p_dim(new DimArray(2, PtPred_.size1()));
+      ValArray::Ptr p_val(new ValArray(PtPred_.data()));
+      return MultiArray(p_dim, p_val);
+    }
+    MultiArray GetPosteriorEstimate() const
+    {
+      DimArray::Ptr p_dim(new DimArray(1, xt_.size()));
+      ValArray::Ptr p_val(new ValArray(xt_.data()));
+      return MultiArray(p_dim, p_val);
+    }
+    MultiArray GetPosteriorCovariance() const
+    {
+      DimArray::Ptr p_dim(new DimArray(2, Pt_.size1()));
+      ValArray::Ptr p_val(new ValArray(Pt_.data()));
+      return MultiArray(p_dim, p_val);
+    }
 
-    KalmanFilter(const MultiArray & xtminus1, const MultiArray & Ptminus1, const MultiArray & Rt, StateType stateType = UPDATED);
+    KalmanFilter(const MultiArray & xtminus1,
+                 const MultiArray & Ptminus1,
+                 const MultiArray & Rt,
+                 StateType stateType = UPDATED);
 
-    KalmanFilter(Scalar xtminus1, Scalar Ptminus1, Scalar Rt, StateType stateType = UPDATED);
+    KalmanFilter(Scalar xtminus1,
+                 Scalar Ptminus1,
+                 Scalar Rt,
+                 StateType stateType = UPDATED);
   };
 
 }

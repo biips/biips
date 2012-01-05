@@ -25,12 +25,11 @@ namespace Biips
       return false;
   }
 
-
-  Bool DCat::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DCat::checkParamValues(const NumArray::Array & paramValues) const
   {
-    const MultiArray & weights = paramValues[0];
+    const NumArray & weights = paramValues[0];
 
-    for (Size i=0; i<weights.Values().size(); ++i)
+    for (Size i = 0; i < weights.Values().size(); ++i)
     {
       if (weights.Values()[i] < 0.0)
         return false;
@@ -39,48 +38,44 @@ namespace Biips
     return true;
   }
 
-
   DimArray DCat::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     return *P_SCALAR_DIM;
   }
 
-
-  MultiArray DCat::sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const
+  void DCat::sample(ValArray & values,
+                    const NumArray::Array & paramValues,
+                    const NumArray::Pair & boundValues,
+                    Rng & rng) const
   {
-    const MultiArray & weights = paramValues[0];
+    const NumArray & weights = paramValues[0];
 
-    typedef boost::random::discrete_distribution<Int ,Scalar> DistType;
+    typedef boost::random::discrete_distribution<Int, Scalar> DistType;
     DistType dist(weights.Values().begin(), weights.Values().end());
     typedef boost::variate_generator<Rng::GenType&, DistType> GenType;
     GenType gen(rng.GetGen(), dist);
 
-    return MultiArray(Scalar(gen() + 1));
+    values[0] = Scalar(gen() + 1);
   }
 
-
-  Scalar DCat::logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const
+  Scalar DCat::logDensity(const NumArray & x,
+                          const NumArray::Array & paramValues,
+                          const NumArray::Pair & boundValues) const
   {
-    const MultiArray & weights = paramValues[0];
+    const NumArray & weights = paramValues[0];
     Scalar my_point = x.ScalarView();
 
-    return log(weights.Values()[Size(my_point)-1]) - log(weights.Values().Sum());
+    return log(weights.Values()[Size(my_point) - 1])
+        - log(weights.Values().Sum());
   }
 
-
-  MultiArray::Pair DCat::unboundedSupport(const MultiArray::Array & paramValues) const
+  void DCat::unboundedSupport(ValArray & lower,
+                              ValArray & upper,
+                              const NumArray::Array & paramValues) const
   {
-    const MultiArray & weights = paramValues[0];
-    const Scalar n_cat(weights.Length());
-
-    static const MultiArray lower(0.0);
-    const MultiArray upper(n_cat);
-
-    static MultiArray::Pair support;
-    support.first = lower;
-    support.second = upper;
-
-    return support;
+    const NumArray & weights = paramValues[0];
+    lower[0] = 0.0;
+    upper[0] = Scalar(weights.Length());
   }
 
 }

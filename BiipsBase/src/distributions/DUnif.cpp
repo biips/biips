@@ -22,8 +22,7 @@ namespace Biips
     return lower.IsScalar() && upper.IsScalar();
   }
 
-
-  Bool DUnif::checkParamValues(const MultiArray::Array & paramValues) const
+  Bool DUnif::checkParamValues(const NumArray::Array & paramValues) const
   {
     Scalar lower = paramValues[0].ScalarView();
     Scalar upper = paramValues[1].ScalarView();
@@ -31,14 +30,15 @@ namespace Biips
     return lower < upper;
   }
 
-
   DimArray DUnif::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     return *P_SCALAR_DIM;
   }
 
-
-  MultiArray DUnif::sample(const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues, Rng & rng) const
+  void DUnif::sample(ValArray & values,
+                     const NumArray::Array & paramValues,
+                     const NumArray::Pair & boundValues,
+                     Rng & rng) const
   {
     Scalar lower = paramValues[0].ScalarView();
     Scalar upper = paramValues[1].ScalarView();
@@ -48,35 +48,30 @@ namespace Biips
     typedef boost::variate_generator<Rng::GenType&, DistType> GenType;
     GenType gen(rng.GetGen(), dist);
 
-    return MultiArray(gen());
+    values[0] = gen();
   }
 
-
-  Scalar DUnif::logDensity(const MultiArray & x, const MultiArray::Array & paramValues, const MultiArray::Pair & boundValues) const
+  Scalar DUnif::logDensity(const NumArray & x,
+                           const NumArray::Array & paramValues,
+                           const NumArray::Pair & boundValues) const
   {
     Scalar lower = paramValues[0].ScalarView();
     Scalar upper = paramValues[1].ScalarView();
     Scalar my_point = x.ScalarView();
 
     if (my_point < lower || my_point > upper)
-        return BIIPS_NEGINF;
+      return BIIPS_NEGINF;
     else
-        return -std::log(upper - lower);
+      return -std::log(upper - lower);
   }
 
-
-  MultiArray::Pair DUnif::unboundedSupport(const MultiArray::Array & paramValues) const
+  void DUnif::unboundedSupport(ValArray & lower,
+                               ValArray & upper,
+                               const NumArray::Array & paramValues) const
   {
-    Scalar lower = paramValues[0].ScalarView();
-    Scalar upper = paramValues[1].ScalarView();
-
-    static MultiArray::Pair support;
-    support.first = MultiArray(lower);
-    support.second = MultiArray(upper);
-
-    return support;
+    lower[0] = paramValues[0].ScalarView();
+    upper[0] = paramValues[1].ScalarView();
   }
-
 
   Bool DUnif::IsSupportFixed(const Flags & fixmask) const
   {

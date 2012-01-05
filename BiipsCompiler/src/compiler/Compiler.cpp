@@ -17,22 +17,23 @@
 
 namespace Biips
 {
-  class CompileError : public RuntimeError
+  class CompileError: public RuntimeError
   {
   public:
     typedef RuntimeError BaseType;
 
-    CompileError(ParseTree const * pTree, const String & msg)
-     : BaseType(String("Compilation error on line ") + print(pTree->line())
-         + ".")
+    CompileError(ParseTree const * pTree, const String & msg) :
+      BaseType(String("Compilation error on line ") + print(pTree->line())
+          + ".")
     {
       if (!msg.empty())
         msg_ += "\n" + msg;
     }
 
-    virtual ~CompileError() throw() {}
+    virtual ~CompileError() throw ()
+    {
+    }
   };
-
 
   NodeId Compiler::constFromTable(ParseTree const * pTree)
   {
@@ -41,7 +42,8 @@ namespace Biips
     if (!indexExpression_)
       throw LogicError("Can only call constFromTable inside index expression");
 
-    std::map<String, MultiArray>::const_iterator it = dataMap_.find(pTree->name());
+    std::map<String, MultiArray>::const_iterator it =
+        dataMap_.find(pTree->name());
     if (it == dataMap_.end())
       return NULL_NODEID;
 
@@ -86,30 +88,29 @@ namespace Biips
     }
   }
 
-
   Bool Compiler::IndexExpression(ParseTree const * pTree, Int & value)
   {
     /*
-       Evaluates an index expression.
+     Evaluates an index expression.
 
-       Index expressions occur in three contexts:
-       1) In the limits of a "for" loop
-       2) On the left hand side of a relation
-       3) On the right hand side of a relation
+     Index expressions occur in three contexts:
+     1) In the limits of a "for" loop
+     2) On the left hand side of a relation
+     3) On the right hand side of a relation
 
-       They are scalar, integer-valued, constant expressions.  We
-       return true on success and the result is written to the
-       parameter value.
+     They are scalar, integer-valued, constant expressions.  We
+     return true on success and the result is written to the
+     parameter value.
      */
 
     /*
-       The counter indexExpression_ is non-zero if we are inside an
-       Index expression. This invokes special rules in the functions
-       getParameter and getArraySubset.  The counter tracks the levels
-       of nesting of index expressions.
+     The counter indexExpression_ is non-zero if we are inside an
+     Index expression. This invokes special rules in the functions
+     getParameter and getArraySubset.  The counter tracks the levels
+     of nesting of index expressions.
 
-       The array indexNodeIds_ holds the Nodes created during the
-       evaluation of the index expression.
+     The array indexNodeIds_ holds the Nodes created during the
+     evaluation of the index expression.
      */
 
     indexExpression_++;
@@ -128,20 +129,24 @@ namespace Biips
       throw NodeError(node_id, "Index value not defined.");
 
     if (pValues->size() != 1)
-      throw NodeError(node_id, String("Index expression evaluates to non-scalar value: ") + print(*pValues));
+      throw NodeError(node_id,
+                      String("Index expression evaluates to non-scalar value: ")
+                          + print(*pValues));
     Scalar val = pValues->ScalarView();
     if (!checkInteger(val))
-      throw NodeError(node_id, String("Index expression evaluates to non-integer value: ") + print(val));
+      throw NodeError(node_id,
+                      String("Index expression evaluates to non-integer value: ")
+                          + print(val));
     value = roundInteger(val);
 
     // destruction of the index nodes
     if (indexExpression_ == 0)
     {
-      while(!indexNodeIds_.empty())
+      while (!indexNodeIds_.empty())
       {
         NodeId node_id = indexNodeIds_.back();
 
-        if (node_id != model_.GraphPtr()->GetSize()-1)
+        if (node_id != model_.GraphPtr()->GetSize() - 1)
           throw LogicError("Can only remove the last inserted node in the graph.");
 
         model_.GraphPtr()->PopNode();
@@ -151,18 +156,18 @@ namespace Biips
     return true;
   }
 
-
-  IndexRange Compiler::getRange(ParseTree const * pTree, const IndexRange & defaultRange)
+  IndexRange Compiler::getRange(ParseTree const * pTree,
+                                const IndexRange & defaultRange)
   {
     /*
-       Evaluate a range expression. If successful, it returns the range
-       corresponding to the expression.  If unsuccessful (due to missing
-       values) returns a null range.
+     Evaluate a range expression. If successful, it returns the range
+     corresponding to the expression.  If unsuccessful (due to missing
+     values) returns a null range.
 
-       The defaultRange argument provides default values if the range
-       expression is blank: e.g. foo[] or bar[,1].  The default range
-       may be a null range, in which case, missing indices will result in
-       failure.
+     The defaultRange argument provides default values if the range
+     expression is blank: e.g. foo[] or bar[,1].  The default range
+     may be a null range, in which case, missing indices will result in
+     failure.
      */
 
     const std::vector<ParseTree*> & range_list = pTree->parameters();
@@ -177,7 +182,8 @@ namespace Biips
     // Check size and integrity of range expression
     Size size = range_list.size();
     if (!defaultRange.IsNull() && size != defaultRange.NDim(false))
-      throw CompileError(pTree, String("Dimension mismatch taking subset of ") + name);
+      throw CompileError(pTree, String("Dimension mismatch taking subset of ")
+          + name);
 
     for (Size i = 0; i < size; ++i)
     {
@@ -206,8 +212,8 @@ namespace Biips
             upper[i] = lower[i];
           break;
         case 2:
-          if (!IndexExpression(range_list[i]->parameters()[0], lower[i]) ||
-              !IndexExpression(range_list[i]->parameters()[1], upper[i]))
+          if (!IndexExpression(range_list[i]->parameters()[0], lower[i])
+              || !IndexExpression(range_list[i]->parameters()[1], upper[i]))
             return NULL_RANGE;
           break;
         default:
@@ -241,19 +247,20 @@ namespace Biips
     return IndexRange(lower, upper);
   }
 
-
   IndexRange Compiler::variableSubsetRange(ParseTree const *var)
   {
     /*
-      Get the range of a subset expression of a variable on the LHS of a
-      relation.  This means that the subset expression must be constant.
+     Get the range of a subset expression of a variable on the LHS of a
+     relation.  This means that the subset expression must be constant.
      */
     if (var->treeClass() != P_VAR)
       throw LogicError("Expecting variable expression");
 
     const String & name = var->name();
     if (counterMap_.count(name))
-      throw CompileError(var, String("Counter cannot appear on LHS of relation: ") + name);
+      throw CompileError(var,
+                         String("Counter cannot appear on LHS of relation: ")
+                             + name);
 
     if (model_.GetSymbolTable().Contains(name))
     {
@@ -267,11 +274,15 @@ namespace Biips
         return array.Range();
       }
       if (range_list.size() != array.Range().NDim(false))
-        throw CompileError(var, String("Dimension mismatch in subset expression of ") + name);
+        throw CompileError(var,
+                           String("Dimension mismatch in subset expression of ")
+                               + name);
 
       IndexRange range = getRange(var, array.Range());
       if (range.IsNull())
-        throw CompileError(var, String("Missing values in subset expression of ") + name);
+        throw CompileError(var,
+                           String("Missing values in subset expression of ")
+                               + name);
 
       return range;
     }
@@ -280,22 +291,23 @@ namespace Biips
       // Undeclared node
       IndexRange range = getRange(var, NULL_RANGE);
       if (range.IsNull())
-        throw CompileError(var, String("Cannot evaluate subset expression for ") + name);
+        throw CompileError(var,
+                           String("Cannot evaluate subset expression for ")
+                               + name);
 
       return range;
     }
   }
 
-
   IndexRange Compiler::counterRange(ParseTree const *var)
   {
     /* The range expression for a counter differs from that of
-       a variable in that it is
-       1) one-dimensional
-       2) may not be empty
-       Further, no variables are created for counters in the
-       Symbol Table
-    */
+     a variable in that it is
+     1) one-dimensional
+     2) may not be empty
+     Further, no variables are created for counters in the
+     Symbol Table
+     */
     if (var->treeClass() != P_COUNTER)
       throw LogicError("Expecting counter expression");
 
@@ -309,16 +321,19 @@ namespace Biips
     Size size = prange->parameters().size();
     if (size < 1 || size > 2)
       throw LogicError(String("Invalid range expression for counter ")
-                        + var->name());
+          + var->name());
     Int lower;
-    if(!IndexExpression(prange->parameters()[0], lower))
-      throw CompileError(var, String("Cannot evaluate lower index of counter ") + var->name());
+    if (!IndexExpression(prange->parameters()[0], lower))
+      throw CompileError(var, String("Cannot evaluate lower index of counter ")
+          + var->name());
 
     Int upper;
     if (prange->parameters().size() == 2)
     {
       if (!IndexExpression(prange->parameters()[1], upper))
-        throw CompileError(var, String("Cannot evaluate upper index of counter ") + var->name());
+        throw CompileError(var,
+                           String("Cannot evaluate upper index of counter ")
+                               + var->name());
     }
     else
       upper = lower;
@@ -329,12 +344,11 @@ namespace Biips
       return IndexRange(lower, upper);
   }
 
-
   NodeId Compiler::getArraySubset(ParseTree const * pTree)
   {
     NodeId node_id = NULL_NODEID;
 
-    if(pTree->treeClass() != P_VAR)
+    if (pTree->treeClass() != P_VAR)
       throw LogicError("Expecting expression");
 
     if (counterMap_.count(pTree->name()))
@@ -358,7 +372,8 @@ namespace Biips
       if (model_.GetSymbolTable().Contains(pTree->name()))
       {
         // FIXME SymbolTable::GetNodeArray returning non const reference ?
-        const NodeArray & array = model_.GetSymbolTable().GetNodeArray(pTree->name());
+        const NodeArray & array =
+            model_.GetSymbolTable().GetNodeArray(pTree->name());
         IndexRange subset_range = getRange(pTree, array.Range());
         if (!subset_range.IsNull())
         {
@@ -367,18 +382,21 @@ namespace Biips
             throw CompileError(pTree, String("Subset ") + array.Name()
                 + print(subset_range) + " out of range");
 
-//          node_id = array.GetSubset(subset_range);//, model_);
-          node_id = model_.GetSymbolTable().GetNodeArraySubset(pTree->name(), subset_range);
+          //          node_id = array.GetSubset(subset_range);//, model_);
+          node_id = model_.GetSymbolTable().GetNodeArraySubset(pTree->name(),
+                                                               subset_range);
           if ((node_id == NULL_NODEID) && strictResolution_)
             throw CompileError(pTree, String("Unable to resolve parameter ")
-                + array.Name() + print(subset_range) + "(one of its ancestors may be undefined)");
+                + array.Name() + print(subset_range)
+                + "(one of its ancestors may be undefined)");
         }
         else if (!indexExpression_)
         {
           //A stochastic subset
           // FIXME getMixtureNode
           //node_id = getMixtureNode(pTree, this);
-          throw CompileError(pTree, String("Mixture nodes are not implemented yet."));
+          throw CompileError(pTree,
+                             String("Mixture nodes are not implemented yet."));
         }
       }
       else if (strictResolution_)
@@ -398,8 +416,8 @@ namespace Biips
     return node_id;
   }
 
-
-  static const Function::Ptr & getFunctionPtr(ParseTree const * pTree, const FunctionTable & functab)
+  static const Function::Ptr & getFunctionPtr(ParseTree const * pTree,
+                                              const FunctionTable & functab)
   {
     if (pTree->treeClass() != P_FUNCTION)
       throw LogicError("Malformed parse tree: Expected function");
@@ -411,8 +429,8 @@ namespace Biips
     return p_func;
   }
 
-
-  NodeId Compiler::getLength(ParseTree const * pTree, const SymbolTable & symtab)
+  NodeId Compiler::getLength(ParseTree const * pTree,
+                             const SymbolTable & symtab)
   {
     if (pTree->treeClass() != P_LENGTH)
       throw LogicError("Malformed parse tree. Expecting dim expression");
@@ -432,7 +450,8 @@ namespace Biips
         if (indexExpression_)
         {
           ValArray::Ptr pVal(new ValArray(1, Scalar(subset_range.Length())));
-          NodeId node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+          NodeId node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM,
+                                                              pVal);
           indexNodeIds_.push_back(node_id);
           return node_id;
         }
@@ -447,7 +466,6 @@ namespace Biips
     else
       return NULL_NODEID;
   }
-
 
   // FIXME
   NodeId Compiler::getDim(ParseTree const * pTree, const SymbolTable & symtab)
@@ -520,7 +538,7 @@ namespace Biips
         node_id = getArraySubset(pTree);
         break;
       case P_LENGTH:
-        node_id = getLength(pTree,model_.GetSymbolTable());
+        node_id = getLength(pTree, model_.GetSymbolTable());
         break;
       case P_DIM:
         node_id = getDim(pTree, model_.GetSymbolTable());
@@ -528,14 +546,14 @@ namespace Biips
       case P_LINK:
         // FIXME LinkFunction
         throw LogicError("LinkFunctions are not implemented yet.");
-//        if (GetParameterVector(pTree, parents))
-//        {
-//          LinkFunction const *link = funcTab().findLink(pTree->name());
-//          if (!link)
-//            throw CompileError(pTree, "Unknown link function:", pTree->name());
-//          node_id = _logicalfactory.getNode(FunctionPtr(link), parents, model_);
-//        }
-//        break;
+        //        if (GetParameterVector(pTree, parents))
+        //        {
+        //          LinkFunction const *link = funcTab().findLink(pTree->name());
+        //          if (!link)
+        //            throw CompileError(pTree, "Unknown link function:", pTree->name());
+        //          node_id = _logicalfactory.getNode(FunctionPtr(link), parents, model_);
+        //        }
+        //        break;
       case P_FUNCTION:
         if (getParameterVector(pTree, parents))
         {
@@ -569,7 +587,6 @@ namespace Biips
     return node_id;
   }
 
-
   /*
    * Before creating the node y <- foo(a,b), or z ~ dfoo(a,b), the parent
    * nodes must a,b be created. This expression evaluates the vector(a,b)
@@ -583,7 +600,9 @@ namespace Biips
 
     switch (pTree->treeClass())
     {
-      case P_FUNCTION: case P_LINK: case P_DENSITY:
+      case P_FUNCTION:
+      case P_LINK:
+      case P_DENSITY:
         for (Size i = 0; i < pTree->parameters().size(); ++i)
         {
           NodeId node_id = GetParameter(pTree->parameters()[i]);
@@ -602,7 +621,6 @@ namespace Biips
     return true;
   }
 
-
   NodeId Compiler::allocateStochastic(ParseTree const *pStochRelation)
   {
     ParseTree const *p_distribution = pStochRelation->parameters()[1];
@@ -618,10 +636,11 @@ namespace Biips
     {
       //Truncated distribution
       const ParseTree * truncated = pStochRelation->parameters()[2];
-      switch(truncated->treeClass()) {
-      case P_BOUNDS: // case P_INTERVAL: // FIXME: JAGS version > 3 seems to have a P_INTERVAL treeClass value
+      switch (truncated->treeClass())
+      {
+        case P_BOUNDS: // case P_INTERVAL: // FIXME: JAGS version > 3 seems to have a P_INTERVAL treeClass value
           break;
-      default:
+        default:
           throw LogicError("Invalid parse tree");
       }
       const ParseTree * lower = truncated->parameters()[0];
@@ -641,9 +660,9 @@ namespace Biips
     }
 
     /*
-         Check data table to see if this is an observed node.  If it is,
-         we put the data in a array of doubles pointed to by this_data,
-         and set data_length equal to the length of the array
+     Check data table to see if this is an observed node.  If it is,
+     we put the data in a array of doubles pointed to by this_data,
+     and set data_length equal to the length of the array
      */
     ValArray::Ptr p_this_data;
     Size data_length = 0;
@@ -687,56 +706,60 @@ namespace Biips
     const String & distname = p_distribution->name();
     const Distribution::Ptr & p_dist = DistTab().GetPtr(distname);
     if (!p_dist)
-      throw CompileError(p_distribution, String("Unknown distribution: ") + distname);
+      throw CompileError(p_distribution, String("Unknown distribution: ")
+          + distname);
 
     // FIXME Observable Functions
-//    if (!p_this_data) {
-//      /*
-//             Special rule for observable functions, which exist both as
-//             a Function and a Distribution.  If the node is unobserved,
-//             and we find a function matched to the distribution in
-//             obsFuncTab, then we create a Logical Node instead.
-//       */
-//      FunctionPtr const &func = obsFuncTab().find(dist);
-//      if (!isNULL(func)) {
-//        //FIXME: Why are we not using a factory here?
-//        LogicalNode *lnode = LogicalFactory::newNode(func, parameters);
-//        _model.addNode(lnode);
-//        return lnode;
-//      }
-//    }
+    //    if (!p_this_data) {
+    //      /*
+    //             Special rule for observable functions, which exist both as
+    //             a Function and a Distribution.  If the node is unobserved,
+    //             and we find a function matched to the distribution in
+    //             obsFuncTab, then we create a Logical Node instead.
+    //       */
+    //      FunctionPtr const &func = obsFuncTab().find(dist);
+    //      if (!isNULL(func)) {
+    //        //FIXME: Why are we not using a factory here?
+    //        LogicalNode *lnode = LogicalFactory::newNode(func, parameters);
+    //        _model.addNode(lnode);
+    //        return lnode;
+    //      }
+    //    }
 
 
     // FIXME: copied from JAGS 3.1.0 which has a P_INTERVAL treeClass value
-//    /*
-//       We allow BUGS-style interval censoring notation for
-//       compatibility but only allow it if there are no free parameters
-//       in the distribution
-//    */
-//    if (stoch_relation->parameters().size() == 3) {
-//        ParseTree const *t = stoch_relation->parameters()[2];
-//        if (t->treeClass() == P_INTERVAL) {
-//            for (unsigned int i = 0; i < parameters.size(); ++i) {
-//                if (!parameters[i]->isObserved()) {
-//                    CompileError(stoch_relation,
-//                                 "BUGS I(,) notation is not allowed unless",
-//                                 "all parameters are fixed");
-//                }
-//            }
-//        }
-//    }
+    //    /*
+    //       We allow BUGS-style interval censoring notation for
+    //       compatibility but only allow it if there are no free parameters
+    //       in the distribution
+    //    */
+    //    if (stoch_relation->parameters().size() == 3) {
+    //        ParseTree const *t = stoch_relation->parameters()[2];
+    //        if (t->treeClass() == P_INTERVAL) {
+    //            for (unsigned int i = 0; i < parameters.size(); ++i) {
+    //                if (!parameters[i]->isObserved()) {
+    //                    CompileError(stoch_relation,
+    //                                 "BUGS I(,) notation is not allowed unless",
+    //                                 "all parameters are fixed");
+    //                }
+    //            }
+    //        }
+    //    }
 
     Bool obs = p_this_data;
 
-    NodeId snode_id = model_.GraphPtr()->AddStochasticNode(p_dist, parameters, obs, lower_bound_id, upper_bound_id);
+    NodeId snode_id = model_.GraphPtr()->AddStochasticNode(p_dist,
+                                                           parameters,
+                                                           obs,
+                                                           lower_bound_id,
+                                                           upper_bound_id);
 
-     // If Node is observed, set the data
-     if (obs)
-       model_.GraphPtr()->SetObsValue(snode_id, p_this_data);
+    // If Node is observed, set the data
+    if (obs)
+      model_.GraphPtr()->SetObsValue(snode_id, p_this_data);
 
     return snode_id;
   }
-
 
   NodeId Compiler::allocateLogical(ParseTree const *pRelation)
   {
@@ -751,10 +774,14 @@ namespace Biips
         ValArray::Ptr pVal(new ValArray(1, Scalar(expression->value())));
         node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
         /* The reason we aren't using a ConstantFactory here is to ensure
-             that the nodes are correctly named */
+         that the nodes are correctly named */
         break;
       }
-      case P_VAR: case P_FUNCTION: case P_LINK: case P_LENGTH: case P_DIM:
+      case P_VAR:
+      case P_FUNCTION:
+      case P_LINK:
+      case P_LENGTH:
+      case P_DIM:
         node_id = GetParameter(expression);
         break;
       default:
@@ -763,8 +790,8 @@ namespace Biips
     }
 
     /*
-        Check that there are no values in the data table corresponding to
-        this node.
+     Check that there are no values in the data table corresponding to
+     this node.
      */
     ParseTree *var = pRelation->parameters()[0];
     std::map<String, MultiArray>::const_iterator q = dataMap_.find(var->name());
@@ -788,7 +815,6 @@ namespace Biips
     return node_id;
   }
 
-
   void Compiler::allocate(ParseTree const *pRelations)
   {
     if (isResolvedFlags_[nRelations_])
@@ -796,7 +822,7 @@ namespace Biips
 
     NodeId node_id = NULL_NODEID;
 
-    switch(pRelations->treeClass())
+    switch (pRelations->treeClass())
     {
       case P_STOCHREL:
         node_id = allocateStochastic(pRelations);
@@ -817,7 +843,8 @@ namespace Biips
       {
         //Undeclared array. It's size is inferred from the dimensions of
         //the newly created node
-        symtab.AddVariable(var->name(), model_.GraphPtr()->GetNode(node_id).Dim());
+        symtab.AddVariable(var->name(),
+                           model_.GraphPtr()->GetNode(node_id).Dim());
         const NodeArray & array = symtab.GetNodeArray(var->name());
         symtab.InsertNode(node_id, var->name(), array.Range()); // TODO check this code
         //array.Insert(node_id, array.Range());
@@ -839,7 +866,6 @@ namespace Biips
       isResolvedFlags_[nRelations_] = true;
     }
   }
-
 
   void Compiler::setConstantMask(ParseTree const *pRelations)
   {
@@ -865,19 +891,18 @@ namespace Biips
     }
   }
 
-
   void Compiler::getArrayDim(ParseTree const *pTree)
   {
     /*
-       Called by traverseTree, this function calculates the size
-       of all arrays from the left-hand side of all
-       relations, and stores the results in the map nodeArrayRangesMap_.
+     Called by traverseTree, this function calculates the size
+     of all arrays from the left-hand side of all
+     relations, and stores the results in the map nodeArrayRangesMap_.
      */
 
     ParseTree const *var = pTree->parameters()[0];
     const String & name = var->name();
 
-    if(var->parameters().empty())
+    if (var->parameters().empty())
     {
       //No index expession => No info on array size
       return;
@@ -902,7 +927,8 @@ namespace Biips
       //Check against the existing entry, and modify if necessary
       Size ndim = it->second[0].size();
       if (new_range.NDim(false) != ndim)
-        throw CompileError(var, String("Inconsistent dimensiosn for array ") + name);
+        throw CompileError(var, String("Inconsistent dimensiosn for array ")
+            + name);
 
       else
       {
@@ -915,65 +941,64 @@ namespace Biips
     }
   }
 
-
   void Compiler::writeConstantData(ParseTree const *pRelations)
   {
-      /*
-         Values supplied in the data table, but which DO NOT
-         appear on the left-hand side of a relation, are constants.
-         We have to find these values in order to create the
-         constant nodes that form the top level of any graphical
-         model.
-      */
+    /*
+     Values supplied in the data table, but which DO NOT
+     appear on the left-hand side of a relation, are constants.
+     We have to find these values in order to create the
+     constant nodes that form the top level of any graphical
+     model.
+     */
 
-      //First we set up the constant mask, setting all values to true by
-      //default
-      for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
-          it != dataMap_.end(); ++it)
+    //First we set up the constant mask, setting all values to true by
+    //default
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
+        != dataMap_.end(); ++it)
+    {
+      std::pair<String, Flags> a_pair;
+      a_pair.first = it->first;
+      a_pair.second = Flags(it->second.Length(), true);
+      constantMaskMap_.insert(a_pair);
+    }
+
+    //Now traverse the parse tree, setting node array subsets that
+    //correspond to the left-hand side of any relation to be false
+    traverseTree(pRelations, &Compiler::setConstantMask);
+
+    //Create a temporary copy of the data table containing only
+    //data for constant nodes
+    std::map<String, MultiArray> temp_data_table;
+    // Caution: the default MultiArray copy constructor is copying pointers.
+    // We do not want a direct copy of dataMap_ because we would obtain copies of the pointers
+    // and modifications of temp_data_table values would apply to dataMap_.
+    // We need to explicitly copy the values of MultiArrays.
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
+        != dataMap_.end(); ++it)
+    {
+      // allocate memory
+      DimArray::Ptr p_dim(new DimArray(it->second.Dim()));
+      ValArray::Ptr p_val(new ValArray(it->second.Values()));
+      temp_data_table.insert(std::make_pair(it->first, MultiArray(p_dim, p_val)));
+    }
+
+    for (std::map<String, MultiArray>::iterator it = temp_data_table.begin(); it
+        != temp_data_table.end(); ++it)
+    {
+      const String & name = it->first;
+      MultiArray & temp_data = it->second;
+      const Flags & const_mask = constantMaskMap_.find(name)->second;
+      for (Size i = 0; i < temp_data.Length(); ++i)
       {
-          std::pair<String, Flags> a_pair;
-          a_pair.first = it->first;
-          a_pair.second = Flags(it->second.Length(), true);
-          constantMaskMap_.insert(a_pair);
-      }
-
-      //Now traverse the parse tree, setting node array subsets that
-      //correspond to the left-hand side of any relation to be false
-      traverseTree(pRelations, &Compiler::setConstantMask);
-
-      //Create a temporary copy of the data table containing only
-      //data for constant nodes
-      std::map<String, MultiArray> temp_data_table;
-      // Caution: the default MultiArray copy constructor is copying pointers.
-      // We do not want a direct copy of dataMap_ because we would obtain copies of the pointers
-      // and modifications of temp_data_table values would apply to dataMap_.
-      // We need to explicitly copy the values of MultiArrays.
-      for(std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
-          it != dataMap_.end(); ++it)
-      {
-        temp_data_table.insert(std::make_pair(it->first,
-            MultiArray(it->second.Dim(), it->second.Values())));
-      }
-
-
-      for(std::map<String, MultiArray>::iterator it = temp_data_table.begin();
-          it != temp_data_table.end(); ++it)
-      {
-        const String & name = it->first;
-        MultiArray & temp_data = it->second;
-        const Flags & const_mask = constantMaskMap_.find(name)->second;
-        for (Size i = 0; i < temp_data.Length(); ++i)
+        if (!const_mask[i])
         {
-          if (!const_mask[i])
-          {
-            temp_data.Values()[i] = BIIPS_REALNA;
-          }
+          temp_data.Values()[i] = BIIPS_REALNA;
         }
       }
+    }
 
-      model_.GetSymbolTable().WriteData(temp_data_table);
+    model_.GetSymbolTable().WriteData(temp_data_table);
   }
-
 
   void Compiler::WriteRelations(ParseTree const *pRelations)
   {
@@ -999,21 +1024,21 @@ namespace Biips
     isResolvedFlags_.clear();
   }
 
-
-  void Compiler::traverseTree(ParseTree const * pRelations, CompilerMemFn fun,
-      Bool resetCounter)
+  void Compiler::traverseTree(ParseTree const * pRelations,
+                              CompilerMemFn fun,
+                              Bool resetCounter)
   {
     /*
-       Traverse parse tree, expanding FOR loops and applying function
-       fun to relations.
+     Traverse parse tree, expanding FOR loops and applying function
+     fun to relations.
      */
 
     if (resetCounter)
       nRelations_ = 0;
 
     const std::vector<ParseTree*> & relation_list = pRelations->parameters();
-    for (std::vector<ParseTree*>::const_iterator it_p_tree = relation_list.begin();
-        it_p_tree != relation_list.end(); ++it_p_tree)
+    for (std::vector<ParseTree*>::const_iterator it_p_tree =
+        relation_list.begin(); it_p_tree != relation_list.end(); ++it_p_tree)
     {
       ParseTree *var;
 
@@ -1031,7 +1056,8 @@ namespace Biips
             counterMap_.erase(var->name());
           }
           break;
-        case P_STOCHREL: case P_DETRMREL:
+        case P_STOCHREL:
+        case P_DETRMREL:
           (this->*fun)(*it_p_tree);
           nRelations_++;
           break;
@@ -1042,10 +1068,10 @@ namespace Biips
     }
   }
 
-
-  Compiler::Compiler(BUGSModel & model, const std::map<String, MultiArray> & dataMap)
-   : model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0),
-     strictResolution_(false), indexExpression_(0)
+  Compiler::Compiler(BUGSModel & model,
+                     const std::map<String, MultiArray> & dataMap) :
+    model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0),
+        strictResolution_(false), indexExpression_(0)
   {
     if (!model_.GraphPtr()->Empty())
       throw LogicError("Non empty graph in Compiler constructor.");
@@ -1053,17 +1079,16 @@ namespace Biips
       throw LogicError("Non empty symbol table in Compiler constructor.");
   }
 
-
   void Compiler::DeclareVariables(const Types<ParseTree*>::Array & pVariables)
   {
     Types<ParseTree*>::Array::const_iterator it_p_var;
-    for (it_p_var = pVariables.begin() ; it_p_var != pVariables.end(); ++it_p_var)
+    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end(); ++it_p_var)
     {
       if ((*it_p_var)->treeClass() != P_VAR)
         throw std::invalid_argument("Expected variable expression");
     }
 
-    for (it_p_var = pVariables.begin() ; it_p_var != pVariables.end(); ++it_p_var)
+    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end(); ++it_p_var)
     {
       ParseTree const * node_dec = *it_p_var;
       const String & name = node_dec->name();
@@ -1081,23 +1106,26 @@ namespace Biips
         {
           Int dim_i;
           if (!IndexExpression(node_dec->parameters()[i], dim_i))
-            throw CompileError(node_dec, String("Unable to calculate dimensions of node ") + name);
+            throw CompileError(node_dec,
+                               String("Unable to calculate dimensions of node ")
+                                   + name);
           if (dim_i <= 0)
             // FIXME
-            throw CompileError(node_dec, String("Non-positive dimension for node ") + name + " , dimension = " + print(dim_i));
-          dim[i] = static_cast<Size>(dim_i);
+            throw CompileError(node_dec,
+                               String("Non-positive dimension for node ")
+                                   + name + " , dimension = " + print(dim_i));
+          dim[i] = static_cast<Size> (dim_i);
         }
         model_.GetSymbolTable().AddVariable(name, dim);
       }
     }
   }
 
-
   void Compiler::UndeclaredVariables(ParseTree const *pRelations)
   {
     // Get undeclared variables from data table
-    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
-        it != dataMap_.end(); ++it)
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
+        != dataMap_.end(); ++it)
     {
       const String & name = it->first;
       if (model_.GetSymbolTable().Contains(name))
@@ -1105,10 +1133,10 @@ namespace Biips
         const NodeArray & array = model_.GetSymbolTable().GetNodeArray(name);
         if (it->second.Dim() != array.Range().Dim(false))
         {
-          throw RuntimeError(String("Dimensions of ") + name +
-              " in declaration (" + print(array.Range()) +
-              ") conflict with dimensions in data (" +
-              print(IndexRange(it->second.Dim())) + ")");
+          throw RuntimeError(String("Dimensions of ") + name
+              + " in declaration (" + print(array.Range())
+              + ") conflict with dimensions in data ("
+              + print(IndexRange(it->second.Dim())) + ")");
         }
       }
       else
@@ -1128,15 +1156,18 @@ namespace Biips
       if (model_.GetSymbolTable().Contains(it->first))
       {
         //Node already declared. Check consistency
-        const NodeArray & array = model_.GetSymbolTable().GetNodeArray(it->first);
+        const NodeArray & array =
+            model_.GetSymbolTable().GetNodeArray(it->first);
         const Indices & upper = array.Range().Upper();
         if (upper.size() != it->second[1].size())
-          throw RuntimeError(String("Dimension mismatch between data and model for node ") + it->first);
+          throw RuntimeError(String("Dimension mismatch between data and model for node ")
+              + it->first);
 
         for (Size j = 0; j < upper.size(); ++j)
         {
           if (it->second[1][j] > upper[j])
-            throw RuntimeError(String("Index out of range for node ") + it->first);
+            throw RuntimeError(String("Index out of range for node ")
+                + it->first);
         }
       }
       else
@@ -1150,7 +1181,7 @@ namespace Biips
           if (upper[j] <= 0)
             throw RuntimeError(String("Invalid index for node ") + it->first);
           else
-            dim[j] = static_cast<Size>(upper[j]);
+            dim[j] = static_cast<Size> (upper[j]);
         }
 
         model_.GetSymbolTable().AddVariable(it->first, dim);
@@ -1158,17 +1189,15 @@ namespace Biips
     }
   }
 
-
   FunctionTable & Compiler::FuncTab()
   {
     static FunctionTable funcTab_;
     return funcTab_;
   }
 
-
   DistributionTable & Compiler::DistTab()
   {
-    static DistributionTable  distTab_;
+    static DistributionTable distTab_;
     return distTab_;
   }
 

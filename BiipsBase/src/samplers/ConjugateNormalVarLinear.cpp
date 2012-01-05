@@ -79,11 +79,13 @@ namespace Biips
     NodeId prior_mean_id = node.Parents()[0];
     NodeId prior_var_id = node.Parents()[1];
 
-    Scalar prior_mean = getNodeValue(prior_mean_id, graph_, *this).ScalarView();
+    static ValArray prior_mean;
+    prior_mean = getNodeValue(prior_mean_id, graph_, *this).Values();
     Scalar prior_var = getNodeValue(prior_var_id, graph_, *this).ScalarView();
 
     Scalar like_var_inv = 0.0;
-    Scalar like_mean = 0.0;
+    static ValArray like_mean(1);
+    like_mean[0] = 0.0;
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
     boost::tie(it_offspring, it_offspring_end)
@@ -93,29 +95,38 @@ namespace Biips
     {
       graph_.VisitNode(*it_offspring, like_form_vis);
       like_var_inv += like_form_vis.GetVarInv();
-      like_mean += like_form_vis.GetMean();
+      like_mean[0] += like_form_vis.GetMean();
       ++it_offspring;
     }
 
-    Scalar post_var = 1 / (1 / prior_var + like_var_inv);
-    Scalar post_mean = post_var * (prior_mean / prior_var + like_mean);
-    like_mean /= like_var_inv;
+    static ValArray post_var(1);
+    post_var[0] = 1 / (1 / prior_var + like_var_inv);
+    static ValArray post_mean(1);
+    post_mean[0] = post_var[0] * (prior_mean[0] / prior_var + like_mean[0]);
+    like_mean[0] /= like_var_inv;
 
-    MultiArray::Array post_param_values(2);
-    post_param_values[0] = MultiArray(post_mean);
-    post_param_values[1] = MultiArray(post_var);
-    nodeValuesMap()[nodeId_]
-        = DNormVar::Instance()->Sample(post_param_values,
-                                       NULL_MULTIARRAYPAIR,
-                                       *pRng_).ValuesPtr();
+    static NumArray::Array post_param_values(2);
+    post_param_values[0].SetPtr(P_SCALAR_DIM.get(), &post_mean);
+    post_param_values[1].SetPtr(P_SCALAR_DIM.get(), &post_var);
 
-    MultiArray::Array norm_const_param_values(2);
-    norm_const_param_values[0] = MultiArray(like_mean);
-    norm_const_param_values[1] = MultiArray(prior_var + 1 / like_var_inv);
+    //allocate memory
+    nodeValuesMap()[nodeId_].reset(new ValArray(1));
+    //sample
+    DNormVar::Instance()->Sample(*nodeValuesMap()[nodeId_],
+                                 post_param_values,
+                                 NULL_NUMARRAYPAIR,
+                                 *pRng_);
+
+    static NumArray::Array norm_const_param_values(2);
+    norm_const_param_values[0].SetPtr(P_SCALAR_DIM.get(), &like_mean);
+    static ValArray norm_const_var(1);
+    norm_const_var[0] = prior_var + 1 / like_var_inv;
+    norm_const_param_values[1].SetPtr(P_SCALAR_DIM.get(), &norm_const_var);
     logIncrementalWeight_
-        = DNormVar::Instance()->LogDensity(MultiArray(prior_mean),
+        = DNormVar::Instance()->LogDensity(NumArray(P_SCALAR_DIM.get(),
+                                                    &prior_mean),
                                            norm_const_param_values,
-                                           NULL_MULTIARRAYPAIR); // FIXME Boundaries
+                                           NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(logIncrementalWeight_))
       throw RuntimeError("Failure to calculate log incremental weight.");
     // TODO optimize computation removing constant terms

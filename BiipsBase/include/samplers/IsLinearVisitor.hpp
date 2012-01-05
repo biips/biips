@@ -20,17 +20,10 @@ namespace Biips
 
   enum LinearFuncType
   {
-    ADD,
-    MULTIPLY,
-    MAT_MULT,
-    SUBSTRACT,
-    DIVIDE,
-    NEG
+    ADD, MULTIPLY, MAT_MULT, SUBSTRACT, DIVIDE, NEG
   };
 
-
   const std::map<String, LinearFuncType> & linearFuncMap();
-
 
   // nodeB is expected to be a StochasticNode from the nodeSequence
   Bool isLinear(NodeId nodeA, NodeId nodeB, const Graph & graph);

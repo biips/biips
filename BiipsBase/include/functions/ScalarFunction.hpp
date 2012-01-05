@@ -17,7 +17,7 @@ namespace Biips
 {
 
   template<typename UnaryOperator>
-  class UnaryScalarFunction : public Function
+  class UnaryScalarFunction: public Function
   {
   public:
     typedef Function BaseType;
@@ -25,20 +25,27 @@ namespace Biips
     typedef typename Types<SelfType>::Ptr Ptr;
 
   protected:
-    UnaryScalarFunction(const String & name) : BaseType(name, 1) {};
+    UnaryScalarFunction(const String & name) :
+      BaseType(name, 1)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const { return true; }
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
+    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return true;
+    }
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
-    virtual ~UnaryScalarFunction() {};
+    virtual ~UnaryScalarFunction()
+    {
+    }
   };
 
-
   template<typename BinaryOperator>
-  class BinaryScalarFunction : public Function
+  class BinaryScalarFunction: public Function
   {
   public:
     typedef Function BaseType;
@@ -46,20 +53,25 @@ namespace Biips
     typedef typename Types<SelfType>::Ptr Ptr;
 
   protected:
-    BinaryScalarFunction(const String & name) : BaseType(name, 2) {};
+    BinaryScalarFunction(const String & name) :
+      BaseType(name, 2)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
+    virtual Bool
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
-    virtual ~BinaryScalarFunction() {};
+    virtual ~BinaryScalarFunction()
+    {
+    }
   };
 
-
   template<typename BinaryOperator>
-  class VariableScalarFunction : public Function
+  class VariableScalarFunction: public Function
   {
   public:
     typedef Function BaseType;
@@ -67,31 +79,32 @@ namespace Biips
     typedef typename Types<SelfType>::Ptr Ptr;
 
   protected:
-    VariableScalarFunction(const String & name) : BaseType(name, 0) {};
+    VariableScalarFunction(const String & name) :
+      BaseType(name, 0)
+    {
+    }
 
-    virtual Bool checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const MultiArray::Array & paramValues) const = 0;
+    virtual Bool
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual MultiArray eval(const MultiArray::Array & paramValues) const;
+    virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
-    virtual ~VariableScalarFunction() {};
+    virtual ~VariableScalarFunction()
+    {
+    }
   };
 
-
-
-
   template<typename UnaryOperator>
-  MultiArray UnaryScalarFunction<UnaryOperator>::eval(const MultiArray::Array & paramValues) const
+  void UnaryScalarFunction<UnaryOperator>::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const MultiArray & val = paramValues[0];
+    const NumArray & val = paramValues[0];
 
     static UnaryOperator op;
 
-    MultiArray ans = MultiArray(val.DimPtr(), val.Values().Apply(op));
-    return ans;
+    std::transform(val.Values().begin(), val.Values().end(), values.begin(), op);
   }
-
 
   template<typename UnaryOperator>
   DimArray UnaryScalarFunction<UnaryOperator>::dim(const Types<DimArray::Ptr>::Array & paramDims) const
@@ -100,54 +113,67 @@ namespace Biips
   }
 
   template<typename BinaryOperator>
-  Bool BinaryScalarFunction<BinaryOperator>::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  Bool BinaryScalarFunction<BinaryOperator>::checkParamDims(const Types<
+      DimArray::Ptr>::Array & paramDims) const
   {
-    if(paramDims[0]->IsScalar())
+    if (paramDims[0]->IsScalar())
       return true;
-    else if(paramDims[1]->IsScalar())
+    else if (paramDims[1]->IsScalar())
       return true;
     else
       return *paramDims[0] == *paramDims[1];
   }
 
-
   template<typename BinaryOperator>
   DimArray BinaryScalarFunction<BinaryOperator>::dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
-    if ( paramDims[0]->IsScalar() )
+    if (paramDims[0]->IsScalar())
       return *paramDims[1];
     else
       return *paramDims[0];
   }
 
-
   template<typename BinaryOperator>
-  MultiArray BinaryScalarFunction<BinaryOperator>::eval(const MultiArray::Array & paramValues) const
+  void BinaryScalarFunction<BinaryOperator>::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const MultiArray & left = paramValues[0];
-    const MultiArray & right = paramValues[1];
+    const NumArray & left = paramValues[0];
+    const NumArray & right = paramValues[1];
 
     static BinaryOperator op;
 
-    MultiArray ans;
-    if ( left.IsScalar() )
-      ans = MultiArray(right.DimPtr(), right.Values().Apply(std::bind1st(op, left.ScalarView())));
-    else if ( right.IsScalar() )
-      ans = MultiArray(left.DimPtr(), left.Values().Apply(std::bind2nd(op, right.ScalarView())));
+    if (left.IsScalar())
+    {
+      std::transform(right.Values().begin(),
+                     right.Values().end(),
+                     values.begin(),
+                     std::bind1st(op, left.ScalarView()));
+    }
+    else if (right.IsScalar())
+    {
+      std::transform(left.Values().begin(),
+                     left.Values().end(),
+                     values.begin(),
+                     std::bind2nd(op, right.ScalarView()));
+    }
     else
-      ans = MultiArray(left.DimPtr(), left.Values().Apply(op, right.Values()));
-    return ans;
+    {
+      std::transform(left.Values().begin(),
+                     left.Values().end(),
+                     right.Values().begin(),
+                     values.begin(),
+                     op);
+    }
   }
 
-
   template<typename BinaryOperator>
-  Bool VariableScalarFunction<BinaryOperator>::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  Bool VariableScalarFunction<BinaryOperator>::checkParamDims(const Types<
+      DimArray::Ptr>::Array & paramDims) const
   {
     Bool ans = true;
     DimArray::Ptr p_ref_dim;
-    for (Size i=0; i<paramDims.size() && ans; ++i)
+    for (Size i = 0; i < paramDims.size() && ans; ++i)
     {
-      if(paramDims[i]->IsScalar())
+      if (paramDims[i]->IsScalar())
         continue;
       else if (!p_ref_dim)
         p_ref_dim = paramDims[i];
@@ -157,16 +183,16 @@ namespace Biips
     return ans;
   }
 
-
   template<typename BinaryOperator>
-  DimArray VariableScalarFunction<BinaryOperator>::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  DimArray VariableScalarFunction<BinaryOperator>::dim(const Types<
+      DimArray::Ptr>::Array & paramDims) const
   {
     DimArray::Ptr p_ref_dim = paramDims[0];
     if (p_ref_dim->IsScalar())
     {
-      for (Size i=1; i<paramDims.size(); ++i)
+      for (Size i = 1; i < paramDims.size(); ++i)
       {
-        if(paramDims[i]->IsScalar())
+        if (paramDims[i]->IsScalar())
           continue;
         else
         {
@@ -178,29 +204,37 @@ namespace Biips
     return *p_ref_dim;
   }
 
-
   template<typename BinaryOperator>
-  MultiArray VariableScalarFunction<BinaryOperator>::eval(const MultiArray::Array & paramValues) const
+  void VariableScalarFunction<BinaryOperator>::eval(ValArray & values,
+                                                    const NumArray::Array & paramValues) const
   {
     static BinaryOperator op;
 
-    MultiArray ans;
-    ans.Alloc(paramValues[0]);
-    for (Size i=1; i<paramValues.size(); ++i)
+    if (paramValues[0].IsScalar())
+      std::fill(values.begin(), values.end(), paramValues[0].ScalarView());
+    else
+      values.assign(paramValues[0].Values().begin(),
+                    paramValues[0].Values().end());
+
+    for (Size i = 1; i < paramValues.size(); ++i)
     {
-      const MultiArray & right = paramValues[i];
-      if ( ans.IsScalar() )
+      const NumArray & right = paramValues[i];
+      if (right.IsScalar())
       {
-        Scalar s = ans.ScalarView();
-        ans.Alloc(right);
-        ans.Values().SelfApply(std::bind1st(op, s));
+        std::transform(values.begin(),
+                       values.end(),
+                       values.begin(),
+                       std::bind2nd(op, right.ScalarView()));
       }
-      else if ( right.IsScalar() )
-        ans.Values().SelfApply(std::bind2nd(op, right.ScalarView()));
       else
-        ans.Values().SelfApply(op, right.Values());
+      {
+        std::transform(values.begin(),
+                       values.end(),
+                       right.Values().begin(),
+                       values.begin(),
+                       op);
+      }
     }
-    return ans;
   }
 }
 

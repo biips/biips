@@ -35,16 +35,17 @@ typedef map<string, vector<MultiArray> > StoredDataMap;
 typedef map<string, map<Size, vector<Scalar> > > StoredErrorsMap;
 
 void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
-    const vector<string> & sources_names,
-    vector<string> & monitor,
-    StoredDimMap & dim_map,
-    StoredDataMap & data_map,
-    Scalar & log_norm_const_bench,
-    StoredDataMap & bench_filter_map,
-    StoredDataMap & bench_smooth_map,
-    StoredErrorsMap & errors_filter_map,
-    StoredErrorsMap & errors_smooth_map);
+                       const vector<string> & sources_names,
+                       vector<string> & monitor,
+                       StoredDimMap & dim_map,
+                       StoredDataMap & data_map,
+                       Scalar & log_norm_const_bench,
+                       StoredDataMap & bench_filter_map,
+                       StoredDataMap & bench_smooth_map,
+                       StoredErrorsMap & errors_filter_map,
+                       StoredErrorsMap & errors_smooth_map);
 
-map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataMap);
+map<String, MultiArray>
+    transformStoredDataMap(const StoredDataMap & storedDataMap);
 
 #endif /* BIIPS_STOREUNREGISTERED_HPP_ */
