@@ -33,7 +33,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/math_toolkit}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/random}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/distribution_common}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/distribution_toolkit}&quot;"/>
@@ -555,7 +554,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/math_toolkit}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/random}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/distribution_common}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/distribution_toolkit}&quot;"/>

@@ -230,7 +230,7 @@ namespace Biips
 
   NumArray::Array getParamValues(NodeId nodeId,
                                  const Graph & graph,
-                                 const Monitor & monitor,
+                                 const Types<Monitor::Ptr>::Array & monitors,
                                  Size particleIndex)
   {
     GraphTypes::ParentIterator it_param, it_param_end;
@@ -243,13 +243,21 @@ namespace Biips
     if (is_bounded_vis.IsLowerBounded())
       --it_param_end;
 
-    NumArray::Array param_values(std::distance(it_param, it_param_end));
-    Size i = 0;
-    while (it_param != it_param_end)
+    Size n_par = std::distance(it_param, it_param_end);
+
+    if (monitors.size() != n_par)
+      throw LogicError("getParamValues: incorrect monitors size.");
+
+    NumArray::Array param_values(n_par);
+    for (Size i = 0; it_param != it_param_end; ++it_param, ++i)
     {
-      param_values[i] = getNodeValue(*it_param, graph, monitor, particleIndex);
-      ++it_param;
-      ++i;
+      if (!monitors[i])
+        throw LogicError("getParamValues: null monitor pointer.");
+
+      param_values[i] = getNodeValue(*it_param,
+                                     graph,
+                                     *monitors[i],
+                                     particleIndex);
     }
     return param_values;
   }
@@ -309,7 +317,7 @@ namespace Biips
 
   NumArray::Pair getBoundValues(NodeId nodeId,
                                 const Graph & graph,
-                                const Monitor & monitor,
+                                const Types<Monitor::Ptr>::Pair & monitors,
                                 Size particleIndex)
   {
     GraphTypes::ParentIterator it_param, it_param_end;
@@ -322,18 +330,24 @@ namespace Biips
 
     if (is_bounded_vis.IsUpperBounded())
     {
+      if (!monitors.second)
+        throw LogicError("getBoundValues: null monitor pointer.");
+
       --it_param_end;
       bound_values.second = getNodeValue(*it_param_end,
                                          graph,
-                                         monitor,
+                                         *monitors.second,
                                          particleIndex);
     }
     if (is_bounded_vis.IsLowerBounded())
     {
+      if (!monitors.first)
+        throw LogicError("getBoundValues: null monitor pointer.");
+
       --it_param_end;
       bound_values.first = getNodeValue(*it_param_end,
                                         graph,
-                                        monitor,
+                                        *monitors.first,
                                         particleIndex);
     }
 
@@ -436,15 +450,16 @@ namespace Biips
   }
 
   void getSupportValues(ValArray & lower,
-                                  ValArray & upper,
-                                  NodeId nodeId,
-                                  const Graph & graph,
-                                  const Monitor & monitor,
-                                  Size particleIndex)
+                        ValArray & upper,
+                        NodeId nodeId,
+                        const Graph & graph,
+                        const Types<Monitor::Ptr>::Array & paramMonitors,
+                        const Types<Monitor::Ptr>::Pair & boundMonitors,
+                        Size particleIndex)
   {
     NumArray::Array param_values = getParamValues(nodeId,
                                                   graph,
-                                                  monitor,
+                                                  paramMonitors,
                                                   particleIndex);
     UnboundedSupportVisitor unbound_support_vis(param_values, lower, upper);
     graph.VisitNode(nodeId, unbound_support_vis);
@@ -456,7 +471,7 @@ namespace Biips
     {
       NumArray::Pair bound_values = getBoundValues(nodeId,
                                                    graph,
-                                                   monitor,
+                                                   boundMonitors,
                                                    particleIndex);
 
       if (!bound_values.first.IsNULL())

@@ -30,10 +30,9 @@ namespace Biips
     Scalar y = (t - mu_) * sqrtTau_;
     using std::log;
     using std::pow;
-    using boost::math::tgamma;
-    return log(tgamma(0.5 * (k_ + 1.0))) - log(tgamma(0.5 * k_))
-        + log(sqrtTau_) - 0.5 * log(k_ * M_PI) - 0.5 * (k_ + 1.0) * log(1.0
-        + pow(y, 2) / k_);
+    using boost::math::lgamma;
+    return lgamma(0.5 * (k_ + 1.0)) - lgamma(0.5 * k_) + log(sqrtTau_) - 0.5
+        * log(k_ * M_PI) - 0.5 * (k_ + 1.0) * log(1.0 + pow(y, 2) / k_);
   }
 
   Scalar TDistType::cdf(Scalar t) const

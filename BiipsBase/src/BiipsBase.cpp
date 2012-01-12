@@ -22,6 +22,7 @@
 #include "functions/Step.hpp"
 #include "functions/Transpose.hpp"
 #include "functions/Sum.hpp"
+#include "functions/Inverse.hpp"
 
 #include "distributions/DNorm.hpp"
 #include "distributions/DNormVar.hpp"
@@ -39,6 +40,8 @@
 #include "distributions/DT.hpp"
 #include "distributions/DWeib.hpp"
 #include "distributions/DPar.hpp"
+#include "distributions/DPois.hpp"
+#include "distributions/DF.hpp"
 
 #include "samplers/DiscreteOptimal.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
@@ -104,6 +107,7 @@ namespace Biips
 
     funcTab.Insert(Transpose::Instance());
     funcTab.Insert(Sum::Instance());
+    funcTab.Insert(Inverse::Instance());
 
     // TODO check returned boolean
     distTab.Insert(DNorm::Instance());
@@ -122,6 +126,8 @@ namespace Biips
     distTab.Insert(DT::Instance());
     distTab.Insert(DWeib::Instance());
     distTab.Insert(DPar::Instance());
+    distTab.Insert(DPois::Instance());
+    distTab.Insert(DF::Instance());
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
                                                                      true));

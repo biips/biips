@@ -47,9 +47,9 @@ namespace Biips
       Scalar shape = paramValues[0].ScalarView();
       Scalar inv_scale = paramValues[1].ScalarView();
       using std::log;
-      using boost::math::tgamma;
+      using boost::math::lgamma;
       return shape * log(inv_scale) + (shape - 1.0) * log(x) - inv_scale * x
-          - log(tgamma(shape));
+          - lgamma(shape);
     }
 
     MathDistType dist = mathDist(paramValues);

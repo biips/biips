@@ -1,37 +1,35 @@
 //                                               -*- C++ -*-
-/*! \file DBeta.hpp
- * \brief
- *
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
+/*! \file DF.hpp
+ * \brief 
+ * 
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
  */
 
-#ifndef BIIPS_DBETA_HPP_
-#define BIIPS_DBETA_HPP_
+#ifndef BIIPS_DF_HPP_
+#define BIIPS_DF_HPP_
 
 #include "distributions/BoostScalarDistribution.hpp"
-
-#include <boost/random/beta_distribution.hpp>
-#include <boost/math/distributions/beta.hpp>
+#include <boost/random/fisher_f_distribution.hpp>
+#include <boost/math/distributions/fisher_f.hpp>
 
 namespace Biips
 {
-  typedef boost::math::beta_distribution<Scalar> BetaMathDistType;
-  typedef boost::beta_distribution<Scalar> BetaRandomDistType;
 
-  class DBeta: public BoostScalarDistribution<BetaMathDistType,
-      BetaRandomDistType>
+  typedef boost::math::fisher_f_distribution<Scalar> FMathDistType;
+  typedef boost::fisher_f_distribution<Scalar> FRandomDistType;
+
+  class DF: public BoostScalarDistribution<FMathDistType, FRandomDistType>
   {
   public:
-    typedef DBeta SelfType;
-    typedef BoostScalarDistribution<BetaMathDistType, BetaRandomDistType>
-        BaseType;
+    typedef DF SelfType;
+    typedef BoostScalarDistribution<FMathDistType, FRandomDistType> BaseType;
 
   protected:
-    DBeta() :
-      BaseType("dbeta", 2, DIST_PROPORTION, false)
+    DF() :
+      BaseType("df", 2, DIST_POSITIVE, false)
     {
     }
     virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
@@ -49,9 +47,8 @@ namespace Biips
       static Distribution::Ptr p_instance(new SelfType());
       return p_instance;
     }
-    ;
   };
 
 }
 
-#endif /* BIIPS_DBETA_HPP_ */
+#endif /* BIIPS_DF_HPP_ */

@@ -63,7 +63,8 @@ namespace Biips
     }
 
   public:
-    NumArray() : pDim_(NULL), pValues_(NULL)
+    NumArray() :
+      pDim_(NULL), pValues_(NULL)
     {
     }
     explicit NumArray(DimArray * pDim, StorageType * pVal) :
@@ -256,23 +257,27 @@ namespace Biips
     typedef std::vector<NumArray> BaseType;
 
     NumArrayArray()
-    {}
-    NumArrayArray(Size s) : BaseType(s)
-    {}
+    {
+    }
+    NumArrayArray(Size s) :
+      BaseType(s)
+    {
+    }
   };
 
   // -----------------------------------------------------------------------------
   // NumArrayPair
   // -----------------------------------------------------------------------------
 
-  class NumArrayPair : public std::pair<NumArray, NumArray>
+  class NumArrayPair: public std::pair<NumArray, NumArray>
   {
   public:
     typedef NumArrayPair SelfType;
     typedef std::pair<NumArray, NumArray> BaseType;
 
     NumArrayPair()
-    {}
+    {
+    }
   };
 
   const NumArrayPair NULL_NUMARRAYPAIR;
@@ -342,12 +347,12 @@ namespace Biips
     void checkDimPtr() const
     {
       if (!pDim_)
-      throw LogicError("Can not access dimension of MultiArray: null pointer.");
+        throw LogicError("Can not access dimension of MultiArray: null pointer.");
     }
     void checkValuesPtr() const
     {
       if (!pValues_)
-      throw LogicError("Can not access values of MultiArray: null pointer.");
+        throw LogicError("Can not access values of MultiArray: null pointer.");
     }
 
   public:
@@ -361,8 +366,8 @@ namespace Biips
      * @param pValue values array shared pointer
      */
     MultiArray(const DimArray::Ptr & pDim,
-        const Types<StorageType>::Ptr & pValue) :
-    pDim_(pDim), pValues_(pValue)
+               const Types<StorageType>::Ptr & pValue) :
+      pDim_(pDim), pValues_(pValue)
     {
     } // TODO check dims
     Size NDim() const
@@ -542,15 +547,18 @@ namespace Biips
     typedef std::vector<MultiArray> BaseType;
 
     MultiArrayArray()
-    {}
-    MultiArrayArray(Size s) : BaseType(s)
-    {}
+    {
+    }
+    MultiArrayArray(Size s) :
+      BaseType(s)
+    {
+    }
 
     MultiArrayArray Clone() const
     {
       MultiArrayArray clone(size());
-      for (Size i = 0; i<size(); ++i)
-      clone[i] = (*this)[i].Clone();
+      for (Size i = 0; i < size(); ++i)
+        clone[i] = (*this)[i].Clone();
       return clone;
     }
   };
@@ -559,13 +567,14 @@ namespace Biips
   // MultiArrayPair
   // -----------------------------------------------------------------------------
 
-  class MultiArrayPair : public std::pair<MultiArray, MultiArray>
+  class MultiArrayPair: public std::pair<MultiArray, MultiArray>
   {
   public:
     typedef MultiArrayPair SelfType;
     typedef std::pair<MultiArray, MultiArray> BaseType;
     MultiArrayPair()
-    {}
+    {
+    }
 
     MultiArrayPair Clone() const
     {

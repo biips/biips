@@ -86,8 +86,7 @@ namespace Biips
     ublas::cholesky_invert(norm_const_cov);
 
     static Vector norm_const_mean;
-    norm_const_mean = ublas::prod(norm_const_cov,
-                                         Vector(LikeParamContrib[0]));
+    norm_const_mean = ublas::prod(norm_const_cov, Vector(LikeParamContrib[0]));
     norm_const_cov += Matrix(priorParamValues[1]);
 
     static NumArray::Array norm_const_param_values(2);

@@ -19,16 +19,14 @@
 namespace Biips
 {
 
-
   //! A values array class
   /*!
    * ValArray is the raw contiguous array container of data values.
    * It inherits publicly std::vector<Scalar>
    * and comes along with element-wise operators.
    */
-  class ValArray : public std::vector<Scalar>,
-  boost::arithmetic<ValArray,
-  boost::arithmetic<ValArray, Scalar> >
+  class ValArray: public std::vector<Scalar>, boost::arithmetic<ValArray,
+      boost::arithmetic<ValArray, Scalar> >
   {
   public:
     typedef std::vector<Scalar> BaseType;
@@ -39,18 +37,28 @@ namespace Biips
     /*!
      * Creates an empty ValArray.
      */
-    ValArray() {};
+    ValArray()
+    {
+    }
+
     /*!
      * Creates a ValArray with n elements.
      * @param n number of elements
      */
-    explicit ValArray(size_type n) : BaseType(n) {};
+    explicit ValArray(size_type n) :
+      BaseType(n)
+    {
+    }
+
     /*!
      * Creates a ValArray with n copies of val.
      * @param n number of elements
      * @param val value of the elements
      */
-    ValArray(size_type n, value_type val) : BaseType(n, val) {}
+    ValArray(size_type n, value_type val) :
+      BaseType(n, val)
+    {
+    }
     /*!
      * Creates a ValArray from a copy of a range.
      * Will copy the sequence from first to last excluded.
@@ -58,85 +66,87 @@ namespace Biips
      * @param last iterator on the last element of the range
      */
     template<typename InputIterator>
-    ValArray(InputIterator first, InputIterator last) : BaseType(first, last) {}
+    ValArray(InputIterator first, InputIterator last) :
+      BaseType(first, last)
+    {
+    }
 
     //! Unary minus operator
-    ValArray operator- () const;
+    ValArray operator-() const;
 
     //! Unary logical not operator
-    ValArray operator ! () const;
+    ValArray operator !() const;
 
     //! Plus assign operator.
     /*!
      * Adds rhs element-wise.
      * @param rhs must have the same size
      */
-    ValArray & operator += (const ValArray & rhs);
+    ValArray & operator +=(const ValArray & rhs);
     //! Scalar plus assign operator.
     /*!
      *
      * Adds val to each element.
      */
-    ValArray & operator += (Scalar val);
+    ValArray & operator +=(Scalar val);
     //! Minus assign operator.
     /*!
      *
      * Subtracts rhs element-wise.
      */
-    ValArray & operator -= (const ValArray & rhs);
+    ValArray & operator -=(const ValArray & rhs);
     //! Scalar minus assign operator.
     /*!
      *
      * Subtracts val to each element.
      */
-    ValArray & operator -= (Scalar val);
+    ValArray & operator -=(Scalar val);
     //! Multiply assign operator.
     /*!
      *
      * Multiplies by rhs element-wise.
      * @param rhs must have the same size
      */
-    ValArray & operator *= (const ValArray & rhs);
+    ValArray & operator *=(const ValArray & rhs);
     //! Scalar multiply assign operator.
     /*!
      *
      * Multiplies each element by val.
      */
-    ValArray & operator *= (Scalar val);
+    ValArray & operator *=(Scalar val);
     //! Divide assign operator.
     /*!
      *
      * Divides by rhs element-wise.
      * @param rhs must have the same size
      */
-    ValArray & operator /= (const ValArray & rhs);
+    ValArray & operator /=(const ValArray & rhs);
     //! Scalar divide assign operator.
     /*!
      *
      * Divides each element by val.
      */
-    ValArray & operator /= (Scalar val);
+    ValArray & operator /=(Scalar val);
 
-    ValArray operator == (const ValArray & rhs) const;
-    ValArray operator != (const ValArray & rhs) const;
-    ValArray operator > (const ValArray & rhs) const;
-    ValArray operator < (const ValArray & rhs) const;
-    ValArray operator >= (const ValArray & rhs) const;
-    ValArray operator <= (const ValArray & rhs) const;
+    ValArray operator ==(const ValArray & rhs) const;
+    ValArray operator !=(const ValArray & rhs) const;
+    ValArray operator >(const ValArray & rhs) const;
+    ValArray operator <(const ValArray & rhs) const;
+    ValArray operator >=(const ValArray & rhs) const;
+    ValArray operator <=(const ValArray & rhs) const;
 
-    ValArray operator == (Scalar val) const;
-    ValArray operator != (Scalar val) const;
-    ValArray operator > (Scalar val) const;
-    ValArray operator < (Scalar val) const;
-    ValArray operator >= (Scalar val) const;
-    ValArray operator <= (Scalar val) const;
+    ValArray operator ==(Scalar val) const;
+    ValArray operator !=(Scalar val) const;
+    ValArray operator >(Scalar val) const;
+    ValArray operator <(Scalar val) const;
+    ValArray operator >=(Scalar val) const;
+    ValArray operator <=(Scalar val) const;
 
-    ValArray operator && (const ValArray & rhs) const;
-    ValArray operator || (const ValArray & rhs) const;
+    ValArray operator &&(const ValArray & rhs) const;
+    ValArray operator ||(const ValArray & rhs) const;
 
-    ValArray operator && (Scalar val) const;
-    ValArray operator || (Scalar val) const;
-
+    ValArray operator &&(Scalar val) const;
+    ValArray operator ||(Scalar val) const;
 
     //! Sum computation
     /*!
@@ -149,20 +159,26 @@ namespace Biips
      * This method gives a convenient Scalar handle of the ValArray.
      * @return The first value of the array if size is 1
      */
-    Scalar ScalarView() const { return operator[](0); } // TODO throw exception
+    Scalar ScalarView() const
+    {
+      return operator[](0);
+    } // TODO throw exception
     /*!
      * Most of the ValArray objects will contain one scalar value.
      * This method gives a convenient Scalar handle of the ValArray.
      * @return A reference to the first value of the array if size is 1
      */
-    Scalar & ScalarView() { return operator[](0); } // TODO throw exception
+    Scalar & ScalarView()
+    {
+      return operator[](0);
+    } // TODO throw exception
 
     /*!
      * Applies an unary operator to each element of the ValArray.
      * @param op Unary operator. It can be a functor or a function pointer
      * @return The modified ValArray
      */
-    template <typename UnaryOperator>
+    template<typename UnaryOperator>
     ValArray Apply(UnaryOperator op) const;
 
     /*!
@@ -171,7 +187,7 @@ namespace Biips
      * @param rhs The right hand side operand ValArray
      * @return The result ValArray
      */
-    template <typename BinaryOperator>
+    template<typename BinaryOperator>
     ValArray Apply(BinaryOperator op, const ValArray & rhs) const;
 
     /*!
@@ -179,7 +195,7 @@ namespace Biips
      * The result is stored in this ValArray.
      * @param op Unary operator. It can be a functor or a function pointer
      */
-    template <typename UnaryOperator>
+    template<typename UnaryOperator>
     ValArray & SelfApply(UnaryOperator op);
 
     /*!
@@ -190,13 +206,12 @@ namespace Biips
      * @param rhs The right hand side operand ValArray
      * @return The result ValArray
      */
-    template <typename BinaryOperator>
+    template<typename BinaryOperator>
     ValArray & SelfApply(BinaryOperator op, const ValArray & rhs);
 
   };
 
-
-  template <typename UnaryOperator>
+  template<typename UnaryOperator>
   ValArray ValArray::Apply(UnaryOperator op) const
   {
     ValArray ans(size());
@@ -204,8 +219,7 @@ namespace Biips
     return ans;
   }
 
-
-  template <typename BinaryOperator>
+  template<typename BinaryOperator>
   ValArray ValArray::Apply(BinaryOperator op, const ValArray & rhs) const
   {
     ValArray ans(size());
@@ -213,33 +227,30 @@ namespace Biips
     return ans;
   }
 
-  template <typename UnaryOperator>
+  template<typename UnaryOperator>
   ValArray & ValArray::SelfApply(UnaryOperator op)
   {
     std::transform(begin(), end(), begin(), op);
     return *this;
   }
 
-
-  template <typename BinaryOperator>
+  template<typename BinaryOperator>
   ValArray & ValArray::SelfApply(BinaryOperator op, const ValArray & rhs)
   {
     std::transform(begin(), end(), rhs.begin(), begin(), op);
     return *this;
   }
 
+  ValArray operator -(Scalar val, const ValArray & rhs);
+  ValArray operator /(Scalar val, const ValArray & rhs);
 
-  ValArray operator - (Scalar val, const ValArray & rhs);
-  ValArray operator / (Scalar val, const ValArray & rhs);
-
-  ValArray operator == (Scalar val, const ValArray & rhs);
-  ValArray operator != (Scalar val, const ValArray & rhs);
-  ValArray operator > (Scalar val, const ValArray & rhs);
-  ValArray operator < (Scalar val, const ValArray & rhs);
-  ValArray operator >= (Scalar val, const ValArray & rhs);
-  ValArray operator <= (Scalar val, const ValArray & rhs);
+  ValArray operator ==(Scalar val, const ValArray & rhs);
+  ValArray operator !=(Scalar val, const ValArray & rhs);
+  ValArray operator >(Scalar val, const ValArray & rhs);
+  ValArray operator <(Scalar val, const ValArray & rhs);
+  ValArray operator >=(Scalar val, const ValArray & rhs);
+  ValArray operator <=(Scalar val, const ValArray & rhs);
 
 }
-
 
 #endif /* BIIPS_VALARRAY_HPP_ */

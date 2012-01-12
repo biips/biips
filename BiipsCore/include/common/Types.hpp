@@ -21,7 +21,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/fwd.hpp>
 
-
 //! The namespace where all @biips symbols live.
 namespace Biips
 {
@@ -48,9 +47,8 @@ namespace Biips
   //! %Numerical scalar type
   typedef Real Scalar;
 
-
   //! Template structure defining usual derived types from the parameter type T
-  template <typename T>
+  template<typename T>
   struct Types
   {
     typedef T SelfType; //!< The template type itself
@@ -116,7 +114,7 @@ namespace Biips
 
   const Size BIIPS_SIZEMIN = std::numeric_limits<Size>::min();
   const Size BIIPS_SIZEMAX = std::numeric_limits<Size>::max();
-  const Size BIIPS_SIZENA = BIIPS_SIZEMAX-1;
+  const Size BIIPS_SIZENA = BIIPS_SIZEMAX - 1;
 
   const Int BIIPS_INTMIN = std::numeric_limits<Int>::min();
   const Int BIIPS_INTMAX = std::numeric_limits<Int>::max();
@@ -126,16 +124,25 @@ namespace Biips
   const Real BIIPS_NEGINF = -std::numeric_limits<Real>::infinity();
   const Real BIIPS_POSINF = std::numeric_limits<Real>::infinity();
   const Real BIIPS_REALNAN = std::numeric_limits<Real>::quiet_NaN();
-  const Real BIIPS_REALNA = BIIPS_REALMAX * (1 - std::numeric_limits<Real>::epsilon());
+  const Real BIIPS_REALNA = BIIPS_REALMAX * (1
+      - std::numeric_limits<Real>::epsilon());
 
   const NodeId NULL_NODEID = BIIPS_SIZENA;
 
-  inline Bool isFinite(Scalar r) { return finite(r); }
+  inline Bool isFinite(Scalar r)
+  {
+    return finite(r);
+  }
 
-  inline Bool isNan(Scalar r) { return isnan(r); }
-  inline Bool isNan(Size s) { return isnan(s); }
+  inline Bool isNan(Scalar r)
+  {
+    return isnan(r);
+  }
+  inline Bool isNan(Size s)
+  {
+    return isnan(s);
+  }
 
 }
-
 
 #endif /* BIIPS_TYPES_HPP_ */
