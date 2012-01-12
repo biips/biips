@@ -1,37 +1,37 @@
 //                                               -*- C++ -*-
-/*! \file DBeta.hpp
- * \brief
- *
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
+/*! \file DPois.hpp
+ * \brief 
+ * 
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
  */
 
-#ifndef BIIPS_DBETA_HPP_
-#define BIIPS_DBETA_HPP_
+#ifndef BIIPS_DPOIS_HPP_
+#define BIIPS_DPOIS_HPP_
 
 #include "distributions/BoostScalarDistribution.hpp"
-
-#include <boost/random/beta_distribution.hpp>
-#include <boost/math/distributions/beta.hpp>
+#include <boost/random/poisson_distribution.hpp>
+#include <boost/math/distributions/poisson.hpp>
 
 namespace Biips
 {
-  typedef boost::math::beta_distribution<Scalar> BetaMathDistType;
-  typedef boost::beta_distribution<Scalar> BetaRandomDistType;
 
-  class DBeta: public BoostScalarDistribution<BetaMathDistType,
-      BetaRandomDistType>
+  typedef boost::math::poisson_distribution<Scalar> PoisMathDistType;
+  typedef boost::poisson_distribution<Int, Scalar> PoisRandomDistType;
+
+  class DPois: public BoostScalarDistribution<PoisMathDistType,
+      PoisRandomDistType>
   {
   public:
-    typedef DBeta SelfType;
-    typedef BoostScalarDistribution<BetaMathDistType, BetaRandomDistType>
+    typedef DPois SelfType;
+    typedef BoostScalarDistribution<PoisMathDistType, PoisRandomDistType>
         BaseType;
 
   protected:
-    DBeta() :
-      BaseType("dbeta", 2, DIST_PROPORTION, false)
+    DPois() :
+      BaseType("dpois", 1, DIST_POSITIVE, true)
     {
     }
     virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
@@ -49,9 +49,8 @@ namespace Biips
       static Distribution::Ptr p_instance(new SelfType());
       return p_instance;
     }
-    ;
   };
 
 }
 
-#endif /* BIIPS_DBETA_HPP_ */
+#endif /* BIIPS_DPOIS_HPP_ */

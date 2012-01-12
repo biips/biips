@@ -24,16 +24,28 @@ namespace boost
    * The Node::Ptr objects are stored in a vertex property map of the graph.
    * This property map is stored by the boost graph object.
    */
-  enum vertex_node_ptr_t { vertex_node_ptr = 101 }; // a unique number
+  enum vertex_node_ptr_t
+  {
+    vertex_node_ptr = 101
+  }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, node_ptr);
 
-  enum vertex_observed_t { vertex_observed = 103 }; // a unique number
+  enum vertex_observed_t
+  {
+    vertex_observed = 103
+  }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, observed);
 
-  enum vertex_value_t { vertex_value = 104 }; // a unique number
+  enum vertex_value_t
+  {
+    vertex_value = 104
+  }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, value);
 
-  enum vertex_discrete_t { vertex_discrete = 105 }; // a unique number
+  enum vertex_discrete_t
+  {
+    vertex_discrete = 105
+  }; // a unique number
   BOOST_INSTALL_PROPERTY(vertex, discrete);
 }
 
@@ -64,7 +76,6 @@ namespace Biips
     UNKNOWN
   };
 
-
   //! Node values array storage
   /*!
    * This type the value type of a particle.
@@ -74,7 +85,6 @@ namespace Biips
    * NodeValues objects have the size of the Graph object.
    */
   typedef Types<Types<NumArray::StorageType>::Ptr>::Array NodeValues;
-
 
   //! Graph related types
   /*!
@@ -99,12 +109,12 @@ namespace Biips
      * Other vertices or edges properties have to be stored in external property maps
      * \see NodeValuesMap
      */
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-    boost::property<boost::vertex_node_ptr_t, Node::Ptr,
-    boost::property<boost::vertex_observed_t, Bool,
-    boost::property<boost::vertex_discrete_t, Bool,
-    boost::property<boost::vertex_value_t, Types<MultiArray::StorageType>::Ptr> > > >
-    > ParentsGraph;
+    typedef boost::adjacency_list<boost::vecS, boost::vecS,
+        boost::bidirectionalS, boost::property<boost::vertex_node_ptr_t,
+            Node::Ptr, boost::property<boost::vertex_observed_t, Bool,
+                boost::property<boost::vertex_discrete_t, Bool,
+                    boost::property<boost::vertex_value_t, Types<
+                        MultiArray::StorageType>::Ptr> > > > > ParentsGraph;
 
     //! Node values property map
     /*!
@@ -127,17 +137,25 @@ namespace Biips
      */
     typedef Flags FlagsMap;
 
-    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::type ValuesPropertyMap;
-    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::type ObservedPropertyMap;
-    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::type DiscretePropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::type
+        ValuesPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::type
+        ObservedPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::type
+        DiscretePropertyMap;
 
-    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::const_type ConstValuesPropertyMap;
-    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::const_type ConstObservedPropertyMap;
-    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::const_type ConstDiscretePropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_value_t>::const_type
+        ConstValuesPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_observed_t>::const_type
+        ConstObservedPropertyMap;
+    typedef boost::property_map<ParentsGraph, boost::vertex_discrete_t>::const_type
+        ConstDiscretePropertyMap;
 
-    typedef boost::graph_traits<ParentsGraph>::adjacency_iterator ParentIterator;
+    typedef boost::graph_traits<ParentsGraph>::adjacency_iterator
+        ParentIterator;
     typedef boost::reverse_graph<ParentsGraph> ChildrenGraph;
-    typedef boost::graph_traits<ChildrenGraph>::adjacency_iterator ChildIterator;
+    typedef boost::graph_traits<ChildrenGraph>::adjacency_iterator
+        ChildIterator;
 
     typedef std::set<NodeId>::const_iterator StochasticParentIterator;
 

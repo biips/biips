@@ -45,9 +45,9 @@ namespace Biips
     {
       Scalar degree = paramValues[0].ScalarView();
       using std::log;
-      using boost::math::tgamma;
+      using boost::math::lgamma;
       return 0.5 * ((degree - 0.5) * log(x) - x - degree * log(2.0))
-          - log(tgamma(0.5 * degree));
+          - lgamma(0.5 * degree);
     }
 
     MathDistType dist = mathDist(paramValues);

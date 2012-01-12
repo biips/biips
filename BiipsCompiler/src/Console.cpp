@@ -69,7 +69,6 @@ namespace Biips
   {
   }
 
-
   void Console::clearParseTrees()
   {
     delete pData_;
@@ -85,12 +84,10 @@ namespace Biips
     }
   }
 
-
   Console::~Console()
   {
     clearParseTrees();
   }
-
 
   static void getVariableNames(ParseTree const * pTree,
                                std::set<String> & names,
@@ -142,7 +139,6 @@ namespace Biips
       }
     }
   }
-
 
   Bool Console::CheckModel(const String & modelFileName, Bool verbose)
   {
@@ -229,14 +225,12 @@ namespace Biips
     return true;
   }
 
-
   void Console::ClearModel(Bool verbose)
   {
     if (verbose)
       out_ << PROMPT_STRING << "Deleting model" << endl;
     pModel_.reset();
   }
-
 
   Bool Console::Compile(std::map<String, MultiArray> & dataMap,
                         Bool genData,
@@ -392,6 +386,10 @@ namespace Biips
       if (pModel_)
       {
         Graph & model_graph = *(pModel_->GraphPtr());
+        if (verbose)
+        {
+          out_ << INDENT_STRING << "Building and checking graph" << endl;
+        }
         model_graph.Build();
 
         if (verbose)
@@ -428,7 +426,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::BuildSampler(Bool prior, Size verbose)
   {
@@ -477,12 +474,10 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::SamplerBuilt()
   {
     return (pModel_ && pModel_->SamplerBuilt());
   }
-
 
   Bool Console::RunForwardSampler(Size nParticles,
                                   Size smcRngSeed,
@@ -547,7 +542,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::RunBackwardSmoother(Bool verbose, Bool progressBar)
   {
     if (!pModel_)
@@ -599,7 +593,6 @@ namespace Biips
     return true;
   }
 
-
   // FIXME add module manager and a load module by name function
   Bool Console::LoadBaseModule(Bool verbose)
   {
@@ -614,7 +607,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::SetDefaultFilterMonitors()
   {
@@ -632,7 +624,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::SetFilterMonitor(const String & name, const IndexRange & range)
   {
@@ -659,7 +650,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::SetSmoothTreeMonitor(const String & name,
                                      const IndexRange & range)
@@ -688,7 +678,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::SetSmoothMonitor(const String & name, const IndexRange & range)
   {
     if (!pModel_)
@@ -714,7 +703,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::ExtractFilterStat(const String & name,
                                   StatsTag statFeature,
@@ -752,7 +740,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::ExtractSmoothTreeStat(const String & name,
                                       StatsTag statFeature,
                                       std::map<IndexRange, MultiArray> & statMap)
@@ -789,7 +776,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::ExtractSmoothStat(const String & name,
                                   StatsTag statFeature,
@@ -830,7 +816,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
@@ -863,7 +848,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
@@ -903,7 +887,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange,
       ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
@@ -941,7 +924,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpData(std::map<String, MultiArray> & dataMap)
   {
     if (!pModel_)
@@ -963,7 +945,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
   {
@@ -998,7 +979,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
   {
     if (!pModel_)
@@ -1032,7 +1012,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap)
   {
     if (!pModel_)
@@ -1065,7 +1044,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::ClearFilterMonitors()
   {
     if (!pModel_)
@@ -1092,7 +1070,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::ClearSmoothTreeMonitors()
   {
@@ -1122,7 +1099,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::ClearSmoothMonitors()
   {
     if (!pModel_)
@@ -1150,7 +1126,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::PrintGraphviz(std::ostream & os)
   {
     if (!pModel_)
@@ -1166,7 +1141,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::DumpNodeIds(Types<NodeId>::Array & nodeIds)
   {
@@ -1187,7 +1161,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::DumpNodeNames(Types<String>::Array & nodeNames)
   {
@@ -1212,7 +1185,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpNodeTypes(Types<NodeType>::Array & nodeTypes)
   {
     if (!pModel_)
@@ -1236,7 +1208,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpNodeObserved(Flags & nodeObserved)
   {
     if (!pModel_)
@@ -1259,7 +1230,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::DumpNodeIterations(Types<Size>::Array & nodeIterations)
   {
@@ -1296,7 +1266,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpNodeSamplers(Types<String>::Array & nodeSamplers)
   {
     if (!pModel_)
@@ -1328,7 +1297,6 @@ namespace Biips
 
     return true;
   }
-
 
   Bool Console::GraphSize(Size & s)
   {

@@ -30,8 +30,9 @@ namespace Biips
    * @return KNOWN, DEPENDING, or UNKNOWN
    * \see NodesRelationType
    */
-  NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph & graph);
-
+  NodesRelationType nodesRelation(NodeId nodeA,
+                                  NodeId nodeB,
+                                  const Graph & graph);
 
   Bool anyUnknownParent(NodeId id, NodeId sampledId, const Graph & graph);
 

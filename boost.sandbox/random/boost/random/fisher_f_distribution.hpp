@@ -23,6 +23,7 @@ namespace boost {
         typedef chi_squared_distribution<RealType> base_type;
 
     public:
+        typedef RealType input_type; // EDIT: Added by Adrien Todeschini on the 11/01/12
         typedef RealType result_type;
 
         explicit fisher_f_distribution(const result_type& d1 = result_type(1),

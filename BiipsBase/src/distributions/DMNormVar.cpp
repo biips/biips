@@ -85,7 +85,9 @@ namespace Biips
 
     ublas::vector<Scalar, ValArray> sample_vec(values.size(), ValArray());
     sample_vec.data().swap(values);
-    sample_vec = ublas::prod(var_chol, sample_vec);
+    sample_vec
+        = ublas::prod(ublas::triangular_adaptor<Matrix, ublas::lower>(var_chol),
+                      sample_vec);
     values.swap(sample_vec.data());
 
     for (Size i = 0; i < n_dim; ++i)

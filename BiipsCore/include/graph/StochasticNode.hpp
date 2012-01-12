@@ -41,9 +41,10 @@ namespace Biips
       return pPrior_->Name();
     }
 
-    void Sample(ValArray & values, const NumArray::Array & paramValues,
-                      const NumArray::Pair & boundValues,
-                      Rng & rng) const
+    void Sample(ValArray & values,
+                const NumArray::Array & paramValues,
+                const NumArray::Pair & boundValues,
+                Rng & rng) const
     {
       values = ValArray(pDim_->Length());
       pPrior_->Sample(values, paramValues, boundValues, rng);
@@ -54,11 +55,23 @@ namespace Biips
     {
       return pPrior_->LogDensity(x, paramValues, boundValues);
     }
-    void UnboundedSupport(ValArray & lower, ValArray & upper, const NumArray::Array & paramValues) const
+    void UnboundedSupport(ValArray & lower,
+                          ValArray & upper,
+                          const NumArray::Array & paramValues) const
     {
       lower = ValArray(pDim_->Length());
       upper = ValArray(pDim_->Length());
       pPrior_->UnboundedSupport(lower, upper, paramValues);
+    }
+
+    NodeId Lower() const
+    {
+      return lowerNodeId_;
+    }
+
+    NodeId Upper() const
+    {
+      return upperNodeId_;
     }
 
     Bool IsLowerBounded() const

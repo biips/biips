@@ -18,7 +18,7 @@
 namespace Biips
 {
 
-  class NodesRelationVisitor : public ConstNodeVisitor
+  class NodesRelationVisitor: public ConstNodeVisitor
   {
   protected:
     typedef NodesRelationVisitor SelfType;
@@ -30,26 +30,33 @@ namespace Biips
     NodeId myId_;
     NodesRelationType ans_;
 
-    virtual void visit(const ConstantNode & node)  { ans_ = KNOWN; } // Every ContantNode is KNOWN.
+    virtual void visit(const ConstantNode & node)
+    {
+      ans_ = KNOWN;
+    } // Every ContantNode is KNOWN.
     virtual void visit(const StochasticNode & node);
     virtual void visit(const LogicalNode & node);
 
   public:
-    NodesRelationType GetRelation() const { return ans_; }
+    NodesRelationType GetRelation() const
+    {
+      return ans_;
+    }
 
-    NodesRelationVisitor(const Graph & graph, NodeId myId)
-    : graph_(graph), myId_(myId), ans_(UNKNOWN) {}
+    NodesRelationVisitor(const Graph & graph, NodeId myId) :
+      graph_(graph), myId_(myId), ans_(UNKNOWN)
+    {
+    }
   };
-
 
   void NodesRelationVisitor::visit(const StochasticNode & node)
   {
-    if ( nodeId_ == myId_ )
+    if (nodeId_ == myId_)
     {
       ans_ = DEPENDING; // A stochastic node depends on itself
       return;
     }
-    if ( graph_.GetObserved()[nodeId_] )
+    if (graph_.GetObserved()[nodeId_])
     {
       ans_ = KNOWN; // Its value is KNOWN if it is observed
       return;
@@ -57,7 +64,7 @@ namespace Biips
     Types<NodeId>::ConstIterator it_node_id_1, it_node_id_2, it_node_id_end;
     boost::tie(it_node_id_1, it_node_id_end) = graph_.GetSortedNodes();
     it_node_id_2 = it_node_id_1;
-    if ( graph_.GetRanks()[nodeId_] < graph_.GetRanks()[myId_] )
+    if (graph_.GetRanks()[nodeId_] < graph_.GetRanks()[myId_])
     {
       ans_ = KNOWN;
       // Its value is KNOWN if it has been computed before, i.e. if nodeID_ is before myId_
@@ -68,18 +75,18 @@ namespace Biips
     ans_ = UNKNOWN;
   }
 
-
   void NodesRelationVisitor::visit(const LogicalNode & node)
   {
     StochasticParentNodeIdIterator it_stoch_parent_id, it_stoch_parent_id_end;
-    boost::tie(it_stoch_parent_id, it_stoch_parent_id_end) = graph_.GetStochasticParents(nodeId_);
+    boost::tie(it_stoch_parent_id, it_stoch_parent_id_end)
+        = graph_.GetStochasticParents(nodeId_);
     ans_ = KNOWN; // First consider nodeId_ is KNOWN
     // Then visit its stochastic parents.
     for (; it_stoch_parent_id != it_stoch_parent_id_end; ++it_stoch_parent_id)
     {
       SelfType vis(graph_, myId_);
       graph_.VisitNode(*it_stoch_parent_id, vis);
-      switch ( vis.GetRelation() )
+      switch (vis.GetRelation())
       {
         case DEPENDING:
           ans_ = DEPENDING;
@@ -98,8 +105,9 @@ namespace Biips
     }
   }
 
-
-  NodesRelationType nodesRelation(NodeId nodeA, NodeId nodeB, const Graph & graph)
+  NodesRelationType nodesRelation(NodeId nodeA,
+                                  NodeId nodeB,
+                                  const Graph & graph)
   {
     // nodeB is expected to be a StochasticNode from the nodeSequence
     if (graph.GetNode(nodeB).GetType() != STOCHASTIC)
@@ -108,7 +116,6 @@ namespace Biips
     graph.VisitNode(nodeA, vis);
     return vis.GetRelation();
   }
-
 
   Bool anyUnknownParent(NodeId id, NodeId sampledId, const Graph & graph)
   {
@@ -121,7 +128,6 @@ namespace Biips
     }
     return false;
   }
-
 
 //  Types<NodesRelationType>::Array getParentnodesRelations(NodeId nodeId, const Graph & graph)
 //  {
