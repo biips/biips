@@ -43,12 +43,12 @@ namespace Biips
     virtual Scalar q(Scalar p,
                      const NumArray::Array & paramValues,
                      Bool lower,
-                     Bool give_log) const;
+                     Bool log_p) const;
     virtual Scalar r(const NumArray::Array & paramValues, Rng & rng) const;
 
     virtual MathDistType mathDist(const NumArray::Array & paramValues) const = 0;
     virtual RandomDistType
-        randomDist(const NumArray::Array & paramValues) const = 0;
+    randomDist(const NumArray::Array & paramValues) const = 0;
 
     BoostScalarDistribution(const String & name,
                             Size nParam,
@@ -98,21 +98,19 @@ namespace Biips
   Scalar BoostScalarDistribution<MathDist, RandomDist>::q(Scalar p,
                                                           const NumArray::Array & paramValues,
                                                           Bool lower,
-                                                          Bool give_log) const
+                                                          Bool log_p) const
   {
     MathDistType dist = mathDist(paramValues);
 
-    using namespace boost::math;
-    Scalar q;
-    if (lower)
-      q = quantile(dist, p);
-    else
-      q = quantile(complement(dist, p));
+    if (log_p)
+      return p = std::exp(p);
 
-    if (give_log)
-      return std::log(q);
+    using namespace boost::math;
+
+    if (lower)
+      return quantile(dist, p);
     else
-      return q;
+      return quantile(complement(dist, p));
   }
 
   template<typename MathDist, typename RandomDist>

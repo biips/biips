@@ -108,7 +108,7 @@ namespace Biips
     virtual Scalar q(Scalar p,
                      const NumArray::Array & paramValues,
                      Bool lower,
-                     Bool give_log) const = 0;
+                     Bool log_p) const = 0;
     /**
      * Random number generation, ignoring bounds
      * @param parameters Array of parameters
@@ -135,7 +135,6 @@ namespace Biips
     virtual ~BoundedScalarDistribution()
     {
     }
-    ;
   };
 
 }
