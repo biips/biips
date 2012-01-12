@@ -52,8 +52,7 @@ namespace Biips
 
     MathDistType dist = mathDist(paramValues);
 
-    using boost::math::pdf;
-    return pdf(dist, x);
+    return boost::math::pdf(dist, x);
   }
 
   Scalar DPar::unboundedLower(const NumArray::Array & paramValues) const

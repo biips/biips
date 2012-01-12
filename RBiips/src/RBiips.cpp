@@ -59,6 +59,8 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
     {
       DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
       ValArray::Ptr p_val(new ValArray(r_vec.size()));
+//      std::copy(r_vec.begin(), r_vec.end(), p_val->begin());
+//      std::replace(p_val->begin(), p_val->end(), Scalar(NA_REAL), BIIPS_REALNA);
       std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
       marray.SetPtr(p_dim, p_val);
     }
@@ -67,6 +69,8 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
       Rcpp::IntegerVector r_dim = r_vec.attr("dim");
       DimArray::Ptr p_dim(new DimArray(r_dim.begin(), r_dim.end()));
       ValArray::Ptr p_val(new ValArray(r_vec.size()));
+//      std::copy(r_vec.begin(), r_vec.end(), p_val->begin());
+//      std::replace(p_val->begin(), p_val->end(), Scalar(NA_REAL), BIIPS_REALNA);
       std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
       marray.SetPtr(p_dim, p_val);
     }
@@ -107,6 +111,8 @@ SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     Size len = values_array.Dim().Length();
     Rcpp::NumericVector values(len);
 
+//    std::copy(values_array.Values().begin(), values_array.Values().end(), values.begin());
+//    std::replace(values.begin(), values.end(), BIIPS_REALNA, Scalar(NA_REAL));
     std::replace_copy(values_array.Values().begin(), values_array.Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
 
     values.attr("dim") = dim;
@@ -480,6 +486,8 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     Size len = monitor.GetValues().Dim().Length();
     Rcpp::NumericVector values(len);
     const ValArray & values_val = monitor.GetValues().Values();
+//    std::copy(values_val.begin(),values_val.end(), values.begin());
+//    std::replace(values.begin(), values.end(), BIIPS_REALNA, Scalar(NA_REAL));
     std::replace_copy(values_val.begin(), values_val.end(), values.begin(), BIIPS_REALNA, NA_REAL);
     values.attr("dim") = dim_particles;
 

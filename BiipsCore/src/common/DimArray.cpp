@@ -17,8 +17,8 @@ namespace Biips
   {
     DimArray dimDropped;
     for (Size i = 0; i < size(); ++i)
-      if ( (*this)[i] > 1 )
+      if ((*this)[i] > 1)
         dimDropped.push_back((*this)[i]);
-    return  dimDropped.empty() && !empty() ? *P_SCALAR_DIM : dimDropped;
+    return dimDropped.empty() && !empty() ? *P_SCALAR_DIM : dimDropped;
   }
 }

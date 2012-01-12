@@ -80,8 +80,7 @@ namespace Biips
     ublas::cholesky_invert(norm_const_prec);
 
     static Vector norm_const_mean;
-    norm_const_mean = ublas::prod(norm_const_prec,
-                                             Vector(LikeParamContrib[0]));
+    norm_const_mean = ublas::prod(norm_const_prec, Vector(LikeParamContrib[0]));
 
     Matrix prior_prec(priorParamValues[1]);
     if (!ublas::cholesky_factorize(prior_prec))

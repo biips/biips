@@ -9,10 +9,10 @@
  */
 
 #include "distributions/DBeta.hpp"
+#include <boost/math/special_functions/gamma.hpp>
 
 namespace Biips
 {
-  using std::log;
 
   Bool DBeta::checkParamValues(const NumArray::Array & paramValues) const
   {
@@ -51,4 +51,22 @@ namespace Biips
     return RandomDistType(alpha, beta);
   }
 
+  Scalar DBeta::d(Scalar x, const NumArray::Array & paramValues, Bool give_log) const
+  {
+    if (give_log)
+    {
+      Scalar alpha = paramValues[0].ScalarView();
+      Scalar beta = paramValues[1].ScalarView();
+
+      using std::log;
+      using boost::math::lgamma;
+
+      return lgamma(alpha + beta) - lgamma(alpha) - lgamma(beta)
+          + (alpha - 1.0) * log(x) + (beta - 1.0) * log(1.0 - x);
+    }
+
+    MathDistType dist = mathDist(paramValues);
+
+    return boost::math::pdf(dist, x);
+  }
 }

@@ -13,12 +13,12 @@
 
 #include "common/Types.hpp"
 #include "common/MultiArray.hpp"
+#include "model/Monitor.hpp"
 
 namespace Biips
 {
   class Graph;
   class NodeSampler;
-  class Monitor;
 
   NumArray getNodeValue(NodeId nodeId,
                         const Graph & graph,
@@ -35,7 +35,7 @@ namespace Biips
                                  NodeSampler & nodeSampler);
   NumArray::Array getParamValues(NodeId nodeId,
                                  const Graph & graph,
-                                 const Monitor & monitor,
+                                 const Types<Monitor::Ptr>::Array & monitors,
                                  Size particleIndex);
 
   NumArray::Pair getBoundValues(NodeId nodeId,
@@ -43,7 +43,7 @@ namespace Biips
                                 NodeSampler & nodeSampler);
   NumArray::Pair getBoundValues(NodeId nodeId,
                                 const Graph & graph,
-                                const Monitor & monitor,
+                                const Types<Monitor::Ptr>::Pair & monitors,
                                 Size particleIndex);
 
   void getSupportValues(ValArray & lower,
@@ -55,7 +55,8 @@ namespace Biips
                         ValArray & upper,
                         NodeId nodeId,
                         const Graph & graph,
-                        const Monitor & monitor,
+                        const Types<Monitor::Ptr>::Array & paramMonitors,
+                        const Types<Monitor::Ptr>::Pair & boundMonitors,
                         Size particleIndex);
 
   Bool isSupportFixed(NodeId nodeId, const Graph & graph);
