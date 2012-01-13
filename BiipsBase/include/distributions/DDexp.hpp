@@ -147,10 +147,6 @@ namespace Biips
     {
     }
     virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-    virtual void sample(ValArray & values,
-                        const NumArray::Array & paramValues,
-                        const NumArray::Pair & boundValues,
-                        Rng & rng) const;
 
     virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
     virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;
