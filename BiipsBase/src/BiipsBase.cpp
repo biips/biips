@@ -23,6 +23,10 @@
 #include "functions/Transpose.hpp"
 #include "functions/Sum.hpp"
 #include "functions/Inverse.hpp"
+#include "functions/Max.hpp"
+#include "functions/Min.hpp"
+#include "functions/Prod.hpp"
+#include "functions/Equals.hpp"
 
 #include "distributions/DNorm.hpp"
 #include "distributions/DNormVar.hpp"
@@ -83,6 +87,7 @@ namespace Biips
     funcTab.Insert(PowInfix::Instance());
     funcTab.Insert(Pow::Instance());
 
+    funcTab.Insert(Equals::Instance());
     funcTab.Insert(IfElse::Instance());
 
     funcTab.Insert(Cos::Instance());
@@ -110,6 +115,9 @@ namespace Biips
     funcTab.Insert(Transpose::Instance());
     funcTab.Insert(Sum::Instance());
     funcTab.Insert(Inverse::Instance());
+    funcTab.Insert(Max::Instance());
+    funcTab.Insert(Min::Instance());
+    funcTab.Insert(Prod::Instance());
 
     // TODO check returned boolean
     distTab.Insert(DNorm::Instance());

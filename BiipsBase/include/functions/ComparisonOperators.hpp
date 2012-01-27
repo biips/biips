@@ -48,7 +48,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
   class GreaterOrEqual: public BinaryScalarFunction<std::greater_equal<Scalar> >
@@ -83,7 +82,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
   class LessThan: public BinaryScalarFunction<std::less<Scalar> >
@@ -118,7 +116,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
   class LessOrEqual: public BinaryScalarFunction<std::less_equal<Scalar> >
@@ -153,7 +150,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
   class Equal: public BinaryScalarFunction<std::equal_to<Scalar> >
@@ -188,7 +184,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
   class NotEqual: public BinaryScalarFunction<std::not_equal_to<Scalar> >
@@ -223,7 +218,6 @@ namespace Biips
       static Function::Ptr p_instance(new SelfType());
       return p_instance;
     }
-
   };
 
 }
