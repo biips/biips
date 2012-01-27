@@ -57,7 +57,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       if (parsed.options[op].value.empty())
       {
         cerr << "in source: " << source << ". ";
-        boost::throw_exception(po::invalid_syntax(key, "no value given"));
+        boost::throw_exception(po::error(String("no value given in '") + key
+            + "'"));
       }
 
       string section = key.substr(0, pos);
@@ -99,8 +100,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
               else if (n_rows_current != n_rows)
               {
                 cerr << "in source: " << source << ". ";
-                boost::throw_exception(po::invalid_syntax(key,
-                                                          "columns have different lengths."));
+                boost::throw_exception(po::error(String("columns have different lengths in '")
+                    + key + "'"));
               }
               n_columns++;
             }
@@ -226,7 +227,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           if (dim < 1)
           {
             cerr << "in source: " << source << ". ";
-            boost::throw_exception(po::invalid_syntax(key, "index must be > 0"));
+            boost::throw_exception(po::error(String("index must be > 0 in '")
+                + key + "'"));
           }
           Size len = 1;
           if (dim_map.count(var))
@@ -234,8 +236,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
           if (dim > len)
           {
             cerr << "in source: " << source << ". ";
-            boost::throw_exception(po::invalid_syntax(key,
-                                                      "data exceeds dimension"));
+            boost::throw_exception(po::error(String("data exceeds dimension in '")
+                + key + "'"));
           }
 
           Bool allocate = datatype_map[var].empty();
