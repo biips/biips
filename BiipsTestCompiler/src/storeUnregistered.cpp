@@ -65,10 +65,10 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
             getline(iss, var_name, BIIPSTEST_INPUT_VALUES_SEPARATOR);
             if (var_name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._")
                 != string::npos)
-              boost::throw_exception(po::invalid_syntax(key, var_name
+              boost::throw_exception(po::error(var_name
                   + " is not a valid variable name."));
             if (var_name.find_first_of("0123456789._") == 0)
-              boost::throw_exception(po::invalid_syntax(key, var_name
+              boost::throw_exception(po::error(var_name
                   + " is not a valid variable name."));
             monitor.push_back(var_name);
           }
@@ -85,7 +85,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       if (parsed.options[op].value.empty())
       {
         cerr << "in source: " << source << ". ";
-        boost::throw_exception(po::invalid_syntax(key, "no value given"));
+        throw std::runtime_error(String("no value given in '") + key + "'");
       }
 
       string section = key.substr(0, pos);
@@ -132,6 +132,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
       }
 
       // bench and errors sections
+
       else if (section == "bench" || section == "errors")
       {
         // check if multiple values
@@ -158,6 +159,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
             p_datatype_map = &bench_filter_map;
           }
           // errors section
+
           else if (section == "errors")
             p_errors_map = &errors_filter_map;
         }
@@ -170,6 +172,7 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
             p_datatype_map = &bench_smooth_map;
           }
           // errors section
+
           else if (section == "errors")
             p_errors_map = &errors_smooth_map;
         }
@@ -202,7 +205,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         if (dim < 1)
         {
           cerr << "in source: " << source << ". ";
-          boost::throw_exception(po::invalid_syntax(key, "index must be > 0"));
+          boost::throw_exception(po::error(String("index must be > 0 in '"
+              + key + "'")));
         }
         Size len = 1;
         if (dim_map.count(var))
@@ -210,8 +214,8 @@ void storeUnregistered(const vector<po::parsed_options> & parsed_sources,
         if (dim > len)
         {
           cerr << "in source: " << source << ". ";
-          boost::throw_exception(po::invalid_syntax(key,
-                                                    "data exceeds dimension"));
+          boost::throw_exception(po::error(String("data exceeds dimension in '"
+              + key + "'")));
         }
 
         Bool allocate = datatype_map[var].empty();

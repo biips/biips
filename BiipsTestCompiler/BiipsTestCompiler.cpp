@@ -37,12 +37,12 @@ namespace Biips
   const String BIIPSTEST_CONFIG_FILE_NAME = "biipstestcompiler.cfg";
 
   std::map<String, std::map<IndexRange, MultiArray> >
-      extractStat(Console & console,
-                  StatsTag tag,
-                  const Types<String>::Array & monitoredVar,
-                  const String & statName,
-                  Bool verbose,
-                  Bool smooth = false);
+  extractStat(Console & console,
+              StatsTag tag,
+              const Types<String>::Array & monitoredVar,
+              const String & statName,
+              Bool verbose,
+              Bool smooth = false);
 
   struct Curve
   {
@@ -72,10 +72,9 @@ namespace Biips
                Bool smooth = false);
 
   Bool
-      computeError(Scalar & error,
-                   const String & varName,
-                   const std::map<String, std::map<IndexRange, MultiArray> > & smcMeanValuesMap,
-                   const std::map<String, std::vector<MultiArray> > & benchValuesMap);
+  computeError(Scalar & error, const String & varName, const std::map<String,
+      std::map<IndexRange, MultiArray> > & smcMeanValuesMap, const std::map<
+      String, std::vector<MultiArray> > & benchValuesMap);
 }
 
 using std::cout;
@@ -329,8 +328,9 @@ BOOST_AUTO_TEST_CASE( my_test )
     else if (do_smooth_str == "off")
       do_smooth = false;
     else
-      boost::throw_exception(po::invalid_syntax("smooth", do_smooth_str
-          + " is not a valid value."));
+      boost::throw_exception(po::validation_error(po::validation_error::invalid_bool_value,
+                                                  do_smooth_str,
+                                                  "smooth"));
 
     Console console(cout, cerr);
 
