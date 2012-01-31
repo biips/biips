@@ -157,8 +157,12 @@ namespace Biips
     {
       return boost::get(boost::vertex_discrete, parentsGraph_);
     }
+    // Sets observed values of stochastic nodes only
     void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
     void SetObsValues(const NodeValues & nodeValues);
+
+    // Called after changing node data
+    void UpdateObservedNode(NodeId id);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
     Node const & GetNode(NodeId nodeId) const

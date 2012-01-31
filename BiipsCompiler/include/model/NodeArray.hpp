@@ -87,6 +87,8 @@ namespace Biips
      */
     void SetData(const MultiArray & value);
 
+    void ChangeData(const MultiArray & value);
+
     /**
      * Gets the values of nodes that have been inserted into
      * the array.

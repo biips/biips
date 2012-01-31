@@ -436,6 +436,13 @@ namespace Biips
     return true;
   }
 
+  Bool BUGSModel::ChangeData(const std::map<String, MultiArray> & dataMap)
+  {
+    symbolTable_.ChangeData(dataMap);
+
+    return true;
+  }
+
   Bool BUGSModel::DumpData(std::map<String, MultiArray> & dataMap) const
   {
     symbolTable_.ReadData(dataMap);

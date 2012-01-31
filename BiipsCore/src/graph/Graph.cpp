@@ -304,6 +304,143 @@ namespace Biips
     return node_id;
   }
 
+  void Graph::UpdateObservedNode(NodeId nodeId)
+  {
+    switch (GetNode(nodeId).GetType())
+    {
+      case CONSTANT:
+      {
+        // Change discreteness if necessary
+        if (GetDiscrete()[nodeId])
+        {
+          for (Size i = 0; i < GetValues()[nodeId]->size(); ++i)
+          {
+            if (!checkInteger((*GetValues()[nodeId])[i]))
+            {
+              boost::put(boost::vertex_discrete, parentsGraph_, nodeId, false);
+              break;
+            }
+          }
+        }
+
+        // Update children
+        ChildIterator it_children, it_children_end;
+        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+        for (; it_children != it_children_end; ++it_children)
+          UpdateObservedNode(*it_children);
+        break;
+      }
+
+      case LOGICAL:
+      {
+        // FIXME: lazy copy-paste from AddLogicalNode
+        // Update value
+        const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                          parentsGraph_);
+        const ObservedPropertyMap & observed_map =
+            boost::get(boost::vertex_observed, parentsGraph_);
+
+        NodeValues node_values(GetSize());
+        Flags sampled_flags(GetSize());
+        for (NodeId id = 0; id < GetSize(); ++id)
+        {
+          node_values[id] = values_map[id];
+          sampled_flags[id] = observed_map[id];
+        }
+        sampled_flags[nodeId] = false;
+
+        NodeSampler sample_node_vis(*this);
+        sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
+        VisitNode(nodeId, sample_node_vis);
+
+        boost::put(boost::vertex_value,
+                   parentsGraph_,
+                   nodeId,
+                   node_values[nodeId]);
+
+        // Change discreteness if necessary
+        if (GetDiscrete()[nodeId])
+        {
+          const LogicalNode & l_node =
+              dynamic_cast<const LogicalNode &> (GetNode(nodeId));
+          const Types<NodeId>::Array & parameters = l_node.Parents();
+
+          if (l_node.IsFunction()) // FuncNode
+          {
+            Flags mask(parameters.size());
+            for (Size i = 0; i < parameters.size(); ++i)
+              mask[i] = GetDiscrete()[parameters[i]];
+            const FuncNode & f_node = dynamic_cast<const FuncNode &> (l_node);
+            boost::put(boost::vertex_discrete,
+                       parentsGraph_,
+                       nodeId,
+                       f_node.FuncPtr()->IsDiscreteValued(mask));
+          }
+          else // AggregateNode
+          {
+            for (Size i = 0; i < parameters.size(); ++i)
+            {
+              if (!GetDiscrete()[parameters[i]])
+              {
+                boost::put(boost::vertex_discrete, parentsGraph_, nodeId, false);
+                break;
+              }
+            }
+          }
+        }
+
+        // Update children
+        ChildIterator it_children, it_children_end;
+        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+        for (; it_children != it_children_end; ++it_children)
+          UpdateObservedNode(*it_children);
+        break;
+      }
+
+      case STOCHASTIC:
+      {
+        // FIXME: lazy copy-paste from AddStochasticNode
+        // Check discreteness of parents
+        const StochasticNode & s_node =
+            dynamic_cast<const StochasticNode &> (GetNode(nodeId));
+
+        const Types<NodeId>::Array & parameters = s_node.Parents();
+        Flags mask(parameters.size());
+        for (Size i = 0; i < parameters.size(); ++i)
+          mask[i] = GetDiscrete()[parameters[i]];
+        if (!s_node.PriorPtr()->CheckParamDiscrete(mask))
+          throw DistError(s_node.PriorPtr(),
+                          "Failed check for discrete-valued parameters");
+
+        // Change discreteness if necessary
+        if (GetDiscrete()[nodeId])
+        {
+          boost::put(boost::vertex_discrete,
+                     parentsGraph_,
+                     nodeId,
+                     s_node.PriorPtr()->IsDiscreteValued(mask));
+        }
+
+        // Update stochastic children
+        // no need to update logical children, we only changed discreteness
+        ChildIterator it_children, it_children_end;
+        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+        for (; it_children != it_children_end; ++it_children)
+        {
+          if (GetNode(*it_children).GetType() == STOCHASTIC)
+            UpdateObservedNode(*it_children);
+        }
+        break;
+
+        // FIXME: this can invalidate some assigned samplers ?
+      }
+
+      default:
+        break;
+    }
+
+  }
+
   void Graph::PopNode()
   {
     if (Empty())
@@ -737,7 +874,17 @@ namespace Biips
     virtual void visit(StochasticNode & node)
     {
       if (graph_.GetObserved()[nodeId_])
+      {
+        // check discreteness
+        if (graph_.GetDiscrete()[nodeId_])
+        {
+          for (Size i = 0; i < nodeValuesMap_[nodeId_]->size(); ++i)
+            if (!checkInteger((*nodeValuesMap_[nodeId_])[i]))
+              throw RuntimeError("Can not set observed value: value is not discrete.");
+        }
         graph_.setValue(nodeId_, nodeValuesMap_[nodeId_]);
+      }
+
     }
 
     virtual void visit(LogicalNode & node)
