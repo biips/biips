@@ -33,6 +33,7 @@ namespace Biips
     ParseTree * pRelations_;
     Types<ParseTree*>::Array * pVariables_;
     Types<String>::Array nodeArrayNames_;
+    Bool lockBackward_;
 
     void clearParseTrees();
 
@@ -76,23 +77,32 @@ namespace Biips
      *
      * @return true on success or false on error.
      */
-    Bool Compile(std::map<String, MultiArray> & dataMap, Bool genData, Size dataRngSeed, Bool verbose = true);
+    Bool Compile(std::map<String, MultiArray> & dataMap,
+                 Bool genData,
+                 Size dataRngSeed,
+                 Bool verbose = true);
 
     Bool PrintGraphviz(std::ostream & os);
     /*!
      * Returns a vector of variable names used by the model. This vector
      * excludes any counters used by the model within a for loop.
      */
-    Types<String>::Array const & VariableNames() const { return nodeArrayNames_; }
+    Types<String>::Array const & VariableNames() const
+    {
+      return nodeArrayNames_;
+    }
 
     /*! Clears the model */
     void ClearModel(Bool verbose = true);
 
     Bool SetDefaultFilterMonitors();
 
-    Bool SetFilterMonitor(const String & name, const IndexRange & range = NULL_RANGE);
-    Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range = NULL_RANGE);
-    Bool SetSmoothMonitor(const String & name, const IndexRange & range = NULL_RANGE);
+    Bool SetFilterMonitor(const String & name, const IndexRange & range =
+        NULL_RANGE);
+    Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
+        NULL_RANGE);
+    Bool SetSmoothMonitor(const String & name, const IndexRange & range =
+        NULL_RANGE);
 
     /*!
      * @short Builds the SMC sampler.
@@ -105,22 +115,40 @@ namespace Biips
     Bool BuildSampler(Bool prior, Size verbose = 1);
     Bool SamplerBuilt();
 
-    Bool RunForwardSampler(Size nParticles, Size smcRngSeed, const String & rsType, Scalar essThreshold, Scalar & logNormConst, Bool verbose = true, Bool progressBar = true);
+    Bool RunForwardSampler(Size nParticles,
+                           Size smcRngSeed,
+                           const String & rsType,
+                           Scalar essThreshold,
+                           Scalar & logNormConst,
+                           Bool verbose = true,
+                           Bool progressBar = true);
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
-    Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothTreeStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<IndexRange, MultiArray> & statMap);
+    Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<
+        IndexRange, MultiArray> & statMap);
+    Bool ExtractSmoothTreeStat(const String & name,
+                               StatsTag statFeature,
+                               std::map<IndexRange, MultiArray> & statMap);
+    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<
+        IndexRange, MultiArray> & statMap);
 
-    Bool ExtractFilterPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange, ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
+    Bool ExtractFilterPdf(const String & name, std::map<IndexRange,
+        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        0.25);
+    Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
+        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        0.25);
+    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange,
+        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        0.25);
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);
+    Bool ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose = true);
 
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
-    Bool DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    Bool
+    DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
 
     Bool DumpNodeIds(Types<NodeId>::Array & nodeIds);

@@ -237,6 +237,22 @@ RcppExport SEXP get_data(SEXP pConsole)
 }
 
 
+RcppExport void change_data(SEXP pConsole, SEXP data)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  // Read data
+  std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
+
+  if (! p_console->ChangeData(data_map, verbosity))
+    throw RuntimeError("Failed to change data.");
+
+  VOID_END_RBIIPS
+}
+
+
 RcppExport void print_graphviz(SEXP pConsole, SEXP dotFileName)
 {
   BEGIN_RBIIPS
