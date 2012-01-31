@@ -332,6 +332,42 @@ namespace Biips
     // COPY: ********** to here **********
   }
 
+  void NodeArray::ChangeData(const MultiArray & value)
+  {
+    if (!(range_ == IndexRange(value.DimPtr())))
+      throw RuntimeError(String("Dimension mismatch when setting value of node array ")
+          + Name());
+
+    if (anyMissing(value))
+      throw RuntimeError("Can not change data: there are missing values.");
+
+    // check that nodes are constant
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+    {
+      NodeId id = it->left;
+      if (graph_.GetNode(id).GetType() != CONSTANT)
+        throw RuntimeError(String("Can not change data: node is not constant."));
+    }
+
+    // change values
+    for (Size i=0; i<nodeIds_.size(); ++i)
+    {
+      Scalar new_val = value.Values()[i];
+      NodeId id = nodeIds_[i];
+      Size offset = offsets_[i];
+      (*graph_.GetValues()[id])[offset] = new_val;
+    }
+
+    // Update nodes
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+    {
+      NodeId id = it->left;
+      graph_.UpdateObservedNode(id);
+    }
+  }
+
   MultiArray NodeArray::GetData() const
   {
     Size len = range_.Length();

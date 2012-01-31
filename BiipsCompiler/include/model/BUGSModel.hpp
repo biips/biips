@@ -89,6 +89,7 @@ namespace Biips
                           Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
+    Bool ChangeData(const std::map<String, MultiArray> & dataMap);
 
     Bool
         DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;

@@ -65,7 +65,8 @@ namespace Biips
 {
 
   Console::Console(std::ostream & out, std::ostream & err) :
-    out_(out), err_(err), pData_(NULL), pRelations_(NULL), pVariables_(NULL)
+    out_(out), err_(err), pData_(NULL), pRelations_(NULL), pVariables_(NULL),
+        lockBackward_(false)
   {
   }
 
@@ -536,6 +537,7 @@ namespace Biips
       // normalizing constant
       logNormConst = pModel_->Sampler().LogNormConst();
 
+      lockBackward_ = false;
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -557,6 +559,13 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't run backward smoother. SMC sampler did not finish!"
+          << endl;
+      return false;
+    }
+    if (lockBackward_)
+    {
+      err_
+          << "Can't run backward smoother. Data has been changed. You must run forward SMC sampler again."
           << endl;
       return false;
     }
@@ -934,14 +943,60 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->DumpData(dataMap);
-      if (!ok)
+      if (!pModel_->DumpData(dataMap))
       {
         err_ << "Failed to dump data" << endl;
         return false;
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't change data. No model!" << endl;
+      return false;
+    }
+    if (pModel_->GraphPtr()->Empty())
+    {
+      err_
+          << "Can't change data. No nodes in graph (Have you compiled the model?)"
+          << endl;
+      return false;
+    }
+    if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
+        && !pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't change data. SMC sampler is running." << endl;
+      return false;
+    }
+    if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't change data. Backward smoother is running." << endl;
+      return false;
+    }
+    try
+    {
+      if (verbose)
+      {
+        out_ << PROMPT_STRING << "Changing data" << endl;
+      }
+      if (!pModel_->ChangeData(dataMap))
+      {
+        err_ << "Failed to change data" << endl;
+        return false;
+      }
+      lockBackward_ = true;
+      ClearFilterMonitors();
+      ClearSmoothTreeMonitors();
+      if (pModel_->SmootherInitialized())
+        ClearSmoothMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS;
 
     return true;
   }

@@ -29,20 +29,35 @@ namespace Biips
     Model & model_;
     std::map<String, NodeArray::Ptr> nodeArraysMap_;
 
-    NodeArray & getNodeArray(const String & name) { return *(nodeArraysMap_.at(name)); }
+    NodeArray & getNodeArray(const String & name)
+    {
+      return *(nodeArraysMap_.at(name));
+    }
 
   public:
     explicit SymbolTable(Model & model);
 
     void AddVariable(const String & name, const DimArray & dim);
 
-    void InsertNode(NodeId nodeId, const String & name, const IndexRange & range);
+    void InsertNode(NodeId nodeId,
+                    const String & name,
+                    const IndexRange & range);
 
-    const NodeArray & GetNodeArray(const String & name) const { return *(nodeArraysMap_.at(name)); }
+    const NodeArray & GetNodeArray(const String & name) const
+    {
+      return *(nodeArraysMap_.at(name));
+    }
 
-    NodeId GetNodeArraySubset(const String & name, const IndexRange & subsetRange) const { return nodeArraysMap_.at(name)->GetSubset(subsetRange); }
+    NodeId GetNodeArraySubset(const String & name,
+                              const IndexRange & subsetRange) const
+    {
+      return nodeArraysMap_.at(name)->GetSubset(subsetRange);
+    }
 
-    Bool Contains(const String & name) const { return nodeArraysMap_.count(name); }
+    Bool Contains(const String & name) const
+    {
+      return nodeArraysMap_.count(name);
+    }
 
     Bool Contains(NodeId nodeId) const;
 
@@ -50,9 +65,15 @@ namespace Biips
 
     String GetName(NodeId nodeId) const;
 
-    Size GetSize() const { return nodeArraysMap_.size(); }
+    Size GetSize() const
+    {
+      return nodeArraysMap_.size();
+    }
 
-    Bool Empty() const { return nodeArraysMap_.empty(); }
+    Bool Empty() const
+    {
+      return nodeArraysMap_.empty();
+    }
 
     /**
      * Creates constant nodes in all the NodeArrays in symbol table
@@ -63,6 +84,8 @@ namespace Biips
      * @see NodeArray#SetData
      */
     void WriteData(std::map<String, MultiArray> const & dataMap);
+
+    void ChangeData(std::map<String, MultiArray> const & dataMap);
 
     /**
      * Reads the current value of selected nodes in the symbol table and
