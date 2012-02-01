@@ -362,7 +362,7 @@ namespace Biips
         if (GetDiscrete()[nodeId])
         {
           const LogicalNode & l_node =
-              dynamic_cast<const LogicalNode &> (GetNode(nodeId));
+              static_cast<const LogicalNode &> (GetNode(nodeId));
           const Types<NodeId>::Array & parameters = l_node.Parents();
 
           if (l_node.IsFunction()) // FuncNode
@@ -370,7 +370,7 @@ namespace Biips
             Flags mask(parameters.size());
             for (Size i = 0; i < parameters.size(); ++i)
               mask[i] = GetDiscrete()[parameters[i]];
-            const FuncNode & f_node = dynamic_cast<const FuncNode &> (l_node);
+            const FuncNode & f_node = static_cast<const FuncNode &> (l_node);
             boost::put(boost::vertex_discrete,
                        parentsGraph_,
                        nodeId,
@@ -402,7 +402,7 @@ namespace Biips
         // FIXME: lazy copy-paste from AddStochasticNode
         // Check discreteness of parents
         const StochasticNode & s_node =
-            dynamic_cast<const StochasticNode &> (GetNode(nodeId));
+            static_cast<const StochasticNode &> (GetNode(nodeId));
 
         const Types<NodeId>::Array & parameters = s_node.Parents();
         Flags mask(parameters.size());
