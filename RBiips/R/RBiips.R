@@ -1,4 +1,4 @@
-# COPY: Adapted from rjags module file: jags.R
+## COPY: Adapted from rjags module file: jags.R
 
 set.verbosity <- function(level=1)
 {
@@ -172,29 +172,29 @@ parse.varname <- function(varname) {
 
   v <- v[[1]]
   if (is.name(v)) {
-    ##Full node array requested
+    ## Full node array requested
     return(list(name=deparse(v)))
   }
   else if (is.call(v) && identical(deparse(v[[1]]), "[") && length(v) > 2) {
-    ##Subset requested
+    ## Subset requested
     ndim <- length(v) - 2
     lower <- upper <- numeric(ndim)
     if (any(nchar(sapply(v, deparse)) == 0)) {
-      ##We have to catch empty indices here or they will cause trouble
-      ##below
+      ## We have to catch empty indices here or they will cause trouble
+      ## below
       return(NULL)
     }
     for (i in 1:ndim) {
       index <- v[[i+2]]
       if (is.numeric(index)) {
-        ##Single index
+        ## Single index
         lower[i] <- upper[i] <- index
       }
       else if (is.call(index) && length(index) == 3 &&
                identical(deparse(index[[1]]), ":") &&
                is.numeric(index[[2]]) && is.numeric(index[[3]]))
         {
-          ##Index range
+          ## Index range
           lower[i] <- index[[2]]
           upper[i] <- index[[3]]
         }
@@ -229,7 +229,7 @@ parse.varnames <- function(varnames)
 }
 
 
-monitor.biips <- function(obj, variable.names, type="backward.smoothing")
+monitor.biips <- function(obj, variable.names, type="smoothing")
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model.")
@@ -357,15 +357,15 @@ run.biips <- function(obj, n.part, backward=FALSE,
   return(results)
 }
 
+
 pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
                        rw.sd, dprior=list(), hyperparams=list(),
-                       n.part, rs.thres=0.5, rs.type="stratified", proposal="auto")
+                       n.part, rs.thres=0.5, rs.type="stratified")
 {
-  
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
   
-  # check variable.names
+  ## check variable.names
   if (!is.character(variable.names))
     stop("Invalid variable.names argument")
   pn <- parse.varnames(variable.names)
@@ -398,7 +398,7 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
     stop("Invalid dprior argument")
   for (var in variable.names) {
     if (!var %in% names(dprior)) {
-      # default improper uniform prior
+      ## default improper uniform prior
       dprior[[var]] <- function(params, hyperparams, ..., log) {
         if (log)
           return(0.0)
@@ -415,20 +415,21 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
   if (!is.list(hyperparams))
     stop("Invalid hyperparams argument")
   
-  # stop biips verbosity
+  ## stop biips verbosity
   set.verbosity(0)
   
-  # Initialization
-  #---------------
-  data <- obj$data()
-  
+  ## Initialization
+  #---------------  
   sample <- list()
   for (var in variable.names) {
-    sample[[var]] <- data[[var]]
+    sample[[var]] <- obj$data()[[var]]
   }
   
-  # SMC
-  build.biips(obj, proposal=proposal)
+  ## build smc sampler
+  if (!.Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")) {
+    .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
+  }
+  ## run smc
   out.biips <- run.biips(obj, n.part=n.part, backward=FALSE, rs.thres=rs.thres, rs.type=rs.type)
   log.norm.const.old <- out.biips$log.norm.const
   
@@ -437,37 +438,29 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
   for (var in variable.names)
     log.prior.old[[var]] <- dprior[[var]](sample[[var]], hyperparams[[var]], log=TRUE)
   
-  n.samples <- 0
   prop <- list()
-  mf <- tempfile()
-  writeLines(obj$model(), mf)
   ans <- list()
   
-  # Metropolis-Hastings iterations
-  #-------------------------------
+  ## Metropolis-Hastings iterations
+  ##-------------------------------
   for(i in 1:(n.burn+n.iter)) {
     print(i)
     for (var in variable.names) {
-      # Random walk proposal
+      ## Random walk proposal
       prop[[var]] <- rnorm(1, sample[[var]], rw.sd[[var]])
-      #data[[var]] <- prop[[var]]
-    
-      # recompile model
-      #obj <- biips.model(mf, data, sample.data=FALSE)
       
-      # change model data
+      ## change model data
       .Call("change_data", obj$ptr(), prop, PACKAGE="RBiips")
    
-      # SMC
-      #build.biips(obj, proposal=proposal)
+      ## run smc sampler
       out.biips <- run.biips(obj, n.part=n.part, backward=FALSE, rs.thres=rs.thres, rs.type=rs.type)
     
-      # Acceptance rate
+      ## Acceptance rate
       log.norm.const.prop <- out.biips$log.norm.const
       log.prior.prop[[var]] <- dprior[[var]](prop[[var]], hyperparams[[var]], log=TRUE)
       log.ar <- log.norm.const.prop - log.norm.const.old + log.prior.old[[var]] - log.prior.prop[[var]]
     
-      # Accept/Reject step
+      ## Accept/Reject step
       if (runif(1) < exp(log.ar)) {
         # accept
         sample <- prop
@@ -476,22 +469,140 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
       }
     }
     
-    # Store output
+    ## Store output
     if (i>n.burn && ((i-n.burn-1)%%thin == 0)) {
-      n.samples <- n.samples + 1
       ans[["log.norm.const"]][i-n.burn] <- log.norm.const.old
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]],sample[[var]])
     }
   }
   
-  # set output dimensions
+  ## set output dimensions
   for (var in variable.names) {
-    dim(ans[[var]]) <- c(dim(sample[[var]]), n.samples)
-    names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iter")
+    dim(ans[[var]]) <- c(dim(sample[[var]]), n.iter)
+    names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iteration")
+    class(ans[[var]]) <- "mcarray"
   }
   
-  # start biips verbosity
+  ## restart biips verbosity
+  set.verbosity(1)
+    
+  return(ans)
+}
+
+
+pimh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
+                       n.part, rs.thres=0.5, rs.type="stratified")
+{
+  if (!is.biips(obj))
+    stop("Invalid BiiPS model")
+  
+  ## check variable.names
+  if (!is.character(variable.names))
+    stop("Invalid variable.names argument")
+  pn <- parse.varnames(variable.names)
+  for (l in pn[["lower"]]) {
+    if (!is.null(l))
+      stop("Invalid variable.names argument: subsets are not allowed")
+  }
+  for (u in pn[["upper"]]) {
+    if (!is.null(u))
+      stop("Invalid variable.names argument: subsets are not allowed")
+  }
+  
+  if (!is.numeric(n.burn) || !is.atomic(n.burn) || n.burn < 0)
+    stop("Invalid n.burn argument")
+  n.burn <- as.integer(n.burn)
+  if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
+    stop("Invalid n.iter argument")
+  n.iter <- as.integer(n.iter)
+  if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
+    stop("Invalid thin argument")
+  thin <- as.integer(thin)
+  
+  ## stop biips verbosity
+  set.verbosity(0)
+  
+  ## monitor variables
+  monitor.biips(obj, variable.names, type="smoothing")
+  
+  ## Initialization
+  ##---------------
+  ## build smc sampler
+  if (!.Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")) {
+    .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
+  }
+  ## run smc sampler
+  out.biips <- run.biips(obj, n.part=n.part, backward=FALSE, rs.thres=rs.thres, rs.type=rs.type)
+  log.norm.const.old <- out.biips$log.norm.const
+  
+  ## draw one particle
+  weights <- out.biips[[variable.names[[1]]]]$smoothing$weights
+  dim.weights <- dim(weights)[-length(dim(weights))]
+  from <- 1
+  to <- (length(weights)-n.part+1)
+  by <- prod(dim.weights)
+  print(to)
+  print(by)
+  indvec <- seq(from, to, by)
+  prob <- weights[indvec]
+  chosen <- which(rmultinom(1, 1, prob)==1)
+  
+  ## Store output
+  sample <- list()
+  dim <- list()
+  len <- list()
+  for (var in variable.names) {
+    dim.var <- dim(out.biips[[var]]$smoothing$values)
+    dim[[var]] <- dim.var[-length(dim.var)]
+    len[[var]] <- prod(dim[[var]])
+    sample[[var]] <- out.biips[[var]]$smoothing$values[((chosen-1)*len[[var]]+1):(chosen*len[[var]])]
+  }
+  
+  ans <- list()
+  
+  ## Independant Metropolis-Hastings iterations
+  ##-------------------------------------------
+  for(i in 1:(n.burn+n.iter)) {
+    print(i)
+ 
+    ## SMC
+    out.biips <- run.biips(obj, n.part=n.part, backward=FALSE, rs.thres=rs.thres, rs.type=rs.type)
+  
+    ## Acceptance rate
+    log.norm.const.prop <- out.biips$log.norm.const
+    log.ar <- log.norm.const.prop - log.norm.const.old
+  
+    ## Accept/Reject step
+    if (runif(1) < exp(log.ar)) {
+      ## Accept
+      log.norm.const.old <- log.norm.const.prop
+      
+      ## draw one particle
+      prob <- weights[indvec]
+      chosen <- which(rmultinom(1, 1, prob)==1)
+      for (var in variable.names) {
+        sample[[var]] <- out.biips[[var]]$smoothing$values[((chosen-1)*len[[var]]+1):(chosen*len[[var]])]
+      }
+    }
+    
+    ## Store output
+    if (i>n.burn && ((i-n.burn-1)%%thin == 0)) {
+      ans[["log.norm.const"]][i-n.burn] <- log.norm.const.old
+      for (var in variable.names)
+        ans[[var]] <- c(ans[[var]], sample[[var]])
+    }
+  }
+  
+  ## set output dimensions
+  for (var in variable.names) {
+    n.dim <- length(dim[[var]])
+    dim(ans[[var]]) <- c(dim[[var]], n.iter)
+    names(dim(ans[[var]])) <- c(rep("", n.dim), "iteration")
+    class(ans[[var]]) <- "mcarray"
+  }
+  
+  ## start biips verbosity
   set.verbosity(1)
     
   return(ans)
