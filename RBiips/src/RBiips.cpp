@@ -12,6 +12,7 @@
 #include "RBiipsCommon.h"
 #include <fstream>
 #include "iostream/outStream.hpp"
+#include "iostream/ProgressBar.hpp"
 
 using namespace Biips;
 using std::endl;
@@ -337,7 +338,8 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
         rbiips_cout << range;
     }
   }
-  rbiips_cout << endl;
+  if (verbosity>0)
+    rbiips_cout << endl;
 
   VOID_END_RBIIPS
 }
@@ -370,7 +372,8 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
         rbiips_cout << range;
     }
   }
-  rbiips_cout << endl;
+  if (verbosity>0)
+    rbiips_cout << endl;
 
   VOID_END_RBIIPS
 }
@@ -403,7 +406,8 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
         rbiips_cout << range;
     }
   }
-  rbiips_cout << endl;
+  if (verbosity>0)
+    rbiips_cout << endl;
 
   VOID_END_RBIIPS
 }
@@ -757,4 +761,42 @@ RcppExport SEXP get_node_samplers(SEXP pConsole)
 
   return nodes_data_frame;
   END_RBIIPS
+}
+
+
+RcppExport SEXP progress_bar(SEXP expected_count, SEXP symbol, SEXP iter_name)
+{
+  BEGIN_RBIIPS
+  std::string symbol_str = Rcpp::as<std::string>(symbol);
+  if (symbol_str.size() != 1)
+    throw RuntimeError("Error in progress_bar: symbol argument must be one character sized.");
+
+  Rcpp::XPtr<ProgressBar> p_progress_bar(new ProgressBar(Rcpp::as<unsigned long>(expected_count),
+                                                    rbiips_cout, INDENT_STRING, symbol_str[0],
+                                                    Rcpp::as<std::string>(iter_name)));
+  return p_progress_bar;
+
+  END_RBIIPS
+}
+
+
+RcppExport void restart_progress_bar(SEXP p_progress_bar, SEXP expected_count, SEXP symbol, SEXP iter_name, SEXP display_bar)
+{
+  BEGIN_RBIIPS
+  Rcpp::XPtr<ProgressBar> p_bar(p_progress_bar);
+  std::string symbol_str = Rcpp::as<std::string>(symbol);
+  if (symbol_str.size() != 1)
+    throw RuntimeError("Error in restart_progress_bar: symbol argument must be one character sized.");
+  p_bar->restart(Rcpp::as<unsigned long>(expected_count), symbol_str[0],
+                 Rcpp::as<std::string>(iter_name), Rcpp::as<bool>(display_bar));
+  VOID_END_RBIIPS
+}
+
+
+RcppExport void advance_progress_bar(SEXP p_progress_bar, SEXP count)
+{
+  BEGIN_RBIIPS
+  Rcpp::XPtr<ProgressBar> p_bar(p_progress_bar);
+  (*p_bar) += Rcpp::as<unsigned long>(count);
+  VOID_END_RBIIPS
 }
