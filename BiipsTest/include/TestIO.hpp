@@ -47,8 +47,6 @@ namespace Biips
     return oss.str();
   }
 
-
-  void progressBar(Scalar progress, Size & currentPos, time_t & timer, std::ostream & os = std::cout, String finalValue = "", Size length = 50);
 }
 
 #endif /* BIIPS_TESTIO_HPP_ */

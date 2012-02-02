@@ -235,9 +235,9 @@ print.diagnostic.particles <- function(x, ...)
     cat("diagnostic: GOOD\n")
   else {
     cat("diagnostic: POOR\n")
-    cat("   The minimum effective sample size is too low: ", x$ESS, "\n", sep="")
-    cat("   Estimates may be poor for some variables.\n")
-    cat("   You should increase n.part.")
+    cat("    The minimum effective sample size is too low: ", x$ESS, "\n", sep="")
+    cat("    Estimates may be poor for some variables.\n")
+    cat("    You should increase n.part.")
   }
 }
 
