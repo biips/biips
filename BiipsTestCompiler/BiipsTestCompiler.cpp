@@ -21,6 +21,7 @@
 #include "common/cholesky.hpp"
 #include "Plot.hpp"
 #include "iostream/outStream.hpp"
+#include "iostream/ProgressBar.hpp"
 
 #include <fstream>
 #include <ctime>
@@ -30,7 +31,6 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/p_square_quantile.hpp>
 #include <boost/math/distributions/students_t.hpp>
-#include <boost/progress.hpp>
 
 namespace Biips
 {
@@ -490,12 +490,11 @@ BOOST_AUTO_TEST_CASE( my_test )
         if (verbosity > 0 && interactive && n_smc > 1)
           pressEnterToContinue();
 
-        Types<boost::progress_display>::Ptr p_show_progress;
+        Types<ProgressBar>::Ptr p_show_progress;
         if (verbosity == 1 && n_smc > 1)
-          p_show_progress
-              = Types<boost::progress_display>::Ptr(new boost::progress_display(n_smc,
-                                                                                cout,
-                                                                                ""));
+          p_show_progress = Types<ProgressBar>::Ptr(new ProgressBar(n_smc,
+                                                                    cout,
+                                                                    INDENT_STRING));
 
         vector<Scalar> errors_filter_new;
         vector<Scalar> errors_smooth_new;

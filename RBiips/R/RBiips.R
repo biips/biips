@@ -441,10 +441,16 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
   prop <- list()
   ans <- list()
   
+  # progress bar
+  bar <- .Call("progress_bar", n.burn, '*', "burning iterations", PACKAGE="RBiips")
+  
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:(n.burn+n.iter)) {
-    print(i)
+    # progress bar
+    if(i == (n.burn+1))
+      .Call("restart_progress_bar", bar, n.iter, '*', "iterations", FALSE, PACKAGE="RBiips")
+    
     for (var in variable.names) {
       ## Random walk proposal
       prop[[var]] <- rnorm(1, sample[[var]], rw.sd[[var]])
@@ -470,11 +476,14 @@ pmmh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
     }
     
     ## Store output
-    if (i>n.burn && ((i-n.burn-1)%%thin == 0)) {
+    if (i>n.burn && (i-n.burn-1)%%thin == 0) {
       ans[["log.norm.const"]][i-n.burn] <- log.norm.const.old
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]],sample[[var]])
     }
+    
+    # advance progress bar
+    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
   ## set output dimensions
@@ -542,8 +551,6 @@ pimh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
   from <- 1
   to <- (length(weights)-n.part+1)
   by <- prod(dim.weights)
-  print(to)
-  print(by)
   indvec <- seq(from, to, by)
   prob <- weights[indvec]
   chosen <- which(rmultinom(1, 1, prob)==1)
@@ -561,11 +568,16 @@ pimh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
   
   ans <- list()
   
+  # progress bar
+  bar <- .Call("progress_bar", n.burn, '*', "burning iterations", PACKAGE="RBiips")
+  
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:(n.burn+n.iter)) {
-    print(i)
- 
+    # progress bar
+    if(i == (n.burn+1))
+      .Call("restart_progress_bar", bar, n.iter, '*', "iterations", FALSE, PACKAGE="RBiips")
+    
     ## SMC
     out.biips <- run.biips(obj, n.part=n.part, backward=FALSE, rs.thres=rs.thres, rs.type=rs.type)
   
@@ -587,11 +599,14 @@ pimh.biips <- function(obj, variable.names, n.burn=0, n.iter, thin=1,
     }
     
     ## Store output
-    if (i>n.burn && ((i-n.burn-1)%%thin == 0)) {
+    if (i>n.burn && (i-n.burn-1)%%thin == 0) {
       ans[["log.norm.const"]][i-n.burn] <- log.norm.const.old
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
+    
+    # advance progress bar
+    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
   ## set output dimensions

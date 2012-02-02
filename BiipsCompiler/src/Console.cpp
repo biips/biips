@@ -15,6 +15,7 @@
 #include "Console.hpp"
 #include "compiler/Compiler.hpp"
 #include "iostream/outStream.hpp"
+#include "iostream/ProgressBar.hpp"
 
 // FIXME to be removed. Manage dynamically loaded modules
 #include "BiipsBase.hpp"
@@ -22,7 +23,6 @@
 #include "compiler/parser_extra.h"
 
 #include <cstdio>
-#include <boost/progress.hpp>
 
 #ifdef BIIPS_COMPILER_DEBUG_ON
 #include "printParseTree.hpp"
@@ -507,12 +507,11 @@ namespace Biips
         out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter
             << " iterations" << endl;
 
-      Types<boost::progress_display>::Ptr p_show_progress;
+      Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress
-            = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter,
-                                                                              out_,
-                                                                              ""));
+        p_show_progress = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                                  out_,
+                                                                  INDENT_STRING));
 
       // filtering
 
@@ -580,12 +579,11 @@ namespace Biips
         out_ << PROMPT_STRING << "Running backward smoother of " << n_iter
             << " iterations" << endl;
 
-      Types<boost::progress_display>::Ptr p_show_progress;
+      Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress
-            = Types<boost::progress_display>::Ptr(new boost::progress_display(n_iter,
-                                                                              out_,
-                                                                              ""));
+        p_show_progress = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                                  out_,
+                                                                  INDENT_STRING));
 
       // smoothing
       for (Size n = n_iter; n > 0; --n)
