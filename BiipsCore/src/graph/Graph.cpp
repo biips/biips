@@ -86,32 +86,9 @@ namespace Biips
       }
     }
 
-    if (observed)
-    {
-      boost::put(boost::vertex_observed, parentsGraph_, node_id, false);
-      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
-                                                        parentsGraph_);
-      const ObservedPropertyMap & observed_map =
-          boost::get(boost::vertex_observed, parentsGraph_);
-
-      NodeValues node_values(GetSize());
-      Flags sampled_flags(GetSize());
-      for (NodeId id = 0; id < GetSize(); ++id)
-      {
-        node_values[id] = values_map[id];
-        sampled_flags[id] = observed_map[id];
-      }
-      NodeSampler sample_node_vis(*this);
-      sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
-      VisitNode(node_id, sample_node_vis);
-
-      boost::put(boost::vertex_value,
-                 parentsGraph_,
-                 node_id,
-                 node_values[node_id]);
-    }
-
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
+    if (observed)
+      updateLogicalObsValue(node_id);
 
     //set discreteness
     Bool discrete = true;
@@ -140,6 +117,30 @@ namespace Biips
       param_dims[i] = GetNode(parameters[i]).DimPtr();
 
     return param_dims;
+  }
+
+  void Graph::updateLogicalObsValue(NodeId nodeId)
+  {
+    if (!GetNode(nodeId).GetType() == LOGICAL)
+      throw LogicError("Can't update logical obs value: node is not logical.");
+    const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                      parentsGraph_);
+    const ObservedPropertyMap & observed_map =
+        boost::get(boost::vertex_observed, parentsGraph_);
+
+    NodeValues node_values(GetSize());
+    Flags sampled_flags(GetSize());
+    for (NodeId id = 0; id < GetSize(); ++id)
+    {
+      node_values[id] = values_map[id];
+      sampled_flags[id] = observed_map[id];
+    }
+    sampled_flags[nodeId] = false;
+    NodeSampler sample_node_vis(*this);
+    sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
+    VisitNode(nodeId, sample_node_vis);
+
+    boost::put(boost::vertex_value, parentsGraph_, nodeId, node_values[nodeId]);
   }
 
   NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc,
@@ -173,32 +174,9 @@ namespace Biips
       }
     }
 
-    if (observed)
-    {
-      boost::put(boost::vertex_observed, parentsGraph_, node_id, false);
-      const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
-                                                        parentsGraph_);
-      const ObservedPropertyMap & observed_map =
-          boost::get(boost::vertex_observed, parentsGraph_);
-
-      NodeValues node_values(GetSize());
-      Flags sampled_flags(GetSize());
-      for (NodeId id = 0; id < GetSize(); ++id)
-      {
-        node_values[id] = values_map[id];
-        sampled_flags[id] = observed_map[id];
-      }
-      NodeSampler sample_node_vis(*this);
-      sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
-      VisitNode(node_id, sample_node_vis);
-
-      boost::put(boost::vertex_value,
-                 parentsGraph_,
-                 node_id,
-                 node_values[node_id]);
-    }
-
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
+    if (observed)
+      updateLogicalObsValue(node_id);
 
     //set discreteness
     Flags mask(parameters.size());
@@ -299,13 +277,14 @@ namespace Biips
     if (pObsValue->size() != GetNode(node_id).Dim().Length())
       throw LogicError("Can not add stochastic node: observed value size does not match dimension.");
 
-    boost::put(boost::vertex_value, parentsGraph_, node_id, pObsValue);
+    SetObsValue(node_id, pObsValue);
 
     return node_id;
   }
 
-  void Graph::UpdateObservedNode(NodeId nodeId)
+  Bool Graph::updateDiscreteness(NodeId nodeId)
   {
+    Bool discrete_changed = false;
     switch (GetNode(nodeId).GetType())
     {
       case CONSTANT:
@@ -318,49 +297,21 @@ namespace Biips
             if (!checkInteger((*GetValues()[nodeId])[i]))
             {
               boost::put(boost::vertex_discrete, parentsGraph_, nodeId, false);
+              discrete_changed = true;
               break;
             }
           }
         }
 
-        // Update children
-        ChildIterator it_children, it_children_end;
-        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-        for (; it_children != it_children_end; ++it_children)
-          UpdateObservedNode(*it_children);
         break;
       }
 
       case LOGICAL:
       {
-        // FIXME: lazy copy-paste from AddLogicalNode
-        // Update value
-        const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
-                                                          parentsGraph_);
-        const ObservedPropertyMap & observed_map =
-            boost::get(boost::vertex_observed, parentsGraph_);
-
-        NodeValues node_values(GetSize());
-        Flags sampled_flags(GetSize());
-        for (NodeId id = 0; id < GetSize(); ++id)
-        {
-          node_values[id] = values_map[id];
-          sampled_flags[id] = observed_map[id];
-        }
-        sampled_flags[nodeId] = false;
-
-        NodeSampler sample_node_vis(*this);
-        sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
-        VisitNode(nodeId, sample_node_vis);
-
-        boost::put(boost::vertex_value,
-                   parentsGraph_,
-                   nodeId,
-                   node_values[nodeId]);
-
         // Change discreteness if necessary
         if (GetDiscrete()[nodeId])
         {
+          Bool discrete = true;
           const LogicalNode & l_node =
               static_cast<const LogicalNode &> (GetNode(nodeId));
           const Types<NodeId>::Array & parameters = l_node.Parents();
@@ -371,10 +322,7 @@ namespace Biips
             for (Size i = 0; i < parameters.size(); ++i)
               mask[i] = GetDiscrete()[parameters[i]];
             const FuncNode & f_node = static_cast<const FuncNode &> (l_node);
-            boost::put(boost::vertex_discrete,
-                       parentsGraph_,
-                       nodeId,
-                       f_node.FuncPtr()->IsDiscreteValued(mask));
+            discrete = f_node.FuncPtr()->IsDiscreteValued(mask);
           }
           else // AggregateNode
           {
@@ -382,18 +330,15 @@ namespace Biips
             {
               if (!GetDiscrete()[parameters[i]])
               {
-                boost::put(boost::vertex_discrete, parentsGraph_, nodeId, false);
+                discrete = false;
                 break;
               }
             }
           }
-        }
 
-        // Update children
-        ChildIterator it_children, it_children_end;
-        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-        for (; it_children != it_children_end; ++it_children)
-          UpdateObservedNode(*it_children);
+          boost::put(boost::vertex_discrete, parentsGraph_, nodeId, discrete);
+          discrete_changed = !discrete;
+        }
         break;
       }
 
@@ -415,21 +360,21 @@ namespace Biips
         // Change discreteness if necessary
         if (GetDiscrete()[nodeId])
         {
-          boost::put(boost::vertex_discrete,
-                     parentsGraph_,
-                     nodeId,
-                     s_node.PriorPtr()->IsDiscreteValued(mask));
+          Bool discrete = s_node.PriorPtr()->IsDiscreteValued(mask);
+          boost::put(boost::vertex_discrete, parentsGraph_, nodeId, discrete);
+
+          if (discrete)
+          {
+            // check value discreteness
+            for (Size i = 0; i < GetValues()[nodeId]->size(); ++i)
+            {
+              if (!checkInteger((*GetValues()[nodeId])[i]))
+                throw RuntimeError("Can not set observed value: value is not discrete.");
+            }
+          }
+          discrete_changed = !discrete;
         }
 
-        // Update stochastic children
-        // no need to update logical children, we only changed discreteness
-        ChildIterator it_children, it_children_end;
-        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-        for (; it_children != it_children_end; ++it_children)
-        {
-          if (GetNode(*it_children).GetType() == STOCHASTIC)
-            UpdateObservedNode(*it_children);
-        }
         break;
 
         // FIXME: this can invalidate some assigned samplers ?
@@ -438,7 +383,79 @@ namespace Biips
       default:
         break;
     }
+    return discrete_changed;
+  }
 
+  void Graph::UpdateObservedNode(NodeId nodeId,
+                                 Bool updateValue,
+                                 Bool updateDiscrete)
+  {
+    switch (GetNode(nodeId).GetType())
+    {
+      case CONSTANT:
+      {
+        // update discreteness
+        Bool discrete_changed = updateDiscreteness(nodeId);
+
+        // Update children
+        ChildIterator it_children, it_children_end;
+        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+        for (; it_children != it_children_end; ++it_children)
+          UpdateObservedNode(*it_children, true, discrete_changed);
+
+        break;
+      }
+
+      case LOGICAL:
+      {
+        if (!GetObserved()[nodeId])
+          break;
+
+        // Update value
+        if (updateValue)
+          updateLogicalObsValue(nodeId);
+
+        // update discreteness
+        Bool discrete_changed = false;
+        if (updateDiscrete)
+          discrete_changed = updateDiscreteness(nodeId);
+
+        // Update children
+        ChildIterator it_children, it_children_end;
+        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+        for (; it_children != it_children_end; ++it_children)
+          UpdateObservedNode(*it_children, updateValue
+              && (GetNode(*it_children).GetType()) == LOGICAL, discrete_changed);
+
+        break;
+      }
+
+      case STOCHASTIC:
+      {
+        // update discreteness
+        Bool discrete_changed = false;
+        if (updateDiscrete)
+          discrete_changed = updateDiscreteness(nodeId);
+
+        // Update children
+        if (updateValue || discrete_changed)
+        {
+          ChildIterator it_children, it_children_end;
+          boost::tie(it_children, it_children_end) = GetChildren(nodeId);
+          for (; it_children != it_children_end; ++it_children)
+            UpdateObservedNode(*it_children,
+                               updateValue && (GetNode(*it_children).GetType())
+                                   == LOGICAL,
+                               discrete_changed);
+        }
+
+        break;
+        // FIXME: this can invalidate some assigned samplers ?
+      }
+
+      default:
+        break;
+    }
   }
 
   void Graph::PopNode()
@@ -853,10 +870,17 @@ namespace Biips
 
   void Graph::SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue)
   {
-    if (GetObserved()[nodeId]) // TODO manage else case : throw exception
+    if (GetNode(nodeId).GetType() != STOCHASTIC || !GetObserved()[nodeId])
+      throw RuntimeError("Can't set value, node is not observed.");
+
+    // check discreteness
+    if (GetDiscrete()[nodeId])
     {
-      setValue(nodeId, pObsValue);
+      for (Size i = 0; i < pObsValue->size(); ++i)
+        if (!checkInteger((*pObsValue)[i]))
+          throw RuntimeError("Can not set observed value: value is not discrete.");
     }
+    boost::put(boost::vertex_value, parentsGraph_, nodeId, pObsValue);
   }
 
   class SetObsValuesVisitor: public NodeVisitor
@@ -870,25 +894,13 @@ namespace Biips
     virtual void visit(ConstantNode & node)
     {
     }
-
+    virtual void visit(LogicalNode & node)
+    {
+    }
     virtual void visit(StochasticNode & node)
     {
       if (graph_.GetObserved()[nodeId_])
-      {
-        // check discreteness
-        if (graph_.GetDiscrete()[nodeId_])
-        {
-          for (Size i = 0; i < nodeValuesMap_[nodeId_]->size(); ++i)
-            if (!checkInteger((*nodeValuesMap_[nodeId_])[i]))
-              throw RuntimeError("Can not set observed value: value is not discrete.");
-        }
-        graph_.setValue(nodeId_, nodeValuesMap_[nodeId_]);
-      }
-
-    }
-
-    virtual void visit(LogicalNode & node)
-    {
+        graph_.SetObsValue(nodeId_, nodeValuesMap_[nodeId_]);
     }
 
   public:

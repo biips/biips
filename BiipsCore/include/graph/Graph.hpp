@@ -68,12 +68,11 @@ namespace Biips
     void buildStochasticParents();
     void buildStochasticChildren();
     void buildLikelihoodChildren();
-    void setValue(NodeId nodeId, const ValArray::Ptr & pVal)
-    {
-      boost::put(boost::vertex_value, parentsGraph_, nodeId, pVal);
-    }
     Types<DimArray::Ptr>::Array
-        getParamDims(const Types<NodeId>::Array parameters) const;
+    getParamDims(const Types<NodeId>::Array parameters) const;
+
+    void updateLogicalObsValue(NodeId nodeId);
+    Bool updateDiscreteness(NodeId nodeId);
 
   public:
     Graph();
@@ -108,11 +107,11 @@ namespace Biips
     Types<ParentIterator>::Pair GetParents(NodeId nodeId) const;
     Types<ChildIterator>::Pair GetChildren(NodeId nodeId) const;
     Types<StochasticParentIterator>::Pair
-        GetStochasticParents(NodeId nodeId) const;
+    GetStochasticParents(NodeId nodeId) const;
     Types<StochasticChildIterator>::Pair
-        GetStochasticChildren(NodeId nodeId) const;
+    GetStochasticChildren(NodeId nodeId) const;
     Types<LikelihoodChildIterator>::Pair
-        GetLikelihoodChildren(NodeId nodeId) const;
+    GetLikelihoodChildren(NodeId nodeId) const;
 
     Types<NodeId>::ConstIteratorPair GetSortedNodes() const;
 
@@ -162,7 +161,9 @@ namespace Biips
     void SetObsValues(const NodeValues & nodeValues);
 
     // Called after changing node data
-    void UpdateObservedNode(NodeId id);
+    void UpdateObservedNode(NodeId id,
+                            Bool updateValue = true,
+                            Bool updateDiscrete = true);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
     Node const & GetNode(NodeId nodeId) const
@@ -184,13 +185,11 @@ namespace Biips
     void PrintGraphviz(std::ostream & os) const;
   };
 
-
   template<typename VertexWriter>
   void Graph::PrintGraphviz(std::ostream & os, VertexWriter vw) const
   {
     boost::write_graphviz(os, childrenGraph_, vw);
   }
-
 
   class VertexPropertyWriter
   {

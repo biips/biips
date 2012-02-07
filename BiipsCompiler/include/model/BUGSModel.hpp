@@ -90,6 +90,9 @@ namespace Biips
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
     Bool ChangeData(const std::map<String, MultiArray> & dataMap);
+    Bool GetLogPriorDensity(Scalar & prior,
+                         const String & variable,
+                         IndexRange range = NULL_RANGE) const;
 
     Bool
         DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
@@ -98,6 +101,12 @@ namespace Biips
     Bool
         DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
+    Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng, std::map<
+        String, MultiArray> & sampledValues) const;
+
+    void virtual ClearFilterMonitors();
+    void virtual ClearSmoothTreeMonitors();
+    void virtual ClearSmoothMonitors();
   };
 
 }

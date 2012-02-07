@@ -88,6 +88,35 @@ namespace Biips
     }
   };
 
+  class NodeArrayValue
+  {
+  protected:
+    IndexRange range_;
+    MultiArray value_;
+
+    template<typename StorageOrderType>
+    void addObservedNode(NodeId id,
+                         const IndexRange & subRange,
+                         const Graph & graph);
+    template<typename StorageOrderType>
+    void addMonitoredNode(NodeId id,
+                          const IndexRange & subRange,
+                          const Monitor::Ptr & pMonitor,
+                          Size particleIndex);
+
+  public:
+    NodeArrayValue(const NodeArray & nodeArray,
+                   const IndexRange & range,
+                   const Monitor::Ptr & pMonitor,
+                   Size particleIndex,
+                   const Graph & graph);
+
+    const MultiArray & GetValue() const
+    {
+      return value_;
+    }
+  };
+
 }
 
 #endif /* BIIPS_NODEARRAYMONITOR_HPP_ */

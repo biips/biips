@@ -11,6 +11,7 @@
 #include "model/BUGSModel.hpp"
 #include "common/IndexRangeIterator.hpp"
 #include "iostream/outStream.hpp"
+#include <boost/random/discrete_distribution_sw_2009.hpp>
 
 namespace Biips
 {
@@ -70,7 +71,8 @@ namespace Biips
     return data_table;
   }
 
-  Bool BUGSModel::SetFilterMonitor(const String & name, const IndexRange & range)
+  Bool BUGSModel::SetFilterMonitor(const String & name,
+                                   const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -103,7 +105,8 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::SetSmoothTreeMonitor(const String & name, const IndexRange & range)
+  Bool BUGSModel::SetSmoothTreeMonitor(const String & name,
+                                       const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -136,7 +139,8 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::SetSmoothMonitor(const String & name, const IndexRange & range)
+  Bool BUGSModel::SetSmoothMonitor(const String & name,
+                                   const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -529,6 +533,47 @@ namespace Biips
     return true;
   }
 
+  Bool BUGSModel::SampleSmoothTreeParticle(const Rng::Ptr & pRng, std::map<
+      String, MultiArray> & sampledValues) const
+  {
+    if (!pSampler_)
+      return false;
+    if (!pSampler_->AtEnd())
+      return false;
+
+    // sample one particle according to the weights
+    typedef boost::random::discrete_distribution<Int, Scalar> CategoricalDist;
+    CategoricalDist dist(pSmoothTreeMonitor_->GetUnnormWeights().begin(),
+                         pSmoothTreeMonitor_->GetUnnormWeights().end());
+    typedef boost::variate_generator<Rng::GenType&, CategoricalDist>
+        CategoricalGen;
+    CategoricalGen gen(pRng->GetGen(), dist);
+    Size chosen_particle = gen();
+
+    for (Size i = 0; i < smoothTreeMonitorsNames_.size(); ++i)
+    {
+      const String & var_name = smoothTreeMonitorsNames_[i];
+      if (!symbolTable_.Contains(var_name))
+        throw LogicError(String("Monitored array ") + var_name
+            + " does not exist in the symbol table.");
+
+      String name = var_name;
+      IndexRange range = smoothTreeMonitorsRanges_[i];
+      if (range.IsNull())
+        range = symbolTable_.GetNodeArray(name).Range();
+      else
+        name.append(print(range));
+
+      sampledValues[name] = NodeArrayValue(symbolTable_.GetNodeArray(var_name),
+                                           range,
+                                           pSmoothTreeMonitor_,
+                                           chosen_particle,
+                                           *pGraph_).GetValue();
+    }
+
+    return true;
+  }
+
   Bool BUGSModel::DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
@@ -614,4 +659,45 @@ namespace Biips
     pGraph_->PrintGraphviz(out, vnpw);
   }
 
+  Bool BUGSModel::GetLogPriorDensity(Scalar & prior,
+                                     const String & variable,
+                                     IndexRange range) const
+  {
+    if (!symbolTable_.Contains(variable))
+      throw RuntimeError(String("Can not get prior density: variable ")
+          + variable + " not found.");
+
+    const NodeArray & array = symbolTable_.GetNodeArray(variable);
+    if (range.IsNull())
+      range = array.Range();
+    NodeId node_id = array.GetNode(range);
+    if (node_id == NULL_NODEID)
+      throw RuntimeError(String("Can not get prior density: invalid range: ")
+          + variable + print(range));
+
+    prior = BaseType::GetLogPriorDensity(node_id);
+
+    return true;
+  }
+
+  void BUGSModel::ClearFilterMonitors()
+  {
+    filterMonitorsNames_.clear();
+    filterMonitorsRanges_.clear();
+    BaseType::ClearFilterMonitors();
+  }
+
+  void BUGSModel::ClearSmoothTreeMonitors()
+  {
+    smoothTreeMonitorsNames_.clear();
+    smoothTreeMonitorsRanges_.clear();
+    BaseType::ClearSmoothTreeMonitors();
+  }
+
+  void BUGSModel::ClearSmoothMonitors()
+  {
+    smoothMonitorsNames_.clear();
+    smoothMonitorsRanges_.clear();
+    BaseType::ClearSmoothMonitors();
+  }
 }
