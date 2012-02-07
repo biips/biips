@@ -341,17 +341,33 @@ namespace Biips
     if (anyMissing(value))
       throw RuntimeError("Can not change data: there are missing values.");
 
-    // check that nodes are constant
+    // check that nodes are valid
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
     {
       NodeId id = it->left;
-      if (graph_.GetNode(id).GetType() != CONSTANT)
-        throw RuntimeError(String("Can not change data: node is not constant."));
+      if (graph_.GetNode(id).GetType() == LOGICAL)
+        throw RuntimeError(String("Can not change data: node is logical."));
+
+      if (graph_.GetNode(id).GetType() == STOCHASTIC)
+      {
+        // check node is observed
+        if (!graph_.GetObserved()[id])
+          throw RuntimeError(String("Can not change data: node is not observed."));
+
+        //check that its parents are observed
+        GraphTypes::ParentIterator it_parent, it_parent_end;
+        boost::tie(it_parent, it_parent_end) = graph_.GetParents(id);
+        for(; it_parent != it_parent_end; ++it_parent)
+        {
+          if (!graph_.GetObserved()[*it_parent])
+            throw RuntimeError(String("Can not change data: node has unobserved parents."));
+        }
+      }
     }
 
     // change values
-    for (Size i=0; i<nodeIds_.size(); ++i)
+    for (Size i = 0; i < nodeIds_.size(); ++i)
     {
       Scalar new_val = value.Values()[i];
       NodeId id = nodeIds_[i];

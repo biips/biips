@@ -13,6 +13,7 @@
 #include <fstream>
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
+#include "version.hpp"
 
 using namespace Biips;
 using std::endl;
@@ -127,6 +128,14 @@ SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     rbiips_cout << endl;
 
   return data_list;
+}
+
+
+RcppExport SEXP get_version()
+{
+  BEGIN_RBIIPS
+  return Rcpp::wrap(BIIPS_VERSION());
+  END_RBIIPS
 }
 
 
@@ -446,7 +455,7 @@ RcppExport SEXP is_sampler_built(SEXP pConsole)
 }
 
 
-RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP essThreshold, SEXP resampleType)
+RcppExport void run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP essThreshold, SEXP resampleType)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -456,7 +465,6 @@ RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed,
   Size smc_rng_seed = Rcpp::as<Size>(smcRngSeed);
   String resample_type = Rcpp::as<String>(resampleType);
   Scalar ess_threshold = Rcpp::as<Scalar>(essThreshold);
-  Scalar log_norm_const;
 
   if (verbosity>0)
   {
@@ -467,15 +475,95 @@ RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed,
     rbiips_cout << INDENT_STRING << "rs.type = " << resample_type << endl;
   }
 
-  if (!p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, log_norm_const, false, verbosity>0))
+  if (!p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, false, verbosity>0))
     throw RuntimeError("Failed to run SMC sampler.");
 
-  if (verbosity>0)
-    rbiips_cout << INDENT_STRING << "log-normalizing constant = " << log_norm_const << endl;
+  VOID_END_RBIIPS
+}
 
-  return Rcpp::wrap(log_norm_const);
+
+RcppExport SEXP is_smc_sampler_at_end(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Bool ans = p_console->ForwardSamplerAtEnd();
+  return Rcpp::wrap(ans);
 
   END_RBIIPS
+}
+
+
+RcppExport SEXP get_log_norm_const(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Scalar log_norm_const;
+  if(!p_console->GetLogNormConst(log_norm_const))
+    throw RuntimeError("Failed to get log normalizing constant.");
+
+  return Rcpp::wrap(log_norm_const);
+  END_RBIIPS
+}
+
+
+RcppExport void set_log_norm_const(SEXP pConsole, SEXP logNormConst)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  p_console->SetLogNormConst(Rcpp::as<Scalar>(logNormConst));
+
+  VOID_END_RBIIPS
+}
+
+
+RcppExport void sample_smooth_tree_particle(SEXP pConsole, SEXP smcRngSeed)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  if (!p_console->SampleSmoothTreeParticle(Rcpp::as<Size>(smcRngSeed)))
+    throw RuntimeError("Failed to sample smooth tree particle.");
+
+  VOID_END_RBIIPS
+}
+
+
+RcppExport SEXP get_sampled_smooth_tree_particle(SEXP pConsole)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  std::map<String, MultiArray> sampled_value_map;
+
+  if(!p_console->DumpSampledSmoothTreeParticle(sampled_value_map))
+    throw RuntimeError("Failed to get sampled smooth tree particle.");
+
+  return readDataTable<MultiArray::StorageOrderType>(sampled_value_map);
+
+  END_RBIIPS
+}
+
+
+RcppExport void set_sampled_smooth_tree_particle(SEXP pConsole, SEXP sampledValue)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(sampledValue);
+
+  if(!p_console->SetSampledSmoothTreeParticle(sampled_value_map))
+    throw RuntimeError("Failed to set sampled smooth tree particle.");
+
+  VOID_END_RBIIPS
 }
 
 
@@ -780,23 +868,43 @@ RcppExport SEXP progress_bar(SEXP expected_count, SEXP symbol, SEXP iter_name)
 }
 
 
-RcppExport void restart_progress_bar(SEXP p_progress_bar, SEXP expected_count, SEXP symbol, SEXP iter_name, SEXP display_bar)
+RcppExport void restart_progress_bar(SEXP pProgressBar, SEXP expected_count, SEXP symbol, SEXP iter_name, SEXP display_bar)
 {
   BEGIN_RBIIPS
-  Rcpp::XPtr<ProgressBar> p_bar(p_progress_bar);
+  Rcpp::XPtr<ProgressBar> p_progress_bar(pProgressBar);
   std::string symbol_str = Rcpp::as<std::string>(symbol);
   if (symbol_str.size() != 1)
     throw RuntimeError("Error in restart_progress_bar: symbol argument must be one character sized.");
-  p_bar->restart(Rcpp::as<unsigned long>(expected_count), symbol_str[0],
+  p_progress_bar->restart(Rcpp::as<unsigned long>(expected_count), symbol_str[0],
                  Rcpp::as<std::string>(iter_name), Rcpp::as<bool>(display_bar));
   VOID_END_RBIIPS
 }
 
 
-RcppExport void advance_progress_bar(SEXP p_progress_bar, SEXP count)
+RcppExport void advance_progress_bar(SEXP pProgressBar, SEXP count)
 {
   BEGIN_RBIIPS
-  Rcpp::XPtr<ProgressBar> p_bar(p_progress_bar);
-  (*p_bar) += Rcpp::as<unsigned long>(count);
+  Rcpp::XPtr<ProgressBar> p_progress_bar(pProgressBar);
+  (*p_progress_bar) += Rcpp::as<unsigned long>(count);
   VOID_END_RBIIPS
+}
+
+
+RcppExport SEXP get_log_prior_density(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector var(varName);
+
+  String name(var[0]);
+  IndexRange range = makeRange(lower, upper);
+  Scalar prior;
+
+  if(!p_console->GetLogPriorDensity(prior, name, range))
+    throw RuntimeError("Failed to get prior density.");
+
+  return Rcpp::wrap(prior);
+  END_RBIIPS
 }

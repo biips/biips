@@ -34,6 +34,8 @@ namespace Biips
     Types<ParseTree*>::Array * pVariables_;
     Types<String>::Array nodeArrayNames_;
     Bool lockBackward_;
+    Scalar logNormConst_;
+    std::map<String, MultiArray> sampledValueMap_;
 
     void clearParseTrees();
 
@@ -104,6 +106,14 @@ namespace Biips
     Bool SetSmoothMonitor(const String & name, const IndexRange & range =
         NULL_RANGE);
 
+    Bool ReleaseFilterMonitors();
+    Bool ReleaseSmoothTreeMonitors();
+    Bool ReleaseSmoothMonitors();
+
+    Bool ClearFilterMonitors();
+    Bool ClearSmoothTreeMonitors();
+    Bool ClearSmoothMonitors();
+
     /*!
      * @short Builds the SMC sampler.
      *
@@ -119,9 +129,17 @@ namespace Biips
                            Size smcRngSeed,
                            const String & rsType,
                            Scalar essThreshold,
-                           Scalar & logNormConst,
                            Bool verbose = true,
                            Bool progressBar = true);
+
+    Bool ForwardSamplerAtEnd();
+
+    Bool GetLogNormConst(Scalar & logNormConst);
+    Bool SetLogNormConst(Scalar logNormConst);
+
+    Bool SampleSmoothTreeParticle(Size rngSeed);
+    Bool DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
+    Bool SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
@@ -144,7 +162,11 @@ namespace Biips
         0.25);
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);
-    Bool ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose = true);
+    Bool
+    ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose = true);
+    Bool GetLogPriorDensity(Scalar & prior,
+                            const String & variable,
+                            const IndexRange & range = NULL_RANGE);
 
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool
@@ -157,10 +179,6 @@ namespace Biips
     Bool DumpNodeObserved(Flags & nodeObserved);
     Bool DumpNodeIterations(Types<Size>::Array & nodeIterations);
     Bool DumpNodeSamplers(Types<String>::Array & nodeSamplers);
-
-    Bool ClearFilterMonitors();
-    Bool ClearSmoothTreeMonitors();
-    Bool ClearSmoothMonitors();
   };
 }
 

@@ -77,9 +77,15 @@ namespace Biips
 
     // only release monitor objects
     // but keep nodeIds
+    void virtual ReleaseFilterMonitors();
+    void virtual ReleaseSmoothTreeMonitors();
+    void virtual ReleaseSmoothMonitors();
+
     void virtual ClearFilterMonitors();
     void virtual ClearSmoothTreeMonitors();
     void virtual ClearSmoothMonitors();
+
+    Scalar GetLogPriorDensity(NodeId nodeId) const;
   };
 
 }

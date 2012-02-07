@@ -250,4 +250,88 @@ namespace Biips
     }
   }
 
+  template<>
+  void NodeArrayValue::addObservedNode<ColumnMajorOrder>(NodeId id,
+                                                        const IndexRange & subRange,
+                                                        const Graph & graph)
+  {
+    // iterate the elements of the subrange
+    for (IndexRangeIterator it_sub_range(subRange); !it_sub_range.AtEnd(); it_sub_range.Next())
+    {
+      if (!range_.Contains(IndexRange(it_sub_range)))
+        continue;
+      // compute the offset of the new larger array
+      Size offset = range_.GetOffset(it_sub_range);
+
+      // compute the offset of the sub array
+      Size sub_offset = subRange.GetOffset(it_sub_range);
+
+      value_.Values()[offset] = (*(graph.GetValues()[id]))[sub_offset];
+    }
+  }
+
+  template<>
+  void NodeArrayValue::addMonitoredNode<ColumnMajorOrder>(NodeId id,
+                                                        const IndexRange & subRange,
+                                                        const Monitor::Ptr & pMonitor,
+                                                        Size particleIndex)
+  {
+    if (!pMonitor)
+      throw LogicError("Monitor::Ptr is null, in NodeArrayMonitor::addMonitoredNode.");
+    if (!pMonitor->Contains(id))
+      throw LogicError("Node is not monitored, in NodeArrayMonitor::addMonitoredNode.");
+
+    NodeMonitor node_monitor(id, pMonitor);
+
+    // iterate the elements of the subrange
+    for (IndexRangeIterator it_sub_range(subRange); !it_sub_range.AtEnd(); it_sub_range.Next())
+    {
+      if (!range_.Contains(IndexRange(it_sub_range)))
+        continue;
+      // compute the offset of the new larger array
+      Size offset = range_.GetOffset(it_sub_range);
+
+      // compute the offset of the sub array
+      Size sub_offset = subRange.GetOffset(it_sub_range);
+
+      // iterate all the particles
+      value_.Values()[offset]
+          = (*(node_monitor.GetNodeValues()[particleIndex]))[sub_offset];
+    }
+  }
+
+  NodeArrayValue::NodeArrayValue(const NodeArray & nodeArray,
+                                 const IndexRange & range,
+                                 const Monitor::Ptr & pMonitor,
+                                 Size particleIndex,
+                                 const Graph & graph) :
+    range_(range)
+  {
+    if (!nodeArray.Range().Contains(range_))
+      throw LogicError(String("NodeArrayMonitor: range ") + print(range_)
+          + " is not contained in variable " + nodeArray.Name());
+
+    // allocate memory
+    ValArray::Ptr
+        p_values_val(new ValArray(range_.Dim().Length(), BIIPS_REALNA));
+    value_.SetPtr(range_.DimPtr(), p_values_val);
+
+    boost::bimap<NodeId, IndexRange>::const_iterator it_bimap =
+        nodeArray.NodeIdRangeBimap().begin();
+
+    // iterate over all the subnodes
+    for (; it_bimap != nodeArray.NodeIdRangeBimap().end(); ++it_bimap)
+    {
+      NodeId id = it_bimap->left;
+      const IndexRange & sub_range = it_bimap->right;
+      if (!range_.Overlaps(sub_range))
+        continue;
+
+      if (graph.GetObserved()[id])
+        addObservedNode<StorageOrder> (id, sub_range, graph);
+      else
+        addMonitoredNode<StorageOrder> (id, sub_range, pMonitor, particleIndex);
+    }
+  }
+
 }
