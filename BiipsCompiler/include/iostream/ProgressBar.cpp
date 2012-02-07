@@ -78,9 +78,8 @@ namespace Biips
     // use of floating point ensures that both large and small counts
     // work correctly.  static_cast<>() is also used several places
     // to suppress spurious compiler warnings.
-    unsigned int tics_needed =
-        static_cast<unsigned int> ((static_cast<double> (count_)
-            / expected_count_) * 49.0);
+    unsigned int tics_needed = static_cast<unsigned int> (49.0 * count_
+        / expected_count_);
     do
       os_ << symbol_ << std::flush;
     while (++tic_ < tics_needed);
@@ -93,11 +92,11 @@ namespace Biips
       os_ << "| " << count_ << " " << iter_name_;
       if (display_time_)
       {
-        os_ << " in ";
         // use istream instead of ios_base to workaround GNU problem (Greg Chicares)
         std::istream::fmtflags old_flags = os_.setf(std::istream::fixed,
                                                     std::istream::floatfield);
         std::streamsize old_prec = os_.precision(2);
+        os_ << " in ";
         os_ << timer_.elapsed() << " s"; // "s" is System International d'Unites std
         os_.flags(old_flags);
         os_.precision(old_prec);

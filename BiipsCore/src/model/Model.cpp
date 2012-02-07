@@ -11,6 +11,8 @@
 #include "model/Model.hpp"
 #include "model/Monitor.hpp"
 #include "sampler/Accumulator.hpp"
+#include "sampler/GetNodeValueVisitor.hpp"
+#include "graph/StochasticNode.hpp"
 
 namespace Biips
 {
@@ -77,7 +79,7 @@ namespace Biips
     return true;
   }
 
-  void Model::ClearFilterMonitors()
+  void Model::ReleaseFilterMonitors()
   {
     filterMonitors_.clear();
     for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
@@ -87,12 +89,12 @@ namespace Biips
     }
   }
 
-  void Model::ClearSmoothTreeMonitors()
+  void Model::ReleaseSmoothTreeMonitors()
   {
     pSmoothTreeMonitor_.reset();
   }
 
-  void Model::ClearSmoothMonitors()
+  void Model::ReleaseSmoothMonitors()
   {
     smoothMonitors_.clear();
     for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
@@ -100,6 +102,24 @@ namespace Biips
     {
       it_monitors->second.reset();
     }
+  }
+
+  void Model::ClearFilterMonitors()
+  {
+    filterMonitors_.clear();
+    filterMonitorsMap_.clear();
+  }
+
+  void Model::ClearSmoothTreeMonitors()
+  {
+    pSmoothTreeMonitor_.reset();
+    smoothTreeMonitoredNodeIds_.clear();
+  }
+
+  void Model::ClearSmoothMonitors()
+  {
+    smoothMonitors_.clear();
+    smoothMonitorsMap_.clear();
   }
 
   const ForwardSampler & Model::Sampler() const
@@ -123,23 +143,6 @@ namespace Biips
     pSampler_ = ForwardSampler::Ptr(new ForwardSampler(*pGraph_));
 
     pSampler_->Build();
-
-    // Clear Monitors
-    filterMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator it =
-        filterMonitorsMap_.begin(); it != filterMonitorsMap_.end(); ++it)
-    {
-      it->second.reset();
-    }
-
-    smoothMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator it =
-        smoothMonitorsMap_.begin(); it != smoothMonitorsMap_.end(); ++it)
-    {
-      it->second.reset();
-    }
-
-    pSmoothTreeMonitor_.reset();
   }
 
   void Model::InitSampler(Size nParticles,
@@ -147,6 +150,11 @@ namespace Biips
                           const String & rsType,
                           Scalar threshold)
   {
+    // release monitors
+    ReleaseFilterMonitors();
+    ReleaseSmoothTreeMonitors();
+    ReleaseSmoothMonitors();
+
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
 
     // lock SmoothTree monitored nodes
@@ -250,6 +258,9 @@ namespace Biips
 
   void Model::InitBackwardSmoother()
   {
+    // release monitors
+    ReleaseSmoothMonitors();
+
     if (!defaultMonitorsSet_)
       throw LogicError("Can not initiate backward smoother: default monitors not set.");
 
@@ -544,5 +555,67 @@ namespace Biips
     pSampler_->Accumulate(nodeId, scalar_acc);
 
     return scalar_acc.Pdf();
+  }
+
+  class LogPriorDensityVisitor: public ConstNodeVisitor
+  {
+  protected:
+    const Graph & graph_;
+    Scalar prior_;
+  public:
+    virtual void visit(const StochasticNode & node)
+    {
+      NumArray x(node.DimPtr().get(), graph_.GetValues()[nodeId_].get());
+      NumArray::Array parents(node.Parents().size());
+      for (Size i = 0; i < node.Parents().size(); ++i)
+      {
+        NodeId par_id = node.Parents()[i];
+        parents[i].SetPtr(graph_.GetNode(par_id).DimPtr().get(),
+                          graph_.GetValues()[par_id].get());
+      }
+      NumArray::Pair bounds;
+      if (node.PriorPtr()->CanBound())
+      {
+        if (node.IsLowerBounded())
+          bounds.first.SetPtr(graph_.GetNode(node.Lower()).DimPtr().get(),
+                              graph_.GetValues()[node.Lower()].get());
+
+        if (node.IsUpperBounded())
+          bounds.second.SetPtr(graph_.GetNode(node.Upper()).DimPtr().get(),
+                             graph_.GetValues()[node.Upper()].get());
+      }
+
+      prior_ = node.LogPriorDensity(x, parents, bounds);
+    }
+
+    Scalar GetPrior() const
+    {
+      return prior_;
+    }
+
+    explicit LogPriorDensityVisitor(const Graph & graph) :
+      graph_(graph)
+    {
+    }
+  };
+
+  Scalar Model::GetLogPriorDensity(NodeId nodeId) const
+  {
+    if (pGraph_->GetNode(nodeId).GetType() != STOCHASTIC
+        && !pGraph_->GetObserved()[nodeId])
+      throw RuntimeError("Can not get prior density: node is not observed stochastic.");
+
+    GraphTypes::ParentIterator it_parent, it_parent_end;
+    boost::tie(it_parent, it_parent_end) = pGraph_->GetParents(nodeId);
+    for (; it_parent != it_parent_end; ++it_parent)
+    {
+      if (!pGraph_->GetObserved()[*it_parent])
+        throw RuntimeError("Can not get prior density: node has unobserved parents.");
+    }
+
+    LogPriorDensityVisitor log_prior_vis(*pGraph_);
+    pGraph_->VisitNode(nodeId, log_prior_vis);
+
+    return log_prior_vis.GetPrior();
   }
 }

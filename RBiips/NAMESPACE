@@ -1,2 +1,43 @@
 useDynLib(RBiips)
-exportPattern("^[[:alpha:]]+")
+
+importFrom(stats, variable.names)
+
+export ( 
+  biips.model,
+  smc.samples,
+  pmmh.samples,
+  pimh.samples,
+  load.biips.module,
+  set.biips.verbosity,
+  is.biips,
+  build.sampler,
+  update.pmmh,
+  update.pimh,
+  diagnostic
+)
+
+S3method(print, biips)
+S3method(variable.names, biips)
+S3method(build.sampler, biips)
+S3method(update.pmmh, biips)
+S3method(update.pimh, biips)
+
+S3method(print, particles)
+S3method(print, particles.list)
+S3method(summary, particles)
+S3method(summary, particles.list)
+S3method(print, summary.particles)
+S3method(print, summary.particles.list)
+S3method(plot, particles)
+S3method(plot, particles.list)
+S3method(plot, summary.particles)
+S3method(plot, summary.particles.list)
+S3method(diagnostic, particles)
+S3method(diagnostic, particles.list)
+S3method(print, diagnostic.particles)
+S3method(density, particles)
+S3method(density, particles.list)
+S3method(plot, density.particles.atomic)
+S3method(plot, density.particles.atomic.list)
+S3method(plot, density.particles)
+S3method(plot, density.particles.list)

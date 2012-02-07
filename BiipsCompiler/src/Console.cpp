@@ -484,7 +484,6 @@ namespace Biips
                                   Size smcRngSeed,
                                   const String & rsType,
                                   Scalar essThreshold,
-                                  Scalar & logNormConst,
                                   Bool verbose,
                                   Bool progressBar)
   {
@@ -509,13 +508,16 @@ namespace Biips
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
-                                                                  out_,
-                                                                  INDENT_STRING));
+        p_show_progress
+            = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                      out_,
+                                                      INDENT_STRING));
 
       // filtering
 
+      // FIXME
       Rng::Ptr p_smc_rng(new Rng(smcRngSeed));
+
       pModel_->InitSampler(nParticles, p_smc_rng, rsType, essThreshold);
 
       if (p_show_progress)
@@ -534,9 +536,71 @@ namespace Biips
       }
 
       // normalizing constant
-      logNormConst = pModel_->Sampler().LogNormConst();
+      logNormConst_ = pModel_->Sampler().LogNormConst();
 
       lockBackward_ = false;
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ForwardSamplerAtEnd()
+  {
+    return (pModel_ && pModel_->SamplerBuilt() && pModel_->Sampler().AtEnd());
+  }
+
+  Bool Console::GetLogNormConst(Scalar & logNormConst)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't get log normalizing constant. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't get log normalizing constant. SMC sampler did not run!"
+          << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't get log normalizing constant. SMC sampler did not finish!"
+          << endl;
+      return false;
+    }
+    try
+    {
+      logNormConst = logNormConst_;
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::SetLogNormConst(Scalar logNormConst)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't set log normalizing constant. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't set log normalizing constant. SMC sampler did not run!"
+          << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't set log normalizing constant. SMC sampler did not finish!"
+          << endl;
+      return false;
+    }
+    try
+    {
+      logNormConst_ = logNormConst;
+      lockBackward_ = true;
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -581,9 +645,10 @@ namespace Biips
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
-                                                                  out_,
-                                                                  INDENT_STRING));
+        p_show_progress
+            = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                      out_,
+                                                      INDENT_STRING));
 
       // smoothing
       for (Size n = n_iter; n > 0; --n)
@@ -705,6 +770,139 @@ namespace Biips
         err_ << endl;
         return false;
       }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ClearFilterMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear filter monitors. No model!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearFilterMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ClearSmoothTreeMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth tree monitors. No model!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearSmoothTreeMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ClearSmoothMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth monitors. No model!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ClearSmoothMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ReleaseFilterMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear filter monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't clear filter monitors. Sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't clear filter monitors. Sampler still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ReleaseFilterMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ReleaseSmoothTreeMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth tree monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't clear smooth tree monitors. Sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't clear smooth tree monitors. Sampler still running!"
+          << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ReleaseSmoothTreeMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::ReleaseSmoothMonitors()
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't clear smooth monitors. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SmootherInitialized())
+    {
+      err_ << "Can't clear smooth monitors. Smoother not initialized!" << endl;
+      return false;
+    }
+    if (!pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't clear smooth monitors. Smoother still running!" << endl;
+      return false;
+    }
+
+    try
+    {
+      pModel_->ReleaseSmoothMonitors();
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -989,10 +1187,10 @@ namespace Biips
         return false;
       }
       lockBackward_ = true;
-      ClearFilterMonitors();
-      ClearSmoothTreeMonitors();
+      ReleaseFilterMonitors();
+      ReleaseSmoothTreeMonitors();
       if (pModel_->SmootherInitialized())
-        ClearSmoothMonitors();
+        ReleaseSmoothMonitors();
     }
     BIIPS_CONSOLE_CATCH_ERRORS;
 
@@ -1097,82 +1295,104 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ClearFilterMonitors()
+
+  Bool Console::SampleSmoothTreeParticle(Size rngSeed)
   {
     if (!pModel_)
     {
-      err_ << "Can't clear filter monitors. No model!" << endl;
+      err_ << "Can't sample smooth tree particle. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't clear filter monitors. Sampler not built!" << endl;
+      err_ << "Can't sample smooth tree particle. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't clear filter monitors. Sampler still running!" << endl;
-      return false;
-    }
-
-    try
-    {
-      pModel_->ClearFilterMonitors();
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::ClearSmoothTreeMonitors()
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't clear smooth tree monitors. No model!" << endl;
-      return false;
-    }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't clear smooth tree monitors. Sampler not built!" << endl;
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_ << "Can't clear smooth tree monitors. Sampler still running!"
+      err_ << "Can't sample smooth tree particle. SMC sampler still running!"
           << endl;
       return false;
     }
 
     try
     {
-      pModel_->ClearSmoothTreeMonitors();
+      // FIXME
+      Rng::Ptr p_rng(new Rng(rngSeed));
+
+      Bool ok = pModel_->SampleSmoothTreeParticle(p_rng, sampledValueMap_);
+      if (!ok)
+      {
+        err_ << "Failed to sample smooth tree particle" << endl;
+        return false;
+      }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
     return true;
   }
 
-  Bool Console::ClearSmoothMonitors()
+
+  Bool Console::DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't clear smooth monitors. No model!" << endl;
+      err_ << "Can't sample smooth tree particle. No model!" << endl;
       return false;
     }
-    if (!pModel_->SmootherInitialized())
+    if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't clear smooth monitors. Smoother not initialized!" << endl;
+      err_ << "Can't sample smooth tree particle. SMC sampler not built!" << endl;
       return false;
     }
-    if (!pModel_->Smoother().AtEnd())
+    if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't clear smooth monitors. Smoother still running!" << endl;
+      err_ << "Can't sample smooth tree particle. SMC sampler still running!"
+          << endl;
       return false;
     }
 
     try
     {
-      pModel_->ClearSmoothMonitors();
+      sampledValueMap = sampledValueMap_;
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+
+  Bool Console::SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't set sampled smooth tree particle. No model!" << endl;
+      return false;
+    }
+    if (!pModel_->SamplerBuilt())
+    {
+      err_ << "Can't set sampled smooth tree particle. SMC sampler not built!" << endl;
+      return false;
+    }
+    if (!pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't set sampled smooth tree particle. SMC sampler still running!"
+          << endl;
+      return false;
+    }
+
+    try
+    {
+      std::map<String, MultiArray>::const_iterator it = sampledValueMap.begin();
+      for (; it != sampledValueMap.end(); ++it)
+      {
+        if (!sampledValueMap_.count(it->first))
+          throw RuntimeError("Can't set sampled value: variable not found.");
+
+        if(it->second.Dim() != sampledValueMap_.at(it->first).Dim())
+          throw RuntimeError("Can't set sampled value: dimension mismatch.");
+        sampledValueMap_[it->first] = it->second;
+      }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1361,6 +1581,28 @@ namespace Biips
     try
     {
       s = pModel_->GraphPtr()->GetSize();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::GetLogPriorDensity(Scalar & prior,
+                                   const String & variable,
+                                   const IndexRange & range)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't get prior density. No model!" << endl;
+      return false;
+    }
+    try
+    {
+      if (!pModel_->GetLogPriorDensity(prior, variable, range))
+      {
+        err_ << "Failed to get log prior density." << endl;
+        return false;
+      }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 

@@ -521,16 +521,18 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           // Run sampler
           //----------------------
-          Scalar log_norm_const;
           Bool verbose_run_smc = verbosity > 1 || (verbosity > 0 && n_smc == 1);
           if (!console.RunForwardSampler(n_part,
                                          smc_rng_seed,
                                          resample_type,
                                          ess_threshold,
-                                         log_norm_const,
                                          verbose_run_smc,
                                          verbose_run_smc))
             throw RuntimeError("Failed to run SMC sampler.");
+
+          Scalar log_norm_const;
+          if (!console.GetLogNormConst(log_norm_const))
+            throw RuntimeError("Failed to get log normalizing constant.");
 
           if (verbosity == 1 && n_smc > 1 && !do_smooth)
             ++(*p_show_progress);
