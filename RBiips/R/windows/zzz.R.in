@@ -1,0 +1,101 @@
+.findBiiPS <- function(hive, major)
+{
+  ## Returns the registry key corresponding to the latest release of
+  ## BiiPS-major.x.y, or NULL if no release is found
+  
+  regkey <- try(readRegistry("SOFTWARE\\BiiPS", hive = hive, maxdepth = 2,
+                             view="32-bit"), silent = TRUE)
+  if (inherits(regkey, "try-error")) {
+    return(NULL)
+  }
+  keynames <- names(regkey)
+  keynames <- keynames[grep(paste("^BiiPS-", major, "\\.", sep=""), keynames)]
+  if (length(keynames) == 0) {
+    return(NULL)
+  }
+  else {
+    regkey <- regkey[keynames]
+    for (i in seq(along=keynames)) {
+      if (!is.null(regkey[[i]][["InstallDir"]])) {
+        return(regkey[i])
+      }
+    }
+    return(NULL)
+  }
+}
+
+.noBiiPS <- function(major)
+{
+  paste("Failed to locate any version of BiiPS version ", major, "\n\n",
+        "The RBiips package is just an interface to the BiiPS libraries\n",
+        "Make sure you have installed BiiPS-", major,
+        ".0.0.exe or higher from\n",
+        "@Biips_URL@\n", sep="")
+}
+
+.onLoad <- function(lib, pkg)
+{
+### First task is to get installation directory of JAGS
+
+    ## Try environment variable first
+    biips.home <- Sys.getenv("BIIPS_HOME")
+    if (nchar(biips.home)==0) {
+      ## Search the registry. We need to look for both machine-wide and
+      ## user-specific installations
+
+      biips.major <- @Biips_VERSION_MAJOR@
+      
+      key1 <- .findBiiPS("HLM", biips.major)
+      key2 <- .findBiiPS("HCU", biips.major)
+
+      if (is.null(key1)) {
+        if (is.null(key2)) {
+          stop(.noBiiPS(biips.major))
+        }
+        else {
+          latest <- key2
+        }
+      }
+      else if (is.null(key2) || names(key2) < names(key1)) {
+        latest <- key1
+      }
+      else {
+        latest <- key2
+      }
+
+      biips.home <- latest[[1]][["InstallDir"]]
+    }
+    
+### Add biips.home to the windows PATH, if not already present
+
+    bindir <- file.path(biips.home, .Platform$r_arch, "bin")
+    path <- Sys.getenv("PATH")
+    split.path <- strsplit(path, .Platform$path.sep)$PATH
+    if (!any(split.path == bindir)) {
+        path <- paste(bindir, path, sep=.Platform$path.sep)
+        Sys.setenv("PATH"=path)
+    }
+    
+### Set the module directory, if the option biips.moddir is not already set
+    
+    #if (is.null(getOption("biips.moddir"))) {
+    #    options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
+    #            "modules"))
+    #}
+    library.dynam("RBiips", pkg, lib)
+    packageStartupMessage("linking to BiiPS ",
+                          .Call("get_version", PACKAGE="RBiips"))
+    
+    #.Call("init_biips_console", PACKAGE="RBiips")
+  
+    ## ... and the modules
+    load.biips.module("basemod")
+  
+    set.biips.verbosity(1)
+
+}
+
+.onUnload <- function(libpath)
+{
+    library.dynam.unload("RBiips", libpath)
+}

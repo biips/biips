@@ -10,7 +10,7 @@
 
 #include "sampler/Resampler.hpp"
 
-#include <boost/random/discrete_distribution_sw_2009.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 

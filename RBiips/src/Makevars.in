@@ -1,7 +1,8 @@
-PKG_CPPFLAGS = -I/usr/include/biips/BiipsCore -I/usr/include/biips/BiipsBase -I/usr/include/biips/BiipsCompiler
+PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/BiipsCore/include -I@BIIPS_INCLUDE@/BiipsBase/include -I@BIIPS_INCLUDE@/BiipsCompiler/include
 
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"` -lBiipsCore -lBiipsBase -lBiipsCompiler
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -L@BIIPS_LIB@ -lBiipsCore @BIIPS_RPATH@ -L@BIIPS_LIB@ -lBiipsBase @BIIPS_RPATH@ -L@BIIPS_LIB@ -lBiipsCompiler @BIIPS_RPATH@
+
 ## As an alternative, one can also add this code in a file 'configure'
 ##
 ##    PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`

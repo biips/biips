@@ -42,14 +42,14 @@ namespace Biips
       throw LogicError(String("Name ") + name
           + " does not exist in the symbol table.");
 
-    // check that nodeId is not already in an existing NodeArray
-    for (std::map<String, NodeArray::Ptr>::const_iterator it_table =
-        nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
-    {
-      if (it_table->second->Contains(nodeId))
-        throw LogicError(String("Node ") + print(nodeId)
-            + " already in use in variable " + it_table->first + ".");
-    }
+    //    // check that nodeId is not already in an existing NodeArray
+    //    for (std::map<String, NodeArray::Ptr>::const_iterator it_table =
+    //        nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
+    //    {
+    //      if (it_table->second->Contains(nodeId))
+    //        throw LogicError(String("Node ") + print(nodeId)
+    //            + " already in use in variable " + it_table->first + ".");
+    //    }
 
     nodeArraysMap_.at(name)->Insert(nodeId, range);
   }
@@ -132,17 +132,37 @@ namespace Biips
 
   void SymbolTable::ChangeData(std::map<String, MultiArray> const & dataMap)
   {
+    std::map<Size, NodeId> logic_children_by_rank;
+    std::map<Size, NodeId> sto_children_by_rank;
     for (std::map<String, MultiArray>::const_iterator p(dataMap.begin()); p
         != dataMap.end(); ++p)
     {
       const String & name = p->first;
-      if (Contains(name))
-      {
-        NodeArray & array = getNodeArray(name);
-        array.ChangeData(p->second);
-      }
-      else
+      if (!Contains(name))
         throw RuntimeError("Can't change data: variable is not defined in the model.");
+
+      NodeArray & array = getNodeArray(name);
+      // change data, get all observed logical children
+      // update discreteness and get stochastic children to be updated
+      array.ChangeData(p->second, logic_children_by_rank, sto_children_by_rank);
+    }
+
+    // update logical children
+    for (std::map<Size, NodeId>::const_iterator it(logic_children_by_rank.begin()); it != logic_children_by_rank.end(); ++it)
+    {
+      NodeId id = it->second;
+      model_.GraphPtr()->UpdateLogicalObsValue(id);
+      model_.GraphPtr()->UpdateDiscreteness(id, sto_children_by_rank);
+    }
+
+    // update stochastic children discreteness
+    for (Size rank = 0; rank < model_.GraphPtr()->GetRanks().back(); ++rank)
+    {
+      if (!sto_children_by_rank.count(rank))
+        continue;
+
+      NodeId id = sto_children_by_rank.at(rank);
+      model_.GraphPtr()->UpdateDiscreteness(id, sto_children_by_rank);
     }
   }
 

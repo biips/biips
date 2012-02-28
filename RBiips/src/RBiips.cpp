@@ -13,7 +13,7 @@
 #include <fstream>
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
-#include "version.hpp"
+#include "BiipsVersion.hpp"
 
 using namespace Biips;
 using std::endl;
@@ -247,7 +247,7 @@ RcppExport SEXP get_data(SEXP pConsole)
 }
 
 
-RcppExport void change_data(SEXP pConsole, SEXP data)
+RcppExport SEXP change_data(SEXP pConsole, SEXP data)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -256,10 +256,11 @@ RcppExport void change_data(SEXP pConsole, SEXP data)
   // Read data
   std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
 
-  if (! p_console->ChangeData(data_map, verbosity))
-    throw RuntimeError("Failed to change data.");
+  Bool ok = p_console->ChangeData(data_map, verbosity);
 
-  VOID_END_RBIIPS
+  return Rcpp::wrap(ok);
+
+  END_RBIIPS
 }
 
 
@@ -455,7 +456,7 @@ RcppExport SEXP is_sampler_built(SEXP pConsole)
 }
 
 
-RcppExport void run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP essThreshold, SEXP resampleType)
+RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed, SEXP essThreshold, SEXP resampleType)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -475,10 +476,11 @@ RcppExport void run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed,
     rbiips_cout << INDENT_STRING << "rs.type = " << resample_type << endl;
   }
 
-  if (!p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, false, verbosity>0))
-    throw RuntimeError("Failed to run SMC sampler.");
+  Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, false, verbosity>0);
 
-  VOID_END_RBIIPS
+  return Rcpp::wrap(ok);
+
+  END_RBIIPS
 }
 
 

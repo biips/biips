@@ -108,6 +108,7 @@ namespace Biips
   {
     filterMonitors_.clear();
     filterMonitorsMap_.clear();
+    defaultMonitorsSet_ = false;
   }
 
   void Model::ClearSmoothTreeMonitors()

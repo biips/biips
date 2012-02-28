@@ -1,0 +1,72 @@
+The RBiips package is an interface to the BiiPS libraries.  In order to
+build a binary package, or install from source, you must have a matching
+installation of the BiiPS libraries.
+
+Windows
+-------
+
+At compile time, there is no way for windows to guess where the BiiPS
+library is installed, so you must supply the location yourself using
+the variable BIIPS_ROOT.
+
+You can specify BIIPS_ROOT as an environment variable, e.g.  on 32-bit
+windows:
+
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-2.2.0
+
+or, for 64-bit windows
+
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-2.2.0-x64
+or
+set BIIPS_ROOT=c:\Program Files (x86)\BiiPS\BiiPS-2.2.0
+
+In R >= 2.12.0 you will be able to set BIIPS_ROOT as a (platform-
+specific) make variable in etc${R_ARCH}/Makevars.win.
+
+Unix
+----
+
+The configure script will try to guess the location of the BiiPS
+libraries installation. It will look in /<prefix>/<lib>, where
+
+- <prefix> is the determined from the location of the BiiPS
+  script that launches the command line interface.
+
+  For example, if this is "/usr/local/bin/biips", then prefix will
+  be "/usr/local"
+
+- <lib> is derived from the value of "LIBnn", returned by 
+  "R CMD config LIBnn".
+
+  This is particularly important on 64-bit unix, where R is 
+  installed by default in /usr/local/lib64 and LIBnn is "lib64"
+
+The configure script will also look for BiiPS headers in
+/<prefix>/include/biips
+
+If the configure script fails to find the BiiPS headers or libraries,
+you can set the environment variables BIIPS_INCLUDE and BIIPS_LIB
+to point to the correct directory.
+
+Alternatively, you can use the configure options
+
+--with-biips-include=/path/to/biips/headers 
+                    (default /usr/local/include/biips)
+
+--with-biips-lib=/path/to/biips/libraries
+                (default /usr/local/[lib|lib64])
+
+These options are onto the RBiips configure script with:
+"R CMD INSTALL --configure-args='--with-biips...'
+
+#Exceptionally, you may need to set the location of the BiiPS modules.
+#But this will only be necessary if you reset moddir when installing
+#BiiPS. This can be done by setting the environment variabel BIIPS_MODULES
+#or by using the configure option
+#
+#--with-biips-modules=/path/to/biips/modules
+#                    (default /usr/local/[lib|lib64]/biips/modules-w.y.z)
+#                     where w.y.z is the version number of BiiPS
+
+
+

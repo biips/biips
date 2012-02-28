@@ -71,9 +71,6 @@ namespace Biips
     Types<DimArray::Ptr>::Array
     getParamDims(const Types<NodeId>::Array parameters) const;
 
-    void updateLogicalObsValue(NodeId nodeId);
-    Bool updateDiscreteness(NodeId nodeId);
-
   public:
     Graph();
 
@@ -161,9 +158,9 @@ namespace Biips
     void SetObsValues(const NodeValues & nodeValues);
 
     // Called after changing node data
-    void UpdateObservedNode(NodeId id,
-                            Bool updateValue = true,
-                            Bool updateDiscrete = true);
+    void UpdateDiscreteness(NodeId nodeId, std::map<Size, NodeId> & stoChildrenByRank);
+    void GetLogicalChildrenByRank(NodeId nodeId, std::map<Size, NodeId> & logicChildrenByRank);
+    void UpdateLogicalObsValue(NodeId nodeId);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
     Node const & GetNode(NodeId nodeId) const

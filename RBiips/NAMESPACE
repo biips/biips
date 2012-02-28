@@ -1,3 +1,6 @@
+if(tools:::.OStype() == "windows") {
+importFrom(utils, readRegistry)
+}
 useDynLib(RBiips)
 
 importFrom(stats, variable.names)
