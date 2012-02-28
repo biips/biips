@@ -13,9 +13,11 @@
 //#define BIIPS_COMPILER_DEBUG_ON
 
 #include "Console.hpp"
+#include "compiler/ParseTree.h"
 #include "compiler/Compiler.hpp"
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
+#include "model/BUGSModel.hpp"
 
 // FIXME to be removed. Manage dynamically loaded modules
 #include "BiipsBase.hpp"
@@ -32,6 +34,33 @@ using std::endl;
 
 // FIXME
 #define BIIPS_CONSOLE_CATCH_ERRORS                                    \
+    catch (NodeError & except)                                        \
+    {                                                                 \
+      err_ << "Error in node " <<                                     \
+      pModel_->GetSymbolTable().GetName(except.GetNodeId()) << endl;  \
+      err_ << except.what() << endl;                                  \
+      return false;                                                   \
+    }                                                                 \
+    catch (RuntimeError & except)                                     \
+    {                                                                 \
+      err_ << "RUNTIME ERROR: " << except.what() << endl;             \
+      return false;                                                   \
+    }                                                                 \
+    catch (LogicError & except)                                       \
+    {                                                                 \
+      err_ << "LOGIC ERROR: " << except.what() << endl;               \
+      /*err_ << "Please send a bug report to "                          \
+         << PACKAGE_BUGREPORT << endl;*/                              \
+    return false;                                                     \
+    }/*                                                                 \
+  catch(const std::exception & e)                                     \
+  {                                                                   \
+    std::cerr << "STD ERROR: " << e.what() << endl;                   \
+    return false;                                                     \
+  }*/
+
+
+#define BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL                       \
     catch (NodeError & except)                                        \
     {                                                                 \
       err_ << "Error in node " <<                                     \
@@ -61,6 +90,8 @@ using std::endl;
     return false;                                                     \
   }*/
 
+
+
 namespace Biips
 {
 
@@ -88,6 +119,7 @@ namespace Biips
   Console::~Console()
   {
     clearParseTrees();
+    ClearModel(false);
   }
 
   static void getVariableNames(ParseTree const * pTree,
@@ -228,9 +260,13 @@ namespace Biips
 
   void Console::ClearModel(Bool verbose)
   {
-    if (verbose)
-      out_ << PROMPT_STRING << "Deleting model" << endl;
-    pModel_.reset();
+    if (!pModel_)
+    {
+      if (verbose)
+        out_ << PROMPT_STRING << "Deleting model" << endl;
+
+      delete pModel_;
+    }
   }
 
   Bool Console::Compile(std::map<String, MultiArray> & dataMap,
@@ -250,7 +286,7 @@ namespace Biips
 
     if (pData_ && genData)
     {
-      pModel_ = BUGSModel::Ptr(new BUGSModel());
+      pModel_ = new BUGSModel();
 
       Compiler compiler(*pModel_, dataMap);
 
@@ -350,12 +386,12 @@ namespace Biips
           dataMap.insert(std::make_pair(name, sampled_values));
         }
 
-        pModel_.reset();
+        ClearModel(false);
       }
-      BIIPS_CONSOLE_CATCH_ERRORS
+      BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL
     }
 
-    pModel_ = BUGSModel::Ptr(new BUGSModel());
+    pModel_ = new BUGSModel();
     Compiler compiler(*pModel_, dataMap);
 
     if (verbose)
@@ -423,7 +459,7 @@ namespace Biips
         return true;
       }
     }
-    BIIPS_CONSOLE_CATCH_ERRORS;
+    BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL;
 
     return true;
   }
@@ -470,7 +506,7 @@ namespace Biips
         pModel_->PrintSamplersSequence(out_);
       }
     }
-    BIIPS_CONSOLE_CATCH_ERRORS;
+    BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL
 
     return true;
   }
@@ -675,7 +711,7 @@ namespace Biips
     {
       loadBaseModule(Compiler::FuncTab(), Compiler::DistTab());
     }
-    BIIPS_CONSOLE_CATCH_ERRORS
+    BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL
 
     return true;
   }
@@ -834,17 +870,6 @@ namespace Biips
       err_ << "Can't clear filter monitors. No model!" << endl;
       return false;
     }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't clear filter monitors. Sampler not built!" << endl;
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_ << "Can't clear filter monitors. Sampler still running!" << endl;
-      return false;
-    }
-
     try
     {
       pModel_->ReleaseFilterMonitors();
@@ -861,18 +886,6 @@ namespace Biips
       err_ << "Can't clear smooth tree monitors. No model!" << endl;
       return false;
     }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't clear smooth tree monitors. Sampler not built!" << endl;
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_ << "Can't clear smooth tree monitors. Sampler still running!"
-          << endl;
-      return false;
-    }
-
     try
     {
       pModel_->ReleaseSmoothTreeMonitors();
@@ -889,17 +902,6 @@ namespace Biips
       err_ << "Can't clear smooth monitors. No model!" << endl;
       return false;
     }
-    if (!pModel_->SmootherInitialized())
-    {
-      err_ << "Can't clear smooth monitors. Smoother not initialized!" << endl;
-      return false;
-    }
-    if (!pModel_->Smoother().AtEnd())
-    {
-      err_ << "Can't clear smooth monitors. Smoother still running!" << endl;
-      return false;
-    }
-
     try
     {
       pModel_->ReleaseSmoothMonitors();
@@ -1192,7 +1194,7 @@ namespace Biips
       if (pModel_->SmootherInitialized())
         ReleaseSmoothMonitors();
     }
-    BIIPS_CONSOLE_CATCH_ERRORS;
+    BIIPS_CONSOLE_CATCH_ERRORS
 
     return true;
   }

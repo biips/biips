@@ -332,7 +332,9 @@ namespace Biips
     // COPY: ********** to here **********
   }
 
-  void NodeArray::ChangeData(const MultiArray & value)
+  void NodeArray::ChangeData(const MultiArray & value,
+                             std::map<Size, NodeId> & logicChildrenByRank,
+                             std::map<Size, NodeId> & stoChildrenByRank)
   {
     if (!(range_ == IndexRange(value.DimPtr())))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
@@ -346,10 +348,11 @@ namespace Biips
         nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
     {
       NodeId id = it->left;
-      if (graph_.GetNode(id).GetType() == LOGICAL)
+      NodeType type = graph_.GetNode(id).GetType();
+      if (type == LOGICAL)
         throw RuntimeError(String("Can not change data: node is logical."));
 
-      if (graph_.GetNode(id).GetType() == STOCHASTIC)
+      if (type == STOCHASTIC)
       {
         // check node is observed
         if (!graph_.GetObserved()[id])
@@ -358,7 +361,7 @@ namespace Biips
         //check that its parents are observed
         GraphTypes::ParentIterator it_parent, it_parent_end;
         boost::tie(it_parent, it_parent_end) = graph_.GetParents(id);
-        for(; it_parent != it_parent_end; ++it_parent)
+        for (; it_parent != it_parent_end; ++it_parent)
         {
           if (!graph_.GetObserved()[*it_parent])
             throw RuntimeError(String("Can not change data: node has unobserved parents."));
@@ -375,12 +378,14 @@ namespace Biips
       (*graph_.GetValues()[id])[offset] = new_val;
     }
 
-    // Update nodes
+    // get observed logical children
+    // and update discreteness
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
     {
       NodeId id = it->left;
-      graph_.UpdateObservedNode(id);
+      graph_.GetLogicalChildrenByRank(id, logicChildrenByRank);
+      graph_.UpdateDiscreteness(id, stoChildrenByRank);
     }
   }
 

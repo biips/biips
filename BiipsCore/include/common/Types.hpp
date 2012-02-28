@@ -82,6 +82,13 @@ namespace Biips
    */
   typedef Size NodeId;
 
+  enum NodeType
+  {
+    STOCHASTIC,
+    LOGICAL,
+    CONSTANT
+  };
+
   //! Alias for ublas namespace
   /*!
    * Boost.uBLAS is a C++ template class library for Basic Linear Algebra.

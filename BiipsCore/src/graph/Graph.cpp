@@ -88,7 +88,7 @@ namespace Biips
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
     if (observed)
-      updateLogicalObsValue(node_id);
+      UpdateLogicalObsValue(node_id);
 
     //set discreteness
     Bool discrete = true;
@@ -119,7 +119,7 @@ namespace Biips
     return param_dims;
   }
 
-  void Graph::updateLogicalObsValue(NodeId nodeId)
+  void Graph::UpdateLogicalObsValue(NodeId nodeId)
   {
     if (!GetNode(nodeId).GetType() == LOGICAL)
       throw LogicError("Can't update logical obs value: node is not logical.");
@@ -176,7 +176,7 @@ namespace Biips
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
     if (observed)
-      updateLogicalObsValue(node_id);
+      UpdateLogicalObsValue(node_id);
 
     //set discreteness
     Flags mask(parameters.size());
@@ -282,7 +282,8 @@ namespace Biips
     return node_id;
   }
 
-  Bool Graph::updateDiscreteness(NodeId nodeId)
+  void Graph::UpdateDiscreteness(NodeId nodeId,
+                                 std::map<Size, NodeId> & stoChildrenByRank)
   {
     Bool discrete_changed = false;
     switch (GetNode(nodeId).GetType())
@@ -383,78 +384,38 @@ namespace Biips
       default:
         break;
     }
-    return discrete_changed;
+
+    if (discrete_changed)
+    {
+      GraphTypes::ChildIterator it_child, it_child_end;
+      boost::tie(it_child, it_child_end) = GetChildren(nodeId);
+      for (; it_child != it_child_end; ++it_child)
+      {
+        if (GetNode(*it_child).GetType() == STOCHASTIC)
+        {
+          Size rank = GetRanks()[*it_child];
+          stoChildrenByRank[rank] = *it_child;
+        }
+      }
+    }
   }
 
-  void Graph::UpdateObservedNode(NodeId nodeId,
-                                 Bool updateValue,
-                                 Bool updateDiscrete)
+  void Graph::GetLogicalChildrenByRank(NodeId nodeId,
+                                       std::map<Size, NodeId> & logicChildrenByRank)
   {
-    switch (GetNode(nodeId).GetType())
+    if (!builtFlag_)
+      throw LogicError("GetLogicalChildrenByRank: Graph not built.");
+
+    ChildIterator it_child, it_child_end;
+    boost::tie(it_child, it_child_end) = GetChildren(nodeId);
+    for (; it_child != it_child_end; ++it_child)
     {
-      case CONSTANT:
+      if (GetNode(*it_child).GetType() == LOGICAL && GetObserved()[*it_child])
       {
-        // update discreteness
-        Bool discrete_changed = updateDiscreteness(nodeId);
-
-        // Update children
-        ChildIterator it_children, it_children_end;
-        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-        for (; it_children != it_children_end; ++it_children)
-          UpdateObservedNode(*it_children, true, discrete_changed);
-
-        break;
+        Size rank = GetRanks()[*it_child];
+        logicChildrenByRank[rank] = *it_child;
+        GetLogicalChildrenByRank(*it_child, logicChildrenByRank);
       }
-
-      case LOGICAL:
-      {
-        if (!GetObserved()[nodeId])
-          break;
-
-        // Update value
-        if (updateValue)
-          updateLogicalObsValue(nodeId);
-
-        // update discreteness
-        Bool discrete_changed = false;
-        if (updateDiscrete)
-          discrete_changed = updateDiscreteness(nodeId);
-
-        // Update children
-        ChildIterator it_children, it_children_end;
-        boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-        for (; it_children != it_children_end; ++it_children)
-          UpdateObservedNode(*it_children, updateValue
-              && (GetNode(*it_children).GetType()) == LOGICAL, discrete_changed);
-
-        break;
-      }
-
-      case STOCHASTIC:
-      {
-        // update discreteness
-        Bool discrete_changed = false;
-        if (updateDiscrete)
-          discrete_changed = updateDiscreteness(nodeId);
-
-        // Update children
-        if (updateValue || discrete_changed)
-        {
-          ChildIterator it_children, it_children_end;
-          boost::tie(it_children, it_children_end) = GetChildren(nodeId);
-          for (; it_children != it_children_end; ++it_children)
-            UpdateObservedNode(*it_children,
-                               updateValue && (GetNode(*it_children).GetType())
-                                   == LOGICAL,
-                               discrete_changed);
-        }
-
-        break;
-        // FIXME: this can invalidate some assigned samplers ?
-      }
-
-      default:
-        break;
     }
   }
 

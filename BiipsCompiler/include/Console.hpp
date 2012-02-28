@@ -13,8 +13,14 @@
 #ifndef BIIPS_CONSOLE_HPP_
 #define BIIPS_CONSOLE_HPP_
 
-#include "model/BUGSModel.hpp"
-#include "compiler/ParseTree.h"
+#include "common/Types.hpp"
+#include <map>
+#include "common/IndexRange.hpp"
+#include "common/MultiArray.hpp"
+#include "sampler/Accumulator.hpp"
+#include "model/NodeArrayMonitor.hpp"
+
+class ParseTree;
 
 namespace Biips
 {
@@ -23,12 +29,14 @@ namespace Biips
   const Size INDENT_SIZE = 4;
   const String INDENT_STRING(INDENT_SIZE, ' ');
 
+  class BUGSModel;
+
   class Console
   {
   protected:
     std::ostream & out_;
     std::ostream & err_;
-    BUGSModel::Ptr pModel_;
+    BUGSModel * pModel_;
     ParseTree * pData_;
     ParseTree * pRelations_;
     Types<ParseTree*>::Array * pVariables_;

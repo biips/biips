@@ -3,7 +3,7 @@
 * \brief
 *
 * $LastChangedBy$
-* $LastChangedDate: 2011-01-28 10:42:19 +0100 (ven. 28 janv. 2011) $
+* $LastChangedDate$
 * $LastChangedRevision$
 * $Id$
 */

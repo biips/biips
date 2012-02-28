@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file version.cpp
+/*! \file BiipsVersion.cpp
  * \brief 
  * 
  * $LastChangedBy$
@@ -8,13 +8,15 @@
  * $Id$
  */
 
-#include "version.hpp"
+#include "BiipsConfig.hpp"
+#include "BiipsVersion.hpp"
+#include "common/Utility.hpp"
 
 namespace Biips
 {
   const String & BIIPS_VERSION()
   {
-    static const String VERSION = "0.7.1";
+    static const String VERSION = Biips_VERSION;
     return VERSION;
   }
 }
