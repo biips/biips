@@ -15,6 +15,7 @@
 
 #include "common/Types.hpp"
 #include "common/IndexRange.hpp"
+#include <map>
 
 #include <boost/bimap.hpp>
 
@@ -87,7 +88,9 @@ namespace Biips
      */
     void SetData(const MultiArray & value);
 
-    void ChangeData(const MultiArray & value);
+    void ChangeData(const MultiArray & value,
+                    std::map<Size, NodeId> & logicChildrenByRank,
+                    std::map<Size, NodeId> & stoChildrenByRank);
 
     /**
      * Gets the values of nodes that have been inserted into

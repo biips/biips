@@ -1,0 +1,19 @@
+//                                               -*- C++ -*-
+/*! \file BiipsConfig.hpp
+ * \brief 
+ * 
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $Id$
+ */
+
+#ifndef BIIPS_CONFIG_HPP_
+#define BIIPS_CONFIG_HPP_
+
+#define Biips_VERSION_MAJOR @Biips_VERSION_MAJOR@
+#define Biips_VERSION_MINOR @Biips_VERSION_MINOR@
+#define Biips_VERSION_PATCH @Biips_VERSION_PATCH@
+#define Biips_VERSION "@Biips_VERSION@"
+
+#endif /* BIIPS_CONFIG_HPP_ */

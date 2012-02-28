@@ -16,13 +16,6 @@
 namespace Biips
 {
 
-  enum NodeType
-  {
-    STOCHASTIC,
-    LOGICAL,
-    CONSTANT
-  };
-
   class NodeVisitor;
   class ConstNodeVisitor;
 

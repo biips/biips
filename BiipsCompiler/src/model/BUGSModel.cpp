@@ -11,7 +11,7 @@
 #include "model/BUGSModel.hpp"
 #include "common/IndexRangeIterator.hpp"
 #include "iostream/outStream.hpp"
-#include <boost/random/discrete_distribution_sw_2009.hpp>
+#include <boost/random/discrete_distribution.hpp>
 
 namespace Biips
 {

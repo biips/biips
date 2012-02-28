@@ -236,7 +236,11 @@ smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, .
   }
   
   ## monitor
-  monitor.biips(obj, variable.names, type)  
+  if(backward) {
+    .Call("set_default_monitors", obj$ptr(), PACKAGE="RBiips")
+  }
+  if (!missing(variable.names))
+    monitor.biips(obj, variable.names, type)
   
   ## smc forward sampler
   run.smc.forward(obj, ...)
@@ -283,7 +287,7 @@ smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, .
 
 
 pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
-                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified")
+                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified", max.fail=0)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
@@ -310,6 +314,9 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   ## stop biips verbosity
   set.biips.verbosity(0)
   
+  ## restart biips verbosity on exit
+  on.exit(set.biips.verbosity(1)) 
+  
   ## Initialization
   #---------------  
   out <- init.pmmh.biips(obj, variable.names=variable.names, pn=pn,
@@ -318,9 +325,16 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
   
-  prop <- list()
+  ## reset data to sample on exit
+  on.exit(
+      if (n.iter > 0 && !accepted) {
+        .Call("set_log_norm_const", obj$ptr(), log.norm.const, PACKAGE="RBiips")
+      }, add=TRUE)
+  
   ans <- list()
   n.samples <- 0
+  n.fail <- 0
+  accepted <- TRUE
   
   ## progress bar
   bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
@@ -335,6 +349,14 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
     log.prior <- out$log.prior
     log.norm.const <- out$log.norm.const
     accepted <- out$accepted
+    n.fail <- n.fail + out$n.fail
+    
+    ## advance progress bar
+    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    
+    if (n.fail > max.fail) {
+      stop(paste("Number of failures exceeds max.fail:", n.fail, "failures."))
+    }
     
     ## Store output
     if ((i-1)%%thin == 0) {
@@ -343,15 +365,6 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
-    
-    ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
-  }
-  
-  ## reset data to sample
-  if (n.iter > 0 && !accepted) {
-    .Call("change_data", obj$ptr(), sample, PACKAGE="RBiips")
-    .Call("set_log_norm_const", obj$ptr(), log.norm.const, PACKAGE="RBiips")
   }
   
   ## set output dimensions
@@ -364,9 +377,6 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   names(dim(ans[["log.norm.const"]])) <- c("", "iteration")
   class(ans[["log.norm.const"]]) <- "mcarray"
   
-  ## restart biips verbosity
-  set.biips.verbosity(1)
-    
   return(ans)
 }
 

@@ -1,21 +1,43 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.6)
+
+# project configuration
 project (BiipsBase CXX)
+set (LIBRARY_OUTPUT_PATH lib/${CMAKE_BUILD_TYPE})
 
+# find boost libraries
+find_package(Boost 1.42.0 REQUIRED)
+include_directories (${Boost_LIBRARY_DIRS})
 
-file(GLOB BiipsBase_SOURCE_FILES_1 src/*.cpp)
-file(GLOB BiipsBase_SOURCE_FILES_2 src/*/*.cpp)
+# include directories
+include_directories (
+	${PROJECT_SOURCE_DIR}/include
+	${BiipsCore_SOURCE_DIR}/include
+)
 
-add_library (BiipsBase SHARED ${BiipsBase_SOURCE_FILES_1}
-			      ${BiipsBase_SOURCE_FILES_2})
+# source files list generation
+file (GLOB_RECURSE SOURCE_FILES
+	${PROJECT_BINARY_DIR}/include/*.hpp
+	${PROJECT_BINARY_DIR}/include/*.h
+	${PROJECT_BINARY_DIR}/src/*.cpp
+	${PROJECT_BINARY_DIR}/src/*.cc
+	${PROJECT_SOURCE_DIR}/include/*.hpp
+	${PROJECT_SOURCE_DIR}/include/*.h
+	${PROJECT_SOURCE_DIR}/src/*.cpp
+	${PROJECT_SOURCE_DIR}/src/*.cc
+)
 
-include_directories (${BiipsBase_SOURCE_DIR}/include
-		     ${BiipsCore_SOURCE_DIR}/include
-		     ${Biips_SOURCE_DIR}/boost.sandbox/random
-		     ${Biips_SOURCE_DIR}/boost.sandbox/statistics/random)
+# add the library
+add_library (${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
-INSTALL(TARGETS BiipsBase DESTINATION lib)
+# add the install targets
+install (TARGETS ${PROJECT_NAME} DESTINATION lib
+	COMPONENT library)
 
-SET(CPACK_GENERATOR "DEB")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "biips-support <biips-support@lists.gforge.inria.fr>")
- 
-INCLUDE(CPack)
+install(DIRECTORY
+	${PROJECT_SOURCE_DIR}/include/
+	DESTINATION include/biips/${PROJECT_NAME}
+	COMPONENT development
+	PATTERN .svn EXCLUDE
+	PATTERN *.in EXCLUDE
+)
+

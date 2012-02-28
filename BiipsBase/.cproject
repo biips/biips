@@ -33,8 +33,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/random}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/random}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.425475853" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -552,8 +550,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsCore/include}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/BiipsBase/include}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/random}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/boost.sandbox/statistics/random}&quot;"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1287759336" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>

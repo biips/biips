@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file version.hpp
+/*! \file BiipsVersion.hpp
  * \brief 
  * 
  * $LastChangedBy$

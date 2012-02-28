@@ -115,18 +115,30 @@ run.smc.forward <- function(obj, n.part,
   }
   
   ## run smc sampler
-  .Call("run_smc_sampler", obj$ptr(), as.integer(n.part), as.integer(smc.rng.seed), rs.thres, rs.type, PACKAGE="RBiips")
+  ok <- .Call("run_smc_sampler", obj$ptr(), as.integer(n.part), as.integer(smc.rng.seed), rs.thres, rs.type, PACKAGE="RBiips")
   
-  invisible(NULL)
+  invisible(ok)
 }
 
 
 init.pmmh.biips <- function(obj, variable.names, pn,
                             n.part, rs.thres=0.5, rs.type="stratified")
 {  
+  
   sample <- list()
   for (var in variable.names) {
     sample[[var]] <- obj$data()[[var]]
+  }
+  
+  log.prior <- list()
+  for (v in seq(along=variable.names))
+  {
+    log.p <- .Call("get_log_prior_density", obj$ptr(),
+                   pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+    if (is.infinite(log.p) && log.p<0) 
+      stop("get log prior density: bad initial values.")
+    
+    log.prior[[variable.names[[v]]]] <- log.p
   }
   
   ## build smc sampler
@@ -134,19 +146,13 @@ init.pmmh.biips <- function(obj, variable.names, pn,
     .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
   }
   
-  ## get old log normalizing constant
+  ## get log normalizing constant
   if (!.Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")) {
     ## run smc
-    run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+    if (!run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type))
+      stop("run smc forward sampler: bad initial values.")
   }
   log.norm.const <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
-  
-  log.prior <- list()
-  for (v in seq(along=variable.names))
-  {
-    log.prior[[variable.names[[v]]]] <- .Call("get_log_prior_density", obj$ptr(),
-                                                  pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-  }
   
   ans <- list(sample=sample, log.prior=log.prior, log.norm.const=log.norm.const)
   return(ans)
@@ -156,40 +162,72 @@ init.pmmh.biips <- function(obj, variable.names, pn,
 one.update.pmmh.biips <- function(obj, variable.names, pn,
                                   rw.sd, n.part, rs.thres=0.5, rs.type="stratified",
                                   sample, log.prior, log.norm.const)
-{  
-  prop <- list()
-  log.prior.prop <- list()
+{
+  n.fail <- 0
   
   ## Metropolis-Hastings iteration
   ##------------------------------
   for (v in seq(along=variable.names)) {
     var <- variable.names[[v]]
     ## Random walk proposal
+    prop <- list()
     prop[[var]] <- rnorm(1, sample[[var]], rw.sd[[var]])
     dim(prop[[var]]) <- dim(sample[[var]])
     
     ## change model data
-    .Call("change_data", obj$ptr(), prop, PACKAGE="RBiips")
- 
+    ok <- .Call("change_data", obj$ptr(), prop[var], PACKAGE="RBiips")
+    
+    if (!ok) {
+      accepted <- FALSE
+      ## reset previous value
+      prop[[var]] <- sample[[var]]
+      if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
+        stop("proposed data change failed: Can not reset previous data.")
+      n.fail <- n.fail+1
+      next
+    }
+    
+    log.prior.prop <- .Call("get_log_prior_density", obj$ptr(),
+                            pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+    
+    if (is.infinite(log.prior.prop) && log.prior.prop<0) {
+      accepted <- FALSE
+      ## reset previous value
+      if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
+        stop("get log prior failed: Can not reset previous data.")
+      next
+    }
+   
     ## run smc sampler
-    run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
-  
+    ok <- run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+    
+    if (!ok) {
+      accepted <- FALSE
+      ## reset previous value
+      if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
+        stop("run smc forward sampler failed: Can not reset previous data.")
+      n.fail <- n.fail+1
+      next
+    }
+    
     ## Acceptance rate
     log.norm.const.prop <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
-    log.prior.prop[[var]] <- .Call("get_log_prior_density", obj$ptr(),
-                                  pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-    log.ar <- log.norm.const.prop - log.norm.const + log.prior[[var]] - log.prior.prop[[var]]
+    log.ar <- log.norm.const.prop - log.norm.const + log.prior.prop - log.prior[[var]]
   
     ## Accept/Reject step
     accepted <- (runif(1) < exp(log.ar))
     if (accepted) {
-      sample <- prop
-      log.norm.const <- log.norm.const.prop  
-      log.prior[[var]] <- log.prior.prop[[var]]
+      sample[[var]] <- prop[[var]]
+      log.prior[[var]] <- log.prior.prop
+      log.norm.const <- log.norm.const.prop
+    } else {
+      ## reset previous value
+      if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
+        stop("rejected proposed value: Can not reset previous data.")
     }
   }
   
-  ans <- list(sample=sample, log.prior=log.prior, log.norm.const=log.norm.const, accepted=accepted)
+  ans <- list(sample=sample, log.prior=log.prior, log.norm.const=log.norm.const, accepted=accepted, n.fail=n.fail)
   return(ans)
 }
 
@@ -199,7 +237,7 @@ update.pmmh <- function(x, ...)
 
 
 update.pmmh.biips <- function(obj, variable.names, n.iter,
-                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified")
+                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified", max.fail = 0)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
@@ -212,9 +250,6 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
-    stop("Invalid thin argument")
-  thin <- as.integer(thin)
   
   if (!is.list(rw.sd))
     stop("Invalid rw.sd argument")
@@ -226,6 +261,9 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   ## stop biips verbosity
   set.biips.verbosity(0)
   
+  ## restart biips verbosity on exit
+  on.exit(set.biips.verbosity(1))
+  
   ## initialize
   out <- init.pmmh.biips(obj, variable.names=variable.names, pn=pn,
                          n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
@@ -233,8 +271,17 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
   
+  ## reset data to sample on exit
+  on.exit(
+      if (n.iter > 0 && !accepted) {
+        .Call("set_log_norm_const", obj$ptr(), log.norm.const, PACKAGE="RBiips")
+      }, add=TRUE)
+  
   ## progress bar
   bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  
+  n.fail <- 0
+  accepted <- TRUE
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
@@ -246,19 +293,15 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
     log.prior <- out$log.prior
     log.norm.const <- out$log.norm.const
     accepted <- out$accepted
+    n.fail <- n.fail + out$n.fail
     
     ## advance progress bar
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    
+    if (n.fail > max.fail) {
+      stop(paste("Number of failures exceeds max.fail:", n.fail, "failures."))
+    }
   }
-  
-  ## reset data to sample
-  if (n.iter > 0 && !accepted) {
-    .Call("change_data", obj$ptr(), sample, PACKAGE="RBiips")
-    .Call("set_log_norm_const", obj$ptr(), log.norm.const, PACKAGE="RBiips")
-  }
-  
-  ## restart biips verbosity
-  set.biips.verbosity(1)
     
   invisible(NULL)
 }
@@ -334,7 +377,7 @@ update.pimh <- function(x, ...)
   UseMethod("update.pimh")
 
 
-update.pimh.biips <- function(obj, variable.names, n.iter, thin=1,
+update.pimh.biips <- function(obj, variable.names, n.iter,
                        n.part, rs.thres=0.5, rs.type="stratified")
 {
   if (!is.biips(obj))
@@ -348,9 +391,6 @@ update.pimh.biips <- function(obj, variable.names, n.iter, thin=1,
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
-    stop("Invalid thin argument")
-  thin <- as.integer(thin)
   
   ## stop biips verbosity
   set.biips.verbosity(0)

@@ -13,7 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "config.hpp"
-#include "version.hpp"
+#include "BiipsVersion.hpp"
 #include "storeUnregistered.hpp"
 #include "TestIO.hpp"
 #include "ModelTest.hpp"
