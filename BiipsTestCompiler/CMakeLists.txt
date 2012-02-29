@@ -1,8 +1,11 @@
 cmake_minimum_required (VERSION 2.6) 
 
+include (GNUInstallDirs)
+
 # project configuration
-project (BiipsTestCompiler CXX)
-set (EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
+project (BiipsTestCompiler-src CXX)
+set (PROJECT_EXE_NAME BiipsTestCompiler)
+set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
 # find boost libraries
 set (Boost_USE_STATIC_LIBS OFF)
@@ -57,28 +60,29 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 )
 
 # add the executable
-add_executable (${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries (${PROJECT_NAME} ${EXTRA_LIBS})
+add_executable (${PROJECT_EXE_NAME} ${SOURCE_FILES})
+target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LIBS})
+set_target_properties(${PROJECT_EXE_NAME} PROPERTIES COMPILE_FLAGS -Wno-deprecated)
 
 # add the install targets
-install (TARGETS ${PROJECT_NAME}
-	DESTINATION share/biips/${PROJECT_NAME}/bin
+install (TARGETS ${PROJECT_EXE_NAME}
+	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/biips/${PROJECT_EXE_NAME}/bin
 	COMPONENT test
 )
 install (FILES
 	biipstestcompiler.cfg
-	DESTINATION share/biips/${PROJECT_NAME}
+	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/biips/${PROJECT_EXE_NAME}
 	COMPONENT test
 )
 install (PROGRAMS
 	BiipsTestCompiler.sh
-	DESTINATION share/biips/${PROJECT_NAME}
+	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/biips/${PROJECT_EXE_NAME}
 	COMPONENT test
 )
 
 install(DIRECTORY
 	${PROJECT_SOURCE_DIR}/bench/
-	DESTINATION share/biips/${PROJECT_NAME}/bench
+	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/biips/${PROJECT_EXE_NAME}/bench
 	COMPONENT test
 	FILES_MATCHING
 	PATTERN hmm_1d*.cfg
@@ -87,7 +91,7 @@ install(DIRECTORY
 
 install(DIRECTORY
 	${PROJECT_SOURCE_DIR}/model/
-	DESTINATION share/biips/${PROJECT_NAME}/model
+	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/biips/${PROJECT_EXE_NAME}/model
 	COMPONENT test
 	FILES_MATCHING
 	PATTERN hmm_1d*.bug

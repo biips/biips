@@ -11,7 +11,7 @@
 cmake_minimum_required (VERSION 2.8)
 
 # project configuration
-project (Biips CXX)
+project (Biips-src CXX)
 
 set (Biips_VERSION_MAJOR 0)
 set (Biips_VERSION_MINOR 7)
