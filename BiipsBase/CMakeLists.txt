@@ -1,8 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
 
+include (GNUInstallDirs)
+
 # project configuration
-project (BiipsBase CXX)
-set (LIBRARY_OUTPUT_PATH lib/${CMAKE_BUILD_TYPE})
+project (BiipsBase-src CXX)
+set (PROJECT_LIB_NAME BiipsBase)
+set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
@@ -27,15 +30,16 @@ file (GLOB_RECURSE SOURCE_FILES
 )
 
 # add the library
-add_library (${PROJECT_NAME} SHARED ${SOURCE_FILES})
+add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
+set_target_properties(${PROJECT_LIB_NAME} PROPERTIES COMPILE_FLAGS -Wno-deprecated)
 
 # add the install targets
-install (TARGETS ${PROJECT_NAME} DESTINATION lib
+install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	COMPONENT library)
 
 install(DIRECTORY
 	${PROJECT_SOURCE_DIR}/include/
-	DESTINATION include/biips/${PROJECT_NAME}
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/biips/${PROJECT_LIB_NAME}
 	COMPONENT development
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
