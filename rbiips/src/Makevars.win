@@ -1,0 +1,5 @@
+PKG_CPPFLAGS = -I"$(BIIPS_ROOT)/core/include" -I"$(BIIPS_ROOT)/base/include" -I"$(BIIPS_ROOT)/compiler/include"
+
+## Use the R_HOME indirection to support installations of multiple R version
+PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()") -L"$(BIIPS_ROOT)/core/${R_ARCH}/lib" -lBiipsCore -L"$(BIIPS_ROOT)/base/${R_ARCH}/lib" -lBiipsBase -L"$(BIIPS_ROOT)/compiler/${R_ARCH}/lib" -lBiipsCompiler
+

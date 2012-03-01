@@ -10,6 +10,10 @@
  * COPY: Adapted from JAGS Console class
  */
 
+extern "C" {
+  void BiipsCompiler_is_present(void) {}
+}
+
 //#define BIIPS_COMPILER_DEBUG_ON
 
 #include "Console.hpp"

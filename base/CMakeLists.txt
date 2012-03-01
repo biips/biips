@@ -1,18 +1,12 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.6)
 
 include (GNUInstallDirs)
 
 # project configuration
-project (BiipsCore-src CXX)
-set (PROJECT_LIB_NAME BiipsCore)
-set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
-
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file (
-	${PROJECT_SOURCE_DIR}/include/BiipsConfig.hpp.in
-	${PROJECT_BINARY_DIR}/include/BiipsConfig.hpp
-)
+project (BiipsBase CXX)
+set (PROJECT_LIB_NAME ${PROJECT_NAME})
+string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
+set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
@@ -20,8 +14,8 @@ include_directories (${Boost_LIBRARY_DIRS})
 
 # include directories
 include_directories (
-	${PROJECT_BINARY_DIR}/include
 	${PROJECT_SOURCE_DIR}/include
+	${BiipsCore_SOURCE_DIR}/include
 )
 
 # source files list generation
@@ -45,9 +39,8 @@ install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	COMPONENT library)
 
 install(DIRECTORY
-	${PROJECT_BINARY_DIR}/include/
 	${PROJECT_SOURCE_DIR}/include/
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/biips/${PROJECT_LIB_NAME}
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/biips/${PROJECT_REL_DIR}
 	COMPONENT development
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE

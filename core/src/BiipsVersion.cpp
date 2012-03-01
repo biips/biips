@@ -8,6 +8,10 @@
  * $Id$
  */
 
+extern "C" {
+  void BiipsCore_is_present(void) {}
+}
+
 #include "BiipsConfig.hpp"
 #include "BiipsVersion.hpp"
 #include "common/Utility.hpp"
