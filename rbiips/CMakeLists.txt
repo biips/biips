@@ -1,30 +1,31 @@
 cmake_minimum_required (VERSION 2.6) 
 
 # project configuration
-project (RBiips-src)
-set (PROJECT_PKG_NAME RBiips)
+project (RBiips)
+set (PROJECT_PKG_NAME ${PROJECT_NAME})
+string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 
 # configure DESCRIPTION file
 configure_file (
-	DESCRIPTION.in
+	DESCRIPTION.IN
 	${PROJECT_PKG_NAME}/DESCRIPTION
 )
 
 # configure README file
 configure_file (
-	README.in
+	README.IN
 	${PROJECT_PKG_NAME}/README
 )
 
 # configure R/windows/zzz.R file
 configure_file (
-	R/windows/zzz.R.in
+	R/windows/zzz.R.IN
 	${PROJECT_PKG_NAME}/R/windows/zzz.R
 )
 
 # configure configure.ac file
 configure_file (
-	configure.ac.in
+	configure.ac.IN
 	${PROJECT_PKG_NAME}/configure.ac
 	@ONLY
 )
@@ -36,7 +37,7 @@ if (UNIX)
 endif (UNIX)
 
 # copy files to binary directory
-macro (copy_dir_to_binary)
+macro (copy_dir_to_binary dir)
 	file (
 		GLOB SOURCE_FILES
 		${PROJECT_SOURCE_DIR}/${dir}*
@@ -44,8 +45,7 @@ macro (copy_dir_to_binary)
 	file (	COPY ${SOURCE_FILES}
 		DESTINATION ${PROJECT_PKG_NAME}/${dir}
 		PATTERN CMakeLists.txt EXCLUDE
-		PATTERN *.in EXCLUDE
-		PATTERN *.win EXCLUDE
+		PATTERN *.IN EXCLUDE
 		PATTERN .svn EXCLUDE
 		PATTERN .project EXCLUDE
 		PATTERN .cproject EXCLUDE
@@ -61,21 +61,21 @@ copy_dir_to_binary(src/)
 
 # add R package tools targets
 add_custom_target (${PROJECT_PKG_NAME}_check
-	R CMD check ${PROJECT_PKG_NAME}/${PROJECT_PKG_NAME}
+	R CMD check ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	COMMENT "Checking ${PROJECT_PKG_NAME} R package"
 	VERBATIM
 )
 
 add_custom_target (${PROJECT_PKG_NAME}_build
-	R CMD build ${PROJECT_PKG_NAME}/${PROJECT_PKG_NAME}
+	R CMD build ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	COMMENT "Building ${PROJECT_PKG_NAME} R package"
 	VERBATIM
 )
 
 add_custom_target (${PROJECT_PKG_NAME}_install
-	R CMD INSTALL ${PROJECT_PKG_NAME}/${PROJECT_PKG_NAME}
+	R CMD INSTALL ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	COMMENT "Installing ${PROJECT_PKG_NAME} R package"
 	VERBATIM

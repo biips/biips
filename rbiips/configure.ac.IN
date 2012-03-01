@@ -32,9 +32,9 @@ fi
 
 AC_LANG_PUSH(C++)
 OCPPFLAGS=${CPPFLAGS}
-CPPFLAGS=-I${BIIPS_INCLUDE}/BiipsCompiler/include
-AC_CHECK_HEADER(Console.hpp, [],
-             [AC_MSG_FAILURE("Problem with header file ${BIIPS_INCLUDE}/Console.hpp ")])
+CPPFLAGS="-I${BIIPS_INCLUDE}/core -I${BIIPS_INCLUDE}/base -I${BIIPS_INCLUDE}/compiler"
+AC_CHECK_HEADER([Console.hpp], [],
+             [AC_MSG_FAILURE("Problem with header file ${BIIPS_INCLUDE}/compiler/Console.hpp")])
 CPPFLAGS=${OCPPFLAGS}
 AC_LANG_POP()
 
@@ -86,33 +86,32 @@ fi
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
 LDFLAGS="-L${BIIPS_LIB} -Wl,-rpath ${BIIPS_LIB}"
-AC_CHECK_LIB(BiipsCore, biips_version, [],
+AC_CHECK_LIB(BiipsCore, BiipsCore_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsCore library in ${BIIPS_LIB}")])
-AC_CHECK_LIB(BiipsBase, biips_version, [],
+AC_CHECK_LIB(BiipsBase, BiipsBase_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsBase library in ${BIIPS_LIB}")])
-AC_CHECK_LIB(BiipsCompiler, biips_version, [],
+AC_CHECK_LIB(BiipsCompiler, BiipsCompiler_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsCompiler library in ${BIIPS_LIB}")])
-
 AC_LANG_POP()
 LDFLAGS=${OLDFLAGS}
 
 #Finally, set optional module directory using --with-biips-modules or
 #environment variable BIIPS_MODULES
 
-AC_ARG_WITH([biips-modules],
-            AC_HELP_STRING([--with-biips-modules=MOD_PATH],
-                           [the location of the BiiPS modules]),
-            [biips_mod_path=$withval])
-if test [ -n "$biips_mod_path" ] ; then
-   BIIPS_MODULES=$biips_mod_path
-else
-   if test [ -z "${BIIPS_MODULES}" ] ; then
-      BIIPS_MODULES=${BIIPS_LIB}/biips/modules-${PACKAGE_VERSION}
-      if test [! -d ${BIIPS_MODULES} ]; then
-         AC_MSG_ERROR("BiiPS module directory ${BIIPS_MODULES} does not exist.")
-      fi
-   fi
-fi
+#AC_ARG_WITH([biips-modules],
+#            AC_HELP_STRING([--with-biips-modules=MOD_PATH],
+#                           [the location of the BiiPS modules]),
+#            [biips_mod_path=$withval])
+#if test [ -n "$biips_mod_path" ] ; then
+#   BIIPS_MODULES=$biips_mod_path
+#else
+#   if test [ -z "${BIIPS_MODULES}" ] ; then
+#      BIIPS_MODULES=${BIIPS_LIB}/biips/modules-${PACKAGE_VERSION}
+#      if test [! -d ${BIIPS_MODULES} ]; then
+#         AC_MSG_ERROR("BiiPS module directory ${BIIPS_MODULES} does not exist.")
+#      fi
+#   fi
+#fi
 
 AC_SUBST(BIIPS_INCLUDE)
 AC_SUBST(BIIPS_LIB)
