@@ -8,6 +8,10 @@
  * Id:      $Id$
  */
 
+extern "C" {
+  void BiipsBase_is_present(void) {}
+}
+
 #include "BiipsBase.hpp"
 #include "sampler/ForwardSampler.hpp"
 
