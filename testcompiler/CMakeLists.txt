@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 include (GNUInstallDirs)
 
 # project configuration
-project (BiipsTestCompiler CXX)
+project (BiipsTestCompiler CXX C)
 set (PROJECT_EXE_NAME ${PROJECT_NAME})
 string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
