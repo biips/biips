@@ -15,6 +15,11 @@ configure_file (
 	${PROJECT_BINARY_DIR}/include/BiipsConfig.hpp
 )
 
+configure_file (
+	${PROJECT_SOURCE_DIR}/biips_version.in
+	${PROJECT_BINARY_DIR}/biips_version
+)
+
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
 include_directories (${Boost_LIBRARY_DIRS})
@@ -52,5 +57,11 @@ install(DIRECTORY
 	COMPONENT Development
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
+)
+
+install(PROGRAMS
+	${PROJECT_SOURCE_DIR}/biips_version
+	DESTINATION ${CMAKE_INSTALL_BINDIR}
+	COMPONENT Runtime
 )
 
