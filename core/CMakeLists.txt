@@ -60,7 +60,7 @@ install(DIRECTORY
 )
 
 install(PROGRAMS
-	${PROJECT_SOURCE_DIR}/biips_version
+	${PROJECT_BINARY_DIR}/biips_version
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	COMPONENT Runtime
 )
