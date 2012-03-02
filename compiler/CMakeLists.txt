@@ -37,12 +37,12 @@ set_target_properties(${PROJECT_LIB_NAME} PROPERTIES COMPILE_FLAGS -Wno-deprecat
 
 # add the install targets
 install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	COMPONENT library)
+	COMPONENT Runtime)
 
 install(DIRECTORY
 	${PROJECT_SOURCE_DIR}/include/
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/biips/${PROJECT_REL_DIR}
-	COMPONENT development
+	COMPONENT Development
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
 )

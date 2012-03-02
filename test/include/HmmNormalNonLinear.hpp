@@ -42,7 +42,7 @@ namespace Biips
     HmmNormalNonLinear(int argc, char** argv, Size verbose = 1, Size showMode =
         0, Bool precFlag = false, std::ostream & os = std::cout);
 
-    virtual void PrintIntro() const;
+    virtual void PrintIntro();
 
     //    virtual void InputModelParam(std::istream & is = std::cin);
 
