@@ -59,7 +59,7 @@ namespace Biips
       nodeSamplerFactoryInvOrder_.push_back(ConjugateNormalVarFactory::Instance());
   }
 
-  void HmmNormalLinear::PrintIntro() const
+  void HmmNormalLinear::PrintIntro()
   {
     using namespace std;
     os_ << "BiiPS test: Hidden Markov Model linear gaussian 1D" << endl;

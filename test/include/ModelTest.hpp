@@ -27,7 +27,7 @@ namespace Biips
     String name_;
     Size verbose_;
     Size showMode_;
-    mutable std::ostream & os_;
+    std::ostream & os_;
 
     Graph::Ptr pDataGraph_;
     Graph::Ptr pModelGraph_;
@@ -120,7 +120,7 @@ namespace Biips
       return name_;
     }
 
-    virtual void PrintIntro() const = 0;
+    virtual void PrintIntro() = 0;
 
     //    virtual void InputModelParam(std::istream & is = std::cin) = 0;
     void SetModelParam(const std::map<String, MultiArray> & model_param_map);

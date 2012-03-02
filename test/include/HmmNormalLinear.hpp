@@ -46,7 +46,7 @@ namespace Biips
                     Bool precFlag = false,
                     std::ostream & os = std::cout);
 
-    virtual void PrintIntro() const;
+    virtual void PrintIntro();
 
     //    virtual void InputModelParam(std::istream & is = std::cin);
 
