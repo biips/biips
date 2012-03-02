@@ -25,7 +25,7 @@ else
       if test [ "$prefix" = "NONE" ]; then
          AC_MSG_ERROR("Location of BiiPS headers not defined. Use configure arg '--with-biips-include' or environment variable 'BIIPS_INCLUDE'")
       else
-         BIIPS_INCLUDE=${prefix}/include/biipsq()
+         BIIPS_INCLUDE=${prefix}/include/biips
       fi
    fi
 fi
