@@ -155,7 +155,7 @@ namespace Biips
     }
   }
 
-  void HmmMNormalLinear4D::PrintIntro() const
+  void HmmMNormalLinear4D::PrintIntro()
   {
     using namespace std;
     os_ << "BiiPS test: Hidden Markov Model linear gaussian 4D" << endl;

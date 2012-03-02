@@ -54,7 +54,7 @@ namespace Biips
     //      nodeSamplerFactoryInvOrder_.push_back(ConjugateNormalVarFactory::Instance());
   }
 
-  void HmmNormalNonLinear::PrintIntro() const
+  void HmmNormalNonLinear::PrintIntro()
   {
     using namespace std;
     cout << "BiiPS test : Hidden Markov Model non-linear gaussian 1D" << endl;
