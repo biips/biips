@@ -9,7 +9,7 @@ CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 
-AC_PREFIX_PROGRAM(jags)  # TODO: this command looks for program biips. If path to biips is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
+AC_PREFIX_PROGRAM(biips_version)  # TODO: this command looks for program biips_version. If path to biips_version is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
 
 #Set optional include path with option --with-biips-include or
 #environment variable BIIPS_INCLUDE
@@ -25,7 +25,7 @@ else
       if test [ "$prefix" = "NONE" ]; then
          AC_MSG_ERROR("Location of BiiPS headers not defined. Use configure arg '--with-biips-include' or environment variable 'BIIPS_INCLUDE'")
       else
-         BIIPS_INCLUDE=${prefix}/include/biips
+         BIIPS_INCLUDE=${prefix}/include/biipsq()
       fi
    fi
 fi
