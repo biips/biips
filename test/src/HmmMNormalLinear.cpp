@@ -8,6 +8,7 @@
  * $Id$
  */
 
+#include "config.hpp"
 #include "HmmMNormalLinear.hpp"
 
 #include "BiipsCore.hpp"
@@ -16,9 +17,12 @@
 #include "samplers/ConjugateMNormalVarLinear.hpp"
 
 #include "KalmanFilter.hpp"
-#include "Plot.hpp"
 #include "TestIO.hpp"
 #include "common/cholesky.hpp"
+
+#ifdef USE_Qwt5_Qt4
+#include "Plot.hpp"
+#endif //USE_Qwt5_Qt4
 
 namespace Biips
 {
@@ -473,6 +477,7 @@ namespace Biips
 
   void HmmMNormalLinear::PlotResults(const String & plotFileName) const
   {
+#ifdef USE_Qwt5_Qt4
     const MultiArray::Array & x_gen = dataValuesMap_.at("x");
     const MultiArray::Array & y_obs = dataValuesMap_.at("y");
     const MultiArray::Array & x_est_KF = benchFilterValuesMap_.at("x");
@@ -588,6 +593,7 @@ namespace Biips
 
     if (showMode_ >= 1)
       results_plot.Show();
+#endif //USE_Qwt5_Qt4
   }
 
 }

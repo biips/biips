@@ -1,11 +1,12 @@
 #                                               -*- cmake -*-
 #
 #  CMakeLists.txt
-#  Top level biips project CMakeList
+#  Top level Biips project CMakeList
 #
-#  @author: $LastChangedBy:$
-#  @date:   $LastChangedDate:$
-#  Id:      $Id:$
+#  @author: $LastChangedBy$
+#  @date:   $LastChangedDate$
+#  @version:$LastChangedRevision$
+#  Id:      $Id$
 #
 
 cmake_minimum_required (VERSION 2.8)
@@ -77,6 +78,10 @@ set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~)
 
 # debian package specific options
 set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost1.42-dev")
+if (USE_Qwt5_Qt4)
+    set (CPACK_DEBIAN_PACKAGE_DEPENDS
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4")
+endif (USE_Qwt5_Qt4)
 set (CPACK_DEBIAN_PACKAGE_SECTION non-free/math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
@@ -91,4 +96,3 @@ set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
 set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/Changelog)
 
 include (CPack)
-

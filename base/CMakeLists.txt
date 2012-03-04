@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 include (GNUInstallDirs)
 
@@ -10,7 +10,7 @@ set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SY
 
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
-include_directories (${Boost_LIBRARY_DIRS})
+include_directories (${Boost_INCLUDE_DIRS})
 
 # include directories
 include_directories (

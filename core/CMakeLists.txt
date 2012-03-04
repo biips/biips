@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.8) 
 
 include (GNUInstallDirs)
 
@@ -16,13 +16,13 @@ configure_file (
 )
 
 configure_file (
-	${PROJECT_SOURCE_DIR}/biips_version.in
-	${PROJECT_BINARY_DIR}/biips_version
+	${PROJECT_SOURCE_DIR}/biips_info.in
+	${PROJECT_BINARY_DIR}/biips_info
 )
 
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
-include_directories (${Boost_LIBRARY_DIRS})
+include_directories (${Boost_INCLUDE_DIRS})
 
 # include directories
 include_directories (
@@ -60,7 +60,7 @@ install(DIRECTORY
 )
 
 install(PROGRAMS
-	${PROJECT_BINARY_DIR}/biips_version
+	${PROJECT_BINARY_DIR}/biips_info
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	COMPONENT Runtime
 )
