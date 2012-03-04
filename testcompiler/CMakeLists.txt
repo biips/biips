@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.8) 
 
 include (GNUInstallDirs)
 
@@ -9,26 +9,43 @@ string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
 # find boost libraries
-set (Boost_USE_STATIC_LIBS OFF)
-set (Boost_USE_MULTITHREADED OFF)
+set (Boost_USE_STATIC_LIBS ON)
+set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.42.0 REQUIRED
-	unit_test_framework
 	program_options
 )
-include_directories (${Boost_LIBRARY_DIRS})
+include_directories (${Boost_INCLUDE_DIRS})
+set (EXTRA_LIBS ${EXTRA_LIBS}
+	${Boost_LIBRARIES}
+)
+
+# should we use qwt5-qt4
+option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
 
 # find qwt5-qt4
-find_package(Qwt5 REQUIRED)
-if (NOT Qwt5_Qt4_FOUND)
-	message(FATAL_ERROR "Qwt5 linked with Qt4 not found")
-endif (NOT Qwt5_Qt4_FOUND)
-include_directories (${Qwt5_INCLUDE_DIR})
-include(UseQt4)
+if (USE_Qwt5_Qt4)
+    find_package(Qwt5 REQUIRED)
+    if (NOT Qwt5_Qt4_FOUND)
+    	message(FATAL_ERROR "Qwt5 linked with Qt4 not found")
+    endif (NOT Qwt5_Qt4_FOUND)
+    include_directories (${Qwt5_INCLUDE_DIR})
+    include(UseQt4)
+    set (EXTRA_LIBS ${EXTRA_LIBS}
+    	${Qwt5_Qt4_LIBRARY}
+    )
+endif (USE_Qwt5_Qt4)
+
+# configure config.hpp
+configure_file(
+    ${PROJECT_SOURCE_DIR}/include/config.hpp.in
+    ${PROJECT_BINARY_DIR}/include/config.hpp
+)
 
 # include Biips libraries
 include_directories (
 	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_BINARY_DIR}/include
 	${BiipsCompiler_SOURCE_DIR}/include
 	${BiipsBase_SOURCE_DIR}/include
 	${BiipsCore_SOURCE_DIR}/include
@@ -45,16 +62,9 @@ file (GLOB SOURCE_FILES
 	${PROJECT_SOURCE_DIR}/include/*.hpp
 	${PROJECT_SOURCE_DIR}/include/*.h
 )
-set (SOURCE_FILES
-	${SOURCE_FILES}
-	${PROJECT_SOURCE_DIR}/BiipsTestCompiler.cpp
-	${PROJECT_SOURCE_DIR}/config.hpp
-)
 
 # linked libraries
 set (EXTRA_LIBS ${EXTRA_LIBS}
-	${Boost_LIBRARIES}
-	${Qwt5_Qt4_LIBRARY}
 	BiipsCompiler
 	BiipsBase
 	BiipsCore

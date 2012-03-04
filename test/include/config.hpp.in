@@ -15,4 +15,6 @@
 #define BIIPS_CATCH_ON
 //#define BIIPS_DEBUG_ON
 
+#cmakedefine USE_Qwt5_Qt4
+
 #endif /* BIIPS_CONFIG_HPP_ */

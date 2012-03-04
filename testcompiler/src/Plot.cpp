@@ -8,6 +8,9 @@
  * Id:      $Id$
  */
 
+#include "config.hpp"
+#ifdef USE_Qwt5_Qt4
+
 #include "Plot.hpp"
 #include "sampler/Accumulator.hpp"
 
@@ -194,3 +197,5 @@ namespace Biips
   };
 
 }
+
+#endif //USE_Qwt5_Qt4

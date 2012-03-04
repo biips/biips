@@ -8,9 +8,8 @@
 * Id:      $Id$
 */
 
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE BiipsTest
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "config.hpp"
 #include "BiipsVersion.hpp"
@@ -59,7 +58,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     Size model_id;
     Size exec_step;
     Size check_mode;
-    Size show_mode;
     Size data_rng_seed;
     Size smc_rng_seed;
     vector<Size> n_particles;
@@ -67,10 +65,11 @@ BOOST_AUTO_TEST_CASE( my_test )
     String resample_type;
     Size n_smc;
     Scalar reject_level;
-    String plot_file_name;
     String config_file_name;
     vector<String> mutations;
     Size verbosity;
+    Size show_mode;
+    String plot_file_name;
     Size num_bins;
 
     // Declare a group of options that will be
@@ -86,6 +85,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 2: \thigh.")
         ("interactive", "asks questions to the user.\n"
             "applies when verbose>0.")
+#ifdef USE_Qwt5_Qt4
         ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),"shows plots, interrupting execution.\n"
             "applies when repeat-smc=1.\n"
             "values:\n"
@@ -93,6 +93,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 1: \tshows final results plots.\n"
             " 2: \t1 + shows pdf histogram plots.")
         ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histogram plots.")
+#endif //USE_Qwt5_Qt4
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
             " 0: \tsamples or reads values of the graph.\n"
