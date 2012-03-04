@@ -8,9 +8,8 @@
  * $Id$
  */
 
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE BiipsTestCompiler
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "config.hpp"
 #include "BiipsVersion.hpp"
@@ -19,9 +18,12 @@
 #include "Console.hpp"
 #include "kolmogorov.hpp"
 #include "common/cholesky.hpp"
-#include "Plot.hpp"
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
+
+#ifdef USE_Qwt5_Qt4
+#include "Plot.hpp"
+#endif //USE_Qwt5_Qt4
 
 #include <fstream>
 #include <ctime>
@@ -44,6 +46,7 @@ namespace Biips
               Bool verbose,
               Bool smooth = false);
 
+#ifdef USE_Qwt5_Qt4
   struct Curve
   {
     Types<Scalar>::Array x;
@@ -70,6 +73,7 @@ namespace Biips
                Bool verbose,
                Size numBins,
                Bool smooth = false);
+#endif //USE_Qwt5_Qt4
 
   Bool
   computeError(Scalar & error, const String & varName, const std::map<String,
@@ -96,7 +100,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     Size exec_step;
     String do_smooth_str;
     Size check_mode;
-    Size show_mode;
     Size data_rng_seed;
     Size smc_rng_seed;
     vector<Size> n_particles;
@@ -104,59 +107,59 @@ BOOST_AUTO_TEST_CASE( my_test )
     String resample_type;
     Size n_smc;
     Scalar reject_level;
-    //    String plot_file_name;
     String dot_file_name;
     String config_file_name;
     vector<String> mutations;
     Size verbosity;
+    Size show_mode;
     Size num_bins;
+    //    String plot_file_name;
 
     // Declare a group of options that will be
     // allowed only on command line
     po::options_description generic("Generic options");
-    generic.add_options()("help-test,h", "produces help message.")("version",
-                                                                   "prints version string.")("verbose,v",
-                                                                                             po::value<
-                                                                                                 Size>(&verbosity)->default_value(1),
-                                                                                             "verbosity level.\n"
-                                                                                               "values:\n"
-                                                                                               " 0: \tnone.\n"
-                                                                                               " 1: \tminimal.\n"
-                                                                                               " 2: \thigh.")("interactive",
-                                                                                                              "asks questions to the user.\n"
-                                                                                                                "applies when verbose>0.")("show-plots,s",
-                                                                                                                                           po::value<
-                                                                                                                                               Size>(&show_mode)->default_value(0),
-                                                                                                                                           "shows plots, interrupting execution.\n"
-                                                                                                                                             "applies when repeat-smc=1.\n"
-                                                                                                                                             "values:\n"
-                                                                                                                                             " 0: \tno plots.\n"
-                                                                                                                                             " 1: \tshows final results plots.\n"
-                                                                                                                                             " 2: \t1 + shows pdf histogram plots.")("num-bins",
-                                                                                                                                                                                     po::value<
-                                                                                                                                                                                         Size>(&num_bins)->default_value(40),
-                                                                                                                                                                                     "number of bins in the histogram plots.")("step",
-                                                                                                                                                                                                                               po::value<
-                                                                                                                                                                                                                                   Size>(&exec_step)->default_value(3),
-                                                                                                                                                                                                                               "execution step to be reached (if possible).\n"
-                                                                                                                                                                                                                                 "values:\n"
-                                                                                                                                                                                                                                 " 0: \tcompiles model, generates data and reads values from cfg file.\n"
-                                                                                                                                                                                                                                 " 1: \t0 + runs SMC samplers and extract statistics.\n"
-                                                                                                                                                                                                                                 " 2: \t1 + computes errors vs benchmarks.\n"
-                                                                                                                                                                                                                                 " 3: \t2 + checks that errors are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")("smooth",
-                                                                                                                                                                                                                                                                                                                                                                                                                                           po::value<
-                                                                                                                                                                                                                                                                                                                                                                                                                                               String>(&do_smooth_str)->default_value("on"),
-                                                                                                                                                                                                                                                                                                                                                                                                                                           "toggle backward smoothing step.\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                             "values:\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                             " on: \tenable backward smoothing step.\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                             " off: \tdisable backward smoothing step.")("check-mode",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         po::value<
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             Size>(&check_mode)->default_value(2),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "errors to be checked.\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "values:\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           " 0: \tchecks normalizing-constant mean.\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           " 1: \t0 + checks filtering errors goodness of fit.\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           " 2: \t1 + checks smoothing errors goodness of fit.");
+    generic.add_options()
+        ("help-test,h", "produces help message.")
+        ("version", "prints version string.")
+        ("verbose,v", po::value<Size>(&verbosity)->default_value(1),
+            "verbosity level.\n"
+            "values:\n"
+            " 0: \tnone.\n"
+            " 1: \tminimal.\n"
+            " 2: \thigh.")
+        ("interactive",
+            "asks questions to the user.\n"
+            "applies when verbose>0.")
+#ifdef USE_Qwt5_Qt4
+        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),
+            "shows plots, interrupting execution.\n"
+            "applies when repeat-smc=1.\n"
+            "values:\n"
+            " 0: \tno plots.\n"
+           " 1: \tshows final results plots.\n"
+           " 2: \t1 + shows pdf histogram plots.")
+        ("num-bins", po::value<Size>(&num_bins)->default_value(40),
+            "number of bins in the histogram plots.")
+#endif //USE_Qwt5_Qt4
+        ("step", po::value<Size>(&exec_step)->default_value(3),
+            "execution step to be reached (if possible).\n"
+            "values:\n"
+            " 0: \tcompiles model, generates data and reads values from cfg file.\n"
+            " 1: \t0 + runs SMC samplers and extract statistics.\n"
+            " 2: \t1 + computes errors vs benchmarks.\n"
+            " 3: \t2 + checks that errors are distributed according to reference SMC errors, when repeat-smc>1. checks that error is lesser than a 1-alpha quantile of the reference SMC errors, when repeat-smc=1.")
+        ("smooth", po::value<String>(&do_smooth_str)->default_value("on"),
+            "toggle backward smoothing step.\n"
+            "values:\n"
+            " on: \tenable backward smoothing step.\n"
+            " off: \tdisable backward smoothing step.")
+        ("check-mode", po::value<Size>(&check_mode)->default_value(2),
+            "errors to be checked.\n"
+            "values:\n"
+            " 0: \tchecks normalizing-constant mean.\n"
+            " 1: \t0 + checks filtering errors goodness of fit.\n"
+            " 2: \t1 + checks smoothing errors goodness of fit.")
+        ;
 
     // Declare a group of options that will be
     // allowed both on command line and in
@@ -552,6 +555,7 @@ BOOST_AUTO_TEST_CASE( my_test )
               extractStat(console, MEAN, monitored_var, "mean", (verbosity > 0
                   && n_smc == 1), false);
 
+#ifdef USE_Qwt5_Qt4
           // plot mean curve
           //---------------------------
           std::map<String, Types<Curve>::Array> curves_map;
@@ -586,6 +590,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             if (verbosity > 0 && interactive)
               pressEnterToContinue();
           }
+#endif //USE_Qwt5_Qt4
 
           if (exec_step < 2)
             continue;
@@ -646,6 +651,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                                               (verbosity > 0 && n_smc == 1),
                                               true);
 
+#ifdef USE_Qwt5_Qt4
             // plot smooth mean curve
             //---------------------------
             if (show_mode >= 1 && n_smc == 1)
@@ -679,6 +685,7 @@ BOOST_AUTO_TEST_CASE( my_test )
               if (verbosity > 0 && interactive)
                 pressEnterToContinue();
             }
+#endif //USE_Qwt5_Qt4
 
             if (exec_step < 2)
               continue;
@@ -995,6 +1002,7 @@ namespace Biips
     return stat_map;
   }
 
+#ifdef USE_Qwt5_Qt4
   void plotStat(Console & console,
                 const String & varName,
                 const String & statName,
@@ -1163,6 +1171,7 @@ namespace Biips
       }
     }
   }
+#endif //USE_Qwt5_Qt4
 
   Bool computeError(Scalar & error,
                     const String & varName,

@@ -8,10 +8,14 @@
  * $Id$
  */
 
+#include "config.hpp"
 #include "HmmNormalNonLinear.hpp"
 #include "BiipsCore.hpp"
-#include "Plot.hpp"
 #include "TestIO.hpp"
+
+#ifdef USE_Qwt5_Qt4
+#include "Plot.hpp"
+#endif //USE_Qwt5_Qt4
 
 namespace Biips
 {
@@ -425,6 +429,7 @@ namespace Biips
     x_quant_95[t].SetPtr(P_SCALAR_DIM,
                          ValArray::Ptr(new ValArray(1, scalarAcc_.Quantile(1))));
 
+#ifdef USE_Qwt5_Qt4
     if (showMode_ >= 2)
     {
       ScalarHistogram pdf_hist = scalarAcc_.Pdf();
@@ -434,6 +439,7 @@ namespace Biips
       pdf_plot_PF.SetBackgroundColor(Qt::white);
       pdf_plot_PF.Show();
     }
+#endif //USE_Qwt5_Qt4
   }
 
   void HmmNormalNonLinear::filterAccumulate(Size t)
@@ -453,6 +459,7 @@ namespace Biips
 
   void HmmNormalNonLinear::PlotResults(const String & plotFileName) const
   {
+#ifdef USE_Qwt5_Qt4
     const MultiArray::Array & x_gen = dataValuesMap_.at("x");
     const MultiArray::Array & y_obs = dataValuesMap_.at("y");
     const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
@@ -535,6 +542,7 @@ namespace Biips
 
     if (showMode_ >= 1)
       results_plot.Show();
+#endif //USE_Qwt5_Qt4
   }
 
 }

@@ -9,7 +9,7 @@ CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 
-AC_PREFIX_PROGRAM(biips_version)  # TODO: this command looks for program biips_version. If path to biips_version is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
+AC_PREFIX_PROGRAM(biips_info)  # TODO: this command looks for program biips_info. If path to biips_info is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
 
 #Set optional include path with option --with-biips-include or
 #environment variable BIIPS_INCLUDE
