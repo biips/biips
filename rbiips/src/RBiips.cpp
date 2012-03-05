@@ -48,7 +48,7 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
     rbiips_cout << INDENT_STRING << "Variables:";
 
   Rcpp::CharacterVector names = data_list.attr("names");
-  for (Size i=0; i<names.size(); ++i)
+  for (int i=0; i<names.size(); ++i)
   {
     String var_name(names[i]);
     if (verbosity>0)
@@ -334,7 +334,7 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
   if (verbosity>0)
     rbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
 
-  for (Size i=0; i<monitored_var.size(); ++i)
+  for (int i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
@@ -368,7 +368,7 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
   if (verbosity>0)
     rbiips_cout << PROMPT_STRING << "Smooth tree monitoring variables:";
 
-  for (Size i=0; i<monitored_var.size(); ++i)
+  for (int i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
@@ -402,7 +402,7 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
 
   Rcpp::StringVector monitored_var(varNames);
 
-  for (Size i=0; i<monitored_var.size(); ++i)
+  for (int i=0; i<monitored_var.size(); ++i)
   {
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
