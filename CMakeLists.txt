@@ -27,21 +27,33 @@ set (Biips_URL http://biips.gforge.inria.fr)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Systems")
 set (Biips_DESCRIPTION )
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
+
 if (WIN32)
 	execute_process (COMMAND "date" "/T" OUTPUT_VARIABLE Biips_DATE)
-	string (REGEX REPLACE "(..)/(..)/(....).*" "\\3-\\2-\\1"
-		Biips_DATE ${Biips_DATE})
+	message (STATUS Biips_DATE=${Biips_DATE})
 elseif (UNIX)
 	execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE Biips_DATE)
-	string (REGEX REPLACE "(..)/(..)/(....).*" "\\3-\\2-\\1"
-		Biips_DATE ${Biips_DATE})
-else (WIN32)
-	message (SEND_ERROR "date not implemented")
-	set (Biips_DATE 0000-00-00)
 endif (WIN32)
+if (Biips_DATE)
+	string (REGEX REPLACE
+		"(..)/(..)/(....).*"
+		"\\3-\\2-\\1"
+		Biips_DATE
+		${Biips_DATE}
+	)
+else (Biips_DATE)
+	message (WARNING "date not implemented")
+	set (Biips_DATE 0000-00-00)
+endif (Biips_DATE)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
+# configure boost
+option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
+option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" ON)
+option (Boost_USE_STATIC_RUNTIME
+	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
+	
 # add subprojects
 add_subdirectory (core)
 add_subdirectory (base)
@@ -77,10 +89,14 @@ set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~)
 
 # debian package specific options
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost1.42-dev")
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.42.0)")
+if (NOT Boost_USE_STATIC_LIBS)
+    set (CPACK_DEBIAN_PACKAGE_DEPENDS
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
+endif (NOT Boost_USE_STATIC_LIBS)
 if (USE_Qwt5_Qt4)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
 endif (USE_Qwt5_Qt4)
 set (CPACK_DEBIAN_PACKAGE_SECTION non-free/math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
@@ -88,11 +104,15 @@ set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips-dev, libbiips-test, biips-test")
 
 # rpm package specific options
-set (CPACK_RPM_PACKAGE_REQUIRES "libc6 >= 2.7, libstdc++6 >= 4.4.0")
+set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
+if (USE_Qwt5_Qt4)
+    set (CPACK_RPM_PACKAGE_REQUIRES
+        "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")
+endif (USE_Qwt5_Qt4)
 set (CPACK_RPM_PACKAGE_RELEASE 1)
 set (CPACK_RPM_PACKAGE_LICENSE unknown)
 set (CPACK_RPM_PACKAGE_GROUP unknown)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
-set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/Changelog)
+set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
 
 include (CPack)

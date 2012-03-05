@@ -143,11 +143,11 @@ namespace Biips
 
   inline Bool isNan(Scalar r)
   {
-    return isnan(r);
+    return std::isnan(r);
   }
   inline Bool isNan(Size s)
   {
-    return isnan(s);
+    return std::isnan(s);
   }
 
 }

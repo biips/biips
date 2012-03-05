@@ -33,7 +33,10 @@ file (GLOB_RECURSE SOURCE_FILES
 
 # add the library
 add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
-set_target_properties(${PROJECT_LIB_NAME} PROPERTIES COMPILE_FLAGS -Wno-deprecated)
+if (UNIX)
+	set (EXTRA_CCFLAGS -Wno-deprecated)
+	set_target_properties(${PROJECT_LIB_NAME} PROPERTIES COMPILE_FLAGS ${EXTRA_CCFLAGS})
+endif (UNIX)
 
 # add the install targets
 install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}

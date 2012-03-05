@@ -8,8 +8,9 @@
  * $Id$
  */
 
+#include "BiipsConfig.hpp"
 #include "common/Utility.hpp"
-#ifndef Win32
+#ifndef WIN32
 #include <pwd.h>
 #endif
 
@@ -23,7 +24,7 @@ namespace Biips
     if(s[0] != '~') return s;
     String name = s;
 
-#ifdef Win32
+#ifdef WIN32
     if(isalpha(s[1])) return s;
 #else
     if(name.size() > 1 && s[1] != '/') return s;
@@ -35,7 +36,7 @@ namespace Biips
       if (p)
         UserHOME = p;
 
-#ifdef Win32
+#ifdef WIN32
       if (UserHOME.empty())
       {
         if (p = std::getenv("USERPROFILE"))

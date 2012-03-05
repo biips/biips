@@ -9,9 +9,6 @@ string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
 # find boost libraries
-set (Boost_USE_STATIC_LIBS ON)
-set (Boost_USE_MULTITHREADED ON)
-set (Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.42.0 REQUIRED
 	program_options
 )
@@ -73,7 +70,10 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 # add the executable
 add_executable (${PROJECT_EXE_NAME} ${SOURCE_FILES})
 target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LIBS})
-set_target_properties(${PROJECT_EXE_NAME} PROPERTIES COMPILE_FLAGS -Wno-deprecated)
+if (UNIX)
+	set (EXTRA_CCFLAGS -Wno-deprecated)
+	set_target_properties(${PROJECT_EXE_NAME} PROPERTIES COMPILE_FLAGS ${EXTRA_CCFLAGS})
+endif (UNIX)
 
 # add the install targets
 install (TARGETS ${PROJECT_EXE_NAME}
