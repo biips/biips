@@ -35,7 +35,7 @@
 
 .onLoad <- function(lib, pkg)
 {
-### First task is to get installation directory of JAGS
+### First task is to get installation directory of BiiPS
 
     ## Try environment variable first
     biips.home <- Sys.getenv("BIIPS_HOME")

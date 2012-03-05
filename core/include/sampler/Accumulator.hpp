@@ -201,7 +201,7 @@ namespace Biips
 
     void Init();
 
-    virtual void Push(Scalar value, Scalar weight)
+    void Push(Scalar value, Scalar weight)
     {
       acc_(value, acc::weight = weight);
     }

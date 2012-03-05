@@ -32,18 +32,23 @@ configure_file (
 
 # Generate configuration scripts
 if (UNIX)
-	execute_process( COMMAND "autoconf"
-		WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_PKG_NAME})
+	find_program (AUTOCONF autoconf)
+	if (AUTOCONF)
+		execute_process( COMMAND "autoconf"
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_PKG_NAME})
+	else (AUTOCONF)
+		message (SEND_ERROR "autoconf not found")
+	endif (AUTOCONF)
 endif (UNIX)
 
 # copy files to binary directory
 macro (copy_dir_to_binary dir)
 	file (
 		GLOB SOURCE_FILES
-		${PROJECT_SOURCE_DIR}/${dir}*
+		${PROJECT_SOURCE_DIR}/${dir}/*
 	)
 	file (	COPY ${SOURCE_FILES}
-		DESTINATION ${PROJECT_PKG_NAME}/${dir}
+		DESTINATION ${PROJECT_PKG_NAME}/${dir}/
 		PATTERN CMakeLists.txt EXCLUDE
 		PATTERN *.IN EXCLUDE
 		PATTERN .svn EXCLUDE
@@ -53,11 +58,11 @@ macro (copy_dir_to_binary dir)
 endmacro(copy_dir_to_binary)
 
 copy_dir_to_binary(.)
-copy_dir_to_binary(man/)
-copy_dir_to_binary(R/)
-copy_dir_to_binary(R/unix/)
-copy_dir_to_binary(R/windows/)
-copy_dir_to_binary(src/)
+copy_dir_to_binary(man)
+copy_dir_to_binary(R)
+copy_dir_to_binary(R/unix)
+copy_dir_to_binary(R/windows)
+copy_dir_to_binary(src)
 
 # add R package tools targets
 add_custom_target (${PROJECT_PKG_NAME}_check
