@@ -28,7 +28,7 @@ static ScalarAccumulator accumulate(SEXP values, SEXP weights, FeatureIterator f
   accu.AddFeatures(firstFeat, LastFeat);
   accu.Init();
 
-  for (Size i = 0; i<values_vec.size(); ++i)
+  for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   return accu;
@@ -124,7 +124,7 @@ RcppExport SEXP weighted_median (SEXP values, SEXP weights)
   accu.AddQuantileProb(0.5);
   accu.Init();
 
-  for (Size i = 0; i<values_vec.size(); ++i)
+  for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
@@ -150,11 +150,11 @@ RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
   accu.SetQuantileProbs(probs_vec.begin(), probs_vec.end());
   accu.Init();
 
-  for (Size i = 0; i<values_vec.size(); ++i)
+  for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
-  for (Size i = 0; i<probs_vec.size(); ++i)
+  for (int i = 0; i<probs_vec.size(); ++i)
   {
     if (probs_vec[i] == 0.5)
       stats["Median"] = Rcpp::wrap(accu.Quantile(i));
@@ -180,7 +180,7 @@ RcppExport SEXP weighted_table(SEXP values, SEXP weights)
   accu.AddFeature(PDF);
   accu.Init();
 
-  for (Size i = 0; i<values_vec.size(); ++i)
+  for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
@@ -212,7 +212,7 @@ RcppExport SEXP weighted_mode(SEXP values, SEXP weights)
   accu.AddFeature(MODE);
   accu.Init();
 
-  for (Size i = 0; i<values_vec.size(); ++i)
+  for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
