@@ -28,23 +28,24 @@ set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Sys
 set (Biips_DESCRIPTION )
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
 
-if (WIN32)
-	execute_process (COMMAND "date" "/T" OUTPUT_VARIABLE Biips_DATE)
-	message (STATUS Biips_DATE=${Biips_DATE})
-elseif (UNIX)
-	execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE Biips_DATE)
-endif (WIN32)
-if (Biips_DATE)
-	string (REGEX REPLACE
-		"(..)/(..)/(....).*"
-		"\\3-\\2-\\1"
-		Biips_DATE
-		${Biips_DATE}
-	)
-else (Biips_DATE)
-	message (WARNING "date not implemented")
-	set (Biips_DATE 0000-00-00)
-endif (Biips_DATE)
+if (NOT Biips_DATE)
+	if (WIN32)
+		execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
+	elseif (UNIX)
+		execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE TODAY)
+	endif (WIN32)
+	if (TODAY)
+		string (REGEX REPLACE
+			"(..)/(..)/(....).*"
+			"\\3-\\2-\\1"
+			Biips_DATE
+			${TODAY}
+		)
+	else (TODAY)
+		message (SEND_ERROR "date not implemented.\nPlease set variable Biips_DATE to yyyy-mm-dd")
+	endif (TODAY)
+endif (NOT Biips_DATE)
+message (STATUS Biips_DATE=${Biips_DATE})
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
