@@ -6,7 +6,7 @@ Title: @Biips_DESCRIPTION_SUMMARY@
 Author: @Biips_AUTHOR@
 Maintainer: @Biips_CONTACT@
 Depends: R (>= 2.13.0), Rcpp (>= 0.9.4), stats
-SystemRequirements: biips (== @Biips_VERSION@)
+SystemRequirements: biips (== @Biips_VERSION@), boost (>= 1.42)
 Description: Interface to the BiiPS SMC library
 License: @Biips_LICENSE@
 URL: @Biips_URL@
