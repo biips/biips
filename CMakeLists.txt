@@ -90,11 +90,12 @@ set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~)
 
 # debian package specific options
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.42.0)")
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
 endif (NOT Boost_USE_STATIC_LIBS)
+set (CPACK_DEBIAN_PACKAGE_SUGGESTS "libboost-dev (>= 1.42.0), r-base (>= 2.13)")
 if (USE_Qwt5_Qt4)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
