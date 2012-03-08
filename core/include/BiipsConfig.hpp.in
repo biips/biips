@@ -16,4 +16,10 @@
 #define Biips_VERSION_PATCH @Biips_VERSION_PATCH@
 #define Biips_VERSION "@Biips_VERSION@"
 
+#define Boost_MAJOR_VERSION @Boost_MAJOR_VERSION@
+#define Boost_MINOR_VERSION @Boost_MINOR_VERSION@
+#define Boost_SUBMINOR_VERSION @Boost_SUBMINOR_VERSION@
+#define Boost_VERSION @Boost_VERSION@
+#define Boost_LIB_VERSION "@Boost_LIB_VERSION@"
+
 #endif /* BIIPS_CONFIG_HPP_ */
