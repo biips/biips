@@ -14,6 +14,21 @@ cmake_minimum_required (VERSION 2.8)
 # project configuration
 project (Biips CXX)
 
+option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
+if (PRINT_SYSTEM_INFO)
+    message (STATUS CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+    message (STATUS CMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION})
+    message (STATUS CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
+    message (STATUS WIN32=${WIN32})
+    message (STATUS UNIX=${UNIX})
+    message (STATUS MINGW=${MINGW})
+    message (STATUS CMAKE_GENERATOR=${CMAKE_GENERATOR})
+    message (STATUS CMAKE_BUILD_TOOL=${CMAKE_BUILD_TOOL})
+    message (STATUS CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
+    message (STATUS CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+    message (STATUS CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
+endif (PRINT_SYSTEM_INFO)
+
 set (Biips_VERSION_MAJOR 0)
 set (Biips_VERSION_MINOR 7)
 set (Biips_VERSION_PATCH 1)
@@ -27,6 +42,7 @@ set (Biips_URL http://biips.gforge.inria.fr)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Systems")
 set (Biips_DESCRIPTION )
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
+
 
 if (NOT Biips_DATE)
 	if (WIN32)
@@ -55,6 +71,9 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" ON)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 	
+# configure build
+option (BUILD_SHARED_LIBS "Build shared libraries." ON)
+	
 # add subprojects
 add_subdirectory (core)
 add_subdirectory (base)
@@ -63,6 +82,7 @@ add_subdirectory (test)
 add_subdirectory (testcompiler)
 add_subdirectory (rbiips)
 
+#============= CPACK commands ============
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_NAME libbiips)
@@ -87,9 +107,10 @@ set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${Biips_SOURCE_DIR}/README)
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
 set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
+#set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~)
 
-# debian package specific options
+# Debian package specific options
 set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
@@ -105,7 +126,7 @@ set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips-dev, libbiips-test, biips-test")
 
-# rpm package specific options
+# RPM package specific options
 set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
 if (USE_Qwt5_Qt4)
     set (CPACK_RPM_PACKAGE_REQUIRES
@@ -116,5 +137,16 @@ set (CPACK_RPM_PACKAGE_LICENSE unknown)
 set (CPACK_RPM_PACKAGE_GROUP unknown)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
 set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
+
+# NSIS package specific options
+IF(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  SET(CPACK_NSIS_DISPLAY_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY})
+  SET(CPACK_NSIS_HELP_LINK ${Biips_URL})
+  SET(CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
+  SET(CPACK_NSIS_CONTACT ${Biips_CONTACT})
+#  SET(CPACK_NSIS_MODIFY_PATH ON)
+ENDIF(WIN32 AND NOT UNIX)
 
 include (CPack)
