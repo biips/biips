@@ -26,20 +26,10 @@ configure_file (
 # configure configure.ac file
 configure_file (
 	configure.ac.IN
-	${PROJECT_PKG_NAME}/configure.ac
+	${PROJECT_SOURCE_DIR}/configure.ac
 	@ONLY
 )
 
-# Generate configuration scripts
-if (UNIX)
-	find_program (AUTOCONF autoconf)
-	if (AUTOCONF)
-		execute_process( COMMAND "autoconf"
-			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_PKG_NAME})
-	else (AUTOCONF)
-		message (SEND_ERROR "autoconf not found")
-	endif (AUTOCONF)
-endif (UNIX)
 
 # copy files to binary directory
 macro (copy_dir_to_binary dir)
@@ -63,6 +53,21 @@ copy_dir_to_binary(R)
 copy_dir_to_binary(R/unix)
 copy_dir_to_binary(R/windows)
 copy_dir_to_binary(src)
+
+# Generate configuration scripts
+if (UNIX)
+	find_program (AUTOCONF autoconf)
+	if (AUTOCONF)
+		execute_process (COMMAND autoconf
+			WORKING_DIRECTORY ${PROJECT_PKG_NAME}
+		)
+		file ( COPY configure
+			DESTINATION ${PROJECT_SOURCE_DIR}
+		)
+	else (AUTOCONF)
+		message (SEND_ERROR "autoconf not found")
+	endif (AUTOCONF)
+endif (UNIX)
 
 # add R package tools targets
 add_custom_target (${PROJECT_PKG_NAME}_check
