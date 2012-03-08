@@ -11,7 +11,7 @@
 #include <cmath>
 
 #include <boost/assert.hpp>
-#include <boost/random/gamma_distribution.hpp>
+#include "boost/random/gamma_distribution_2par.hpp" // EDIT: Modified by Adrien Todeschini on the 7/03/12
 
 namespace boost {
 

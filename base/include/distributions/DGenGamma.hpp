@@ -12,7 +12,7 @@
 #define BIIPS_DGENGAMMA_HPP_
 
 #include "distributions/BoostScalarDistribution.hpp"
-#include <boost/random/gamma_distribution.hpp>
+#include "boost/random/gamma_distribution_2par.hpp"
 #include <boost/math/distributions/gamma.hpp>
 
 namespace Biips

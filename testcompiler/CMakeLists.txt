@@ -4,7 +4,8 @@ include (GNUInstallDirs)
 
 # project configuration
 project (BiipsTestCompiler CXX C)
-set (PROJECT_EXE_NAME ${PROJECT_NAME})
+set (BiipsTestCompiler_EXE_NAME ${PROJECT_NAME})
+set (PROJECT_EXE_NAME ${BiipsTestCompiler_EXE_NAME})
 string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
@@ -63,17 +64,17 @@ file (GLOB SOURCE_FILES
 # linked libraries
 set (EXTRA_LIBS ${EXTRA_LIBS}
 	BiipsCompiler
-	BiipsBase
+    BiipsBase
 	BiipsCore
 )
 
 # add the executable
 add_executable (${PROJECT_EXE_NAME} ${SOURCE_FILES})
 target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LIBS})
-if (UNIX)
+if (UNIX OR MINGW)
 	set (EXTRA_CCFLAGS -Wno-deprecated)
 	set_target_properties(${PROJECT_EXE_NAME} PROPERTIES COMPILE_FLAGS ${EXTRA_CCFLAGS})
-endif (UNIX)
+endif (UNIX OR MINGW)
 
 # add the install targets
 install (TARGETS ${PROJECT_EXE_NAME}

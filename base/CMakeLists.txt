@@ -4,9 +4,11 @@ include (GNUInstallDirs)
 
 # project configuration
 project (BiipsBase CXX)
-set (PROJECT_LIB_NAME ${PROJECT_NAME})
+set (BiipsBase_LIB_NAME ${PROJECT_NAME})
+set (PROJECT_LIB_NAME ${BiipsBase_LIB_NAME})
 string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
+set (BiipsBase_LIBRARY_DIR ${PROJECT_BINARY_DIR}/${LIBRARY_OUTPUT_PATH})
 
 # find boost libraries
 find_package(Boost 1.42.0 REQUIRED)
@@ -30,12 +32,18 @@ file (GLOB_RECURSE SOURCE_FILES
 	${PROJECT_SOURCE_DIR}/src/*.cc
 )
 
+# linked libraries
+set (EXTRA_LIBS ${EXTRA_LIBS}
+	BiipsCore
+)
+
 # add the library
-add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
-if (UNIX OR MINGW32)
+add_library (${PROJECT_LIB_NAME} ${SOURCE_FILES})
+target_link_libraries (${PROJECT_LIB_NAME} ${EXTRA_LIBS})
+if (UNIX OR MINGW)
 	set (EXTRA_CCFLAGS -Wno-deprecated)
 	set_target_properties(${PROJECT_LIB_NAME} PROPERTIES COMPILE_FLAGS ${EXTRA_CCFLAGS})
-endif (UNIX OR MINGW32)
+endif (UNIX OR MINGW)
 
 # add the install targets
 install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
