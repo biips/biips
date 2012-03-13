@@ -75,26 +75,22 @@
         path <- paste(bindir, path, sep=.Platform$path.sep)
         Sys.setenv("PATH"=path)
     }
-	cat("path=",path,"\n")
-	cat("PATH=",Sys.getenv("PATH"),"\n")
     
 ### Set the module directory, if the option biips.moddir is not already set
     
-    #if (is.null(getOption("biips.moddir"))) {
-    #    options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
-    #            "modules"))
-    #}
+    if (is.null(getOption("biips.moddir"))) {
+        options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
+                "modules"))
+    }
     library.dynam("RBiips", pkg, lib)
     packageStartupMessage("linking to BiiPS ",
                           .Call("get_version", PACKAGE="RBiips"))
     
     #.Call("init_biips_console", PACKAGE="RBiips")
   
-    ## ... and the modules
     load.biips.module("basemod")
   
     set.biips.verbosity(1)
-
 }
 
 .onUnload <- function(libpath)
