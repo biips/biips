@@ -23,11 +23,26 @@ configure_file (
 	${PROJECT_PKG_NAME}/R/windows/zzz.R
 )
 
+# configure src/Makevars.in.IN file
+configure_file (
+	src/Makevars.in.IN
+	${PROJECT_PKG_NAME}/src/Makevars.in
+	@ONLY
+)
+
+# configure src/Makevars.win.IN file
+configure_file (
+	src/Makevars.win.IN
+	${PROJECT_PKG_NAME}/src/Makevars.win
+	@ONLY
+)
+
 # configure configure.ac file
 configure_file (
 	configure.ac.IN
 	${PROJECT_SOURCE_DIR}/configure.ac
 	@ONLY
+	NEWLINE_STYLE UNIX
 )
 
 
@@ -80,14 +95,21 @@ add_custom_target (${PROJECT_PKG_NAME}_check
 add_custom_target (${PROJECT_PKG_NAME}_build
 	R CMD build ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Building ${PROJECT_PKG_NAME} R package"
+	COMMENT "Building ${PROJECT_PKG_NAME} R source package"
 	VERBATIM
 )
 
-add_custom_target (${PROJECT_PKG_NAME}_install
+add_custom_target (${PROJECT_PKG_NAME}_INSTALL
 	R CMD INSTALL ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	COMMENT "Installing ${PROJECT_PKG_NAME} R package"
+	VERBATIM
+)
+
+add_custom_target (${PROJECT_PKG_NAME}_INSTALL_build
+	R CMD INSTALL --build ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	COMMENT "Building ${PROJECT_PKG_NAME} R binary package"
 	VERBATIM
 )
 
