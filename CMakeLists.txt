@@ -66,7 +66,6 @@ message (STATUS Biips_DATE=${Biips_DATE})
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
 # configure build
-option (BUILD_SHARED_LIBS "Build shared libraries." ON)
 math (EXPR BUILD_ARCH_BIT_NB 8*${CMAKE_SIZEOF_VOID_P})
 option (BUILD_FORCE_32BIT "Force 32bit compilation." OFF)
 option (BUILD_FORCE_64BIT "Force 64bit compilation." OFF)
@@ -124,8 +123,8 @@ set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE
 # ===============
 add_subdirectory (core)
 add_subdirectory (base)
-add_subdirectory (compiler)
 add_subdirectory (test)
+add_subdirectory (compiler)
 add_subdirectory (testcompiler)
 add_subdirectory (rbiips)
 

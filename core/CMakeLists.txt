@@ -42,7 +42,7 @@ file (GLOB_RECURSE SOURCE_FILES
 )
 
 # add the library
-add_library (${PROJECT_LIB_NAME} ${SOURCE_FILES})
+add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
 
 # add the install targets
 install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${Biips_INSTALL_LIBDIR}
