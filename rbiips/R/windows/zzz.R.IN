@@ -16,7 +16,7 @@
   else {
     regkey <- regkey[keynames]
     for (i in seq(along=keynames)) {
-      if (!is.null(regkey[[i]][["InstallDir"]])) {
+      if (!is.null(regkey[[i]][[1]])) {
         return(regkey[i])
       }
     }
@@ -63,18 +63,20 @@
         latest <- key2
       }
 
-      biips.home <- latest[[1]][["InstallDir"]]
+      biips.home <- latest[[1]][[1]]
     }
     
 ### Add biips.home to the windows PATH, if not already present
 
     bindir <- file.path(biips.home, .Platform$r_arch, "bin")
     path <- Sys.getenv("PATH")
-    split.path <- strsplit(path, .Platform$path.sep)$PATH
+    split.path <- strsplit(path, .Platform$path.sep)[[1]]
     if (!any(split.path == bindir)) {
         path <- paste(bindir, path, sep=.Platform$path.sep)
         Sys.setenv("PATH"=path)
     }
+	cat("path=",path,"\n")
+	cat("PATH=",Sys.getenv("PATH"),"\n")
     
 ### Set the module directory, if the option biips.moddir is not already set
     

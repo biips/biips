@@ -3,15 +3,16 @@
 #  CMakeLists.txt
 #  Top level Biips project CMakeList
 #
-#  @author: $LastChangedBy$
-#  @date:   $LastChangedDate$
-#  @version:$LastChangedRevision$
-#  Id:      $Id$
+#  @author: $LastChangedBy:$
+#  @date:   $LastChangedDate:$
+#  @version:$LastChangedRevision:$
+#  Id:      $Id:$
 #
 
 cmake_minimum_required (VERSION 2.8)
 
 # project configuration
+# =====================
 project (Biips CXX)
 
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
@@ -43,7 +44,6 @@ set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Sys
 set (Biips_DESCRIPTION )
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
 
-
 if (NOT Biips_DATE)
 	if (WIN32)
 		execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
@@ -65,16 +65,63 @@ message (STATUS Biips_DATE=${Biips_DATE})
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
+# configure build
+option (BUILD_SHARED_LIBS "Build shared libraries." ON)
+math (EXPR BUILD_ARCH_BIT_NB 8*${CMAKE_SIZEOF_VOID_P})
+option (BUILD_FORCE_32BIT "Force 32bit compilation." OFF)
+option (BUILD_FORCE_64BIT "Force 64bit compilation." OFF)
+if (BUILD_FORCE_32BIT)
+	if (BUILD_FORCE_64BIT)
+		message (FATAL_ERROR "Can not set both BUILD_FORCE_32BIT and BUILD_FORCE_64BIT to ON.\n")
+	endif (BUILD_FORCE_64BIT)
+	set (BUILD_ARCH_BIT_NB 32)
+	add_definitions (-m32)
+	set (EXTRA_COMPILE_FLAGS -m32)
+	set (EXTRA_LINK_FLAGS -m32)
+elseif (BUILD_FORCE_64BIT)
+	set (BUILD_ARCH_BIT_NB 64)
+	add_definitions (-m64)
+	set (EXTRA_COMPILE_FLAGS -m64)
+	set (EXTRA_LINK_FLAGS -m64)
+endif (BUILD_FORCE_32BIT)
+message (STATUS BUILD_ARCH_BIT_NB=${BUILD_ARCH_BIT_NB})
+
+option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
+if (SUPPRESS_DEPRECATED_WARNINGS)
+	add_definitions (-Wno-deprecated)
+	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
+endif (SUPPRESS_DEPRECATED_WARNINGS)
+
 # configure boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" ON)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
-	
-# configure build
-option (BUILD_SHARED_LIBS "Build shared libraries." ON)
-	
-# add subprojects
+
+# configure install directories
+include (GNUInstallDirs)
+if (UNIX)
+	set (Biips_INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR})
+	set (Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/biips)
+	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR}/biips)
+elseif (WIN32)
+	if (BUILD_ARCH_BIT_NB EQUAL 32)
+		set (Biips_INSTALL_BINDIR i386/${CMAKE_INSTALL_BINDIR})
+	elseif (BUILD_ARCH_BIT_NB EQUAL 64)
+		set (Biips_INSTALL_BINDIR x64/${CMAKE_INSTALL_BINDIR})
+	endif (BUILD_ARCH_BIT_NB EQUAL 32)
+	set (Biips_INSTALL_LIBDIR ${Biips_INSTALL_BINDIR})
+	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
+	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
+endif (UNIX)
+
+# configure output directories
+set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
+set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
+
+# Add subprojects
+# ===============
 add_subdirectory (core)
 add_subdirectory (base)
 add_subdirectory (compiler)
@@ -85,8 +132,8 @@ add_subdirectory (rbiips)
 #============= CPACK commands ============
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
-set (CPACK_PACKAGE_NAME libbiips)
-set (CPACK_PACKAGE_VENDOR ${Biips_AUTHOR})
+set (CPACK_PACKAGE_NAME biips)
+set (CPACK_PACKAGE_VENDOR BiiPS)
 
 #if (UNIX)
 #	execute_process(COMMAND "dpkg" "--print-architecture" OUTPUT_VARIABLE SYSTEM_ARCH)
@@ -107,8 +154,10 @@ set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${Biips_SOURCE_DIR}/README)
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
 set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
+
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
-set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~)
+
+set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 
 # Debian package specific options
 set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
@@ -139,14 +188,15 @@ set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
 set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
 
 # NSIS package specific options
-IF(WIN32 AND NOT UNIX)
+if (WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
-  SET(CPACK_NSIS_DISPLAY_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY})
-  SET(CPACK_NSIS_HELP_LINK ${Biips_URL})
-  SET(CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
-  SET(CPACK_NSIS_CONTACT ${Biips_CONTACT})
-#  SET(CPACK_NSIS_MODIFY_PATH ON)
-ENDIF(WIN32 AND NOT UNIX)
+  set (CPACK_NSIS_EXECUTABLES_DIRECTORY ${Biips_INSTALL_BINDIR})
+  set (CPACK_NSIS_INSTALL_ROOT "\$PROGRAMFILES64\\\\BiiPS")
+  set (CPACK_NSIS_DISPLAY_NAME "BiiPS ${Biips_VERSION}")
+  set (CPACK_NSIS_HELP_LINK ${Biips_URL})
+  set (CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
+  set (CPACK_NSIS_CONTACT ${Biips_CONTACT})
+endif (WIN32 AND NOT UNIX)
 
 include (CPack)
