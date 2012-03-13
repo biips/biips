@@ -67,7 +67,7 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 
 # add the executable
 add_executable (${PROJECT_EXE_NAME} ${SOURCE_FILES})
-target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LIBS} ${EXTRA_LINK_FLAGS})
+target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LINK_FLAGS} ${EXTRA_LIBS})
 
 # add the install targets
 install (TARGETS ${PROJECT_EXE_NAME}

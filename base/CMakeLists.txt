@@ -34,8 +34,8 @@ set (EXTRA_LIBS ${EXTRA_LIBS}
 )
 
 # add the library
-add_library (${PROJECT_LIB_NAME} ${SOURCE_FILES})
-target_link_libraries (${PROJECT_LIB_NAME} ${EXTRA_LIBS} ${EXTRA_LINK_FLAGS})
+add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
+target_link_libraries (${PROJECT_LIB_NAME} ${EXTRA_LINK_FLAGS} ${EXTRA_LIBS})
 
 # add the install targets
 install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${Biips_INSTALL_LIBDIR}
