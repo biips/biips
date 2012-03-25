@@ -22,8 +22,8 @@
 
 namespace Biips
 {
-  class ScalarHistogram;
-  class DiscreteScalarHistogram;
+  class Histogram;
+  class DiscreteHistogram;
 
   class Plot
   {
@@ -45,7 +45,7 @@ namespace Biips
 
     void AddCurve(const MultiArray::Array & x, const MultiArray::Array & y, String name, const QColor & color = Qt::blue, uint width = 1, Qt::PenStyle style = Qt::SolidLine, uint symbolSize = 5, QwtSymbol::Style symbol = QwtSymbol::NoSymbol);
 
-    void AddHistogram(const ScalarHistogram & hist, String name, const QColor & color);
+    void AddHistogram(const Histogram & hist, String name, const QColor & color);
 
     void AddHistogram(const Types<Scalar>::Array & x, const Types<Scalar>::Array & y, String name, const QColor & color = Qt::blue);
 

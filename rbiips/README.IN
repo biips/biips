@@ -12,16 +12,18 @@ the variable BIIPS_ROOT.
 You can specify BIIPS_ROOT as an environment variable, e.g.  on 32-bit
 windows:
 
-set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-2.2.0
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-1.0.0
 
 or, for 64-bit windows
 
-set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-2.2.0-x64
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-1.0.0-x64
 or
-set BIIPS_ROOT=c:\Program Files (x86)\BiiPS\BiiPS-2.2.0
+set BIIPS_ROOT=c:\Program Files (x86)\BiiPS\BiiPS-1.0.0
 
 In R >= 2.12.0 you will be able to set BIIPS_ROOT as a (platform-
 specific) make variable in etc${R_ARCH}/Makevars.win.
+
+idem for BOOST_ROOOT
 
 Unix
 ----
@@ -29,8 +31,8 @@ Unix
 The configure script will try to guess the location of the BiiPS
 libraries installation. It will look in /<prefix>/<lib>, where
 
-- <prefix> is the determined from the location of the BiiPS
-  script that launches the command line interface.
+- <prefix> is the determined from the location of the biips_info
+  script.
 
   For example, if this is "/usr/local/bin/biips", then prefix will
   be "/usr/local"
@@ -61,7 +63,7 @@ These options are onto the RBiips configure script with:
 
 #Exceptionally, you may need to set the location of the BiiPS modules.
 #But this will only be necessary if you reset moddir when installing
-#BiiPS. This can be done by setting the environment variabel BIIPS_MODULES
+#BiiPS. This can be done by setting the environment variable BIIPS_MODULES
 #or by using the configure option
 #
 #--with-biips-modules=/path/to/biips/modules

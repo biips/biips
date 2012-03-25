@@ -435,7 +435,7 @@ namespace Biips
                                           Size numBins,
                                           std::map<String, MultiArray::Array> & statsValuesMap)
   {
-    elementAcc_.AddFeature(MEAN);
+    arrayAcc_.AddFeature(MEAN);
 
     Size t_max = sizeParamMap_["t.max"];
 
@@ -455,9 +455,9 @@ namespace Biips
 
     MultiArray::Array & x_est = statsValuesMap["x"];
 
-    pSampler_->Accumulate(x[t], elementAcc_);
-    x_est[t].SetPtr(DimArray::Ptr(new DimArray(elementAcc_.Mean().Dim())),
-                    ValArray::Ptr(new ValArray(elementAcc_.Mean().Values())));
+    pSampler_->Accumulate(x[t], arrayAcc_);
+    x_est[t].SetPtr(DimArray::Ptr(new DimArray(arrayAcc_.Mean().Dim())),
+                    ValArray::Ptr(new ValArray(arrayAcc_.Mean().Values())));
   }
 
   void HmmMNormalLinear::filterAccumulate(Size t)

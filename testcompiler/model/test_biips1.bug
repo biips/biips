@@ -1,0 +1,57 @@
+var x[14,t.max],y[2,t.max]
+
+data
+{
+  for (t in 1:t.max)
+  {
+    #x[1,t] ~ dunif(a,a+b)
+    x[1,t] ~ dnormvar(mean.x, var.x)
+    x[2,t] ~ dnorm(mean.x, 1/var.x)
+    x[3,t] ~ dbeta(a,b)
+    x[4,t] ~ dchisqr(k)
+    x[5,t] ~ ddexp(mean.x,var.x)
+    x[6,t] ~ dexp(a)
+    x[7,t] ~ dgamma(a,b)
+#x[7,t] <- 0
+    #x[7,t] ~ dgen.gamma(a,b,c)
+    x[8,t] ~ dlnorm(mean.x,var.x)
+  #  x[9,t] ~ dpar(a,b)
+    x[9,t] ~ dt(mean.x,var.x, a)
+    #x[10,t] ~ dunif(a,a+b)
+    x[10,t] ~ dweib(a,b)
+    x[11,t] ~ dpois(a)
+    x[12,t] ~ dbin(p,n)
+    x[13,t] ~ dbern(p)
+    x[14,t] ~ dcat(vect)
+
+    y[1:2,t] ~ dmnorm(mean.y,omega)
+  }
+}
+
+model
+{
+  for (t in 1:t.max)
+  {
+    #x[1,t] ~ dunif(a,a+b)
+    x[1,t] ~ dnormvar(mean.x, var.x)
+    x[2,t] ~ dnorm(mean.x, 1/var.x)
+    x[3,t] ~ dbeta(a,b)
+    x[4,t] ~ dchisqr(k)
+    x[5,t] ~ ddexp(mean.x,var.x)
+    x[6,t] ~ dexp(a)
+    x[7,t] ~ dgamma(a,b)
+#x[7,t] <- 0
+    #x[7,t] ~ dgen.gamma(a,b,c)
+    x[8,t] ~ dlnorm(mean.x,var.x)
+  #  x[9,t] ~ dpar(a,b)
+    x[9,t] ~ dt(mean.x,var.x, a)
+    #x[10,t] ~ dunif(a,a+b)
+    x[10,t] ~ dweib(a,b)
+    x[11,t] ~ dpois(a)
+    x[12,t] ~ dbin(p,n)
+    x[13,t] ~ dbern(p)
+    x[14,t] ~ dcat(vect)
+
+    y[1:2,t] ~ dmnorm(mean.y,omega)
+  }
+}

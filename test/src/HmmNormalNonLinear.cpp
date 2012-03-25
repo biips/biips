@@ -389,12 +389,11 @@ namespace Biips
   {
     scalarAcc_.AddFeature(MEAN);
     scalarAcc_.AddFeature(VARIANCE);
-    scalarAcc_.AddFeature(QUANTILES);
+
     Scalar probs[] =
       { 0.05, 0.95 };
-    scalarAcc_.SetQuantileProbs(probs, probs + sizeof(probs) / sizeof(probs[0]));
-    scalarAcc_.AddFeature(PDF);
-    scalarAcc_.SetPdfParam(floor(nParticles * 0.25), numBins);
+    quantAcc_ = QuantileAccumulator(probs, probs + sizeof(probs) / sizeof(probs[0]));
+    densAcc_ = DensityAccumulator(floor(nParticles * 0.25), numBins);
 
     Size t_max = sizeParamMap_["t.max"];
 
@@ -420,19 +419,21 @@ namespace Biips
     MultiArray::Array & x_quant_95 = statsValuesMap["x.q95"];
 
     pSampler_->Accumulate(x[t], scalarAcc_);
+    pSampler_->Accumulate(x[t], quantAcc_);
     x_est[t].SetPtr(P_SCALAR_DIM,
                     ValArray::Ptr(new ValArray(1, scalarAcc_.Mean())));
     x_var[t].SetPtr(P_SCALAR_DIM,
                     ValArray::Ptr(new ValArray(1, scalarAcc_.Variance())));
     x_quant_05[t].SetPtr(P_SCALAR_DIM,
-                         ValArray::Ptr(new ValArray(1, scalarAcc_.Quantile(0))));
+                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(0))));
     x_quant_95[t].SetPtr(P_SCALAR_DIM,
-                         ValArray::Ptr(new ValArray(1, scalarAcc_.Quantile(1))));
+                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(1))));
 
 #ifdef USE_Qwt5_Qt4
+    pSampler_->Accumulate(x[t], densAcc_);
     if (showMode_ >= 2)
     {
-      ScalarHistogram pdf_hist = scalarAcc_.Pdf();
+      Histogram pdf_hist = densAcc_.Density();
       Plot pdf_plot_PF(argc_, argv_);
       pdf_plot_PF.AddHistogram(pdf_hist, "", Qt::blue);
       pdf_plot_PF.SetTitle(title + " x pdf estimates, t = " + toString(t));

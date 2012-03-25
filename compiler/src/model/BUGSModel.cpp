@@ -263,7 +263,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractFilterStat(String name,
-                                    StatsTag statFeature,
+                                    StatTag statFeature,
                                     std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
@@ -289,7 +289,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothTreeStat(String name,
-                                        StatsTag statFeature,
+                                        StatTag statFeature,
                                         std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
@@ -316,7 +316,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothStat(String name,
-                                    StatsTag statFeature,
+                                    StatTag statFeature,
                                     std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
@@ -342,7 +342,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -370,7 +370,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractFilterPdf(node_id,
+      Histogram pdf_hist = BaseType::ExtractFilterPdf(node_id,
                                                             numBins,
                                                             cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
@@ -380,7 +380,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothTreePdf(String name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract smooth tree pdf: pdf map is not empty.");
@@ -408,7 +408,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id,
+      Histogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id,
                                                                 numBins,
                                                                 cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
@@ -418,7 +418,7 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -446,7 +446,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      ScalarHistogram pdf_hist = BaseType::ExtractSmoothPdf(node_id,
+      Histogram pdf_hist = BaseType::ExtractSmoothPdf(node_id,
                                                             numBins,
                                                             cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));

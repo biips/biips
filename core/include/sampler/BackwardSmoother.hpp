@@ -71,11 +71,11 @@ namespace Biips
     Scalar GetNodeESS(NodeId nodeId) const;
 
     void
-    Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
+    Accumulate(NodeId nodeId, Accumulator & featuresAcc, Size n = 0) const;
     void Accumulate(NodeId nodeId,
-                    DiscreteScalarAccumulator & featuresAcc,
+                    DiscreteAccumulator & featuresAcc,
                     Size n = 0) const;
-    void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
+    void Accumulate(NodeId nodeId, ArrayAccumulator & featuresAcc) const;
 
     void InitMonitor(SmoothMonitor & monitor) const;
     void MonitorNode(NodeId nodeId, SmoothMonitor & monitor) const;

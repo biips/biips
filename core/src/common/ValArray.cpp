@@ -206,4 +206,17 @@ namespace Biips
     return rhs.Apply(std::bind1st(std::less_equal<Scalar>(), val));
   }
 
+  inline Scalar sqrtScalar(Scalar s)
+  {
+    return std::sqrt(s);
+  }
 }
+
+namespace std
+{
+  Biips::ValArray sqrt(const Biips::ValArray & val)
+  {
+    return val.Apply(&Biips::sqrtScalar);
+  }
+}
+

@@ -10,7 +10,8 @@
 
 #include "model/Model.hpp"
 #include "model/Monitor.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/ArrayAccumulator.hpp"
 #include "sampler/GetNodeValueVisitor.hpp"
 #include "graph/StochasticNode.hpp"
 
@@ -157,6 +158,9 @@ namespace Biips
     ReleaseSmoothMonitors();
 
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
+
+    if (pSampler_->NIterations() == 0)
+      return;
 
     // lock SmoothTree monitored nodes
     for (std::set<NodeId>::const_iterator it_nodes =
@@ -323,74 +327,46 @@ namespace Biips
   }
 
   MultiArray Model::extractMonitorStat(NodeId nodeId,
-                                       StatsTag statFeature,
+                                       StatTag statFeature,
                                        const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
   {
     if (monitorsMap.find(nodeId) == monitorsMap.end())
       throw LogicError("Node is not yet monitored.");
 
-    ElementAccumulator elem_acc;
-    elem_acc.AddFeature(statFeature);
+    ArrayAccumulator array_acc;
+    array_acc.AddFeature(statFeature);
 
-    switch (statFeature)
-    {
-      case MIN:
-      case MAX:
-      case PDF:
-      case QUANTILES:
-      case CDF:
-      case MODE:
-        throw LogicError("Can not extract statistic in Model::extractMonitorStat.");
-        break;
-      default:
-        monitorsMap.at(nodeId)->Accumulate(nodeId,
-                                           elem_acc,
-                                           pGraph_->GetNode(nodeId).DimPtr());
-        break;
-    }
+    monitorsMap.at(nodeId)->Accumulate(nodeId,
+                                       array_acc,
+                                       pGraph_->GetNode(nodeId).DimPtr());
 
     MultiArray stat_marray;
 
     switch (statFeature)
     {
-      case COUNT:
-      {
-        ValArray::Ptr p_val(new ValArray(1, elem_acc.Count()));
-        stat_marray.SetPtr(P_SCALAR_DIM, p_val);
-        break;
-      }
-      case SUM_OF_WEIGHTS:
-      {
-        ValArray::Ptr p_val(new ValArray(1, elem_acc.SumOfWeights()));
-        stat_marray.SetPtr(P_SCALAR_DIM, p_val);
-        break;
-      }
       case SUM:
-        stat_marray = elem_acc.Sum();
+        stat_marray = array_acc.Sum();
         break;
       case MEAN:
-        stat_marray = elem_acc.Mean();
+        stat_marray = array_acc.Mean();
         break;
       case VARIANCE:
-        stat_marray = elem_acc.Variance();
+        stat_marray = array_acc.Variance();
         break;
       case MOMENT2:
-        stat_marray = elem_acc.Moment<2> ();
+        stat_marray = array_acc.Moment<2> ();
         break;
       case MOMENT3:
-        stat_marray = elem_acc.Moment<3> ();
+        stat_marray = array_acc.Moment<3> ();
         break;
       case MOMENT4:
-        stat_marray = elem_acc.Moment<4> ();
-        break;
-      case MOMENT5:
-        stat_marray = elem_acc.Moment<5> ();
+        stat_marray = array_acc.Moment<4> ();
         break;
       case SKEWNESS:
-        stat_marray = elem_acc.Skewness();
+        stat_marray = array_acc.Skewness();
         break;
       case KURTOSIS:
-        stat_marray = elem_acc.Kurtosis();
+        stat_marray = array_acc.Kurtosis();
         break;
       default:
         break;
@@ -399,7 +375,7 @@ namespace Biips
     return stat_marray;
   }
 
-  MultiArray Model::ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const
+  MultiArray Model::ExtractFilterStat(NodeId nodeId, StatTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter statistic: no ForwardSampler.");
@@ -407,7 +383,7 @@ namespace Biips
     return extractMonitorStat(nodeId, statFeature, filterMonitorsMap_);
   }
 
-  MultiArray Model::ExtractSmoothStat(NodeId nodeId, StatsTag statFeature) const
+  MultiArray Model::ExtractSmoothStat(NodeId nodeId, StatTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract backward smoother statistic: no ForwardSampler.");
@@ -416,10 +392,10 @@ namespace Biips
   }
 
   // TODO manage discrete variable cases
-  ScalarHistogram Model::extractMonitorPdf(NodeId nodeId,
-                                           Size numBins,
-                                           Scalar cacheFraction,
-                                           const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
+  Histogram Model::extractMonitorPdf(NodeId nodeId,
+                                     Size numBins,
+                                     Scalar cacheFraction,
+                                     const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter pdf: no ForwardSampler.");
@@ -430,20 +406,18 @@ namespace Biips
     if (monitorsMap.find(nodeId) == monitorsMap.end())
       throw LogicError("Node is not yet monitored.");
 
-    ScalarAccumulator scalar_acc;
-    scalar_acc.AddFeature(PDF);
-    scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles() * cacheFraction),
-                           numBins);
+    DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
+        * cacheFraction), numBins);
 
-    monitorsMap.at(nodeId)->Accumulate(nodeId, scalar_acc);
+    monitorsMap.at(nodeId)->Accumulate(nodeId, dens_acc);
 
-    return scalar_acc.Pdf();
+    return dens_acc.Density();
   }
 
   // TODO manage discrete variable cases
-  ScalarHistogram Model::ExtractFilterPdf(NodeId nodeId,
-                                          Size numBins,
-                                          Scalar cacheFraction) const
+  Histogram Model::ExtractFilterPdf(NodeId nodeId,
+                                    Size numBins,
+                                    Scalar cacheFraction) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter pdf: no ForwardSampler.");
@@ -452,9 +426,9 @@ namespace Biips
   }
 
   // TODO manage discrete variable cases
-  ScalarHistogram Model::ExtractSmoothPdf(NodeId nodeId,
-                                          Size numBins,
-                                          Scalar cacheFraction) const
+  Histogram Model::ExtractSmoothPdf(NodeId nodeId,
+                                    Size numBins,
+                                    Scalar cacheFraction) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract backward smooth pdf: no ForwardSampler.");
@@ -463,45 +437,20 @@ namespace Biips
   }
 
   // FIXME Still valid after optimization ?
-  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const
+  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract smooth tree statistic: no ForwardSampler.");
 
-    ElementAccumulator elem_acc;
+    ArrayAccumulator elem_acc;
     elem_acc.AddFeature(statFeature);
 
-    switch (statFeature)
-    {
-      case MIN:
-      case MAX:
-      case PDF:
-      case QUANTILES:
-      case CDF:
-      case MODE:
-        throw LogicError("Can not extract statistic in Model::ExtractSmoothTreeStat.");
-        break;
-      default:
-        pSampler_->Accumulate(nodeId, elem_acc);
-        break;
-    }
+    pSampler_->Accumulate(nodeId, elem_acc);
 
     MultiArray stat_marray;
 
     switch (statFeature)
     {
-      case COUNT:
-      {
-        ValArray::Ptr p_val(new ValArray(1, elem_acc.Count()));
-        stat_marray.SetPtr(P_SCALAR_DIM, p_val);
-        break;
-      }
-      case SUM_OF_WEIGHTS:
-      {
-        ValArray::Ptr p_val(new ValArray(1, elem_acc.SumOfWeights()));
-        stat_marray.SetPtr(P_SCALAR_DIM, p_val);
-        break;
-      }
       case SUM:
         stat_marray = elem_acc.Sum();
         break;
@@ -519,9 +468,6 @@ namespace Biips
         break;
       case MOMENT4:
         stat_marray = elem_acc.Moment<4> ();
-        break;
-      case MOMENT5:
-        stat_marray = elem_acc.Moment<5> ();
         break;
       case SKEWNESS:
         stat_marray = elem_acc.Skewness();
@@ -538,9 +484,9 @@ namespace Biips
 
   // TODO manage dicrete variable cases
   // FIXME Still valid after optimization ?
-  ScalarHistogram Model::ExtractSmoothTreePdf(NodeId nodeId,
-                                              Size numBins,
-                                              Scalar cacheFraction) const
+  Histogram Model::ExtractSmoothTreePdf(NodeId nodeId,
+                                        Size numBins,
+                                        Scalar cacheFraction) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract smooth tree pdf: no ForwardSampler.");
@@ -548,14 +494,12 @@ namespace Biips
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
       throw LogicError("Can not extract smooth tree pdf: node is not scalar.");
 
-    ScalarAccumulator scalar_acc;
-    scalar_acc.AddFeature(PDF);
-    scalar_acc.SetPdfParam(roundSize(pSampler_->NParticles() * cacheFraction),
-                           numBins);
+    DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
+        * cacheFraction), numBins);
 
-    pSampler_->Accumulate(nodeId, scalar_acc);
+    pSampler_->Accumulate(nodeId, dens_acc);
 
-    return scalar_acc.Pdf();
+    return dens_acc.Density();
   }
 
   class LogPriorDensityVisitor: public ConstNodeVisitor
@@ -583,7 +527,7 @@ namespace Biips
 
         if (node.IsUpperBounded())
           bounds.second.SetPtr(graph_.GetNode(node.Upper()).DimPtr().get(),
-                             graph_.GetValues()[node.Upper()].get());
+                               graph_.GetValues()[node.Upper()].get());
       }
 
       prior_ = node.LogPriorDensity(x, parents, bounds);

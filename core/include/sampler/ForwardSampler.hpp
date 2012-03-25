@@ -21,9 +21,11 @@ namespace Biips
 {
   class Graph;
 
-  class ScalarAccumulator;
-  class DiscreteScalarAccumulator;
-  class ElementAccumulator;
+  class Accumulator;
+  class DensityAccumulator;
+  class QuantileAccumulator;
+  class DiscreteAccumulator;
+  class ArrayAccumulator;
 
   class FilterMonitor;
 
@@ -100,7 +102,7 @@ namespace Biips
     Size NParticles() const;
     Bool AtEnd() const
     {
-      return iterNodeId_ + 1 == nodeIdSequence_.end();
+      return NIterations() == 0 || iter_ + 1 == NIterations();
     }
     Size Iteration() const
     {
@@ -108,7 +110,7 @@ namespace Biips
     }
     Size NIterations() const
     {
-      return nodeSamplerSequence_.size();
+      return nodeIdSequence_.size();
     }
     Scalar ESS() const
     {
@@ -165,11 +167,14 @@ namespace Biips
       return resampled_;
     }
 
-    void Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
-    void Accumulate(NodeId nodeId,
-                    DiscreteScalarAccumulator & featuresAcc,
-                    Size n = 0) const;
-    void Accumulate(NodeId nodeId, ElementAccumulator & featuresAcc) const;
+    void Accumulate(NodeId nodeId, Accumulator & featuresAcc, Size n = 0) const;
+    void
+        Accumulate(NodeId nodeId, DensityAccumulator & featuresAcc, Size n = 0) const;
+    void
+        Accumulate(NodeId nodeId, QuantileAccumulator & featuresAcc, Size n = 0) const;
+    void Accumulate(NodeId nodeId, DiscreteAccumulator & featuresAcc, Size n =
+        0) const;
+    void Accumulate(NodeId nodeId, ArrayAccumulator & featuresAcc) const;
 
     void InitMonitor(FilterMonitor & monitor) const;
     void MonitorNode(NodeId nodeId, FilterMonitor & monitor) const;

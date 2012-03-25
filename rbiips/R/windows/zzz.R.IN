@@ -78,10 +78,10 @@
     
 ### Set the module directory, if the option biips.moddir is not already set
     
-    if (is.null(getOption("biips.moddir"))) {
-        options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
-                "modules"))
-    }
+#    if (is.null(getOption("biips.moddir"))) {
+#        options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
+#                "modules"))
+#    }
     library.dynam("RBiips", pkg, lib)
     packageStartupMessage("linking to BiiPS ",
                           .Call("get_version", PACKAGE="RBiips"))

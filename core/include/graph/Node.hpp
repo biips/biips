@@ -24,7 +24,7 @@ namespace Biips
   protected:
     const NodeType nodeType_;
     DimArray::Ptr pDim_;
-    Types<NodeId>::Array directParents_;
+    Types<NodeId>::Array parents_;
 
   public:
     typedef Node SelfType;
@@ -51,7 +51,7 @@ namespace Biips
     }
     const Types<NodeId>::Array & Parents() const
     {
-      return directParents_;
+      return parents_;
     }
     NodeType GetType() const
     {

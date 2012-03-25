@@ -560,8 +560,8 @@ void t_DirichletMultinomial(int argc, char* argv[])
         PressEnterToContinue();
 
 #ifndef BIIPS_VALGRIND_ON
-      DiscreteScalarAccumulator stats_acc;
-      stats_acc.AddFeature(PDF);
+      DiscreteAccumulator stats_acc;
+      stats_acc.AddFeature(DENSITY);
       stats_acc.AddFeature(MAX_PDF);
 
       Types<Scalar>::Array c_est_PF(t_max);
@@ -602,7 +602,7 @@ void t_DirichletMultinomial(int argc, char* argv[])
       if ( promptFlag )
         PressEnterToContinue();
 
-      ElementAccumulator stats_pi_acc;
+      ArrayAccumulator stats_pi_acc;
       stats_pi_acc.AddFeature(MEAN);
       sampler.Accumulate(pi_k[t_max], stats_pi_acc);
       Types<Scalar>::Array pi_est_PF(K_val);

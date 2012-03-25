@@ -171,7 +171,9 @@ one.update.pmmh.biips <- function(obj, variable.names, pn,
     var <- variable.names[[v]]
     ## Random walk proposal
     prop <- list()
-    prop[[var]] <- rnorm(1, sample[[var]], rw.sd[[var]])
+    for (d in 1:length(sample[[var]])) {
+      prop[[var]] <- rnorm(1, sample[[var]][[d]], rw.sd[[var]][[d]])
+    }
     dim(prop[[var]]) <- dim(sample[[var]])
     
     ## change model data
@@ -270,6 +272,12 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   sample <- out$sample
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
+  
+  # check rw.sd dimension
+  for (var in variable.names) {
+    if (length(rw.sd[[var]]) != length(sample[[var]]))
+      stop(paste("incorrect rw.sd dimension for variable", var))
+  }
   
   ## reset data to sample on exit
   on.exit(
