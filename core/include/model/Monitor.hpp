@@ -19,9 +19,11 @@
 namespace Biips
 {
 
-  class ScalarAccumulator;
-  class DiscreteScalarAccumulator;
-  class ElementAccumulator;
+  class Accumulator;
+  class DensityAccumulator;
+  class QuantileAccumulator;
+  class DiscreteAccumulator;
+  class ArrayAccumulator;
   class Particle;
 
   class Monitor
@@ -133,12 +135,15 @@ namespace Biips
     }
 
     void
-    Accumulate(NodeId nodeId, ScalarAccumulator & featuresAcc, Size n = 0) const;
+    Accumulate(NodeId nodeId, Accumulator & featuresAcc, Size n = 0) const;
+    void
+    Accumulate(NodeId nodeId, DensityAccumulator & densAcc, Size n = 0) const;
+    void
+        Accumulate(NodeId nodeId, QuantileAccumulator & quantAcc, Size n = 0) const;
+    void Accumulate(NodeId nodeId, DiscreteAccumulator & featuresAcc, Size n =
+        0) const;
     void Accumulate(NodeId nodeId,
-                    DiscreteScalarAccumulator & featuresAcc,
-                    Size n = 0) const;
-    void Accumulate(NodeId nodeId,
-                    ElementAccumulator & featuresAcc,
+                    ArrayAccumulator & featuresAcc,
                     const DimArray::Ptr & pDim) const;
 
     void ClearNode(NodeId nodeId)

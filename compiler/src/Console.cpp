@@ -10,8 +10,11 @@
  * COPY: Adapted from JAGS Console class
  */
 
-extern "C" {
-  void BiipsCompiler_is_present(void) {}
+extern "C"
+{
+  void BiipsCompiler_is_present(void)
+  {
+  }
 }
 
 //#define BIIPS_COMPILER_DEBUG_ON
@@ -63,7 +66,6 @@ using std::endl;
     return false;                                                     \
   }*/
 
-
 #define BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL                       \
     catch (NodeError & except)                                        \
     {                                                                 \
@@ -93,8 +95,6 @@ using std::endl;
     ClearModel();                                                     \
     return false;                                                     \
   }*/
-
-
 
 namespace Biips
 {
@@ -543,8 +543,17 @@ namespace Biips
       Size n_iter = pModel_->Sampler().NIterations();
 
       if (verbose)
-        out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter
-            << " iterations" << endl;
+      {
+        if (n_iter > 0)
+          out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter
+              << " iterations" << endl;
+        else
+          out_ << PROMPT_STRING << "Skipping SMC sampler: no iterations"
+              << endl;
+      }
+
+      if (n_iter == 0)
+        return true;
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
@@ -675,6 +684,14 @@ namespace Biips
 
     try
     {
+      if (pModel_->Sampler().NIterations() <= 1)
+      {
+        if (verbose)
+          out_ << PROMPT_STRING << "Skipping backward smoother: no iterations"
+              << endl;
+        return true;
+      }
+
       pModel_->InitBackwardSmoother();
 
       Size n_iter = pModel_->Sampler().NIterations() - 1;
@@ -916,7 +933,7 @@ namespace Biips
   }
 
   Bool Console::ExtractFilterStat(const String & name,
-                                  StatsTag statFeature,
+                                  StatTag statFeature,
                                   std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -952,7 +969,7 @@ namespace Biips
   }
 
   Bool Console::ExtractSmoothTreeStat(const String & name,
-                                      StatsTag statFeature,
+                                      StatTag statFeature,
                                       std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -989,7 +1006,7 @@ namespace Biips
   }
 
   Bool Console::ExtractSmoothStat(const String & name,
-                                  StatsTag statFeature,
+                                  StatTag statFeature,
                                   std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -1028,7 +1045,7 @@ namespace Biips
   }
 
   Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1061,7 +1078,7 @@ namespace Biips
   }
 
   Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1099,7 +1116,7 @@ namespace Biips
   }
 
   Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange,
-      ScalarHistogram> & pdfMap, Size numBins, Scalar cacheFraction)
+      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1301,7 +1318,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::SampleSmoothTreeParticle(Size rngSeed)
   {
     if (!pModel_)
@@ -1311,7 +1327,8 @@ namespace Biips
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler not built!" << endl;
+      err_ << "Can't sample smooth tree particle. SMC sampler not built!"
+          << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -1338,7 +1355,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
@@ -1348,7 +1364,8 @@ namespace Biips
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler not built!" << endl;
+      err_ << "Can't sample smooth tree particle. SMC sampler not built!"
+          << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -1367,7 +1384,6 @@ namespace Biips
     return true;
   }
 
-
   Bool Console::SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
@@ -1377,12 +1393,14 @@ namespace Biips
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't set sampled smooth tree particle. SMC sampler not built!" << endl;
+      err_ << "Can't set sampled smooth tree particle. SMC sampler not built!"
+          << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't set sampled smooth tree particle. SMC sampler still running!"
+      err_
+          << "Can't set sampled smooth tree particle. SMC sampler still running!"
           << endl;
       return false;
     }
@@ -1395,7 +1413,7 @@ namespace Biips
         if (!sampledValueMap_.count(it->first))
           throw RuntimeError("Can't set sampled value: variable not found.");
 
-        if(it->second.Dim() != sampledValueMap_.at(it->first).Dim())
+        if (it->second.Dim() != sampledValueMap_.at(it->first).Dim())
           throw RuntimeError("Can't set sampled value: dimension mismatch.");
         sampledValueMap_[it->first] = it->second;
       }

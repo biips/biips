@@ -46,7 +46,6 @@ namespace Biips
                 const NumArray::Pair & boundValues,
                 Rng & rng) const
     {
-      values = ValArray(pDim_->Length());
       pPrior_->Sample(values, paramValues, boundValues, rng);
     }
     Scalar LogPriorDensity(const NumArray & x,
@@ -59,8 +58,6 @@ namespace Biips
                           ValArray & upper,
                           const NumArray::Array & paramValues) const
     {
-      lower = ValArray(pDim_->Length());
-      upper = ValArray(pDim_->Length());
       pPrior_->UnboundedSupport(lower, upper, paramValues);
     }
 

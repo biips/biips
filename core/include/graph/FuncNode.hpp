@@ -37,7 +37,6 @@ namespace Biips
     }
     virtual void Eval(ValArray & values, const NumArray::Array & paramValues) const
     {
-      values = ValArray(pDim_->Length());
       pFunc_->Eval(values, paramValues);
     }
     virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const

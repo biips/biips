@@ -213,11 +213,11 @@ void t_BetaBinomial(int argc, char* argv[])
       if ( promptFlag )
         PressEnterToContinue();
 
-      ScalarAccumulator stats_acc;
+      Accumulator stats_acc;
       stats_acc.AddFeature(MEAN);
       stats_acc.AddFeature(VARIANCE);
       stats_acc.AddFeature(QUANTILES);
-      stats_acc.AddFeature(PDF);
+      stats_acc.AddFeature(DENSITY);
       stats_acc.AddFeature(CDF);
       stats_acc.SetPdfParam(nb_particles/4, 20);
       stats_acc.SetCdfParam(50);
@@ -278,7 +278,7 @@ void t_BetaBinomial(int argc, char* argv[])
       // Qwt Plot : final time pdf estimate
       //-----------------------------------
       {
-        ScalarHistogram pdf_hist = stats_acc.Pdf();
+        Histogram pdf_hist = stats_acc.Density();
         Plot pdf_plot_PF(argc, argv);
         pdf_plot_PF.AddHistogram(pdf_hist, "", Qt::blue);
         pdf_plot_PF.SetTitle("Pdf estimates");

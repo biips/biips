@@ -47,11 +47,11 @@ extern "C" {
 #include "distributions/DGamma.hpp"
 #include "distributions/DT.hpp"
 #include "distributions/DWeib.hpp"
-#include "distributions/DPar.hpp"
+//#include "distributions/DPar.hpp"
 #include "distributions/DPois.hpp"
 #include "distributions/DF.hpp"
-#include "distributions/DDexp.hpp"
-#include "distributions/DGenGamma.hpp"
+//#include "distributions/DDexp.hpp"
+//#include "distributions/DGenGamma.hpp"
 
 #include "samplers/DiscreteOptimal.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
@@ -139,11 +139,11 @@ namespace Biips
     distTab.Insert(DGamma::Instance());
     distTab.Insert(DT::Instance());
     distTab.Insert(DWeib::Instance());
-    distTab.Insert(DPar::Instance());
+//    distTab.Insert(DPar::Instance());
     distTab.Insert(DPois::Instance());
     distTab.Insert(DF::Instance());
-    distTab.Insert(DDexp::Instance());
-    distTab.Insert(DGenGamma::Instance());
+//    distTab.Insert(DDexp::Instance());
+//    distTab.Insert(DGenGamma::Instance());
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
                                                                      true));

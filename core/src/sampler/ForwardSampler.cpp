@@ -16,7 +16,8 @@
 #include "graph/ConstantNode.hpp"
 #include "graph/StochasticNode.hpp"
 #include "graph/LogicalNode.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/ArrayAccumulator.hpp"
 #include "model/Monitor.hpp"
 
 namespace Biips
@@ -338,7 +339,7 @@ namespace Biips
     if (!pResampler_)
       throw LogicError("Resampler::Ptr is Null.");
 
-    resampleThreshold_ = threshold < 1.0 ? threshold * nParticles_ : threshold;
+    resampleThreshold_ = threshold <= 1.0 ? threshold * nParticles_ : threshold;
   }
 
   void ForwardSampler::Initialize(Size nbParticles,
@@ -348,6 +349,9 @@ namespace Biips
   {
     if (!built_)
       throw LogicError("Can not initialize ForwardSampler: not built.");
+
+    if (NIterations() == 0)
+      throw LogicError("Can not initialize ForwardSampler: no iterations.");
 
     nParticles_ = nbParticles;
     pRng_ = pRng;
@@ -440,7 +444,7 @@ namespace Biips
   }
 
   void ForwardSampler::Accumulate(NodeId nodeId,
-                                  ScalarAccumulator & featuresAcc,
+                                  Accumulator & featuresAcc,
                                   Size n) const
   {
     Size iter = GetNodeSamplingIteration(nodeId);
@@ -454,7 +458,35 @@ namespace Biips
   }
 
   void ForwardSampler::Accumulate(NodeId nodeId,
-                                  DiscreteScalarAccumulator & featuresAcc,
+                                  DensityAccumulator & densAcc,
+                                  Size n) const
+  {
+    Size iter = GetNodeSamplingIteration(nodeId);
+    if (iter > Iteration())
+      throw LogicError("Can't Accumulate: node has not been sampled yet!");
+
+    densAcc.Init();
+    for (Size i = 0; i < nParticles_; i++)
+      densAcc.Push((*(particles_[i].GetValue()[nodeId]))[n],
+                   particles_[i].Weight());
+  }
+
+  void ForwardSampler::Accumulate(NodeId nodeId,
+                                  QuantileAccumulator & quantAcc,
+                                  Size n) const
+  {
+    Size iter = GetNodeSamplingIteration(nodeId);
+    if (iter > Iteration())
+      throw LogicError("Can't Accumulate: node has not been sampled yet!");
+
+    quantAcc.Init();
+    for (Size i = 0; i < nParticles_; i++)
+      quantAcc.Push((*(particles_[i].GetValue()[nodeId]))[n],
+                    particles_[i].Weight());
+  }
+
+  void ForwardSampler::Accumulate(NodeId nodeId,
+                                  DiscreteAccumulator & featuresAcc,
                                   Size n) const
   {
     Size iter = GetNodeSamplingIteration(nodeId);
@@ -467,8 +499,7 @@ namespace Biips
                        particles_[i].Weight());
   }
 
-  void ForwardSampler::Accumulate(NodeId nodeId,
-                                  ElementAccumulator & featuresAcc) const
+  void ForwardSampler::Accumulate(NodeId nodeId, ArrayAccumulator & featuresAcc) const
   {
     Size iter = GetNodeSamplingIteration(nodeId);
     if (iter > Iteration())

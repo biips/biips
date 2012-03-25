@@ -14,7 +14,7 @@
 #include "model/Model.hpp"
 #include "model/NodeArray.hpp"
 #include "model/SymbolTable.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
 #include "model/NodeArrayMonitor.hpp"
 
 #include <map>
@@ -68,23 +68,23 @@ namespace Biips
     void PrintGraphviz(std::ostream & out) const;
 
     // TODO manage multi statFeature
-    Bool ExtractFilterStat(String name, StatsTag statFeature, std::map<
+    Bool ExtractFilterStat(String name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothTreeStat(String name, StatsTag statFeature, std::map<
+    Bool ExtractSmoothTreeStat(String name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothStat(String name, StatsTag statFeature, std::map<
+    Bool ExtractSmoothStat(String name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap) const;
 
     Bool ExtractFilterPdf(String name,
-                          std::map<IndexRange, ScalarHistogram> & pdfMap,
+                          std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25) const;
     Bool ExtractSmoothTreePdf(String name,
-                              std::map<IndexRange, ScalarHistogram> & pdfMap,
+                              std::map<IndexRange, Histogram> & pdfMap,
                               Size numBins = 40,
                               Scalar cacheFraction = 0.25) const;
     Bool ExtractSmoothPdf(String name,
-                          std::map<IndexRange, ScalarHistogram> & pdfMap,
+                          std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25) const;
 

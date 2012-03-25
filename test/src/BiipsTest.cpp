@@ -68,9 +68,11 @@ BOOST_AUTO_TEST_CASE( my_test )
     String config_file_name;
     vector<String> mutations;
     Size verbosity;
-    Size show_mode;
-    String plot_file_name;
     Size num_bins;
+    Size show_mode = 0;
+#ifdef USE_Qwt5_Qt4
+    String plot_file_name;
+#endif //USE_Qwt5_Qt4
 
     // Declare a group of options that will be
     // allowed only on command line
@@ -85,15 +87,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 2: \thigh.")
         ("interactive", "asks questions to the user.\n"
             "applies when verbose>0.")
-#ifdef USE_Qwt5_Qt4
-        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),"shows plots, interrupting execution.\n"
-            "applies when repeat-smc=1.\n"
-            "values:\n"
-            " 0: \tno plots.\n"
-            " 1: \tshows final results plots.\n"
-            " 2: \t1 + shows pdf histogram plots.")
-        ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histogram plots.")
-#endif //USE_Qwt5_Qt4
+        ("num-bins", po::value<Size>(&num_bins)->default_value(40), "number of bins in the histograms.")
         ("step", po::value<Size>(&exec_step)->default_value(3), "execution step to be reached (if possible).\n"
             "values:\n"
             " 0: \tsamples or reads values of the graph.\n"
@@ -105,6 +99,14 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 0: \tchecks normalizing-constant mean.\n"
             " 1: \t0 + checks filtering errors goodness of fit.\n"
             " 2: \t1 + checks smoothing errors goodness of fit.")
+#ifdef USE_Qwt5_Qt4
+        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),"shows plots, interrupting execution.\n"
+            "applies when repeat-smc=1.\n"
+            "values:\n"
+            " 0: \tno plots.\n"
+            " 1: \tshows final results plots.\n"
+            " 2: \t1 + shows pdf histogram plots.")
+#endif //USE_Qwt5_Qt4
         ;
 
     // Declare a group of options that will be
@@ -137,8 +139,10 @@ BOOST_AUTO_TEST_CASE( my_test )
             "applies when repeat-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
         ("alpha", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
+#ifdef USE_Qwt5_Qt4
         ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
             "applies when repeat-smc=1.")
+#endif //USE_Qwt5_Qt4
         ;
 
     // Hidden options, will be allowed both on command line and
@@ -516,6 +520,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
 
+#ifdef USE_Qwt5_Qt4
           // Plot results
           if (n_smc==1 && (vm.count("plot-file-name") || show_mode >= 1) )
           {
@@ -527,6 +532,7 @@ BOOST_AUTO_TEST_CASE( my_test )
                 pressEnterToContinue();
             }
           }
+#endif //USE_Qwt5_Qt4
         }
 
         if (exec_step < 3)

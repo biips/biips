@@ -11,7 +11,8 @@
 #include "sampler/BackwardSmoother.hpp"
 #include "graph/StochasticNode.hpp"
 #include "common/Utility.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/ArrayAccumulator.hpp"
 #include "sampler/GetNodeValueVisitor.hpp"
 #include "boost/numeric/ublas/matrix_proxy.hpp"
 
@@ -278,7 +279,7 @@ namespace Biips
   }
 
   void BackwardSmoother::Accumulate(NodeId nodeId,
-                                    ScalarAccumulator & featuresAcc,
+                                    Accumulator & featuresAcc,
                                     Size n) const
   {
     const Monitor & last_monitor = *filterMonitors_.back();
@@ -293,7 +294,7 @@ namespace Biips
   }
 
   void BackwardSmoother::Accumulate(NodeId nodeId,
-                                    DiscreteScalarAccumulator & featuresAcc,
+                                    DiscreteAccumulator & featuresAcc,
                                     Size n) const
   {
     const Monitor & last_monitor = *filterMonitors_.back();
@@ -308,7 +309,7 @@ namespace Biips
   }
 
   void BackwardSmoother::Accumulate(NodeId nodeId,
-                                    ElementAccumulator & featuresAcc) const
+                                    ArrayAccumulator & featuresAcc) const
   {
     const Monitor & last_monitor = *filterMonitors_.back();
     if (!last_monitor.Contains(nodeId))

@@ -15,7 +15,7 @@
 #include "sampler/ForwardSampler.hpp"
 #include "sampler/BackwardSmoother.hpp"
 #include "model/Monitor.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
 
 namespace Biips
 {
@@ -34,8 +34,8 @@ namespace Biips
     std::set<NodeId> smoothTreeMonitoredNodeIds_;
     Bool defaultMonitorsSet_;
 
-    MultiArray extractMonitorStat(NodeId nodeId, StatsTag statFeature, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
-    ScalarHistogram extractMonitorPdf(NodeId nodeId, Size numBins, Scalar cacheFraction, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+    MultiArray extractMonitorStat(NodeId nodeId, StatTag statFeature, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+    Histogram extractMonitorPdf(NodeId nodeId, Size numBins, Scalar cacheFraction, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
 
   public:
 
@@ -66,14 +66,14 @@ namespace Biips
     void IterateBackwardSmoother();
 
     // TODO manage multi statFeature
-    MultiArray ExtractFilterStat(NodeId nodeId, StatsTag statFeature) const;
-    MultiArray ExtractSmoothStat(NodeId nodeId, StatsTag statFeature) const;
+    MultiArray ExtractFilterStat(NodeId nodeId, StatTag statFeature) const;
+    MultiArray ExtractSmoothStat(NodeId nodeId, StatTag statFeature) const;
 
-    MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatsTag statFeature) const;
-    ScalarHistogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatTag statFeature) const;
+    Histogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
     
-    ScalarHistogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    ScalarHistogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    Histogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
     // only release monitor objects
     // but keep nodeIds

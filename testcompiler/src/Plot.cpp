@@ -12,7 +12,7 @@
 #ifdef USE_Qwt5_Qt4
 
 #include "Plot.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
 
 namespace Biips
 {
@@ -104,7 +104,7 @@ namespace Biips
   }
 
 
-  void Plot::AddHistogram(const ScalarHistogram & hist, const String & name, const QColor & color, Bool antialiased)
+  void Plot::AddHistogram(const Histogram & hist, const String & name, const QColor & color, Bool antialiased)
   {
     Types<Scalar>::Array x = hist.GetPositions();
     Types<Scalar>::Array y = hist.GetFrequencies();

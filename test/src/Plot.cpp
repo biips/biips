@@ -12,7 +12,7 @@
 #ifdef USE_Qwt5_Qt4
 
 #include "Plot.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
 
 namespace Biips
 {
@@ -87,7 +87,7 @@ namespace Biips
   }
 
 
-  void Plot::AddHistogram(const ScalarHistogram & hist, String name, const QColor & color)
+  void Plot::AddHistogram(const Histogram & hist, String name, const QColor & color)
   {
     Size hist_size = hist.size();
     QwtArray<Scalar> x_data(hist.size()+1);
@@ -95,7 +95,7 @@ namespace Biips
 
     x_data[0] = hist.begin()->first;
     y_data[0] = 0.0;
-    ScalarHistogram::const_iterator it = hist.begin();
+    Histogram::const_iterator it = hist.begin();
     for (Size i=1; i<hist_size; ++i)
     {
       y_data[i] = it->second;

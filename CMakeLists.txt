@@ -172,7 +172,7 @@ endif (USE_Qwt5_Qt4)
 set (CPACK_DEBIAN_PACKAGE_SECTION non-free/math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
-set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips-dev, libbiips-test, biips-test")
+set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips-test")
 
 # RPM package specific options
 set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
