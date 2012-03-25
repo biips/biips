@@ -13,7 +13,8 @@
 
 #include "graph/Graph.hpp"
 #include "sampler/ForwardSampler.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/ArrayAccumulator.hpp"
 #include "function/Function.hpp"
 #include "distribution/Distribution.hpp"
 
@@ -33,10 +34,11 @@ namespace Biips
     Graph::Ptr pModelGraph_;
     ForwardSampler::Ptr pSampler_;
     Types<NodeSamplerFactory::Ptr>::Array nodeSamplerFactoryInvOrder_;
-    ScalarAccumulator scalarAcc_;
-    DiscreteScalarAccumulator discreteScalarAcc_;
-    ElementAccumulator elementAcc_;
-
+    Accumulator scalarAcc_;
+    DensityAccumulator densAcc_;
+    QuantileAccumulator quantAcc_;
+    DiscreteAccumulator discreteScalarAcc_;
+    ArrayAccumulator arrayAcc_;
     std::map<String, Size> sizeParamMap_;
     std::map<String, Scalar> scalarParamMap_;
     std::map<String, MultiArray> dataTypeParamMap_;

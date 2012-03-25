@@ -40,7 +40,7 @@ namespace Biips
 
   std::map<String, std::map<IndexRange, MultiArray> >
   extractStat(Console & console,
-              StatsTag tag,
+              StatTag tag,
               const Types<String>::Array & monitoredVar,
               const String & statName,
               Bool verbose,
@@ -111,8 +111,10 @@ BOOST_AUTO_TEST_CASE( my_test )
     String config_file_name;
     vector<String> mutations;
     Size verbosity;
-    Size show_mode;
     Size num_bins;
+#ifdef USE_Qwt5_Qt4
+    Size show_mode;
+#endif //USE_Qwt5_Qt4
     //    String plot_file_name;
 
     // Declare a group of options that will be
@@ -130,17 +132,8 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("interactive",
             "asks questions to the user.\n"
             "applies when verbose>0.")
-#ifdef USE_Qwt5_Qt4
-        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),
-            "shows plots, interrupting execution.\n"
-            "applies when repeat-smc=1.\n"
-            "values:\n"
-            " 0: \tno plots.\n"
-           " 1: \tshows final results plots.\n"
-           " 2: \t1 + shows pdf histogram plots.")
         ("num-bins", po::value<Size>(&num_bins)->default_value(40),
-            "number of bins in the histogram plots.")
-#endif //USE_Qwt5_Qt4
+            "number of bins in the histograms.")
         ("step", po::value<Size>(&exec_step)->default_value(3),
             "execution step to be reached (if possible).\n"
             "values:\n"
@@ -159,6 +152,15 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 0: \tchecks normalizing-constant mean.\n"
             " 1: \t0 + checks filtering errors goodness of fit.\n"
             " 2: \t1 + checks smoothing errors goodness of fit.")
+#ifdef USE_Qwt5_Qt4
+        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),
+            "shows plots, interrupting execution.\n"
+            "applies when repeat-smc=1.\n"
+            "values:\n"
+            " 0: \tno plots.\n"
+           " 1: \tshows final results plots.\n"
+           " 2: \t1 + shows pdf histogram plots.")
+#endif //USE_Qwt5_Qt4
         ;
 
     // Declare a group of options that will be
@@ -751,7 +753,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           cout << INDENT_STRING << "expected log-norm-const mean = "
               << log_norm_const_bench << endl;
 
-          using namespace acc;
+          using namespace boost::accumulators;
           typedef accumulator_set<long double, features<tag::mean,
               tag::variance> > acc_ref_type;
 
@@ -841,7 +843,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             cout << INDENT_STRING << "alpha = " << reject_level << endl;
           }
 
-          using namespace acc;
+          using namespace boost::accumulators;
           typedef accumulator_set<Scalar, features<tag::p_square_quantile> >
               acc_ref_type;
 
@@ -962,7 +964,7 @@ namespace Biips
 {
 
   std::map<String, std::map<IndexRange, MultiArray> > extractStat(Console & console,
-                                                                  StatsTag tag,
+                                                                  StatTag tag,
                                                                   const Types<
                                                                       String>::Array & monitoredVar,
                                                                   const String & statName,
@@ -1121,7 +1123,7 @@ namespace Biips
                Size numBins,
                Bool smooth)
   {
-    std::map<String, std::map<IndexRange, ScalarHistogram> > pdf_map;
+    std::map<String, std::map<IndexRange, Histogram> > pdf_map;
 
     for (Size i = 0; i < monitoredVar.size(); ++i)
     {
@@ -1151,7 +1153,7 @@ namespace Biips
               + name);
       }
 
-      for (std::map<IndexRange, ScalarHistogram>::iterator it_pdf_map =
+      for (std::map<IndexRange, Histogram>::iterator it_pdf_map =
           pdf_map[name].begin(); it_pdf_map != pdf_map[name].end(); ++it_pdf_map)
       {
         Plot pdf_plot(0, 0);

@@ -11,7 +11,8 @@
 #include "model/Monitor.hpp"
 #include "common/Error.hpp"
 #include "sampler/Particle.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/ArrayAccumulator.hpp"
 
 namespace Biips
 {
@@ -94,8 +95,52 @@ namespace Biips
     return nodes;
   }
 
+  void Monitor::Accumulate(NodeId nodeId, Accumulator & featuresAcc, Size n) const
+  {
+    checkWeightsSet();
+    checkWeightsSwapped();
+
+    if (!Contains(nodeId))
+      throw LogicError("Can not accumulate: Node is not monitored.");
+
+    featuresAcc.Init();
+
+    for (Size i = 0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      featuresAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
+  }
+
+  void Monitor::Accumulate(NodeId nodeId, DensityAccumulator & densAcc, Size n) const
+  {
+    checkWeightsSet();
+    checkWeightsSwapped();
+
+    if (!Contains(nodeId))
+      throw LogicError("Can not accumulate: Node is not monitored.");
+
+    densAcc.Init();
+
+    for (Size i = 0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      densAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
+  }
+
   void Monitor::Accumulate(NodeId nodeId,
-                           ScalarAccumulator & featuresAcc,
+                           QuantileAccumulator & quantAcc,
+                           Size n) const
+  {
+    checkWeightsSet();
+    checkWeightsSwapped();
+
+    if (!Contains(nodeId))
+      throw LogicError("Can not accumulate: Node is not monitored.");
+
+    quantAcc.Init();
+
+    for (Size i = 0; i < particleValuesMap_.at(nodeId).size(); ++i)
+      quantAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
+  }
+
+  void Monitor::Accumulate(NodeId nodeId,
+                           DiscreteAccumulator & featuresAcc,
                            Size n) const
   {
     checkWeightsSet();
@@ -111,23 +156,7 @@ namespace Biips
   }
 
   void Monitor::Accumulate(NodeId nodeId,
-                           DiscreteScalarAccumulator & featuresAcc,
-                           Size n) const
-  {
-    checkWeightsSet();
-    checkWeightsSwapped();
-
-    if (!Contains(nodeId))
-      throw LogicError("Can not accumulate: Node is not monitored.");
-
-    featuresAcc.Init();
-
-    for (Size i = 0; i < particleValuesMap_.at(nodeId).size(); ++i)
-      featuresAcc.Push((*(particleValuesMap_.at(nodeId))[i])[n], weights_[i]);
-  }
-
-  void Monitor::Accumulate(NodeId nodeId,
-                           ElementAccumulator & featuresAcc,
+                           ArrayAccumulator & featuresAcc,
                            const DimArray::Ptr & pDim) const
   {
     checkWeightsSet();

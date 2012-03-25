@@ -23,13 +23,6 @@ configure_file (
 	${PROJECT_PKG_NAME}/R/windows/zzz.R
 )
 
-# configure src/Makevars.in.IN file
-configure_file (
-	src/Makevars.in.IN
-	${PROJECT_PKG_NAME}/src/Makevars.in
-	@ONLY
-)
-
 # configure src/Makevars.win.IN file
 configure_file (
 	src/Makevars.win.IN

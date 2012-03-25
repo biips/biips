@@ -21,7 +21,7 @@
 #include "graph/GraphTypes.hpp"
 #include "graph/Graph.hpp"
 #include "sampler/ForwardSampler.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
 
 
 #endif /* BIIPSCORE_HPP_ */

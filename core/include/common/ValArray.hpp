@@ -253,4 +253,9 @@ namespace Biips
 
 }
 
+namespace std
+{
+  Biips::ValArray sqrt(const Biips::ValArray & val);
+}
+
 #endif /* BIIPS_VALARRAY_HPP_ */

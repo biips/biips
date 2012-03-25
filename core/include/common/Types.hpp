@@ -84,9 +84,7 @@ namespace Biips
 
   enum NodeType
   {
-    STOCHASTIC,
-    LOGICAL,
-    CONSTANT
+    STOCHASTIC, LOGICAL, CONSTANT
   };
 
   //! Alias for ublas namespace
@@ -149,6 +147,11 @@ namespace Biips
   {
     return std::isnan(s);
   }
+
+  enum StatTag
+  {
+    SUM, MEAN, VARIANCE, MOMENT2, MOMENT3, MOMENT4, SKEWNESS, KURTOSIS
+  };
 
 }
 

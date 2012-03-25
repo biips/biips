@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
   // Declare and configure a ScalarAccumulator object :
   //---------------------------------------------------
-  ScalarAccumulator stats_acc;
+  Accumulator stats_acc;
   stats_acc.AddFeature(MEAN);
   stats_acc.AddFeature(VARIANCE);
 

@@ -336,10 +336,6 @@ namespace Biips
       os_ << std::endl;
     }
 
-    scalarAcc_.ClearQuantileProbs();
-    scalarAcc_.ClearFeatures();
-    discreteScalarAcc_.ClearFeatures();
-
     initSmoothAccumulators(nParticles, numBins);
 
     // smoothing

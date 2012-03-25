@@ -17,7 +17,7 @@
 #include <map>
 #include "common/IndexRange.hpp"
 #include "common/MultiArray.hpp"
-#include "sampler/Accumulator.hpp"
+#include "common/Histogram.hpp"
 #include "model/NodeArrayMonitor.hpp"
 
 class ParseTree;
@@ -151,22 +151,22 @@ namespace Biips
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
-    Bool ExtractFilterStat(const String & name, StatsTag statFeature, std::map<
+    Bool ExtractFilterStat(const String & name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap);
     Bool ExtractSmoothTreeStat(const String & name,
-                               StatsTag statFeature,
+                               StatTag statFeature,
                                std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothStat(const String & name, StatsTag statFeature, std::map<
+    Bool ExtractSmoothStat(const String & name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap);
 
     Bool ExtractFilterPdf(const String & name, std::map<IndexRange,
-        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
         0.25);
     Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
-        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
         0.25);
     Bool ExtractSmoothPdf(const String & name, std::map<IndexRange,
-        ScalarHistogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
+        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
         0.25);
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);

@@ -325,6 +325,12 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
   
+  # check rw.sd dimension
+  for (var in variable.names) {
+    if (length(rw.sd[[var]]) != length(sample[[var]]))
+      stop(paste("incorrect rw.sd dimension for variable", var))
+  }
+  
   ## reset data to sample on exit
   on.exit(
       if (n.iter > 0 && !accepted) {

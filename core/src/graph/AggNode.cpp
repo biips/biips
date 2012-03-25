@@ -28,7 +28,6 @@ namespace Biips
   void AggNode::Eval(ValArray & values, const NumArray::Array & paramValues) const
   // TODO checks
   {
-    values = ValArray(pDim_->Length());
     for (Size i = 0; i < Dim().Length(); ++i)
       values[i] = paramValues[i].Values()[offsets_[i]];
   }

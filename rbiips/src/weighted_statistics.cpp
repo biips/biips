@@ -9,7 +9,8 @@
  */
 
 #include "RBiipsCommon.h"
-#include "sampler/Accumulator.hpp"
+#include "common/Accumulator.hpp"
+#include "common/Utility.hpp"
 
 using namespace Biips;
 using std::endl;
@@ -17,15 +18,17 @@ using std::endl;
 using namespace Biips;
 
 template <typename FeatureIterator>
-static ScalarAccumulator accumulate(SEXP values, SEXP weights, FeatureIterator firstFeat, FeatureIterator LastFeat)
+static Accumulator accumulate(SEXP values, SEXP weights, FeatureIterator firstFeat, FeatureIterator lastFeat)
 {
   Rcpp::NumericVector values_vec(values);
   Rcpp::NumericVector weights_vec(weights);
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
 
-  ScalarAccumulator accu;
-  accu.AddFeatures(firstFeat, LastFeat);
+  Accumulator accu;
+  for (;firstFeat != lastFeat; ++firstFeat)
+    accu.AddFeature(*firstFeat);
+
   accu.Init();
 
   for (int i = 0; i<values_vec.size(); ++i)
@@ -39,8 +42,8 @@ RcppExport SEXP weighted_mean (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatsTag features[] = {MEAN};
-  ScalarAccumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatsTag));
+  static StatTag features[] = {MEAN};
+  Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
   stats["Mean"] = Rcpp::wrap(accu.Mean());
@@ -54,8 +57,8 @@ RcppExport SEXP weighted_var (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatsTag features[] = {MEAN, VARIANCE};
-  ScalarAccumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatsTag));
+  static StatTag features[] = {MEAN, VARIANCE};
+  Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
   stats["Mean"] = Rcpp::wrap(accu.Mean());
@@ -72,8 +75,8 @@ RcppExport SEXP weighted_skew (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatsTag features[] = {MEAN, VARIANCE, SKEWNESS};
-  ScalarAccumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatsTag));
+  static StatTag features[] = {MEAN, VARIANCE, SKEWNESS};
+  Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
   stats["Mean"] = Rcpp::wrap(accu.Mean());
@@ -92,8 +95,8 @@ RcppExport SEXP weighted_kurt (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatsTag features[] = {MEAN, VARIANCE, SKEWNESS, KURTOSIS};
-  ScalarAccumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatsTag));
+  static StatTag features[] = {MEAN, VARIANCE, SKEWNESS, KURTOSIS};
+  Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
   stats["Mean"] = Rcpp::wrap(accu.Mean());
@@ -119,9 +122,8 @@ RcppExport SEXP weighted_median (SEXP values, SEXP weights)
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
 
-  ScalarAccumulator accu;
-  accu.AddFeature(QUANTILES);
-  accu.AddQuantileProb(0.5);
+  static Scalar probs[] = {0.5};
+  QuantileAccumulator accu(probs, probs+sizeof(probs)/sizeof(Scalar));
   accu.Init();
 
   for (int i = 0; i<values_vec.size(); ++i)
@@ -145,9 +147,7 @@ RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
     throw LogicError("values and weights must have same length.");
   Rcpp::NumericVector probs_vec(probs);
 
-  ScalarAccumulator accu;
-  accu.AddFeature(QUANTILES);
-  accu.SetQuantileProbs(probs_vec.begin(), probs_vec.end());
+  QuantileAccumulator accu(probs_vec.begin(), probs_vec.end());
   accu.Init();
 
   for (int i = 0; i<values_vec.size(); ++i)
@@ -176,15 +176,14 @@ RcppExport SEXP weighted_table(SEXP values, SEXP weights)
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
 
-  DiscreteScalarAccumulator accu;
-  accu.AddFeature(PDF);
+  DiscreteAccumulator accu;
   accu.Init();
 
   for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
-  const DiscreteScalarHistogram & hist = accu.Pdf();
+  const DiscreteHistogram & hist = accu.Pdf();
   Types<Scalar>::Array vec = hist.GetPositions();
   Rcpp::IntegerVector x(vec.begin(), vec.end());
   vec = hist.GetFrequencies();
@@ -208,15 +207,14 @@ RcppExport SEXP weighted_mode(SEXP values, SEXP weights)
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
 
-  DiscreteScalarAccumulator accu;
-  accu.AddFeature(MODE);
+  DiscreteAccumulator accu;
   accu.Init();
 
   for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
-  const DiscreteScalarHistogram & hist = accu.Pdf();
+  const DiscreteHistogram & hist = accu.Pdf();
   Types<Scalar>::Array vec = hist.GetPositions();
   Rcpp::IntegerVector x(vec.begin(), vec.end());
   vec = hist.GetFrequencies();

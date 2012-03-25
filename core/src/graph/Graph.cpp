@@ -465,21 +465,19 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
 
     const Graph & graph_;
-    Flags insertedMask_;
     Types<NodeId>::Array & topoSort_;
     Types<Size>::Array & ranks_;
     Size offspringLevel_;
-    Size ancestorLevel_;
     Size rank_;
+    Types<Size>::Array parentsInserted_;
 
     virtual void visit(const ConstantNode & node)
     {
-      if (insertedMask_[nodeId_])
-        return;
+      if (ranks_[nodeId_] != BIIPS_SIZENA)
+        throw LogicError("TopologicalSortVisitor can not visit a constant node twice.");
 
       topoSort_.push_back(nodeId_);
       ranks_[nodeId_] = rank_++;
-      insertedMask_[nodeId_] = true;
 
       // visit the logical children
       GraphTypes::ChildIterator it_children, it_children_end;
@@ -487,24 +485,26 @@ namespace Biips
 
       ++offspringLevel_;
       for (; it_children != it_children_end; ++it_children)
+      {
+        parentsInserted_[*it_children]++;
         graph_.VisitNode(*it_children, *this);
+      }
       --offspringLevel_;
     }
 
     virtual void visit(const StochasticNode & node)
     {
+      if (ranks_[nodeId_] != BIIPS_SIZENA)
+        return;
+
       if (offspringLevel_ && !graph_.GetObserved()[nodeId_])
         return;
 
-      if (insertedMask_[nodeId_])
-        return;
-
-      if (!parentsInserted(nodeId_))
+      if (parentsInserted_[nodeId_] != node.Parents().size())
         return;
 
       topoSort_.push_back(nodeId_);
       ranks_[nodeId_] = rank_++;
-      insertedMask_[nodeId_] = true;
 
       // visit the logical children
       GraphTypes::ChildIterator it_children, it_children_end;
@@ -512,26 +512,11 @@ namespace Biips
 
       ++offspringLevel_;
       for (; it_children != it_children_end; ++it_children)
-        graph_.VisitNode(*it_children, *this);
-      --offspringLevel_;
-    }
-
-    Bool parentsInserted(NodeId nodeId)
-    {
-      GraphTypes::ParentIterator it_parent, it_parent_end;
-      boost::tie(it_parent, it_parent_end) = graph_.GetParents(nodeId);
-      for (; it_parent != it_parent_end; ++it_parent)
       {
-        if (!insertedMask_[*it_parent])
-        {
-          ++ancestorLevel_;
-          graph_.VisitNode(*it_parent, *this);
-          --ancestorLevel_;
-        }
-        if (!insertedMask_[*it_parent])
-          return false;
+        parentsInserted_[*it_children]++;
+        graph_.VisitNode(*it_children, *this);
       }
-      return true;
+      --offspringLevel_;
     }
 
     virtual void visit(const LogicalNode & node)
@@ -539,23 +524,18 @@ namespace Biips
       if (!offspringLevel_)
         return;
 
-      if (ancestorLevel_)
+      if (ranks_[nodeId_] != BIIPS_SIZENA)
         return;
 
       if (topoSort_.empty())
         throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in empty node id sequence.");
 
-      if (insertedMask_[nodeId_])
-        return;
-
-      // push the logical children back
-      // if its parents have been inserted
-      if (!parentsInserted(nodeId_))
+      // check if all its parents have been inserted
+      if (parentsInserted_[nodeId_] != node.Parents().size())
         return;
 
       topoSort_.push_back(nodeId_);
       ranks_[nodeId_] = rank_++;
-      insertedMask_[nodeId_] = true;
 
       // visit the logical children
       GraphTypes::ChildIterator it_children, it_children_end;
@@ -563,7 +543,10 @@ namespace Biips
 
       ++offspringLevel_;
       for (; it_children != it_children_end; ++it_children)
+      {
+        parentsInserted_[*it_children]++;
         graph_.VisitNode(*it_children, *this);
+      }
       --offspringLevel_;
     }
 
@@ -572,9 +555,8 @@ namespace Biips
     TopologicalSortVisitor(const Graph & graph,
                            Types<NodeId>::Array & topoSort,
                            Types<Size>::Array & ranks) :
-      graph_(graph), insertedMask_(graph.GetSize(), false),
-          topoSort_(topoSort), ranks_(ranks), offspringLevel_(0),
-          ancestorLevel_(0), rank_(0)
+      graph_(graph), topoSort_(topoSort), ranks_(ranks),
+          offspringLevel_(0), rank_(0), parentsInserted_(graph.GetSize(), 0)
     {
     }
   };
@@ -582,13 +564,18 @@ namespace Biips
   void Graph::topologicalSort()
   {
     // TODO : optimize
-    topoSort_.clear();
+    topoSort_.resize(GetSize());
+    for (NodeId id = 0; id < GetSize(); ++id)
+      topoSort_[id] = id;
     ranks_.assign(GetSize(), BIIPS_SIZENA);
-    boost::topological_sort(parentsGraph_, std::back_inserter(topoSort_));
 
     Types<NodeId>::Array temp_sort;
     TopologicalSortVisitor topo_vis(*this, temp_sort, ranks_);
     VisitGraph(topo_vis);
+
+    if (temp_sort.size() != GetSize())
+      throw LogicError("Topological sort missing nodes.");
+
     topoSort_.swap(temp_sort);
   }
 

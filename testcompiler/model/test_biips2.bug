@@ -1,0 +1,54 @@
+var x.true[t.max],x[t.max],x2[2],x2.true[2],y[t.max],y2[2]
+
+data
+{
+  for (t in 1:8)
+  {
+    x.true[t] ~ dgamma(5, 1)
+    
+  }
+  for (t in 9:10)
+ {
+    x.true[t] ~ dbeta(1,1)  
+ }
+  y[1] ~ dbeta(x.true[1],10)
+  y[2] ~ dchisqr(x.true[2])
+  y[3] ~ dexp(x.true[3])
+  y[4] ~ dgamma(x.true[4], 5)
+  y[5] ~ dnorm(x.true[5], 2)
+  y[6] ~ dt(x.true[6], 2, 4)
+  y[7] ~ dweib(x.true[7], 3)
+  y[8] ~ dpois(x.true[8])
+  y[9] ~ dbern(x.true[9])
+  y[10] ~ dbinom(x.true[10], 100)
+
+ x2.true ~ dmnorm(mean.x,omega)
+ y2 ~ dmnorm(x2.true, omega) 
+}
+
+model
+{
+  for (t in 1:8)
+  {
+    x[t] ~ dgamma(5, 1)
+    
+  }
+  for (t in 9:10)
+ {
+    x[t] ~ dbeta(1,1)  
+
+ }
+  y[1] ~ dbeta(x[1],10)
+  y[2] ~ dchisqr(x[2])
+  y[3] ~ dexp(x[3])
+  y[4] ~ dgamma(x[4], 5)
+  y[5] ~ dnorm(x[5], 2)
+  y[6] ~ dt(x[6], 2, 4)
+  y[7] ~ dweib(x[7], 3)
+  y[8] ~ dpois(x[8])
+y[9] ~ dbern(x[9])
+y[10] ~ dbinom(x[10], 100)
+
+ x2 ~ dmnorm(mean.x,omega)
+ y2 ~ dmnorm(x2, omega)
+}
