@@ -127,6 +127,7 @@ add_subdirectory (test)
 add_subdirectory (compiler)
 add_subdirectory (testcompiler)
 add_subdirectory (rbiips)
+add_subdirectory (matbiips)
 
 #============= CPACK commands ============
 # build a CPack driven installer package
