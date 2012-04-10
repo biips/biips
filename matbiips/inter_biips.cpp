@@ -1,5 +1,7 @@
 #include "mex.h"
 #include <string>
+#include <Console.hpp>
+
 using namespace std;
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
