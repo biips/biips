@@ -2,10 +2,10 @@
 /*! \file Rostream.h
  * \brief 
  * 
- * $LastChangedBy$
- * $LastChangedDate$
- * $LastChangedRevision$
- * $Id$
+ * \author  $LastChangedBy$
+ * \date    $LastChangedDate$
+ * \version $LastChangedRevision$
+ * Id:      $Id$
  */
 
 #ifndef ROSTREAM_H_

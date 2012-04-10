@@ -1,0 +1,7 @@
+BiiPS software is a set of libraries for
+Bayesian inference with interacting Particle Systems 
+
+Version:       @Biips_VERSION@
+Last modified: @Biips_DATE@
+Maintainer:    @Biips_CONTACT@
+Homepage:      @Biips_URL@

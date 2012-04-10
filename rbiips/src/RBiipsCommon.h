@@ -2,10 +2,10 @@
 /*! \file RBiipsCommon.h
  * \brief 
  * 
- * $LastChangedBy$
- * $LastChangedDate$
- * $LastChangedRevision$
- * $Id$
+ * \author  $LastChangedBy$
+ * \date    $LastChangedDate$
+ * \version $LastChangedRevision$
+ * Id:      $Id$
  */
 
 #ifndef RBIIPSCOMMON_H_

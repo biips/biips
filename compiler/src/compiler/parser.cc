@@ -126,9 +126,9 @@
 /* Copy the first part of user declarations.  */
 #line 2 "parser.yy"
 
-#include <compiler/ParseTree.h>
+#include "compiler/ParseTree.h"
 #include "remap.h"
-#include "parser_extra.h"
+#include "compiler/parser_extra.h"
 
 #include <cstdio>
 #include <cstdlib>

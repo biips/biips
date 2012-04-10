@@ -1,12 +1,37 @@
 #                                               -*- cmake -*-
 #
-#  CMakeLists.txt
-#  Top level Biips project CMakeList
+#  BiiPS software is a set of libraries for
+#  Bayesian inference with interacting Particle Systems.
+#  Copyright (C) Inria, 2012
+#  Contributors: Adrien Todeschini, Francois Caron
+#  
+#  BiiPS is derived software based on:
+#  JAGS, Copyright (C) Martyn Plummer, 2002-2010
+#  SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
 #
-#  @author: $LastChangedBy:$
-#  @date:   $LastChangedDate:$
-#  @version:$LastChangedRevision:$
-#  Id:      $Id:$
+#  This file is part of BiiPS.
+#
+#  BiiPS is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+#  \file     CMakeLists.txt
+#  \brief    Top level Biips project CMakeList
+#
+#  \author   $LastChangedBy$
+#  \date     $LastChangedDate$
+#  \version  $LastChangedRevision$
+#  Id:       $Id$
 #
 
 cmake_minimum_required (VERSION 2.8)
@@ -31,14 +56,14 @@ if (PRINT_SYSTEM_INFO)
 endif (PRINT_SYSTEM_INFO)
 
 set (Biips_VERSION_MAJOR 0)
-set (Biips_VERSION_MINOR 7)
-set (Biips_VERSION_PATCH 1)
+set (Biips_VERSION_MINOR 1)
+set (Biips_VERSION_PATCH 0)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
 file (WRITE VERSION ${Biips_VERSION})
 
-set (Biips_AUTHOR Inria)
-set (Biips_LICENSE unknown)
+set (Biips_OWNER Inria)
+set (Biips_LICENSE GPL-3)
 set (Biips_URL http://biips.gforge.inria.fr)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Systems")
 set (Biips_DESCRIPTION )
@@ -62,6 +87,12 @@ if (NOT Biips_DATE)
 	endif (TODAY)
 endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
+
+# configure README file
+configure_file (
+	${PROJECT_SOURCE_DIR}/README.in
+	${PROJECT_BINARY_DIR}/README
+)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
@@ -151,7 +182,7 @@ set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
-set (CPACK_RESOURCE_FILE_README ${Biips_SOURCE_DIR}/README)
+set (CPACK_RESOURCE_FILE_README ${Biips_BINARY_DIR}/README)
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
 set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
 
@@ -170,7 +201,7 @@ if (USE_Qwt5_Qt4)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
 endif (USE_Qwt5_Qt4)
-set (CPACK_DEBIAN_PACKAGE_SECTION non-free/math)
+set (CPACK_DEBIAN_PACKAGE_SECTION math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips-test")
@@ -182,8 +213,8 @@ if (USE_Qwt5_Qt4)
         "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")
 endif (USE_Qwt5_Qt4)
 set (CPACK_RPM_PACKAGE_RELEASE 1)
-set (CPACK_RPM_PACKAGE_LICENSE unknown)
-set (CPACK_RPM_PACKAGE_GROUP unknown)
+set (CPACK_RPM_PACKAGE_LICENSE ${Biips_LICENSE})
+set (CPACK_RPM_PACKAGE_GROUP Applications/Engineering)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
 set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
 

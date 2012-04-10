@@ -1,15 +1,45 @@
 //                                               -*- C++ -*-
+/*
+ * BiiPS software is a set of libraries for
+ * Bayesian inference with interacting Particle Systems.
+ * Copyright (C) Inria, 2012
+ * Contributors: Adrien Todeschini, Francois Caron
+ *
+ * BiiPS is derived software based on:
+ * JAGS, Copyright (C) Martyn Plummer, 2002-2010
+ * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
+ *
+ * This file is part of BiiPS.
+ *
+ * BiiPS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*! \file kolmogorov.cpp
 * \brief
 *
-* $LastChangedBy$
-* $LastChangedDate$
-* $LastChangedRevision$
-* $Id$
+* \author  $LastChangedBy$
+* \date    $LastChangedDate$
+* \version $LastChangedRevision$
+* Id:      $Id$
 *
-* COPY: Copied and pasted KolmogorovProb function from TMath library:
+* COPY: Adapted from TMath library KolmogorovProb function:
 * http://root.cern.ch/root/html/src/TMath.cxx.html#RDBIQ
-*
+* Authors: Rene Brun, Anna Kreshuk, Eddy Offermann, Fons Rademakers   29/07/95
+* Copyright (C) 1995-2004, Rene Brun and Fons Rademakers.
+* All rights reserved.
+* For the licensing terms see $ROOTSYS/LICENSE.
+* For the list of contributors see $ROOTSYS/README/CREDITS.
 */
 
 #include "kolmogorov.hpp"
@@ -33,17 +63,6 @@ namespace Biips
 
     inline Int_t Max(Int_t a, Int_t b)
     { return std::max(a,b); }
-
-    // COPY: ************ from here ********************
-    // Authors: Rene Brun, Anna Kreshuk, Eddy Offermann, Fons Rademakers   29/07/95
-
-    /*************************************************************************
-    * Copyright (C) 1995-2004, Rene Brun and Fons Rademakers.               *
-    * All rights reserved.                                                  *
-    *                                                                       *
-    * For the licensing terms see $ROOTSYS/LICENSE.                         *
-    * For the list of contributors see $ROOTSYS/README/CREDITS.             *
-    *************************************************************************/
 
     Double_t KolmogorovProb(Double_t z)
     {
@@ -104,7 +123,6 @@ namespace Biips
       }
       return p;
     }
-    // COPY: ************ to here ********************
   }
 
   Scalar ksProb(Scalar z)
