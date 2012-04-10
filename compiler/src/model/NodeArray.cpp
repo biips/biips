@@ -1,11 +1,37 @@
 //                                               -*- C++ -*-
+/*
+ * BiiPS software is a set of libraries for
+ * Bayesian inference with interacting Particle Systems.
+ * Copyright (C) Inria, 2012
+ * Contributors: Adrien Todeschini, Francois Caron
+ *
+ * BiiPS is derived software based on:
+ * JAGS, Copyright (C) Martyn Plummer, 2002-2010
+ * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
+ *
+ * This file is part of BiiPS.
+ *
+ * BiiPS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*! \file NodeArray.cpp
  * \brief 
  * 
- * $LastChangedBy$
- * $LastChangedDate: 2011-02-28 18:15:08 +0100 (lun., 28 févr. 2011) $
- * $LastChangedRevision$
- * $Id$
+ * \author  $LastChangedBy$
+ * \date    $LastChangedDate: 2011-02-28 18:15:08 +0100 (lun., 28 févr. 2011) $
+ * \version $LastChangedRevision$
+ * Id:      $Id$
  *
  * COPY: Adapted from JAGS NodeArray class
  */
@@ -27,9 +53,7 @@ namespace Biips
 
   Bool NodeArray::IsEmpty(const IndexRange & targetRange) const
   {
-    // COPY: Copied an pasted from NodeArray::isEmpty function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::isEmpty function
     if (!range_.Contains(targetRange))
       throw LogicError("Range error in NodeArray::IsEmpty");
 
@@ -37,7 +61,7 @@ namespace Biips
       if (nodeIds_.at(range_.GetOffset(it)) != NULL_NODEID)
         return false;
     return true;
-    // COPY: ********** to here **********
+    // ENDCOPY
   }
 
   void NodeArray::Insert(NodeId nodeId, const IndexRange & targetRange)
@@ -46,9 +70,7 @@ namespace Biips
       throw LogicError(String("Attempt to insert non existing node at ")
           + name_ + print(targetRange));
 
-    // COPY: Copied an pasted from NodeArray::insert function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::insert function
     if (nodeId == NULL_NODEID)
       throw LogicError(String("Attempt to insert NULL node at ") + name_
           + print(targetRange));
@@ -69,7 +91,7 @@ namespace Biips
       nodeIds_.at(offset) = nodeId;
       offsets_.at(offset) = k;
     }
-    // COPY: ********** to here **********
+    // ENDCOPY
 
     typedef boost::bimap<NodeId, IndexRange>::value_type Val;
     nodeIdRangeBimap_.insert(Val(nodeId, targetRange));
@@ -80,9 +102,7 @@ namespace Biips
                                     const IndexRange::Indices & lower,
                                     const DimArray & dim) const
   {
-    // COPY: Copied an pasted from NodeArray::findActiveIndices function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::findActiveIndices function
 
     /*
      We pay a heavy computational price for the flexibility of
@@ -142,14 +162,12 @@ namespace Biips
       }
     }
     return false;
-    // COPY: ********** to here **********
+    // ENDCOPY
   }
 
   NodeId NodeArray::GetSubset(const IndexRange & subsetRange)//, Model & model)
   {
-    // COPY: Copied an pasted from NodeArray::getSubset function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::getSubset function
 
     //Check validity of target range
     if (!range_.Contains(subsetRange))
@@ -175,7 +193,7 @@ namespace Biips
     }
     DimArray::Ptr p_dim(new DimArray(subsetRange.Dim(true)));
     node_id = graph_.AddAggNode(p_dim, parent_node_ids, offsets);
-    // COPY: ********** to here **********
+    // ENDCOPY
 
     typedef boost::bimap<NodeId, IndexRange>::value_type Val;
     nodeIdRangeBimap_.insert(Val(node_id, subsetRange));
@@ -205,9 +223,8 @@ namespace Biips
     if (it != nodeIdRangeBimap_.left.end())
       return it->second;
 
-    // COPY: Copied an pasted from NodeArray::getRange function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::getRange function
+
     /* Find the lower limit of the range. This is easy */
     Size ndim = range_.NDim(false);
     IndexRange::Indices lower(ndim);
@@ -238,7 +255,7 @@ namespace Biips
     {
       throw LogicError("Unable to find node range");
     }
-    // COPY: ********** to here **********
+    // ENDCOPY
   }
 
   Bool NodeArray::allNodesMissing() const
@@ -268,9 +285,7 @@ namespace Biips
       return;
     }
 
-    // COPY: Copied an pasted from NodeArray::setData function of JAGS
-    // and then modified to fit Biips code
-    // COPY: ********** from here **********
+    // COPY: Adapted from JAGS NodeArray::setData function
     const ValArray & x = value.Values();
 
     //Gather all the nodes for which a data value is supplied
@@ -329,7 +344,7 @@ namespace Biips
     //        graph_.SetObsValue(node_id, p_node_value);
     //      }
     //    }
-    // COPY: ********** to here **********
+    // ENDCOPY
   }
 
   void NodeArray::ChangeData(const MultiArray & value,

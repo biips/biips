@@ -3,28 +3,31 @@
 \alias{RBiips}
 \docType{package}
 \title{
-What the package does (short line)
+Bayesian inference with interacting Particle Systems
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Interface with C++ BiiPS software for analysing Bayesian graphical models using particle methods, aka Sequential Monte Carlo (SMC) methods.
+
 }
 \details{
 \tabular{ll}{
 Package: \tab RBiips\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2011-05-24\cr
-License: \tab What license is it under?\cr
+Version: \tab @Biips_VERSION@\cr
+Date: \tab @Biips_DATE@\cr
+License: \tab @Biips_LICENSE@\cr
 LazyLoad: \tab yes\cr
 }
-~~ An overview of how to use the package, including the most ~~
-~~ important functions ~~
+Compile your model using biips.model function. Then compute estimates using standard SMC algorithm (using smc.samples), or Particle MCMC methods (using pmmh.samples or pimh.samples functions).
 }
 \author{
-Who wrote it
+RBiips development is supported by the team ALEA at Inria Bordeaux Sud-Ouest.
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Individual contributors:
+Adrien Todeschini (Design and development)
+François Caron (Probability expertise and specifications)
+
+Maintainer: biips-support <biips-support@gforge.inria.fr>
 }
 \references{
 ~~ Literature or other references for background information ~~
