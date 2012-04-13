@@ -209,6 +209,7 @@ namespace Biips
 
     //allocate memory
     nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+
     //sample
     DMNorm::Instance()->Sample(*nodeValuesMap()[nodeId_],
                                post_param_values,

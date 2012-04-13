@@ -50,6 +50,7 @@ namespace Biips
 
   class Graph;
   class MultiArray;
+  class Rng;
 
   class NodeArray
   {
@@ -114,9 +115,13 @@ namespace Biips
      */
     void SetData(const MultiArray & value);
 
-    void ChangeData(const MultiArray & value,
+    Bool ChangeData(const MultiArray & value,
                     std::map<Size, NodeId> & logicChildrenByRank,
-                    std::map<Size, NodeId> & stoChildrenByRank);
+                    std::map<Size, NodeId> & stoChildrenByRank,
+                    Bool mcmc = true);
+
+    Bool SampleData(std::map<Size, NodeId> & logicChildrenByRank, std::map<
+        Size, NodeId> & stoChildrenByRank, Rng * pRng, Bool mcmc = true);
 
     /**
      * Gets the values of nodes that have been inserted into

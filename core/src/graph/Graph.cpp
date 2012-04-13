@@ -114,7 +114,7 @@ namespace Biips
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
     if (observed)
-      UpdateLogicalObsValue(node_id);
+      SampleValue(node_id, NULL, true);
 
     //set discreteness
     Bool discrete = true;
@@ -143,30 +143,6 @@ namespace Biips
       param_dims[i] = GetNode(parameters[i]).DimPtr();
 
     return param_dims;
-  }
-
-  void Graph::UpdateLogicalObsValue(NodeId nodeId)
-  {
-    if (!GetNode(nodeId).GetType() == LOGICAL)
-      throw LogicError("Can't update logical obs value: node is not logical.");
-    const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
-                                                      parentsGraph_);
-    const ObservedPropertyMap & observed_map =
-        boost::get(boost::vertex_observed, parentsGraph_);
-
-    NodeValues node_values(GetSize());
-    Flags sampled_flags(GetSize());
-    for (NodeId id = 0; id < GetSize(); ++id)
-    {
-      node_values[id] = values_map[id];
-      sampled_flags[id] = observed_map[id];
-    }
-    sampled_flags[nodeId] = false;
-    NodeSampler sample_node_vis(*this);
-    sample_node_vis.SetMembers(node_values, sampled_flags, NULL);
-    VisitNode(nodeId, sample_node_vis);
-
-    boost::put(boost::vertex_value, parentsGraph_, nodeId, node_values[nodeId]);
   }
 
   NodeId Graph::AddLogicalNode(const Function::Ptr & pFunc,
@@ -202,7 +178,7 @@ namespace Biips
 
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
     if (observed)
-      UpdateLogicalObsValue(node_id);
+      SampleValue(node_id, NULL, true);
 
     //set discreteness
     Flags mask(parameters.size());
@@ -581,8 +557,8 @@ namespace Biips
     TopologicalSortVisitor(const Graph & graph,
                            Types<NodeId>::Array & topoSort,
                            Types<Size>::Array & ranks) :
-      graph_(graph), topoSort_(topoSort), ranks_(ranks),
-          offspringLevel_(0), rank_(0), parentsInserted_(graph.GetSize(), 0)
+      graph_(graph), topoSort_(topoSort), ranks_(ranks), offspringLevel_(0),
+          rank_(0), parentsInserted_(graph.GetSize(), 0)
     {
     }
   };
@@ -704,10 +680,11 @@ namespace Biips
   void Graph::Build()
   {
     if (builtFlag_)
-      throw LogicError("The graph is already built.");
+      throw LogicError("Can not build graph: already built.");
 
+    // check acyclic
     if (HasCycle())
-      throw RuntimeError("The graph has a cycle.");
+      throw RuntimeError("Can not build graph: has a cycle.");
 
     topologicalSort();
 
@@ -840,6 +817,67 @@ namespace Biips
     sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
     VisitGraph(sample_node_vis);
     return node_values;
+  }
+
+  ValArray::Ptr Graph::SampleValue(NodeId nodeId, Rng * pRng, Bool setObsValue)
+  {
+    if (!GetNode(nodeId).GetType() == CONSTANT)
+      throw LogicError("Can't sample value: node is constant.");
+
+    const ValuesPropertyMap & values_map = boost::get(boost::vertex_value,
+                                                      parentsGraph_);
+    const ObservedPropertyMap & observed_map =
+        boost::get(boost::vertex_observed, parentsGraph_);
+
+    NodeValues node_values(GetSize());
+    Flags sampled_flags(GetSize());
+    for (NodeId id = 0; id < GetSize(); ++id)
+    {
+      node_values[id] = values_map[id];
+      sampled_flags[id] = observed_map[id];
+    }
+
+    // force the node evaluation by the NodeSampler
+    sampled_flags[nodeId] = false;
+
+    NodeSampler sample_node_vis(*this);
+    sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
+    VisitNode(nodeId, sample_node_vis);
+
+    ValArray::Ptr pVal = node_values.at(nodeId);
+    if (setObsValue)
+      boost::put(boost::vertex_value, parentsGraph_, nodeId, pVal);
+
+    return pVal;
+  }
+
+  // this function is used to assign an observed value to
+  // a stochastic node when doing Particle MCMC
+  void Graph::SetObserved(NodeId nodeId)
+  {
+    boost::put(boost::vertex_observed, parentsGraph_, nodeId, true);
+    // allocate memory: temporary NA value
+    ValArray::Ptr p_val(new ValArray(GetNode(nodeId).Dim().Length(),
+                                     BIIPS_REALNA));
+    SetObsValue(nodeId, p_val);
+
+    // set logical children observed
+    ChildIterator it_child, it_child_end;
+    boost::tie(it_child, it_child_end) = GetChildren(nodeId);
+    for (; it_child != it_child_end; ++it_child)
+    {
+      if (GetNode(*it_child).GetType() != LOGICAL)
+        continue;
+
+      // check parents are all observed
+      ParentIterator it_par, it_par_end;
+      boost::tie(it_par, it_par_end) = GetParents(nodeId);
+      for (; it_par != it_par_end; ++it_par)
+        if (!GetObserved()[*it_par])
+          continue;
+
+      SetObserved(*it_child);
+    }
   }
 
   void Graph::SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue)

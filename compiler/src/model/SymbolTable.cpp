@@ -156,8 +156,33 @@ namespace Biips
     }
   }
 
-  void SymbolTable::ChangeData(std::map<String, MultiArray> const & dataMap)
+  void SymbolTable::update_children(const std::map<Size, NodeId> & logicChildrenByRank,
+                                    std::map<Size, NodeId> & stoChildrenByRank)
   {
+    // update logical children
+    for (std::map<Size, NodeId>::const_iterator it(logicChildrenByRank.begin()); it
+        != logicChildrenByRank.end(); ++it)
+    {
+      NodeId id = it->second;
+      model_.GraphPtr()->SampleValue(id);
+      model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
+    }
+
+    // update stochastic children discreteness
+    for (Size rank = 0; rank < model_.GraphPtr()->GetRanks().back(); ++rank)
+    {
+      if (!stoChildrenByRank.count(rank))
+        continue;
+
+      NodeId id = stoChildrenByRank.at(rank);
+      model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
+    }
+  }
+
+  Bool SymbolTable::ChangeData(const std::map<String, MultiArray> & dataMap)
+  {
+    Bool set_observed_nodes = false;
+
     std::map<Size, NodeId> logic_children_by_rank;
     std::map<Size, NodeId> sto_children_by_rank;
     for (std::map<String, MultiArray>::const_iterator p(dataMap.begin()); p
@@ -170,26 +195,43 @@ namespace Biips
       NodeArray & array = getNodeArray(name);
       // change data, get all observed logical children
       // update discreteness and get stochastic children to be updated
-      array.ChangeData(p->second, logic_children_by_rank, sto_children_by_rank);
+      set_observed_nodes = array.ChangeData(p->second,
+                                            logic_children_by_rank,
+                                            sto_children_by_rank);
     }
 
-    // update logical children
-    for (std::map<Size, NodeId>::const_iterator it(logic_children_by_rank.begin()); it != logic_children_by_rank.end(); ++it)
+    // update children
+    update_children(logic_children_by_rank, sto_children_by_rank);
+
+    return set_observed_nodes;
+  }
+
+  Bool SymbolTable::SampleData(const std::set<String> & variableNames,
+                               Rng * pRng)
+  {
+    Bool set_observed_nodes = false;
+
+    std::map<Size, NodeId> logic_children_by_rank;
+    std::map<Size, NodeId> sto_children_by_rank;
+    for (std::set<String>::const_iterator p(variableNames.begin()); p
+        != variableNames.end(); ++p)
     {
-      NodeId id = it->second;
-      model_.GraphPtr()->UpdateLogicalObsValue(id);
-      model_.GraphPtr()->UpdateDiscreteness(id, sto_children_by_rank);
+      const String & name = *p;
+      if (!Contains(name))
+        throw RuntimeError("Can't sample data: variable is not defined in the model.");
+
+      NodeArray & array = getNodeArray(name);
+      // sample data, get all observed logical children
+      // update discreteness and get stochastic children to be updated
+      set_observed_nodes = array.SampleData(logic_children_by_rank,
+                                            sto_children_by_rank,
+                                            pRng);
     }
 
-    // update stochastic children discreteness
-    for (Size rank = 0; rank < model_.GraphPtr()->GetRanks().back(); ++rank)
-    {
-      if (!sto_children_by_rank.count(rank))
-        continue;
+    // update children
+    update_children(logic_children_by_rank, sto_children_by_rank);
 
-      NodeId id = sto_children_by_rank.at(rank);
-      model_.GraphPtr()->UpdateDiscreteness(id, sto_children_by_rank);
-    }
+    return set_observed_nodes;
   }
 
   void SymbolTable::ReadData(std::map<String, MultiArray> & dataMap) const

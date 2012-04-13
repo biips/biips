@@ -288,9 +288,8 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractFilterStat(String name,
-                                    StatTag statFeature,
-                                    std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractFilterStat(String name, StatTag statFeature, std::map<
+      IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -341,9 +340,8 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractSmoothStat(String name,
-                                    StatTag statFeature,
-                                    std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractSmoothStat(String name, StatTag statFeature, std::map<
+      IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -367,8 +365,10 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractFilterPdf(String name, std::map<IndexRange,
-      Histogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  Bool BUGSModel::ExtractFilterPdf(String name,
+                                   std::map<IndexRange, Histogram> & pdfMap,
+                                   Size numBins,
+                                   Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -397,8 +397,8 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       Histogram pdf_hist = BaseType::ExtractFilterPdf(node_id,
-                                                            numBins,
-                                                            cacheFraction);
+                                                      numBins,
+                                                      cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -435,16 +435,18 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       Histogram pdf_hist = BaseType::ExtractSmoothTreePdf(node_id,
-                                                                numBins,
-                                                                cacheFraction);
+                                                          numBins,
+                                                          cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
     return true;
   }
 
-  Bool BUGSModel::ExtractSmoothPdf(String name, std::map<IndexRange,
-      Histogram> & pdfMap, Size numBins, Scalar cacheFraction) const
+  Bool BUGSModel::ExtractSmoothPdf(String name,
+                                   std::map<IndexRange, Histogram> & pdfMap,
+                                   Size numBins,
+                                   Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -473,17 +475,27 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       Histogram pdf_hist = BaseType::ExtractSmoothPdf(node_id,
-                                                            numBins,
-                                                            cacheFraction);
+                                                      numBins,
+                                                      cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
     return true;
   }
 
-  Bool BUGSModel::ChangeData(const std::map<String, MultiArray> & dataMap)
+  Bool BUGSModel::ChangeData(const std::map<String, MultiArray> & dataMap,
+                             Bool & rebuildSampler)
   {
-    symbolTable_.ChangeData(dataMap);
+    rebuildSampler = symbolTable_.ChangeData(dataMap);
+
+    return true;
+  }
+
+  Bool BUGSModel::SampleData(const std::set<String> & variableNames,
+                             Rng * pRng,
+                             Bool & rebuildSampler)
+  {
+    rebuildSampler = symbolTable_.SampleData(variableNames, pRng);
 
     return true;
   }

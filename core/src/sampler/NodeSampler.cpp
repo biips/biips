@@ -53,13 +53,15 @@ namespace Biips
     if (!membersSet_)
       throw LogicError("NodeSampler can not visit LogicalNode: members not set.");
 
-    if (sampledFlagsMap()[nodeId_])
-      return;
+    // TODO double check the need of this
+//    if (sampledFlagsMap()[nodeId_])
+//      return;
 
     NumArray::Array params = getParamValues(nodeId_, graph_, *this);
 
     // allocate memory
-    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+    if (!nodeValuesMap()[nodeId_])
+      nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
 
     // evaluate
     node.Eval(*nodeValuesMap()[nodeId_], params);
@@ -91,7 +93,11 @@ namespace Biips
     NumArray::Pair bound_values = getBoundValues(nodeId_, graph_, *this);
 
     // allocate memory
-    nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+    if (!nodeValuesMap()[nodeId_])
+      nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
+
+    if (!pRng_)
+      throw LogicError("NodeSampler can not sample StochasticNode: Rng pointer is null.");
 
     // sample
     node.Sample(*nodeValuesMap()[nodeId_], param_values, bound_values, *pRng_);

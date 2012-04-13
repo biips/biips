@@ -293,6 +293,24 @@ namespace Biips
     return nodeIterations_;
   }
 
+  void ForwardSampler::Build()
+  {
+    buildNodeIdSequence();
+    buildNodeSamplers();
+    built_ = true;
+  }
+
+//  void ForwardSampler::Reset()
+//  {
+//    nodeLocks_.assign(graph_.GetSize(), 0);
+//    nodeIdSequence_.clear();
+//    obsNodeIdSequence_.clear();
+//    nodeIterations_.assign(graph_.GetSize(), BIIPS_SIZENA);
+//    nodeSamplerSequence_.clear();
+//    built_ = false;
+//    initialized_ = false;
+//  }
+
   void ForwardSampler::mutateParticle(Particle & lastParticle)
   {
     // sample current stochastic node
@@ -307,7 +325,7 @@ namespace Biips
     lastParticle.AddToLogWeight(log_incr_weight);
 
     // compute all logical children
-    // TODO only update nodes which have a monitored children
+    // TODO only update nodes which have a monitored child
     Types<NodeId>::Iterator it_logical_children = iterNodeId_->begin() + 1;
     while (it_logical_children != iterNodeId_->end())
     {

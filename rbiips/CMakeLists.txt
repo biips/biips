@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    Top level Biips project CMakeList
+#  \brief    RBiips subproject CMakeList
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$

@@ -43,6 +43,7 @@
 #include "model/NodeArray.hpp"
 
 #include <map>
+#include <set>
 
 namespace Biips
 {
@@ -60,6 +61,8 @@ namespace Biips
       return *(nodeArraysMap_.at(name));
     }
 
+    void update_children(const std::map<Size, NodeId> & logicChildrenByRank,
+                         std::map<Size, NodeId> & stoChildrenByRank);
   public:
     explicit SymbolTable(Model & model);
 
@@ -109,9 +112,11 @@ namespace Biips
      *
      * @see NodeArray#SetData
      */
-    void WriteData(std::map<String, MultiArray> const & dataMap);
+    void WriteData(const std::map<String, MultiArray> & dataMap);
 
-    void ChangeData(std::map<String, MultiArray> const & dataMap);
+    Bool ChangeData(const std::map<String, MultiArray> & dataMap);
+
+    Bool SampleData(const std::set<String> & variableNames, Rng * pRng);
 
     /**
      * Reads the current value of selected nodes in the symbol table and
