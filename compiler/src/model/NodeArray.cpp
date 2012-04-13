@@ -347,9 +347,10 @@ namespace Biips
     // ENDCOPY
   }
 
-  void NodeArray::ChangeData(const MultiArray & value,
+  Bool NodeArray::ChangeData(const MultiArray & value,
                              std::map<Size, NodeId> & logicChildrenByRank,
-                             std::map<Size, NodeId> & stoChildrenByRank)
+                             std::map<Size, NodeId> & stoChildrenByRank,
+                             Bool mcmc)
   {
     if (!(range_ == IndexRange(value.DimPtr())))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
@@ -358,6 +359,8 @@ namespace Biips
     if (anyMissing(value))
       throw RuntimeError("Can not change data: there are missing values.");
 
+    Bool set_observed_nodes = false;
+
     // check that nodes are valid
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
@@ -365,23 +368,43 @@ namespace Biips
       NodeId id = it->left;
       NodeType type = graph_.GetNode(id).GetType();
       if (type == LOGICAL)
-        throw RuntimeError(String("Can not change data: node is logical."));
+        throw RuntimeError("Can not change data: node is logical.");
+
+      if (type == CONSTANT && mcmc)
+        throw RuntimeError("Can not change data: node is constant.");
 
       if (type == STOCHASTIC)
       {
-        // check node is observed
-        if (!graph_.GetObserved()[id])
-          throw RuntimeError(String("Can not change data: node is not observed."));
-
-        //check that its parents are observed
-        GraphTypes::ParentIterator it_parent, it_parent_end;
-        boost::tie(it_parent, it_parent_end) = graph_.GetParents(id);
-        for (; it_parent != it_parent_end; ++it_parent)
+        if (mcmc)
         {
-          if (!graph_.GetObserved()[*it_parent])
-            throw RuntimeError(String("Can not change data: node has unobserved parents."));
+          // check that it has no stochastic parent
+          GraphTypes::StochasticParentIterator it_parent, it_parent_end;
+          if (it_parent != it_parent_end)
+            throw RuntimeError(String("Can not change data: node has stochastic parents."));
+
+          // check node is observed
+          if (!graph_.GetObserved()[id])
+          {
+            graph_.SetObserved(id);
+            set_observed_nodes = true;
+          }
+        }
+        else
+        {
+          // check that its parents are observed
+          GraphTypes::ParentIterator it_parent, it_parent_end;
+          boost::tie(it_parent, it_parent_end) = graph_.GetParents(id);
+          for (; it_parent != it_parent_end; ++it_parent)
+          {
+            if (!graph_.GetObserved()[*it_parent])
+              throw RuntimeError(String("Can not change data: node has unobserved parents."));
+          }
+          // check node is observed
+          if (!graph_.GetObserved()[id])
+            throw RuntimeError(String("Can not change data: node is not observed."));
         }
       }
+
     }
 
     // change values
@@ -402,6 +425,77 @@ namespace Biips
       graph_.GetLogicalChildrenByRank(id, logicChildrenByRank);
       graph_.UpdateDiscreteness(id, stoChildrenByRank);
     }
+
+    return set_observed_nodes;
+  }
+
+  Bool NodeArray::SampleData(std::map<Size, NodeId> & logicChildrenByRank,
+                             std::map<Size, NodeId> & stoChildrenByRank,
+                             Rng * pRng,
+                             Bool mcmc)
+  {
+    // FIXME lazy copy-paste from ChangeData method
+
+    Bool set_observed_nodes = false;
+
+    // check that nodes are valid
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+    {
+      NodeId id = it->left;
+      NodeType type = graph_.GetNode(id).GetType();
+      if (type != STOCHASTIC)
+        throw RuntimeError(String("Can not sample data: node is not stochastic."));
+
+      if (mcmc)
+      {
+        // check that it has no stochastic parent
+        GraphTypes::StochasticParentIterator it_parent, it_parent_end;
+        if (it_parent != it_parent_end)
+          throw RuntimeError(String("Can not change data: node has stochastic parents."));
+
+        // check node is observed
+        if (!graph_.GetObserved()[id])
+        {
+          graph_.SetObserved(id);
+          set_observed_nodes = true;
+        }
+      }
+      else
+      {
+        // check that its parents are observed
+        GraphTypes::ParentIterator it_parent, it_parent_end;
+        boost::tie(it_parent, it_parent_end) = graph_.GetParents(id);
+        for (; it_parent != it_parent_end; ++it_parent)
+        {
+          if (!graph_.GetObserved()[*it_parent])
+            throw RuntimeError(String("Can not change data: node has unobserved parents."));
+        }
+        // check node is observed
+        if (!graph_.GetObserved()[id])
+          throw RuntimeError(String("Can not change data: node is not observed."));
+      }
+    }
+
+    // sample values
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+    {
+      NodeId id = it->left;
+      graph_.SampleValue(id, pRng, true);
+    }
+
+    // get observed logical children
+    // and update discreteness
+    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+    {
+      NodeId id = it->left;
+      graph_.GetLogicalChildrenByRank(id, logicChildrenByRank);
+      graph_.UpdateDiscreteness(id, stoChildrenByRank);
+    }
+
+    return set_observed_nodes;
   }
 
   MultiArray NodeArray::GetData() const

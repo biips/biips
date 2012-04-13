@@ -1199,7 +1199,8 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose)
+  Bool Console::ChangeData(const std::map<String, MultiArray> & dataMap,
+                           Bool verbose)
   {
     if (!pModel_)
     {
@@ -1230,11 +1231,72 @@ namespace Biips
       {
         out_ << PROMPT_STRING << "Changing data" << endl;
       }
-      if (!pModel_->ChangeData(dataMap))
+      Bool rebuild_sampler;
+      if (!pModel_->ChangeData(dataMap, rebuild_sampler))
       {
         err_ << "Failed to change data" << endl;
         return false;
       }
+      if (pModel_->SamplerBuilt() && rebuild_sampler)
+        pModel_->BuildSampler();
+
+      lockBackward_ = true;
+      ReleaseFilterMonitors();
+      ReleaseSmoothTreeMonitors();
+      if (pModel_->SmootherInitialized())
+        ReleaseSmoothMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::SampleData(const std::set<String> & variableNames,
+                           Size rngSeed,
+                           Bool verbose)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't sample data. No model!" << endl;
+      return false;
+    }
+    if (pModel_->GraphPtr()->Empty())
+    {
+      err_
+          << "Can't sample data. No nodes in graph (Have you compiled the model?)"
+          << endl;
+      return false;
+    }
+    if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
+        && !pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't sample data. SMC sampler is running." << endl;
+      return false;
+    }
+    if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't sample data. Backward smoother is running." << endl;
+      return false;
+    }
+    try
+    {
+      if (verbose)
+      {
+        out_ << PROMPT_STRING << "Sampling data" << endl;
+      }
+
+      // FIXME
+      Rng::Ptr p_rng(new Rng(rngSeed));
+
+      Bool rebuild_sampler;
+      if (!pModel_->SampleData(variableNames, p_rng.get(), rebuild_sampler))
+      {
+        err_ << "Failed to sample data" << endl;
+        return false;
+      }
+      if (pModel_->SamplerBuilt() && rebuild_sampler)
+        pModel_->BuildSampler();
+
       lockBackward_ = true;
       ReleaseFilterMonitors();
       ReleaseSmoothTreeMonitors();

@@ -56,8 +56,8 @@ if (PRINT_SYSTEM_INFO)
 endif (PRINT_SYSTEM_INFO)
 
 set (Biips_VERSION_MAJOR 0)
-set (Biips_VERSION_MINOR 1)
-set (Biips_VERSION_PATCH 0)
+set (Biips_VERSION_MINOR 7)
+set (Biips_VERSION_PATCH 2)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
 file (WRITE VERSION ${Biips_VERSION})
@@ -150,6 +150,11 @@ endif (UNIX)
 set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
 
+
+# configure interfaces build
+option (BUILD_RBIIPS "Activate RBiips (BiiPS interface for GNU R) build" ON)
+option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
+
 # Add subprojects
 # ===============
 add_subdirectory (core)
@@ -157,8 +162,12 @@ add_subdirectory (base)
 add_subdirectory (test)
 add_subdirectory (compiler)
 add_subdirectory (testcompiler)
-add_subdirectory (rbiips)
-add_subdirectory (matbiips)
+if (BUILD_RBIIPS)
+    add_subdirectory (rbiips)
+endif (BUILD_RBIIPS)
+if (BUILD_MATBIIPS)
+    add_subdirectory (matbiips)
+endif (BUILD_MATBIIPS)
 
 #============= CPACK commands ============
 # build a CPack driven installer package
@@ -173,6 +182,7 @@ set (CPACK_PACKAGE_VENDOR BiiPS)
 #	set (SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 #endif (UNIX)
 
+# Generic package options
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_SYSTEM_NAME})
 set (CPACK_PACKAGE_SOURCE_FILE_NAME ${CPACK_PACKAGE_NAME}-src_${Biips_VERSION})
 set (CPACK_PACKAGE_VERSION_MAJOR ${Biips_VERSION_MAJOR})
@@ -185,12 +195,11 @@ set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${Biips_BINARY_DIR}/README)
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
 set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
+set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 
-set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
-
-# Debian package specific options
+# Linux Debian package specific options
 set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
@@ -206,7 +215,7 @@ set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips-test")
 
-# RPM package specific options
+# Linux RPM package specific options
 set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
 if (USE_Qwt5_Qt4)
     set (CPACK_RPM_PACKAGE_REQUIRES
@@ -218,7 +227,7 @@ set (CPACK_RPM_PACKAGE_GROUP Applications/Engineering)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
 set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
 
-# NSIS package specific options
+# Windows NSIS package specific options
 if (WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.

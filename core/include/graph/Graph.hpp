@@ -152,14 +152,18 @@ namespace Biips
       return builtFlag_;
     }
 
+    // TODO: delete/improve this
     const std::map<String, Size> & NodesSummary() const
     {
       return nodesSummaryMap_;
     }
+
+    // TODO: delete/improve this
     const std::map<String, Size> & UnobsNodesSummary() const
     {
       return unobsNodesSummaryMap_;
     }
+
     Bool HasCycle() const;
     void Build();
     void VisitNode(NodeId nodeId, NodeVisitor & vis);
@@ -179,14 +183,21 @@ namespace Biips
     {
       return boost::get(boost::vertex_discrete, parentsGraph_);
     }
+
+    void SetObserved(NodeId nodeId);
+
     // Sets observed values of stochastic nodes only
     void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
     void SetObsValues(const NodeValues & nodeValues);
 
+    ValArray::Ptr SampleValue(NodeId nodeId,
+                              Rng * pRng = NULL,
+                              Bool setObsValue = false);
     // Called after changing node data
-    void UpdateDiscreteness(NodeId nodeId, std::map<Size, NodeId> & stoChildrenByRank);
-    void GetLogicalChildrenByRank(NodeId nodeId, std::map<Size, NodeId> & logicChildrenByRank);
-    void UpdateLogicalObsValue(NodeId nodeId);
+    void UpdateDiscreteness(NodeId nodeId,
+                            std::map<Size, NodeId> & stoChildrenByRank);
+    void GetLogicalChildrenByRank(NodeId nodeId,
+                                  std::map<Size, NodeId> & logicChildrenByRank);
 
     //Node::Ptr operator[] (NodeId nodeId) { return GetNodePtr(nodeId); };
     Node const & GetNode(NodeId nodeId) const

@@ -77,10 +77,12 @@ namespace Biips
       return symbolTable_;
     }
 
-    Bool SetFilterMonitor(const String & name, const IndexRange & range = NULL_RANGE);
+    Bool SetFilterMonitor(const String & name, const IndexRange & range =
+        NULL_RANGE);
     Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
         NULL_RANGE);
-    Bool SetSmoothMonitor(const String & name, const IndexRange & range = NULL_RANGE);
+    Bool SetSmoothMonitor(const String & name, const IndexRange & range =
+        NULL_RANGE);
 
     Bool
     IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
@@ -115,20 +117,24 @@ namespace Biips
                           Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
-    Bool ChangeData(const std::map<String, MultiArray> & dataMap);
+    Bool ChangeData(const std::map<String, MultiArray> & dataMap,
+                    Bool & rebuildSampler);
+    Bool SampleData(const std::set<String> & variableNames,
+                    Rng * pRng,
+                    Bool & rebuildSampler);
     Bool GetLogPriorDensity(Scalar & prior,
-                         const String & variable,
-                         IndexRange range = NULL_RANGE) const;
+                            const String & variable,
+                            IndexRange range = NULL_RANGE) const;
 
     Bool
-        DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
         DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
-        DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
-    Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng, std::map<
-        String, MultiArray> & sampledValues) const;
+    Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng, std::map<String,
+        MultiArray> & sampledValues) const;
 
     void virtual ClearFilterMonitors();
     void virtual ClearSmoothTreeMonitors();

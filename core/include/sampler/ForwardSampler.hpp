@@ -157,12 +157,10 @@ namespace Biips
     const Types<Size>::Array & GetNodeSamplingIterations() const;
     Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
 
-    void Build()
-    {
-      buildNodeIdSequence();
-      buildNodeSamplers();
-      built_ = true;
-    }
+    void Build();
+
+//    void Reset();
+
     Bool Built() const
     {
       return built_;
