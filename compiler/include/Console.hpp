@@ -41,6 +41,7 @@
 
 #include "common/Types.hpp"
 #include <map>
+#include <set>
 #include "common/IndexRange.hpp"
 #include "common/MultiArray.hpp"
 #include "common/Histogram.hpp"
@@ -172,8 +173,10 @@ namespace Biips
     Bool SetLogNormConst(Scalar logNormConst);
 
     Bool SampleSmoothTreeParticle(Size rngSeed);
-    Bool DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
-    Bool SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
+    Bool
+        DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
+    Bool
+        SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
@@ -185,19 +188,25 @@ namespace Biips
     Bool ExtractSmoothStat(const String & name, StatTag statFeature, std::map<
         IndexRange, MultiArray> & statMap);
 
-    Bool ExtractFilterPdf(const String & name, std::map<IndexRange,
-        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
-        0.25);
+    Bool ExtractFilterPdf(const String & name,
+                          std::map<IndexRange, Histogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25);
     Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
-        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
-        0.25);
-    Bool ExtractSmoothPdf(const String & name, std::map<IndexRange,
-        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction =
-        0.25);
+        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
+    Bool ExtractSmoothPdf(const String & name,
+                          std::map<IndexRange, Histogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25);
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);
     Bool
-    ChangeData(std::map<String, MultiArray> & dataMap, Bool verbose = true);
+    ChangeData(const std::map<String, MultiArray> & dataMap, Bool verbose =
+        true);
+    Bool
+    SampleData(const std::set<String> & variableNames,
+               Size rngSeed,
+               Bool verbose = true);
     Bool GetLogPriorDensity(Scalar & prior,
                             const String & variable,
                             const IndexRange & range = NULL_RANGE);
