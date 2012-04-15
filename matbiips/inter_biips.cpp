@@ -1,9 +1,10 @@
 #include "mex.h"
 #include <string>
 #include <Console.hpp>
+#include "Mostream.h"
 
 using namespace std;
-
+using namespace Biips;
 #define MAX_CONSOLES 10
 typedef Console * Console_ptr;
 Console_ptr consoles[MAX_CONSOLES];
