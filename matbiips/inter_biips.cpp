@@ -3,6 +3,12 @@
 #include <Console.hpp>
 
 using namespace std;
+
+#define MAX_CONSOLES 10
+typedef Console * Console_ptr;
+Console_ptr consoles[MAX_CONSOLES];
+int nb_consoles = 0;
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
     
@@ -28,7 +34,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
     if (name_func == "make_console") {
    
-       mexPrintf("bon nom de fonction\n");
+       if (nb_consoles < MAX_CONSOLES - 1) {
+	  consoles[nb_consoles] = new Console(mbiips_cout, mbiips_cerr);
+	  nb_consoles++;
+          plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+	  *mxGetPr(plhs[0]) = nb_consoles++;
+       }
+       else {
+         mexErrMsgTxt("Too many existing consoles opened!");
+      }
     }
     
     else {
