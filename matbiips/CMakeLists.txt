@@ -1,3 +1,5 @@
+# search for mex utility 
+find_package(Mex)
 #define sources
 set(MBIIPS_SRC inter_biips.cpp Mostream.cpp)
 foreach(f ${MBIIPS_SRC})
