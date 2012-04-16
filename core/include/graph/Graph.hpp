@@ -187,7 +187,9 @@ namespace Biips
     void SetObserved(NodeId nodeId);
 
     // Sets observed values of stochastic nodes only
-    void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue);
+    void SetObsValue(NodeId nodeId,
+                     const ValArray::Ptr & pObsValue,
+                     Bool stochOnly = true);
     void SetObsValues(const NodeValues & nodeValues);
 
     ValArray::Ptr SampleValue(NodeId nodeId,

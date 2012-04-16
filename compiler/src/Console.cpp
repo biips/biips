@@ -1251,8 +1251,9 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SampleData(const std::set<String> & variableNames,
+  Bool Console::SampleData(const Types<String>::Array & variableNames,
                            Size rngSeed,
+                           std::map<String, MultiArray> & dataMap,
                            Bool verbose)
   {
     if (!pModel_)
@@ -1289,7 +1290,10 @@ namespace Biips
       Rng::Ptr p_rng(new Rng(rngSeed));
 
       Bool rebuild_sampler;
-      if (!pModel_->SampleData(variableNames, p_rng.get(), rebuild_sampler))
+      if (!pModel_->SampleData(variableNames,
+                               p_rng.get(),
+                               dataMap,
+                               rebuild_sampler))
       {
         err_ << "Failed to sample data" << endl;
         return false;

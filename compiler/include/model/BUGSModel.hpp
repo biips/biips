@@ -119,8 +119,9 @@ namespace Biips
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
     Bool ChangeData(const std::map<String, MultiArray> & dataMap,
                     Bool & rebuildSampler);
-    Bool SampleData(const std::set<String> & variableNames,
+    Bool SampleData(const Types<String>::Array & variableNames,
                     Rng * pRng,
+                    std::map<String, MultiArray> & dataMap,
                     Bool & rebuildSampler);
     Bool GetLogPriorDensity(Scalar & prior,
                             const String & variable,

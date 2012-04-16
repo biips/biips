@@ -491,11 +491,12 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::SampleData(const std::set<String> & variableNames,
+  Bool BUGSModel::SampleData(const Types<String>::Array & variableNames,
                              Rng * pRng,
+                             std::map<String, MultiArray> & dataMap,
                              Bool & rebuildSampler)
   {
-    rebuildSampler = symbolTable_.SampleData(variableNames, pRng);
+    rebuildSampler = symbolTable_.SampleData(variableNames, pRng, dataMap);
 
     return true;
   }

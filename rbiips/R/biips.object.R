@@ -82,9 +82,8 @@ build.sampler.biips <- function(obj, proposal= "auto")
 }
 
 
-run.smc.forward <- function(obj, n.part,
-                      rs.thres = 0.5, rs.type = "stratified",
-                      smc.rng.seed)
+run.smc.forward <- function(obj, n.part, rs.thres = 0.5, rs.type = "stratified",
+                            smc.rng.seed)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
@@ -121,22 +120,64 @@ run.smc.forward <- function(obj, n.part,
 }
 
 
-init.pmmh.biips <- function(obj, variable.names, pn,
-                            n.part, rs.thres=0.5, rs.type="stratified")
-{  
+init.pmmh <- function(x, ...)
+  UseMethod("init.pmmh")
+
+
+init.pmmh.biips <- function(obj, variable.names, inits=list(),
+                            n.part, rs.thres=0.5, rs.type="stratified",
+                            inits.rng.seed)
+{ 
+  if (!is.biips(obj))
+    stop("Invalid BiiPS model")
   
-  sample <- list()
-  for (var in variable.names) {
-    sample[[var]] <- obj$data()[[var]]
+  ## check variable.names
+  if (!is.character(variable.names))
+    stop("Invalid variable.names argument")
+  pn <- parse.varnames(variable.names)
+  
+  ## check inits
+  if (!is.list(inits))
+    stop("Invalid inits argument")
+  if (length(inits) > 0) {
+    for (var in variable.names) {
+      if (!var %in% names(inits))
+        warning(paste("Missing init value for variable", var))
+    }    
   }
   
+  ## check inits.rng.seed parameter
+  if (missing(inits.rng.seed)) {
+    inits.rng.seed <- runif(1, 0, as.integer(Sys.time()));
+  }
+  if (!is.numeric(inits.rng.seed) || !is.atomic(inits.rng.seed) || inits.rng.seed < 0) {
+    stop("Invalid inits.rng.seed argument")
+  }
+  
+  ## make init sample
+  sample <- list()
+  for (var in variable.names) {
+    if (var %in% names(inits)) {
+      if(!.Call("change_data", obj$ptr(), inits[var], PACKAGE="RBiips"))
+        stop(paste("data change failed: invalid initial value for variable", var))
+      sample[[var]] <- inits[[var]]
+    } else {
+      data <- obj$data()
+      if (var %in% names(data))
+        sample[[var]] <- data[[var]]
+      else
+        sample[[var]] <- .Call("sample_data", obj$ptr(), var, inits.rng.seed, PACKAGE="RBiips")
+    }
+  }
+  
+  ## log prior density
   log.prior <- list()
   for (v in seq(along=variable.names))
   {
     log.p <- .Call("get_log_prior_density", obj$ptr(),
                    pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
     if (is.infinite(log.p) && log.p<0) 
-      stop("get log prior density: bad initial values.")
+      stop(paste("get log prior density: invalid initial values for variable", variable.names[[v]]))
     
     log.prior[[variable.names[[v]]]] <- log.p
   }
@@ -150,18 +191,19 @@ init.pmmh.biips <- function(obj, variable.names, pn,
   if (!.Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")) {
     ## run smc
     if (!run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type))
-      stop("run smc forward sampler: bad initial values.")
+      stop("run smc forward sampler: invalid initial values.")
   }
   log.norm.const <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
   
   ans <- list(sample=sample, log.prior=log.prior, log.norm.const=log.norm.const)
-  return(ans)
+  
+  invisible(ans)
 }
 
 
-one.update.pmmh.biips <- function(obj, variable.names, pn,
-                                  rw.sd, n.part, rs.thres=0.5, rs.type="stratified",
-                                  sample, log.prior, log.norm.const)
+one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
+                                  sample, log.prior, log.norm.const,
+                                  n.part, rs.thres, rs.type)
 {
   n.fail <- 0
   
@@ -171,8 +213,10 @@ one.update.pmmh.biips <- function(obj, variable.names, pn,
     var <- variable.names[[v]]
     ## Random walk proposal
     prop <- list()
-    for (d in 1:length(sample[[var]])) {
-      prop[[var]] <- rnorm(1, sample[[var]][[d]], rw.sd[[var]][[d]])
+    l <- length(sample[[var]])
+    prop[[var]] <- vector(length=l)
+    for (d in 1:l) {
+      prop[[var]][[d]] <- rnorm(1, sample[[var]][[d]], rw.sd[[var]][[d]])
     }
     dim(prop[[var]]) <- dim(sample[[var]])
     
@@ -181,11 +225,12 @@ one.update.pmmh.biips <- function(obj, variable.names, pn,
     
     if (!ok) {
       accepted <- FALSE
+      n.fail <- n.fail+1
+      warning(paste("Failure changing data. proposal:", prop))
       ## reset previous value
       prop[[var]] <- sample[[var]]
       if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
-        stop("proposed data change failed: Can not reset previous data.")
-      n.fail <- n.fail+1
+        stop("can not reset previous data.")
       next
     }
     
@@ -194,28 +239,31 @@ one.update.pmmh.biips <- function(obj, variable.names, pn,
     
     if (is.infinite(log.prior.prop) && log.prior.prop<0) {
       accepted <- FALSE
+      n.fail <- n.fail+1
+      warning(paste("Failure evaluating proposal log prior. proposal:", prop))
       ## reset previous value
       if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
-        stop("get log prior failed: Can not reset previous data.")
+        stop("can not reset previous data.")
       next
     }
-   
+    
     ## run smc sampler
     ok <- run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
     
     if (!ok) {
       accepted <- FALSE
+      n.fail <- n.fail+1
+      warning(paste("Failure running smc forward sampler. proposal:", prop))
       ## reset previous value
       if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
-        stop("run smc forward sampler failed: Can not reset previous data.")
-      n.fail <- n.fail+1
+        stop("can not reset previous data.")
       next
     }
     
     ## Acceptance rate
     log.norm.const.prop <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
     log.ar <- log.norm.const.prop - log.norm.const + log.prior.prop - log.prior[[var]]
-  
+    
     ## Accept/Reject step
     accepted <- (runif(1) < exp(log.ar))
     if (accepted) {
@@ -225,7 +273,7 @@ one.update.pmmh.biips <- function(obj, variable.names, pn,
     } else {
       ## reset previous value
       if(!.Call("change_data", obj$ptr(), sample[var], PACKAGE="RBiips"))
-        stop("rejected proposed value: Can not reset previous data.")
+        stop("can not reset previous data.")
     }
   }
   
@@ -238,16 +286,11 @@ update.pmmh <- function(x, ...)
   UseMethod("update.pmmh")
 
 
-update.pmmh.biips <- function(obj, variable.names, n.iter,
-                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified", max.fail = 0)
-{
+update.pmmh.biips <- function(obj, variable.names, n.iter, rw.sd,
+                              n.part, max.fail = 0, ...)
+{  
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
-  
-  ## check variable.names
-  if (!is.character(variable.names))
-    stop("Invalid variable.names argument")
-  pn <- parse.varnames(variable.names)
   
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
@@ -267,11 +310,12 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   on.exit(set.biips.verbosity(1))
   
   ## initialize
-  out <- init.pmmh.biips(obj, variable.names=variable.names, pn=pn,
-                         n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+  out <- init.pmmh.biips(obj, variable.names=variable.names, n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
+  
+  pn <- parse.varnames(variable.names)
   
   # check rw.sd dimension
   for (var in variable.names) {
@@ -294,9 +338,9 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(obj, variable.names=variable.names, pn=pn,
-                                  rw.sd=rw.sd, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type,
-                                  sample=sample, log.prior=log.prior, log.norm.const=log.norm.const)
+    out <- one.update.pmmh.biips(obj, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
+                                 sample=sample, log.prior=log.prior, log.norm.const=log.norm.const,
+                                 n.part=n.part, ...)
     sample <- out$sample
     log.prior <- out$log.prior
     log.norm.const <- out$log.norm.const
@@ -316,7 +360,7 @@ update.pmmh.biips <- function(obj, variable.names, n.iter,
 
 
 init.pimh.biips <- function(obj, variable.names,
-                            n.part, rs.thres=0.5, rs.type="stratified")
+                            n.part, rs.thres, rs.type)
 {
   ## monitor variables
   monitor.biips(obj, variable.names, type="smoothing")
@@ -350,7 +394,7 @@ init.pimh.biips <- function(obj, variable.names,
 
 
 one.update.pimh.biips <- function(obj, variable.names,
-                                  n.part, rs.thres=0.5, rs.type="stratified",
+                                  n.part, rs.thres, rs.type,
                                   sample, log.norm.const)
 {
   ## SMC
@@ -386,7 +430,7 @@ update.pimh <- function(x, ...)
 
 
 update.pimh.biips <- function(obj, variable.names, n.iter,
-                       n.part, rs.thres=0.5, rs.type="stratified")
+                       n.part, ...)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
@@ -405,7 +449,7 @@ update.pimh.biips <- function(obj, variable.names, n.iter,
   
   ## initialize
   out <- init.pimh.biips(obj, variable.names=variable.names,
-                         n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+                         n.part=n.part, ...)
   sample <- out$sample
   log.norm.const <- out$log.norm.const
   
@@ -417,9 +461,9 @@ update.pimh.biips <- function(obj, variable.names, n.iter,
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(obj, variable.names=variable.names,
-                                 n.part=n.part, rs.thres=rs.thres, rs.type=rs.type,
-                                 sample=sample, log.norm.const=log.norm.const)
+    out <- one.update.pimh.biips(obj, variable.names=variable.names, 
+                                 sample=sample, log.norm.const=log.norm.const,
+                                 n.part=n.part, ...)
     sample <- out$sample
     log.norm.const <- out$log.norm.const
     accepted <- out$accepted
