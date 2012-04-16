@@ -41,7 +41,6 @@
 
 #include "common/Types.hpp"
 #include <map>
-#include <set>
 #include "common/IndexRange.hpp"
 #include "common/MultiArray.hpp"
 #include "common/Histogram.hpp"
@@ -204,8 +203,9 @@ namespace Biips
     ChangeData(const std::map<String, MultiArray> & dataMap, Bool verbose =
         true);
     Bool
-    SampleData(const std::set<String> & variableNames,
+    SampleData(const Types<String>::Array & variableNames,
                Size rngSeed,
+               std::map<String, MultiArray> & dataMap,
                Bool verbose = true);
     Bool GetLogPriorDensity(Scalar & prior,
                             const String & variable,

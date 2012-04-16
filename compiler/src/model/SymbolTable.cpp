@@ -206,17 +206,18 @@ namespace Biips
     return set_observed_nodes;
   }
 
-  Bool SymbolTable::SampleData(const std::set<String> & variableNames,
-                               Rng * pRng)
+  Bool SymbolTable::SampleData(const Types<String>::Array & variableNames,
+                               Rng * pRng,
+                               std::map<String, MultiArray> & dataMap)
   {
     Bool set_observed_nodes = false;
 
     std::map<Size, NodeId> logic_children_by_rank;
     std::map<Size, NodeId> sto_children_by_rank;
-    for (std::set<String>::const_iterator p(variableNames.begin()); p
-        != variableNames.end(); ++p)
+    for (Types<String>::ConstIterator it(variableNames.begin()); it
+        != variableNames.end(); ++it)
     {
-      const String & name = *p;
+      const String & name = *it;
       if (!Contains(name))
         throw RuntimeError("Can't sample data: variable is not defined in the model.");
 
@@ -226,6 +227,7 @@ namespace Biips
       set_observed_nodes = array.SampleData(logic_children_by_rank,
                                             sto_children_by_rank,
                                             pRng);
+      dataMap.insert(std::make_pair(name, array.GetData()));
     }
 
     // update children

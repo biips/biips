@@ -286,17 +286,9 @@ smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, .
 }
 
 
-pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
-                       rw.sd, n.part, rs.thres=0.5, rs.type="stratified", max.fail=0)
-{
-  if (!is.biips(obj))
-    stop("Invalid BiiPS model")
-  
-  ## check variable.names
-  if (!is.character(variable.names))
-    stop("Invalid variable.names argument")
-  pn <- parse.varnames(variable.names)
-  
+pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
+                         n.part, max.fail=0, ...)
+{  
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
@@ -319,11 +311,12 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   
   ## Initialization
   #---------------  
-  out <- init.pmmh.biips(obj, variable.names=variable.names, pn=pn,
-                         n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+  out <- init.pmmh.biips(obj, variable.names=variable.names, n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.norm.const <- out$log.norm.const
+  
+  pn <- parse.varnames(variable.names)
   
   # check rw.sd dimension
   for (var in variable.names) {
@@ -348,9 +341,9 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1,
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(obj, variable.names=variable.names, pn=pn,
-                                  rw.sd=rw.sd, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type,
-                                  sample=sample, log.prior=log.prior, log.norm.const=log.norm.const)
+    out <- one.update.pmmh.biips(obj, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
+                                sample=sample, log.prior=log.prior, log.norm.const=log.norm.const,
+                                 n.part=n.part, ...)
     sample <- out$sample
     log.prior <- out$log.prior
     log.norm.const <- out$log.norm.const

@@ -290,6 +290,26 @@ RcppExport SEXP change_data(SEXP pConsole, SEXP data)
 }
 
 
+RcppExport SEXP sample_data(SEXP pConsole, SEXP variableNames, SEXP rngSeed)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::CharacterVector variable_names(variableNames);
+  Types<String>::Array var_names(variable_names.begin(), variable_names.end());
+
+  std::map<String, MultiArray> data_map;
+
+  Bool ok = p_console->SampleData(var_names, Rcpp::as<Size>(rngSeed),
+                                  data_map, verbosity);
+
+  return readDataTable<MultiArray::StorageOrderType>(data_map);
+
+  END_RBIIPS
+}
+
+
 RcppExport void print_graphviz(SEXP pConsole, SEXP dotFileName)
 {
   BEGIN_RBIIPS

@@ -859,7 +859,7 @@ namespace Biips
     // allocate memory: temporary NA value
     ValArray::Ptr p_val(new ValArray(GetNode(nodeId).Dim().Length(),
                                      BIIPS_REALNA));
-    SetObsValue(nodeId, p_val);
+    SetObsValue(nodeId, p_val, false);
 
     // set logical children observed
     ChildIterator it_child, it_child_end;
@@ -880,10 +880,18 @@ namespace Biips
     }
   }
 
-  void Graph::SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue)
+  void Graph::SetObsValue(NodeId nodeId,
+                          const ValArray::Ptr & pObsValue,
+                          Bool stochOnly)
   {
-    if (GetNode(nodeId).GetType() != STOCHASTIC || !GetObserved()[nodeId])
-      throw RuntimeError("Can't set value, node is not observed.");
+    if (stochOnly)
+      if (GetNode(nodeId).GetType() != STOCHASTIC)
+        throw RuntimeError(String("Can't set value, node is not stochastic. node id:")
+            + print(nodeId));
+
+    if (!GetObserved()[nodeId])
+      throw LogicError(String("Can't set value, node is not observed. node id:")
+          + print(nodeId));
 
     // check discreteness
     if (GetDiscrete()[nodeId])
