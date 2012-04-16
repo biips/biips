@@ -43,7 +43,6 @@
 #include "model/NodeArray.hpp"
 
 #include <map>
-#include <set>
 
 namespace Biips
 {
@@ -116,7 +115,9 @@ namespace Biips
 
     Bool ChangeData(const std::map<String, MultiArray> & dataMap);
 
-    Bool SampleData(const std::set<String> & variableNames, Rng * pRng);
+    Bool SampleData(const Types<String>::Array & variableNames,
+                    Rng * pRng,
+                    std::map<String, MultiArray> & dataMap);
 
     /**
      * Reads the current value of selected nodes in the symbol table and
