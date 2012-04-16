@@ -24,7 +24,7 @@ endforeach(l ${MBIIPS_LIBS})
 add_custom_command(
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/inter_biips.mex
 DEPENDS ${SOURCES} 
-COMMAND mex 
+COMMAND ${MEX_COMMAND} 
 ARGS  -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE} -I${Biips_compiler_INCLUDE}  
 -L${Biips_INSTALL_LIBDIR} ${EXTRA_LIBS}
 ${SOURCES}
