@@ -21,16 +21,17 @@ foreach(l ${MBIIPS_LIBS})
 endforeach(l ${MBIIPS_LIBS})
 
 #define mexfile compilation command
+message(STATUS ${MEX_EXT})
 add_custom_command(
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/inter_biips.mex
 DEPENDS ${SOURCES} 
 COMMAND ${MEX_COMMAND} 
-ARGS  -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE} -I${Biips_compiler_INCLUDE}  
+ARGS  -v -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE} -I${Biips_compiler_INCLUDE}  
 -L${Biips_INSTALL_LIBDIR} ${EXTRA_LIBS}
 ${SOURCES}
 COMMENT "building mexfile")
 
 #define target
-add_custom_target(matbiips ALL
+add_custom_target(matbiips 
 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/inter_biips.mex
 )
