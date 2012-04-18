@@ -5,8 +5,8 @@ Date: @Biips_DATE@
 Title: @Biips_DESCRIPTION_SUMMARY@
 Author: @Biips_OWNER@
 Maintainer: @Biips_CONTACT@
-Depends: R (>= 2.13.0), Rcpp (>= 0.9.4), stats
-SystemRequirements: biips (== @Biips_VERSION@), boost (>= 1.42)
+Depends: R (>= @R_VERSION@), Rcpp (>= @Rcpp_VERSION@), stats
+SystemRequirements: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
 Description: @Biips_DESCRIPTION@
 License: @Biips_LICENSE@
 URL: @Biips_URL@
