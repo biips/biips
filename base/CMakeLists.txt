@@ -1,6 +1,6 @@
 #                                               -*- cmake -*-
 #
-#  BiiPS software is a set of libraries for
+#  BiiPS software is a set of C++ libraries for
 #  Bayesian inference with interacting Particle Systems.
 #  Copyright (C) Inria, 2012
 #  Contributors: Adrien Todeschini, Francois Caron
@@ -43,7 +43,7 @@ set (PROJECT_LIB_NAME ${BiipsBase_LIB_NAME})
 string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 
 # find boost libraries
-find_package(Boost 1.42.0 REQUIRED)
+find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED)
 include_directories (${Boost_INCLUDE_DIRS})
 
 # include directories
