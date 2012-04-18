@@ -1,6 +1,6 @@
 #                                               -*- cmake -*-
 #
-#  BiiPS software is a set of libraries for
+#  BiiPS software is a set of C++ libraries for
 #  Bayesian inference with interacting Particle Systems.
 #  Copyright (C) Inria, 2012
 #  Contributors: Adrien Todeschini, Francois Caron
@@ -65,9 +65,10 @@ file (WRITE VERSION ${Biips_VERSION})
 set (Biips_OWNER Inria)
 set (Biips_LICENSE GPL-3)
 set (Biips_URL http://biips.gforge.inria.fr)
+set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Systems")
-set (Biips_DESCRIPTION )
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
+file (READ Description Biips_DESCRIPTION)
 
 if (NOT Biips_DATE)
 	if (WIN32)
@@ -90,8 +91,23 @@ message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure README file
 configure_file (
-	${PROJECT_SOURCE_DIR}/README.in
-	${PROJECT_BINARY_DIR}/README
+	${PROJECT_SOURCE_DIR}/README.md.in
+	${PROJECT_BINARY_DIR}/README.md
+)
+
+# set dependencies versions
+set (JAGS_VERSION 3.2.0)
+set (SMCTC_VERSION 1.0-RC4)
+set (Boost_VERSION_REQUIRED 1.42.0)
+
+set (rjags_VERSION 3.2)
+set (Rcpp_VERSION 0.9.4)
+set (R_VERSION 2.13.0)
+
+# configure NOTICES file
+configure_file (
+	${PROJECT_SOURCE_DIR}/NOTICES.in
+	${PROJECT_BINARY_DIR}/NOTICES
 )
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)

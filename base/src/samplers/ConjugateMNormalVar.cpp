@@ -1,6 +1,6 @@
 //                                               -*- C++ -*-
 /*
- * BiiPS software is a set of libraries for
+ * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Contributors: Adrien Todeschini, Francois Caron
