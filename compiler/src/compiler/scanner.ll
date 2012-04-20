@@ -1,4 +1,4 @@
-//                                               -*- C++ -*-
+//                                               -*- lex -*-
 /*
  * BiiPS software is a set of libraries for
  * Bayesian inference with interacting Particle Systems.
