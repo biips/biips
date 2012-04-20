@@ -212,7 +212,7 @@ set (CPACK_RESOURCE_FILE_README ${Biips_BINARY_DIR}/README.md)
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
 set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
-set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-logo-bg-white.jpg")
+set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
 
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 
