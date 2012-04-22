@@ -90,9 +90,27 @@ endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure README file
+if (APPLE)
+    set (Biips_README_FILE README.txt)
+else (APPLE)
+    set (Biips_README_FILE README.md)
+endif (APPLE)
+
 configure_file (
 	${PROJECT_SOURCE_DIR}/README.md.in
-	${PROJECT_BINARY_DIR}/README.md
+	${PROJECT_BINARY_DIR}/${Biips_README_FILE}
+)
+
+# configure COPYING file
+if (APPLE)
+    set (Biips_COPYING_FILE COPYING.txt)
+else (APPLE)
+    set (Biips_README_FILE COPYING)
+endif (APPLE)
+
+configure_file (
+	${PROJECT_SOURCE_DIR}/COPYING
+	${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE}
 )
 
 # set dependencies versions
@@ -208,9 +226,9 @@ set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
-set (CPACK_RESOURCE_FILE_README ${Biips_BINARY_DIR}/README.md)
+set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/${Biips_README_FILE})
 set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
-set (CPACK_RESOURCE_FILE_LICENSE ${Biips_SOURCE_DIR}/COPYING)
+set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE})
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
 
