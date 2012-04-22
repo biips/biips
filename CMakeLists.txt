@@ -90,23 +90,35 @@ endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure README file
-if (APPLE)
+if (APPLE OR WIN32)
     set (Biips_README_FILE README.txt)
-else (APPLE)
+else (APPLE OR WIN32)
     set (Biips_README_FILE README.md)
-endif (APPLE)
+endif (APPLE OR WIN32)
 
 configure_file (
 	${PROJECT_SOURCE_DIR}/README.md.in
 	${PROJECT_BINARY_DIR}/${Biips_README_FILE}
 )
 
+# configure Welcome file
+if (APPLE OR WIN32)
+    set (Biips_WELCOME_FILE Welcome.txt)
+else (APPLE OR WIN32)
+    set (Biips_WELCOME_FILE Welcome)
+endif (APPLE OR WIN32)
+
+configure_file (
+	${PROJECT_SOURCE_DIR}/Welcome
+	${PROJECT_BINARY_DIR}/${Biips_WELCOME_FILE}
+)
+
 # configure COPYING file
-if (APPLE)
+if (APPLE OR WIN32)
     set (Biips_COPYING_FILE COPYING.txt)
-else (APPLE)
+else (APPLE OR WIN32)
     set (Biips_README_FILE COPYING)
-endif (APPLE)
+endif (APPLE OR WIN32)
 
 configure_file (
 	${PROJECT_SOURCE_DIR}/COPYING
@@ -227,7 +239,7 @@ set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/${Biips_README_FILE})
-set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/Welcome)
+set (CPACK_RESOURCE_FILE_WELCOME ${Biips_SOURCE_DIR}/${Biips_WELCOME_FILE})
 set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE})
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
