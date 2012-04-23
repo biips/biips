@@ -23,7 +23,7 @@ Compile your model using biips.model function. Then compute estimates using stan
 \author{
 RBiips development is supported by the team ALEA at Inria Bordeaux Sud-Ouest.
 
-Individual contributors:
+Individual Authors:
 Adrien Todeschini (Design and development)
 François Caron (Probability expertise and specifications)
 
