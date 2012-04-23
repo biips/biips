@@ -26,7 +26,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-#  \file     zzz.R.IN
+#  \file     zzz.R
 #  \brief    package loading functions for windows
 #
 #  \author   $LastChangedBy$
