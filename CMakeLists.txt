@@ -91,7 +91,7 @@ endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure resource files
-macro (configure_resource_file name in out_unix out_win)
+macro (configure_resource_file name in out_unix out_win args)
     if (APPLE OR WIN32)
         set (Biips_${name}_FILE ${name}${out_win})
     else (APPLE OR WIN32)
@@ -101,12 +101,13 @@ macro (configure_resource_file name in out_unix out_win)
     configure_file (
     	${name}${in}
     	${Biips_${name}_FILE}
+    	${args}
     )
 endmacro(configure_resource_file)
 
-configure_resource_file (README .md.in .md .txt)
-configure_resource_file (Welcome "" "" .txt)
-configure_resource_file (COPYING "" "" .txt)
+configure_resource_file (README .md.in .md .txt @ONLY)
+configure_resource_file (Welcome "" "" .txt COPYONLY)
+configure_resource_file (COPYING "" "" .txt COPYONLY)
 
 # configure NOTICES file
 configure_file (
