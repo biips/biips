@@ -117,7 +117,7 @@ if (UNIX)
 	find_program (AUTOCONF autoconf)
 	if (AUTOCONF)
 		execute_process (COMMAND autoconf
-			WORKING_DIRECTORY ${PROJECT_PKG_NAME}
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_PKG_NAME}
 		)
 	else (AUTOCONF)
 		message (SEND_ERROR "autoconf not found")
