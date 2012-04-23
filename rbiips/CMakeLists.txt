@@ -40,43 +40,50 @@ cmake_minimum_required (VERSION 2.8)
 # project configuration
 project (RBiips)
 set (PROJECT_PKG_NAME ${PROJECT_NAME})
-string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
+string (REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 
 # configure DESCRIPTION file
 configure_file (
-	DESCRIPTION.IN
+	DESCRIPTION.in
 	${PROJECT_PKG_NAME}/DESCRIPTION
 )
 
 # configure README file
 configure_file (
-	README.IN
+	README.in
 	${PROJECT_PKG_NAME}/README
 )
 
 # configure NOTICES file
 configure_file (
-	NOTICES.IN
+	NOTICES.in
 	${PROJECT_PKG_NAME}/NOTICES
 )
 
 # configure R/windows/zzz.R file
 configure_file (
-	R/windows/zzz.R.IN
+	R/windows/zzz.R.in
 	${PROJECT_PKG_NAME}/R/windows/zzz.R
 )
 
-# configure src/Makevars.win.IN file
+# configure src/Makevars.in file
 configure_file (
-	src/Makevars.win.IN
+	src/Makevars.in.in
+	${PROJECT_PKG_NAME}/src/Makevars.in
+	@ONLY
+)
+
+# configure src/Makevars.win file
+configure_file (
+	src/Makevars.win.in
 	${PROJECT_PKG_NAME}/src/Makevars.win
 	@ONLY
 )
 
 # configure configure.ac file
 configure_file (
-	configure.ac.IN
-	${PROJECT_SOURCE_DIR}/configure.ac
+	configure.ac.in
+	${PROJECT_PKG_NAME}/configure.ac
 	@ONLY
 	NEWLINE_STYLE UNIX
 )
@@ -84,17 +91,17 @@ configure_file (
 
 # copy files to binary directory
 macro (copy_dir_to_binary dir)
-	file (
-		GLOB SOURCE_FILES
+	file ( GLOB SOURCE_FILES
 		${PROJECT_SOURCE_DIR}/${dir}/*
 	)
-	file (	COPY ${SOURCE_FILES}
+	file (COPY ${SOURCE_FILES}
 		DESTINATION ${PROJECT_PKG_NAME}/${dir}/
 		PATTERN CMakeLists.txt EXCLUDE
-		PATTERN *.IN EXCLUDE
+		PATTERN *.in EXCLUDE
 		PATTERN .svn EXCLUDE
 		PATTERN .project EXCLUDE
 		PATTERN .cproject EXCLUDE
+		PATTERN *~ EXCLUDE
 	)
 endmacro(copy_dir_to_binary)
 
@@ -111,9 +118,6 @@ if (UNIX)
 	if (AUTOCONF)
 		execute_process (COMMAND autoconf
 			WORKING_DIRECTORY ${PROJECT_PKG_NAME}
-		)
-		file ( COPY configure
-			DESTINATION ${PROJECT_SOURCE_DIR}
 		)
 	else (AUTOCONF)
 		message (SEND_ERROR "autoconf not found")

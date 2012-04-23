@@ -36,10 +36,7 @@
 
 cmake_minimum_required (VERSION 2.8)
 
-# project configuration
-# =====================
-project (Biips CXX)
-
+# print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
 if (PRINT_SYSTEM_INFO)
     message (STATUS CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
@@ -54,6 +51,10 @@ if (PRINT_SYSTEM_INFO)
     message (STATUS CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
     message (STATUS CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
 endif (PRINT_SYSTEM_INFO)
+
+# project configuration
+# =====================
+project (Biips CXX)
 
 set (Biips_VERSION_MAJOR 0)
 set (Biips_VERSION_MINOR 7)
@@ -89,40 +90,28 @@ if (NOT Biips_DATE)
 endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
 
-# configure README file
-if (APPLE OR WIN32)
-    set (Biips_README_FILE README.txt)
-else (APPLE OR WIN32)
-    set (Biips_README_FILE README.md)
-endif (APPLE OR WIN32)
+# configure resource files
+macro (configure_resource_file name in out_unix out_win)
+    if (APPLE OR WIN32)
+        set (Biips_${name}_FILE ${name}${out_win})
+    else (APPLE OR WIN32)
+        set (Biips_${name}_FILE ${name}${out_unix})
+    endif (APPLE OR WIN32)
+    
+    configure_file (
+    	${name}${in}
+    	${Biips_${name}_FILE}
+    )
+endmacro(configure_resource_file)
 
+configure_resource_file (README .md.in .md .txt)
+configure_resource_file (Welcome "" "" .txt)
+configure_resource_file (COPYING "" "" .txt)
+
+# configure NOTICES file
 configure_file (
-	${PROJECT_SOURCE_DIR}/README.md.in
-	${PROJECT_BINARY_DIR}/${Biips_README_FILE}
-)
-
-# configure Welcome file
-if (APPLE OR WIN32)
-    set (Biips_WELCOME_FILE Welcome.txt)
-else (APPLE OR WIN32)
-    set (Biips_WELCOME_FILE Welcome)
-endif (APPLE OR WIN32)
-
-configure_file (
-	${PROJECT_SOURCE_DIR}/Welcome
-	${PROJECT_BINARY_DIR}/${Biips_WELCOME_FILE}
-)
-
-# configure COPYING file
-if (APPLE OR WIN32)
-    set (Biips_COPYING_FILE COPYING.txt)
-else (APPLE OR WIN32)
-    set (Biips_README_FILE COPYING)
-endif (APPLE OR WIN32)
-
-configure_file (
-	${PROJECT_SOURCE_DIR}/COPYING
-	${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE}
+	${PROJECT_SOURCE_DIR}/NOTICES.in
+	${PROJECT_BINARY_DIR}/NOTICES
 )
 
 # set dependencies versions
@@ -134,15 +123,9 @@ set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
 set (R_VERSION 2.13.0)
 
-# configure NOTICES file
-configure_file (
-	${PROJECT_SOURCE_DIR}/NOTICES.in
-	${PROJECT_BINARY_DIR}/NOTICES
-)
-
+# configure build
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
-# configure build
 math (EXPR BUILD_ARCH_BIT_NB 8*${CMAKE_SIZEOF_VOID_P})
 option (BUILD_FORCE_32BIT "Force 32bit compilation." OFF)
 option (BUILD_FORCE_64BIT "Force 64bit compilation." OFF)
@@ -239,7 +222,7 @@ set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/${Biips_README_FILE})
-set (CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/${Biips_WELCOME_FILE})
+set (CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/${Biips_Welcome_FILE})
 set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE})
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")

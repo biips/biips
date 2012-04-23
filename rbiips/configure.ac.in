@@ -26,7 +26,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-#  \file     configure.ac.IN
+#  \file     configure.ac
 #  \brief    autoconf script for unix
 #
 #  \author   $LastChangedBy$
