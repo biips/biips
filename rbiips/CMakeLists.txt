@@ -70,7 +70,7 @@ configure_file (
 configure_file (
 	src/Makevars.in.in
 	${PROJECT_PKG_NAME}/src/Makevars.in
-	@ONLY
+	COPYONLY
 )
 
 # configure src/Makevars.win file
