@@ -634,6 +634,7 @@ the "copyright" line and a pointer to where the full notice is found.
     BiiPS software is a set of C++ libraries for
     Bayesian inference with interacting Particle Systems.
     Copyright (C) Inria, 2012
+    Authors: Adrien Todeschini, Francois Caron
 
     BiiPS is derived software based on:
     JAGS, Copyright (C) Martyn Plummer, 2002-2010
