@@ -3,7 +3,7 @@
  * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
- * Contributors: Adrien Todeschini, Francois Caron
+ * Authors: Adrien Todeschini, Francois Caron
  *
  * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
@@ -66,7 +66,7 @@ namespace Biips
 
   public:
     BUGSModel() :
-      symbolTable_(*this)
+        symbolTable_(*this)
     {
     }
 
@@ -96,46 +96,39 @@ namespace Biips
     void PrintGraphviz(std::ostream & out) const;
 
     // TODO manage multi statFeature
-    Bool ExtractFilterStat(String name, StatTag statFeature, std::map<
-        IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothTreeStat(String name, StatTag statFeature, std::map<
-        IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothStat(String name, StatTag statFeature, std::map<
-        IndexRange, MultiArray> & statMap) const;
+    Bool ExtractFilterStat(String name, StatTag statFeature,
+        std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothTreeStat(String name, StatTag statFeature,
+        std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothStat(String name, StatTag statFeature,
+        std::map<IndexRange, MultiArray> & statMap) const;
 
-    Bool ExtractFilterPdf(String name,
-                          std::map<IndexRange, Histogram> & pdfMap,
-                          Size numBins = 40,
-                          Scalar cacheFraction = 0.25) const;
+    Bool ExtractFilterPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
+        Size numBins = 40, Scalar cacheFraction = 0.25) const;
     Bool ExtractSmoothTreePdf(String name,
-                              std::map<IndexRange, Histogram> & pdfMap,
-                              Size numBins = 40,
-                              Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothPdf(String name,
-                          std::map<IndexRange, Histogram> & pdfMap,
-                          Size numBins = 40,
-                          Scalar cacheFraction = 0.25) const;
+        std::map<IndexRange, Histogram> & pdfMap, Size numBins = 40,
+        Scalar cacheFraction = 0.25) const;
+    Bool ExtractSmoothPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
+        Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
-    Bool ChangeData(const std::map<String, MultiArray> & dataMap,
-                    Bool & rebuildSampler);
-    Bool SampleData(const Types<String>::Array & variableNames,
-                    Rng * pRng,
-                    std::map<String, MultiArray> & dataMap,
-                    Bool & rebuildSampler);
-    Bool GetLogPriorDensity(Scalar & prior,
-                            const String & variable,
-                            IndexRange range = NULL_RANGE) const;
+    Bool ChangeData(const std::map<String, MultiArray> & dataMap, Bool mcmc,
+        Bool & rebuildSampler);
+    Bool SampleData(const Types<String>::Array & variableNames, Rng * pRng,
+        std::map<String, MultiArray> & dataMap, Bool & rebuildSampler);
+    Bool GetLogPriorDensity(Scalar & prior, const String & variable,
+        IndexRange range = NULL_RANGE) const;
 
     Bool
     DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
-        DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    DumpSmoothTreeMonitors(
+        std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
     DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
-    Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng, std::map<String,
-        MultiArray> & sampledValues) const;
+    Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng,
+        std::map<String, MultiArray> & sampledValues) const;
 
     void virtual ClearFilterMonitors();
     void virtual ClearSmoothTreeMonitors();

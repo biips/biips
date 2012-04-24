@@ -134,11 +134,11 @@ namespace Biips
     Bool SetDefaultFilterMonitors();
 
     Bool SetFilterMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                              NULL_RANGE);
     Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                                  NULL_RANGE);
     Bool SetSmoothMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                              NULL_RANGE);
 
     Bool ReleaseFilterMonitors();
     Bool ReleaseSmoothTreeMonitors();
@@ -173,26 +173,30 @@ namespace Biips
 
     Bool SampleSmoothTreeParticle(Size rngSeed);
     Bool
-        DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
+    DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
     Bool
-        SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
+    SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
 
-    Bool ExtractFilterStat(const String & name, StatTag statFeature, std::map<
-        IndexRange, MultiArray> & statMap);
+    Bool ExtractFilterStat(const String & name,
+                           StatTag statFeature,
+                           std::map<IndexRange, MultiArray> & statMap);
     Bool ExtractSmoothTreeStat(const String & name,
                                StatTag statFeature,
                                std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothStat(const String & name, StatTag statFeature, std::map<
-        IndexRange, MultiArray> & statMap);
+    Bool ExtractSmoothStat(const String & name,
+                           StatTag statFeature,
+                           std::map<IndexRange, MultiArray> & statMap);
 
     Bool ExtractFilterPdf(const String & name,
                           std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
-        Histogram> & pdfMap, Size numBins = 40, Scalar cacheFraction = 0.25);
+    Bool ExtractSmoothTreePdf(const String & name,
+                              std::map<IndexRange, Histogram> & pdfMap,
+                              Size numBins = 40,
+                              Scalar cacheFraction = 0.25);
     Bool ExtractSmoothPdf(const String & name,
                           std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
@@ -200,8 +204,9 @@ namespace Biips
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);
     Bool
-    ChangeData(const std::map<String, MultiArray> & dataMap, Bool verbose =
-        true);
+    ChangeData(const std::map<String, MultiArray> & dataMap,
+               Bool mcmc,
+               Bool verbose = true);
     Bool
     SampleData(const Types<String>::Array & variableNames,
                Size rngSeed,

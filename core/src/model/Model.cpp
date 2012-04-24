@@ -110,7 +110,8 @@ namespace Biips
   {
     filterMonitors_.clear();
     for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
-        filterMonitorsMap_.begin(); it_monitors != filterMonitorsMap_.end(); ++it_monitors)
+        filterMonitorsMap_.begin(); it_monitors != filterMonitorsMap_.end();
+        ++it_monitors)
     {
       it_monitors->second.reset();
     }
@@ -125,7 +126,8 @@ namespace Biips
   {
     smoothMonitors_.clear();
     for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
-        smoothMonitorsMap_.begin(); it_monitors != smoothMonitorsMap_.end(); ++it_monitors)
+        smoothMonitorsMap_.begin(); it_monitors != smoothMonitorsMap_.end();
+        ++it_monitors)
     {
       it_monitors->second.reset();
     }
@@ -190,8 +192,8 @@ namespace Biips
 
     // lock SmoothTree monitored nodes
     for (std::set<NodeId>::const_iterator it_nodes =
-        smoothTreeMonitoredNodeIds_.begin(); it_nodes
-        != smoothTreeMonitoredNodeIds_.end(); ++it_nodes)
+        smoothTreeMonitoredNodeIds_.begin();
+        it_nodes != smoothTreeMonitoredNodeIds_.end(); ++it_nodes)
       pSampler_->LockNode(*it_nodes);
 
     Size t = pSampler_->Iteration();
@@ -224,8 +226,8 @@ namespace Biips
     p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        smoothTreeMonitoredNodeIds_.begin(); it_ids
-        != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+        smoothTreeMonitoredNodeIds_.begin();
+        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
@@ -274,8 +276,8 @@ namespace Biips
     p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        smoothTreeMonitoredNodeIds_.begin(); it_ids
-        != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+        smoothTreeMonitoredNodeIds_.begin();
+        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
@@ -298,10 +300,10 @@ namespace Biips
     if (!pSampler_)
       throw LogicError("Can not initiate backward smoother: no ForwardSampler.");
 
-    pSmoother_
-        = BackwardSmoother::Ptr(new BackwardSmoother(*pGraph_,
-                                                     filterMonitors_,
-                                                     pSampler_->GetNodeSamplingIterations()));
+    pSmoother_ =
+        BackwardSmoother::Ptr(new BackwardSmoother(*pGraph_,
+                                                   filterMonitors_,
+                                                   pSampler_->GetNodeSamplingIterations()));
 
     pSmoother_->Initialize();
 
@@ -380,13 +382,13 @@ namespace Biips
         stat_marray = array_acc.Variance();
         break;
       case MOMENT2:
-        stat_marray = array_acc.Moment<2> ();
+        stat_marray = array_acc.Moment<2>();
         break;
       case MOMENT3:
-        stat_marray = array_acc.Moment<3> ();
+        stat_marray = array_acc.Moment<3>();
         break;
       case MOMENT4:
-        stat_marray = array_acc.Moment<4> ();
+        stat_marray = array_acc.Moment<4>();
         break;
       case SKEWNESS:
         stat_marray = array_acc.Skewness();
@@ -433,7 +435,8 @@ namespace Biips
       throw LogicError("Node is not yet monitored.");
 
     DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
-        * cacheFraction), numBins);
+                                          * cacheFraction),
+                                numBins);
 
     monitorsMap.at(nodeId)->Accumulate(nodeId, dens_acc);
 
@@ -463,7 +466,8 @@ namespace Biips
   }
 
   // FIXME Still valid after optimization ?
-  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId, StatTag statFeature) const
+  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId,
+                                          StatTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract smooth tree statistic: no ForwardSampler.");
@@ -487,13 +491,13 @@ namespace Biips
         stat_marray = elem_acc.Variance();
         break;
       case MOMENT2:
-        stat_marray = elem_acc.Moment<2> ();
+        stat_marray = elem_acc.Moment<2>();
         break;
       case MOMENT3:
-        stat_marray = elem_acc.Moment<3> ();
+        stat_marray = elem_acc.Moment<3>();
         break;
       case MOMENT4:
-        stat_marray = elem_acc.Moment<4> ();
+        stat_marray = elem_acc.Moment<4>();
         break;
       case SKEWNESS:
         stat_marray = elem_acc.Skewness();
@@ -521,7 +525,8 @@ namespace Biips
       throw LogicError("Can not extract smooth tree pdf: node is not scalar.");
 
     DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
-        * cacheFraction), numBins);
+                                          * cacheFraction),
+                                numBins);
 
     pSampler_->Accumulate(nodeId, dens_acc);
 
@@ -534,6 +539,16 @@ namespace Biips
     const Graph & graph_;
     Scalar prior_;
   public:
+    virtual void visit(const ConstantNode & node)
+    {
+      prior_ = BIIPS_REALNA;
+    }
+
+    virtual void visit(const LogicalNode & node)
+    {
+      prior_ = BIIPS_REALNA;
+    }
+
     virtual void visit(const StochasticNode & node)
     {
       NumArray x(node.DimPtr().get(), graph_.GetValues()[nodeId_].get());
@@ -565,23 +580,29 @@ namespace Biips
     }
 
     explicit LogPriorDensityVisitor(const Graph & graph) :
-      graph_(graph)
+        graph_(graph)
     {
     }
   };
 
   Scalar Model::GetLogPriorDensity(NodeId nodeId) const
   {
-    if (pGraph_->GetNode(nodeId).GetType() != STOCHASTIC
-        && !pGraph_->GetObserved()[nodeId])
-      throw RuntimeError("Can not get prior density: node is not observed stochastic.");
+    // constant and stochastic will be assigned NA
 
-    GraphTypes::ParentIterator it_parent, it_parent_end;
-    boost::tie(it_parent, it_parent_end) = pGraph_->GetParents(nodeId);
-    for (; it_parent != it_parent_end; ++it_parent)
+    // check node is observed
+    if (!pGraph_->GetObserved()[nodeId])
+      throw RuntimeError("Can not get prior density: node is not observed.");
+
+    if (pGraph_->GetNode(nodeId).GetType() == STOCHASTIC)
     {
-      if (!pGraph_->GetObserved()[*it_parent])
-        throw RuntimeError("Can not get prior density: node has unobserved parents.");
+      // check parents of stochastic nodes are observed
+      GraphTypes::ParentIterator it_parent, it_parent_end;
+      boost::tie(it_parent, it_parent_end) = pGraph_->GetParents(nodeId);
+      for (; it_parent != it_parent_end; ++it_parent)
+      {
+        if (!pGraph_->GetObserved()[*it_parent])
+          throw RuntimeError("Can not get prior density: node has unobserved parents.");
+      }
     }
 
     LogPriorDensityVisitor log_prior_vis(*pGraph_);
