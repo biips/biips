@@ -3,7 +3,7 @@
  * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
- * Contributors: Adrien Todeschini, Francois Caron
+ * Authors: Adrien Todeschini, Francois Caron
  *
  * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
@@ -45,9 +45,9 @@ namespace Biips
 {
 
   NodeArray::NodeArray(const String & name, Graph & graph, const DimArray & dim) :
-    name_(name), graph_(graph), range_(dim),
-        nodeIds_(dim.Length(), NULL_NODEID), offsets_(dim.Length(),
-                                                      BIIPS_SIZENA)
+      name_(name), graph_(graph), range_(dim), nodeIds_(dim.Length(),
+                                                        NULL_NODEID), offsets_(dim.Length(),
+                                                                               BIIPS_SIZENA)
   {
   }
 
@@ -67,22 +67,22 @@ namespace Biips
   void NodeArray::Insert(NodeId nodeId, const IndexRange & targetRange)
   {
     if (nodeId >= graph_.GetSize())
-      throw LogicError(String("Attempt to insert non existing node at ")
-          + name_ + print(targetRange));
+      throw LogicError(String("Attempt to insert non existing node at ") + name_
+                       + print(targetRange));
 
     // COPY: Adapted from JAGS NodeArray::insert function
     if (nodeId == NULL_NODEID)
       throw LogicError(String("Attempt to insert NULL node at ") + name_
-          + print(targetRange));
+                       + print(targetRange));
     if (graph_.GetNode(nodeId).Dim().Drop() != targetRange.Dim(true))
       throw RuntimeError(String("Cannot insert node into ") + name_
-          + print(targetRange) + ". Dimension mismatch");
+                         + print(targetRange) + ". Dimension mismatch");
     if (!range_.Contains(targetRange))
       throw RuntimeError(String("Cannot insert node into ") + name_
-          + print(targetRange) + ". Range out of bounds");
+                         + print(targetRange) + ". Range out of bounds");
     if (!IsEmpty(targetRange))
       throw RuntimeError(String("Node ") + name_ + print(targetRange)
-          + " overlaps previously defined nodes");
+                         + " overlaps previously defined nodes");
 
     IndexRangeIterator it_j(targetRange);
     for (Size k = 0; !it_j.AtEnd(); it_j.Next(), ++k)
@@ -165,14 +165,14 @@ namespace Biips
     // ENDCOPY
   }
 
-  NodeId NodeArray::GetSubset(const IndexRange & subsetRange)//, Model & model)
+  NodeId NodeArray::GetSubset(const IndexRange & subsetRange) //, Model & model)
   {
     // COPY: Adapted from JAGS NodeArray::getSubset function
 
     //Check validity of target range
     if (!range_.Contains(subsetRange))
       throw RuntimeError(String("Cannot get subset ") + name_
-          + print(subsetRange) + ". Range out of bounds");
+                         + print(subsetRange) + ". Range out of bounds");
 
     /* If range corresponds to a set node, then return this */
     NodeId node_id = GetNode(subsetRange);
@@ -272,7 +272,7 @@ namespace Biips
   {
     if (!(range_ == IndexRange(value.DimPtr())))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
-          + Name());
+                         + Name());
 
     // first if all values are not missing
     // and no node have been inserted yet
@@ -354,7 +354,7 @@ namespace Biips
   {
     if (!(range_ == IndexRange(value.DimPtr())))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
-          + Name());
+                         + Name());
 
     if (anyMissing(value))
       throw RuntimeError("Can not change data: there are missing values.");
@@ -377,6 +377,10 @@ namespace Biips
       {
         if (mcmc)
         {
+          // check node is not discrete
+          if (graph_.GetDiscrete()[id])
+            throw RuntimeError(String("Can not change data: node is discrete."));
+
           // check that it has no stochastic parent
           GraphTypes::StochasticParentIterator it_parent, it_parent_end;
           if (it_parent != it_parent_end)
@@ -443,8 +447,7 @@ namespace Biips
         nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
     {
       NodeId id = it->left;
-      NodeType type = graph_.GetNode(id).GetType();
-      if (type != STOCHASTIC)
+      if (graph_.GetNode(id).GetType() != STOCHASTIC)
         throw RuntimeError(String("Can not sample data: node is not stochastic."));
 
       if (mcmc)

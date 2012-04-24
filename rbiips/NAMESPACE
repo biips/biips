@@ -9,6 +9,7 @@ export (
   smc.samples,
   pmmh.samples,
   pimh.samples,
+  smc.sensitivity,
   load.biips.module,
   set.biips.verbosity,
   is.biips,

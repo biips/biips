@@ -179,7 +179,7 @@ namespace Biips
     }
   }
 
-  Bool SymbolTable::ChangeData(const std::map<String, MultiArray> & dataMap)
+  Bool SymbolTable::ChangeData(const std::map<String, MultiArray> & dataMap, Bool mcmc)
   {
     Bool set_observed_nodes = false;
 
@@ -197,7 +197,7 @@ namespace Biips
       // update discreteness and get stochastic children to be updated
       set_observed_nodes = array.ChangeData(p->second,
                                             logic_children_by_rank,
-                                            sto_children_by_rank);
+                                            sto_children_by_rank, mcmc);
     }
 
     // update children
