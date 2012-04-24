@@ -126,8 +126,7 @@ namespace Biips
 {
 
   Console::Console(std::ostream & out, std::ostream & err) :
-    out_(out), err_(err), pData_(NULL), pRelations_(NULL), pVariables_(NULL),
-        lockBackward_(false)
+      out_(out), err_(err), pData_(NULL), pRelations_(NULL), pVariables_(NULL), lockBackward_(false)
   {
   }
 
@@ -176,8 +175,8 @@ namespace Biips
     }
 
     const Types<ParseTree*>::Array & param = pTree->parameters();
-    for (Types<ParseTree*>::Array::const_iterator p = param.begin(); p
-        != param.end(); ++p)
+    for (Types<ParseTree*>::Array::const_iterator p = param.begin();
+        p != param.end(); ++p)
     {
       ParseTree * counter;
 
@@ -274,8 +273,8 @@ namespace Biips
     Types<String>::Array counter_stack;
     if (pVariables_)
     {
-      for (Types<ParseTree*>::Array::const_iterator it = pVariables_->begin(); it
-          != pVariables_->end(); ++it)
+      for (Types<ParseTree*>::Array::const_iterator it = pVariables_->begin();
+          it != pVariables_->end(); ++it)
         getVariableNames(*it, names_set, counter_stack);
     }
     if (pData_)
@@ -349,17 +348,17 @@ namespace Biips
           if (data_graph.GetObserved()[*it_node_id])
           {
             GraphTypes::ParentIterator it_parents, it_parents_end;
-            boost::tie(it_parents, it_parents_end)
-                = data_graph.GetParents(*it_node_id);
+            boost::tie(it_parents, it_parents_end) =
+                data_graph.GetParents(*it_node_id);
             for (; it_parents != it_parents_end; ++it_parents)
             {
               if (!data_graph.GetObserved()[*it_parents])
               {
                 err_ << "Invalid data graph: observed node "
-                    << pModel_->GetSymbolTable().GetName(*it_node_id)
-                    << " has unobserved parent "
-                    << pModel_->GetSymbolTable().GetName(*it_parents)
-                    << std::endl;
+                     << pModel_->GetSymbolTable().GetName(*it_node_id)
+                     << " has unobserved parent "
+                     << pModel_->GetSymbolTable().GetName(*it_parents)
+                     << std::endl;
                 ClearModel();
                 return false;
               }
@@ -372,22 +371,22 @@ namespace Biips
           out_ << INDENT_STRING << "Graph size: " << data_graph.GetSize();
           out_ << " (Constant: " << data_graph.NodesSummary().at("Constant");
           out_ << ", Logical: " << data_graph.NodesSummary().at("Logical");
-          out_ << ", Stochastic: "
-              << data_graph.NodesSummary().at("Stochastic") << ")" << endl;
+          out_ << ", Stochastic: " << data_graph.NodesSummary().at("Stochastic")
+               << ")" << endl;
           Size n_data_unobs_nodes =
               data_graph.UnobsNodesSummary().at("Logical")
-                  + data_graph.UnobsNodesSummary().at("Stochastic");
+              + data_graph.UnobsNodesSummary().at("Stochastic");
           out_ << INDENT_STRING << "Unobserved nodes: " << n_data_unobs_nodes;
           out_ << " (Logical: " << data_graph.UnobsNodesSummary().at("Logical");
           out_ << ", Stochastic: "
-              << data_graph.UnobsNodesSummary().at("Stochastic") << ")" << endl;
+               << data_graph.UnobsNodesSummary().at("Stochastic") << ")"
+               << endl;
         }
 
         if (verbose)
           out_ << INDENT_STRING << "Sampling data" << endl;
 
-        std::map<String, MultiArray>
-            sampled_data_map(pModel_->Sample(p_datagen_rng.get()));
+        std::map<String, MultiArray> sampled_data_map(pModel_->Sample(p_datagen_rng.get()));
 
         // FIXME
         //        //Save data generating RNG for later use. It is owned by the
@@ -398,7 +397,8 @@ namespace Biips
           out_ << INDENT_STRING << "Reading data back into data table" << endl;
 
         for (std::map<String, MultiArray>::const_iterator it_sampled =
-            sampled_data_map.begin(); it_sampled != sampled_data_map.end(); ++it_sampled)
+            sampled_data_map.begin(); it_sampled != sampled_data_map.end();
+            ++it_sampled)
         {
           const MultiArray & sampled_values = it_sampled->second;
 
@@ -465,15 +465,16 @@ namespace Biips
           out_ << " (Constant: " << model_graph.NodesSummary().at("Constant");
           out_ << ", Logical: " << model_graph.NodesSummary().at("Logical");
           out_ << ", Stochastic: "
-              << model_graph.NodesSummary().at("Stochastic") << ")" << endl;
-          Size n_unobs_nodes = model_graph.UnobsNodesSummary().at("Logical")
+               << model_graph.NodesSummary().at("Stochastic") << ")" << endl;
+          Size n_unobs_nodes =
+              model_graph.UnobsNodesSummary().at("Logical")
               + model_graph.UnobsNodesSummary().at("Stochastic");
           out_ << INDENT_STRING << "Unobserved nodes: " << n_unobs_nodes;
           out_ << " (Logical: "
-              << model_graph.UnobsNodesSummary().at("Logical");
+               << model_graph.UnobsNodesSummary().at("Logical");
           out_ << ", Stochastic: "
-              << model_graph.UnobsNodesSummary().at("Stochastic") << ")"
-              << endl;
+               << model_graph.UnobsNodesSummary().at("Stochastic") << ")"
+               << endl;
         }
 
         // FIXME
@@ -512,9 +513,10 @@ namespace Biips
     {
       // TODO manage this more finely
       // set all NodeSampler factories inactive if prior is true
-      std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator
-          it_sampler_fact = ForwardSampler::NodeSamplerFactories().begin();
-      for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end(); ++it_sampler_fact)
+      std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::iterator it_sampler_fact =
+          ForwardSampler::NodeSamplerFactories().begin();
+      for (; it_sampler_fact != ForwardSampler::NodeSamplerFactories().end();
+          ++it_sampler_fact)
       {
         it_sampler_fact->second = !prior;
       }
@@ -572,10 +574,10 @@ namespace Biips
       {
         if (n_iter > 0)
           out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter
-              << " iterations" << endl;
+               << " iterations" << endl;
         else
           out_ << PROMPT_STRING << "Skipping SMC sampler: no iterations"
-              << endl;
+               << endl;
       }
 
       if (n_iter == 0)
@@ -583,10 +585,10 @@ namespace Biips
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress
-            = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
-                                                      out_,
-                                                      INDENT_STRING));
+        p_show_progress =
+            Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                    out_,
+                                                    INDENT_STRING));
 
       // filtering
 
@@ -635,13 +637,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't get log normalizing constant. SMC sampler did not run!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't get log normalizing constant. SMC sampler did not finish!"
-          << endl;
+           << endl;
       return false;
     }
     try
@@ -663,13 +665,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't set log normalizing constant. SMC sampler did not run!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't set log normalizing constant. SMC sampler did not finish!"
-          << endl;
+           << endl;
       return false;
     }
     try
@@ -697,7 +699,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't run backward smoother. SMC sampler did not finish!"
-          << endl;
+           << endl;
       return false;
     }
     if (lockBackward_)
@@ -714,7 +716,7 @@ namespace Biips
       {
         if (verbose)
           out_ << PROMPT_STRING << "Skipping backward smoother: no iterations"
-              << endl;
+               << endl;
         return true;
       }
 
@@ -724,14 +726,14 @@ namespace Biips
 
       if (verbose)
         out_ << PROMPT_STRING << "Running backward smoother of " << n_iter
-            << " iterations" << endl;
+             << " iterations" << endl;
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)
-        p_show_progress
-            = Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
-                                                      out_,
-                                                      INDENT_STRING));
+        p_show_progress =
+            Types<ProgressBar>::Ptr(new ProgressBar(n_iter,
+                                                    out_,
+                                                    INDENT_STRING));
 
       // smoothing
       for (Size n = n_iter; n > 0; --n)
@@ -975,7 +977,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract filter statistic. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -985,7 +987,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract filter statistic for variable " << name
-            << endl;
+             << endl;
         return false;
       }
     }
@@ -1006,13 +1008,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't extract smooth tree statistic. SMC sampler not built!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract smooth tree statistic. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1022,7 +1024,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract smooth tree statistic for variable " << name
-            << endl;
+             << endl;
         return false;
       }
     }
@@ -1061,7 +1063,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract backward smoother statistic for variable "
-            << name << endl;
+             << name << endl;
         return false;
       }
     }
@@ -1070,8 +1072,10 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractFilterPdf(const String & name, std::map<IndexRange,
-      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  Bool Console::ExtractFilterPdf(const String & name,
+                                 std::map<IndexRange, Histogram> & pdfMap,
+                                 Size numBins,
+                                 Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1103,8 +1107,10 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothTreePdf(const String & name, std::map<IndexRange,
-      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  Bool Console::ExtractSmoothTreePdf(const String & name,
+                                     std::map<IndexRange, Histogram> & pdfMap,
+                                     Size numBins,
+                                     Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1119,7 +1125,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract smooth tree pdf. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1132,7 +1138,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract smooth tree pdf for variable " << name
-            << endl;
+             << endl;
         return false;
       }
     }
@@ -1141,8 +1147,10 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothPdf(const String & name, std::map<IndexRange,
-      Histogram> & pdfMap, Size numBins, Scalar cacheFraction)
+  Bool Console::ExtractSmoothPdf(const String & name,
+                                 std::map<IndexRange, Histogram> & pdfMap,
+                                 Size numBins,
+                                 Scalar cacheFraction)
   {
     if (!pModel_)
     {
@@ -1159,7 +1167,7 @@ namespace Biips
     if (!pModel_->Smoother().AtEnd())
     {
       err_ << "Can't extract backward smoother pdf. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1169,7 +1177,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract backward smoother pdf for variable " << name
-            << endl;
+             << endl;
         return false;
       }
     }
@@ -1200,6 +1208,7 @@ namespace Biips
   }
 
   Bool Console::ChangeData(const std::map<String, MultiArray> & dataMap,
+                           Bool mcmc,
                            Bool verbose)
   {
     if (!pModel_)
@@ -1232,7 +1241,7 @@ namespace Biips
         out_ << PROMPT_STRING << "Changing data" << endl;
       }
       Bool rebuild_sampler;
-      if (!pModel_->ChangeData(dataMap, rebuild_sampler))
+      if (!pModel_->ChangeData(dataMap, mcmc, rebuild_sampler))
       {
         err_ << "Failed to change data" << endl;
         return false;
@@ -1360,7 +1369,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't dump smooth tree monitors. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1420,13 +1429,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler not built!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1457,13 +1466,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler not built!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler still running!"
-          << endl;
+           << endl;
       return false;
     }
 
@@ -1486,7 +1495,7 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't set sampled smooth tree particle. SMC sampler not built!"
-          << endl;
+           << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
@@ -1541,8 +1550,8 @@ namespace Biips
     try
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end)
-          = pModel_->GraphPtr()->GetSortedNodes();
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->GraphPtr()->GetSortedNodes();
 
       nodeIds.assign(it_nodes, it_nodes_end);
     }
@@ -1561,8 +1570,8 @@ namespace Biips
     try
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end)
-          = pModel_->GraphPtr()->GetSortedNodes();
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->GraphPtr()->GetSortedNodes();
 
       nodeNames.resize(std::distance(it_nodes, it_nodes_end));
 
@@ -1584,8 +1593,8 @@ namespace Biips
     try
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end)
-          = pModel_->GraphPtr()->GetSortedNodes();
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->GraphPtr()->GetSortedNodes();
 
       nodeTypes.resize(std::distance(it_nodes, it_nodes_end));
 
@@ -1607,8 +1616,8 @@ namespace Biips
     try
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end)
-          = pModel_->GraphPtr()->GetSortedNodes();
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->GraphPtr()->GetSortedNodes();
 
       nodeObserved.resize(std::distance(it_nodes, it_nodes_end));
 
@@ -1630,14 +1639,14 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't dump node sampling iterations. SMC sampler not built!"
-          << endl;
+           << endl;
       return false;
     }
     try
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
-      boost::tie(it_nodes, it_nodes_end)
-          = pModel_->GraphPtr()->GetSortedNodes();
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->GraphPtr()->GetSortedNodes();
 
       nodeIterations.resize(std::distance(it_nodes, it_nodes_end));
 
@@ -1646,8 +1655,8 @@ namespace Biips
         if (pModel_->GraphPtr()->GetObserved()[*it_nodes])
           nodeIterations[i] = BIIPS_SIZENA;
         else
-          nodeIterations[i]
-              = pModel_->Sampler().GetNodeSamplingIteration(*it_nodes);
+          nodeIterations[i] =
+              pModel_->Sampler().GetNodeSamplingIteration(*it_nodes);
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS

@@ -3,7 +3,7 @@
  * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
- * Contributors: Adrien Todeschini, Francois Caron
+ * Authors: Adrien Todeschini, Francois Caron
  *
  * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
@@ -113,7 +113,8 @@ namespace Biips
      */
     void WriteData(const std::map<String, MultiArray> & dataMap);
 
-    Bool ChangeData(const std::map<String, MultiArray> & dataMap);
+    Bool ChangeData(const std::map<String, MultiArray> & dataMap,
+                    Bool mcmc);
 
     Bool SampleData(const Types<String>::Array & variableNames,
                     Rng * pRng,

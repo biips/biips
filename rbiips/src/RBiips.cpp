@@ -274,7 +274,7 @@ RcppExport SEXP get_data(SEXP pConsole)
 }
 
 
-RcppExport SEXP change_data(SEXP pConsole, SEXP data)
+RcppExport SEXP change_data(SEXP pConsole, SEXP data, SEXP mcmc)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -283,7 +283,7 @@ RcppExport SEXP change_data(SEXP pConsole, SEXP data)
   // Read data
   std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
 
-  Bool ok = p_console->ChangeData(data_map, verbosity);
+  Bool ok = p_console->ChangeData(data_map, Rcpp::as<Bool>(mcmc), verbosity);
 
   return Rcpp::wrap(ok);
 
@@ -953,6 +953,9 @@ RcppExport SEXP get_log_prior_density(SEXP pConsole, SEXP varName, SEXP lower, S
 
   if(!p_console->GetLogPriorDensity(prior, name, range))
     throw RuntimeError("Failed to get prior density.");
+
+  if (prior == BIIPS_REALNA)
+    prior = NA_REAL;
 
   return Rcpp::wrap(prior);
   END_RBIIPS

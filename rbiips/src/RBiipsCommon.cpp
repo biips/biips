@@ -3,7 +3,7 @@
  * RBiips package for GNU R is an interface to BiiPS C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
- * Contributors: Adrien Todeschini, Francois Caron
+ * Authors: Adrien Todeschini, Francois Caron
  *
  * RBiips is derived software based on:
  * BiiPS, Copyright (C) Inria, 2012

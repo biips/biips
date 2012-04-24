@@ -118,7 +118,7 @@ namespace Biips
     Bool ChangeData(const MultiArray & value,
                     std::map<Size, NodeId> & logicChildrenByRank,
                     std::map<Size, NodeId> & stoChildrenByRank,
-                    Bool mcmc = true);
+                    Bool mcmc);
 
     Bool SampleData(std::map<Size, NodeId> & logicChildrenByRank, std::map<
         Size, NodeId> & stoChildrenByRank, Rng * pRng, Bool mcmc = true);
