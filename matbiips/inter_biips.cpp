@@ -1,14 +1,19 @@
 #include "mex.h"
 #include <string>
 #include <Console.hpp>
-#include <map>
+#include <deque>
 #include "Mostream.h"
 
 using namespace std;
 using namespace Biips;
 typedef Console * Console_ptr;
-std::map<int, Console_ptr> consoles;
-int nb_consoles = 0;
+std::deque<Console_ptr> consoles;
+
+inline bool
+CheckConsoleId(std::deque<Console_ptr> consoles, int id) { 
+return ((id < consoles.size()) && (consoles[id] != NULL)); 
+}
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
@@ -34,10 +39,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     if (name_func == "make_console") {
    
-	  consoles[nb_consoles] = new Console(mbiips_cout, mbiips_cerr);
-	  nb_consoles++;
+          consoles.push_back(new Console(mbiips_cout, mbiips_cerr));
           plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-	  *mxGetPr(plhs[0]) = nb_consoles;
+          *mxGetPr(plhs[0]) = consoles.size()-1;
     }
    
     /////////////////////////////////////////
@@ -46,29 +50,44 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     else if (name_func == "clear_console") {
 
        if (nrhs < 2) {
-         mexErrMsgTxt("inter_biips : clear_console must have one integer argument");
+         mexErrMsgTxt("clear_console :  must have one integer argument");
        }
        
        int console_id = static_cast<int>(*mxGetPr(prhs[1]));
        
        // the console_id does not exist in the console map
-       if (consoles.find(console_id) == consoles.end()) {
-         mexErrMsgTxt("inter_biips : the console id does not exist");
+       if (CheckConsoleId(consoles, console_id)) {
+           delete consoles[console_id];
+           consoles[console_id] = NULL;
        }
+       else { 
+         mexErrMsgTxt("clear_console : the console id does not exist");
+       }
+    }       
+    /////////////////////////////////////////
+    // CHECK_MODEL FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "check_model") {
 
-       if (nb_consoles >0) {
-	  
-	  delete consoles[console_id];
-	  consoles.erase(console_id);
-	  nb_consoles--;
+       if (nrhs < 3) {
+         mexErrMsgTxt("check_model: must have two arguments");
        }
-       else {
-         mexErrMsgTxt("not anymore consoles opened!");
-      }
-           
-    }
+       
+       int console_id = static_cast<int>(*mxGetPr(prhs[1]));
+       char * filename = mxArrayToString(prhs[2]);
+       
+       if (CheckConsoleId(consoles, console_id)) {
+              Console * p_console = consoles[console_id];
+	      mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
+              if (! p_console->CheckModel(string(filename), true)) 
+                 mexErrMsgTxt("Model syntax is incorrect.");
+       }
+       else { 
+         mexErrMsgTxt("check_model : the console id does not exist");
+       }
+       mxFree(filename);
+    }       
     else {
-
        mexPrintf("bad name of function\n");
 
     }
