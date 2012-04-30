@@ -9,10 +9,8 @@ using namespace Biips;
 typedef Console * Console_ptr;
 std::deque<Console_ptr> consoles;
 
-inline bool
-CheckConsoleId(std::deque<Console_ptr> consoles, int id) { 
-return ((id < consoles.size()) && (consoles[id] != NULL)); 
-}
+#define CheckConsoleId(id) if ((id >= consoles.size()) || (consoles[id] == NULL))\
+mexErrMsgTxt("clear_console : the console id does not exist")
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
@@ -49,20 +47,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "clear_console") {
 
-       if (nrhs < 2) {
+       if (nrhs < 2) 
          mexErrMsgTxt("clear_console :  must have one integer argument");
-       }
        
        int console_id = static_cast<int>(*mxGetPr(prhs[1]));
        
        // the console_id does not exist in the console map
-       if (CheckConsoleId(consoles, console_id)) {
-           delete consoles[console_id];
-           consoles[console_id] = NULL;
-       }
-       else { 
-         mexErrMsgTxt("clear_console : the console id does not exist");
-       }
+       CheckConsoleId(console_id);
+       
+       delete consoles[console_id];
+       consoles[console_id] = NULL;
+       
     }       
     /////////////////////////////////////////
     // CHECK_MODEL FUNCTION
@@ -76,17 +71,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        int console_id = static_cast<int>(*mxGetPr(prhs[1]));
        char * filename = mxArrayToString(prhs[2]);
        
-       if (CheckConsoleId(consoles, console_id)) {
-              Console * p_console = consoles[console_id];
-	      mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
-              if (! p_console->CheckModel(string(filename), true)) 
+       CheckConsoleId(console_id);
+       
+       Console * p_console = consoles[console_id];
+       
+       mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
+       if (! p_console->CheckModel(string(filename), true)) 
                  mexErrMsgTxt("Model syntax is incorrect.");
-       }
-       else { 
-         mexErrMsgTxt("check_model : the console id does not exist");
-       }
+       
        mxFree(filename);
     }       
+    /////////////////////////////////////////
+    // GET_VARIABLE_NAMES FUNCTION
+    /////////////////////////////////////////
+    /*else if (name_func == "get_variable_names") {
+
+       if (nrhs < 2) {
+         mexErrMsgTxt("check_model: must have one arguments");
+       }
+       int id = static_cast<int>(*mxGetPr(prhs[1]));
+       
+       CheckConsoleId(id);
+       Console * p_console = consoles[id];
+       const Types<String>::Array & names = p_console->VariableNames();
+        
+    } */      
     else {
        mexPrintf("bad name of function\n");
 
