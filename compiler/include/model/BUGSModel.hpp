@@ -78,16 +78,16 @@ namespace Biips
     }
 
     Bool SetFilterMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                              NULL_RANGE);
     Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                                  NULL_RANGE);
     Bool SetSmoothMonitor(const String & name, const IndexRange & range =
-        NULL_RANGE);
+                              NULL_RANGE);
 
     Bool
     IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
     Bool IsSmoothTreeMonitored(const String & name, IndexRange range =
-        NULL_RANGE) const;
+                                   NULL_RANGE) const;
     Bool
     IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
 
@@ -96,39 +96,53 @@ namespace Biips
     void PrintGraphviz(std::ostream & out) const;
 
     // TODO manage multi statFeature
-    Bool ExtractFilterStat(String name, StatTag statFeature,
-        std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothTreeStat(String name, StatTag statFeature,
-        std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothStat(String name, StatTag statFeature,
-        std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractFilterStat(String name,
+                           StatTag statFeature,
+                           std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothTreeStat(String name,
+                               StatTag statFeature,
+                               std::map<IndexRange, MultiArray> & statMap) const;
+    Bool ExtractSmoothStat(String name,
+                           StatTag statFeature,
+                           std::map<IndexRange, MultiArray> & statMap) const;
 
-    Bool ExtractFilterPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
-        Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    Bool ExtractFilterPdf(String name,
+                          std::map<IndexRange, Histogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25) const;
     Bool ExtractSmoothTreePdf(String name,
-        std::map<IndexRange, Histogram> & pdfMap, Size numBins = 40,
-        Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
-        Size numBins = 40, Scalar cacheFraction = 0.25) const;
+                              std::map<IndexRange, Histogram> & pdfMap,
+                              Size numBins = 40,
+                              Scalar cacheFraction = 0.25) const;
+    Bool ExtractSmoothPdf(String name,
+                          std::map<IndexRange, Histogram> & pdfMap,
+                          Size numBins = 40,
+                          Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
-    Bool ChangeData(const std::map<String, MultiArray> & dataMap, Bool mcmc,
-        Bool & rebuildSampler);
-    Bool SampleData(const Types<String>::Array & variableNames, Rng * pRng,
-        std::map<String, MultiArray> & dataMap, Bool & rebuildSampler);
-    Bool GetLogPriorDensity(Scalar & prior, const String & variable,
-        IndexRange range = NULL_RANGE) const;
+    Bool ChangeData(const String & variable,
+                    const IndexRange & range,
+                    const MultiArray & data,
+                    Bool mcmc,
+                    Bool & rebuildSampler);
+    Bool SampleData(const String & variable,
+                    const IndexRange & range,
+                    MultiArray & data,
+                    Rng * pRng);
+    Bool RemoveData(const String & variable, const IndexRange & range);
+    Bool GetLogPriorDensity(Scalar & prior,
+                            const String & variable,
+                            IndexRange range = NULL_RANGE) const;
 
     Bool
     DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
-    DumpSmoothTreeMonitors(
-        std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
     DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
     Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng,
-        std::map<String, MultiArray> & sampledValues) const;
+                                  std::map<String, MultiArray> & sampledValues) const;
 
     void virtual ClearFilterMonitors();
     void virtual ClearSmoothTreeMonitors();

@@ -99,7 +99,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SetFilterMonitor(const String & name,
-      const IndexRange & range)
+                                   const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -133,7 +133,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SetSmoothTreeMonitor(const String & name,
-      const IndexRange & range)
+                                       const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -167,7 +167,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SetSmoothMonitor(const String & name,
-      const IndexRange & range)
+                                   const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -231,7 +231,7 @@ namespace Biips
   }
 
   Bool BUGSModel::IsSmoothTreeMonitored(const String & name,
-      IndexRange range) const
+                                        IndexRange range) const
   {
     if (!symbolTable_.Contains(name))
       return false;
@@ -290,8 +290,9 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractFilterStat(String name, StatTag statFeature,
-      std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractFilterStat(String name,
+                                    StatTag statFeature,
+                                    std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -315,8 +316,9 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractSmoothTreeStat(String name, StatTag statFeature,
-      std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractSmoothTreeStat(String name,
+                                        StatTag statFeature,
+                                        std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract smooth tree statistic: statistics map is not empty.");
@@ -341,8 +343,9 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractSmoothStat(String name, StatTag statFeature,
-      std::map<IndexRange, MultiArray> & statMap) const
+  Bool BUGSModel::ExtractSmoothStat(String name,
+                                    StatTag statFeature,
+                                    std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -367,8 +370,9 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractFilterPdf(String name,
-      std::map<IndexRange, Histogram> & pdfMap, Size numBins,
-      Scalar cacheFraction) const
+                                   std::map<IndexRange, Histogram> & pdfMap,
+                                   Size numBins,
+                                   Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -406,8 +410,9 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothTreePdf(String name,
-      std::map<IndexRange, Histogram> & pdfMap, Size numBins,
-      Scalar cacheFraction) const
+                                       std::map<IndexRange, Histogram> & pdfMap,
+                                       Size numBins,
+                                       Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract smooth tree pdf: pdf map is not empty.");
@@ -445,8 +450,9 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractSmoothPdf(String name,
-      std::map<IndexRange, Histogram> & pdfMap, Size numBins,
-      Scalar cacheFraction) const
+                                   std::map<IndexRange, Histogram> & pdfMap,
+                                   Size numBins,
+                                   Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract filter pdf: pdf map is not empty.");
@@ -483,18 +489,30 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ChangeData(const std::map<String, MultiArray> & dataMap,
-      Bool mcmc, Bool & rebuildSampler)
+  Bool BUGSModel::ChangeData(const String & variable,
+                             const IndexRange & range,
+                             const MultiArray & data,
+                             Bool mcmc,
+                             Bool & rebuildSampler)
   {
-    rebuildSampler = symbolTable_.ChangeData(dataMap, mcmc);
+    rebuildSampler = symbolTable_.ChangeData(variable, range, data, mcmc);
 
     return true;
   }
 
-  Bool BUGSModel::SampleData(const Types<String>::Array & variableNames,
-      Rng * pRng, std::map<String, MultiArray> & dataMap, Bool & rebuildSampler)
+  Bool BUGSModel::SampleData(const String & variable,
+                             const IndexRange & range,
+                             MultiArray & data,
+                             Rng * pRng)
   {
-    rebuildSampler = symbolTable_.SampleData(variableNames, pRng, dataMap);
+    symbolTable_.SampleData(variable, range, data, pRng);
+
+    return true;
+  }
+
+  Bool BUGSModel::RemoveData(const String & variable, const IndexRange & range)
+  {
+    symbolTable_.RemoveData(variable, range);
 
     return true;
   }
@@ -506,8 +524,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::DumpFilterMonitors(
-      std::map<String, NodeArrayMonitor> & monitorsMap) const
+  Bool BUGSModel::DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
       return false;
@@ -539,8 +556,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::DumpSmoothTreeMonitors(
-      std::map<String, NodeArrayMonitor> & monitorsMap) const
+  Bool BUGSModel::DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
       return false;
@@ -573,7 +589,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SampleSmoothTreeParticle(const Rng::Ptr & pRng,
-      std::map<String, MultiArray> & sampledValues) const
+                                           std::map<String, MultiArray> & sampledValues) const
   {
     if (!pSampler_)
       return false;
@@ -612,8 +628,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::DumpSmoothMonitors(
-      std::map<String, NodeArrayMonitor> & monitorsMap) const
+  Bool BUGSModel::DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
       return false;
@@ -698,8 +713,9 @@ namespace Biips
     pGraph_->PrintGraphviz(out, vnpw);
   }
 
-  Bool BUGSModel::GetLogPriorDensity(Scalar & prior, const String & variable,
-      IndexRange range) const
+  Bool BUGSModel::GetLogPriorDensity(Scalar & prior,
+                                     const String & variable,
+                                     IndexRange range) const
   {
     if (!symbolTable_.Contains(variable))
       throw RuntimeError(String("Can not get prior density: variable ")

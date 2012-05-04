@@ -204,14 +204,21 @@ namespace Biips
 
     Bool DumpData(std::map<String, MultiArray> & dataMap);
     Bool
-    ChangeData(const std::map<String, MultiArray> & dataMap,
-               Bool mcmc,
+    ChangeData(const String & variable,
+               const IndexRange & range,
+               const MultiArray & data,
+               Bool mcmc = true,
                Bool verbose = true);
     Bool
-    SampleData(const Types<String>::Array & variableNames,
+    SampleData(const String & variable,
+               const IndexRange & range,
+               MultiArray & data,
                Size rngSeed,
-               std::map<String, MultiArray> & dataMap,
                Bool verbose = true);
+
+    Bool RemoveData(const String & variable,
+                    const IndexRange & range,
+                    Bool verbose);
     Bool GetLogPriorDensity(Scalar & prior,
                             const String & variable,
                             const IndexRange & range = NULL_RANGE);

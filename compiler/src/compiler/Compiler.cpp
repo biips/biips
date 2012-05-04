@@ -782,7 +782,7 @@ namespace Biips
 
     // If Node is observed, set the data
     if (obs)
-      model_.GraphPtr()->SetObsValue(snode_id, p_this_data);
+      model_.GraphPtr()->SetObsValue(snode_id, p_this_data, true);
 
     return snode_id;
   }
