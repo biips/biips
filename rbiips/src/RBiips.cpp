@@ -88,8 +88,6 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
     {
       DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
       ValArray::Ptr p_val(new ValArray(r_vec.size()));
-//      std::copy(r_vec.begin(), r_vec.end(), p_val->begin());
-//      std::replace(p_val->begin(), p_val->end(), Scalar(NA_REAL), BIIPS_REALNA);
       std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
       marray.SetPtr(p_dim, p_val);
     }
@@ -98,8 +96,6 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
       Rcpp::IntegerVector r_dim = r_vec.attr("dim");
       DimArray::Ptr p_dim(new DimArray(r_dim.begin(), r_dim.end()));
       ValArray::Ptr p_val(new ValArray(r_vec.size()));
-//      std::copy(r_vec.begin(), r_vec.end(), p_val->begin());
-//      std::replace(p_val->begin(), p_val->end(), Scalar(NA_REAL), BIIPS_REALNA);
       std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
       marray.SetPtr(p_dim, p_val);
     }
@@ -140,8 +136,6 @@ SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     Size len = values_array.Dim().Length();
     Rcpp::NumericVector values(len);
 
-//    std::copy(values_array.Values().begin(), values_array.Values().end(), values.begin());
-//    std::replace(values.begin(), values.end(), BIIPS_REALNA, Scalar(NA_REAL));
     std::replace_copy(values_array.Values().begin(), values_array.Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
 
     values.attr("dim") = dim;
@@ -155,6 +149,25 @@ SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     rbiips_cout << endl;
 
   return data_list;
+}
+
+
+static IndexRange makeRange(const Rcpp::RObject & lower,
+                            const Rcpp::RObject & upper)
+{
+  if (lower.isNULL() || upper.isNULL())
+    return IndexRange();
+
+  Rcpp::IntegerVector il(lower);
+  Rcpp::IntegerVector iu(upper);
+  if (il.size() != iu.size())
+    throw LogicError("length mismatch between lower and upper limits");
+
+  IndexRange::Indices lind(il.begin(), il.end());
+  IndexRange::Indices uind(iu.begin(), iu.end());
+
+  IndexRange r = IndexRange(lind, uind);
+  return r;
 }
 
 
@@ -274,16 +287,39 @@ RcppExport SEXP get_data(SEXP pConsole)
 }
 
 
-RcppExport SEXP change_data(SEXP pConsole, SEXP data, SEXP mcmc)
+RcppExport SEXP change_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper,
+                            SEXP data, SEXP mcmc)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  // Read data
-  std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
+  Rcpp::StringVector var(varName);
+  String name(var[0]);
+  IndexRange range = makeRange(lower, upper);
 
-  Bool ok = p_console->ChangeData(data_map, Rcpp::as<Bool>(mcmc), verbosity);
+  // write data
+  Rcpp::NumericVector r_vec(data);
+  MultiArray marray;
+
+  if (!r_vec.hasAttribute("dim"))
+  {
+    DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
+    ValArray::Ptr p_val(new ValArray(r_vec.size()));
+    std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
+    marray.SetPtr(p_dim, p_val);
+  }
+  else
+  {
+    Rcpp::IntegerVector r_dim = r_vec.attr("dim");
+    DimArray::Ptr p_dim(new DimArray(r_dim.begin(), r_dim.end()));
+    ValArray::Ptr p_val(new ValArray(r_vec.size()));
+    std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
+    marray.SetPtr(p_dim, p_val);
+  }
+
+  Bool ok = p_console->ChangeData(name, range,
+                                  marray, Rcpp::as<Bool>(mcmc), verbosity);
 
   return Rcpp::wrap(ok);
 
@@ -291,23 +327,53 @@ RcppExport SEXP change_data(SEXP pConsole, SEXP data, SEXP mcmc)
 }
 
 
-RcppExport SEXP sample_data(SEXP pConsole, SEXP variableNames, SEXP rngSeed)
+RcppExport SEXP sample_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper,
+                            SEXP rngSeed)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  Rcpp::CharacterVector variable_names(variableNames);
-  Types<String>::Array var_names(variable_names.begin(), variable_names.end());
+  Rcpp::StringVector var(varName);
+  String name(var[0]);
+  IndexRange range = makeRange(lower, upper);
 
-  std::map<String, MultiArray> data_map;
+  MultiArray data;
 
-  Bool ok = p_console->SampleData(var_names, Rcpp::as<Size>(rngSeed),
-                                  data_map, verbosity);
+  Bool ok = p_console->SampleData(name, range, data, Rcpp::as<Size>(rngSeed),
+                                  verbosity);
+  if (!ok)
+    throw RuntimeError("Failed to sample data.");
 
-  return readDataTable<MultiArray::StorageOrderType>(data_map);
+  // read data
+  Rcpp::IntegerVector dim(data.Dim().begin(), data.Dim().end());
+
+  Size len = data.Dim().Length();
+  Rcpp::NumericVector values(len);
+
+  std::replace_copy(data.Values().begin(), data.Values().end(), values.begin(),
+                    BIIPS_REALNA, NA_REAL);
+
+  values.attr("dim") = dim;
+
+  return values;
 
   END_RBIIPS
+}
+
+RcppExport void remove_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector var(varName);
+  String name(var[0]);
+  IndexRange range = makeRange(lower, upper);
+
+  Bool ok = p_console->RemoveData(name, range ,verbosity);
+
+  VOID_END_RBIIPS
 }
 
 
@@ -320,7 +386,8 @@ RcppExport void print_graphviz(SEXP pConsole, SEXP dotFileName)
   String dot_file_name = Rcpp::as<String>(dotFileName);
 
   if (verbosity>0)
-    rbiips_cout << PROMPT_STRING << "Writing dot file in: " << dot_file_name << endl;
+    rbiips_cout << PROMPT_STRING << "Writing dot file in: "
+                << dot_file_name << endl;
 
   std::ofstream ofs(dot_file_name.c_str());
 
@@ -347,24 +414,6 @@ RcppExport void set_default_monitors(SEXP pConsole)
     throw RuntimeError("Failed to set default filter monitors");
 
   VOID_END_RBIIPS
-}
-
-
-static IndexRange makeRange(const Rcpp::RObject & lower, const Rcpp::RObject & upper)
-{
-  if (lower.isNULL() || upper.isNULL())
-    return IndexRange();
-
-  Rcpp::IntegerVector il(lower);
-  Rcpp::IntegerVector iu(upper);
-  if (il.size() != iu.size())
-    throw LogicError("length mismatch between lower and upper limits");
-
-  IndexRange::Indices lind(il.begin(), il.end());
-  IndexRange::Indices uind(iu.begin(), iu.end());
-
-  IndexRange r = IndexRange(lind, uind);
-  return r;
 }
 
 
@@ -643,8 +692,6 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     Size len = monitor.GetValues().Dim().Length();
     Rcpp::NumericVector values(len);
     const ValArray & values_val = monitor.GetValues().Values();
-//    std::copy(values_val.begin(),values_val.end(), values.begin());
-//    std::replace(values.begin(), values.end(), BIIPS_REALNA, Scalar(NA_REAL));
     std::replace_copy(values_val.begin(), values_val.end(), values.begin(), BIIPS_REALNA, NA_REAL);
     values.attr("dim") = dim_particles;
 

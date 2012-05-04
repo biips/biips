@@ -61,7 +61,8 @@ namespace Biips
     }
 
     void update_children(const std::map<Size, NodeId> & logicChildrenByRank,
-                         std::map<Size, NodeId> & stoChildrenByRank);
+                         std::map<Size, NodeId> & stoChildrenByRank,
+                         Bool mcmc);
   public:
     explicit SymbolTable(Model & model);
 
@@ -113,12 +114,17 @@ namespace Biips
      */
     void WriteData(const std::map<String, MultiArray> & dataMap);
 
-    Bool ChangeData(const std::map<String, MultiArray> & dataMap,
+    Bool ChangeData(const String & variable,
+                    const IndexRange & range,
+                    const MultiArray & data,
                     Bool mcmc);
 
-    Bool SampleData(const Types<String>::Array & variableNames,
-                    Rng * pRng,
-                    std::map<String, MultiArray> & dataMap);
+    void SampleData(const String & variable,
+                    const IndexRange & range,
+                    MultiArray & data,
+                    Rng * pRng);
+
+    void RemoveData(const String & variable, const IndexRange & range);
 
     /**
      * Reads the current value of selected nodes in the symbol table and

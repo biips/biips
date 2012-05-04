@@ -193,9 +193,11 @@ init.pmmh.biips <- function(obj, variable.names, inits=list(),
   
   ## make init sample
   sample <- list()
-  for (var in variable.names) {
+  for (v in seq(along=variable.names)) {
+    var <- variable.names[[v]]
     if (var %in% names(inits)) {
-      if(!.Call("change_data", obj$ptr(), inits[var], TRUE, PACKAGE="RBiips"))
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                inits[[var]], TRUE, PACKAGE="RBiips"))
         stop(paste("data change failed: invalid initial value for variable", var))
       sample[[var]] <- inits[[var]]
     } else {
@@ -203,7 +205,8 @@ init.pmmh.biips <- function(obj, variable.names, inits=list(),
       if (var %in% names(data))
         sample[[var]] <- data[[var]]
       else
-        sample[[var]] <- .Call("sample_data", obj$ptr(), var, inits.rng.seed, PACKAGE="RBiips")
+        sample[[var]] <- .Call("sample_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                               inits.rng.seed, PACKAGE="RBiips")
     }
   }
   
@@ -211,6 +214,7 @@ init.pmmh.biips <- function(obj, variable.names, inits=list(),
   log.prior <- list()
   for (v in seq(along=variable.names))
   {
+    var <- variable.names[[v]]
     log.p <- .Call("get_log_prior_density", obj$ptr(),
                    pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
     
@@ -221,7 +225,7 @@ init.pmmh.biips <- function(obj, variable.names, inits=list(),
     if (is.infinite(log.p) && log.p<0) 
       stop(paste("get log prior density: invalid initial values for variable", variable.names[[v]]))
     
-    log.prior[[variable.names[[v]]]] <- log.p
+    log.prior[[var]] <- log.p
   }
   
   ## build smc sampler
@@ -255,7 +259,7 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
   ##------------------------------
   for (v in seq(along=variable.names)) {
     var <- variable.names[[v]]
-    accept.rate[[var]] <- NA
+    accept.rate[[var]] <- 0
     
     ## Random walk proposal
     prop <- list()
@@ -267,7 +271,8 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
     dim(prop[[var]]) <- dim(sample[[var]])
     
     ## change model data
-    ok <- .Call("change_data", obj$ptr(), prop[var], TRUE, PACKAGE="RBiips")
+    ok <- .Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                prop[[var]], TRUE, PACKAGE="RBiips")
     
     if (!ok) {
       accepted <- FALSE
@@ -275,7 +280,8 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
       warning(paste("Failure changing data. proposal:", prop))
       ## reset previous value
       prop[[var]] <- sample[[var]]
-      if(!.Call("change_data", obj$ptr(), sample[var], TRUE, PACKAGE="RBiips"))
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data.")
       next
     }
@@ -292,7 +298,8 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
       n.fail <- n.fail+1
       warning(paste("Failure evaluating proposal log prior. proposal:", prop))
       ## reset previous value
-      if(!.Call("change_data", obj$ptr(), sample[var], TRUE, PACKAGE="RBiips"))
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data.")
       next
     }
@@ -305,7 +312,8 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
       n.fail <- n.fail+1
       warning(paste("Failure running smc forward sampler. proposal:", prop))
       ## reset previous value
-      if(!.Call("change_data", obj$ptr(), sample[var], TRUE, PACKAGE="RBiips"))
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data.")
       next
     }
@@ -324,7 +332,8 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
       log.marg.like <- log.marg.like.prop
     } else {
       ## reset previous value
-      if(!.Call("change_data", obj$ptr(), sample[var], TRUE, PACKAGE="RBiips"))
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data.")
     }
   }
@@ -406,7 +415,7 @@ update.pmmh.biips <- function(obj, variable.names, n.iter, rw.sd,
     n.fail <- n.fail + out$n.fail
     
     for (var in variable.names) {
-      accept.rate[[var]][i] <- out$accept.rate[var]
+      accept.rate[[var]][i] <- out$accept.rate[[var]]
     }
     
     ## advance progress bar

@@ -45,7 +45,7 @@ namespace Biips
 {
 
   SymbolTable::SymbolTable(Model & model) :
-    model_(model)
+      model_(model)
   {
   }
 
@@ -53,7 +53,7 @@ namespace Biips
   {
     if (nodeArraysMap_.count(name))
       throw RuntimeError(String("Name ") + name
-          + " already in use in symbol table");
+                         + " already in use in symbol table");
 
     NodeArray::Ptr p_node_array(new NodeArray(name, *(model_.GraphPtr()), dim));
     nodeArraysMap_[name] = p_node_array;
@@ -66,7 +66,7 @@ namespace Biips
     // check that name is an existing variable
     if (!nodeArraysMap_.count(name))
       throw LogicError(String("Name ") + name
-          + " does not exist in the symbol table.");
+                       + " does not exist in the symbol table.");
 
     //    // check that nodeId is not already in an existing NodeArray
     //    for (std::map<String, NodeArray::Ptr>::const_iterator it_table =
@@ -108,7 +108,7 @@ namespace Biips
     }
 
     throw RuntimeError(String("Unable to find Node ") + print(nodeId)
-        + " in the symbol table.");
+                       + " in the symbol table.");
   }
 
   String SymbolTable::GetName(NodeId nodeId) const
@@ -132,8 +132,8 @@ namespace Biips
     typedef GraphTypes::ParentIterator DirectParentNodeIdIterator;
     DirectParentNodeIdIterator it_parents, it_parents_end;
 
-    boost::tie(it_parents, it_parents_end)
-        = model_.GraphPtr()->GetParents(nodeId);
+    boost::tie(it_parents, it_parents_end) =
+        model_.GraphPtr()->GetParents(nodeId);
     Size n_par = std::distance(it_parents, it_parents_end);
     Types<String>::Array par_names(n_par);
     for (Size i = 0; it_parents != it_parents_end; ++it_parents, ++i)
@@ -144,8 +144,8 @@ namespace Biips
 
   void SymbolTable::WriteData(std::map<String, MultiArray> const & dataMap)
   {
-    for (std::map<String, MultiArray>::const_iterator p(dataMap.begin()); p
-        != dataMap.end(); ++p)
+    for (std::map<String, MultiArray>::const_iterator p(dataMap.begin());
+        p != dataMap.end(); ++p)
     {
       const String & name = p->first;
       if (Contains(name))
@@ -157,16 +157,21 @@ namespace Biips
   }
 
   void SymbolTable::update_children(const std::map<Size, NodeId> & logicChildrenByRank,
-                                    std::map<Size, NodeId> & stoChildrenByRank)
+                                    std::map<Size, NodeId> & stoChildrenByRank,
+                                    Bool mcmc)
   {
     // update logical children
-    for (std::map<Size, NodeId>::const_iterator it(logicChildrenByRank.begin()); it
-        != logicChildrenByRank.end(); ++it)
+    for (std::map<Size, NodeId>::const_iterator it(logicChildrenByRank.begin());
+        it != logicChildrenByRank.end(); ++it)
     {
       NodeId id = it->second;
-      model_.GraphPtr()->SampleValue(id);
-      model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
+      model_.GraphPtr()->SampleValue(id, NULL, true);
+      if (!mcmc)
+        model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
     }
+
+    if (mcmc)
+      return;
 
     // update stochastic children discreteness
     for (Size rank = 0; rank < model_.GraphPtr()->GetRanks().back(); ++rank)
@@ -179,67 +184,66 @@ namespace Biips
     }
   }
 
-  Bool SymbolTable::ChangeData(const std::map<String, MultiArray> & dataMap, Bool mcmc)
+  Bool SymbolTable::ChangeData(const String & variable,
+                               const IndexRange & range,
+                               const MultiArray & data,
+                               Bool mcmc)
   {
-    Bool set_observed_nodes = false;
-
     std::map<Size, NodeId> logic_children_by_rank;
     std::map<Size, NodeId> sto_children_by_rank;
-    for (std::map<String, MultiArray>::const_iterator p(dataMap.begin()); p
-        != dataMap.end(); ++p)
-    {
-      const String & name = p->first;
-      if (!Contains(name))
-        throw RuntimeError("Can't change data: variable is not defined in the model.");
+    if (!Contains(variable))
+      throw RuntimeError("Can't change data: variable is not defined in the model.");
 
-      NodeArray & array = getNodeArray(name);
-      // change data, get all observed logical children
-      // update discreteness and get stochastic children to be updated
-      set_observed_nodes = array.ChangeData(p->second,
-                                            logic_children_by_rank,
-                                            sto_children_by_rank, mcmc);
-    }
+    NodeArray & array = getNodeArray(variable);
+    // change data, get all observed logical children
+    // update discreteness and get stochastic children to be updated
+    Bool set_observed_nodes = array.ChangeData(range,
+                                               data,
+                                               logic_children_by_rank,
+                                               sto_children_by_rank,
+                                               mcmc);
 
     // update children
-    update_children(logic_children_by_rank, sto_children_by_rank);
+    update_children(logic_children_by_rank, sto_children_by_rank, mcmc);
 
     return set_observed_nodes;
   }
 
-  Bool SymbolTable::SampleData(const Types<String>::Array & variableNames,
-                               Rng * pRng,
-                               std::map<String, MultiArray> & dataMap)
+  void SymbolTable::SampleData(const String & variable,
+                               const IndexRange & range,
+                               MultiArray & data,
+                               Rng * pRng)
   {
-    Bool set_observed_nodes = false;
-
     std::map<Size, NodeId> logic_children_by_rank;
-    std::map<Size, NodeId> sto_children_by_rank;
-    for (Types<String>::ConstIterator it(variableNames.begin()); it
-        != variableNames.end(); ++it)
-    {
-      const String & name = *it;
-      if (!Contains(name))
-        throw RuntimeError("Can't sample data: variable is not defined in the model.");
+    if (!Contains(variable))
+      throw RuntimeError("Can't sample data: variable is not defined in the model.");
 
-      NodeArray & array = getNodeArray(name);
-      // sample data, get all observed logical children
-      // update discreteness and get stochastic children to be updated
-      set_observed_nodes = array.SampleData(logic_children_by_rank,
-                                            sto_children_by_rank,
-                                            pRng);
-      dataMap.insert(std::make_pair(name, array.GetData()));
-    }
+    NodeArray & array = getNodeArray(variable);
+    // sample data, get all observed logical children
+    array.SampleData(range, pRng, logic_children_by_rank);
+    data = array.GetData();
 
+    std::map<Size, NodeId> empty;
     // update children
-    update_children(logic_children_by_rank, sto_children_by_rank);
+    update_children(logic_children_by_rank, empty, true);
+  }
 
-    return set_observed_nodes;
+  void SymbolTable::RemoveData(const String & variable,
+                               const IndexRange & range)
+  {
+    if (!Contains(variable))
+      throw RuntimeError("Can't remove data: variable is not defined in the model.");
+
+    NodeArray & array = getNodeArray(variable);
+    // remove data
+    array.RemoveData(range);
   }
 
   void SymbolTable::ReadData(std::map<String, MultiArray> & dataMap) const
   {
     std::map<String, NodeArray::Ptr>::const_iterator it_table;
-    for (it_table = nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
+    for (it_table = nodeArraysMap_.begin(); it_table != nodeArraysMap_.end();
+        ++it_table)
     {
       /* Create a new MultiArray to hold the values from the symbol table */
       MultiArray read_values = it_table->second->GetData();

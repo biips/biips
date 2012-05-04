@@ -1207,7 +1207,9 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ChangeData(const std::map<String, MultiArray> & dataMap,
+  Bool Console::ChangeData(const String & variable,
+                           const IndexRange & range,
+                           const MultiArray & data,
                            Bool mcmc,
                            Bool verbose)
   {
@@ -1241,7 +1243,7 @@ namespace Biips
         out_ << PROMPT_STRING << "Changing data" << endl;
       }
       Bool rebuild_sampler;
-      if (!pModel_->ChangeData(dataMap, mcmc, rebuild_sampler))
+      if (!pModel_->ChangeData(variable, range, data, mcmc, rebuild_sampler))
       {
         err_ << "Failed to change data" << endl;
         return false;
@@ -1260,9 +1262,10 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SampleData(const Types<String>::Array & variableNames,
+  Bool Console::SampleData(const String & variable,
+                           const IndexRange & range,
+                           MultiArray & data,
                            Size rngSeed,
-                           std::map<String, MultiArray> & dataMap,
                            Bool verbose)
   {
     if (!pModel_)
@@ -1298,16 +1301,64 @@ namespace Biips
       // FIXME
       Rng::Ptr p_rng(new Rng(rngSeed));
 
-      Bool rebuild_sampler;
-      if (!pModel_->SampleData(variableNames,
-                               p_rng.get(),
-                               dataMap,
-                               rebuild_sampler))
+      if (!pModel_->SampleData(variable, range, data, p_rng.get()))
       {
         err_ << "Failed to sample data" << endl;
         return false;
       }
-      if (pModel_->SamplerBuilt() && rebuild_sampler)
+      if (pModel_->SamplerBuilt())
+        pModel_->BuildSampler();
+
+      lockBackward_ = true;
+      ReleaseFilterMonitors();
+      ReleaseSmoothTreeMonitors();
+      if (pModel_->SmootherInitialized())
+        ReleaseSmoothMonitors();
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::RemoveData(const String & variable,
+                           const IndexRange & range,
+                           Bool verbose)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't remove data. No model!" << endl;
+      return false;
+    }
+    if (pModel_->GraphPtr()->Empty())
+    {
+      err_
+          << "Can't remove data. No nodes in graph (Have you compiled the model?)"
+          << endl;
+      return false;
+    }
+    if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
+        && !pModel_->Sampler().AtEnd())
+    {
+      err_ << "Can't remove data. SMC sampler is running." << endl;
+      return false;
+    }
+    if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
+    {
+      err_ << "Can't remove data. Backward smoother is running." << endl;
+      return false;
+    }
+    try
+    {
+      if (verbose)
+      {
+        out_ << PROMPT_STRING << "Removing data" << endl;
+      }
+      if (!pModel_->RemoveData(variable, range))
+      {
+        err_ << "Failed to remove data" << endl;
+        return false;
+      }
+      if (pModel_->SamplerBuilt())
         pModel_->BuildSampler();
 
       lockBackward_ = true;
