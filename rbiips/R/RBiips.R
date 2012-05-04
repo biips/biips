@@ -157,7 +157,7 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
                   .Call("check_model", p, mf, PACKAGE="RBiips")
                   unlink(mf)
                   ## Re-compile
-                  .Call("compile_model", p, .Call("get_data", p, PACKAGE="RBiips"),
+                  .Call("compile_model", p, data,
                         FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
                   invisible(NULL)
                 })
@@ -346,7 +346,7 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
   on.exit(set.biips.verbosity(1)) 
   
   ## Initialization
-  #---------------  
+  #----------------
   out <- init.pmmh.biips(obj, variable.names=variable.names, n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
@@ -392,7 +392,7 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
     n.fail <- n.fail + out$n.fail
     
     for (var in variable.names) {
-      accept.rate[[var]][i] <- out$accept.rate[var]
+      accept.rate[[var]][i] <- out$accept.rate[[var]]
     }
     
     ## advance progress bar
@@ -405,17 +405,22 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
     ## Store output
     if ((i-1)%%thin == 0) {
       n.samples <- n.samples +1
-      ans[["log.marg.like"]][n.samples] <- log.marg.like
+#       ans[["log.marg.like"]][n.samples] <- log.marg.like
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
   }
   
+  ## output
+  ## mean acceptance rate for each parameter
   mean.ar <- list()
   for (var in variable.names) {
     mean.ar[[var]] <- mean(accept.rate[[var]])
   }
   ans[["mean.ar"]] <- mean.ar
+  
+  ## number of failures
+  ans[["n.fail"]] <- n.fail
   
   ## set output dimensions
   for (var in variable.names) {
@@ -423,9 +428,9 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
     names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iteration")
     class(ans[[var]]) <- "mcarray"
   }
-  dim(ans[["log.marg.like"]]) <- c(1, n.samples)
-  names(dim(ans[["log.marg.like"]])) <- c("", "iteration")
-  class(ans[["log.marg.like"]]) <- "mcarray"
+#   dim(ans[["log.marg.like"]]) <- c(1, n.samples)
+#   names(dim(ans[["log.marg.like"]])) <- c("", "iteration")
+#   class(ans[["log.marg.like"]]) <- "mcarray"
   
   return(ans)
 }
@@ -515,7 +520,7 @@ pimh.samples <- function(obj, variable.names, n.iter, thin=1,
 
 
 smc.sensitivity <- function(obj, params,
-                         n.part, rs.thres=0.5, rs.type="stratified")
+                            n.part, rs.thres=0.5, rs.type="stratified")
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model")
@@ -562,10 +567,8 @@ smc.sensitivity <- function(obj, params,
     }
   }
   
-  log.marg.like <- vector(length=n.params)
-  log.marg.like.pen <- vector(length=n.params)
-  max.log.marg.like <- -Inf
-  max.log.marg.like.pen <- -Inf
+  ## data backup
+  data <- obj$data()
   
   ## stop biips verbosity
   set.biips.verbosity(0)
@@ -573,23 +576,33 @@ smc.sensitivity <- function(obj, params,
   ## restart biips verbosity on exit
   on.exit(set.biips.verbosity(1))
   
+  ## initialize
+  ##-----------
+  log.marg.like <- vector(length=n.params)
+  log.marg.like.pen <- vector(length=n.params)
+  max.log.marg.like <- -Inf
+  max.log.marg.like.pen <- -Inf
+  
   ## progress bar
   bar <- .Call("progress_bar", n.params, '*', "iterations", PACKAGE="RBiips")
   
   ## Iterate 
+  ##--------
   for (k in 1:n.params) {
     
-    ## make one param list
+    ## make one param
     param <- list()
-    for (var in variable.names) {
-      ind <- seq(from=(k-1)*len[[var]]+1, to=k*len[[var]])
-      param[[var]] <- params[[var]][ind]
-      dim(param[[var]]) <- dim[[var]]
+    for (v in seq(along=variable.names)) {
+      var <- variable.names[[v]]
+      ind <- seq(from=(k-1)*len[[v]]+1, to=k*len[[v]])
+      param[[v]] <- params[[v]][ind]
+      dim(param[[v]]) <- dim[[v]]
+      
+      ## change param value
+      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                param[[v]], FALSE, PACKAGE="RBiips"))
+        stop(paste("data change failed: invalid parameter. variable =", var,". value =", param[v]))
     }
-    
-    ## change data
-    if(!.Call("change_data", obj$ptr(), param, FALSE, PACKAGE="RBiips"))
-      stop(paste("data change failed: invalid parameter. value =", param))
     
     log.prior <- 0
     for (v in seq(along=variable.names)) {
@@ -629,6 +642,61 @@ smc.sensitivity <- function(obj, params,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
+  ## restore data
+  ##-------------
+  obj$recompile()
+  
+#   for (v in seq(along=variable.names)) {
+#     if (!(pn$names[[v]] %in% names(data))) {
+#       ok <- .Call("remove_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+#       if (!ok)
+#         stop("Failure restoring data")
+#       next
+#     }
+#     
+#     if (is.null(pn$lower[[v]])) {
+#       data.sub <- data[[v]]
+#     } else {
+#       ## compute offsets
+#       offsets <- NULL
+#       dim <- dim(data[[v]])
+#       if (is.null(dim))
+#         dim <- length(data[[v]])
+#       ind <- vector(len=length(dim))
+#       
+#       for (i in seq(along=data[[v]])) {
+#         r <- i
+#         for (d in seq(along=dim)) {
+#           ind[d] <- ((r-1) %% dim[d]) +1
+#           r <- ceiling(r/dim[d])
+#         }
+#         print(ind)
+#         if (any(ind<pn$lower[[v]]) || any(ind>pn$upper[[v]]))
+#           next
+#         offsets <- c(offsets, i)
+#       }
+#       
+#       data.sub <- array(data[[v]][offsets], dim=pn$upper[[v]]-pn$lower[[v]]+1)
+#     }
+#     
+#     if (all(is.na(data.sub))) {
+#       ok <- .Call("remove_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+#       if (!ok)
+#         stop("Failure restoring data")
+#       next
+#     }
+#     
+#     if (any(is.na(data.sub)))
+#       stop("Failure restoring data")
+#     
+#     ok <- .Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+#                 data.sub, FALSE, PACKAGE="RBiips")
+#     if (!ok)
+#       stop("Failure restoring data")
+#   }
+  
+  ## output
+  ##--------
   ans <- list(log.marg.like=log.marg.like, max.param=max.param, max.log.marg.like=max.log.marg.like,
               log.marg.like.pen=log.marg.like.pen, max.param.pen=max.param.pen, max.log.marg.like.pen=max.log.marg.like.pen)
   

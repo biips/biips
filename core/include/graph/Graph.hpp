@@ -185,8 +185,9 @@ namespace Biips
     }
 
     void SetObserved(NodeId nodeId);
+    void SetUnobserved(NodeId nodeId);
 
-    // Sets observed values of stochastic nodes only
+    // Sets observed values
     void SetObsValue(NodeId nodeId,
                      const ValArray::Ptr & pObsValue,
                      Bool stochOnly = true);
@@ -236,7 +237,7 @@ namespace Biips
     typedef VertexPropertyWriter SelfType;
 
     VertexPropertyWriter(const Graph & graph) :
-      graph_(graph)
+        graph_(graph)
     {
     }
     virtual ~VertexPropertyWriter()

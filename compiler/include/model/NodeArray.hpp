@@ -115,13 +115,17 @@ namespace Biips
      */
     void SetData(const MultiArray & value);
 
-    Bool ChangeData(const MultiArray & value,
+    Bool ChangeData(IndexRange range,
+                    const MultiArray & value,
                     std::map<Size, NodeId> & logicChildrenByRank,
                     std::map<Size, NodeId> & stoChildrenByRank,
                     Bool mcmc);
 
-    Bool SampleData(std::map<Size, NodeId> & logicChildrenByRank, std::map<
-        Size, NodeId> & stoChildrenByRank, Rng * pRng, Bool mcmc = true);
+    void SampleData(IndexRange range,
+                    Rng * pRng,
+                    std::map<Size, NodeId> & logicChildrenByRank);
+
+    void RemoveData(IndexRange range);
 
     /**
      * Gets the values of nodes that have been inserted into
