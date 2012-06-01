@@ -88,6 +88,13 @@ configure_file (
 	NEWLINE_STYLE UNIX
 )
 
+# configure RBiips-package.Rd file
+configure_file (
+	man/RBiips-package.Rd.in
+	${PROJECT_PKG_NAME}/man/RBiips-package.Rd
+	@ONLY
+)
+
 
 # copy files to binary directory
 macro (copy_dir_to_binary dir)

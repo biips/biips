@@ -87,8 +87,8 @@ namespace Biips
 
     Bool builtFlag_;
 
-    std::map<String, Size> nodesSummaryMap_;
-    std::map<String, Size> unobsNodesSummaryMap_;
+    std::map<NodeType, Size> nodesSummaryMap_;
+    std::map<NodeType, Size> unobsNodesSummaryMap_;
 
     void topologicalSort();
     void buildStochasticParents();
@@ -153,13 +153,13 @@ namespace Biips
     }
 
     // TODO: delete/improve this
-    const std::map<String, Size> & NodesSummary() const
+    const std::map<NodeType, Size> & NodesSummary() const
     {
       return nodesSummaryMap_;
     }
 
     // TODO: delete/improve this
-    const std::map<String, Size> & UnobsNodesSummary() const
+    const std::map<NodeType, Size> & UnobsNodesSummary() const
     {
       return unobsNodesSummaryMap_;
     }

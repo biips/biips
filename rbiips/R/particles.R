@@ -92,9 +92,9 @@ stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
     indvec <- seq(d, len*(n.part-1)+d,len)
     for (f in fun) {
       if (f == "quantiles")
-        d.stat <- .Call("weighted_quantiles", x$values[indvec], n.part*x$weights[indvec], probs, package="RBiips")
+        d.stat <- .Call("weighted_quantiles", x$values[indvec], n.part*x$weights[indvec], probs, PACKAGE="RBiips")
       else
-        d.stat <- .Call(paste("weighted_",f,sep=""), x$values[indvec], n.part*x$weights[indvec], package="RBiips")
+        d.stat <- .Call(paste("weighted_",f,sep=""), x$values[indvec], n.part*x$weights[indvec], PACKAGE="RBiips")
       stat.names <- names(d.stat)[names(d.stat) != "Table"]
       if (d==1) {
         for (n in stat.names) {
@@ -110,13 +110,13 @@ stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
 }
 
 
-summary.particles <- function(x, fun, probs = c(0.25,0.5,0.75))
+summary.particles <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
 {
-  if (is.null(x$values) || is.null(x$weights) || is.null(x$discrete)) {
+  if (is.null(object$values) || is.null(object$weights) || is.null(object$discrete)) {
     NextMethod()
   }
   
-  if (all(x$discrete)) {
+  if (all(object$discrete)) {
     if (missing(fun))
       fun <- "mode"
     else
@@ -139,23 +139,23 @@ summary.particles <- function(x, fun, probs = c(0.25,0.5,0.75))
                               "quantiles"), several.ok = TRUE)
   }
 
-  drop.dims <- names(dim(x$values)) %in% c("particle")
+  drop.dims <- names(dim(object$values)) %in% c("particle")
   
-  stat <- stat.particles(x, fun, probs)
-  stat[["drop.dims"]] <- dim(x$values)[drop.dims]
-  stat[["name"]] <- deparse.varname(x$name, x$lower, x$upper)
-  stat[["type"]] <- x$type
+  stat <- stat.particles(object, fun, probs)
+  stat[["drop.dims"]] <- dim(object$values)[drop.dims]
+  stat[["name"]] <- deparse.varname(object$name, object$lower, object$upper)
+  stat[["type"]] <- object$type
   class(stat) <- "summary.particles"
 
   return(stat)
 }
 
 
-summary.particles.list <- function(x, ...)
+summary.particles.list <- function(object, ...)
 {
   ans <- list()
-  for (n in names(x))
-    ans[[n]] <- summary(x[[n]], ...)
+  for (n in names(object))
+    ans[[n]] <- summary(object[[n]], ...)
   
   class(ans) <- "summary.particles.list"
 
@@ -186,7 +186,7 @@ print.summary.particles.list <- function(x, ...)
 }
 
 
-plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="flat array index",
+plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
                                    ylab="estimates", main, sub, leg.args=list(), ...)
 {
   ltyy <- lty
@@ -222,7 +222,7 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="f
   if (missing(sub))
     sub <- paste("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
         collapse=","))
-  matplot(mat, type=type, xlab=xlab, ylab=ylab, main=main, lty=lty, lwd=lwd, col=col, ...)
+  matplot(mat, type=type, xlab=xlab, ylab=ylab, main=main, sub=sub, lty=lty, lwd=lwd, col=col, ...)
   
   leg.args[["legend"]] <- stat.names
   do.call("legend.summary.particles", leg.args)
@@ -253,13 +253,13 @@ plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.
 }
 
 
-diagnostic <- function(x, ...)
+diagnostic <- function(object, ...)
   UseMethod("diagnostic")
 
 
-diagnostic.particles <- function(x, ess.thres=30)
+diagnostic.particles <- function(object, ess.thres=30, ...)
 {
-  ess.min <- min(x$ess)
+  ess.min <- min(object$ess)
   ans <- list("ESS min."=ess.min, "valid"=ess.min>ess.thres)
   class(ans) <- "diagnostic.particles"
   return(ans)
@@ -279,11 +279,11 @@ print.diagnostic.particles <- function(x, ...)
 }
 
 
-diagnostic.particles.list <- function(x, ...)
+diagnostic.particles.list <- function(object, ...)
 {
   ans <- list()
-  for (n in names(x))
-    ans[[n]] <- diagnostic(x[[n]], ...)
+  for (n in names(object))
+    ans[[n]] <- diagnostic(object[[n]], ...)
   return(ans)
 }
 
@@ -383,7 +383,7 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
       bww <- bw[[d]]
     
     if (discrete) {
-      table <- .Call("weighted_table", values, weights, package="RBiips")
+      table <- .Call("weighted_table", values, weights, PACKAGE="RBiips")
       dens <- list(x=table[["Table"]]$x, y=table[["Table"]]$y, bw=1)
     } else {
       dens <- density(values, weights=weights, bw=bww, adjust=adjust, ...)
@@ -461,7 +461,7 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
       ylab <- "probability"
     if (missing(main))
       main <- "discrete law histograms"
-    main.title <- paste(x$name, main)
+    main.title <- paste(x[[t]]$name, main)
     
     barplot(x$density$y, names.arg=x$density$x,
             col=col, xlab=xlab, ylab=ylab, main=main.title,
@@ -475,7 +475,7 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
-    main.title <- paste(x$name, main)
+    main.title <- paste(x[[t]]$name, main)
     
     plot(x$density$x, x$density$y,
          type=type, lty=lty, lwd=lwd, col=col,
@@ -540,7 +540,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
       ylab <- "probabilty"
     if (missing(main))
       main <- "discrete law histograms"
-    main.title <- paste(x$name, main)
+    main.title <- paste(x[[t]]$name, main)
     
     if (length(col)>length(x))
       col <- col[1:length(x)]
@@ -570,7 +570,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
-    main.title <- paste(x$name, main)
+    main.title <- paste(x[[t]]$name, main)
   
     matplot(xx, yy,
          type=type, lty=lty, lwd=lwd, col=col,

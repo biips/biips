@@ -50,10 +50,10 @@ class ParseTree;
 
 namespace Biips
 {
-
-  const String PROMPT_STRING = ">>> ";
-  const Size INDENT_SIZE = 4;
-  const String INDENT_STRING(INDENT_SIZE, ' ');
+  String PROMPT_STRING = "* ";
+  Size INDENT_SIZE = 4;
+  const char INDENT_CHAR = ' ';
+  String INDENT_STRING(INDENT_SIZE, INDENT_CHAR);
 
   class BUGSModel;
 
@@ -93,12 +93,12 @@ namespace Biips
      *
      * @return true on success or false on error.
      */
-    Bool CheckModel(const String & modelFileName, Bool verbose = true);
+    Bool CheckModel(const String & modelFileName, Size verbosity = 1);
 
     Bool GraphSize(Size & s);
 
     // FIXME add module manager and a load module by name function
-    Bool LoadBaseModule(Bool verbose = true);
+    Bool LoadBaseModule(Size verbosity = 1);
 
     /*!
      * Compiles the model.
@@ -116,7 +116,7 @@ namespace Biips
     Bool Compile(std::map<String, MultiArray> & dataMap,
                  Bool genData,
                  Size dataRngSeed,
-                 Bool verbose = true);
+                 Size verbosity = 1);
 
     Bool PrintGraphviz(std::ostream & os);
     /*!
@@ -129,7 +129,7 @@ namespace Biips
     }
 
     /*! Clears the model */
-    void ClearModel(Bool verbose = true);
+    void ClearModel(Size verbosity = 1);
 
     Bool SetDefaultFilterMonitors();
 
@@ -156,14 +156,14 @@ namespace Biips
      *
      * @returns true on success, false on failure
      */
-    Bool BuildSampler(Bool prior, Size verbose = 1);
+    Bool BuildSampler(Bool prior, Size verbosity = 1);
     Bool SamplerBuilt();
 
     Bool RunForwardSampler(Size nParticles,
                            Size smcRngSeed,
                            const String & rsType,
                            Scalar essThreshold,
-                           Bool verbose = true,
+                           Size verbosity = 1,
                            Bool progressBar = true);
 
     Bool ForwardSamplerAtEnd();
@@ -177,7 +177,7 @@ namespace Biips
     Bool
     SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
 
-    Bool RunBackwardSmoother(Bool verbose = true, Bool progressBar = true);
+    Bool RunBackwardSmoother(Size verbosity = 1, Bool progressBar = true);
 
     Bool ExtractFilterStat(const String & name,
                            StatTag statFeature,
@@ -208,17 +208,17 @@ namespace Biips
                const IndexRange & range,
                const MultiArray & data,
                Bool mcmc = true,
-               Bool verbose = true);
+               Size verbosity = 1);
     Bool
     SampleData(const String & variable,
                const IndexRange & range,
                MultiArray & data,
                Size rngSeed,
-               Bool verbose = true);
+               Size verbosity = 1);
 
     Bool RemoveData(const String & variable,
                     const IndexRange & range,
-                    Bool verbose);
+                    Size verbosity = 1);
     Bool GetLogPriorDensity(Scalar & prior,
                             const String & variable,
                             const IndexRange & range = NULL_RANGE);

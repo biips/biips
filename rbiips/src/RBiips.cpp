@@ -45,7 +45,7 @@
 using namespace Biips;
 using std::endl;
 
-static Size verbosity = 0;
+static Size VERBOSITY = 1;
 
 static inline void checkConsole(SEXP ptr)
 {
@@ -61,7 +61,7 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
 {
   std::map<String, MultiArray> data_map;
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Writing data table" << endl;
 
   Rcpp::List data_list(data);
@@ -71,14 +71,14 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
     return data_map;
   }
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << INDENT_STRING << "Variables:";
 
   Rcpp::CharacterVector names = data_list.attr("names");
   for (int i=0; i<names.size(); ++i)
   {
     String var_name(names[i]);
-    if (verbosity>0)
+    if (VERBOSITY>1)
       rbiips_cout << " " << var_name;
 
     Rcpp::NumericVector r_vec = data_list[var_name];
@@ -102,7 +102,7 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
 
     data_map[var_name] = marray;
   }
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << endl;
 
   return data_map;
@@ -115,12 +115,12 @@ static SEXP readDataTable(const std::map<String, MultiArray> & dataMap);
 template<>
 SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap)
 {
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Reading data table" << endl;
 
   Rcpp::List data_list;
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << INDENT_STRING << "Variables:";
 
   Rcpp::CharacterVector names;
@@ -142,10 +142,10 @@ SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
     data_list[var_name] = values;
 
-    if (verbosity>0)
+    if (VERBOSITY>1)
       rbiips_cout << " " << var_name;
   }
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << endl;
 
   return data_list;
@@ -179,10 +179,54 @@ RcppExport SEXP get_version()
 }
 
 
-RcppExport void set_verbosity(SEXP verb)
+RcppExport SEXP verbosity(SEXP verb)
 {
   BEGIN_RBIIPS
-  verbosity = Rcpp::as<Size>(verb);
+  Size old_verb = VERBOSITY;
+  if (!Rf_isNull(verb))
+    VERBOSITY = Rcpp::as<Size>(verb);
+  return Rcpp::wrap(old_verb);
+  END_RBIIPS
+}
+
+
+RcppExport SEXP prompt_string(SEXP prompt)
+{
+  BEGIN_RBIIPS
+  String old = PROMPT_STRING;
+  if (!Rf_isNull(prompt))
+    PROMPT_STRING = Rcpp::as<String>(prompt);
+  return Rcpp::wrap(PROMPT_STRING);
+  END_RBIIPS
+}
+
+
+RcppExport SEXP indent_size(SEXP size)
+{
+  BEGIN_RBIIPS
+  Size old = INDENT_SIZE;
+  if (!Rf_isNull(size))
+  {
+    INDENT_SIZE = Rcpp::as<Size>(size);
+    INDENT_STRING = String(INDENT_SIZE, INDENT_CHAR);
+  }
+  return Rcpp::wrap(INDENT_SIZE);
+  END_RBIIPS
+}
+
+
+RcppExport void message(SEXP mess)
+{
+  BEGIN_RBIIPS
+  rbiips_cout << PROMPT_STRING << Rcpp::as<String>(mess) << endl;
+  VOID_END_RBIIPS
+}
+
+
+RcppExport void indent_message(SEXP mess)
+{
+  BEGIN_RBIIPS
+  rbiips_cout << INDENT_STRING << Rcpp::as<String>(mess) << endl;
   VOID_END_RBIIPS
 }
 
@@ -234,10 +278,7 @@ RcppExport void check_model(SEXP pConsole, SEXP modelFileName)
   Rcpp::XPtr<Console> p_console(pConsole);
 
   // Check model syntax
-  if (verbosity>0)
-    rbiips_cout << PROMPT_STRING << "Parsing model in: " << Rcpp::as<String>(modelFileName) << endl;
-
-  if (! p_console->CheckModel(Rcpp::as<String>(modelFileName), true))
+  if (! p_console->CheckModel(Rcpp::as<String>(modelFileName), VERBOSITY))
     throw RuntimeError("Model syntax is incorrect.");
 
   VOID_END_RBIIPS
@@ -254,18 +295,13 @@ RcppExport void compile_model(SEXP pConsole, SEXP data, SEXP sampleData, SEXP da
   std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
 
   Bool sample_data = Rcpp::as<Bool>(sampleData);
-  Size data_rng_seed = 0;
-  if (sample_data)
-  {
-    data_rng_seed = Rcpp::as<Size>(dataRngSeed);
-
-    if (verbosity>0)
-      rbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
-  }
+  Size data_rng_seed = Rcpp::as<Size>(dataRngSeed);
 
   // Compile model
-  if (! p_console->Compile(data_map, sample_data, data_rng_seed, verbosity>0))
+  if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY))
     throw RuntimeError("Failed to compile model.");
+  if (sample_data && VERBOSITY>1)
+    rbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
 
   VOID_END_RBIIPS
 }
@@ -319,7 +355,7 @@ RcppExport SEXP change_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper,
   }
 
   Bool ok = p_console->ChangeData(name, range,
-                                  marray, Rcpp::as<Bool>(mcmc), verbosity);
+                                  marray, Rcpp::as<Bool>(mcmc), VERBOSITY);
 
   return Rcpp::wrap(ok);
 
@@ -341,7 +377,7 @@ RcppExport SEXP sample_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper,
   MultiArray data;
 
   Bool ok = p_console->SampleData(name, range, data, Rcpp::as<Size>(rngSeed),
-                                  verbosity);
+                                  VERBOSITY);
   if (!ok)
     throw RuntimeError("Failed to sample data.");
 
@@ -371,7 +407,7 @@ RcppExport void remove_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper)
   String name(var[0]);
   IndexRange range = makeRange(lower, upper);
 
-  Bool ok = p_console->RemoveData(name, range ,verbosity);
+  Bool ok = p_console->RemoveData(name, range ,VERBOSITY);
 
   VOID_END_RBIIPS
 }
@@ -385,7 +421,7 @@ RcppExport void print_graphviz(SEXP pConsole, SEXP dotFileName)
 
   String dot_file_name = Rcpp::as<String>(dotFileName);
 
-  if (verbosity>0)
+  if (VERBOSITY)
     rbiips_cout << PROMPT_STRING << "Writing dot file in: "
                 << dot_file_name << endl;
 
@@ -407,7 +443,7 @@ RcppExport void set_default_monitors(SEXP pConsole)
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
 
   if (!p_console->SetDefaultFilterMonitors())
@@ -427,7 +463,7 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
   Rcpp::List monitored_lower(lower);
   Rcpp::List monitored_upper(upper);
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
 
   for (int i=0; i<monitored_var.size(); ++i)
@@ -435,16 +471,15 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetFilterMonitor(name, range))
+    Bool ok = p_console->SetFilterMonitor(name, range);
+    if (ok && VERBOSITY>1)
     {
-      if (verbosity == 0)
-        continue;
       rbiips_cout << " " << name;
       if (!range.IsNull())
         rbiips_cout << range;
     }
   }
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << endl;
 
   VOID_END_RBIIPS
@@ -461,7 +496,7 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
   Rcpp::List monitored_lower(lower);
   Rcpp::List monitored_upper(upper);
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Smooth tree monitoring variables:";
 
   for (int i=0; i<monitored_var.size(); ++i)
@@ -469,16 +504,15 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetSmoothTreeMonitor(name, range))
+    Bool ok = p_console->SetSmoothTreeMonitor(name, range);
+    if (ok && VERBOSITY>1)
     {
-      if (verbosity == 0)
-        continue;
       rbiips_cout << " " << name;
       if (!range.IsNull())
         rbiips_cout << range;
     }
   }
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << endl;
 
   VOID_END_RBIIPS
@@ -493,7 +527,7 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
   Rcpp::List monitored_lower(lower);
   Rcpp::List monitored_upper(upper);
 
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << PROMPT_STRING << "Smoother monitoring variables:";
 
   Rcpp::StringVector monitored_var(varNames);
@@ -503,16 +537,15 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (p_console->SetSmoothMonitor(name, range))
+    Bool ok = p_console->SetSmoothMonitor(name, range);
+    if (ok && VERBOSITY>1)
     {
-      if (verbosity == 0)
-        continue;
       rbiips_cout << " " << name;
       if (!range.IsNull())
         rbiips_cout << range;
     }
   }
-  if (verbosity>0)
+  if (VERBOSITY>1)
     rbiips_cout << endl;
 
   VOID_END_RBIIPS
@@ -527,15 +560,7 @@ RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
 
   Bool prior_flag = Rcpp::as<Bool>(prior);
 
-  if (verbosity>0)
-  {
-    rbiips_cout << PROMPT_STRING << "Building SMC sampler";
-    if (prior_flag)
-      rbiips_cout << " with prior mutation";
-    rbiips_cout << endl;
-  }
-
-  if (!p_console->BuildSampler(prior_flag, false))
+  if (!p_console->BuildSampler(prior_flag))
     throw RuntimeError("Failed to build sampler.");
 
   VOID_END_RBIIPS
@@ -563,16 +588,7 @@ RcppExport SEXP run_smc_sampler(SEXP pConsole, SEXP nParticles, SEXP smcRngSeed,
   String resample_type = Rcpp::as<String>(resampleType);
   Scalar ess_threshold = Rcpp::as<Scalar>(essThreshold);
 
-  if (verbosity>0)
-  {
-    rbiips_cout << PROMPT_STRING << "Running SMC sampler" << endl;
-    rbiips_cout << INDENT_STRING << "n.part = " << n_part << endl;
-    rbiips_cout << INDENT_STRING << "smc.rng.seed = " << smc_rng_seed << endl;
-    rbiips_cout << INDENT_STRING << "rs.thres = " << ess_threshold << endl;
-    rbiips_cout << INDENT_STRING << "rs.type = " << resample_type << endl;
-  }
-
-  Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, false, verbosity>0);
+  Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, VERBOSITY, VERBOSITY);
 
   return Rcpp::wrap(ok);
 
@@ -826,10 +842,7 @@ RcppExport void run_backward_smoother(SEXP pConsole)
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (verbosity>0)
-    rbiips_cout << PROMPT_STRING << "Running backward smoother" << endl;
-
-  if (!p_console->RunBackwardSmoother(false, verbosity>0))
+  if (!p_console->RunBackwardSmoother(VERBOSITY, VERBOSITY))
     throw RuntimeError("Failed to run backward smoother.");
 
   VOID_END_RBIIPS

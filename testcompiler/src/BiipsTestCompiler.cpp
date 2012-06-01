@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (verbosity > 0)
       cout << INDENT_STRING << "data-rng-seed = " << data_rng_seed << endl;
 
-    if (!console.Compile(data_map, true, data_rng_seed, verbosity > 0))
+    if (!console.Compile(data_map, true, data_rng_seed, verbosity))
       throw RuntimeError("Failed to compile model.");
 
     if (verbosity > 0 && interactive)

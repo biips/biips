@@ -354,17 +354,17 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (verbosity>0)
     {
       cout << INDENT_STRING << "Graph nodes: " << p_model_test->DataGraphSize();
-      cout << " (Constant: "<< p_model_test->DataNodesSummary().at("Constant");
-      cout << ", Logical: "<< p_model_test->DataNodesSummary().at("Logical");
-      cout << ", Stochastic: " << p_model_test->DataNodesSummary().at("Stochastic") << ")" << endl;
+      cout << " (Constant: "<< p_model_test->DataNodesSummary().at(CONSTANT);
+      cout << ", Logical: "<< p_model_test->DataNodesSummary().at(LOGICAL);
+      cout << ", Stochastic: " << p_model_test->DataNodesSummary().at(STOCHASTIC) << ")" << endl;
     }
-    Size n_data_unobs_nodes = p_model_test->DataUnobsNodesSummary().at("Logical") + p_model_test->DataUnobsNodesSummary().at("Stochastic");
+    Size n_data_unobs_nodes = p_model_test->DataUnobsNodesSummary().at(LOGICAL) + p_model_test->DataUnobsNodesSummary().at(STOCHASTIC);
 
     if (verbosity>0)
     {
       cout << INDENT_STRING << "Unobserved nodes: " << n_data_unobs_nodes;
-      cout << " (Logical: "<< p_model_test->DataUnobsNodesSummary().at("Logical");
-      cout << ", Stochastic: " << p_model_test->DataUnobsNodesSummary().at("Stochastic") << ")" << endl;
+      cout << " (Logical: "<< p_model_test->DataUnobsNodesSummary().at(LOGICAL);
+      cout << ", Stochastic: " << p_model_test->DataUnobsNodesSummary().at(STOCHASTIC) << ")" << endl;
     }
 
     if ( verbosity>0 && interactive && yesNoQuestion("Print data graph (y/n)? ", 'y', 'n', 1) )
@@ -449,17 +449,17 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (verbosity>0)
     {
       cout << INDENT_STRING << "Graph nodes: " << p_model_test->ModelGraphSize();
-      cout << " (Constant: "<< p_model_test->ModelNodesSummary().at("Constant");
-      cout << ", Logical: "<< p_model_test->ModelNodesSummary().at("Logical");
-      cout << ", Stochastic: " << p_model_test->ModelNodesSummary().at("Stochastic") << ")" << endl;
+      cout << " (Constant: "<< p_model_test->ModelNodesSummary().at(CONSTANT);
+      cout << ", Logical: "<< p_model_test->ModelNodesSummary().at(LOGICAL);
+      cout << ", Stochastic: " << p_model_test->ModelNodesSummary().at(STOCHASTIC) << ")" << endl;
     }
-    Size n_model_unobs_nodes = p_model_test->ModelUnobsNodesSummary().at("Logical") + p_model_test->ModelUnobsNodesSummary().at("Stochastic");
+    Size n_model_unobs_nodes = p_model_test->ModelUnobsNodesSummary().at(LOGICAL) + p_model_test->ModelUnobsNodesSummary().at(STOCHASTIC);
 
     if (verbosity>0)
     {
       cout << INDENT_STRING << "Unobserved nodes: " << n_model_unobs_nodes;
-      cout << " (Logical: "<< p_model_test->ModelUnobsNodesSummary().at("Logical");
-      cout << ", Stochastic: " << p_model_test->ModelUnobsNodesSummary().at("Stochastic") << ")" << endl;
+      cout << " (Logical: "<< p_model_test->ModelUnobsNodesSummary().at(LOGICAL);
+      cout << ", Stochastic: " << p_model_test->ModelUnobsNodesSummary().at(STOCHASTIC) << ")" << endl;
     }
 
     if (verbosity>0 && interactive && yesNoQuestion("Print model graph (y/n)? ", 'y', 'n', 1) )
@@ -489,7 +489,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         string mut = mutations[i_mut];
         if (verbosity>0)
         {
-          cout << "Running " << n_smc << " SMC algorithms of " << p_model_test->ModelUnobsNodesSummary().at("Stochastic") << " iterations with" << endl;
+          cout << "Running " << n_smc << " SMC algorithms of " << p_model_test->ModelUnobsNodesSummary().at(STOCHASTIC) << " iterations with" << endl;
           cout << INDENT_STRING << "mutation: " << mut << ", particles: " << n_part << endl;
         }
 

@@ -45,8 +45,6 @@
   
   ## ... and the modules
   load.biips.module("basemod")
-  
-  set.biips.verbosity(1)
 }
 
 .onUnload <- function(libpath)
