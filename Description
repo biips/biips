@@ -1,0 +1,4 @@
+ BiiPS is free software, licensed under the GPL.
+ It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
+ Both tools can be used by non-statisticians, via their automated "black box" inference engines.
+ Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as "interacting particles" or "particle filtering" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).
