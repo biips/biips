@@ -80,7 +80,7 @@ namespace Biips
     }
     boost::put(boost::vertex_discrete, parentsGraph_, node_id, discrete);
 
-    nodesSummaryMap_["Constant"] += 1;
+    nodesSummaryMap_[CONSTANT] += 1;
     builtFlag_ = false; // TODO also set to false when SetParameter is called
     return node_id;
   }
@@ -128,9 +128,9 @@ namespace Biips
     }
     boost::put(boost::vertex_discrete, parentsGraph_, node_id, discrete);
 
-    nodesSummaryMap_["Logical"] += 1;
+    nodesSummaryMap_[LOGICAL] += 1;
     if (!observed)
-      unobsNodesSummaryMap_["Logical"] += 1;
+      unobsNodesSummaryMap_[LOGICAL] += 1;
 
     builtFlag_ = false;
     return node_id;
@@ -190,9 +190,9 @@ namespace Biips
                node_id,
                pFunc->IsDiscreteValued(mask));
 
-    nodesSummaryMap_["Logical"] += 1;
+    nodesSummaryMap_[LOGICAL] += 1;
     if (!observed)
-      unobsNodesSummaryMap_["Logical"] += 1;
+      unobsNodesSummaryMap_[LOGICAL] += 1;
 
     builtFlag_ = false;
     return node_id;
@@ -259,9 +259,9 @@ namespace Biips
                node_id,
                pDist->IsDiscreteValued(mask));
 
-    nodesSummaryMap_["Stochastic"] += 1;
+    nodesSummaryMap_[STOCHASTIC] += 1;
     if (!observed)
-      unobsNodesSummaryMap_["Stochastic"] += 1;
+      unobsNodesSummaryMap_[STOCHASTIC] += 1;
 
     builtFlag_ = false;
     return node_id;
@@ -444,17 +444,17 @@ namespace Biips
     switch (GetNode(last_node_id).GetType())
     {
       case CONSTANT:
-        nodesSummaryMap_["Constant"] -= 1;
+        nodesSummaryMap_[CONSTANT] -= 1;
         break;
       case LOGICAL:
-        nodesSummaryMap_["Logical"] -= 1;
+        nodesSummaryMap_[LOGICAL] -= 1;
         if (!GetObserved()[last_node_id])
-          unobsNodesSummaryMap_["Logical"] -= 1;
+          unobsNodesSummaryMap_[LOGICAL] -= 1;
         break;
       case STOCHASTIC:
-        nodesSummaryMap_["Stochastic"] -= 1;
+        nodesSummaryMap_[STOCHASTIC] -= 1;
         if (!GetObserved()[last_node_id])
-          unobsNodesSummaryMap_["Stochastic"] -= 1;
+          unobsNodesSummaryMap_[STOCHASTIC] -= 1;
         break;
       default:
         throw LogicError("Unknown node type.");
@@ -983,11 +983,11 @@ namespace Biips
   Graph::Graph() :
       childrenGraph_(parentsGraph_), builtFlag_(false)
   {
-    nodesSummaryMap_["Constant"] = 0;
-    nodesSummaryMap_["Stochastic"] = 0;
-    nodesSummaryMap_["Logical"] = 0;
-    unobsNodesSummaryMap_["Stochastic"] = 0;
-    unobsNodesSummaryMap_["Logical"] = 0;
+    nodesSummaryMap_[CONSTANT] = 0;
+    nodesSummaryMap_[STOCHASTIC] = 0;
+    nodesSummaryMap_[LOGICAL] = 0;
+    unobsNodesSummaryMap_[STOCHASTIC] = 0;
+    unobsNodesSummaryMap_[LOGICAL] = 0;
   }
 
   void Graph::PrintGraphviz(std::ostream & os) const

@@ -1,0 +1,28 @@
+var x.true[4,t.max], v.true[2,t.max], 
+    x[4,t.max], v[2,t.max], y[2,t.max]
+
+data
+{
+  x.true[,1] ~ dmnorm(mean.x.init, Prec.x.init)
+  y[,1] ~ dmnorm(H %*% x.true[,1], Prec.y)
+  for (t in 2:t.max)
+  {
+    v.true[,t] ~ dmnorm(mean.v, Prec.v)
+    x.true[,t] <- F %*% x.true[,t-1] + G %*% v.true[,t]
+    y[,t] ~ dmnorm(H %*% x.true[,t], Prec.y)
+  }
+}
+
+
+model
+{
+  x[,1] ~ dmnorm(mean.x.init, Prec.x.init)
+  y[,1] ~ dmnorm(H %*% x[,1], Prec.y)
+  for (t in 2:t.max)
+  {
+    v[,t] ~ dmnorm(mean.v, Prec.v)
+    x[,t] <- F %*% x[,t-1] + G %*% v[,t]
+    y[,t] ~ dmnorm(H %*% x[,t], Prec.y)
+  }
+}
+

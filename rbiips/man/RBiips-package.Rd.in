@@ -1,0 +1,50 @@
+\name{RBiips-package}
+\alias{RBiips-package}
+\alias{RBiips}
+\docType{package}
+\title{
+@Biips_DESCRIPTION_SUMMARY@
+}
+\description{
+\emph{RBiips} is an interface with the C++ \href{@Biips_URL@}{BiiPS} libraries for analysing Bayesian graphical
+models using advanced particle methods.
+
+@Biips_DESCRIPTION@
+}
+
+\details{
+%%~~ An overview of how to use the package, including the most important functions ~~
+Typical usage of \emph{RBiips} consits in:
+\enumerate{
+\item compiling your model with \code{\link{biips.model}} function
+\item optionally analyzing sensitivity to parameters with \code{\link{smc.sensitivity}}
+\item generate samples from the conditional distributions
+    \itemize{
+    \item using standard SMC algorithm with \code{\link{smc.samples}} function
+    \item using particle MCMC methods with \code{\link{pmmh.samples}} or \code{\link{pimh.samples}} functions
+    }
+\item analysing output from \code{\link[particles.object]{particles}} and \code{mcarray} objects
+}
+}
+\author{
+\emph{RBiips} development is supported by the team \href{http://alea.bordeaux.inria.fr}{ALEA} at \href{http://www.inria.fr/en/centre/bordeaux}{Inria Bordeaux Sud-Ouest}.
+
+Individual authors:
+\itemize{
+\item Adrien Todeschini (Software design and development)
+\item Francois Caron (Probability expertise and specifications)
+}
+
+Maintainer: \email{@Biips_CONTACT_EMAIL@}
+}
+\references{
+%%~~ Literature or other references for background information ~~
+}
+\keyword{ package }
+\seealso{
+\code{\link[rjags:jags.model]{rjags}},
+\code{\link[pomp:pomp-package]{pomp}}
+}
+\examples{
+%% ~~ simple examples of the most important functions ~~
+}

@@ -7,7 +7,8 @@ Author: @Biips_OWNER@
 Maintainer: @Biips_CONTACT@
 Depends: R (>= @R_VERSION@), Rcpp (>= @Rcpp_VERSION@), stats
 SystemRequirements: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
-Description: @Biips_DESCRIPTION@
+Description:@Biips_DESCRIPTION@
 License: @Biips_LICENSE@
+Copyright: Copyright (C) @Biips_OWNER@, @Biips_COPYRIGHT_YEAR@
 URL: @Biips_URL@
 LinkingTo: Rcpp

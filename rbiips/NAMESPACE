@@ -2,7 +2,7 @@ if(tools:::.OStype() == "windows") {
 importFrom(utils, readRegistry)
 }
 
-importFrom(stats, variable.names)
+importFrom(stats, variable.names, density)
 
 export ( 
   biips.model,
@@ -10,8 +10,6 @@ export (
   pmmh.samples,
   pimh.samples,
   smc.sensitivity,
-  load.biips.module,
-  set.biips.verbosity,
   is.biips,
   build.sampler,
   init.pmmh,

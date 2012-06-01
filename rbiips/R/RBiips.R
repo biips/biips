@@ -36,13 +36,6 @@
 #
 ## COPY: Adapted from rjags module file: jags.R
 
-set.biips.verbosity <- function(level=1)
-{
-  .Call("set_verbosity", level, PACKAGE="RBiips")
-	invisible(NULL)
-}
-
-
 load.biips.module <- function(name, quiet=FALSE)
 {    
   if (!is.character(name) || !is.atomic(name))
@@ -59,20 +52,36 @@ load.biips.module <- function(name, quiet=FALSE)
 }
 
 
-biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, data.rng.seed)
+biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, data.rng.seed, quiet = FALSE)
 {
   if (missing(file)) {
     stop("Model file name missing")
   }
-  if (!is.atomic(file)) {
-    stop(paste("Only one model file allowed."))
+  if (is.character(file)) {
+    f <- try(file(file, "rt"))
+    if (inherits(f, "try-error")) {
+      stop(paste("Cannot open model file \"", file, "\"", 
+                 sep = ""))
+    }
+    close(f)
+    model.code <- readLines(file, warn = FALSE)
+    modfile <- file
   }
-  if (!file.exists(file)) {
-    stop(paste("Model file \"", file, "\" not found", sep=""))
+  else if (!inherits(file, "connection")) {
+    stop("'file' must be a character string or connection")
+  } else {
+    model.code <- readLines(file, warn = FALSE)
+    modfile <- tempfile()
+    writeLines(model.code, modfile)
+  }
+  
+  if (quiet) {
+    verb <- .Call("verbosity", 0, PACKAGE="RBiips")
+    on.exit(.Call("verbosity", verb, PACKAGE="RBiips"), add = TRUE)
   }
   
   p <- .Call("make_console", PACKAGE="RBiips")
-  .Call("check_model", p, file, PACKAGE="RBiips")
+  .Call("check_model", p, modfile, PACKAGE="RBiips")
 
   varnames <- .Call("get_variable_names", p, PACKAGE="RBiips")
   if (is.environment(data)) {
@@ -117,14 +126,19 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
   
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
 
-  model.code <- readLines(file, warn=FALSE)
+  model.data <- .Call("get_data", p, PACKAGE = "RBiips")
   model <- list("ptr" = function() {p},
                 "model" = function() {model.code},
-                "dot" = function(dot.file) {
-                  .Call("print_graphviz", p, dot.file, PACKAGE="RBiips")
+                "dot" = function(file) {
+                  .Call("print_graphviz", p, file, PACKAGE="RBiips")
                   invisible(NULL)
                 },
-                "data" = function() { .Call("get_data", p, PACKAGE="RBiips") },
+                "data" = function() {
+                  model.data
+                  },
+                ".data.sync" = function() {
+                    .Call("get_data", p, PACKAGE="RBiips")
+                },
                 "nodes" = function(type, observed) {
                    sorted.nodes <- data.frame(.Call("get_sorted_nodes", p, PACKAGE="RBiips"))
                    
@@ -157,7 +171,7 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
                   .Call("check_model", p, mf, PACKAGE="RBiips")
                   unlink(mf)
                   ## Re-compile
-                  .Call("compile_model", p, data,
+                  .Call("compile_model", p, model.data,
                         FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
                   invisible(NULL)
                 })
@@ -167,13 +181,13 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
 }
 
   
-is.biips <- function(obj)
+is.biips <- function(object)
 {
-  return(class(obj) == "biips")
+  return(class(object) == "biips")
 }
 
 
-print.biips <- function(x, ...)
+print.biips <- function(x,...)
 {
   if (!is.biips(x))
     stop("Invalid BiiPS model.")
@@ -265,7 +279,9 @@ parse.varnames <- function(varnames)
 }
 
 
-smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, ...)
+smc.samples <- function(obj, variable.names, type=c("filtering", "smoothing", "backward.smoothing"),
+                        n.part, backward=FALSE,
+                        rs.thres = 0.5, rs.type = "stratified", ...)
 {  
   if (!is.logical(backward) || !is.atomic(backward)) {
     stop("Invalid backward argument")
@@ -279,7 +295,7 @@ smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, .
     monitor.biips(obj, variable.names, type)
   
   ## smc forward sampler
-  run.smc.forward(obj, ...)
+  run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type, ...)
   
   log.marg.like <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
   ans <- list()
@@ -322,7 +338,7 @@ smc.samples <- function(obj, variable.names, type="smoothing", backward=FALSE, .
 }
 
 
-pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
+pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
                          n.part, max.fail=0, ...)
 {  
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
@@ -340,14 +356,12 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
   }
   
   ## stop biips verbosity
-  set.biips.verbosity(0)
-  
-  ## restart biips verbosity on exit
-  on.exit(set.biips.verbosity(1)) 
+  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
+  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
   
   ## Initialization
   #----------------
-  out <- init.pmmh.biips(obj, variable.names=variable.names, n.part=n.part, ...)
+  out <- init.pmmh.biips(model, variable.names=variable.names, n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like
@@ -363,7 +377,7 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
   ## reset data to sample on exit
   on.exit(
       if (n.iter > 0 && !accepted) {
-        .Call("set_log_norm_const", obj$ptr(), log.marg.like, PACKAGE="RBiips")
+        .Call("set_log_norm_const", model$ptr(), log.marg.like, PACKAGE="RBiips")
       }, add=TRUE)
   
   ans <- list()
@@ -376,13 +390,14 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
     accept.rate[[var]] <- vector(length=n.iter)
   }
   
+  .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
   bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(obj, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
+    out <- one.update.pmmh.biips(model, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
                                 sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
                                  n.part=n.part, ...)
     sample <- out$sample
@@ -436,10 +451,10 @@ pmmh.samples <- function(obj, variable.names, n.iter, thin=1, rw.sd,
 }
 
 
-pimh.samples <- function(obj, variable.names, n.iter, thin=1,
-                       n.part, rs.thres=0.5, rs.type="stratified")
+pimh.samples <- function(model, variable.names, n.iter, thin = 1,
+                       n.part, ...)
 {
-  if (!is.biips(obj))
+  if (!is.biips(model))
     stop("Invalid BiiPS model")
   
   ## check variable.names
@@ -455,30 +470,29 @@ pimh.samples <- function(obj, variable.names, n.iter, thin=1,
   thin <- as.integer(thin)
   
   ## stop biips verbosity
-  set.biips.verbosity(0)
-  
-  ## restart biips verbosity on exit
-  on.exit(set.biips.verbosity(1))
+  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
+  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
   
   ## Initialization
-  ##---------------
-  out <- init.pimh.biips(obj, variable.names=variable.names,
-                         n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+  ##---------------  
+  out <- init.pimh.biips(model, variable.names=variable.names,
+                         n.part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
   
   ans <- list()
   n.samples <- 0
   
+  .Call("message", paste("Generating PIMH samples with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
   bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
   
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(obj, variable.names=variable.names,
-                                 n.part=n.part, rs.thres=rs.thres, rs.type=rs.type,
-                                 sample=sample, log.marg.like=log.marg.like)
+    out <- one.update.pimh.biips(model, variable.names=variable.names,
+                                 n.part=n.part,
+                                 sample=sample, log.marg.like=log.marg.like, ...)
     sample <- out$sample
     log.marg.like <- out$log.marg.like
     accepted <- out$accepted
@@ -495,12 +509,12 @@ pimh.samples <- function(obj, variable.names, n.iter, thin=1,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
-  clear.monitors.biips(obj, type="smoothing")
+  clear.monitors.biips(model, type="smoothing")
   
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", obj$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_smooth_tree_particle", obj$ptr(), sample, PACKAGE="RBiips")
+    .Call("set_log_norm_const", model$ptr(), log.marg.like, PACKAGE="RBiips")
+    .Call("set_sampled_smooth_tree_particle", model$ptr(), sample, PACKAGE="RBiips")
   }
  
   
@@ -519,10 +533,10 @@ pimh.samples <- function(obj, variable.names, n.iter, thin=1,
 }
 
 
-smc.sensitivity <- function(obj, params,
-                            n.part, rs.thres=0.5, rs.type="stratified")
+smc.sensitivity <- function(model, params,
+                            n.part, ...)
 {
-  if (!is.biips(obj))
+  if (!is.biips(model))
     stop("Invalid BiiPS model")
   
   if (missing(n.part))
@@ -567,14 +581,9 @@ smc.sensitivity <- function(obj, params,
     }
   }
   
-  ## data backup
-  data <- obj$data()
-  
   ## stop biips verbosity
-  set.biips.verbosity(0)
-  
-  ## restart biips verbosity on exit
-  on.exit(set.biips.verbosity(1))
+  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
+  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
   
   ## initialize
   ##-----------
@@ -583,6 +592,7 @@ smc.sensitivity <- function(obj, params,
   max.log.marg.like <- -Inf
   max.log.marg.like.pen <- -Inf
   
+  .Call("message", paste("Analyzing sensitivity with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
   bar <- .Call("progress_bar", n.params, '*', "iterations", PACKAGE="RBiips")
   
@@ -599,14 +609,14 @@ smc.sensitivity <- function(obj, params,
       dim(param[[v]]) <- dim[[v]]
       
       ## change param value
-      if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+      if(!.Call("change_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
                 param[[v]], FALSE, PACKAGE="RBiips"))
         stop(paste("data change failed: invalid parameter. variable =", var,". value =", param[v]))
     }
     
     log.prior <- 0
     for (v in seq(along=variable.names)) {
-      log.p <- .Call("get_log_prior_density", obj$ptr(), 
+      log.p <- .Call("get_log_prior_density", model$ptr(), 
                      pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
       
       if (is.na(log.p)) {
@@ -621,13 +631,13 @@ smc.sensitivity <- function(obj, params,
     }
     
     ## run smc sampler
-    ok <- run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+    ok <- run.smc.forward(model, n.part=n.part, ...)
     
     if (!ok)
       stop(paste("Failure running smc forward sampler. param:", param))
     
     ## log marginal likelihood
-    log.marg.like[k] <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
+    log.marg.like[k] <- .Call("get_log_norm_const", model$ptr(), PACKAGE="RBiips")
     if (log.marg.like[k] > max.log.marg.like) {
       max.log.marg.like <- log.marg.like[k]
       max.param <- param
@@ -644,11 +654,11 @@ smc.sensitivity <- function(obj, params,
   
   ## restore data
   ##-------------
-  obj$recompile()
+  model$recompile()
   
 #   for (v in seq(along=variable.names)) {
 #     if (!(pn$names[[v]] %in% names(data))) {
-#       ok <- .Call("remove_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+#       ok <- .Call("remove_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
 #       if (!ok)
 #         stop("Failure restoring data")
 #       next
@@ -680,7 +690,7 @@ smc.sensitivity <- function(obj, params,
 #     }
 #     
 #     if (all(is.na(data.sub))) {
-#       ok <- .Call("remove_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+#       ok <- .Call("remove_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
 #       if (!ok)
 #         stop("Failure restoring data")
 #       next
@@ -689,7 +699,7 @@ smc.sensitivity <- function(obj, params,
 #     if (any(is.na(data.sub)))
 #       stop("Failure restoring data")
 #     
-#     ok <- .Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+#     ok <- .Call("change_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
 #                 data.sub, FALSE, PACKAGE="RBiips")
 #     if (!ok)
 #       stop("Failure restoring data")
