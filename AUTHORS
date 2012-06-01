@@ -1,12 +1,12 @@
 BiiPS code is Copyright (C) Inria, 2012 
 
 Authors:
-  * Adrien TODESCHINI, software designer and developer
-  * Francois CARON, probability expertise and specifications
+- Adrien TODESCHINI, software designer and developer
+- Francois CARON, probability expertise and specifications
 
 BiiPS code is adapted from:
-  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
-  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
+- JAGS, Copyright (C) Martyn Plummer, 2002-2010
+- SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
   
 Additional information concerning adapted open source software
 is included in the file NOTICES.

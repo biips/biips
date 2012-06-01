@@ -1,0 +1,40 @@
+var v.true[2,t.max-1], x.true[4,t.max], x.radar.true[2,t.max],
+v[2,t.max-1], x[4,t.max], x.radar[2,t.max], y[2,t.max]
+
+data
+{
+  x.true[,1] ~ dmnorm(mean.x.init, Prec.x.init)
+  x.radar.true[,1] <- x.true[1:2,1] - x.pos
+  mu.y.true[1,1] <- sqrt(x.radar.true[1,1]^2+x.radar.true[2,1]^2)
+  mu.y.true[2,1] <- arctan(x.radar.true[2,1]/x.radar.true[1,1])
+  y[,1] ~ dmnorm(mu.y.true[,1], Prec.y)
+
+  for (t in 2:t.max)
+  {
+    v.true[,t-1] ~ dmnorm(mean.v, Prec.v)
+    x.true[,t] <- F %*% x.true[,t-1] + G %*% v.true[,t-1]
+    x.radar.true[,t] <- x.true[1:2,t] - x.pos
+    mu.y.true[1,t] <- sqrt(x.radar.true[1,t]^2+x.radar.true[2,t]^2)
+    mu.y.true[2,t] <- arctan(x.radar.true[2,t]/x.radar.true[1,t])
+    y[,t] ~ dmnorm(mu.y.true[,t], Prec.y)
+  }
+}
+
+model
+{
+  x[,1] ~ dmnorm(mean.x.init, Prec.x.init)
+  x.radar[,1] <- x[1:2,1] - x.pos
+  mu.y[1,1] <- sqrt(x.radar[1,1]^2+x.radar[2,1]^2)
+  mu.y[2,1] <- arctan(x.radar[2,1]/x.radar[1,1])
+  y[,1] ~ dmnorm(mu.y[,1], Prec.y)
+
+  for (t in 2:t.max)
+  {
+    v[,t-1] ~ dmnorm(mean.v, Prec.v)
+    x[,t] <- F %*% x[,t-1] + G %*% v[,t-1]
+    x.radar[,t] <- x[1:2,t] - x.pos
+    mu.y[1,t] <- sqrt(x.radar[1,t]^2+x.radar[2,t]^2)
+    mu.y[2,t] <- arctan(x.radar[2,t]/x.radar[1,t])
+    y[,t] ~ dmnorm(mu.y[,t], Prec.y)
+  }
+}

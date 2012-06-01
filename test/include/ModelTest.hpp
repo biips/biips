@@ -172,11 +172,11 @@ namespace Biips
     {
       return pDataGraph_->GetSize();
     }
-    const std::map<String, Size> & DataNodesSummary() const
+    const std::map<NodeType, Size> & DataNodesSummary() const
     {
       return pDataGraph_->NodesSummary();
     }
-    const std::map<String, Size> & DataUnobsNodesSummary() const
+    const std::map<NodeType, Size> & DataUnobsNodesSummary() const
     {
       return pDataGraph_->UnobsNodesSummary();
     }
@@ -208,11 +208,11 @@ namespace Biips
     {
       return pModelGraph_->GetSize();
     }
-    const std::map<String, Size> & ModelNodesSummary() const
+    const std::map<NodeType, Size> & ModelNodesSummary() const
     {
       return pModelGraph_->NodesSummary();
     }
-    const std::map<String, Size> & ModelUnobsNodesSummary() const
+    const std::map<NodeType, Size> & ModelUnobsNodesSummary() const
     {
       return pModelGraph_->UnobsNodesSummary();
     }

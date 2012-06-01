@@ -126,7 +126,7 @@ namespace Biips
 {
 
   Console::Console(std::ostream & out, std::ostream & err) :
-      out_(out), err_(err), pData_(NULL), pRelations_(NULL), pVariables_(NULL), lockBackward_(false)
+      out_(out), err_(err), pModel_(NULL), pData_(NULL), pRelations_(NULL), pVariables_(NULL), lockBackward_(false)
   {
   }
 
@@ -202,15 +202,17 @@ namespace Biips
     }
   }
 
-  Bool Console::CheckModel(const String & modelFileName, Bool verbose)
+  Bool Console::CheckModel(const String & modelFileName, Size verbosity)
   {
+    if (verbosity)
+      out_ << PROMPT_STRING << "Parsing model in: " << modelFileName << endl;
     if (pRelations_ || pData_ || pVariables_)
     {
       clearParseTrees();
 
       if (pModel_)
       {
-        if (verbose)
+        if (verbosity)
           out_ << PROMPT_STRING << "Replacing existing model" << endl;
         ClearModel();
       }
@@ -287,25 +289,26 @@ namespace Biips
     return true;
   }
 
-  void Console::ClearModel(Bool verbose)
+  void Console::ClearModel(Size verbosity)
   {
     if (!pModel_)
     {
-      if (verbose)
+      if (verbosity)
         out_ << PROMPT_STRING << "Deleting model" << endl;
 
       delete pModel_;
+      pModel_ = NULL;
     }
   }
 
   Bool Console::Compile(std::map<String, MultiArray> & dataMap,
                         Bool genData,
                         Size dataRngSeed,
-                        Bool verbose)
+                        Size verbosity)
   {
     if (pModel_)
     {
-      if (verbose)
+      if (verbosity)
         out_ << PROMPT_STRING << "Replacing existing model" << endl;
       ClearModel();
     }
@@ -319,21 +322,21 @@ namespace Biips
 
       Compiler compiler(*pModel_, dataMap);
 
-      if (verbose)
+      if (verbosity)
         out_ << PROMPT_STRING << "Compiling data graph" << endl;
       try
       {
         if (pVariables_)
         {
-          if (verbose)
+          if (verbosity)
             out_ << INDENT_STRING << "Declaring variables" << endl;
           compiler.DeclareVariables(*pVariables_);
         }
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Resolving undeclared variables" << endl;
         compiler.UndeclaredVariables(pData_);
 
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Allocating nodes" << endl;
         compiler.WriteRelations(pData_);
 
@@ -366,25 +369,31 @@ namespace Biips
           }
         }
 
-        if (verbose)
+        if (verbosity)
         {
           out_ << INDENT_STRING << "Graph size: " << data_graph.GetSize();
-          out_ << " (Constant: " << data_graph.NodesSummary().at("Constant");
-          out_ << ", Logical: " << data_graph.NodesSummary().at("Logical");
-          out_ << ", Stochastic: " << data_graph.NodesSummary().at("Stochastic")
-               << ")" << endl;
-          Size n_data_unobs_nodes =
-              data_graph.UnobsNodesSummary().at("Logical")
-              + data_graph.UnobsNodesSummary().at("Stochastic");
-          out_ << INDENT_STRING << "Unobserved nodes: " << n_data_unobs_nodes;
-          out_ << " (Logical: " << data_graph.UnobsNodesSummary().at("Logical");
-          out_ << ", Stochastic: "
-               << data_graph.UnobsNodesSummary().at("Stochastic") << ")"
-               << endl;
-        }
-
-        if (verbose)
+          if (verbosity > 1)
+          {
+            out_ << " (Constant: " << data_graph.NodesSummary().at(CONSTANT);
+            out_ << ", Logical: " << data_graph.NodesSummary().at(LOGICAL);
+            out_ << ", Stochastic: "
+                 << data_graph.NodesSummary().at(STOCHASTIC) << ")";
+          }
+          out_ << endl;
+          if (verbosity > 1)
+          {
+            Size n_data_unobs_nodes =
+                data_graph.UnobsNodesSummary().at(LOGICAL)
+                + data_graph.UnobsNodesSummary().at(STOCHASTIC);
+            out_ << INDENT_STRING << "Unobserved nodes: " << n_data_unobs_nodes;
+            out_ << " (Logical: "
+                 << data_graph.UnobsNodesSummary().at(LOGICAL);
+            out_ << ", Stochastic: "
+                 << data_graph.UnobsNodesSummary().at(STOCHASTIC) << ")"
+                 << endl;
+          }
           out_ << INDENT_STRING << "Sampling data" << endl;
+        }
 
         std::map<String, MultiArray> sampled_data_map(pModel_->Sample(p_datagen_rng.get()));
 
@@ -393,7 +402,7 @@ namespace Biips
         //        //RNGFactory, not the model.
         //        datagen_rng = pModel_->rng(0);
 
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Reading data back into data table" << endl;
 
         for (std::map<String, MultiArray>::const_iterator it_sampled =
@@ -424,23 +433,23 @@ namespace Biips
     pModel_ = new BUGSModel();
     Compiler compiler(*pModel_, dataMap);
 
-    if (verbose)
+    if (verbosity)
       out_ << PROMPT_STRING << "Compiling model graph" << endl;
     try
     {
       if (pVariables_)
       {
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Declaring variables" << endl;
         compiler.DeclareVariables(*pVariables_);
       }
       if (pRelations_)
       {
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Resolving undeclared variables" << endl;
         compiler.UndeclaredVariables(pRelations_);
 
-        if (verbose)
+        if (verbosity)
           out_ << INDENT_STRING << "Allocating nodes" << endl;
         compiler.WriteRelations(pRelations_);
       }
@@ -453,28 +462,36 @@ namespace Biips
       if (pModel_)
       {
         Graph & model_graph = *(pModel_->GraphPtr());
-        if (verbose)
+        if (verbosity > 1)
         {
           out_ << INDENT_STRING << "Building and checking graph" << endl;
         }
         model_graph.Build();
 
-        if (verbose)
+        if (verbosity)
         {
           out_ << INDENT_STRING << "Graph size: " << model_graph.GetSize();
-          out_ << " (Constant: " << model_graph.NodesSummary().at("Constant");
-          out_ << ", Logical: " << model_graph.NodesSummary().at("Logical");
-          out_ << ", Stochastic: "
-               << model_graph.NodesSummary().at("Stochastic") << ")" << endl;
-          Size n_unobs_nodes =
-              model_graph.UnobsNodesSummary().at("Logical")
-              + model_graph.UnobsNodesSummary().at("Stochastic");
-          out_ << INDENT_STRING << "Unobserved nodes: " << n_unobs_nodes;
-          out_ << " (Logical: "
-               << model_graph.UnobsNodesSummary().at("Logical");
-          out_ << ", Stochastic: "
-               << model_graph.UnobsNodesSummary().at("Stochastic") << ")"
-               << endl;
+          if (verbosity > 1)
+          {
+            out_ << " (Constant: " << model_graph.NodesSummary().at(CONSTANT);
+            out_ << ", Logical: " << model_graph.NodesSummary().at(LOGICAL);
+            out_ << ", Stochastic: "
+                 << model_graph.NodesSummary().at(STOCHASTIC) << ")";
+
+          }
+          out_ << endl;
+          if (verbosity > 1)
+          {
+            Size n_unobs_nodes =
+                model_graph.UnobsNodesSummary().at(LOGICAL)
+                + model_graph.UnobsNodesSummary().at(STOCHASTIC);
+            out_ << INDENT_STRING << "Unobserved nodes: " << n_unobs_nodes;
+            out_ << " (Logical: "
+                 << model_graph.UnobsNodesSummary().at(LOGICAL);
+            out_ << ", Stochastic: "
+                 << model_graph.UnobsNodesSummary().at(STOCHASTIC) << ")"
+                 << endl;
+          }
         }
 
         // FIXME
@@ -495,7 +512,7 @@ namespace Biips
     return true;
   }
 
-  Bool Console::BuildSampler(Bool prior, Size verbose)
+  Bool Console::BuildSampler(Bool prior, Size verbosity)
   {
     if (!pModel_)
     {
@@ -521,18 +538,12 @@ namespace Biips
         it_sampler_fact->second = !prior;
       }
 
-      if (verbose > 0)
-      {
-        out_ << PROMPT_STRING << "Building SMC sampler";
-        if (prior)
-          out_ << " using prior mutation";
-
-        out_ << endl;
-      }
+      if (verbosity)
+        out_ << PROMPT_STRING << "Assigning node samplers" << endl;
 
       pModel_->BuildSampler();
 
-      if (verbose > 1)
+      if (verbosity > 1)
       {
         out_ << INDENT_STRING << "Samplers sequence :" << endl;
         pModel_->PrintSamplersSequence(out_);
@@ -552,7 +563,7 @@ namespace Biips
                                   Size smcRngSeed,
                                   const String & rsType,
                                   Scalar essThreshold,
-                                  Bool verbose,
+                                  Size verbosity,
                                   Bool progressBar)
   {
     if (!pModel_)
@@ -570,13 +581,13 @@ namespace Biips
     {
       Size n_iter = pModel_->Sampler().NIterations();
 
-      if (verbose)
+      if (verbosity)
       {
         if (n_iter > 0)
-          out_ << PROMPT_STRING << "Running SMC sampler of " << n_iter
+          out_ << PROMPT_STRING << "Running SMC forward sampler of " << n_iter
                << " iterations" << endl;
         else
-          out_ << PROMPT_STRING << "Skipping SMC sampler: no iterations"
+          out_ << PROMPT_STRING << "Skipping SMC forward sampler: no iterations"
                << endl;
       }
 
@@ -599,7 +610,7 @@ namespace Biips
 
       if (p_show_progress)
         ++(*p_show_progress);
-      else if (verbose)
+      else if (verbosity>1)
         printSamplerState(pModel_->Sampler(), out_);
 
       for (Size n = 1; n < n_iter; ++n)
@@ -608,7 +619,7 @@ namespace Biips
 
         if (p_show_progress)
           ++(*p_show_progress);
-        else if (verbose)
+        else if (verbosity>1)
           printSamplerState(pModel_->Sampler(), out_);
       }
 
@@ -684,7 +695,7 @@ namespace Biips
     return true;
   }
 
-  Bool Console::RunBackwardSmoother(Bool verbose, Bool progressBar)
+  Bool Console::RunBackwardSmoother(Size verbosity, Bool progressBar)
   {
     if (!pModel_)
     {
@@ -714,7 +725,7 @@ namespace Biips
     {
       if (pModel_->Sampler().NIterations() <= 1)
       {
-        if (verbose)
+        if (verbosity)
           out_ << PROMPT_STRING << "Skipping backward smoother: no iterations"
                << endl;
         return true;
@@ -724,7 +735,7 @@ namespace Biips
 
       Size n_iter = pModel_->Sampler().NIterations() - 1;
 
-      if (verbose)
+      if (verbosity)
         out_ << PROMPT_STRING << "Running backward smoother of " << n_iter
              << " iterations" << endl;
 
@@ -751,9 +762,9 @@ namespace Biips
   }
 
   // FIXME add module manager and a load module by name function
-  Bool Console::LoadBaseModule(Bool verbose)
+  Bool Console::LoadBaseModule(Size verbosity)
   {
-    if (verbose)
+    if (verbosity)
       out_ << PROMPT_STRING << "Loading Base module" << endl;
 
     try
@@ -1211,7 +1222,7 @@ namespace Biips
                            const IndexRange & range,
                            const MultiArray & data,
                            Bool mcmc,
-                           Bool verbose)
+                           Size verbosity)
   {
     if (!pModel_)
     {
@@ -1238,7 +1249,7 @@ namespace Biips
     }
     try
     {
-      if (verbose)
+      if (verbosity)
       {
         out_ << PROMPT_STRING << "Changing data" << endl;
       }
@@ -1266,7 +1277,7 @@ namespace Biips
                            const IndexRange & range,
                            MultiArray & data,
                            Size rngSeed,
-                           Bool verbose)
+                           Size verbosity)
   {
     if (!pModel_)
     {
@@ -1293,7 +1304,7 @@ namespace Biips
     }
     try
     {
-      if (verbose)
+      if (verbosity)
       {
         out_ << PROMPT_STRING << "Sampling data" << endl;
       }
@@ -1322,7 +1333,7 @@ namespace Biips
 
   Bool Console::RemoveData(const String & variable,
                            const IndexRange & range,
-                           Bool verbose)
+                           Size verbosity)
   {
     if (!pModel_)
     {
@@ -1349,7 +1360,7 @@ namespace Biips
     }
     try
     {
-      if (verbose)
+      if (verbosity)
       {
         out_ << PROMPT_STRING << "Removing data" << endl;
       }

@@ -64,12 +64,19 @@ set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION
 file (WRITE VERSION ${Biips_VERSION})
 
 set (Biips_OWNER Inria)
+set (Biips_COPYRIGHT_YEAR 2012)
 set (Biips_LICENSE GPL-3)
-set (Biips_URL http://biips.gforge.inria.fr)
+set (Biips_URL http://alea.bordeaux.inria.fr/biips)
 set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
-set (Biips_DESCRIPTION_SUMMARY "Bayesian Inference with Interacting Particle Systems")
+set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Systems")
 set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
-file (READ Description Biips_DESCRIPTION)
+set (Biips_CONTACT_EMAIL "biips-support@lists.gforge.inria.fr")
+set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
+ It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
+ Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.
+ Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
+
+file (WRITE Description ${Biips_DESCRIPTION})
 
 if (NOT Biips_DATE)
 	if (WIN32)
@@ -91,23 +98,9 @@ endif (NOT Biips_DATE)
 message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure resource files
-macro (configure_resource_file name in out_unix out_win args)
-    if (APPLE OR WIN32)
-        set (Biips_${name}_FILE ${name}${out_win})
-    else (APPLE OR WIN32)
-        set (Biips_${name}_FILE ${name}${out_unix})
-    endif (APPLE OR WIN32)
-    
-    configure_file (
-    	${name}${in}
-    	${Biips_${name}_FILE}
-    	${args}
-    )
-endmacro(configure_resource_file)
-
-configure_resource_file (README .md.in .md .txt @ONLY)
-configure_resource_file (Welcome "" "" .txt COPYONLY)
-configure_resource_file (COPYING "" "" .txt COPYONLY)
+configure_file (README.md.in README.txt @ONLY)
+#configure_file (Welcome Welcome.txt COPYONLY)
+configure_file (COPYING COPYING.txt COPYONLY)
 
 # configure NOTICES file
 configure_file (
@@ -222,9 +215,9 @@ set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
-set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/${Biips_README_FILE})
-set (CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/${Biips_Welcome_FILE})
-set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/${Biips_COPYING_FILE})
+set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/README.txt)
+#set (CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/Welcome.txt)
+set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/COPYING.txt)
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
 
