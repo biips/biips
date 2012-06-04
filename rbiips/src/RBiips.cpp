@@ -560,7 +560,7 @@ RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
 
   Bool prior_flag = Rcpp::as<Bool>(prior);
 
-  if (!p_console->BuildSampler(prior_flag))
+  if (!p_console->BuildSampler(prior_flag, VERBOSITY))
     throw RuntimeError("Failed to build sampler.");
 
   VOID_END_RBIIPS

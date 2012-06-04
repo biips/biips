@@ -200,11 +200,13 @@ init.pmmh.biips <- function(object, variable.names, inits=list(),
   for (v in seq(along=variable.names)) {
     var <- variable.names[[v]]
     if (var %in% names(inits)) {
+      # take init value in inits param
       if(!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
                 inits[[var]], TRUE, PACKAGE="RBiips"))
         stop(paste("data change failed: invalid initial value for variable", var))
       sample[[var]] <- inits[[var]]
     } else {
+      # or sample init value
       data <- object$.data.sync()
       if (var %in% names(data))
         sample[[var]] <- data[[var]]
@@ -300,8 +302,6 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
       
     if (is.infinite(log.prior.prop) && log.prior.prop<0) {
       accepted <- FALSE
-      n.fail <- n.fail+1
-      warning(paste("Failure evaluating proposal log prior. proposal:", prop))
       ## reset previous value
       if(!.Call("change_data", obj$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
                 sample[[var]], TRUE, PACKAGE="RBiips"))

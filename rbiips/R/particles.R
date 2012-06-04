@@ -187,7 +187,7 @@ print.summary.particles.list <- function(x, ...)
 
 
 plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
-                                   ylab="estimates", main, sub, leg.args=list(), ...)
+                                   ylab="value", main, sub, leg.args=list(), ...)
 {
   ltyy <- lty
   lwdd <- lwd
@@ -218,7 +218,7 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="o
   mat <- matrix(values, ncol=length(stat.names))
   n.part <- x$drop.dims[["particle"]]
   if (missing(main))
-    main <- paste(x$name, x$type, "estimates")
+    main <- paste(x$name, x$type, "particle estimates")
   if (missing(sub))
     sub <- paste("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,")" , sep=""),
         collapse=","))
@@ -439,7 +439,7 @@ density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
 
 
 plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
-                                          xlab, ylab, main,
+                                          xlab="value", ylab, main, sub,
                                           leg.args=list(), ...)
 {
   ltyy <- lty
@@ -452,34 +452,34 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
     return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
   }
   
-  leg <- paste(x$type, ", ess=", round(x$ess))
+  leg <- paste(x$type, ", ess=", round(x$ess), sep="")
 
   if (x$discrete) {
-    if (missing(xlab))
-      xlab <- paste("n.part=", x$n.part)
     if (missing(ylab))
       ylab <- "probability"
     if (missing(main))
       main <- "discrete law histograms"
     main.title <- paste(x[[t]]$name, main)
+    if (missing(sub))
+      sub <- paste("n.part=", x$n.part)
     
     barplot(x$density$y, names.arg=x$density$x,
-            col=col, xlab=xlab, ylab=ylab, main=main.title,
+            col=col, xlab=xlab, ylab=ylab, main=main.title, sub=sub,
             legend=leg, ...)
   } else {
-    if (missing(xlab)) {
-      bw <- x$density$bw
-      xlab <- paste("n.part=", x$n.part, ", bw=", signif(bw, digits = 2))
-    }
     if (missing(ylab))
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
     main.title <- paste(x[[t]]$name, main)
+    if (missing(sub)) {
+      bw <- x$density$bw
+      sub <- paste("n.part=", x$n.part, ", bw=", signif(bw, digits = 2), sep="")
+    }
     
     plot(x$density$x, x$density$y,
          type=type, lty=lty, lwd=lwd, col=col,
-         xlab=xlab, ylab=ylab, main=main.title, ...)
+         xlab=xlab, ylab=ylab, main=main.title, sub=sub, ...)
     leg.args[["legend"]] <- leg
   
     do.call(legend.density.particles, leg.args)
@@ -500,7 +500,7 @@ plot.density.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
 
 
 plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
-                                               xlab, ylab, main,
+                                               xlab="value", ylab, main, sub,
                                                leg.args=list(), density=NULL, angle=NULL, ...)
 {
   ltyy <- lty
@@ -515,7 +515,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
 
   leg <- c()
   for (t in names(x)) {
-    leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess)))
+    leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess)), sep="")
   }
   
   if (x[[1]]$discrete) {
@@ -534,13 +534,13 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
     }
     yy <- matrix(yy, nrow=length(x), byrow=TRUE)
     
-    if (missing(xlab))
-      xlab <- paste("n.part=", x[[1]]$n.part)
     if (missing(ylab))
       ylab <- "probabilty"
     if (missing(main))
       main <- "discrete law histograms"
     main.title <- paste(x[[t]]$name, main)
+    if (missing(sub))
+      sub <- paste("n.part=", x[[1]]$n.part, sep="")
     
     if (length(col)>length(x))
       col <- col[1:length(x)]
@@ -549,7 +549,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
     if (length(angle)>length(x))
       angle <- angle[1:length(x)]
     barplot(yy, names.arg=xx,
-            col=col, xlab=xlab, ylab=ylab, main=main.title,
+            col=col, xlab=xlab, ylab=ylab, main=main.title, sub=sub,
             legend=leg, beside=TRUE, density=density, angle=angle, ...)
   } else {
     xx <- c()
@@ -562,19 +562,19 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
     xx <- matrix(xx, ncol=length(x))
     yy <- matrix(yy, ncol=length(x))
     
-    if (missing(xlab)) {
-      bw <- x[[1]]$density$bw
-      xlab <- paste("n.part=", x[[1]]$n.part, ", bw=", signif(bw, digits = 2))
-    }
     if (missing(ylab))
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
     main.title <- paste(x[[t]]$name, main)
+    if (missing(sub)) {
+      bw <- x[[1]]$density$bw
+      sub <- paste("n.part=", x[[1]]$n.part, ", bw=", signif(bw, digits = 2), sep="")
+    }
   
     matplot(xx, yy,
          type=type, lty=lty, lwd=lwd, col=col,
-         xlab=xlab, ylab=ylab, main=main.title, ...)
+         xlab=xlab, ylab=ylab, main=main.title, sub=sub, ...)
     
     leg.args[["legend"]] <- leg
     do.call(legend.density.particles, leg.args)

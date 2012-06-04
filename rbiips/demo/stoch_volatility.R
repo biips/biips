@@ -6,7 +6,7 @@ model.title <- "Stochastic volatility"
 data(SP500, package="RBiips")
 y <- SP500[,"Daily.Return"]
 
-ind <- 800:850
+ind <- 800:900
 
 y <- y[ind]
 
@@ -18,6 +18,7 @@ data <- list(t.max = length(y),
              nu = 2,
              y = y)
 
+par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
 if (interactive()) {
@@ -32,6 +33,10 @@ if(run.jags)
   n.chains <- 1
   jags <- jags.model(model, data=data, n.chains=n.chains)
   print(jags)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
   
   # burn in
   n.burn <- 1000
@@ -48,8 +53,13 @@ if(run.jags)
 require(RBiips)
 
 biips <- biips.model(model, data)
-if (!run.jags)
+if (!run.jags) {
   print(biips)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
+}
 
 # generated data
 x.true <- biips$data()$x.true
@@ -74,9 +84,10 @@ if (interactive()) {
   ans <- readline("plot kernel density estimates ? y|[n] :")
   plot.dens <- (ans == "y")
 }
-if(plot.dens)
-{
-  plot(density(out.biips$x, adjust=2))
+if(plot.dens) {
+  par(mfcol = c(5, 2))
+  plot(density(out.biips$x, adjust=2), bty="n")
+  par(mfcol = c(1,1))
 }
 
 # summary

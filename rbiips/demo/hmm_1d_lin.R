@@ -3,12 +3,13 @@ model <- file.path(find.package("RBiips"), "extdata", "hmm_1d_lin.bug")
 model.title <- "Linear gaussian univariate HMM"
 
 # data
-data <- list(t.max = 50,
+data <- list(t.max = 100,
              mean.x.init = 0,
              prec.x.init = 1,
              prec.x = 100,
              prec.y = 1)
 
+par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
 if (interactive()) {
@@ -23,6 +24,10 @@ if(run.jags)
   n.chains <- 1
   jags <- jags.model(model, data=data, n.chains=n.chains)
   print(jags)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
   
   # burn in
   n.burn <- 10000
@@ -43,8 +48,13 @@ if (run.jags)
   data <- jags$data()
 
 biips <- biips.model(model, data=data, sample.data=!run.jags)
-if (!run.jags)
+if (!run.jags) {
   print(biips)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
+}
 
 # generated data
 x.true <- biips$data()$x.true
@@ -70,9 +80,10 @@ if (interactive()) {
   ans <- readline("plot kernel density estimates ? y|[n] :")
   plot.dens <- (ans == "y")
 }
-if(plot.dens)
-{
-  plot(density(out.biips$x, adjust=2))
+if(plot.dens) {
+  par(mfcol = c(5, 2))
+  plot(density(out.biips$x, adjust=2), bty="n")
+  par(mfcol = c(1,1))
 }
 
 # summary
