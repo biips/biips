@@ -6,13 +6,14 @@ model.title <- "Nonlinear gaussian univariate HMM"
 x.true <- c(2.18058, 13.0408, 4.5904, 0.0172347, 0.0416116, 11.638, 5.31703, 3.56488, 0.494195, 9.97843, 7.31315, 11.3852, 8.14421, 5.3909, -4.92422, 2.57024, 22.0909, 12.6866, 3.02204, 7.16082, 9.8559)
 y <- c(9.25676, 1.16413, 0.687314, 2.98908, 6.68515, 2.59973, -0.86668, -0.137264, 5.93527, 2.4605, 5.84379, 1.3678, 0.634563, -0.376496, 2.00287, 24.3569, 8.40757, 1.47439, 2.79131, 4.42062)
 
-data <- list(t.max = 20,
+data <- list(t.max = length(y),
              mean.x.init = 0,
              prec.x.init = 1/5,
              prec.x = 1/10,
              prec.y = 1,
              y=y)
 
+par(bty = "n")
 # -------------------- Exact solution (fine grid method) --------------------#
 # True filtering posterior mean
 x.gridf.mean = c(-2.93367e-17, 7.33609, 2.52861, 0.950226, 1.74819, 11.6619, 7.74044, 1.20363, 0.899005, 2.41347, -0.00242989, 9.10795, 4.23131, -0.118862, 1.61354, -1.67851, 21.9493, 12.8648, 1.21059, 3.96411, 8.03155)
@@ -33,6 +34,10 @@ if(run.jags)
   n.chains <- 4
   jags <- jags.model(model, data=data, n.chains=n.chains)
   print(jags)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
   
   # burn in
   n.burn <- 10000
@@ -50,8 +55,13 @@ require(RBiips)
 
 # model
 biips <- biips.model(model, data)
-if (!run.jags)
+if (!run.jags) {
   print(biips)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
+}
 
 # build biips
 build.sampler(biips, proposal="auto")
@@ -73,9 +83,10 @@ if (interactive()) {
   ans <- readline("plot kernel density estimates ? y|[n] :")
   plot.dens <- (ans == "y")
 }
-if(plot.dens)
-{
-  plot(density(out.biips$x, adjust=2))
+if(plot.dens) {
+  par(mfcol = c(5, 2))
+  plot(density(out.biips$x, adjust=2), bty="n")
+  par(mfcol = c(1,1))
 }
 
 # summary

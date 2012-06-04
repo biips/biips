@@ -2,6 +2,8 @@ var x[t.max], y[t.max]
 
 data
 {
+  log.prec.y.true ~ dunif(-3, 3)
+  prec.y.true <- exp(log.prec.y.true)
   x.true[1] ~ dnorm(mean.x.init, prec.x.init)
   y[1] ~ dnorm(x.true[1], prec.y.true)
   for (t in 2:t.max)
@@ -13,7 +15,7 @@ data
 
 model
 {
-  log.prec.y ~ dunif(-1, 5)
+  log.prec.y ~ dunif(-3, 3)
   prec.y <- exp(log.prec.y)
   x[1] ~ dnorm(mean.x.init, prec.x.init)
   y[1] ~ dnorm(x[1], prec.y)

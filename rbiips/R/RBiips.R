@@ -605,8 +605,8 @@ smc.sensitivity <- function(model, params,
     for (v in seq(along=variable.names)) {
       var <- variable.names[[v]]
       ind <- seq(from=(k-1)*len[[v]]+1, to=k*len[[v]])
-      param[[v]] <- params[[v]][ind]
-      dim(param[[v]]) <- dim[[v]]
+      param[[var]] <- params[[v]][ind]
+      dim(param[[var]]) <- dim[[v]]
       
       ## change param value
       if(!.Call("change_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
