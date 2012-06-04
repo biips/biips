@@ -29,6 +29,7 @@ data <- list(t.max = t.max,
              Prec.y = Prec.y,
              F = F, G = G, H = H)
 
+par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
 if (interactive()) {
@@ -43,6 +44,10 @@ if(run.jags)
   n.chains <- 1
   jags <- jags.model(model, data=data, n.chains=n.chains)
   print(jags)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
   
   # burn in
   n.burn <- 1000
@@ -63,8 +68,13 @@ if (run.jags)
   data <- jags$data()
 
 biips <- biips.model(model, data=data, sample.data=!run.jags)
-if (!run.jags)
+if (!run.jags) {
   print(biips)
+  if (interactive()) {
+    cat("Type <Return> to continue: ")
+    scan(quiet=TRUE)
+  }
+}
 
 # generated data
 x.true <- biips$data()$x.true
@@ -84,10 +94,11 @@ if (interactive()) {
   ans <- readline("plot kernel density estimates ? y|[n] :")
   plot.dens <- (ans == "y")
 }
-if(plot.dens)
-{
-  plot(density(out.biips$x, adjust=2, subset=paste("x[1,1:",t.max,"]")))
-  plot(density(out.biips$x, adjust=2, subset=paste("x[2,1:",t.max,"]")))
+if(plot.dens) {
+  par(mfcol = c(5, 2))
+  plot(density(out.biips$x, adjust=2, subset=paste("x[1,1:",t.max,"]")), bty="n")
+  plot(density(out.biips$x, adjust=2, subset=paste("x[2,1:",t.max,"]")), bty="n")
+  par(mfcol = c(1,1))
 }
 
 # summary
