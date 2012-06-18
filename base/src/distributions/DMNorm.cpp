@@ -62,21 +62,39 @@ namespace Biips
     for (Size i = 0; i < mean.Length(); ++i)
     {
       if (!isFinite(mean.Values()[i]))
+      {
+        // FIXME
+        std::cerr << "mean component " << i << " has infinite value: "
+        << mean.Values()[i] << std::endl;
         return false;
+      }
     }
 
     const NumArray & prec = paramValues[1];
 
-    // symmetric and positive diagonal
+    static const Scalar TOL = 1e-7;
+
+    // check symmetry and positive diagonal
     Matrix prec_mat(prec);
     for (Size i = 0; i < prec_mat.size1(); ++i)
     {
       if (prec_mat(i, i) <= 0.0)
+      {
+        // FIXME
+        std::cerr << "precision matrix component (" << i << "," << i
+        << ") has negative value: " << prec_mat(i, i) << std::endl;
         return false;
+      }
       for (Size j = 0; j < i; ++j)
       {
-        if (prec_mat(i, j) != prec_mat(j, i))
+        if (std::fabs(prec_mat(i, j) - prec_mat(j, i)) > TOL)
+        {
+          // FIXME
+          std::cerr << "precision matrix components (" << i << "," << j
+          << ") and (" << j << "," << i << ") are not symmetric: "
+          << prec_mat(i, j) << " != " << prec_mat(j, i) << std::endl;
           return false;
+        }
       }
     }
     // TODO check semi-definite positive
@@ -133,11 +151,13 @@ namespace Biips
     if (!ublas::cholesky_factorize(prec_chol))
       throw LogicError("DMNorm::logDensity: matrix is not positive-semidefinite.");
 
-    diff_vec = ublas::prod(diff_vec, ublas::triangular_adaptor<Matrix,
-        ublas::lower>(prec_chol));
-    return -0.5 * (diff_vec.size() * std::log(2 * M_PI)
-        - std::log(ublas::cholesky_det(prec_chol))
-        + ublas::inner_prod(diff_vec, diff_vec));
+    diff_vec =
+        ublas::prod(diff_vec,
+                    ublas::triangular_adaptor<Matrix, ublas::lower>(prec_chol));
+    return -0.5
+           * (diff_vec.size() * std::log(2 * M_PI)
+              - std::log(ublas::cholesky_det(prec_chol))
+              + ublas::inner_prod(diff_vec, diff_vec));
   }
 
   void DMNorm::unboundedSupport(ValArray & lower,

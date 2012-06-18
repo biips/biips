@@ -47,7 +47,6 @@ namespace Biips
 
   const String NodeSampler::NAME_ = "Prior";
 
-
   void NodeSampler::visit(const LogicalNode & node)
   {
     if (!membersSet_)
@@ -69,7 +68,6 @@ namespace Biips
     sampledFlagsMap()[nodeId_] = true;
   }
 
-
   void NodeSampler::visit(const StochasticNode & node)
   {
     if (!membersSet_)
@@ -78,14 +76,13 @@ namespace Biips
     // FIXME
 //    try
 //    {
-      sample(node);
+    sample(node);
 //    }
 //    catch (RuntimeError & err)
 //    {
 //      throw NodeError(nodeId_, String("Failure to sample stochastic node.\n") + err.what());
 //    }
   }
-
 
   void NodeSampler::sample(const StochasticNode & node)
   {
@@ -100,18 +97,27 @@ namespace Biips
       throw LogicError("NodeSampler can not sample StochasticNode: Rng pointer is null.");
 
     // sample
-    node.Sample(*nodeValuesMap()[nodeId_], param_values, bound_values, *pRng_);
+    try
+    {
+      node.Sample(*nodeValuesMap()[nodeId_],
+                  param_values,
+                  bound_values,
+                  *pRng_);
+    }
+    catch (RuntimeError & err)
+    {
+      throw NodeError(nodeId_, String(err.what()));
+    }
 
     sampledFlagsMap()[nodeId_] = true;
     logIncrementalWeight_ = getLogLikelihood(graph_, nodeId_, *this);
   }
 
-
   void NodeSampler::Sample(NodeId nodeId)
   {
     graph_.VisitNode(nodeId, *this);
-  };
-
+  }
+  ;
 
   NodeSamplerFactory::Ptr NodeSamplerFactory::pFactoryInstance_(new NodeSamplerFactory());
 
