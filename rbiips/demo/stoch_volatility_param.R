@@ -1,12 +1,20 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "hmm_1d_lin_param.bug")
-model.title <- "Fixed parameter estimation of linear gaussian univariate HMM"
+model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
+model.title <- "Fixed parameter estimation of Stochastic volatility model"
 
 # data
-data <- list(t.max = 100,
+data(SP500, package="RBiips")
+y <- SP500[,"Daily.Return"]
+
+ind <- 800:900
+
+y <- y[ind]
+
+# data
+data <- list(t.max = length(y),
              mean.x.init = 0,
              prec.x.init = 1,
-             prec.x = 100)
+             y = y)
 
 par(bty = "n")
 # -------------------- JAGS  MCMC--------------------#
@@ -21,7 +29,7 @@ if(run.jags)
   
   # model
   n.chains <- 1
-  jags <- jags.model(model, data=data, n.chains=n.chains)
+  jags <- jags.model(model, data=data, n.chains=n.chains, n.adapt=10000)
   print(jags)
   if (interactive()) {
     cat("Type <Return> to continue: ")
@@ -29,30 +37,30 @@ if(run.jags)
   }
   
   # burn in
-  n.burn.jags <- 200
+  n.burn.jags <- 10000
   ptm <- proc.time()[[1]]
   update(jags, n.burn.jags)
   cat(n.burn.jags, "iterations in", proc.time()[[1]] - ptm, "s.\n")
   
   # jags samples
-  n.iter.jags <- 1000
+  n.iter.jags <- 2000
   ptm <- proc.time()[[1]]
-  out.jags <- jags.samples(jags, c("x","prec.y"),
+  out.jags <- jags.samples(jags, c("x","prec.x"),
                            n.iter=n.iter.jags)
   cat(n.iter.jags, "iterations in", proc.time()[[1]] - ptm, "s.\n")
   
   par(mfcol = c(2,1))
   # plot mcmc samples trace
-  plot(out.jags$prec.y,
+  plot(out.jags$prec.x,
        xlab="iteration", ylab="value",
        main=paste("Trace of", n.iter.jags, "JAGS MCMC samples"))
-  legend("topright", leg="prec.y", pch=1, bty='n')
-       
+  legend("topright", leg="prec.x", pch=1, bty="n")
+  
   # plot mcmc samples histogram
-  hist(out.jags$prec.y,
+  hist(out.jags$prec.x,
        xlab="value", ylab="frequency",
        main=paste("Histogram of", n.iter.jags, "JAGS MCMC samples"))
-  legend("topright", leg="prec.y", pch=0, bty='n')
+  legend("topright", leg="prec.x", pch=0, bty="n")
   
   par(mfcol = c(1,1))
 }
@@ -61,7 +69,7 @@ if(run.jags)
 require(RBiips)
 
 n.part <- 100
-n.burn <- 200
+n.burn <- 100
 n.iter <- 1000
 
 # model
@@ -86,20 +94,20 @@ if (interactive()) {
 }
 if(run.sens)
 {
-  log.prec.y.all <- seq(-3, 3, length=100)
+  log.prec.x.all <- seq(-3, 3, length=100)
   out.sens <- smc.sensitivity(biips,
-                            params=list(log.prec.y=log.prec.y.all),
-                            n.part=n.part)
+                              params=list(log.prec.x=log.prec.x.all),
+                              n.part=n.part)
   
-  prec.y.all <- exp(log.prec.y.all)
-  plot(exp(log.prec.y.all), out.sens$log.marg.like,
-       xlab="prec.y", ylab="Log. Marginal Likelihood",
+  prec.x.all <- exp(log.prec.x.all)
+  plot(exp(log.prec.x.all), out.sens$log.marg.like,
+       xlab="prec.x", ylab="Log. Marginal Likelihood",
        main="Sensitivity analysis")
-  legend("topright", leg="log.marg.like", pch=1, bty='n')
+  legend("topright", leg="log.marg.like", pch=1, bty="n")
   
   # initialize pmmh with max
-  inits <- list(log.prec.y = out.sens$max.param$log.prec.y)
-  init.pmmh(biips, variable.names="log.prec.y", 
+  inits <- list(log.prec.x = out.sens$max.param$log.prec.x)
+  init.pmmh(biips, variable.names=c("log.prec.x"), 
             inits=inits, n.part=n.part)
 }
 
@@ -107,39 +115,37 @@ if(run.sens)
 #---------------------
 
 # burn in
-update.pmmh(biips, variable.names=c("log.prec.y"),
-             n.iter=n.burn,
-             n.part=n.part)
+update.pmmh(biips, variable.names=c("log.prec.x"),
+            n.iter=n.burn,
+            n.part=n.part)
 # sample
-out.pmmh <- pmmh.samples(biips, variable.names=c("log.prec.y"),
-                       n.iter=n.iter,
-                       n.part=n.part)
+out.pmmh <- pmmh.samples(biips, variable.names=c("log.prec.x"),
+                         n.iter=n.iter,
+                         n.part=n.part)
 
 
-prec.y.biips <- exp(out.pmmh$log.prec.y)
+prec.x.biips <- exp(out.pmmh$log.prec.x)
 
 par(mfcol = c(2,1))
 # plot PMMH samples trace
-plot(drop(prec.y.biips),
+plot(drop(prec.x.biips),
      xlab="iteration", ylab="value",
      main=paste("Trace of", n.iter, "BiiPS PMMH samples"))
-legend("topright", leg="prec.y", pch=1, bty='n')
+legend("topright", leg="prec.x", pch=1, bty="n")
 
 # plot PMMH samples histogram
-hist(prec.y.biips,
+hist(prec.x.biips,
      xlab="value", ylab="frequency",
      main=paste("Histogram of", n.iter, "BiiPS PMMH samples"))
-legend("topright", leg="prec.y", pch=0, bty='n')
+legend("topright", leg="prec.x", pch=0, bty="n")
 
+par(mfcol = c(1,1))
 
 #---------------------- display results ----------------------#
-cat("True value: prec.y =", biips$data()$prec.y.true, "\n")
+cat("True value: prec.x =", biips$data()$prec.x.true, "\n")
 
 # mean value
 if (run.jags) {
-  cat("JAGS MCMC mean value: prec.y =", mean(out.jags$prec.y), "\n")
+  cat("JAGS MCMC mean value: prec.x =", mean(out.jags$prec.x), "\n")
 }
-
-cat("BiiPS PMMH mean value: prec.y =", mean(prec.y.biips), "\n")
-
-par(mfcol = c(1,1))
+cat("BiiPS PMMH mean value: prec.x =", mean(prec.x.biips), "\n")

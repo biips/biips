@@ -84,7 +84,7 @@ if (interactive()) {
   plot.dens <- (ans == "y")
 }
 if(plot.dens) {
-  par(mfcol = c(5, 2))
+  par(mfcol = c(3, 1))
   plot(density(out.biips$x, adjust=2), bty="n")
   par(mfcol = c(1,1))
 }
@@ -92,7 +92,13 @@ if(plot.dens) {
 # summary
 x.summ <- summary(out.biips$x, fun=c("mean","quantiles"), probs=c(.05,.95))
 print(x.summ)
+if (backward) {
+  par(mfcol = c(3, 1))
+} else {
+  par(mfcol = c(2, 1))
+}
 plot(x.summ)
+par(mfcol = c(1,1))
 
 # diagnostic
 print(diagnostic(out.biips$x))

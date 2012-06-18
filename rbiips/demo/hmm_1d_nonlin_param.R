@@ -28,7 +28,7 @@ if(run.jags)
   }
   
   # burn in
-  n.burn.jags <- 10000
+  n.burn.jags <- 12000
   ptm <- proc.time()[[1]]
   update(jags, n.burn.jags)
   cat(n.burn.jags, "iterations in", proc.time()[[1]] - ptm, "s.\n")
@@ -59,8 +59,8 @@ if(run.jags)
 # -------------------- BiiPS --------------------#
 require(RBiips)
 
-n.part <- 10
-n.burn <- 100
+n.part <- 100
+n.burn <- 2000
 n.iter <- 1000
 
 # model
@@ -105,18 +105,13 @@ if(run.sens)
 #       PMMH 
 #---------------------
 
-# random walk standard deviation
-rw.sd <- 0.2
-
 # burn in
 update.pmmh(biips, variable.names=c("log.prec.y"),
             n.iter=n.burn,
-            rw.sd=list(log.prec.y=rw.sd),
             n.part=n.part)
 # sample
 out.pmmh <- pmmh.samples(biips, variable.names=c("log.prec.y"),
                          n.iter=n.iter,
-                         rw.sd=list(log.prec.y=rw.sd),
                          n.part=n.part)
 
 

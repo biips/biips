@@ -515,7 +515,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
 
   leg <- c()
   for (t in names(x)) {
-    leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess)), sep="")
+    leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess), sep=""))
   }
   
   if (x[[1]]$discrete) {

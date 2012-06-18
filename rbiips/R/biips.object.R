@@ -254,7 +254,7 @@ init.pmmh.biips <- function(object, variable.names, inits=list(),
 }
 
 
-one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
+one.update.pmmh.biips <- function(obj, variable.names, pn,
                                   sample, log.prior, log.marg.like,
                                   n.part, ...)
 {
@@ -271,10 +271,7 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
     ## Random walk proposal
     prop <- list()
     l <- length(sample[[var]])
-    prop[[var]] <- vector(length=l)
-    for (d in 1:l) {
-      prop[[var]][[d]] <- rnorm(1, sample[[var]][[d]], rw.sd[[var]][[d]])
-    }
+    prop[[var]] <- rnorm(l, sample[[var]], obj$.rw.step())
     dim(prop[[var]]) <- dim(sample[[var]])
     
     ## change model data
@@ -341,7 +338,11 @@ one.update.pmmh.biips <- function(obj, variable.names, pn, rw.sd,
                 sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data.")
     }
+    
+    # rescale random walk step
+    obj$.rw.rescale(accept.rate[[var]])
   }
+  
   
   ans <- list(sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
               accept.rate=accept.rate, accepted=accepted, n.fail=n.fail)
@@ -353,7 +354,7 @@ update.pmmh <- function(object, ...)
   UseMethod("update.pmmh")
 
 
-update.pmmh.biips <- function(object, variable.names, n.iter, rw.sd,
+update.pmmh.biips <- function(object, variable.names, n.iter, 
                               n.part, max.fail = 0, ...)
 {  
   if (!is.biips(object))
@@ -362,13 +363,6 @@ update.pmmh.biips <- function(object, variable.names, n.iter, rw.sd,
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  
-  if (!is.list(rw.sd))
-    stop("Invalid rw.sd argument")
-  for (var in variable.names) {
-    if (!var %in% names(rw.sd))
-      stop(paste("Missing rw.sd value for variable", var))
-  }
   
   ## stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
@@ -382,11 +376,6 @@ update.pmmh.biips <- function(object, variable.names, n.iter, rw.sd,
   
   pn <- parse.varnames(variable.names)
   
-  # check rw.sd dimension
-  for (var in variable.names) {
-    if (length(rw.sd[[var]]) != length(sample[[var]]))
-      stop(paste("incorrect rw.sd dimension for variable", var))
-  }
   
   ## reset data to sample on exit
   on.exit(
@@ -396,7 +385,8 @@ update.pmmh.biips <- function(object, variable.names, n.iter, rw.sd,
   
   .Call("message", paste("Updating PMMH with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  symbol <- ifelse(object$.rw.adapt(), '+', '*')
+  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
   
   n.fail <- 0
   accepted <- TRUE
@@ -409,7 +399,7 @@ update.pmmh.biips <- function(object, variable.names, n.iter, rw.sd,
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(object, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
+    out <- one.update.pmmh.biips(object, variable.names=variable.names, pn=pn, 
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
                                  n.part=n.part, ...)
     sample <- out$sample

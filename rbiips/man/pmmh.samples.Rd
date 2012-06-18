@@ -7,7 +7,7 @@ Generate Particle Marginal Metropolis-Hastings samples
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-pmmh.samples(model, variable.names, n.iter, thin = 1, rw.sd, n.part, max.fail = 0, \dots)
+pmmh.samples(model, variable.names, n.iter, thin = 1, n.part, max.fail = 0, \dots)
 }
 \arguments{
   \item{model}{
@@ -19,8 +19,6 @@ pmmh.samples(model, variable.names, n.iter, thin = 1, rw.sd, n.part, max.fail = 
   number of iterations of the Markov chain to run
 }
   \item{thin}{thinning interval for monitors
-}
-  \item{rw.sd}{list of the desired standard deviations of the random walk for each monitored variable
 }
   \item{n.part}{
 number of particles

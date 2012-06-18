@@ -69,8 +69,8 @@ set (Biips_LICENSE GPL-3)
 set (Biips_URL http://alea.bordeaux.inria.fr/biips)
 set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Systems")
-set (Biips_CONTACT "biips-support <biips-support@lists.gforge.inria.fr>")
-set (Biips_CONTACT_EMAIL "biips-support@lists.gforge.inria.fr")
+set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
+set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
 set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.

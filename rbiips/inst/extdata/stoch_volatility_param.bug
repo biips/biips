@@ -8,10 +8,12 @@ var x[t.max], y[t.max]
 
 model
 {
+  log.prec.x ~ dunif(-3,3)
+  prec.x <- exp(log.prec.x)
   x[1] ~ dnorm(mean.x.init, prec.x.init)
   for (t in 2:t.max)
   { 
     x[t] ~ dnorm(x[t-1], prec.x)    
-    y[t] ~ dnorm(0, exp(-x[t]))
+    y[t] ~ dnorm(0, exp(-x[t])) 
   }
 }

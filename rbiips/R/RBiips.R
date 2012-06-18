@@ -125,8 +125,25 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
   }
   
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
-
+  
   model.data <- .Call("get_data", p, PACKAGE = "RBiips")
+  
+  # local initial parameters of the algorithm of adaptation
+  # of the step of random walk in the PMMH algorithm
+  rwpar <- list(adapt=TRUE,
+                niter=2,
+                pmean=0,
+                lstep=log(0.1),
+                prob=0.234, # Target acceptance probability. The default seems to
+                            # be a fairly robust optimal value.
+                povertarget=FALSE,
+                ncrosstarget=10 #The value ncrosstarget controls the reduction in the step size when rescale is
+                                #called. There is no reason to give it an initial value of zero. In
+                                #fact this is a poor choice since the  step size would be immediately
+                                #halved. We start with a value of 10 so the first change in step size
+                                #is 10%.
+                )
+  
   model <- list("ptr" = function() {p},
                 "model" = function() {model.code},
                 "dot" = function(file) {
@@ -171,8 +188,46 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
                   .Call("check_model", p, mf, PACKAGE="RBiips")
                   unlink(mf)
                   ## Re-compile
-                  .Call("compile_model", p, model.data,
+                  .Call("compile_model", p, data,
                         FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
+                  invisible(NULL)
+                },
+                ".rw.step" = function() {
+                    return(exp(rwpar$lstep))
+                },
+                ".rw.rescale" = function(p) {
+                  if (!rwpar$adapt) {
+                    invisible(NULL)
+                  }
+                  # The step size is adapted to achieve the
+                  # target acceptance rate using a noisy gradient algorithm.
+                  p <- min(p, 1.0)
+                  rwpar$lstep <<- rwpar$lstep + (p-rwpar$prob)/rwpar$niter
+                  if ((p>rwpar$prob) != rwpar$povertarget) {
+                    rwpar$povertarget <<- !rwpar$povertarget
+                    rwpar$ncrosstarget <<- rwpar$ncrosstarget+1
+                  }
+                  # We keep a weighted mean estimate of the mean acceptance probability
+                  # with the weights in favour of more recent iterations
+                  rwpar$pmean <<- rwpar$pmean + 2*(p-rwpar$pmean)/rwpar$niter
+                  rwpar$niter <<- rwpar$niter+1
+                  invisible(NULL)
+                },
+                ".rw.check.adapt" = function() {
+                  if (rwpar$pmean==0 || rwpar$pmean==1){
+                    return(FALSE)
+                  }
+                  # The distance, on a logistic scale, between pmean
+                  # and the target acceptance probability.
+                  d <- abs(log(rwpar$pmean/(1-rwpar$pmean))
+                           - log(rwpar$prob/(1-rwpar$prob)))
+                  return(d < 0.5)
+                },
+                ".rw.adapt" = function() {
+                  return(rwpar$adapt)
+                },
+                ".rw.adapt.off" = function() {
+                  rwpar$adapt <<- FALSE
                   invisible(NULL)
                 })
   class(model) <- "biips"
@@ -338,7 +393,7 @@ smc.samples <- function(obj, variable.names, type=c("filtering", "smoothing", "b
 }
 
 
-pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
+pmmh.samples <- function(model, variable.names, n.iter, thin=1, 
                          n.part, max.fail=0, ...)
 {  
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
@@ -347,13 +402,6 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
   if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
     stop("Invalid thin argument")
   thin <- as.integer(thin)
-  
-  if (!is.list(rw.sd))
-    stop("Invalid rw.sd argument")
-  for (var in variable.names) {
-    if (!var %in% names(rw.sd))
-      stop(paste("Missing rw.sd value for variable", var))
-  }
   
   ## stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
@@ -367,12 +415,6 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
   log.marg.like <- out$log.marg.like
   
   pn <- parse.varnames(variable.names)
-  
-  # check rw.sd dimension
-  for (var in variable.names) {
-    if (length(rw.sd[[var]]) != length(sample[[var]]))
-      stop(paste("incorrect rw.sd dimension for variable", var))
-  }
   
   ## reset data to sample on exit
   on.exit(
@@ -392,12 +434,13 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
   
   .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  symbol <- ifelse(model$.rw.adapt(), '+', '*')
+  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(model, variable.names=variable.names, pn=pn, rw.sd=rw.sd,
+    out <- one.update.pmmh.biips(model, variable.names=variable.names, pn=pn,
                                 sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
                                  n.part=n.part, ...)
     sample <- out$sample
@@ -420,7 +463,6 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
     ## Store output
     if ((i-1)%%thin == 0) {
       n.samples <- n.samples +1
-#       ans[["log.marg.like"]][n.samples] <- log.marg.like
       for (var in variable.names)
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
@@ -443,9 +485,6 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1, rw.sd,
     names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iteration")
     class(ans[[var]]) <- "mcarray"
   }
-#   dim(ans[["log.marg.like"]]) <- c(1, n.samples)
-#   names(dim(ans[["log.marg.like"]])) <- c("", "iteration")
-#   class(ans[["log.marg.like"]]) <- "mcarray"
   
   return(ans)
 }
@@ -656,6 +695,7 @@ smc.sensitivity <- function(model, params,
   ##-------------
   model$recompile()
   
+  # FIXME: Tentative of removing data without recompiling the model
 #   for (v in seq(along=variable.names)) {
 #     if (!(pn$names[[v]] %in% names(data))) {
 #       ok <- .Call("remove_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")

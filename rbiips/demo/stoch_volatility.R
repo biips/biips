@@ -14,8 +14,7 @@ y <- y[ind]
 data <- list(t.max = length(y),
              mean.x.init = 0,
              prec.x.init = 1,
-             prec.x = 1,
-             nu = 2,
+             prec.x = 15,
              y = y)
 
 par(bty = "n")
