@@ -17,8 +17,7 @@ dates <- dates[ind]
 data <- list(t.max = length(ind),
              mean.x.init = 0,
              prec.x.init = 1e-1,
-             prec.x = 10,
-             nu = 10,
+             prec.x = 15,
              y = y)
 
 par(bty = "n")

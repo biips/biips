@@ -584,8 +584,8 @@ namespace Biips
       if (verbosity)
       {
         if (n_iter > 0)
-          out_ << PROMPT_STRING << "Running SMC forward sampler of " << n_iter
-               << " iterations" << endl;
+          out_ << PROMPT_STRING << "Running SMC forward sampler with " << nParticles
+               << " particles" << endl;
         else
           out_ << PROMPT_STRING << "Skipping SMC forward sampler: no iterations"
                << endl;
@@ -736,8 +736,7 @@ namespace Biips
       Size n_iter = pModel_->Sampler().NIterations() - 1;
 
       if (verbosity)
-        out_ << PROMPT_STRING << "Running backward smoother of " << n_iter
-             << " iterations" << endl;
+        out_ << PROMPT_STRING << "Running backward smoother" << endl;
 
       Types<ProgressBar>::Ptr p_show_progress;
       if (progressBar)

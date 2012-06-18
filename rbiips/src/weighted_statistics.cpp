@@ -83,7 +83,7 @@ RcppExport SEXP weighted_var (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE};
+  static StatTag features[] = {MEAN, VARIANCE, MOMENT2};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
@@ -101,7 +101,7 @@ RcppExport SEXP weighted_skew (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE, SKEWNESS};
+  static StatTag features[] = {MEAN, VARIANCE, MOMENT2, MOMENT3, SKEWNESS};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
@@ -121,7 +121,7 @@ RcppExport SEXP weighted_kurt (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE, SKEWNESS, KURTOSIS};
+  static StatTag features[] = {MEAN, VARIANCE, MOMENT2, MOMENT3, MOMENT4, SKEWNESS, KURTOSIS};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;

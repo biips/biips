@@ -3,7 +3,7 @@ model <- file.path(find.package("RBiips"), "extdata", "hmm_4d_nonlin_tracking.bu
 model.title <- "Radar tracking"
 
 # data
-t.max <- 100
+t.max <- 1000
 mean.x.init <- c(0,0,1,0)
 Prec.x.init <- matrix(0,4,4)
 Prec.x.init[row(Prec.x.init)==col(Prec.x.init)] <- 1000
@@ -81,7 +81,7 @@ x.true <- biips$data()$x.true
 y <- biips$data()$y
 
 # build biips
-build.sampler(biips, proposal="auto")
+build.sampler(biips, proposal="prior")
 
 # run biips
 n.part <- 1000

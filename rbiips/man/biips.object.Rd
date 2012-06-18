@@ -23,7 +23,7 @@ Manipulate biips model objects
 \method{init.pmmh}{biips}(object, variable.names, inits = list(), n.part,
                           rs.thres = 0.5, rs.type = "stratified",
                           inits.rng.seed, \dots)
-\method{update.pmmh}{biips}(object, variable.names, n.iter, rw.sd, n.part,
+\method{update.pmmh}{biips}(object, variable.names, n.iter, n.part,
                             max.fail = 0, \dots)
 \method{update.pimh}{biips}(object, variable.names, n.iter, n.part, \dots)
 \method{variable.names}{biips}(object, \dots)
@@ -49,8 +49,6 @@ is.biips(object)
 generation.
 }
   \item{n.iter}{number of iterations of the Markov chain to run
-}
-  \item{rw.sd}{list of the desired standard deviations of the random walk for each variable
 }
   \item{max.fail}{maximum number of failures allowed
 }
