@@ -126,8 +126,6 @@
     #.Call("init_biips_console", PACKAGE="RBiips")
   
     load.biips.module("basemod")
-  
-    set.biips.verbosity(1)
 }
 
 .onUnload <- function(libpath)
