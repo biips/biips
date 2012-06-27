@@ -87,7 +87,7 @@ if(plot.dens) {
 }
 
 # summary
-x.summ <- summary(out.biips$x, fun=c("mean", "quantile"), probs=c(0.05, 0.95))
+x.summ <- summary(out.biips$x, fun=c("mean", "quantile"), probs=c(.025,.975))
 print(x.summ)
 plot(x.summ)
 

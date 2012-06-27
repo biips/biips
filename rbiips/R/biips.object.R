@@ -59,6 +59,30 @@ monitor.biips <- function(obj, variable.names, type="smoothing")
 }
 
 
+is.monitored.biips <- function(obj, variable.names, type="smoothing")
+{
+  if (!is.biips(obj))
+    stop("Invalid BiiPS model.")
+  
+  if (!is.character(variable.names) || length(variable.names) == 0)
+    stop("variable.names must be a character vector")
+  
+  pn <- parse.varnames(variable.names)
+  
+  type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
+  if ("filtering" %in% type) {
+    ok <- .Call("is_filter_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+  }
+  if ("smoothing" %in% type) {
+    ok <-.Call("is_smooth_tree_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+  }
+  if ("backward.smoothing" %in% type) {
+    ok <-.Call("is_smooth_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+  }
+  return(ok)
+}
+
+
 clear.monitors.biips <- function(obj, type="smoothing")
 {
   if (!is.biips(obj))
@@ -433,28 +457,36 @@ update.pmmh.biips <- function(object, variable.names, n.iter,
 init.pimh.biips <- function(obj, variable.names,
                             n.part, rs.thres=0.5, rs.type="stratified")
 {
-  ## monitor variables
-  monitor.biips(obj, variable.names, type="smoothing")
+  monitored <- is.monitored.biips(obj, variable.names, "smoothing")
+  if (!monitored) {
+    ## monitor variables
+    monitor.biips(obj, variable.names, type="smoothing")
+  }
   
-  ## build smc sampler
-  if (!.Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")) {
+  built <- .Call("is_sampler_built", obj$ptr(), PACKAGE="RBiips")
+  if (!built) {
+    ## build smc sampler
     .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
   }
   
+  atend <- !.Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")
   ## get log normalizing constant
-  if (!.Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")) {
+  if (!monitored || !built || !atend) {
     ## run smc sampler
     .Call("message", "Initializing PIMH", PACKAGE="RBiips")
     run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
-    
-    ## sample one particle
-    rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_smooth_tree_particle", obj$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
   }
   log.marg.like <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
   
   ## get sampled value
   sampled.value <- .Call("get_sampled_smooth_tree_particle", obj$ptr(), PACKAGE="RBiips")
+  if (length(sampled.value)==0) {
+    ## sample one particle
+    rng.seed <- runif(1, 0, as.integer(Sys.time()))
+    .Call("sample_smooth_tree_particle", obj$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+    
+    sampled.value <- .Call("get_sampled_smooth_tree_particle", obj$ptr(), PACKAGE="RBiips")
+  }
   sample <- list()
   for (var in variable.names) {
     sample[[var]] <- sampled.value[[var]]

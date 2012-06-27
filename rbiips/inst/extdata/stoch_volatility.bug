@@ -1,17 +1,14 @@
 # Stochastic volatility model
-# with student t innovations
 # see e.g.
 # Chib S, Nardari F, Shephard N. 2002. Markov Chain Monte Carlo Methods for Stochastic # Volatility Models.
 # Journal of Econometrics 108: 281–316.
-
-var x[t.max], y[t.max]
 
 model
 {
   x[1] ~ dnorm(mean.x.init, prec.x.init)
   for (t in 2:t.max)
   { 
-    x[t] ~ dnorm(x[t-1], prec.x)    
+    x[t] ~ dnorm(alpha+beta*x[t-1], prec.x)    
     y[t] ~ dnorm(0, exp(-x[t]))
   }
 }

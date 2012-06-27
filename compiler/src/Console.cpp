@@ -358,10 +358,9 @@ namespace Biips
               if (!data_graph.GetObserved()[*it_parents])
               {
                 err_ << "Invalid data graph: observed node "
-                     << pModel_->GetSymbolTable().GetName(*it_node_id)
-                     << " has unobserved parent "
-                     << pModel_->GetSymbolTable().GetName(*it_parents)
-                     << std::endl;
+                << pModel_->GetSymbolTable().GetName(*it_node_id)
+                << " has unobserved parent "
+                << pModel_->GetSymbolTable().GetName(*it_parents) << std::endl;
                 ClearModel();
                 return false;
               }
@@ -376,8 +375,8 @@ namespace Biips
           {
             out_ << " (Constant: " << data_graph.NodesSummary().at(CONSTANT);
             out_ << ", Logical: " << data_graph.NodesSummary().at(LOGICAL);
-            out_ << ", Stochastic: "
-                 << data_graph.NodesSummary().at(STOCHASTIC) << ")";
+            out_ << ", Stochastic: " << data_graph.NodesSummary().at(STOCHASTIC)
+            << ")";
           }
           out_ << endl;
           if (verbosity > 1)
@@ -386,11 +385,9 @@ namespace Biips
                 data_graph.UnobsNodesSummary().at(LOGICAL)
                 + data_graph.UnobsNodesSummary().at(STOCHASTIC);
             out_ << INDENT_STRING << "Unobserved nodes: " << n_data_unobs_nodes;
-            out_ << " (Logical: "
-                 << data_graph.UnobsNodesSummary().at(LOGICAL);
+            out_ << " (Logical: " << data_graph.UnobsNodesSummary().at(LOGICAL);
             out_ << ", Stochastic: "
-                 << data_graph.UnobsNodesSummary().at(STOCHASTIC) << ")"
-                 << endl;
+            << data_graph.UnobsNodesSummary().at(STOCHASTIC) << ")" << endl;
           }
           out_ << INDENT_STRING << "Sampling data" << endl;
         }
@@ -476,7 +473,7 @@ namespace Biips
             out_ << " (Constant: " << model_graph.NodesSummary().at(CONSTANT);
             out_ << ", Logical: " << model_graph.NodesSummary().at(LOGICAL);
             out_ << ", Stochastic: "
-                 << model_graph.NodesSummary().at(STOCHASTIC) << ")";
+            << model_graph.NodesSummary().at(STOCHASTIC) << ")";
 
           }
           out_ << endl;
@@ -487,10 +484,9 @@ namespace Biips
                 + model_graph.UnobsNodesSummary().at(STOCHASTIC);
             out_ << INDENT_STRING << "Unobserved nodes: " << n_unobs_nodes;
             out_ << " (Logical: "
-                 << model_graph.UnobsNodesSummary().at(LOGICAL);
+            << model_graph.UnobsNodesSummary().at(LOGICAL);
             out_ << ", Stochastic: "
-                 << model_graph.UnobsNodesSummary().at(STOCHASTIC) << ")"
-                 << endl;
+            << model_graph.UnobsNodesSummary().at(STOCHASTIC) << ")" << endl;
           }
         }
 
@@ -522,8 +518,8 @@ namespace Biips
     if (pModel_->GraphPtr()->Empty())
     {
       err_
-          << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)"
-          << endl;
+      << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)"
+      << endl;
       return false;
     }
     try
@@ -584,11 +580,11 @@ namespace Biips
       if (verbosity)
       {
         if (n_iter > 0)
-          out_ << PROMPT_STRING << "Running SMC forward sampler with " << nParticles
-               << " particles" << endl;
+          out_ << PROMPT_STRING << "Running SMC forward sampler with "
+          << nParticles << " particles" << endl;
         else
           out_ << PROMPT_STRING << "Skipping SMC forward sampler: no iterations"
-               << endl;
+          << endl;
       }
 
       if (n_iter == 0)
@@ -610,7 +606,7 @@ namespace Biips
 
       if (p_show_progress)
         ++(*p_show_progress);
-      else if (verbosity>1)
+      else if (verbosity > 1)
         printSamplerState(pModel_->Sampler(), out_);
 
       for (Size n = 1; n < n_iter; ++n)
@@ -619,7 +615,7 @@ namespace Biips
 
         if (p_show_progress)
           ++(*p_show_progress);
-        else if (verbosity>1)
+        else if (verbosity > 1)
           printSamplerState(pModel_->Sampler(), out_);
       }
 
@@ -648,13 +644,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't get log normalizing constant. SMC sampler did not run!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't get log normalizing constant. SMC sampler did not finish!"
-           << endl;
+      << endl;
       return false;
     }
     try
@@ -676,13 +672,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't set log normalizing constant. SMC sampler did not run!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't set log normalizing constant. SMC sampler did not finish!"
-           << endl;
+      << endl;
       return false;
     }
     try
@@ -710,14 +706,14 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't run backward smoother. SMC sampler did not finish!"
-           << endl;
+      << endl;
       return false;
     }
     if (lockBackward_)
     {
       err_
-          << "Can't run backward smoother. Data has been changed. You must run forward SMC sampler again."
-          << endl;
+      << "Can't run backward smoother. Data has been changed. You must run forward SMC sampler again."
+      << endl;
       return false;
     }
 
@@ -727,7 +723,7 @@ namespace Biips
       {
         if (verbosity)
           out_ << PROMPT_STRING << "Skipping backward smoother: no iterations"
-               << endl;
+          << endl;
         return true;
       }
 
@@ -871,6 +867,37 @@ namespace Biips
     return true;
   }
 
+  Bool Console::IsFilterMonitored(const String & name, const IndexRange & range)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't check filter monitor. No model!" << endl;
+      return false;
+    }
+    return pModel_->IsFilterMonitored(name, range);
+  }
+
+  Bool Console::IsSmoothTreeMonitored(const String & name,
+                                      const IndexRange & range)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't check smooth tree monitor. No model!" << endl;
+      return false;
+    }
+    return pModel_->IsSmoothTreeMonitored(name, range);
+  }
+
+  Bool Console::IsSmoothMonitored(const String & name, const IndexRange & range)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't check smooth monitor. No model!" << endl;
+      return false;
+    }
+    return pModel_->IsSmoothMonitored(name, range);
+  }
+
   Bool Console::ClearFilterMonitors()
   {
     if (!pModel_)
@@ -987,7 +1014,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract filter statistic. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -997,7 +1024,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract filter statistic for variable " << name
-             << endl;
+        << endl;
         return false;
       }
     }
@@ -1018,13 +1045,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't extract smooth tree statistic. SMC sampler not built!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract smooth tree statistic. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1034,7 +1061,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract smooth tree statistic for variable " << name
-             << endl;
+        << endl;
         return false;
       }
     }
@@ -1055,15 +1082,15 @@ namespace Biips
     if (!pModel_->SmootherInitialized())
     {
       err_
-          << "Can't extract backward smoother statistic. Backward smoother not initialized!"
-          << endl;
+      << "Can't extract backward smoother statistic. Backward smoother not initialized!"
+      << endl;
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
       err_
-          << "Can't extract backward smoother statistic. Backward smoother still running!"
-          << endl;
+      << "Can't extract backward smoother statistic. Backward smoother still running!"
+      << endl;
       return false;
     }
 
@@ -1073,7 +1100,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract backward smoother statistic for variable "
-             << name << endl;
+        << name << endl;
         return false;
       }
     }
@@ -1135,7 +1162,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't extract smooth tree pdf. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1148,7 +1175,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract smooth tree pdf for variable " << name
-             << endl;
+        << endl;
         return false;
       }
     }
@@ -1170,14 +1197,14 @@ namespace Biips
     if (!pModel_->SmootherInitialized())
     {
       err_
-          << "Can't extract backward smoother pdf. SMC sampler not initialized!"
-          << endl;
+      << "Can't extract backward smoother pdf. SMC sampler not initialized!"
+      << endl;
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
       err_ << "Can't extract backward smoother pdf. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1187,7 +1214,7 @@ namespace Biips
       if (!ok)
       {
         err_ << "Failed to extract backward smoother pdf for variable " << name
-             << endl;
+        << endl;
         return false;
       }
     }
@@ -1231,8 +1258,8 @@ namespace Biips
     if (pModel_->GraphPtr()->Empty())
     {
       err_
-          << "Can't change data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+      << "Can't change data. No nodes in graph (Have you compiled the model?)"
+      << endl;
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
@@ -1286,8 +1313,8 @@ namespace Biips
     if (pModel_->GraphPtr()->Empty())
     {
       err_
-          << "Can't sample data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+      << "Can't sample data. No nodes in graph (Have you compiled the model?)"
+      << endl;
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
@@ -1342,8 +1369,8 @@ namespace Biips
     if (pModel_->GraphPtr()->Empty())
     {
       err_
-          << "Can't remove data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+      << "Can't remove data. No nodes in graph (Have you compiled the model?)"
+      << endl;
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
@@ -1430,7 +1457,7 @@ namespace Biips
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't dump smooth tree monitors. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1490,13 +1517,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler not built!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1527,13 +1554,13 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler not built!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_ << "Can't sample smooth tree particle. SMC sampler still running!"
-           << endl;
+      << endl;
       return false;
     }
 
@@ -1556,14 +1583,14 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't set sampled smooth tree particle. SMC sampler not built!"
-           << endl;
+      << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_
-          << "Can't set sampled smooth tree particle. SMC sampler still running!"
-          << endl;
+      << "Can't set sampled smooth tree particle. SMC sampler still running!"
+      << endl;
       return false;
     }
 
@@ -1700,7 +1727,7 @@ namespace Biips
     if (!pModel_->SamplerBuilt())
     {
       err_ << "Can't dump node sampling iterations. SMC sampler not built!"
-           << endl;
+      << endl;
       return false;
     }
     try
