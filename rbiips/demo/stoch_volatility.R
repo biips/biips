@@ -1,20 +1,23 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility.bug")
+model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
 model.title <- "Stochastic volatility"
 
 # data
 data(SP500, package="RBiips")
 y <- SP500[,"Daily.Return"]
 
-ind <- 800:900
+ind <- 1:100
 
 y <- y[ind]
 
 # data
+sigma<- 1.0
+alpha<- 0.6
+beta <- 0.5
 data <- list(t.max = length(y),
-             mean.x.init = 0,
-             prec.x.init = 1,
-             prec.x = 15,
+             sigma = sigma,
+             beta = beta,
+             alpha = alpha,
              y = y)
 
 par(bty = "n")
@@ -90,7 +93,7 @@ if(plot.dens) {
 }
 
 # summary
-x.summ <- summary(out.biips$x, fun=c("mean","quantiles"), probs=c(.05,.95))
+x.summ <- summary(out.biips$x, fun=c("mean","quantiles"), probs=c(.025,.975))
 print(x.summ)
 plot(x.summ)
 

@@ -1,5 +1,5 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility.bug")
+model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
 model.title <- "Animation of the particle filter applied to a model stochastic volatility"
 
 # data
@@ -14,11 +14,20 @@ y <- y[ind]
 st <- st[ind]
 dates <- dates[ind]
 
-data <- list(t.max = length(ind),
-             mean.x.init = 0,
-             prec.x.init = 1e-1,
-             prec.x = 15,
+sigma<- 1.0
+alpha<- 0.6
+beta <- 0.5
+data <- list(t.max = length(y),
+             sigma = sigma,
+             beta = beta,
+             alpha = alpha,
              y = y)
+
+# data <- list(t.max = length(ind),
+#              mean.x.init = 0,
+#              prec.x.init = 1e-1,
+#              prec.x = 15,
+#              y = y)
 
 par(bty = "n")
 # -------------------- BiiPS SMC --------------------#
@@ -46,7 +55,7 @@ ind.dates <- seq(0, length(dates), 10)
 
 ylim.y <- c(min(st), max(st))
 ylim.x <- c(min(out.biips$x$f$values), max(out.biips$x$f$values))
-ylim.x <- c(-2,2)
+ylim.x <- c(-3,4)
 lwd <- 2
 
 palette("default")
@@ -88,7 +97,7 @@ for (t in 1:t.max) {
          lty=0, col=NA, pch=22, pt.bg=2, pt.cex=3, bty='n', inset=c(0.5,0))
   
   # plot particles as circles
-  points(rep(t-1,n.part), out.biips$x$f$values[t,], col=NA, bg=2, cex=3*n.part*out.biips$x$f$weights[t,], pch=21)
+  points(rep(t-1,n.part), out.biips$x$f$values[t,], col=NA, bg=2, cex=2*n.part*out.biips$x$f$weights[t,], pch=21)
   legend("topleft", legend="Particles",
          lty=0, col=NA, pch=21, pt.bg=2, pt.cex=2, bty='n', inset=c(0.2,0))
 }

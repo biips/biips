@@ -6,14 +6,16 @@ model.title <- "Fixed parameter estimation of Stochastic volatility model"
 data(SP500, package="RBiips")
 y <- SP500[,"Daily.Return"]
 
-ind <- 800:900
+ind <- 1:100
 
 y <- y[ind]
 
 # data
+sigma<- 1.0
+beta <- 0.5
 data <- list(t.max = length(y),
-             mean.x.init = 0,
-             prec.x.init = 1,
+             sigma = sigma,
+             beta = beta,
              y = y)
 
 par(bty = "n")
@@ -37,7 +39,7 @@ if(run.jags)
   }
   
   # burn in
-  n.burn.jags <- 10000
+  n.burn.jags <- 12000
   ptm <- proc.time()[[1]]
   update(jags, n.burn.jags)
   cat(n.burn.jags, "iterations in", proc.time()[[1]] - ptm, "s.\n")
@@ -45,22 +47,22 @@ if(run.jags)
   # jags samples
   n.iter.jags <- 2000
   ptm <- proc.time()[[1]]
-  out.jags <- jags.samples(jags, c("x","prec.x"),
+  out.jags <- jags.samples(jags, c("x","alpha"),
                            n.iter=n.iter.jags)
   cat(n.iter.jags, "iterations in", proc.time()[[1]] - ptm, "s.\n")
   
   par(mfcol = c(2,1))
   # plot mcmc samples trace
-  plot(out.jags$prec.x,
+  plot(out.jags$alpha,
        xlab="iteration", ylab="value",
        main=paste("Trace of", n.iter.jags, "JAGS MCMC samples"))
-  legend("topright", leg="prec.x", pch=1, bty="n")
+  legend("topright", leg="alpha", pch=1, bty="n")
   
   # plot mcmc samples histogram
-  hist(out.jags$prec.x,
+  hist(out.jags$alpha,
        xlab="value", ylab="frequency",
        main=paste("Histogram of", n.iter.jags, "JAGS MCMC samples"))
-  legend("topright", leg="prec.x", pch=0, bty="n")
+  legend("topright", leg="alpha", pch=0, bty="n")
   
   par(mfcol = c(1,1))
 }
@@ -94,20 +96,19 @@ if (interactive()) {
 }
 if(run.sens)
 {
-  log.prec.x.all <- seq(-3, 3, length=100)
+  alpha.all <- seq(0, 0.99, length=100)
   out.sens <- smc.sensitivity(biips,
-                              params=list(log.prec.x=log.prec.x.all),
+                              params=list(alpha=alpha.all),
                               n.part=n.part)
   
-  prec.x.all <- exp(log.prec.x.all)
-  plot(exp(log.prec.x.all), out.sens$log.marg.like,
-       xlab="prec.x", ylab="Log. Marginal Likelihood",
+  plot(alpha.all, out.sens$log.marg.like,
+       xlab="alpha", ylab="Log. Marginal Likelihood",
        main="Sensitivity analysis")
   legend("topright", leg="log.marg.like", pch=1, bty="n")
   
   # initialize pmmh with max
-  inits <- list(log.prec.x = out.sens$max.param$log.prec.x)
-  init.pmmh(biips, variable.names=c("log.prec.x"), 
+  inits <- list(alpha = out.sens$max.param$alpha)
+  init.pmmh(biips, variable.names=c("alpha"), 
             inits=inits, n.part=n.part)
 }
 
@@ -115,37 +116,35 @@ if(run.sens)
 #---------------------
 
 # burn in
-update.pmmh(biips, variable.names=c("log.prec.x"),
+update.pmmh(biips, variable.names=c("alpha"),
             n.iter=n.burn,
             n.part=n.part)
 # sample
-out.pmmh <- pmmh.samples(biips, variable.names=c("log.prec.x"),
+out.pmmh <- pmmh.samples(biips, variable.names=c("alpha"),
                          n.iter=n.iter,
                          n.part=n.part)
 
 
-prec.x.biips <- exp(out.pmmh$log.prec.x)
-
 par(mfcol = c(2,1))
 # plot PMMH samples trace
-plot(drop(prec.x.biips),
+plot(drop(out.pmmh$alpha),
      xlab="iteration", ylab="value",
      main=paste("Trace of", n.iter, "BiiPS PMMH samples"))
-legend("topright", leg="prec.x", pch=1, bty="n")
+legend("topright", leg="alpha", pch=1, bty="n")
 
 # plot PMMH samples histogram
-hist(prec.x.biips,
+hist(out.pmmh$alpha,
      xlab="value", ylab="frequency",
      main=paste("Histogram of", n.iter, "BiiPS PMMH samples"))
-legend("topright", leg="prec.x", pch=0, bty="n")
+legend("topright", leg="alpha", pch=0, bty="n")
 
 par(mfcol = c(1,1))
 
 #---------------------- display results ----------------------#
-cat("True value: prec.x =", biips$data()$prec.x.true, "\n")
+#cat("True value: alpha =", biips$data()$alpha.true, "\n")
 
 # mean value
 if (run.jags) {
-  cat("JAGS MCMC mean value: prec.x =", mean(out.jags$prec.x), "\n")
+  cat("JAGS MCMC mean value: alpha =", mean(out.jags$alpha), "\n")
 }
-cat("BiiPS PMMH mean value: prec.x =", mean(prec.x.biips), "\n")
+cat("BiiPS PMMH mean value: alpha =", mean(out.pmmh$alpha), "\n")

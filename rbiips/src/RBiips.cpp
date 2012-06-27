@@ -552,6 +552,81 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
 }
 
 
+RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector monitored_var(varNames);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
+
+  for (int i=0; i<monitored_var.size(); ++i)
+  {
+    String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
+
+    if (!p_console->IsFilterMonitored(name, range))
+      return Rcpp::wrap(false);
+  }
+
+  return Rcpp::wrap(true);
+
+  END_RBIIPS
+}
+
+
+RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector monitored_var(varNames);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
+
+  for (int i=0; i<monitored_var.size(); ++i)
+  {
+    String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
+
+    if (!p_console->IsSmoothTreeMonitored(name, range))
+      return Rcpp::wrap(false);
+  }
+
+  return Rcpp::wrap(true);
+
+  END_RBIIPS
+}
+
+
+RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector monitored_var(varNames);
+  Rcpp::List monitored_lower(lower);
+  Rcpp::List monitored_upper(upper);
+
+  for (int i=0; i<monitored_var.size(); ++i)
+  {
+    String name(monitored_var[i]);
+    IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
+
+    if (!p_console->IsSmoothMonitored(name, range))
+      return Rcpp::wrap(false);
+  }
+
+  return Rcpp::wrap(true);
+
+  END_RBIIPS
+}
+
+
 RcppExport void build_smc_sampler(SEXP pConsole, SEXP prior)
 {
   BEGIN_RBIIPS

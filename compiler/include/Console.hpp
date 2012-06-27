@@ -140,6 +140,13 @@ namespace Biips
     Bool SetSmoothMonitor(const String & name, const IndexRange & range =
                               NULL_RANGE);
 
+    Bool IsFilterMonitored(const String & name, const IndexRange & range =
+                               NULL_RANGE);
+    Bool IsSmoothTreeMonitored(const String & name, const IndexRange & range =
+                                   NULL_RANGE);
+    Bool IsSmoothMonitored(const String & name, const IndexRange & range =
+                               NULL_RANGE);
+
     Bool ReleaseFilterMonitors();
     Bool ReleaseSmoothTreeMonitors();
     Bool ReleaseSmoothMonitors();

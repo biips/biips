@@ -90,7 +90,7 @@ if(plot.dens) {
 }
 
 # summary
-x.summ <- summary(out.biips$x, fun=c("mean","quantiles"), probs=c(.05,.95))
+x.summ <- summary(out.biips$x, fun=c("mean","quantiles"), probs=c(.025,.975))
 print(x.summ)
 if (backward) {
   par(mfcol = c(3, 1))
