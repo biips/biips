@@ -58,7 +58,7 @@ project (Biips CXX)
 
 set (Biips_VERSION_MAJOR 0)
 set (Biips_VERSION_MINOR 7)
-set (Biips_VERSION_PATCH 2)
+set (Biips_VERSION_PATCH 3)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
 file (WRITE VERSION ${Biips_VERSION})
