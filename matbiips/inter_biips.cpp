@@ -97,7 +97,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
         
     } */      
     else {
-       mexPrintf("bad name of function\n");
+       mexErrMsgTxt("bad name of function\n");
 
     }
     /* set C-style string output_buf to MATLAB mexFunction output*/
