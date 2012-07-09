@@ -1,5 +1,5 @@
 //                                               -*- C++ -*-
-/*! \file ostream.h
+/*! \file Mostream.h
  * \brief 
  * 
  * \author  $LastChangedBy$

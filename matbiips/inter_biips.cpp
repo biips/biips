@@ -3,14 +3,7 @@
 #include <Console.hpp>
 #include <deque>
 #include "Mostream.h"
-
-using namespace std;
-using namespace Biips;
-typedef Console * Console_ptr;
-std::deque<Console_ptr> consoles;
-
-#define CheckConsoleId(id) if ((id >= consoles.size()) || (consoles[id] == NULL))\
-mexErrMsgTxt("clear_console : the console id does not exist")
+#include "inter_utils.h"
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
@@ -82,20 +75,37 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        mxFree(filename);
     }       
     /////////////////////////////////////////
-    // GET_VARIABLE_NAMES FUNCTION
+    // COMPILE_MODEL FUNCTION
     /////////////////////////////////////////
-    /*else if (name_func == "get_variable_names") {
+    else if (name_func == "compile_model") {
 
-       if (nrhs < 2) {
-         mexErrMsgTxt("check_model: must have one arguments");
+       if (nrhs < 5) {
+         mexErrMsgTxt("check_model: must have 4 arguments");
        }
        int id = static_cast<int>(*mxGetPr(prhs[1]));
-       
        CheckConsoleId(id);
        Console * p_console = consoles[id];
-       const Types<String>::Array & names = p_console->VariableNames();
+       
+       if (!mxIsStruct(prhs[2])) 
+          mexErrMsgIsAndTxt("Biips:rhs","second argument must be a struct");
+
+       int field_num = mxGetFieldNumber(pa, "names");
+       if (field_num < 0 ) 
+          mexErrMsgIsAndTxt("Biips:rhs","second argument must have the names field");
+       
+       mxArray * data = mxGetFieldByNumber(prhs[2], 0, field_num);
+       std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
+
+       Bool sample_data = static_cast<Bool>(*mxGetPr(prhs[3]));
+       Size data_rng_seed = static_cast<Size>(*mxGetPr(prhs[4]));
+
+       // Compile model
+       if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY))
+         throw RuntimeError("Failed to compile model.");
+       if (sample_data && VERBOSITY>1)
+         rbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
         
-    } */      
+    }      
     else {
        mexErrMsgTxt("bad name of function\n");
 
