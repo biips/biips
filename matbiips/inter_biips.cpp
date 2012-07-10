@@ -1,10 +1,8 @@
-#include "mex.h"
-#include <string>
-#include <Console.hpp>
 #include <deque>
-#include "Mostream.h"
 #include "inter_utils.h"
 
+typedef Console * Console_ptr;
+std::deque<Console_ptr> consoles;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
@@ -18,12 +16,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
               "Input must be a string.");
     
     if (mxGetM(prhs[0])!=1)
-      mexErrMsgIdAndTxt( "MATLAB:revord:inputNotVector",
+      mexErrMsgIdAndTxt( "inter_biips:inputNotVector",
               "Input must be a row vector.");
     
     char * input_buf = mxArrayToString(prhs[0]);
    
-    string name_func = string(input_buf);
+    String name_func = String(input_buf);
 
     /////////////////////////////////////////
     // MAKE_CONSOLE FUNCTION
@@ -69,7 +67,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        Console * p_console = consoles[console_id];
        
        mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
-       if (! p_console->CheckModel(string(filename), true)) 
+       if (! p_console->CheckModel(String(filename), true)) 
                  mexErrMsgTxt("Model syntax is incorrect.");
        
        mxFree(filename);
@@ -87,14 +85,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        Console * p_console = consoles[id];
        
        if (!mxIsStruct(prhs[2])) 
-          mexErrMsgIsAndTxt("Biips:rhs","second argument must be a struct");
+          mexErrMsgTxt("second argument must be a struct");
 
-       int field_num = mxGetFieldNumber(pa, "names");
-       if (field_num < 0 ) 
-          mexErrMsgIsAndTxt("Biips:rhs","second argument must have the names field");
-       
-       mxArray * data = mxGetFieldByNumber(prhs[2], 0, field_num);
-       std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(data);
+       std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
 
        Bool sample_data = static_cast<Bool>(*mxGetPr(prhs[3]));
        Size data_rng_seed = static_cast<Size>(*mxGetPr(prhs[4]));
@@ -103,7 +96,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY))
          throw RuntimeError("Failed to compile model.");
        if (sample_data && VERBOSITY>1)
-         rbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
+         mbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
         
     }      
     else {

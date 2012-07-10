@@ -11,61 +11,51 @@
 #ifndef INTER_UTILS_H_
 #define INTER_UTILS_H_
 
+#include "mex.h"
+#include <string>
+#include <Console.hpp>
+#include "Mostream.h"
+
 using namespace Biips;
 using std::endl;
 
-typedef Console * Console_ptr;
-std::deque<Console_ptr> consoles;
+static Size VERBOSITY = 1;
 
 #define CheckConsoleId(id) if ((id >= consoles.size()) || (consoles[id] == NULL))\
 mexErrMsgTxt("clear_console : the console id does not exist")
 
 template<typename StorageOrderType>
-static std::map<String, MultiArray> writeDataTable(double * data);
+std::map<String, MultiArray> writeDataTable(const mxArray * data);
 
 template<>
-std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(double * data)
+std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {
   std::map<String, MultiArray> data_map;
 
   if (VERBOSITY>1)
     mbiips_cout << PROMPT_STRING << "Writing data table" << endl;
 
-  Rcpp::List data_list(data);
-  if (!data_list.hasAttribute("names"))
-  {
-    mbiips_cerr << "Warning: Missing variable names" << endl;
-    return data_map;
-  }
-
   if (VERBOSITY>1)
     mbiips_cout << INDENT_STRING << "Variables:";
 
-  Rcpp::CharacterVector names = data_list.attr("names");
-  for (int i=0; i<names.size(); ++i)
+  for (int i=0; i< mxGetNumberOfFields(data); ++i)
   {
-    String var_name(names[i]);
+    String var_name = mxGetFieldNameByNumber(data, i); 
     if (VERBOSITY>1)
       mbiips_cout << " " << var_name;
 
-    Rcpp::NumericVector r_vec = data_list[var_name];
+    mxArray * m = mxGetFieldByNumber(data,0, i);
+    double * m_ptr = mxGetPr(m);
+    mwSize m_nb_elems = mxGetNumberOfElements(m);
+    mwSize ndims = mxGetNumberOfDimensions(m);
+    const mwSize * dims = mxGetDimensions(m);
     MultiArray marray;
 
-    if (!r_vec.hasAttribute("dim"))
-    {
-      DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
-      ValArray::Ptr p_val(new ValArray(r_vec.size()));
-      std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
-      marray.SetPtr(p_dim, p_val);
-    }
-    else
-    {
-      Rcpp::IntegerVector r_dim = r_vec.attr("dim");
-      DimArray::Ptr p_dim(new DimArray(r_dim.begin(), r_dim.end()));
-      ValArray::Ptr p_val(new ValArray(r_vec.size()));
-      std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
-      marray.SetPtr(p_dim, p_val);
-    }
+    DimArray::Ptr p_dim(new DimArray(ndims));
+    std::copy(dims, dims + ndims, p_dim->begin());
+    ValArray::Ptr p_val(new ValArray(m_nb_elems));
+    std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(), BIIPS_REALNA, BIIPS_REALNA);
+    marray.SetPtr(p_dim, p_val);
 
     data_map[var_name] = marray;
   }
@@ -74,7 +64,5 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(double * data)
 
   return data_map;
 }
-
-
 
 #endif
