@@ -269,7 +269,7 @@ namespace Biips
       clearParseTrees();
       return false;
     }
-
+ 
     //Get names of all variables in the model
     std::set<String> names_set;
     Types<String>::Array counter_stack;
