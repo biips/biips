@@ -22,6 +22,9 @@ endforeach(l ${MBIIPS_LIBS})
 #define mexfile compilation command
 set(INTER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/inter_biips.cpp)
 set(INTER_OUT "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(MEX_OPT ${MEX_OPT} "-g")
+endif()
 add_custom_command(
 OUTPUT ${INTER_OUT}
 DEPENDS ${INTER_SRC} 
@@ -43,4 +46,4 @@ ARGS -E copy ${INTER_OUT} ${CMAKE_INSTALL_PREFIX})
 add_custom_target(matbiips 
 DEPENDS ${INTER_INST}
 )
-
+install(FILES cono.m hmm_1d_lin.bug x.dat y.dat DESTINATION .)

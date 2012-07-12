@@ -65,11 +65,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        CheckConsoleId(console_id);
        
        Console * p_console = consoles[console_id];
-       
+ 
        mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
        if (! p_console->CheckModel(String(filename), true)) 
                  mexErrMsgTxt("Model syntax is incorrect.");
-       
        mxFree(filename);
     }       
     /////////////////////////////////////////

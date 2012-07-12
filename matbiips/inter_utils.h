@@ -19,7 +19,7 @@
 using namespace Biips;
 using std::endl;
 
-static Size VERBOSITY = 1;
+static Size VERBOSITY = 2;
 
 #define CheckConsoleId(id) if ((id >= consoles.size()) || (consoles[id] == NULL))\
 mexErrMsgTxt("clear_console : the console id does not exist")
@@ -51,8 +51,11 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
     const mwSize * dims = mxGetDimensions(m);
     MultiArray marray;
 
-    DimArray::Ptr p_dim(new DimArray(ndims));
-    std::copy(dims, dims + ndims, p_dim->begin());
+    std::vector<mwSize> dims_sans_un;
+    std::remove_copy_if(dims, dims + ndims, back_inserter(dims_sans_un),std::bind1st(std::equal_to<int>(),1));
+
+    DimArray::Ptr p_dim(new DimArray(dims_sans_un.size()));
+    std::copy(dims_sans_un.begin(), dims_sans_un.end() , p_dim->begin());
     ValArray::Ptr p_val(new ValArray(m_nb_elems));
     std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(), BIIPS_REALNA, BIIPS_REALNA);
     marray.SetPtr(p_dim, p_val);
