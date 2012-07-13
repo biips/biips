@@ -1,0 +1,22 @@
+var x[tmax], y[tmax]
+data
+{
+  xtrue[1] ~ dnorm(meanxinit, precxinit)
+  y[1] ~ dnorm(xtrue[1], precy)
+  for (t in 2:tmax)
+  {
+    xtrue[t] ~ dnorm(xtrue[t-1], precx)
+    y[t] ~ dnorm(xtrue[t], precy)
+  }
+}
+
+model
+{
+  x[1] ~ dnorm(meanxinit, precxinit)
+  y[1] ~ dnorm(x[1], precy)
+  for (t in 2:tmax)
+  {
+    x[t] ~ dnorm(x[t-1], precx)
+    y[t] ~ dnorm(x[t], precy)
+  }
+}

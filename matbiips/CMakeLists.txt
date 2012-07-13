@@ -2,6 +2,7 @@
 find_package(Mex)
 #define sources
 set(MBIIPS_SRC inter_biips.cpp Mostream.cpp)
+file(GLOB MBIIPS_H *.h)
 foreach(f ${MBIIPS_SRC})
    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${f})
 endforeach(f ${MBIIPS_SRC})
@@ -27,7 +28,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 add_custom_command(
 OUTPUT ${INTER_OUT}
-DEPENDS ${INTER_SRC} 
+DEPENDS ${INTER_SRC} ${MBIIPS_H}
 COMMAND ${MEX_COMMAND} 
 ARGS  -v ${MEX_OPT} -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE} -I${Biips_compiler_INCLUDE}  
 -L${Biips_INSTALL_LIBDIR} ${EXTRA_LIBS}
