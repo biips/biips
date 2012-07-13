@@ -15,7 +15,7 @@
 #include <string>
 #include <Console.hpp>
 #include "Mostream.h"
-
+#include <boost//typeof/typeof.hpp>
 using namespace Biips;
 using std::endl;
 
@@ -51,11 +51,20 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
     const mwSize * dims = mxGetDimensions(m);
     MultiArray marray;
 
+    
+    // we eliminate all dimension equal to one , ie squeeze (in matlab)
     std::vector<mwSize> dims_sans_un;
-    std::remove_copy_if(dims, dims + ndims, back_inserter(dims_sans_un),std::bind1st(std::equal_to<int>(),1));
-
+    
+    BOOST_AUTO (equal_to_one, std::bind1st(std::equal_to<int>(),1));
+    if (std::count_if(dims, dims + ndims, equal_to_one) == ndims) {
+          dims_sans_un.push_back(1);
+    }
+    else {
+         std::remove_copy_if(dims, dims + ndims, back_inserter(dims_sans_un),equal_to_one);
+    }
     DimArray::Ptr p_dim(new DimArray(dims_sans_un.size()));
     std::copy(dims_sans_un.begin(), dims_sans_un.end() , p_dim->begin());
+    
     ValArray::Ptr p_val(new ValArray(m_nb_elems));
     std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(), BIIPS_REALNA, BIIPS_REALNA);
     marray.SetPtr(p_dim, p_val);
