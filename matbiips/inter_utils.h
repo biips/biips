@@ -15,7 +15,8 @@
 #include <string>
 #include <Console.hpp>
 #include "Mostream.h"
-#include <boost//typeof/typeof.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <cstring>
 using namespace Biips;
 using std::endl;
 
@@ -75,6 +76,67 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
     mbiips_cout << endl;
 
   return data_map;
+}
+
+template<typename StorageOrderType>
+void readDataTable(const std::map<String, MultiArray> & dataMap, mxArray * struct_out);
+
+template<>
+void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap, mxArray * struct_out)
+{
+  if (VERBOSITY>1)
+    mbiips_cout << PROMPT_STRING << "Reading data table" << endl;
+
+
+  if (VERBOSITY>1)
+    mbiips_cout << INDENT_STRING << "Variables:";
+
+  
+  mwSize dims[] = { 1 };
+  typedef char * chaine_carac;
+  chaine_carac* field_names= new chaine_carac[dataMap.size()];
+
+  BOOST_AUTO(it, dataMap.begin());
+  for(int i = 0; it != dataMap.end(); ++it,++i) {
+       const String & var_name = it->first;
+       field_names[i] = new char[var_name.size()];
+       strcpy(field_names[i], var_name.c_str());
+  }
+
+  struct_out = mxCreateStructArray(1, dims, dataMap.size(), const_cast<const char **>(field_names));
+  it = dataMap.begin();
+  for(int i = 0; it != dataMap.end(); ++it, ++i) {
+       delete [] field_names[i] ;
+  }
+
+  delete [] field_names;
+
+  std::map<String, MultiArray>::const_iterator it_table = dataMap.begin();
+  for (; it_table!=dataMap.end(); ++it_table)
+  {
+    const String & var_name = it_table->first;
+    const MultiArray & values_array = it_table->second;
+
+    // dim
+    mwSize ndim = values_array.Dim().Length();
+    mwSize *dims = new mwSize [ndim];
+    std::copy(values_array.Dim().begin(), values_array.Dim().end(), dims);
+    mxArray * curr_field = mxCreateNumericArray(ndim, dims, mxDOUBLE_CLASS , mxREAL);
+    
+    delete [] dims;
+    
+    double * curr_field_ptr = mxGetPr(curr_field);
+    std::replace_copy(values_array.Values().begin(), values_array.Values().end(), curr_field_ptr, BIIPS_REALNA, BIIPS_REALNA);
+    
+    int field_number = mxGetFieldNumber(struct_out, var_name.c_str());
+    mxSetFieldByNumber(struct_out, 0, field_number, curr_field);
+
+    if (VERBOSITY>1)
+      mbiips_cout << " " << var_name;
+  }
+  if (VERBOSITY>1)
+    mbiips_cout << endl;
+
 }
 
 #endif
