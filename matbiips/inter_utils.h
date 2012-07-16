@@ -79,10 +79,10 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
 }
 
 template<typename StorageOrderType>
-void readDataTable(const std::map<String, MultiArray> & dataMap, mxArray * struct_out);
+void readDataTable(const std::map<String, MultiArray> & dataMap, mxArray ** struct_out);
 
 template<>
-void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap, mxArray * struct_out)
+void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap, mxArray ** struct_out)
 {
   if (VERBOSITY>1)
     mbiips_cout << PROMPT_STRING << "Reading data table" << endl;
@@ -103,7 +103,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
        strcpy(field_names[i], var_name.c_str());
   }
 
-  struct_out = mxCreateStructArray(1, dims, dataMap.size(), const_cast<const char **>(field_names));
+  *struct_out = mxCreateStructArray(1, dims, dataMap.size(), const_cast<const char **>(field_names));
   it = dataMap.begin();
   for(int i = 0; it != dataMap.end(); ++it, ++i) {
        delete [] field_names[i] ;
@@ -128,8 +128,8 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     double * curr_field_ptr = mxGetPr(curr_field);
     std::replace_copy(values_array.Values().begin(), values_array.Values().end(), curr_field_ptr, BIIPS_REALNA, BIIPS_REALNA);
     
-    int field_number = mxGetFieldNumber(struct_out, var_name.c_str());
-    mxSetFieldByNumber(struct_out, 0, field_number, curr_field);
+    int field_number = mxGetFieldNumber(*struct_out, var_name.c_str());
+    mxSetFieldByNumber(*struct_out, 0, field_number, curr_field);
 
     if (VERBOSITY>1)
       mbiips_cout << " " << var_name;
