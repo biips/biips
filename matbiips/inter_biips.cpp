@@ -77,7 +77,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     else if (name_func == "compile_model") {
 
        if (nrhs < 5) {
-         mexErrMsgTxt("check_model: must have 4 arguments");
+         mexErrMsgTxt("compile_model: must have 4 arguments");
        }
        int id = static_cast<int>(*mxGetPr(prhs[1]));
        CheckConsoleId(id);
@@ -96,6 +96,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          throw RuntimeError("Failed to compile model.");
        if (sample_data && VERBOSITY>1)
          mbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
+        
+    }      
+    /////////////////////////////////////////
+    // GET_DATA FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_data") {
+
+       if (nrhs < 2) {
+         mexErrMsgTxt("get_data: must have 1 arguments");
+       }
+       int id = static_cast<int>(*mxGetPr(prhs[1]));
+       CheckConsoleId(id);
+       Console * p_console = consoles[id];
+       
+       std::map<String, MultiArray> data_table;
+
+       if (! p_console->DumpData(data_table))
+         throw RuntimeError("Failed to read data.");
+
+       //
+       readDataTable<MultiArray::StorageOrderType>(data_table, &plhs[0]);
         
     }      
     else {
