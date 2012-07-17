@@ -138,9 +138,10 @@ namespace Biips
   Bool IndexRange::Contains(const IndexRange & range) const
   {
     if (NDim() != range.NDim())
-      throw LogicError(String("IndexRange::Contains. Number of dimensions mismatch: ")
-          + print(NDim()) + " != " + print(range.NDim()) + "\nwhen checking "
-          + print(*this) + " contains " + print(range));
+      return false;
+//      throw LogicError(String("IndexRange::Contains. Number of dimensions mismatch: ")
+//          + print(NDim()) + " != " + print(range.NDim()) + "\nwhen checking "
+//          + print(*this) + " contains " + print(range));
     for (Size i = 0; i < upper_.size(); ++i)
       if (range.lower_[i] < lower_[i] || range.upper_[i] > upper_[i])
         return false;

@@ -1,4 +1,4 @@
-var x[tmax], y[tmax]
+var y[tmax]
 data
 {
   xtrue[1] ~ dnorm(meanxinit, precxinit)

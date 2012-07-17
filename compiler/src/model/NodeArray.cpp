@@ -270,7 +270,8 @@ namespace Biips
 
   void NodeArray::SetData(const MultiArray & value)
   {
-    if (!(range_ == IndexRange(value.DimPtr())))
+    // check dropped dimensions
+    if (value.Dim().Drop() != range_.Dim(true))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
                          + Name());
 
@@ -280,7 +281,8 @@ namespace Biips
     {
       //Insert a new unique constant node holding
       // all the values
-      NodeId cnode_id = graph_.AddConstantNode(value);
+      // using the dimension from the nodearray
+      NodeId cnode_id = graph_.AddConstantNode(range_.DimPtr(), value.ValuesPtr());
       Insert(cnode_id, range_);
       return;
     }

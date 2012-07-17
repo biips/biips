@@ -85,12 +85,17 @@ using std::endl;
       /*err_ << "Please send a bug report to "                          \
          << PACKAGE_BUGREPORT << endl;*/                              \
     return false;                                                     \
-    }/*                                                                 \
-  catch(const std::exception & e)                                     \
-  {                                                                   \
-    std::cerr << "STD ERROR: " << e.what() << endl;                   \
-    return false;                                                     \
-  }*/
+    }                                                                 \
+    catch(const std::exception & e)                                   \
+    {                                                                 \
+      err_ << "STD ERROR: " << e.what() << endl;                      \
+      return false;                                                   \
+    }                                                                 \
+    catch(...)                                                        \
+    {                                                                 \
+      err_ << "UNKNOWN ERROR: " << endl;                              \
+      return false;                                                   \
+    }
 
 #define BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL                       \
     catch (NodeError & except)                                        \
@@ -114,16 +119,27 @@ using std::endl;
          << PACKAGE_BUGREPORT << endl;*/                              \
     ClearModel();                                                     \
     return false;                                                     \
-    }/*                                                                 \
-  catch(const std::exception & e)                                     \
-  {                                                                   \
-    std::cerr << "STD ERROR: " << e.what() << endl;                   \
-    ClearModel();                                                     \
-    return false;                                                     \
-  }*/
+    }                                                                 \
+    catch(const std::exception & e)                                   \
+    {                                                                 \
+      err_ << "STD ERROR: " << e.what() << endl;                      \
+      ClearModel();                                                   \
+      return false;                                                   \
+    }                                                                 \
+    catch(...)                                                        \
+    {                                                                 \
+      err_ << "UNKNOWN ERROR: " << endl;                              \
+      ClearModel();                                                   \
+      return false;                                                   \
+    }
 
 namespace Biips
 {
+  String PROMPT_STRING = "* ";
+  Size INDENT_SIZE = 4;
+  const char INDENT_CHAR = ' ';
+  String INDENT_STRING(INDENT_SIZE, INDENT_CHAR);
+
 
   Console::Console(std::ostream & out, std::ostream & err) :
       out_(out), err_(err), pModel_(NULL), pData_(NULL), pRelations_(NULL), pVariables_(NULL), lockBackward_(false)
