@@ -63,12 +63,12 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
     //else {
     //     std::remove_copy_if(dims, dims + ndims, back_inserter(dims_sans_un),equal_to_one);
     //}
-    //DimArray::Ptr p_dim(new DimArray(dims_sans_un.size()));
+    DimArray::Ptr p_dim(new DimArray(ndims));
     //std::copy(dims_sans_un.begin(), dims_sans_un.end() , p_dim->begin());
     std::copy(dims, dims + ndims , p_dim->begin());
     
     ValArray::Ptr p_val(new ValArray(m_nb_elems));
-    std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(), NAN, BIIPS_REALNA);
+    std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(), std::numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
     marray.SetPtr(p_dim, p_val);
 
     data_map[var_name] = marray;
