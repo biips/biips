@@ -1,3 +1,13 @@
+//                                               -*- C++ -*-
+/*! \file inter_biips.cpp
+ * \brief
+ *
+ * \author  $LastChangedBy$
+ * \date    $LastChangedDate$
+ * \version $LastChangedRevision$
+ * Id:      $Id$
+ */
+
 #include <deque>
 #include "inter_utils.h"
 
@@ -67,7 +77,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        Console * p_console = consoles[console_id];
  
        mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
-       if (! p_console->CheckModel(String(filename), true)) 
+       if (! p_console->CheckModel(String(filename), VERBOSITY))
                  mexErrMsgTxt("Model syntax is incorrect.");
        mxFree(filename);
     }       
@@ -118,6 +128,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        //
        readDataTable<MultiArray::StorageOrderType>(data_table, &plhs[0]);
         
+    }
+    /////////////////////////////////////////
+    // LOAD MODULE FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "load_module") {
+
+       if (nrhs < 2) {
+         mexErrMsgTxt("get_data: must have 1 arguments");
+       }
+       char * mod_name = mxArrayToString(prhs[1]);
+       if (!std::strcmp(mod_name, "basemod"))
+       {
+         load_base_module();
+         // return true
+         plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+         *mxGetPr(plhs[0]) = 1;
+       }
+       else {
+         // return false
+         plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+         *mxGetPr(plhs[0]) = 0;
+       }
     }      
     else {
        mexErrMsgTxt("bad name of function\n");

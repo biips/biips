@@ -1,7 +1,7 @@
 # search for mex utility 
 find_package(Mex)
 #define sources
-set(MBIIPS_SRC inter_biips.cpp Mostream.cpp)
+set(MBIIPS_SRC inter_biips.cpp Mostream.cpp inter_utils.cpp)
 file(GLOB MBIIPS_H *.h)
 foreach(f ${MBIIPS_SRC})
    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${f})

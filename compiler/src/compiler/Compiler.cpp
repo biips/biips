@@ -49,8 +49,8 @@ namespace Biips
     typedef RuntimeError BaseType;
 
     CompileError(ParseTree const * pTree, const String & msg) :
-      BaseType(String("Compilation error on line ") + print(pTree->line())
-          + ".")
+        BaseType(String("Compilation error on line ") + print(pTree->line())
+                 + ".")
     {
       if (!msg.empty())
         msg_ += "\n" + msg;
@@ -157,12 +157,12 @@ namespace Biips
     if (pValues->size() != 1)
       throw NodeError(node_id,
                       String("Index expression evaluates to non-scalar value: ")
-                          + print(*pValues));
+                      + print(*pValues));
     Scalar val = pValues->ScalarView();
     if (!checkInteger(val))
       throw NodeError(node_id,
                       String("Index expression evaluates to non-integer value: ")
-                          + print(val));
+                      + print(val));
     value = roundInteger(val);
 
     // destruction of the index nodes
@@ -208,8 +208,8 @@ namespace Biips
     // Check size and integrity of range expression
     Size size = range_list.size();
     if (!defaultRange.IsNull() && size != defaultRange.NDim(false))
-      throw CompileError(pTree, String("Dimension mismatch taking subset of ")
-          + name);
+      throw CompileError(pTree,
+                         String("Dimension mismatch taking subset of ") + name);
 
     for (Size i = 0; i < size; ++i)
     {
@@ -286,7 +286,7 @@ namespace Biips
     if (counterMap_.count(name))
       throw CompileError(var,
                          String("Counter cannot appear on LHS of relation: ")
-                             + name);
+                         + name);
 
     if (model_.GetSymbolTable().Contains(name))
     {
@@ -302,13 +302,13 @@ namespace Biips
       if (range_list.size() != array.Range().NDim(false))
         throw CompileError(var,
                            String("Dimension mismatch in subset expression of ")
-                               + name);
+                           + name + print(array.Range()));
 
       IndexRange range = getRange(var, array.Range());
       if (range.IsNull())
         throw CompileError(var,
                            String("Missing values in subset expression of ")
-                               + name);
+                           + name);
 
       return range;
     }
@@ -319,7 +319,7 @@ namespace Biips
       if (range.IsNull())
         throw CompileError(var,
                            String("Cannot evaluate subset expression for ")
-                               + name);
+                           + name);
 
       return range;
     }
@@ -347,11 +347,12 @@ namespace Biips
     Size size = prange->parameters().size();
     if (size < 1 || size > 2)
       throw LogicError(String("Invalid range expression for counter ")
-          + var->name());
+                       + var->name());
     Int lower;
     if (!IndexExpression(prange->parameters()[0], lower))
-      throw CompileError(var, String("Cannot evaluate lower index of counter ")
-          + var->name());
+      throw CompileError(var,
+                         String("Cannot evaluate lower index of counter ")
+                         + var->name());
 
     Int upper;
     if (prange->parameters().size() == 2)
@@ -359,7 +360,7 @@ namespace Biips
       if (!IndexExpression(prange->parameters()[1], upper))
         throw CompileError(var,
                            String("Cannot evaluate upper index of counter ")
-                               + var->name());
+                           + var->name());
     }
     else
       upper = lower;
@@ -405,16 +406,19 @@ namespace Biips
         {
           //A fixed subset
           if (!array.Range().Contains(subset_range))
-            throw CompileError(pTree, String("Subset ") + array.Name()
-                + print(subset_range) + " out of range");
+            throw CompileError(pTree,
+                               String("Subset ") + array.Name()
+                               + print(subset_range) + " out of range"
+                               + print(array.Range()));
 
           //          node_id = array.GetSubset(subset_range);//, model_);
           node_id = model_.GetSymbolTable().GetNodeArraySubset(pTree->name(),
                                                                subset_range);
           if ((node_id == NULL_NODEID) && strictResolution_)
-            throw CompileError(pTree, String("Unable to resolve parameter ")
-                + array.Name() + print(subset_range)
-                + "(one of its ancestors may be undefined)");
+            throw CompileError(pTree,
+                               String("Unable to resolve parameter ")
+                               + array.Name() + print(subset_range)
+                               + "(one of its ancestors may be undefined)");
         }
         else if (!indexExpression_)
         {
@@ -723,8 +727,9 @@ namespace Biips
       else if (nmissing != 0)
       {
         p_this_data.reset();
-        throw CompileError(var, var->name() + print(target_range)
-            + " has missing values");
+        throw CompileError(var,
+                           var->name() + print(target_range)
+                           + " has missing values");
       }
     }
 
@@ -732,8 +737,8 @@ namespace Biips
     const String & distname = p_distribution->name();
     const Distribution::Ptr & p_dist = DistTab().GetPtr(distname);
     if (!p_dist)
-      throw CompileError(p_distribution, String("Unknown distribution: ")
-          + distname);
+      throw CompileError(p_distribution,
+                         String("Unknown distribution: ") + distname);
 
     // FIXME Observable Functions
     //    if (!p_this_data) {
@@ -751,7 +756,6 @@ namespace Biips
     //        return lnode;
     //      }
     //    }
-
 
     // FIXME: copied from JAGS 3.1.0 which has a P_INTERVAL treeClass value
     //    /*
@@ -832,8 +836,9 @@ namespace Biips
         Size j = data_range.GetOffset(p);
         if (data_value[j] != BIIPS_REALNA)
         {
-          throw CompileError(var, var->name() + print(target_range)
-              + " is a logical node and cannot be observed");
+          throw CompileError(var,
+                             var->name() + print(target_range)
+                             + " is a logical node and cannot be observed");
         }
       }
     }
@@ -882,8 +887,9 @@ namespace Biips
         const NodeArray & array = symtab.GetNodeArray(var->name());
         if (array.GetNode(range) != NULL_NODEID)
         {
-          throw CompileError(var, String("Attempt to redefine node")
-              + var->name() + print(range));
+          throw CompileError(var,
+                             String("Attempt to redefine node") + var->name()
+                             + print(range));
         }
         symtab.InsertNode(node_id, var->name(), range); // TODO check this code
         //array.Insert(node_id, range);
@@ -906,9 +912,12 @@ namespace Biips
       throw LogicError("Error in Compiler::setConstantMask");
 
     IndexRange range = variableSubsetRange(var);
-    const IndexRange var_range = IndexRange(q->second.Dim());
+    // check dropped dimensions
+    const IndexRange var_range = IndexRange(q->second.Dim().Drop());
     if (!var_range.Contains(range))
-      throw LogicError("Invalid range in Compiler::setConstantMask.");
+      throw LogicError(String("Subset ") + name + print(range)
+                       + " out of range " + print(var_range)
+                       + " in Compiler::setConstantMask.");
 
     Flags & mask = p->second;
     for (IndexRangeIterator i(range); !i.AtEnd(); i.Next())
@@ -953,8 +962,8 @@ namespace Biips
       //Check against the existing entry, and modify if necessary
       Size ndim = it->second[0].size();
       if (new_range.NDim(false) != ndim)
-        throw CompileError(var, String("Inconsistent dimensiosn for array ")
-            + name);
+        throw CompileError(var,
+                           String("Inconsistent dimensions for array ") + name);
 
       else
       {
@@ -979,8 +988,8 @@ namespace Biips
 
     //First we set up the constant mask, setting all values to true by
     //default
-    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
-        != dataMap_.end(); ++it)
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
+        it != dataMap_.end(); ++it)
     {
       std::pair<String, Flags> a_pair;
       a_pair.first = it->first;
@@ -999,17 +1008,18 @@ namespace Biips
     // We do not want a direct copy of dataMap_ because we would obtain copies of the pointers
     // and modifications of temp_data_table values would apply to dataMap_.
     // We need to explicitly copy the values of MultiArrays.
-    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
-        != dataMap_.end(); ++it)
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
+        it != dataMap_.end(); ++it)
     {
       // allocate memory
       DimArray::Ptr p_dim(new DimArray(it->second.Dim()));
       ValArray::Ptr p_val(new ValArray(it->second.Values()));
-      temp_data_table.insert(std::make_pair(it->first, MultiArray(p_dim, p_val)));
+      temp_data_table.insert(std::make_pair(it->first,
+                                            MultiArray(p_dim, p_val)));
     }
 
-    for (std::map<String, MultiArray>::iterator it = temp_data_table.begin(); it
-        != temp_data_table.end(); ++it)
+    for (std::map<String, MultiArray>::iterator it = temp_data_table.begin();
+        it != temp_data_table.end(); ++it)
     {
       const String & name = it->first;
       MultiArray & temp_data = it->second;
@@ -1075,7 +1085,8 @@ namespace Biips
           if (!counterRange(var).IsNull())
           {
             counterMap_.insert(std::make_pair(var->name(), counterRange(var)));
-            for (Counter & counter = counterMap_.at(var->name()); !counter.AtEnd(); counter.Next())
+            for (Counter & counter = counterMap_.at(var->name());
+                !counter.AtEnd(); counter.Next())
             {
               traverseTree((*it_p_tree)->parameters()[1], fun, false);
             }
@@ -1096,8 +1107,7 @@ namespace Biips
 
   Compiler::Compiler(BUGSModel & model,
                      const std::map<String, MultiArray> & dataMap) :
-    model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0),
-        strictResolution_(false), indexExpression_(0)
+      model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0), strictResolution_(false), indexExpression_(0)
   {
     if (!model_.GraphPtr()->Empty())
       throw LogicError("Non empty graph in Compiler constructor.");
@@ -1108,13 +1118,15 @@ namespace Biips
   void Compiler::DeclareVariables(const Types<ParseTree*>::Array & pVariables)
   {
     Types<ParseTree*>::Array::const_iterator it_p_var;
-    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end(); ++it_p_var)
+    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end();
+        ++it_p_var)
     {
       if ((*it_p_var)->treeClass() != P_VAR)
         throw std::invalid_argument("Expected variable expression");
     }
 
-    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end(); ++it_p_var)
+    for (it_p_var = pVariables.begin(); it_p_var != pVariables.end();
+        ++it_p_var)
     {
       ParseTree const * node_dec = *it_p_var;
       const String & name = node_dec->name();
@@ -1134,13 +1146,13 @@ namespace Biips
           if (!IndexExpression(node_dec->parameters()[i], dim_i))
             throw CompileError(node_dec,
                                String("Unable to calculate dimensions of node ")
-                                   + name);
+                               + name);
           if (dim_i <= 0)
             // FIXME
             throw CompileError(node_dec,
-                               String("Non-positive dimension for node ")
-                                   + name + " , dimension = " + print(dim_i));
-          dim[i] = static_cast<Size> (dim_i);
+                               String("Non-positive dimension for node ") + name
+                               + " , dimension = " + print(dim_i));
+          dim[i] = static_cast<Size>(dim_i);
         }
         model_.GetSymbolTable().AddVariable(name, dim);
       }
@@ -1150,21 +1162,23 @@ namespace Biips
   void Compiler::UndeclaredVariables(ParseTree const *pRelations)
   {
     // Get undeclared variables from data table
-    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin(); it
-        != dataMap_.end(); ++it)
+    for (std::map<String, MultiArray>::const_iterator it = dataMap_.begin();
+        it != dataMap_.end(); ++it)
     {
       const String & name = it->first;
       if (model_.GetSymbolTable().Contains(name))
       {
         const NodeArray & array = model_.GetSymbolTable().GetNodeArray(name);
-        if (it->second.Dim() != array.Range().Dim(false))
+        // check dropped dimensions
+        if (it->second.Dim().Drop() != array.Range().Dim(true))
         {
           throw RuntimeError(String("Dimensions of ") + name
-              + " in declaration (" + print(array.Range())
-              + ") conflict with dimensions in data ("
-              + print(IndexRange(it->second.Dim())) + ")");
+                             + " in declaration (" + print(array.Range())
+                             + ") conflict with dimensions in data ("
+                             + print(IndexRange(it->second.Dim())) + ")");
         }
       }
+      // FIXME do not use dimension from the data ?
       else
       {
         model_.GetSymbolTable().AddVariable(name, it->second.Dim());
@@ -1187,13 +1201,13 @@ namespace Biips
         const Indices & upper = array.Range().Upper();
         if (upper.size() != it->second[1].size())
           throw RuntimeError(String("Dimension mismatch between data and model for node ")
-              + it->first);
+                             + it->first);
 
         for (Size j = 0; j < upper.size(); ++j)
         {
           if (it->second[1][j] > upper[j])
             throw RuntimeError(String("Index out of range for node ")
-                + it->first);
+                               + it->first);
         }
       }
       else
@@ -1207,7 +1221,7 @@ namespace Biips
           if (upper[j] <= 0)
             throw RuntimeError(String("Invalid index for node ") + it->first);
           else
-            dim[j] = static_cast<Size> (upper[j]);
+            dim[j] = static_cast<Size>(upper[j]);
         }
 
         model_.GetSymbolTable().AddVariable(it->first, dim);
