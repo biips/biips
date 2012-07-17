@@ -50,10 +50,10 @@ class ParseTree;
 
 namespace Biips
 {
-  String PROMPT_STRING = "* ";
-  Size INDENT_SIZE = 4;
-  const char INDENT_CHAR = ' ';
-  String INDENT_STRING(INDENT_SIZE, INDENT_CHAR);
+  extern String PROMPT_STRING;
+  extern Size INDENT_SIZE;
+  extern const char INDENT_CHAR;
+  extern String INDENT_STRING;
 
   class BUGSModel;
 
