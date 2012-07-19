@@ -40,18 +40,7 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
     MultiArray marray;
 
 
-    // we eliminate all dimension equal to one , ie squeeze (in matlab)
-    //std::vector<mwSize> dims_sans_un;
-    //
-    //BOOST_AUTO (equal_to_one, std::bind1st(std::equal_to<int>(),1));
-    //if (std::count_if(dims, dims + ndims, equal_to_one) == ndims) {
-    //      dims_sans_un.push_back(1);
-    //}
-    //else {
-    //     std::remove_copy_if(dims, dims + ndims, back_inserter(dims_sans_un),equal_to_one);
-    //}
     DimArray::Ptr p_dim(new DimArray(ndims));
-    //std::copy(dims_sans_un.begin(), dims_sans_un.end() , p_dim->begin());
     std::copy(dims, dims + ndims , p_dim->begin());
 
     ValArray::Ptr p_val(new ValArray(m_nb_elems));
@@ -103,7 +92,6 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     const String & var_name = it_table->first;
     const MultiArray & values_array = it_table->second;
 
-    // dim
     mwSize ndim = values_array.Dim().size();
     mwSize *dims = new mwSize [ndim];
     std::copy(values_array.Dim().begin(), values_array.Dim().end(), dims);
