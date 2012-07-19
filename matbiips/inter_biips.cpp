@@ -125,7 +125,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        if (! p_console->DumpData(data_table))
          throw RuntimeError("Failed to read data.");
 
-       //
        readDataTable<MultiArray::StorageOrderType>(data_table, &plhs[0]);
         
     }

@@ -28,7 +28,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 add_custom_command(
 OUTPUT ${INTER_OUT}
-DEPENDS ${INTER_SRC} ${MBIIPS_H}
+DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
 COMMAND ${MEX_COMMAND} 
 ARGS  -v ${MEX_OPT} -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE} -I${Biips_compiler_INCLUDE}  
 -L${Biips_INSTALL_LIBDIR} ${EXTRA_LIBS}

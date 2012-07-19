@@ -97,14 +97,14 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
   delete [] field_names;
 
-  std::map<String, MultiArray>::const_iterator it_table = dataMap.begin();
+  BOOST_AUTO(it_table, dataMap.begin());
   for (; it_table!=dataMap.end(); ++it_table)
   {
     const String & var_name = it_table->first;
     const MultiArray & values_array = it_table->second;
 
     // dim
-    mwSize ndim = values_array.Dim().Length();
+    mwSize ndim = values_array.Dim().size();
     mwSize *dims = new mwSize [ndim];
     std::copy(values_array.Dim().begin(), values_array.Dim().end(), dims);
     mxArray * curr_field = mxCreateNumericArray(ndim, dims, mxDOUBLE_CLASS , mxREAL);
@@ -112,7 +112,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     delete [] dims;
 
     double * curr_field_ptr = mxGetPr(curr_field);
-    std::replace_copy(values_array.Values().begin(), values_array.Values().end(), curr_field_ptr, BIIPS_REALNA, BIIPS_REALNA);
+    std::replace_copy(values_array.Values().begin(), values_array.Values().end(), curr_field_ptr, BIIPS_REALNA, std::numeric_limits<Scalar>::quiet_NaN() );
 
     int field_number = mxGetFieldNumber(*struct_out, var_name.c_str());
     mxSetFieldByNumber(*struct_out, 0, field_number, curr_field);
