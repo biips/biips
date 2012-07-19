@@ -113,6 +113,27 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
 }
 
+static IndexRange makeRange(const mxArray * lower,
+                            const mxArray * upper)
+{
+  
+  
+  if (mxIsEmpty(lower) || mxIsEmpty(upper))
+    return IndexRange();
+
+  lowerSize = mxGetNumberOfElements(lower);
+  upperSize = mxGetNumberOfElements(upper); 
+  if (lowerSize != upperSize)
+    throw LogicError("length mismatch between lower and upper limits");
+
+
+
+  IndexRange::Indices lind(mxGetPr(lower), mxGetPr(lower) + lowerSize);
+  IndexRange::Indices uind(mxGetPr(upper), mxGetPr(upper) + upperSize);
+
+  IndexRange r = IndexRange(lind, uind);
+  return r;
+}
 
 void load_base_module()
 {
