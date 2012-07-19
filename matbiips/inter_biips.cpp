@@ -137,17 +137,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          mexErrMsgTxt("get_data: must have 1 arguments");
        }
        char * mod_name = mxArrayToString(prhs[1]);
+       plhs[0] = mxCreateLogicalMatrix(1,1);
        if (!std::strcmp(mod_name, "basemod"))
        {
          load_base_module();
          // return true
-         plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-         *mxGetPr(plhs[0]) = 1;
+         *mxGetLogicals(plhs[0]) = 1;
        }
        else {
          // return false
-         plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-         *mxGetPr(plhs[0]) = 0;
+         *mxGetLogicals(plhs[0]) = 0;
        }
     }      
     else {
