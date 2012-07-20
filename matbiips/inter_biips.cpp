@@ -115,7 +115,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     else if (name_func == "get_data") {
 
        if (nrhs < 2) {
-         mexErrMsgTxt("get_data: must have 1 arguments");
+         mexErrMsgTxt("get_data: must have 1 argument");
        }
        int id = static_cast<int>(*mxGetPr(prhs[1]));
        CheckConsoleId(id);
@@ -152,7 +152,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     }      
     
     /////////////////////////////////////////
-    // LOAD MODULE FUNCTION
+    // VERBOSITY FUNCTION
     /////////////////////////////////////////
     else if (name_func == "verbosity") {
 
@@ -163,6 +163,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 	VERBOSITY = static_cast<Size>(*mxGetPr(prhs[1]));
         plhs[0] = mxCreateDoubleMatrix(1,1, mxREAL);
 	*mxGetPr(plhs[0]) = old_verb;
+    }      
+    
+    /////////////////////////////////////////
+    // GET_VARIABLE_NAMES FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_variable_names") {
+
+       if (nrhs < 2) {
+         mexErrMsgTxt("get_variable_names : must have 1 argument");
+       }
+       int id = static_cast<int>(*mxGetPr(prhs[1]));
+       CheckConsoleId(id);
+       Console * p_console = consoles[id];
+       const Types<String>::Array & names = p_console->VariableNames();
+       mwSize ndim = names.size();
+       mwSize dims[] = { ndim };
+       plhs[0] = mxCreateCellArray(1, dims);
+       for (int i = 0; i < ndim ; ++i) {
+            String var_name = names[i]; 
+	    mwSize  nd[] = { var_name.size() }; 
+	    mxArray * value = mxCreateCharArray( 1, nd);
+	    std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
+	    mxSetCell(plhs[0], i, value);
+       }
     }      
     else {
        mexErrMsgTxt("bad name of function\n");
