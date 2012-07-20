@@ -6,4 +6,5 @@ p0=inter_biips('make_console');
 inter_biips('check_model', p0, 'hmm_1d_lin.bug'); 
 inter_biips('compile_model', p0, data, false, 12);
 debilos = inter_biips('get_data',p0);
+vars = inter_biips('get_variable_names',p0);
 inter_biips('clear_console',p0); 
