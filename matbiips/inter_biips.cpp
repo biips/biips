@@ -164,6 +164,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 	    mxSetCell(plhs[0], i, value);
        }
     }      
+    /////////////////////////////////////////
+    // SET_DEFAULT_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "set_default_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+        
+       if (VERBOSITY>1)
+          mbiips_cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
+
+       if (!p_console->SetDefaultFilterMonitors())
+         throw RuntimeError("Failed to set default filter monitors");
+
+    }
     else {
        mexErrMsgTxt("bad name of function\n");
 
