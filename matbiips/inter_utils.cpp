@@ -15,6 +15,7 @@
 #include <BiipsBase.hpp>
 
 
+Size VERBOSITY = 1;
 template<>
 std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {
@@ -121,8 +122,8 @@ static IndexRange makeRange(const mxArray * lower,
   if (mxIsEmpty(lower) || mxIsEmpty(upper))
     return IndexRange();
 
-  lowerSize = mxGetNumberOfElements(lower);
-  upperSize = mxGetNumberOfElements(upper); 
+  mwSize lowerSize = mxGetNumberOfElements(lower);
+  mwSize upperSize = mxGetNumberOfElements(upper); 
   if (lowerSize != upperSize)
     throw LogicError("length mismatch between lower and upper limits");
 

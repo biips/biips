@@ -14,6 +14,7 @@
 typedef Console * Console_ptr;
 std::deque<Console_ptr> consoles;
 
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
     
@@ -134,7 +135,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     else if (name_func == "load_module") {
 
        if (nrhs < 2) {
-         mexErrMsgTxt("get_data: must have 1 arguments");
+         mexErrMsgTxt("get_data: must have 1 argument");
        }
        char * mod_name = mxArrayToString(prhs[1]);
        plhs[0] = mxCreateLogicalMatrix(1,1);
@@ -148,6 +149,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          // return false
          *mxGetLogicals(plhs[0]) = 0;
        }
+    }      
+    
+    /////////////////////////////////////////
+    // LOAD MODULE FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "verbosity") {
+
+       if (nrhs < 2) {
+         mexErrMsgTxt("verbosity: must have 1 argument");
+       }
+        Size old_verb = VERBOSITY;
+	VERBOSITY = static_cast<Size>(*mxGetPr(prhs[1]));
+        plhs[0] = mxCreateDoubleMatrix(1,1, mxREAL);
+	*mxGetPr(plhs[0]) = old_verb;
     }      
     else {
        mexErrMsgTxt("bad name of function\n");

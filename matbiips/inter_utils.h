@@ -18,8 +18,7 @@
 
 using namespace Biips;
 using std::endl;
-
-static Size VERBOSITY = 2;
+extern Size VERBOSITY;
 
 #define CheckConsoleId(id) if ((id >= consoles.size()) || (consoles[id] == NULL))\
 mexErrMsgTxt("clear_console : the console id does not exist")
