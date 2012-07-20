@@ -11,9 +11,7 @@
 #include <deque>
 #include "inter_utils.h"
 
-typedef Console * Console_ptr;
 std::deque<Console_ptr> consoles;
-
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
@@ -49,16 +47,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "clear_console") {
 
-       if (nrhs < 2) 
-         mexErrMsgTxt("clear_console :  must have one integer argument");
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
        
-       int console_id = static_cast<int>(*mxGetPr(prhs[1]));
-       
-       // the console_id does not exist in the console map
-       CheckConsoleId(console_id);
-       
-       delete consoles[console_id];
-       consoles[console_id] = NULL;
+       delete consoles[id];
+       consoles[id] = NULL;
        
     }       
     /////////////////////////////////////////
@@ -66,16 +59,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "check_model") {
 
-       if (nrhs < 3) {
-         mexErrMsgTxt("check_model: must have two arguments");
-       }
+       CheckRhs(nrhs, 2, name_func);
        
-       int console_id = static_cast<int>(*mxGetPr(prhs[1]));
        char * filename = mxArrayToString(prhs[2]);
        
-       CheckConsoleId(console_id);
-       
-       Console * p_console = consoles[console_id];
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id]; 
  
        mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
        if (! p_console->CheckModel(String(filename), VERBOSITY))
@@ -87,11 +76,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "compile_model") {
 
-       if (nrhs < 5) {
-         mexErrMsgTxt("compile_model: must have 4 arguments");
-       }
-       int id = static_cast<int>(*mxGetPr(prhs[1]));
-       CheckConsoleId(id);
+       CheckRhs(nrhs, 4, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
        if (!mxIsStruct(prhs[2])) 
@@ -114,11 +100,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "get_data") {
 
-       if (nrhs < 2) {
-         mexErrMsgTxt("get_data: must have 1 argument");
-       }
-       int id = static_cast<int>(*mxGetPr(prhs[1]));
-       CheckConsoleId(id);
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
        std::map<String, MultiArray> data_table;
@@ -134,19 +117,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "load_module") {
 
-       if (nrhs < 2) {
-         mexErrMsgTxt("get_data: must have 1 argument");
-       }
+       CheckRhs(nrhs, 1, name_func);
+       
        char * mod_name = mxArrayToString(prhs[1]);
-       plhs[0] = mxCreateLogicalMatrix(1,1);
-       if (!std::strcmp(mod_name, "basemod"))
-       {
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       if (!std::strcmp(mod_name, "basemod")) {
          load_base_module();
-         // return true
          *mxGetLogicals(plhs[0]) = 1;
        }
        else {
-         // return false
          *mxGetLogicals(plhs[0]) = 0;
        }
     }      
@@ -156,13 +135,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "verbosity") {
 
-       if (nrhs < 2) {
-         mexErrMsgTxt("verbosity: must have 1 argument");
-       }
-        Size old_verb = VERBOSITY;
-	VERBOSITY = static_cast<Size>(*mxGetPr(prhs[1]));
-        plhs[0] = mxCreateDoubleMatrix(1,1, mxREAL);
-	*mxGetPr(plhs[0]) = old_verb;
+       CheckRhs(nrhs, 1, name_func);
+       Size old_verb = VERBOSITY;
+       VERBOSITY = static_cast<Size>(*mxGetPr(prhs[1]));
+       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+       *mxGetPr(plhs[0]) = old_verb;
     }      
     
     /////////////////////////////////////////
@@ -170,20 +147,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "get_variable_names") {
 
-       if (nrhs < 2) {
-         mexErrMsgTxt("get_variable_names : must have 1 argument");
-       }
-       int id = static_cast<int>(*mxGetPr(prhs[1]));
-       CheckConsoleId(id);
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
+       
        const Types<String>::Array & names = p_console->VariableNames();
        mwSize ndim = names.size();
        mwSize dims[] = { ndim };
        plhs[0] = mxCreateCellArray(1, dims);
+       
        for (int i = 0; i < ndim ; ++i) {
             String var_name = names[i]; 
 	    mwSize  nd[] = { var_name.size() }; 
-	    mxArray * value = mxCreateCharArray( 1, nd);
+	    mxArray * value = mxCreateCharArray(1, nd);
 	    std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
 	    mxSetCell(plhs[0], i, value);
        }
