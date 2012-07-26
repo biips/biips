@@ -42,17 +42,37 @@ set (BiipsTestCompiler_EXE_NAME ${PROJECT_NAME})
 set (PROJECT_EXE_NAME ${BiipsTestCompiler_EXE_NAME})
 string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 
+
 # find boost libraries
+clear_boost()
 find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
 	program_options
 )
-include_directories (${Boost_INCLUDE_DIRS})
+message(Boost_LIBRARIES=${Boost_LIBRARIES})
 set (EXTRA_LIBS ${EXTRA_LIBS}
 	${Boost_LIBRARIES}
 )
 
-# should we use qwt5-qt4
-option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
+# include boost
+include_directories (${Boost_INCLUDE_DIRS})
+
+# find boost 64-bit libraries
+if (WIN32 AND BUILD_x64)
+    set (Boost_LIBRARYDIR64 ${Boost_LIBRARY_DIRS} CACHE PATH "The path to where the Boost 64-bit library files are.")
+    
+    clear_boost()
+    set (BOOST_LIBRARYDIR ${Boost_LIBRARYDIR64})
+    find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
+    	program_options
+    )
+    message(Boost_LIBRARIES=${Boost_LIBRARIES})
+    set (EXTRA_LIBS64 ${EXTRA_LIBS64}
+    	${Boost_LIBRARIES}
+    )
+    unset (BOOST_LIBRARYDIR)
+    clear_boost()
+endif (WIN32 AND BUILD_x64)
+
 
 # find qwt5-qt4
 if (USE_Qwt5_Qt4)
@@ -95,49 +115,24 @@ file (GLOB SOURCE_FILES
 )
 
 # linked libraries
-set (EXTRA_LIBS ${EXTRA_LIBS}
-	BiipsCompiler
-	BiipsBase
-	BiipsCore
-)
+set (BIIPS_LIBS	BiipsCompiler BiipsBase BiipsCore)
 
 # add the executable
-add_executable (${PROJECT_EXE_NAME} ${SOURCE_FILES})
-target_link_libraries (${PROJECT_EXE_NAME} ${EXTRA_LINK_FLAGS} ${EXTRA_LIBS})
+add_biips_executable (${PROJECT_EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
 
 # add the install targets
-install (TARGETS ${PROJECT_EXE_NAME}
-	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/bin
-	COMPONENT Test
-)
+install_biips_test_program(${PROJECT_EXE_NAME})
 
-install (FILES
-	biipstestcompiler.cfg
-	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}
-	COMPONENT Test
-)
+install_biips_test_file(biipstestcompiler.cfg .)
+
+install_biips_test_dir(bench hmm_1d*.cfg)
+
+install_biips_test_dir(model hmm_1d*.bug)
 
 # TODO: .bat script for windows
-install (PROGRAMS
-	BiipsTestCompiler.sh
-	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}
-	COMPONENT Test
-)
-
-install(DIRECTORY
-	${PROJECT_SOURCE_DIR}/bench/
-	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/bench
-	COMPONENT Test
-	FILES_MATCHING
-	PATTERN hmm_1d*.cfg
-	PATTERN .svn EXCLUDE
-)
-
-install(DIRECTORY
-	${PROJECT_SOURCE_DIR}/model/
-	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/model
-	COMPONENT Test
-	FILES_MATCHING
-	PATTERN hmm_1d*.bug
-	PATTERN .svn EXCLUDE
-)
+if (NOT WIN32)
+    install (PROGRAMS
+    	BiipsTestCompiler.sh
+    	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}
+    )
+endif (NOT WIN32)

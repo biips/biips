@@ -36,21 +36,6 @@
 
 cmake_minimum_required (VERSION 2.8)
 
-# print system info
-option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
-if (PRINT_SYSTEM_INFO)
-    message (STATUS CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
-    message (STATUS CMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION})
-    message (STATUS CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
-    message (STATUS WIN32=${WIN32})
-    message (STATUS UNIX=${UNIX})
-    message (STATUS MINGW=${MINGW})
-    message (STATUS CMAKE_GENERATOR=${CMAKE_GENERATOR})
-    message (STATUS CMAKE_BUILD_TOOL=${CMAKE_BUILD_TOOL})
-    message (STATUS CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
-    message (STATUS CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
-    message (STATUS CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
-endif (PRINT_SYSTEM_INFO)
 
 # project configuration
 # =====================
@@ -117,27 +102,55 @@ set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
 set (R_VERSION 2.13.0)
 
+
+# print system info
+option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
+if (PRINT_SYSTEM_INFO)
+    message (CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+    message (CMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION})
+    message (CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
+    message (WIN32=${WIN32})
+    message (UNIX=${UNIX})
+    message (MINGW=${MINGW})
+    message (CMAKE_GENERATOR=${CMAKE_GENERATOR})
+    message (CMAKE_BUILD_TOOL=${CMAKE_BUILD_TOOL})
+    message (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
+    message (CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+    message (CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
+endif (PRINT_SYSTEM_INFO)
+
 # configure build
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
-math (EXPR BUILD_ARCH_BIT_NB 8*${CMAKE_SIZEOF_VOID_P})
-option (BUILD_FORCE_32BIT "Force 32bit compilation." OFF)
-option (BUILD_FORCE_64BIT "Force 64bit compilation." OFF)
-if (BUILD_FORCE_32BIT)
-	if (BUILD_FORCE_64BIT)
-		message (FATAL_ERROR "Can not set both BUILD_FORCE_32BIT and BUILD_FORCE_64BIT to ON.\n")
-	endif (BUILD_FORCE_64BIT)
-	set (BUILD_ARCH_BIT_NB 32)
-	add_definitions (-m32)
-	set (EXTRA_COMPILE_FLAGS -m32)
-	set (EXTRA_LINK_FLAGS -m32)
-elseif (BUILD_FORCE_64BIT)
-	set (BUILD_ARCH_BIT_NB 64)
-	add_definitions (-m64)
-	set (EXTRA_COMPILE_FLAGS -m64)
-	set (EXTRA_LINK_FLAGS -m64)
-endif (BUILD_FORCE_32BIT)
-message (STATUS BUILD_ARCH_BIT_NB=${BUILD_ARCH_BIT_NB})
+set (BUILD_ARCH_LIST "")
+set (BUILD_BITNB_LIST "")
+
+if (WIN32)
+    option (BUILD_BOTH_ARCH "Force i386 (32bit) and x64 (64bit) compilation." ON)
+    if (BUILD_BOTH_ARCH)
+        list (APPEND BUILD_ARCH_LIST i386)
+        list (APPEND BUILD_BITNB_LIST 32)
+        set (BUILD_i386 ON)
+        list (APPEND BUILD_ARCH_LIST x64)
+        list (APPEND BUILD_BITNB_LIST 64)
+        set (BUILD_x64 ON)
+    endif (BUILD_BOTH_ARCH)
+endif (WIN32)
+
+math (EXPR ARCH_BITNB 8*${CMAKE_SIZEOF_VOID_P})
+if (ARCH_BITNB EQUAL 32)
+    if (NOT BUILD_i386)
+    	list (APPEND BUILD_ARCH_LIST i386)
+        list (APPEND BUILD_BITNB_LIST 32)
+        set (BUILD_i386 ON)
+    endif (NOT BUILD_i386)
+elseif (ARCH_BITNB EQUAL 64)
+    if (NOT BUILD_x64)
+    	list (APPEND BUILD_ARCH_LIST x64)
+        list (APPEND BUILD_BITNB_LIST 64)
+        set (BUILD_x64 ON)
+    endif (NOT BUILD_x64)
+endif (ARCH_BITNB EQUAL 32)
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
 if (SUPPRESS_DEPRECATED_WARNINGS)
@@ -151,6 +164,17 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
+macro (clear_boost)
+    unset (Boost_LIBRARIES)
+    unset (Boost_INCLUDE_DIR CACHE)
+    unset (Boost_LIBRARY_DIRS CACHE)
+endmacro (clear_boost)
+
+# should we use qwt5-qt4
+if (NOT WIN32)
+    option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
+endif (NOT WIN32)
+
 # configure install directories
 include (GNUInstallDirs)
 if (UNIX)
@@ -159,27 +183,172 @@ if (UNIX)
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/biips)
 	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR}/biips)
 elseif (WIN32)
-	if (BUILD_ARCH_BIT_NB EQUAL 32)
-		set (Biips_INSTALL_BINDIR i386/${CMAKE_INSTALL_BINDIR})
-	elseif (BUILD_ARCH_BIT_NB EQUAL 64)
-		set (Biips_INSTALL_BINDIR x64/${CMAKE_INSTALL_BINDIR})
-	endif (BUILD_ARCH_BIT_NB EQUAL 32)
-	set (Biips_INSTALL_LIBDIR ${Biips_INSTALL_BINDIR})
+    set (Biips_INSTALL_BINDIR_i386 i386/${CMAKE_INSTALL_BINDIR})
+    set (Biips_INSTALL_BINDIR_x64 x64/${CMAKE_INSTALL_BINDIR})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
-	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
+	set (Biips_INSTALL_DATAROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
 endif (UNIX)
 
 # configure output directories
-set (LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
-set (EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/${CMAKE_BUILD_TYPE})
+set (Biips_LIBRARY_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
+set (Biips_EXECUTABLE_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
+set (LIBRARY_OUTPUT_PATH ${Biips_LIBRARY_OUTPUT_PATH})
+set (EXECUTABLE_OUTPUT_PATH ${Biips_EXECUTABLE_OUTPUT_PATH})
 
 
 # configure interfaces build
 option (BUILD_RBIIPS "Activate RBiips (BiiPS interface for GNU R) build" ON)
 option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
 
+
+# macro to add libraries
+macro (add_biips_library name type sources biips_libs)
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            add_library (${name}-${arch} ${type} ${${sources}})
+            list(FIND BUILD_ARCH_LIST ${arch} offset)
+            list(GET BUILD_BITNB_LIST ${offset} bitnb)
+            set_target_properties(${name}-${arch}
+                PROPERTIES COMPILE_FLAGS -m${bitnb}
+                LINK_FLAGS -m${bitnb}
+                )
+            set (extra_libs "")
+            foreach (lib IN LISTS ${biips_libs})
+                list(APPEND extra_libs ${lib}-${arch})
+            endforeach (lib IN LISTS ${biips_libs})
+            target_link_libraries (${name}-${arch} ${extra_libs})
+        endforeach(arch IN LISTS BUILD_ARCH_LIST)
+    else (WIN32)
+        add_library (${name} ${type} ${${sources}})
+        target_link_libraries (${name} ${biips_libs})
+    endif(WIN32)
+endmacro (add_biips_library)
+
+# macro to install libraries
+macro (install_biips_library name)
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            list(FIND BUILD_ARCH_LIST ${arch} offset)
+            list(GET BUILD_BITNB_LIST ${offset} bitnb)
+            install (TARGETS ${name}-${arch}
+                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
+            	COMPONENT "Runtime_${bitnb}bit"
+            	)
+        endforeach (arch IN LISTS BUILD_ARCH_LIST)
+    else (WIN32)
+        install (TARGETS ${name}
+            DESTINATION ${Biips_INSTALL_LIBDIR}
+            )
+    endif (WIN32)
+endmacro (install_biips_library)
+
+# macro to install script
+macro (install_biips_script dir name)
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            list(FIND BUILD_ARCH_LIST ${arch} offset)
+            list(GET BUILD_BITNB_LIST ${offset} bitnb)
+            install (PROGRAMS ${dir}/${name}
+                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
+                RENAME ${name}.bat
+            	COMPONENT "Runtime_${bitnb}bit"
+            	)
+        endforeach (arch IN LISTS BUILD_ARCH_LIST)
+    else (WIN32)
+        install (PROGRAMS ${name}
+            DESTINATION ${Biips_INSTALL_BINDIR}
+            )
+    endif (WIN32)
+endmacro (install_biips_script)
+
+# macro to add executable
+macro (add_biips_executable name sources extra_libs extra_libs64 biips_libs)
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            add_executable (${name}-${arch} ${${sources}})
+            list(FIND BUILD_ARCH_LIST ${arch} offset)
+            list(GET BUILD_BITNB_LIST ${offset} bitnb)
+            set_target_properties(${name}-${arch}
+                PROPERTIES COMPILE_FLAGS -m${bitnb}
+                LINK_FLAGS -m${bitnb}
+                )
+                
+            if (bitnb EQUAL 64)
+                foreach (lib IN LISTS ${biips_libs})
+                    list(APPEND ${extra_libs64} ${lib}-${arch})
+                endforeach (lib IN LISTS ${biips_libs})
+                target_link_libraries (${name}-${arch} ${${extra_libs64}})
+            else (bitnb EQUAL 64)
+                foreach (lib IN LISTS ${biips_libs})
+                    list(APPEND ${extra_libs} ${lib}-${arch})
+                endforeach (lib IN LISTS ${biips_libs})
+                target_link_libraries (${name}-${arch} ${${extra_libs}})
+            endif (bitnb EQUAL 64)
+        endforeach(arch IN LISTS BUILD_ARCH_LIST)
+    else (WIN32)
+        add_executable (${name} ${${sources}})
+        target_link_libraries (${name} ${${extra_libs}} ${${biips_libs}})
+    endif(WIN32)
+endmacro (add_biips_executable)
+
+# macro to install test program
+macro (install_biips_test_program name)
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            list(FIND BUILD_ARCH_LIST ${arch} offset)
+            list(GET BUILD_BITNB_LIST ${offset} bitnb)
+            install (TARGETS ${name}-${arch}
+                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
+            	COMPONENT "Runtime_${bitnb}bit"
+            	)
+        endforeach (arch IN LISTS BUILD_ARCH_LIST)
+    else (WIN32)
+        install (TARGETS ${name}
+            DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/bin
+            )
+    endif (WIN32)
+endmacro (install_biips_test_program)
+
+
+# macro to install test files
+macro (install_biips_test_file name dir)
+    if (WIN32)
+        install (FILES
+        	${name}
+        	DESTINATION ${Biips_INSTALL_DATADIR}/${PROJECT_REL_DIR}/${dir}
+        )
+    else (WIN32)
+        install (FILES
+        	${name}
+        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/${dir}
+        )
+    endif (WIN32)
+endmacro (install_biips_test_file)
+
+# macro to install test file directories
+macro (install_biips_test_dir dir patt)
+    if (WIN32)
+        install(DIRECTORY
+        	${PROJECT_SOURCE_DIR}/${dir}/
+        	DESTINATION ${Biips_INSTALL_DATADIR}/${PROJECT_REL_DIR}/${dir}
+        	FILES_MATCHING PATTERN ${patt}
+        	PATTERN .svn EXCLUDE
+        )
+    else (WIN32)
+        install(DIRECTORY
+        	${PROJECT_SOURCE_DIR}/${dir}/
+        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/${dir}
+        	FILES_MATCHING PATTERN ${patt}
+        	PATTERN .svn EXCLUDE
+        )
+    endif (WIN32)
+endmacro (install_biips_test_dir)
+
+# ==============================
+# ==============================
 # Add subprojects
-# ===============
+# ==============================
+# ==============================
 add_subdirectory (core)
 add_subdirectory (base)
 add_subdirectory (test)
