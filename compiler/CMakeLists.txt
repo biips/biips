@@ -66,23 +66,18 @@ file (GLOB_RECURSE SOURCE_FILES
 )
 
 # linked libraries
-set (EXTRA_LIBS ${EXTRA_LIBS}
-	BiipsBase
-	BiipsCore
-)
+set (BIIPS_LIBS	BiipsBase BiipsCore)
 
 # add the library
-add_library (${PROJECT_LIB_NAME} SHARED ${SOURCE_FILES})
-target_link_libraries (${PROJECT_LIB_NAME} ${EXTRA_LINK_FLAGS} ${EXTRA_LIBS})
+add_biips_library(${PROJECT_LIB_NAME} SHARED SOURCE_FILES BIIPS_LIBS)
 
 # add the install targets
-install (TARGETS ${PROJECT_LIB_NAME} DESTINATION ${Biips_INSTALL_LIBDIR}
-	COMPONENT Runtime)
+install_biips_library(${PROJECT_LIB_NAME} Runtime)
 
 install(DIRECTORY
 	${PROJECT_SOURCE_DIR}/include/
 	DESTINATION ${Biips_INSTALL_INCLUDEDIR}/${PROJECT_REL_DIR}
-	COMPONENT Development
+	COMPONENT Headers
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
 )
