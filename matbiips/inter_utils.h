@@ -56,6 +56,7 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
    return id;
    }
 }
+IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 
 #endif
