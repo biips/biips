@@ -180,6 +180,48 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          throw RuntimeError("Failed to set default filter monitors");
 
     }
+    /////////////////////////////////////////
+    // SET_FILTER_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "set_filter_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+        
+       if (VERBOSITY>1)
+          mbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
+       
+       const mxArray * varNames = prhs[2];
+      
+       double * monitored_lower  = mxGetPr(prhs[3]);
+       double * monitored_upper  = mxGetPr(prhs[4]);
+      
+       mwSize nbVarNames = mxGetNumberOfElements(varNames);
+
+       if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
+            mexErrMsgTxt("set_filter_monitors  : arguments 2, 3 and 4 must have the same number of Elements");
+
+   
+       if (!mxIsCell(varNames))
+          mbiips_cerr << "set_filter_monitors  : second argument must be a cell" ;
+
+        for(int i = 0; i <  nbVarNames; ++i )
+	 {
+           const mxArray * m = mxGetCell(varNames, i);
+           String name = mxArrayToString(m);
+	   IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
+           Bool ok = p_console->SetSmoothMonitor(name, range);
+           if (ok && VERBOSITY>1)
+              {
+                  mbiips_cout << " " << name;
+                  //if (!range.IsNull())
+                   //   mbiips_cout << range;
+              }
+	 } 
+        if (VERBOSITY>1)
+            mbiips_cout << endl;
+    }
     else {
        mexErrMsgTxt("bad name of function\n");
 
