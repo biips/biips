@@ -114,8 +114,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
 }
 
-static IndexRange makeRange(const mxArray * lower,
-                            const mxArray * upper)
+IndexRange makeRange(const mxArray * lower, const mxArray * upper)
 {
   
   
