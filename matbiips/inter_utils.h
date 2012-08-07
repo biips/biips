@@ -34,10 +34,12 @@ void readDataTable(const std::map<String, MultiArray> & dataMap, mxArray ** stru
 void load_base_module();
 
 // macros for arguments checking
+//
+#if 1
 
 inline  
 void CheckRhs(int nrhs, int nb, String name_func) { 
-  if (nrhs < (nb + 1)) { 
+  if (nrhs != (nb + 1)) { 
      char id_error[1024];
      sprintf(id_error, "inter_biips:%s", name_func.c_str());
      mexErrMsgIdAndTxt(id_error, " %s must have %d argument(s)", name_func.c_str(), nb);
@@ -56,6 +58,27 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
    return id;
    }
 }
+
+#define CheckArgIsCell(nb) \
+ if (!mxIsCell(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << id << " -th argument must be a cell" << endl
+
+#define CheckArgIsString(nb) \
+ if (!mxIsChar(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << id << " -th argument must be a string" << endl
+
+#define CheckArgIsStruct(nb) \
+ if (!mxIsStruct(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << id << " -th argument must be a string" << endl
+
+#define CheckIsString(m)\
+ if (!mxIsChar((m)))\
+    mbiips_cerr << name_func  << " " << " some argument must be a string" << endl
+
+
+#endif
+
+
 IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 

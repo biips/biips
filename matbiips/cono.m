@@ -7,5 +7,6 @@ inter_biips('check_model', p0, 'hmm_1d_lin.bug');
 inter_biips('compile_model', p0, data, false, 12);
 debilos = inter_biips('get_data',p0);
 vars = inter_biips('get_variable_names',p0);
-inter_biips('set_filter_monitors', p0, {'x'}, {1,5});
+inter_biips('verbosity',2);
+inter_biips('set_filter_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('clear_console',p0); 

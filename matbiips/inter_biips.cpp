@@ -83,8 +83,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
-       if (!mxIsStruct(prhs[2])) 
-          mexErrMsgTxt("second argument must be a struct");
+       CheckArgIsStruct(2);
 
        std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
 
@@ -124,7 +123,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        
        char * mod_name = mxArrayToString(prhs[1]);
        plhs[0] = mxCreateLogicalMatrix(1, 1);
-       if (!std::strcmp(mod_name, "basemod")) {
+       if (!std::strcmp(mod_name,"basemod")) {
          load_base_module();
          *mxGetLogicals(plhs[0]) = 1;
        }
@@ -188,44 +187,42 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "set_filter_monitors") {
 
-       CheckRhs(nrhs, 1, name_func);
+       CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
         
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
        
-       const mxArray * varNames = prhs[2];
-      
-       const mxArray * monitored_lower  = prhs[3];
-       const mxArray * monitored_upper  = prhs[4];
-      
-       mwSize nbVarNames = mxGetNumberOfElements(varNames);
+       mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
 
        if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
-            mexErrMsgTxt("set_filter_monitors  : arguments 2, 3 and 4 must have the same number of Elements");
-
+            mbiips_cerr << name_func <<  ": arguments 2, 3 and 4 must have the same number of Elements" << endl;
    
-       if (!mxIsCell(varNames))
-          mbiips_cerr << "set_filter_monitors  : second argument must be a cell" ;
+       CheckArgIsCell(2);
+       CheckArgIsCell(3);
+       CheckArgIsCell(4);
 
-        for(int i = 0; i <  nbVarNames; ++i )
-	 {
-           const mxArray * m   = mxGetCell(varNames, i);
-           const mxArray * low = mxGetCell(monitored_lower, i);
-           const mxArray * up  = mxGetCell(monitored_upper, i);
-           String name = mxArrayToString(m);
-	   
-	   IndexRange range = makeRange(low, up);
-           Bool ok = p_console->SetSmoothMonitor(name, range);
-           if (ok && VERBOSITY>1)
-              {
-                  mbiips_cout << " " << name;
-                  if (!range.IsNull())
-                      mbiips_cout << range;
-              }
-	 } 
-        if (VERBOSITY>1)
+       for(int i = 0; i <  nbVarNames; ++i )
+        {
+          const mxArray * m   = mxGetCell(prhs[2], i);
+          const mxArray * low = mxGetCell(prhs[3], i);
+          const mxArray * up  = mxGetCell(prhs[4], i);
+	  
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+          
+          IndexRange range = makeRange(low, up);
+          Bool ok = p_console->SetFilterMonitor(name, range);
+          if (ok && VERBOSITY>1)
+             {
+                 mbiips_cout << " " << name;
+                 if (!range.IsNull())
+                     mbiips_cout << range;
+             }
+        } 
+       
+       if (VERBOSITY>1)
             mbiips_cout << endl;
     }
     else {
