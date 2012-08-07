@@ -10,6 +10,9 @@
 
 #include <deque>
 #include "inter_utils.h"
+#include <fstream>
+#include "iostream/outStream.hpp"
+#include "iostream/ProgressBar.hpp"
 
 std::deque<Console_ptr> consoles;
 
@@ -218,8 +221,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
            if (ok && VERBOSITY>1)
               {
                   mbiips_cout << " " << name;
-                  //if (!range.IsNull())
-                   //   mbiips_cout << range;
+                  if (!range.IsNull())
+                      mbiips_cout << range;
               }
 	 } 
         if (VERBOSITY>1)
