@@ -11,4 +11,6 @@ inter_biips('verbosity',2);
 inter_biips('set_filter_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('set_smooth_tree_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('set_smooth_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
+bool_et_deux=inter_biips('is_sampler_built',p0)
+inter_biips('build_smc_sampler',p0, 0);
 inter_biips('clear_console',p0); 
