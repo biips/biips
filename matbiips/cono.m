@@ -9,4 +9,6 @@ debilos = inter_biips('get_data',p0);
 vars = inter_biips('get_variable_names',p0);
 inter_biips('verbosity',2);
 inter_biips('set_filter_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
+inter_biips('set_smooth_tree_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
+inter_biips('set_smooth_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('clear_console',p0); 
