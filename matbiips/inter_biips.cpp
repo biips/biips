@@ -194,8 +194,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        
        const mxArray * varNames = prhs[2];
       
-       double * monitored_lower  = mxGetPr(prhs[3]);
-       double * monitored_upper  = mxGetPr(prhs[4]);
+       const mxArray * monitored_lower  = prhs[3];
+       const mxArray * monitored_upper  = prhs[4];
       
        mwSize nbVarNames = mxGetNumberOfElements(varNames);
 
@@ -208,9 +208,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
         for(int i = 0; i <  nbVarNames; ++i )
 	 {
-           const mxArray * m = mxGetCell(varNames, i);
+           const mxArray * m   = mxGetCell(varNames, i);
+           const mxArray * low = mxGetCell(monitored_lower, i);
+           const mxArray * up  = mxGetCell(monitored_upper, i);
            String name = mxArrayToString(m);
-	   IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
+	   
+	   IndexRange range = makeRange(low, up);
            Bool ok = p_console->SetSmoothMonitor(name, range);
            if (ok && VERBOSITY>1)
               {
