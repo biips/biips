@@ -344,6 +344,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
     }
     
+    /////////////////////////////////////////
+    // RUN_SMC_SAMPLER FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "run_smc_sampler") {
+
+       CheckRhs(nrhs, 5, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+
+       CheckArgIsNumeric(2);
+       Size n_part = static_cast<Size>(*mxGetPr(prhs[2]));
+
+       CheckArgIsNumeric(3);
+       Size smc_rng_seed = static_cast<Size>(*mxGetPr(prhs[3]));
+
+       CheckArgIsString(4);
+       String resample_type = mxArrayToString(prhs[4]);
+       
+       CheckArgIsNumeric(5);
+       Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[5]));
+
+       Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, VERBOSITY, VERBOSITY);
+
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       *mxGetLogicals(plhs[0]) =  (ok ? 1 : 0);
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
