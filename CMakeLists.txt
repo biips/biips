@@ -190,8 +190,8 @@ elseif (WIN32)
 endif (UNIX)
 
 # configure output directories
-set (Biips_LIBRARY_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
-set (Biips_EXECUTABLE_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
+set (Biips_LIBRARY_OUTPUT_PATH {CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
+set (Biips_EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
 set (LIBRARY_OUTPUT_PATH ${Biips_LIBRARY_OUTPUT_PATH})
 set (EXECUTABLE_OUTPUT_PATH ${Biips_EXECUTABLE_OUTPUT_PATH})
 
@@ -220,7 +220,7 @@ macro (add_biips_library name type sources biips_libs)
         endforeach(arch IN LISTS BUILD_ARCH_LIST)
     else (WIN32)
         add_library (${name} ${type} ${${sources}})
-        target_link_libraries (${name} ${biips_libs})
+        target_link_libraries (${name} ${${biips_libs}})
     endif(WIN32)
 endmacro (add_biips_library)
 
@@ -255,7 +255,7 @@ macro (install_biips_script dir name)
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
     else (WIN32)
-        install (PROGRAMS ${name}
+        install (PROGRAMS ${${name}}
             DESTINATION ${Biips_INSTALL_BINDIR}
             )
     endif (WIN32)
