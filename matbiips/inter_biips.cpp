@@ -225,6 +225,95 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        if (VERBOSITY>1)
             mbiips_cout << endl;
     }
+    
+    /////////////////////////////////////////
+    // SET_SMOOTH_TREE_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "set_smooth_tree_monitors") {
+
+       CheckRhs(nrhs, 4, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+        
+       if (VERBOSITY>1)
+          mbiips_cout << PROMPT_STRING << "Smooth tree monitoring variables:";
+       
+       mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
+
+       if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
+            mbiips_cerr << name_func <<  ": arguments 2, 3 and 4 must have the same number of Elements" << endl;
+   
+       CheckArgIsCell(2);
+       CheckArgIsCell(3);
+       CheckArgIsCell(4);
+
+       for(int i = 0; i <  nbVarNames; ++i )
+        {
+          const mxArray * m   = mxGetCell(prhs[2], i);
+          const mxArray * low = mxGetCell(prhs[3], i);
+          const mxArray * up  = mxGetCell(prhs[4], i);
+	  
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+          
+          IndexRange range = makeRange(low, up);
+          Bool ok = p_console->SetSmoothTreeMonitor(name, range);
+          if (ok && VERBOSITY>1)
+             {
+                 mbiips_cout << " " << name;
+                 if (!range.IsNull())
+                     mbiips_cout << range;
+             }
+        } 
+       
+       if (VERBOSITY>1)
+            mbiips_cout << endl;
+    }
+    
+    /////////////////////////////////////////
+    // SET_SMOOTH_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "set_smooth_monitors") {
+
+       CheckRhs(nrhs, 4, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+        
+       if (VERBOSITY>1)
+          mbiips_cout << PROMPT_STRING << "Smoother monitoring variables:";
+       
+       mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
+
+       if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
+            mbiips_cerr << name_func <<  ": arguments 2, 3 and 4 must have the same number of Elements" << endl;
+   
+       CheckArgIsCell(2);
+       CheckArgIsCell(3);
+       CheckArgIsCell(4);
+
+       for(int i = 0; i <  nbVarNames; ++i )
+        {
+          const mxArray * m   = mxGetCell(prhs[2], i);
+          const mxArray * low = mxGetCell(prhs[3], i);
+          const mxArray * up  = mxGetCell(prhs[4], i);
+	  
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+          
+          IndexRange range = makeRange(low, up);
+          Bool ok = p_console->SetSmoothMonitor(name, range);
+          if (ok && VERBOSITY>1)
+             {
+                 mbiips_cout << " " << name;
+                 if (!range.IsNull())
+                     mbiips_cout << range;
+             }
+        } 
+       
+       if (VERBOSITY>1)
+            mbiips_cout << endl;
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
