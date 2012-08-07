@@ -314,6 +314,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
             mbiips_cout << endl;
     }
     
+    /////////////////////////////////////////
+    // BUILD_SMC_SAMPLER FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "build_smc_sampler") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       CheckArgIsNumeric(2);
+       Bool prior_flag = static_cast<Bool>(*mxGetPr(prhs[2]));
+
+       if (!p_console->BuildSampler(prior_flag, VERBOSITY))
+         throw RuntimeError("Failed to build sampler.");
+    }
+    
+    /////////////////////////////////////////
+    // IS_SAMPLER_BUILT FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "is_sampler_built") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       *mxGetLogicals(plhs[0]) =  (p_console->SamplerBuilt() ? 1 : 0);
+
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
