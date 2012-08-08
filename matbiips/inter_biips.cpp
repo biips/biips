@@ -359,11 +359,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        CheckArgIsNumeric(3);
        Size smc_rng_seed = static_cast<Size>(*mxGetPr(prhs[3]));
 
-       CheckArgIsString(4);
-       String resample_type = mxArrayToString(prhs[4]);
        
-       CheckArgIsNumeric(5);
-       Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[5]));
+       CheckArgIsNumeric(4);
+       Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[4]));
+       
+       CheckArgIsString(5);
+       String resample_type = mxArrayToString(prhs[5]);
 
        Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, VERBOSITY, VERBOSITY);
 
