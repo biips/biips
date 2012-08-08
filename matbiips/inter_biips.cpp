@@ -372,6 +372,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        *mxGetLogicals(plhs[0]) =  (ok ? 1 : 0);
     }
     
+    /////////////////////////////////////////
+    // GET_LOG_NORM_CONST FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_log_norm_const") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       Scalar log_norm_const;
+       if(!p_console->GetLogNormConst(log_norm_const))
+          throw RuntimeError("Failed to get log normalizing constant.");
+
+       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+       *mxGetPr(plhs[0]) = static_cast<double>(log_norm_const);
+
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
