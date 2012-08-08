@@ -76,7 +76,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
   for(int i = 0; it != dataMap.end(); ++it,++i) {
        const String & var_name = it->first;
        field_names[i] = new char[var_name.size()];
-       strcpy(field_names[i], var_name.c_str());
+       std::strcpy(field_names[i], var_name.c_str());
   }
 
   *struct_out = mxCreateStructArray(1, dims, dataMap.size(), const_cast<const char **>(field_names));
@@ -139,4 +139,104 @@ void load_base_module()
 {
   using namespace Biips;
   loadBaseModule(Compiler::FuncTab(), Compiler::DistTab());
+}
+
+template<>
+void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type, mxArray ** struct_out)
+{
+
+  mwSize dims[] = { 1 };
+  typedef char * chaine_carac;
+  chaine_carac* field_names= new chaine_carac[monitorsMap.size()];
+  
+  BOOST_AUTO(it, monitorsMap.begin());
+  for(int i = 0; it != monitorsMap.end(); ++it,++i) {
+       const String & var_name = it->first;
+       field_names[i] = new char[var_name.size()];
+       std::strcpy(field_names[i], var_name.c_str());
+  }
+
+  *struct_out = mxCreateStructArray(1, dims, monitorsMap.size(), const_cast<const char **>(field_names));
+  it = monitorsMap.begin();
+  
+  // 
+  for(int i = 0; it != monitorsMap.end(); ++it, ++i) {
+       delete [] field_names[i] ;
+  }
+
+  delete [] field_names;
+
+  BOOST_AUTO(it_table, monitorsMap.begin());
+  for (; it_table!=monitorsMap.end(); ++it_table)
+  {
+    const String & var_name = it_table->first;
+    const NodeArrayMonitor & monitor = it_table->second;
+
+    const char * curr_field_names[] = { "values", "weigths", "ess", "discrete",
+                                         "name", "lower", "upper", "type"};
+    mwSize curr_dims[] = { 1 };
+    mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(chaine_carac), 
+                                               curr_field_names);
+    int field_number = mxGetFieldNumber(*struct_out, var_name.c_str());
+    mxSetFieldByNumber(*struct_out, 0, field_number, curr_field);
+
+    // retrieve dimensions
+    
+    mwSize ndim_part = monitor.GetValues().Dim().Size();
+    mwSize *dims_part = new mwSize [ndim_part];
+    std::copy(monitor.GetValues().Dim().begin(),monitor.GetValues().Dim().end(), dims_part);
+    
+    mwSize ndim_arr = monitor.GetValues().Dim().Size();
+    mwSize *dims_arr = new mwSize [ndim_arr];
+    std::copy(monitor.GetValues().Dim().begin(),monitor.GetValues().Dim().end(), dims_arr);
+    
+    // values assignement 
+    const ValArray & values_val = monitor.GetValues().Values();
+    mxArray * sub_field = mxCreateNumericArray(ndim_part, dims_part, mxDOUBLE_CLASS , mxREAL);
+    
+    std::replace_copy(values_val.begin(), values_val.end(), mxGetPr(sub_field), BIIPS_REALNA, std::numeric_limits<Scalar>::quiet_NaN() ); 
+    
+    mxSetFieldByNumber(curr_field, 0, sub_field);
+     
+    // weight assignement 
+    const ValArray & weight_val = monitor.GetWeights().Values();
+    sub_field = mxCreateNumericArray(ndim_part, dims_part, mxDOUBLE_CLASS , mxREAL);
+    std::copy(weight_val.begin(), weight_val.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 1, sub_field);
+   
+    // ess assignement 
+    const ValArray & ess_val = monitor.GetESS().Values();
+    sub_field = mxCreateNumericArray(ndim_arr, dims_arr, mxDOUBLE_CLASS , mxREAL);
+    std::copy(ess_val.begin(), ess_val.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 2, sub_field);
+
+    // discrete assignement 
+    const ValArray & discrete_val = monitor.GetESS().Values();
+    sub_field = mxCreateNumericArray(ndim_arr, dims_arr, mxDOUBLE_CLASS , mxREAL);
+    std::copy(discrete_val.begin(), discrete_val.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 3, sub_field);
+
+    //name assignment
+    mxArray * sub_name = mxCreateString(monitor.GetName().c_str());
+    mxSetFieldByNumber(curr_field, 4, sub_name);
+
+    //lower assignement
+    const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
+    sub_field = mxCreateDoubleMatrix(1, lower_ind.Size(), mxREAL);
+    std::copy(lower_ind.begin(), lower_ind.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 5, sub_field);
+
+    //upper assignement
+    const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
+    sub_field = mxCreateDoubleMatrix(1, upper_ind.Size(), mxREAL);
+    std::copy(upper_ind.begin(), upper_ind.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 6, sub_field);
+
+    //name assignment
+    sub_name = mxCreateString(type.c_str());
+    mxSetFieldByNumber(curr_field, 7, sub_name);
+
+    delete [] dims_part;
+    delete [] dims_arr;
+
 }
