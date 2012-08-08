@@ -14,4 +14,5 @@ inter_biips('set_smooth_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('build_smc_sampler',p0, 0);
 bool_et_deux=inter_biips('is_sampler_built',p0)
 res=inter_biips('run_smc_sampler',p0, 34, 12, 0.5, 'stratified')
+gn=inter_biips('get_log_norm_const', p0)
 inter_biips('clear_console',p0); 
