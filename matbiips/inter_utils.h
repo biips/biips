@@ -33,9 +33,11 @@ void readDataTable(const std::map<String, MultiArray> & dataMap, mxArray ** stru
 
 void load_base_module();
 
-// macros for arguments checking
-//
-#if 1
+template<typename StorageOrderType>
+void getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap, 
+                 const String & type, mxArray ** struct_out);
+
+IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 inline  
 void CheckRhs(int nrhs, int nb, String name_func) { 
@@ -58,6 +60,9 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
    return id;
    }
 }
+// macros for arguments checking
+
+#if 1
 
 #define CheckArgIsCell(nb) \
  if (!mxIsCell(prhs[(nb)]))\
@@ -83,7 +88,6 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
 #endif
 
 
-IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 
 #endif
