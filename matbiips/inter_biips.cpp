@@ -487,6 +487,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
     }
     
+    /////////////////////////////////////////
+    // RUN_BACKWARD_SMOOTHER FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "run_backward_smoother") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       if (!p_console->RunBackwardSmoother(VERBOSITY,VERBOSITY))
+         throw RuntimeError("Failed to run backward smoother.");
+
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
