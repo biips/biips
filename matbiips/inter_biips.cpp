@@ -650,6 +650,92 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          throw RuntimeError("Failed to print dot file.");
 
     }
+    /////////////////////////////////////////
+    // CHANGE_DATA FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "change_data") {
+
+       CheckRhs(nrhs, 6, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+
+       CheckArgIsCell(2);
+       mxArray * str = mxGetCell(prhs[2], 0);
+       CheckIsString(str);
+       String name = mxArrayToString(str);
+
+       CheckArgIsNumeric(3);
+       const mxArray * lower = prhs[3];
+
+       CheckArgIsNumeric(4);
+       const mxArray * upper = prhs[4];
+      
+       IndexRange range = makeRange(lower, upper);
+
+       CheckArgIsNumeric(5);
+       double * r_vec = mxGetPr(prhs[5]);
+       mwSize r_vec_nb_elems = mxGetNumberOfElements(prhs[5]);
+       mwSize ndims = mxGetNumberOfDimensions(prhs[5]);
+       const mwSize * dims = mxGetDimensions(prhs[5]);
+       MultiArray marray;
+
+       DimArray::Ptr p_dim(new DimArray(ndims));
+       std::copy(dims, dims + ndims , p_dim->begin());
+
+       ValArray::Ptr p_val(new ValArray(r_vec_nb_elems));
+       std::replace_copy( r_vec , r_vec + r_vec_nb_elems, p_val->begin(), 
+                           std::numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
+       marray.SetPtr(p_dim, p_val);
+
+       CheckArgIsLogical(6);
+       Bool mcmc = *mxGetLogicals(prhs[6]);
+       Bool ok = p_console->ChangeData(name, range, marray, mcmc, VERBOSITY);
+
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       *mxGetLogicals(plhs[0]) =  (ok ? 1 : 0);
+    }
+    
+    /////////////////////////////////////////
+    // SAMPLE_DATA FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "sample_data") {
+
+       CheckRhs(nrhs, 5, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+
+       CheckArgIsCell(2);
+       mxArray * str = mxGetCell(prhs[2], 0);
+       CheckIsString(str);
+       String name = mxArrayToString(str);
+
+       CheckArgIsNumeric(3);
+       const mxArray * lower = prhs[3];
+
+       CheckArgIsNumeric(4);
+       const mxArray * upper = prhs[4];
+      
+       IndexRange range = makeRange(lower, upper);
+
+       CheckArgIsNumeric(5);
+       Size rngSeed = static_cast<Size>(*mxGetPr(prhs[5]));
+       
+       MultiArray data;
+
+       Bool ok = p_console->SampleData(name, range, data, rngSeed, VERBOSITY);
+       if (!ok)
+         throw RuntimeError("Failed to sample data.");
+    
+       mwSize ndim = data.Dim().size();
+       mwSize *dims = new mwSize [ndim];
+       std::copy(data.Dim().begin(), data.Dim().end(), dims);
+       plhs[0] = mxCreateNumericArray(ndim, dims, mxDOUBLE_CLASS , mxREAL);
+       delete [] dims;
+
+       std::replace_copy(data.Values().begin(), data.Values().end(), mxGetPr(plhs[0]),
+                    BIIPS_REALNA, std::numeric_limits<Scalar>::quiet_NaN());
+
+    }
     
     else {
        mexErrMsgTxt("bad name of function\n");
