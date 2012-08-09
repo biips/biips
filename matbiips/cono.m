@@ -8,6 +8,7 @@ inter_biips('compile_model', p0, data, false, 12);
 debilos = inter_biips('get_data',p0);
 vars = inter_biips('get_variable_names',p0);
 inter_biips('verbosity',2);
+inter_biips('set_default_monitors',p0);
 inter_biips('set_filter_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('set_smooth_tree_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
 inter_biips('set_smooth_monitors', p0, {'x', 'y'}, {1, 1}, {1, 1});
@@ -18,6 +19,7 @@ gn=inter_biips('get_log_norm_const', p0)
 une_cellule=inter_biips('get_filter_monitors',p0)
 deux_cellules=inter_biips('get_smooth_tree_monitors',p0)
 trois_cellules=inter_biips('get_smooth_monitors',p0)
+inter_biips('run_backward_smoother', p0);
 inter_biips('clear_filter_monitors',p0);
 inter_biips('clear_smooth_tree_monitors',p0);
 inter_biips('clear_smooth_monitors',p0);
