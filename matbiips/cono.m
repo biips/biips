@@ -22,6 +22,7 @@ trois_cellules=inter_biips('get_smooth_monitors',p0)
 inter_biips('run_backward_smoother', p0);
 node_samplers=inter_biips('get_nodes_samplers', p0)
 sort_nodes=inter_biips('get_sorted_nodes', p0)
+sample_dat=inter_biips('sample_data', p0, {'x'}, 1, 1, 12)
 inter_biips('print_graphviz',p0, 'debilos');
 inter_biips('clear_filter_monitors',p0);
 inter_biips('clear_smooth_tree_monitors',p0);

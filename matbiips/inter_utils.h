@@ -80,6 +80,10 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
  if (!mxIsNumeric(prhs[(nb)]))\
     mbiips_cerr << name_func  << " " << nb << " -th argument must be numeric" << endl
 
+#define CheckArgIsLogical(nb) \
+ if (!mxIsLogical(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << nb << " -th argument must be logical" << endl
+
 #define CheckIsString(m)\
  if (!mxIsChar((m)))\
     mbiips_cerr << name_func  << " " << " some argument must be a string" << endl
