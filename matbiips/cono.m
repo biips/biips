@@ -15,4 +15,10 @@ inter_biips('build_smc_sampler',p0, 0);
 bool_et_deux=inter_biips('is_sampler_built',p0)
 res=inter_biips('run_smc_sampler',p0, 34, 12, 0.5, 'stratified')
 gn=inter_biips('get_log_norm_const', p0)
+une_cellule=inter_biips('get_filter_monitors',p0)
+deux_cellules=inter_biips('get_smooth_tree_monitors',p0)
+trois_cellules=inter_biips('get_smooth_monitors',p0)
+inter_biips('clear_filter_monitors',p0);
+inter_biips('clear_smooth_tree_monitors',p0);
+inter_biips('clear_smooth_monitors',p0);
 inter_biips('clear_console',p0); 

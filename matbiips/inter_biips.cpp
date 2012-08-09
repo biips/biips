@@ -372,23 +372,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        *mxGetLogicals(plhs[0]) =  (ok ? 1 : 0);
     }
     
-    /////////////////////////////////////////
-    // GET_FILTER_MONITORS FUNCTION
-    /////////////////////////////////////////
-    else if (name_func == "get_filter_monitors") {
-
-       CheckRhs(nrhs, 1, name_func);
-       Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
-  
-       std::map<String, NodeArrayMonitor> monitors_map;
-
-       if (!p_console->DumpFilterMonitors(monitors_map))
-         throw RuntimeError("Failed to dump filter monitors.");
-       
-       getMonitors<ColumnMajorOrder>(monitors_map, "smoothing", &plhs[0]);
-
-    }
     
     /////////////////////////////////////////
     // GET_LOG_NORM_CONST FUNCTION
@@ -405,6 +388,102 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
        plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
        *mxGetPr(plhs[0]) = static_cast<double>(log_norm_const);
+
+    }
+    
+    /////////////////////////////////////////
+    // GET_FILTER_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_filter_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       std::map<String, NodeArrayMonitor> monitors_map;
+
+       if (!p_console->DumpFilterMonitors(monitors_map))
+         throw RuntimeError("Failed to dump filter monitors.");
+       
+       getMonitors<ColumnMajorOrder>(monitors_map, "filtering", &plhs[0]);
+
+    }
+    
+    /////////////////////////////////////////
+    // GET_SMOOTH_TREE_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_smooth_tree_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       std::map<String, NodeArrayMonitor> monitors_map;
+
+       if (!p_console->DumpSmoothTreeMonitors(monitors_map))
+         throw RuntimeError("Failed to dump smooth tree monitors.");
+       
+       getMonitors<ColumnMajorOrder>(monitors_map, "smoothing", &plhs[0]);
+
+    }
+    
+    /////////////////////////////////////////
+    // GET_SMOOTH_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_smooth_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       std::map<String, NodeArrayMonitor> monitors_map;
+
+       if (!p_console->DumpSmoothTreeMonitors(monitors_map))
+         throw RuntimeError("Failed to dump smooth monitors.");
+       
+       getMonitors<ColumnMajorOrder>(monitors_map, "backward.smoothing", &plhs[0]);
+
+    }
+    
+    /////////////////////////////////////////
+    // CLEAR_FILTER_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "clear_filter_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       if (!p_console->ClearFilterMonitors())
+         throw RuntimeError("Failed to clear filter monitors.");
+
+    }
+    
+    /////////////////////////////////////////
+    // CLEAR_SMOOTH_TREE_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "clear_smooth_tree_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       if (!p_console->ClearSmoothTreeMonitors())
+         throw RuntimeError("Failed to clear smooth tree monitors.");
+
+    }
+    
+    /////////////////////////////////////////
+    // CLEAR_SMOOTH_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "clear_smooth_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       if (!p_console->ClearSmoothTreeMonitors())
+         throw RuntimeError("Failed to clear smooth monitors.");
 
     }
     
