@@ -625,6 +625,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        }
     }
     
+    /////////////////////////////////////////
+    // PRINT_GRAPHVIZ FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "print_graphviz") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       CheckArgIsString(2);
+       String dot_file_name = mxArrayToString(prhs[2]);
+
+       if (VERBOSITY)
+         mbiips_cout << PROMPT_STRING << "Writing dot file in: "
+                     << dot_file_name << endl;
+
+       std::ofstream ofs(dot_file_name.c_str());
+
+       if (ofs.fail())
+         throw RuntimeError(String("Failed to open file ") + dot_file_name);
+
+       if (!p_console->PrintGraphviz(ofs))
+         throw RuntimeError("Failed to print dot file.");
+
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
