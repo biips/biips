@@ -704,10 +704,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
 
-       CheckArgIsCell(2);
-       mxArray * str = mxGetCell(prhs[2], 0);
-       CheckIsString(str);
-       String name = mxArrayToString(str);
+       CheckArgIsString(2);
+       String name = mxArrayToString(prhs[2]);
 
        CheckArgIsNumeric(3);
        const mxArray * lower = prhs[3];
@@ -737,6 +735,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
     }
     
+    /////////////////////////////////////////
+    // GET_LOG_PRIOR_DENSITY FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_log_prior_density") {
+
+       CheckRhs(nrhs, 4, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       CheckArgIsString(2);
+       String name = mxArrayToString(prhs[2]);
+
+       CheckArgIsNumeric(3);
+       const mxArray * lower = prhs[3];
+
+       CheckArgIsNumeric(4);
+       const mxArray * upper = prhs[4];
+      
+       IndexRange range = makeRange(lower, upper);
+       Scalar prior;
+
+       if(!p_console->GetLogPriorDensity(prior, name, range))
+         throw RuntimeError("Failed to get prior density.");
+
+       if (prior == BIIPS_REALNA)
+         prior = std::numeric_limits<Scalar>::quiet_NaN();
+       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+       *mxGetPr(plhs[0]) = prior;
+
+    }
     else {
        mexErrMsgTxt("bad name of function\n");
 
