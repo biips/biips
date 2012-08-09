@@ -582,6 +582,48 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
 
     }
+    /////////////////////////////////////////
+    // GET_NODES_SAMPLERS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_nodes_samplers") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+      
+       const char *field_names[] = { "iteration", "sampler"};
+       mwSize  dims[] = { 1};
+       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
+
+       Size graph_size;
+       if (!p_console->GraphSize(graph_size))
+         throw RuntimeError("Failed to get graph size.");
+      
+       {// node_iterations assignment 
+         Types<Size>::Array node_iterations_vec;
+         if (!p_console->DumpNodeIterations(node_iterations_vec))
+            throw RuntimeError("Failed to dump node iterationss.");
+         mxArray * node_iterations = mxCreateDoubleMatrix(1, node_iterations_vec.size(), mxREAL);
+         std::replace_copy(node_iterations_vec.begin(), node_iterations_vec.end(), mxGetPr(node_iterations), 
+                           static_cast<Scalar>(BIIPS_SIZENA), std::numeric_limits<Scalar>::quiet_NaN());
+         mxSetFieldByNumber(plhs[0], 0, 0, node_iterations);
+       }
+       
+       {// node_samplers assignment 
+         Types<String>::Array node_samplers_vec;
+         if (!p_console->DumpNodeSamplers(node_samplers_vec))
+           throw RuntimeError("Failed to dump node samplers.");
+       
+         mwSize name_ndim = 1;
+         mwSize name_dims[] = { node_samplers_vec.size() };
+         mxArray * samplers = mxCreateCellArray(name_ndim, name_dims);
+         for (int i = 0;  i <  node_samplers_vec.size() ; ++i) {
+               mxArray * str = mxCreateString(node_samplers_vec[i].c_str());
+   	       mxSetCell(samplers, i, str);
+         }
+         mxSetFieldByNumber(plhs[0], 0, 1, samplers);
+       }
+    }
     
     else {
        mexErrMsgTxt("bad name of function\n");
