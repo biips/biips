@@ -24,6 +24,9 @@ node_samplers=inter_biips('get_nodes_samplers', p0)
 sort_nodes=inter_biips('get_sorted_nodes', p0)
 sample_dat=inter_biips('sample_data', p0, 'x', 1, 1, 12)
 get_prior = inter_biips('get_log_prior_density', p0, 'y', 1 , 1)
+bool_et_trois=inter_biips('is_smc_sampler_at_end', p0) 
+inter_biips('message', 'HHHAHAHHHA');
+inter_biips('set_log_norm_const', p0, 3); 
 inter_biips('print_graphviz',p0, 'debilos');
 inter_biips('clear_filter_monitors',p0);
 inter_biips('clear_smooth_tree_monitors',p0);
