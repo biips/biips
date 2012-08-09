@@ -765,6 +765,67 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        *mxGetPr(plhs[0]) = prior;
 
     }
+    
+    /////////////////////////////////////////
+    // IS_SMC_SAMPLER_AT_END FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "is_smc_sampler_at_end") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       *mxGetLogicals(plhs[0]) =  (p_console->ForwardSamplerAtEnd() ? 1 : 0);
+
+    }
+    
+    /////////////////////////////////////////
+    // MESSAGE FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "message") {
+
+       CheckRhs(nrhs, 1, name_func);
+       CheckArgIsString(1);
+       String mess = mxArrayToString(prhs[1]);
+       mbiips_cout << PROMPT_STRING << mess << endl;
+    }
+    
+    /////////////////////////////////////////
+    // SET_LOG_NORM_CONST FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "set_log_norm_const") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       CheckArgIsNumeric(2);
+       Scalar logNormConst = static_cast<Scalar>(*mxGetPr(prhs[2]));
+
+       p_console->SetLogNormConst(logNormConst);
+    
+    }
+    
+    /////////////////////////////////////////
+    // PROGRESS_BAR FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "progress_bar") {
+
+       CheckRhs(nrhs, 3, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       CheckArgIsString(2);
+       String symbol = mxArrayToString(prhs[2]);
+       if (symbol.size() != 1)
+           throw RuntimeError("Error in progress_bar: symbol argument must be one character sized.");
+
+       CheckArgIsString(3);
+       String iter_name = mxArrayToString(prhs[3]);
+
+    
+    }
     else {
        mexErrMsgTxt("bad name of function\n");
 
