@@ -373,6 +373,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
+    // GET_FILTER_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_filter_monitors") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+  
+       std::map<String, NodeArrayMonitor> monitors_map;
+
+       if (!p_console->DumpFilterMonitors(monitors_map))
+         throw RuntimeError("Failed to dump filter monitors.");
+       
+       getMonitors<ColumnMajorOrder>(monitors_map, "smoothing", &plhs[0]);
+
+    }
+    
+    /////////////////////////////////////////
     // GET_LOG_NORM_CONST FUNCTION
     /////////////////////////////////////////
     else if (name_func == "get_log_norm_const") {
