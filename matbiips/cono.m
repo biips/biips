@@ -20,6 +20,7 @@ une_cellule=inter_biips('get_filter_monitors',p0)
 deux_cellules=inter_biips('get_smooth_tree_monitors',p0)
 trois_cellules=inter_biips('get_smooth_monitors',p0)
 inter_biips('run_backward_smoother', p0);
+sort_nodes=inter_biips('get_sorted_nodes', p0)
 inter_biips('clear_filter_monitors',p0);
 inter_biips('clear_smooth_tree_monitors',p0);
 inter_biips('clear_smooth_monitors',p0);
