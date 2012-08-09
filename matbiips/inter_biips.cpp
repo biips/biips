@@ -500,6 +500,88 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
          throw RuntimeError("Failed to run backward smoother.");
 
     }
+    /////////////////////////////////////////
+    // GET_SORTED_NODES FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_sorted_nodes") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+      
+       const char *field_names[] = { "id", "names", "type", "observed" };
+       mwSize  dims[] = { 1};
+       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
+
+       Size graph_size;
+       if (!p_console->GraphSize(graph_size))
+         throw RuntimeError("Failed to get graph size.");
+      
+       {// id assignment 
+         Types<Size>::Array node_ids_vec;
+         if (!p_console->DumpNodeIds(node_ids_vec))
+            throw RuntimeError("Failed to dump node ids.");
+         mxArray * id = mxCreateDoubleMatrix(1, node_ids_vec.size(), mxREAL);
+         std::replace_copy(node_ids_vec.begin(), node_ids_vec.end(), mxGetPr(id), 
+                           static_cast<Scalar>(NULL_NODEID), std::numeric_limits<Scalar>::quiet_NaN());
+         mxSetFieldByNumber(plhs[0], 0, 0, id);
+       }
+
+       {// names assignment 
+         Types<String>::Array node_names_vec;
+         if (!p_console->DumpNodeNames(node_names_vec))
+           throw RuntimeError("Failed to dump node names.");
+       
+         mwSize name_ndim = 1;
+         mwSize name_dims[] = { node_names_vec.size() };
+         mxArray * names = mxCreateCellArray(name_ndim, name_dims);
+         for (int i = 0;  i <  node_names_vec.size() ; ++i) {
+               mxArray * str = mxCreateString(node_names_vec[i].c_str());
+   	       mxSetCell(names, i, str);
+         }
+         mxSetFieldByNumber(plhs[0], 0, 1, names);
+       }
+       { // type assignment
+         Types<NodeType>::Array node_types_vec;
+         if (!p_console->DumpNodeTypes(node_types_vec))
+            throw RuntimeError("Failed to dump node types.");
+         mwSize type_ndim = 1;
+         mwSize type_dims[] = { node_types_vec.size() };
+         mxArray * types = mxCreateCellArray(type_ndim, type_dims);
+         for (Size i=0; i<graph_size; ++i)
+         {
+           String type_str ;
+	   switch (node_types_vec[i])
+           {
+             case CONSTANT:
+               type_str = "Constant";
+               break;
+             case Biips::LOGICAL:
+               type_str = "Logical";
+               break;
+             case STOCHASTIC:
+               type_str = "Stochastic";
+               break;
+             default:
+               break;
+           }
+           mxArray * str = mxCreateString(type_str.c_str());
+   	   mxSetCell(types, i, str);
+	 }
+         mxSetFieldByNumber(plhs[0], 0, 2, types);
+       }
+      
+       {// node_obs assignment 
+         Flags node_obs_vec;
+         if (!p_console->DumpNodeObserved(node_obs_vec))
+            throw RuntimeError("Failed to dump node observed boolean.");
+         mxArray * node_obs = mxCreateDoubleMatrix(1, node_obs_vec.size(), mxREAL);
+         std::copy(node_obs_vec.begin(), node_obs_vec.end(), mxGetPr(node_obs));
+         mxSetFieldByNumber(plhs[0], 0, 3, node_obs);
+       }
+
+
+    }
     
     else {
        mexErrMsgTxt("bad name of function\n");
