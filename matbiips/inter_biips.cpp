@@ -12,9 +12,9 @@
 #include "inter_utils.h"
 #include <fstream>
 #include "iostream/outStream.hpp"
-#include "iostream/ProgressBar.hpp"
 
 std::deque<Console_ptr> consoles;
+std::deque<ProgressBar_ptr> progress;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 {
@@ -808,14 +808,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
-    // PROGRESS_BAR FUNCTION
+    // MAKE_PROGRESS_BAR FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "progress_bar") {
-
+    else if(name_func == "make_progress_bar") {
+   
        CheckRhs(nrhs, 3, name_func);
-       Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
        
+       CheckArgIsNumeric(1);
+       unsigned long expected_count = static_cast<unsigned long>(*mxGetPr(prhs[1]));
+
        CheckArgIsString(2);
        String symbol = mxArrayToString(prhs[2]);
        if (symbol.size() != 1)
@@ -823,9 +824,42 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
        CheckArgIsString(3);
        String iter_name = mxArrayToString(prhs[3]);
+	  
 
-    
+       progress.push_back(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING, 
+                                          symbol[0], iter_name));
+       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+       *mxGetPr(plhs[0]) = progress.size()-1;
     }
+   
+    /////////////////////////////////////////
+    // CLEAR_PROGRESS_BAR FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "clear_progress_bar") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetProgressBarId(progress, prhs[1], name_func);
+       
+       delete progress[id];
+       progress[id] = NULL;
+       
+    }       
+    
+    /////////////////////////////////////////
+    // ADVANCE_PROGRESS_BAR FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "advance_progress_bar") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetProgressBarId(progress, prhs[1], name_func);
+       ProgressBar_ptr p = progress[id];
+       
+       CheckArgIsNumeric(2);
+       unsigned long count = static_cast<unsigned long>(*mxGetPr(prhs[2])); 
+       
+       (*p) += count; 
+       
+    }       
     else {
        mexErrMsgTxt("bad name of function\n");
 
