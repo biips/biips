@@ -860,6 +860,99 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        (*p) += count; 
        
     }       
+    
+    /////////////////////////////////////////
+    // IS_SMOOTH_TREE_MONITORS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "is_smooth_tree_monitors") {
+
+       CheckRhs(nrhs, 4, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+        
+       mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
+
+       if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
+            mbiips_cerr << name_func <<  ": arguments 2, 3 and 4 must have the same number of Elements" << endl;
+   
+       CheckArgIsCell(2);
+       CheckArgIsCell(3);
+       CheckArgIsCell(4);
+
+       plhs[0] = mxCreateLogicalMatrix(1, 1);
+       for(int i = 0; i <  nbVarNames; ++i )
+        {
+          const mxArray * m   = mxGetCell(prhs[2], i);
+          const mxArray * low = mxGetCell(prhs[3], i);
+          const mxArray * up  = mxGetCell(prhs[4], i);
+	  
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+          
+          IndexRange range = makeRange(low, up);
+        
+	  if (!p_console->IsSmoothTreeMonitored(name, range)) {
+               *mxGetLogicals(plhs[0]) = 0; 
+               return;
+	    }
+	} 
+       *mxGetLogicals(plhs[0]) = 1; 
+       
+    }
+    
+    /////////////////////////////////////////////
+    // GET_SAMPLED_SMOOTH_TREE_PARTICLE FUNCTION
+    /////////////////////////////////////////////
+    else if (name_func == "get_sampled_smooth_tree_particle") {
+
+       CheckRhs(nrhs, 1, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+
+       std::map<String, MultiArray> sampled_value_map; 
+
+       if(!p_console->DumpSampledSmoothTreeParticle(sampled_value_map))
+         throw RuntimeError("Failed to get sampled smooth tree particle.");
+
+       readDataTable<MultiArray::StorageOrderType>(sampled_value_map, &plhs[0]);
+    
+    }
+    
+    ////////////////////////////////////////////
+    // SAMPLE_SMOOTH_TREE_PARTICLE FUNCTION
+    ////////////////////////////////////////////
+    else if (name_func == "sample_smooth_tree_particle") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       CheckArgIsNumeric(2);
+       Size smcRngSeed = static_cast<Size>(*mxGetPr(prhs[2]));
+
+       if (!p_console->SampleSmoothTreeParticle(smcRngSeed))
+         throw RuntimeError("Failed to sample smooth tree particle.");
+    
+    }
+    
+    ////////////////////////////////////////////
+    // SET_SAMPLED_SMOOTH_TREE_PARTICLE FUNCTION
+    ////////////////////////////////////////////
+    else if (name_func == "set_sampled_smooth_tree_particle") {
+
+       CheckRhs(nrhs, 2, name_func);
+       Size id = GetConsoleId(consoles, prhs[1], name_func);
+       Console * p_console = consoles[id];
+       
+       CheckArgIsStruct(2);
+
+       std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
+
+       if(!p_console->SetSampledSmoothTreeParticle(sampled_value_map))
+         throw RuntimeError("Failed to set sampled smooth tree particle.");
+    
+    }
+    
     else {
        mexErrMsgTxt("bad name of function\n");
 
