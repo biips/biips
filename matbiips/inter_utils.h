@@ -15,12 +15,13 @@
 #include <Console.hpp>
 #include "Mostream.h"
 #include <cstring>
+#include "iostream/ProgressBar.hpp"
 
 using namespace Biips;
 using std::endl;
 extern Size VERBOSITY;
 typedef Console * Console_ptr;
-
+typedef ProgressBar * ProgressBar_ptr;
 
 
 template<typename StorageOrderType>
@@ -57,6 +58,19 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
        char id_error[1024];
        sprintf(id_error, "inter_biips:%s", name_func.c_str());
        mexErrMsgIdAndTxt(id_error, " %s : the console with id %d does not exist", name_func.c_str(), id);
+   return id;
+   }
+}
+
+inline 
+Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress, 
+                   const mxArray * pm,
+		   String name_func) {
+   Size id = static_cast<int>(*mxGetPr(pm));
+   if ((id >= progress.size()) || (progress[id] == NULL)) {
+       char id_error[1024];
+       sprintf(id_error, "inter_biips:%s", name_func.c_str());
+       mexErrMsgIdAndTxt(id_error, " %s : the progress bar with id %d does not exist", name_func.c_str(), id);
    return id;
    }
 }
