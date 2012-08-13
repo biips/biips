@@ -40,4 +40,4 @@ bool_et_quatre = inter_biips('is_smooth_tree_monitors', p0, {'x', 'y'}, {1, 1}, 
 %sampl_tree = inter_biips('get_sampled_smooth_tree_particle', p0);
 inter_biips('clear_progress_bar', pb1);
 inter_biips('clear_console',p0); 
-
+exit;
