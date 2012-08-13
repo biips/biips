@@ -44,7 +44,15 @@ DEPENDS ${INTER_OUT}
 COMMAND ${CMAKE_COMMAND}
 ARGS -E copy ${INTER_OUT} ${CMAKE_INSTALL_PREFIX})
 
+set(INTER_TEST "${CMAKE_BINARY_DIR}/matbiips/tests/inter_biips.${MEX_EXT}")
+message(STATUS ${INTER_TEST})
+add_custom_command(
+OUTPUT ${INTER_TEST}
+DEPENDS ${INTER_OUT}
+COMMAND ${CMAKE_COMMAND}
+ARGS -E copy ${INTER_OUT} "${CMAKE_BINARY_DIR}/matbiips/tests/")
+
 #define target
 add_custom_target(matbiips 
-DEPENDS ${INTER_INST}
+DEPENDS ${INTER_INST} ${INTER_TEST}
 )
