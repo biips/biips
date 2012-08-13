@@ -15,6 +15,7 @@
 #include <Console.hpp>
 #include "Mostream.h"
 #include <cstring>
+#include <cstdio>
 #include "iostream/ProgressBar.hpp"
 
 using namespace Biips;
@@ -44,7 +45,7 @@ inline
 void CheckRhs(int nrhs, int nb, String name_func) { 
   if (nrhs != (nb + 1)) { 
      char id_error[1024];
-     sprintf(id_error, "inter_biips:%s", name_func.c_str());
+     std::sprintf(id_error, "inter_biips:%s", name_func.c_str());
      mexErrMsgIdAndTxt(id_error, " %s must have %d argument(s)", name_func.c_str(), nb);
   }
 }
@@ -93,6 +94,10 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
 #define CheckArgIsNumeric(nb) \
  if (!mxIsNumeric(prhs[(nb)]))\
     mbiips_cerr << name_func  << " " << nb << " -th argument must be numeric" << endl
+
+#define CheckArgIsLogical(nb) \
+ if (!mxIsLogical(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << nb << " -th argument must be logical" << endl
 
 #define CheckArgIsLogical(nb) \
  if (!mxIsLogical(prhs[(nb)]))\
