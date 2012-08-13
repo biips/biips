@@ -344,11 +344,6 @@ macro (install_biips_test_dir dir patt)
     endif (WIN32)
 endmacro (install_biips_test_dir)
 
-#add test
-#file(GLOB m_files matbiips/tests/*.m)
-#foreach(mf in GLOB)
-#
-#endforeach(mf in GLOB)	
 
 
 
@@ -365,9 +360,21 @@ add_subdirectory (testcompiler)
 if (BUILD_RBIIPS)
     add_subdirectory (rbiips)
 endif (BUILD_RBIIPS)
+find_package(Mex)
 if (BUILD_MATBIIPS)
     add_subdirectory (matbiips)
 endif (BUILD_MATBIIPS)
+
+#===========Ctest command
+file(GLOB m_files "${CMAKE_BINARY_DIR}/matbiips/tests/*.m")
+enable_testing()
+foreach(mf ${m_files})
+	get_filename_component(nom ${mf} NAME)
+	get_filename_component(direc ${mf} PATH)
+	add_test(NAME ${nom}-test WORKING_DIRECTORY 
+		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -q 
+		 ${nom})
+endforeach(mf in GLOB)	
 
 #============= CPACK commands ============
 # build a CPack driven installer package
