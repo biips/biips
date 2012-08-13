@@ -255,7 +255,7 @@ macro (install_biips_script dir name)
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
     else (WIN32)
-        install (PROGRAMS ${name}
+        install (PROGRAMS ${dir}/${name}
             DESTINATION ${Biips_INSTALL_BINDIR}
             )
     endif (WIN32)
