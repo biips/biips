@@ -79,7 +79,7 @@ file (GLOB_RECURSE SOURCE_FILES
 
 # add the library
 add_biips_library(${PROJECT_LIB_NAME} SHARED SOURCE_FILES "")
-add_biips_library(${PROJECT_LIB_NAME}-static STATIC SOURCE_FILES "")
+#add_biips_library(${PROJECT_LIB_NAME}-static STATIC SOURCE_FILES "")
 
 # add the install targets
 install_biips_library(${PROJECT_LIB_NAME})
