@@ -372,7 +372,7 @@ foreach(mf ${m_files})
 	get_filename_component(nom ${mf} NAME)
 	get_filename_component(direc ${mf} PATH)
 	add_test(NAME ${nom}-test WORKING_DIRECTORY 
-		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -q 
+		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} 
 		 ${nom})
 endforeach(mf in GLOB)	
 
