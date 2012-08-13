@@ -62,8 +62,8 @@ namespace Biips
     if (pDim->Length() != pValue->size())
       throw LogicError("Can not add constant node: values size does not match dimension.");
 
-    NodeId node_id = boost::add_vertex(parentsGraph_);
     Node::Ptr new_node(new ConstantNode(pDim));
+    NodeId node_id = boost::add_vertex(parentsGraph_);
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, parentsGraph_, node_id, true);
     boost::put(boost::vertex_value, parentsGraph_, node_id, pValue);
@@ -89,9 +89,8 @@ namespace Biips
                            const Types<NodeId>::Array & parameters,
                            const Types<Size>::Array & offsets)
   {
-    NodeId node_id = boost::add_vertex(parentsGraph_);
-
     Node::Ptr new_node(new AggNode(pDim, parameters, offsets));
+    NodeId node_id = boost::add_vertex(parentsGraph_);
 
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
 
@@ -155,8 +154,8 @@ namespace Biips
 
     DimArray::Ptr pDim(new DimArray(pFunc->Dim(param_dims)));
 
-    NodeId node_id = boost::add_vertex(parentsGraph_);
     Node::Ptr new_node(new FuncNode(pDim, pFunc, parameters));
+    NodeId node_id = boost::add_vertex(parentsGraph_);
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
 
     for (Size i = 0; i < parameters.size(); ++i)
@@ -211,13 +210,12 @@ namespace Biips
 
     DimArray::Ptr pDim(new DimArray(pDist->Dim(param_dims)));
 
-    NodeId node_id = boost::add_vertex(parentsGraph_);
-
     Node::Ptr new_node(new StochasticNode(pDim,
                                           pDist,
                                           parameters,
                                           lower,
                                           upper));
+    NodeId node_id = boost::add_vertex(parentsGraph_);
     boost::put(boost::vertex_node_ptr, parentsGraph_, node_id, new_node);
     boost::put(boost::vertex_observed, parentsGraph_, node_id, observed);
 
