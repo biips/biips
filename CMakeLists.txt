@@ -96,7 +96,7 @@ configure_file (
 # set dependencies versions
 set (JAGS_VERSION 3.2.0)
 set (SMCTC_VERSION 1.0-RC4)
-set (Boost_VERSION_REQUIRED 1.42.0)
+set (Boost_VERSION_REQUIRED 1.46.1)
 
 set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
@@ -190,7 +190,7 @@ elseif (WIN32)
 endif (UNIX)
 
 # configure output directories
-set (Biips_LIBRARY_OUTPUT_PATH {CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
+set (Biips_LIBRARY_OUTPUT_PATH ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
 set (Biips_EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
 set (LIBRARY_OUTPUT_PATH ${Biips_LIBRARY_OUTPUT_PATH})
 set (EXECUTABLE_OUTPUT_PATH ${Biips_EXECUTABLE_OUTPUT_PATH})
@@ -221,7 +221,7 @@ macro (add_biips_library name type sources biips_libs)
     else (WIN32)
         add_library (${name} ${type} ${${sources}})
         target_link_libraries (${name} ${${biips_libs}})
-    endif(WIN32)
+endif(WIN32)
 endmacro (add_biips_library)
 
 # macro to install libraries
@@ -433,5 +433,4 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_MUI_ICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-48.ico")
   set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
 endif (WIN32 AND NOT UNIX)
-
 include (CPack)

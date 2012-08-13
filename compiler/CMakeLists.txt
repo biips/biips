@@ -45,7 +45,6 @@ string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 # find boost libraries
 find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED)
 include_directories (${Boost_INCLUDE_DIRS})
-
 # include directories
 include_directories (
 	${PROJECT_SOURCE_DIR}/include
@@ -70,7 +69,7 @@ set (BIIPS_LIBS	BiipsBase BiipsCore)
 
 # add the library
 add_biips_library(${PROJECT_LIB_NAME} SHARED SOURCE_FILES BIIPS_LIBS)
-
+add_biips_library(${PROJECT_LIB_NAME}-static STATIC SOURCE_FILES BIIPS_LIBS)
 # add the install targets
 install_biips_library(${PROJECT_LIB_NAME} Runtime)
 

@@ -1,0 +1,2 @@
+pour compiler avec la bonne version de boost
+cmake -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" ..
