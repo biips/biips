@@ -54,7 +54,7 @@ inline
 Size  GetConsoleId(const std::deque<Console_ptr> consoles, 
                    const mxArray * pm,
 		   String name_func) {
-   Size id = static_cast<int>(*mxGetPr(pm));
+   Size id = static_cast<Size>(*mxGetPr(pm));
    if ((id >= consoles.size()) || (consoles[id] == NULL)) {
        char id_error[1024];
        sprintf(id_error, "inter_biips:%s", name_func.c_str());
@@ -67,7 +67,7 @@ inline
 Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress, 
                    const mxArray * pm,
 		   String name_func) {
-   Size id = static_cast<int>(*mxGetPr(pm));
+   Size id = static_cast<Size>(*mxGetPr(pm));
    if ((id >= progress.size()) || (progress[id] == NULL)) {
        char id_error[1024];
        sprintf(id_error, "inter_biips:%s", name_func.c_str());

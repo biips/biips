@@ -17,7 +17,7 @@
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     
     if (nrhs < 1) {
@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
    
           consoles.push_back(new Console(mbiips_cout, mbiips_cerr));
           plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-          *mxGetPr(plhs[0]) = consoles.size()-1;
+          *mxGetPr(plhs[0]) = static_cast<double>(consoles.size()-1);
     }
    
     /////////////////////////////////////////
@@ -196,7 +196,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
        
-       mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
+       Size nbVarNames = static_cast<Size>(mxGetNumberOfElements(prhs[2]));
 
        if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
             mbiips_cerr << name_func <<  ": arguments 2, 3 and 4 must have the same number of Elements" << endl;
@@ -204,7 +204,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
        CheckArgIsCell(2);
        CheckArgIsCell(3);
        CheckArgIsCell(4);
-
+        
        for(int i = 0; i <  nbVarNames; ++i )
         {
           const mxArray * m   = mxGetCell(prhs[2], i);
