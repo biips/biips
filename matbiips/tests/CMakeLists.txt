@@ -1,3 +1,4 @@
-set(fichiers_test cono.m hmm_1d_lin.bug x.dat y.dat) 
-file(COPY ${fichiers_test} DESTINATION .)
-add_test(cono "${MATLAB}" "<" cono.m)
+set(fichier_tests cono.m hmm_1d_lin.bug x.dat y.dat) 
+install(FILES ${fichier_tests} DESTINATION .)
+#file(COPY ${fichiers_test} DESTINATION .)
+#add_test(cono "${MATLAB}" "<" cono.m)

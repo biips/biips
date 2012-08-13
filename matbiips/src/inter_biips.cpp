@@ -12,6 +12,7 @@
 #include "inter_utils.h"
 #include <fstream>
 #include "iostream/outStream.hpp"
+#include <cstdio>
 
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
@@ -87,7 +88,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,const mxArray *prhs[])
 
        std::map<String, MultiArray> data_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
 
-       Bool sample_data = static_cast<Bool>(*mxGetPr(prhs[3]));
+       CheckArgIsLogical(3);
+       Bool sample_data = static_cast<Bool>(*mxGetLogicals(prhs[3]));
        Size data_rng_seed = static_cast<Size>(*mxGetPr(prhs[4]));
 
        // Compile model
