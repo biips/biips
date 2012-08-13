@@ -221,7 +221,7 @@ macro (add_biips_library name type sources biips_libs)
     else (WIN32)
         add_library (${name} ${type} ${${sources}})
         target_link_libraries (${name} ${${biips_libs}})
-endif(WIN32)
+    endif(WIN32)
 endmacro (add_biips_library)
 
 # macro to install libraries
