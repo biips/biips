@@ -1,29 +1,21 @@
 The RBiips package is an interface to the BiiPS libraries.  In order to
 build a binary package, or install from source, you must have a matching
-installation of the BiiPS libraries.
+installation of the BiiPS librarie as well as Boost headers.
 
 Windows
 -------
 
-At compile time, there is no way for windows to guess where the BiiPS
-library is installed, so you must supply the location yourself using
-the variable BIIPS_ROOT.
+At compile time, there is no way for windows to guess where the BiiPS and Boost
+libraries are installed, so you must supply the location yourself using
+the variables BIIPS_ROOT and BOOST_ROOOT.
 
-You can specify BIIPS_ROOT as an environment variable, e.g.  on 32-bit
-windows:
+You can specify BIIPS_ROOT and BOOST_ROOOT as environment variables, e.g.:
 
-set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-1.0.0
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-@Biips_VERSION@
+set BOOST_ROOT=c:\Program Files\boost\boost-@Boost_VERSION@
 
-or, for 64-bit windows
-
-set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-1.0.0-x64
-or
-set BIIPS_ROOT=c:\Program Files (x86)\BiiPS\BiiPS-1.0.0
-
-In R >= 2.12.0 you will be able to set BIIPS_ROOT as a (platform-
+In R >= 2.12.0 you will be able to set BIIPS_ROOT and BOOST_ROOT as a (platform-
 specific) make variable in etc${R_ARCH}/Makevars.win.
-
-idem for BOOST_ROOOT
 
 Unix
 ----
