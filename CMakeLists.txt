@@ -360,21 +360,23 @@ add_subdirectory (testcompiler)
 if (BUILD_RBIIPS)
     add_subdirectory (rbiips)
 endif (BUILD_RBIIPS)
-find_package(Mex)
 if (BUILD_MATBIIPS)
+    find_package(Mex)
     add_subdirectory (matbiips)
 endif (BUILD_MATBIIPS)
 
 #===========Ctest command
-file(GLOB m_files "${CMAKE_BINARY_DIR}/matbiips/tests/*.m")
-enable_testing()
-foreach(mf ${m_files})
-	get_filename_component(nom ${mf} NAME)
-	get_filename_component(direc ${mf} PATH)
-	add_test(NAME ${nom}-test WORKING_DIRECTORY 
-		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} 
-		 ${nom})
-endforeach(mf in GLOB)	
+if (BUILD_MATBIIPS)
+    file(GLOB m_files "${CMAKE_BINARY_DIR}/matbiips/tests/*.m")
+    enable_testing()
+    foreach(mf ${m_files})
+    	get_filename_component(nom ${mf} NAME)
+    	get_filename_component(direc ${mf} PATH)
+    	add_test(NAME ${nom}-test WORKING_DIRECTORY 
+    		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} 
+    		 ${nom})
+    endforeach(mf in GLOB)	
+endif (BUILD_MATBIIPS)
 
 #============= CPACK commands ============
 # build a CPack driven installer package
