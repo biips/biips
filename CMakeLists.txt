@@ -352,6 +352,7 @@ endmacro (install_biips_test_dir)
 # Add subprojects
 # ==============================
 # ==============================
+add_definitions(-fPIC)
 add_subdirectory (core)
 add_subdirectory (base)
 add_subdirectory (test)

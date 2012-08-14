@@ -14,10 +14,10 @@ set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 foreach(l ${MBIIPS_LIBS})
-	#get_property(MYLIB TARGET ${l}-static PROPERTY LOCATION)
-	#get_filename_component(COCO ${MYLIB} PATH)
-	#set(EXTRA_LIBS ${EXTRA_LIBS} "-L${COCO} -l${l}-static")
-	set(EXTRA_LIBS ${EXTRA_LIBS} "-l${l}")
+	get_property(MYLIB TARGET ${l}-static PROPERTY LOCATION)
+	get_filename_component(COCO ${MYLIB} PATH)
+	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${COCO} -l${l}-static")
+	#set(EXTRA_LIBS ${EXTRA_LIBS} "-l${l}")
 endforeach(l ${MBIIPS_LIBS})
 
 #define mexfile compilation command
@@ -38,12 +38,14 @@ COMMENT "building mexfile")
 
 set(INTER_INST "${CMAKE_INSTALL_PREFIX}/inter_biips.${MEX_EXT}")
 
-add_custom_command(
-OUTPUT ${INTER_INST}
-DEPENDS ${INTER_OUT}
-COMMAND ${CMAKE_COMMAND}
-ARGS -E copy ${INTER_OUT} ${CMAKE_INSTALL_PREFIX})
+#add_custom_command(
+#OUTPUT ${INTER_INST}
+#DEPENDS ${INTER_OUT}
+#COMMAND ${CMAKE_COMMAND}
+#ARGS -E copy ${INTER_OUT} ${CMAKE_INSTALL_PREFIX})
+#install(FILES ${INTER_OUT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
+# installation dans le build du mexfile
 set(INTER_TEST "${CMAKE_BINARY_DIR}/matbiips/tests/inter_biips.${MEX_EXT}")
 message(STATUS ${INTER_TEST})
 add_custom_command(
@@ -54,5 +56,5 @@ ARGS -E copy ${INTER_OUT} "${CMAKE_BINARY_DIR}/matbiips/tests/")
 
 #define target
 add_custom_target(matbiips 
-DEPENDS ${INTER_INST} ${INTER_TEST}
+DEPENDS  ${INTER_TEST}
 )
