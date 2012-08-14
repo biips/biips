@@ -1,7 +1,10 @@
 %data
-x=load('x.dat');
-y=load('y.dat');
-data=struct('y', y, 'tmax', 10, 'precxinit', 1,'precx', 10, 'precy', 1, 'meanxinit', 0);
+tmax=4;
+precx=1;
+precxinit=1;
+meanxinit=0;
+precy=10;
+data=struct('tmax', tmax, 'precxinit', precxinit, 'precx', precx,  'precy', precy, 'meanxinit', meanxinit);
 if (!inter_biips('load_module', 'basemod'))
     error('problem loading module'); 
 end
@@ -11,12 +14,11 @@ inter_biips('verbosity',2);
 
 % verif et compil du modele
 inter_biips('check_model', p0, 'hmm_1d_lin.bug'); 
-inter_biips('compile_model', p0, data, false, 12);
-
+inter_biips('compile_model', p0, data, true, 12);
 inter_biips('set_default_monitors',p0);
-inter_biips('set_filter_monitors', p0, {'x'} , {1 }, { 10 });
-inter_biips('set_smooth_tree_monitors', p0, {'x'}, {1}, {10});
-inter_biips('set_smooth_monitors', p0, {'x'}, {1}, {10 });
+inter_biips('set_filter_monitors', p0, {'x'} , {1 }, { tmax });
+inter_biips('set_smooth_tree_monitors', p0, {'x'}, {1}, {tmax});
+inter_biips('set_smooth_monitors', p0, {'x'}, {1}, {tmax });
 if (!inter_biips('is_sampler_built',p0))
   inter_biips('build_smc_sampler',p0, 0);
   sort_nodes=inter_biips('get_sorted_nodes', p0)
@@ -40,3 +42,4 @@ backward_smooth_monitors=inter_biips('get_smooth_monitors',p0)
 inter_biips('clear_smooth_monitors',p0);
 % on nettoie la console
 inter_biips('clear_console',p0); 
+exit;

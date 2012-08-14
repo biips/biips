@@ -1,3 +1,3 @@
 file(GLOB mfiles *.m)
-set(fichier_tests ${mfiles} hmm_1d_lin.bug x.dat y.dat) 
+set(fichier_tests ${mfiles} hmm_1d_lin.bug) 
 file(COPY ${fichier_tests} DESTINATION .)
