@@ -53,7 +53,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       
        delete consoles[id];
        consoles[id] = NULL;
        

@@ -1,4 +1,4 @@
-N=2;
+N=100;
 ids=zeros(N,1);
 for i=1:N;
   ids(i)=inter_biips('make_console');
