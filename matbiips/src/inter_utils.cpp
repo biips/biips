@@ -189,9 +189,9 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     mwSize *dims_part = new mwSize [ndim_part];
     std::copy(monitor.GetValues().Dim().begin(),monitor.GetValues().Dim().end(), dims_part);
     
-    mwSize ndim_arr = monitor.GetValues().Dim().size();
+    mwSize ndim_arr = monitor.GetRange().Dim().size();
     mwSize *dims_arr = new mwSize [ndim_arr];
-    std::copy(monitor.GetValues().Dim().begin(),monitor.GetValues().Dim().end(), dims_arr);
+    std::copy(monitor.GetRange().Dim().begin(),monitor.GetRange().Dim().end(), dims_arr);
     
     // values assignement 
     const ValArray & values_val = monitor.GetValues().Values();
@@ -215,7 +215,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     mxSetFieldByNumber(curr_field, 0, 2, sub_field);
 
     // discrete assignement 
-    const ValArray & discrete_val = monitor.GetESS().Values();
+    const ValArray & discrete_val = monitor.GetDiscrete().Values();
     sub_field = mxCreateNumericArray(ndim_arr, dims_arr, mxDOUBLE_CLASS , mxREAL);
     std::copy(discrete_val.begin(), discrete_val.end(), mxGetPr(sub_field));
     mxSetFieldByNumber(curr_field, 0, 3, sub_field);
