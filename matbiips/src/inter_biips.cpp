@@ -439,7 +439,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   
        std::map<String, NodeArrayMonitor> monitors_map;
 
-       if (!p_console->DumpSmoothTreeMonitors(monitors_map))
+       if (!p_console->DumpSmoothMonitors(monitors_map))
          throw RuntimeError("Failed to dump smooth monitors.");
        
        getMonitors<ColumnMajorOrder>(monitors_map, "backward.smoothing", &plhs[0]);
@@ -865,7 +865,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     // IS_SMOOTH_TREE_MONITORS FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "is_smooth_tree_monitors") {
+    else if (name_func == "is_smooth_tree_monitored") {
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
