@@ -52,6 +52,7 @@ configure_file (
 configure_file (
 	README.in
 	${PROJECT_PKG_NAME}/README
+	@ONLY
 )
 
 # configure NOTICES file
