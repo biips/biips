@@ -5,7 +5,7 @@ precxinit=1;
 meanxinit=0;
 precy=10;
 data=struct('tmax', tmax, 'precxinit', precxinit, 'precx', precx,  'precy', precy, 'meanxinit', meanxinit);
-if (!inter_biips('load_module', 'basemod'))
+if (~inter_biips('load_module', 'basemod'))
     error('problem loading module'); 
 end
 % intialisation console
@@ -25,7 +25,7 @@ if (!inter_biips('is_sampler_built',p0))
   node_samplers=inter_biips('get_nodes_samplers', p0)
 end
 
-if (!inter_biips('run_smc_sampler', p0, 100, 9, 0.5, 'stratified'))
+if (~inter_biips('run_smc_sampler', p0, 100, 9, 0.5, 'stratified'))
    error('smc sampler failed!');
 end  
 log_norm=inter_biips('get_log_norm_const', p0)
@@ -33,7 +33,7 @@ filter_monitors=inter_biips('get_filter_monitors',p0)
 smooth_monitors=inter_biips('get_smooth_tree_monitors',p0)
 inter_biips('clear_smooth_tree_monitors',p0);
 % on fait un backward
-if (!inter_biips('is_smc_sampler_at_end', p0))
+if (~inter_biips('is_smc_sampler_at_end', p0))
    error('sampler not finish!');
 end   
 inter_biips('run_backward_smoother', p0);
