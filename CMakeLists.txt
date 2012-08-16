@@ -373,9 +373,15 @@ if (BUILD_MATBIIPS)
     foreach(mf ${m_files})
     	get_filename_component(nom ${mf} NAME)
     	get_filename_component(direc ${mf} PATH)
-    	add_test(NAME ${nom}-test WORKING_DIRECTORY 
+	if (MATLAB)
+	add_test(NAME ${nom}-test WORKING_DIRECTORY 
+    		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} "<"
+      		 ${nom})
+        else(MATLAB)
+	add_test(NAME ${nom}-test WORKING_DIRECTORY 
     		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} 
-    		 ${nom})
+      		 ${nom})
+        endif(MATLAB)
     endforeach(mf in GLOB)	
 endif (BUILD_MATBIIPS)
 
