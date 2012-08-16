@@ -1,6 +1,4 @@
-x=load('x.dat');
-y=load('y.dat');
-data=struct('y', y, 'tmax', 10, 'precxinit', 1,'precx', 10, 'precy', 1, 'meanxinit', 0);
+%data=struct('y', y, 'tmax', 10, 'precxinit', 1,'precx', 10, 'precy', 1, 'meanxinit', 0);
 bool_et_un = inter_biips('load_module', 'basemod'); 
 p0=inter_biips('make_console'); 
 %inter_biips('check_model', p0, 'hmm_1d_lin.bug'); 
