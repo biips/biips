@@ -345,9 +345,6 @@ macro (install_biips_test_dir dir patt)
 endmacro (install_biips_test_dir)
 
 
-
-
-
 # for static compilations to work with MATLAB
 add_definitions(-fPIC)
 enable_testing()
