@@ -1,5 +1,6 @@
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(matlab)
 #===========Ctest command
 if (BUILD_MATBIIPS)
     file(GLOB m_files "${CMAKE_BINARY_DIR}/matbiips/tests/*.m")
