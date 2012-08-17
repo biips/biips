@@ -347,12 +347,15 @@ endmacro (install_biips_test_dir)
 
 
 
+
+# for static compilations to work with MATLAB
+add_definitions(-fPIC)
+enable_testing()
 # ==============================
 # ==============================
 # Add subprojects
 # ==============================
 # ==============================
-add_definitions(-fPIC)
 add_subdirectory (core)
 add_subdirectory (base)
 add_subdirectory (test)
@@ -366,24 +369,6 @@ if (BUILD_MATBIIPS)
     add_subdirectory (matbiips)
 endif (BUILD_MATBIIPS)
 
-#===========Ctest command
-if (BUILD_MATBIIPS)
-    file(GLOB m_files "${CMAKE_BINARY_DIR}/matbiips/tests/*.m")
-    enable_testing()
-    foreach(mf ${m_files})
-    	get_filename_component(nom ${mf} NAME)
-    	get_filename_component(direc ${mf} PATH)
-	if (MATLAB)
-	add_test(NAME ${nom}-test WORKING_DIRECTORY 
-    		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} "<"
-      		 ${nom})
-        else(MATLAB)
-	add_test(NAME ${nom}-test WORKING_DIRECTORY 
-    		${direc} COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} 
-      		 ${nom})
-        endif(MATLAB)
-    endforeach(mf in GLOB)	
-endif (BUILD_MATBIIPS)
 
 #============= CPACK commands ============
 # build a CPack driven installer package
