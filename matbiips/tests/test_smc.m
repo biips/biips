@@ -19,7 +19,7 @@ inter_biips('set_default_monitors',p0);
 inter_biips('set_filter_monitors', p0, {'x'} , {1 }, { tmax });
 inter_biips('set_smooth_tree_monitors', p0, {'x'}, {1}, {tmax});
 inter_biips('set_smooth_monitors', p0, {'x'}, {1}, {tmax });
-if (!inter_biips('is_sampler_built',p0))
+if (~inter_biips('is_sampler_built',p0))
   inter_biips('build_smc_sampler',p0, 0);
   sort_nodes=inter_biips('get_sorted_nodes', p0)
   node_samplers=inter_biips('get_nodes_samplers', p0)
