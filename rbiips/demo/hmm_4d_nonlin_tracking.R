@@ -3,7 +3,7 @@ model <- file.path(find.package("RBiips"), "extdata", "hmm_4d_nonlin_tracking.bu
 model.title <- "Radar tracking"
 
 # data
-t.max <- 1000
+t.max <- 100
 mean.x.init <- c(0,0,1,0)
 Prec.x.init <- matrix(0,4,4)
 Prec.x.init[row(Prec.x.init)==col(Prec.x.init)] <- 1000
