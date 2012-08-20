@@ -122,6 +122,8 @@ endif (PRINT_SYSTEM_INFO)
 # configure build
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
+option (BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
+
 set (BUILD_ARCH_LIST "")
 set (BUILD_BITNB_LIST "")
 
@@ -202,25 +204,33 @@ option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON
 
 
 # macro to add libraries
-macro (add_biips_library name type sources biips_libs)
+macro (add_biips_library name sources biips_libs)
     if (WIN32)
         foreach (arch IN LISTS BUILD_ARCH_LIST)
-            add_library (${name}-${arch} ${type} ${${sources}})
+            add_library (${name}-${arch} ${${sources}})
             list(FIND BUILD_ARCH_LIST ${arch} offset)
             list(GET BUILD_BITNB_LIST ${offset} bitnb)
             set_target_properties(${name}-${arch}
                 PROPERTIES COMPILE_FLAGS -m${bitnb}
-                LINK_FLAGS -m${bitnb}
                 )
+            if (BUILD_SHARED_LIBS)
+                set_target_properties(${name}-${arch}
+                    PROPERTIES LINK_FLAGS -m${bitnb}
+                    )
+            endif (BUILD_SHARED_LIBS)
             set (extra_libs "")
-            foreach (lib IN LISTS ${biips_libs})
-                list(APPEND extra_libs ${lib}-${arch})
-            endforeach (lib IN LISTS ${biips_libs})
-            target_link_libraries (${name}-${arch} ${extra_libs})
+            if (BUILD_SHARED_LIBS)
+                foreach (lib IN LISTS ${biips_libs})
+                    list(APPEND extra_libs ${lib}-${arch})
+                endforeach (lib IN LISTS ${biips_libs})
+                target_link_libraries (${name}-${arch} ${extra_libs})
+            endif (BUILD_SHARED_LIBS)
         endforeach(arch IN LISTS BUILD_ARCH_LIST)
     else (WIN32)
-        add_library (${name} ${type} ${${sources}})
-        target_link_libraries (${name} ${${biips_libs}})
+        add_library (${name} ${${sources}})
+        if (BUILD_SHARED_LIBS)
+            target_link_libraries (${name} ${${biips_libs}})
+        endif (BUILD_SHARED_LIBS)
     endif(WIN32)
 endmacro (add_biips_library)
 
