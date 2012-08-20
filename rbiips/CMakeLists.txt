@@ -82,6 +82,12 @@ configure_file (
 )
 
 # configure configure.ac file
+if (BUILD_SHARED_LIBS)
+    set (BIIPS_SHARED ON)
+else (BUILD_SHARED_LIBS)
+    set (BIIPS_SHARED OFF)
+endif(BUILD_SHARED_LIBS)
+
 configure_file (
 	configure.ac.in
 	${PROJECT_PKG_NAME}/configure.ac
@@ -98,27 +104,18 @@ configure_file (
 
 
 # copy files to binary directory
-macro (copy_dir_to_binary dir)
-	file ( GLOB SOURCE_FILES
-		${PROJECT_SOURCE_DIR}/${dir}/*
-	)
-	file (COPY ${SOURCE_FILES}
-		DESTINATION ${PROJECT_PKG_NAME}/${dir}/
-		PATTERN CMakeLists.txt EXCLUDE
-		PATTERN *.in EXCLUDE
-		PATTERN .svn EXCLUDE
-		PATTERN .project EXCLUDE
-		PATTERN .cproject EXCLUDE
-		PATTERN *~ EXCLUDE
-	)
-endmacro(copy_dir_to_binary)
-
-copy_dir_to_binary(.)
-copy_dir_to_binary(man)
-copy_dir_to_binary(R)
-copy_dir_to_binary(R/unix)
-copy_dir_to_binary(R/windows)
-copy_dir_to_binary(src)
+file ( GLOB SOURCE_FILES
+	${PROJECT_SOURCE_DIR}/*
+)
+file (COPY ${SOURCE_FILES}
+	DESTINATION ${PROJECT_PKG_NAME}/
+	PATTERN CMakeLists.txt EXCLUDE
+	PATTERN *.in EXCLUDE
+	PATTERN .svn EXCLUDE
+	PATTERN .project EXCLUDE
+	PATTERN .cproject EXCLUDE
+	PATTERN *~ EXCLUDE
+)
 
 # Generate configuration scripts
 if (UNIX)
@@ -131,6 +128,9 @@ if (UNIX)
 		message (SEND_ERROR "autoconf not found")
 	endif (AUTOCONF)
 endif (UNIX)
+
+# FIXME: we need a find_package(R) command
+# and introduce dependencies between targets
 
 # add R package tools targets
 add_custom_target (${PROJECT_PKG_NAME}_check

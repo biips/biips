@@ -68,8 +68,7 @@ file (GLOB_RECURSE SOURCE_FILES
 set (BIIPS_LIBS	BiipsCore)
 
 # add the library
-add_biips_library(${PROJECT_LIB_NAME} SHARED SOURCE_FILES BIIPS_LIBS)
-add_biips_library(${PROJECT_LIB_NAME}-static STATIC SOURCE_FILES BIIPS_LIBS)
+add_biips_library(${PROJECT_LIB_NAME} SOURCE_FILES BIIPS_LIBS)
 
 # add the install targets
 install_biips_library(${PROJECT_LIB_NAME} Runtime)
