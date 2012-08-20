@@ -72,6 +72,8 @@
 
 .onLoad <- function(lib, pkg)
 {
+    if (@BIIPS_SHARED@)
+    {
 ### First task is to get installation directory of BiiPS
 
     ## Try environment variable first
@@ -119,6 +121,8 @@
 #        options("biips.moddir" = file.path(biips.home, .Platform$r_arch,
 #                "modules"))
 #    }
+
+    }
     library.dynam("RBiips", pkg, lib)
     packageStartupMessage("linking to BiiPS ",
                           .Call("get_version", PACKAGE="RBiips"))

@@ -113,7 +113,7 @@ fi
 # on the linker path then it helps to hard-code the location of BiiPS into
 # the DSO for RBiips. Suggested by Doug Bates, April 2011.
 
-if test [ "@BIIPS_SHARED@" = "ON" ] ; then
+if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
 	AC_ARG_ENABLE([rpath],
 	            AC_HELP_STRING([--enable-rpath],
 	                           [Hard link the location of the BiiPS libraries]))
@@ -124,7 +124,7 @@ fi
 
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
-if test [ "@BIIPS_SHARED@" = "ON" ] ; then
+if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
 	LDFLAGS="-L${BIIPS_LIB} -Wl,-rpath ${BIIPS_LIB}"
 else
 	LDFLAGS="-L${BIIPS_LIB}"

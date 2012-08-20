@@ -10,7 +10,13 @@ set(Biips_compiler_INCLUDE ${CMAKE_SOURCE_DIR}/compiler/include)
 set(Biips_core_INCLUDE ${CMAKE_SOURCE_DIR}/core/include)
 	 
 # define libraries
-set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
+
+if (WIN32)
+    set(MBIIPS_LIBS BiipsBase-${MATLAB_ARCH} BiipsCompiler-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
+else (WIN32)
+    set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
+endif (WIN32)
+
 set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 foreach(l ${MBIIPS_LIBS})
@@ -36,7 +42,7 @@ ARGS  -v  ${MEX_OPT} -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE}
 ${EXTRA_LIBS} ${SOURCES} 
 COMMENT "building mexfile")
 
-set(INTER_INST "${CMAKE_INSTALL_PREFIX}/inter_biips.${MEX_EXT}")
+#set(INTER_INST "${CMAKE_INSTALL_PREFIX}/inter_biips.${MEX_EXT}")
 
 #add_custom_command(
 #OUTPUT ${INTER_INST}
