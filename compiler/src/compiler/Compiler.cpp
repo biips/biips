@@ -912,12 +912,17 @@ namespace Biips
       throw LogicError("Error in Compiler::setConstantMask");
 
     IndexRange range = variableSubsetRange(var);
-    // check dropped dimensions
-    const IndexRange var_range = IndexRange(q->second.Dim().Drop());
+    const IndexRange var_range = IndexRange(q->second.Dim());
     if (!var_range.Contains(range))
-      throw LogicError(String("Subset ") + name + print(range)
-                       + " out of range " + print(var_range)
-                       + " in Compiler::setConstantMask.");
+    {
+      // check dropped dimensions (for Matlab users)
+      // vector data in Matlab are defined as matrix (2 dimensions)
+      const IndexRange var_range_drop = IndexRange(q->second.Dim().Drop());
+      if (!var_range.Contains(range))
+        throw LogicError(String("Subset ") + name + print(range)
+                         + " out of range " + print(var_range_drop)
+                         + " in Compiler::setConstantMask.");
+    }
 
     Flags & mask = p->second;
     for (IndexRangeIterator i(range); !i.AtEnd(); i.Next())
