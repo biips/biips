@@ -42,6 +42,13 @@ project (RBiips)
 set (PROJECT_PKG_NAME ${PROJECT_NAME})
 string (REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
 
+if (BUILD_SHARED_LIBS)
+    set (BIIPS_SHARED TRUE)
+else (BUILD_SHARED_LIBS)
+    set (BIIPS_SHARED FALSE)
+endif(BUILD_SHARED_LIBS)
+
+
 # configure DESCRIPTION file
 configure_file (
 	DESCRIPTION.in
@@ -82,12 +89,6 @@ configure_file (
 )
 
 # configure configure.ac file
-if (BUILD_SHARED_LIBS)
-    set (BIIPS_SHARED ON)
-else (BUILD_SHARED_LIBS)
-    set (BIIPS_SHARED OFF)
-endif(BUILD_SHARED_LIBS)
-
 configure_file (
 	configure.ac.in
 	${PROJECT_PKG_NAME}/configure.ac

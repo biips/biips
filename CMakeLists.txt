@@ -160,6 +160,11 @@ if (SUPPRESS_DEPRECATED_WARNINGS)
 	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
 endif (SUPPRESS_DEPRECATED_WARNINGS)
 
+if (NOT WIN32)
+  # for static compilations to work with MATLAB
+    add_definitions(-fPIC)
+endif(NOT WIN32)
+
 # configure boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
@@ -355,8 +360,6 @@ macro (install_biips_test_dir dir patt)
 endmacro (install_biips_test_dir)
 
 
-# for static compilations to work with MATLAB
-add_definitions(-fPIC)
 enable_testing()
 # ==============================
 # ==============================
