@@ -47,7 +47,6 @@ clear_boost()
 find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
 	program_options
 )
-message(Boost_LIBRARIES=${Boost_LIBRARIES})
 set (EXTRA_LIBS ${EXTRA_LIBS}
 	${Boost_LIBRARIES}
 )
@@ -64,7 +63,6 @@ if (WIN32 AND BUILD_x64)
     find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
     	program_options
     )
-    message(Boost_LIBRARIES=${Boost_LIBRARIES})
     set (EXTRA_LIBS64 ${EXTRA_LIBS64}
     	${Boost_LIBRARIES}
     )

@@ -14,9 +14,9 @@ set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 foreach(l ${MBIIPS_LIBS})
-	get_property(MYLIB TARGET ${l}-static PROPERTY LOCATION)
+	get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
 	get_filename_component(COCO ${MYLIB} PATH)
-	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${COCO} -l${l}-static")
+	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${COCO} -l${l}")
 	#set(EXTRA_LIBS ${EXTRA_LIBS} "-l${l}")
 endforeach(l ${MBIIPS_LIBS})
 
