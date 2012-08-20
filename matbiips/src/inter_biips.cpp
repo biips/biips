@@ -442,7 +442,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        if (!p_console->DumpSmoothMonitors(monitors_map))
          throw RuntimeError("Failed to dump smooth monitors.");
        
-       getMonitors<ColumnMajorOrder>(monitors_map, "backward.smoothing", &plhs[0]);
+       getMonitors<ColumnMajorOrder>(monitors_map, "backward_smoothing", &plhs[0]);
 
     }
     
