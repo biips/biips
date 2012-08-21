@@ -1,15 +1,17 @@
-function monitor_biips(p, variable.names, type)
+function monitor_biips(p, variable_names, type)
   
-    
-  pn <- parse.varnames(variable.names)
+pn = cellfun(@(x) parse_varname(x), variables_names); 
+names = {pn.name};
+lower = {pn.lower};
+upper = {pn.upper};
+indices = arrayfun(@(x) strfind(type, x), 'fsb', 'UniformOutput', 0); 
   
-  type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
-  if ("filtering" %in% type) {
-    .Call("set_filter_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-  }
-  if ("smoothing" %in% type) {
-    .Call("set_smooth_tree_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-  }
-  if ("backward.smoothing" %in% type) {
-    .Call("set_smooth_monitors", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
-  }
+if (~isempty(indices{1})) % filtering
+  inter_biips('set_filter_monitors', p, names, lower, upper);
+end 
+if (~isempty(indices{2})) % smoothing
+  inter_biips('set_smooth_tree_monitors', p, names, lower, upper);
+end  
+if (~isempty(indices{3})) %backward_smoothing
+  inter_biips('set_smooth_monitors', p, names, lower, upper);
+end 
