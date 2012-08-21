@@ -71,9 +71,14 @@ if (interactive()) {
   ans <- readline("Run BiiPS backward smoothing algorithm (requires O(n.part^2) operations) ? y|[n] :")
   backward <- (ans == "y")
 }
+if (backward) {
+  type <- 'fsb'
+} else {
+  type <- 'fs'
+}
 
 out.biips <- smc.samples(biips, "x",
-                         n.part=n.part, backward=backward)
+                         n.part=n.part, type=type)
 
 # plot kernel density estimates for each state component
 if (interactive()) {
@@ -81,7 +86,7 @@ if (interactive()) {
   plot.dens <- (ans == "y")
 }
 if(plot.dens) {
-  par(mfcol = c(2, 10))
+  par(mfcol = c(5, 2))
   plot(density(out.biips$x, adjust=2), bty="n")
   par(mfcol = c(1,1))
 }

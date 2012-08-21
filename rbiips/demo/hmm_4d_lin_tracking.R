@@ -86,8 +86,14 @@ build.sampler(biips, proposal="auto")
 # run biips
 n.part <- 1000
 backward <- FALSE
+if (backward) {
+  type <- 'fsb'
+} else {
+  type <- 'fs'
+}
+
 out.biips <- smc.samples(biips, paste("x[1:2,1:",t.max,"]"),
-                       n.part=n.part, backward=backward)
+                         n.part=n.part, type=type)
 
 # plot kernel density estimates
 if (interactive()) {

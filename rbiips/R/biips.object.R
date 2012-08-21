@@ -59,7 +59,7 @@ monitor.biips <- function(obj, variable.names, type)
 }
 
 
-is.monitored.biips <- function(obj, variable.names, type)
+is.monitored.biips <- function(obj, variable.names, type, check.released=TRUE)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model.")
@@ -70,32 +70,33 @@ is.monitored.biips <- function(obj, variable.names, type)
   pn <- parse.varnames(variable.names)
   
   type <- match.arg(type, c("f", "s", "b"))
-  if ("f" == type) {
-    return(.Call("is_filter_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips"))
+  if (type == "f") {
+    ok <- .Call("is_filter_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
-  if ("s" == type) {
-    return(.Call("is_smooth_tree_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips"))
+  else if (type == "s") {
+    ok <- .Call("is_smooth_tree_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
-  if ("b" == type) {
-    return(.Call("is_smooth_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips"))
+  else if (type == "b") {
+    ok <- .Call("is_smooth_monitored", obj$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
+  return(ok)
 }
 
 
-clear.monitors.biips <- function(obj, type)
+clear.monitors.biips <- function(obj, type, release.only=FALSE)
 {
   if (!is.biips(obj))
     stop("Invalid BiiPS model.")
   
   type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
   if ("f" %in% type) {
-    .Call("clear_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+    .Call("clear_filter_monitors", obj$ptr(), release.only, PACKAGE="RBiips")
   }
   if ("s" %in% type) {
-    .Call("clear_smooth_tree_monitors", obj$ptr(), PACKAGE="RBiips")
+    .Call("clear_smooth_tree_monitors", obj$ptr(), release.only, PACKAGE="RBiips")
   }
   if ("b" %in% type) {
-    .Call("clear_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
+    .Call("clear_smooth_monitors", obj$ptr(), release.only, PACKAGE="RBiips")
   }
   invisible(NULL)
 }
@@ -437,7 +438,7 @@ update.pmmh.biips <- function(object, variable.names, n.iter,
 init.pimh.biips <- function(obj, variable.names,
                             n.part, rs.thres=0.5, rs.type="stratified")
 {
-  monitored <- is.monitored.biips(obj, variable.names, "s")
+  monitored <- is.monitored.biips(obj, variable.names, "s", FALSE)
   if (!monitored) {
     ## monitor variables
     monitor.biips(obj, variable.names, type="s")
@@ -449,7 +450,7 @@ init.pimh.biips <- function(obj, variable.names,
     .Call("build_smc_sampler", obj$ptr(), FALSE, PACKAGE="RBiips")
   }
   
-  atend <- !.Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")
+  atend <- .Call("is_smc_sampler_at_end", obj$ptr(), PACKAGE="RBiips")
   ## get log normalizing constant
   if (!monitored || !built || !atend) {
     ## run smc sampler
@@ -558,7 +559,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
-  clear.monitors.biips(object, type="s")
+  clear.monitors.biips(object, type="s", TRUE)
   
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {
