@@ -1,6 +1,6 @@
 function monitor_biips(p, variable_names, type)
   
-pn = cellfun(@(x) parse_varname(x), variables_names); 
+pn = cellfun(@(x) parse_varname(x), variable_names); 
 names = {pn.name};
 lower = {pn.lower};
 upper = {pn.upper};
