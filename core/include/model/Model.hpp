@@ -101,15 +101,10 @@ namespace Biips
     Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
     Histogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
-    // only release monitor objects
-    // but keep nodeIds
-    void virtual ReleaseFilterMonitors();
-    void virtual ReleaseSmoothTreeMonitors();
-    void virtual ReleaseSmoothMonitors();
-
-    void virtual ClearFilterMonitors();
-    void virtual ClearSmoothTreeMonitors();
-    void virtual ClearSmoothMonitors();
+    // release_only flag: only release monitor objects but keep nodeIds
+    void virtual ClearFilterMonitors(Bool release_only = false);
+    void virtual ClearSmoothTreeMonitors(Bool release_only = false);
+    void virtual ClearSmoothMonitors(Bool release_only = false);
 
     Scalar GetLogPriorDensity(NodeId nodeId) const;
   };

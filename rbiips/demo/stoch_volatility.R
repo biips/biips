@@ -77,9 +77,14 @@ if (interactive()) {
   ans <- readline("Run BiiPS backward smoothing algorithm (requires O(n.part^2) operations) ? y|[n] :")
   backward <- (ans == "y")
 }
+if (backward) {
+  type <- 'fsb'
+} else {
+  type <- 'fs'
+}
 
 out.biips <- smc.samples(biips, "x",
-                         n.part=n.part, backward=backward)
+                         n.part=n.part, type=type)
 
 # plot kernel density estimates
 if (interactive()) {

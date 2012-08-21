@@ -200,7 +200,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::IsFilterMonitored(const String & name, IndexRange range) const
+  Bool BUGSModel::IsFilterMonitored(const String & name, IndexRange range, Bool check_released) const
   {
     if (!symbolTable_.Contains(name))
       return false;
@@ -221,9 +221,13 @@ namespace Biips
         continue;
       if (!filterMonitorsMap_.count(it->left))
         return false;
+
+      if (!check_released)
+        continue;
+
       Size iter = pSampler_->GetNodeSamplingIteration(it->left);
-      if (filterMonitors_.size() < iter + 1 && !filterMonitors_[iter]
-          && !filterMonitors_[iter]->Contains(it->left))
+      if (filterMonitors_.size() < iter + 1 || !filterMonitors_[iter]
+          || !filterMonitors_[iter]->Contains(it->left))
         return false;
     }
 
@@ -231,7 +235,7 @@ namespace Biips
   }
 
   Bool BUGSModel::IsSmoothTreeMonitored(const String & name,
-                                        IndexRange range) const
+                                        IndexRange range, Bool check_released) const
   {
     if (!symbolTable_.Contains(name))
       return false;
@@ -252,14 +256,18 @@ namespace Biips
         continue;
       if (!smoothTreeMonitoredNodeIds_.count(it->left))
         return false;
-      if (!pSmoothTreeMonitor_ && pSmoothTreeMonitor_->Contains(it->left))
+
+      if (!check_released)
+        continue;
+
+      if (!pSmoothTreeMonitor_ || pSmoothTreeMonitor_->Contains(it->left))
         return false;
     }
 
     return true;
   }
 
-  Bool BUGSModel::IsSmoothMonitored(const String & name, IndexRange range) const
+  Bool BUGSModel::IsSmoothMonitored(const String & name, IndexRange range, Bool check_released) const
   {
     if (!symbolTable_.Contains(name))
       return false;
@@ -280,9 +288,13 @@ namespace Biips
         continue;
       if (!smoothMonitorsMap_.count(it->left))
         return false;
+
+      if (!check_released)
+        continue;
+
       Size iter = pSampler_->NIterations() - 1
                   - pSampler_->GetNodeSamplingIteration(it->left);
-      if (smoothMonitors_.size() < iter + 1 && !smoothMonitors_[iter]
+      if (smoothMonitors_.size() < iter + 1 || !smoothMonitors_[iter]
           && !smoothMonitors_[iter]->Contains(it->left))
         return false;
     }
@@ -734,24 +746,30 @@ namespace Biips
     return true;
   }
 
-  void BUGSModel::ClearFilterMonitors()
+  void BUGSModel::ClearFilterMonitors(Bool release_only)
   {
+    BaseType::ClearFilterMonitors(release_only);
+    if (release_only)
+      return;
     filterMonitorsNames_.clear();
     filterMonitorsRanges_.clear();
-    BaseType::ClearFilterMonitors();
   }
 
-  void BUGSModel::ClearSmoothTreeMonitors()
+  void BUGSModel::ClearSmoothTreeMonitors(Bool release_only)
   {
+    BaseType::ClearSmoothTreeMonitors(release_only);
+    if (release_only)
+      return;
     smoothTreeMonitorsNames_.clear();
     smoothTreeMonitorsRanges_.clear();
-    BaseType::ClearSmoothTreeMonitors();
   }
 
-  void BUGSModel::ClearSmoothMonitors()
+  void BUGSModel::ClearSmoothMonitors(Bool release_only)
   {
+    BaseType::ClearSmoothMonitors(release_only);
+    if (release_only)
+      return;
     smoothMonitorsNames_.clear();
     smoothMonitorsRanges_.clear();
-    BaseType::ClearSmoothMonitors();
   }
 }
