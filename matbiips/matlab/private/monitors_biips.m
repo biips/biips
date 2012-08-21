@@ -1,1 +1,0 @@
-function monitors_biips 
