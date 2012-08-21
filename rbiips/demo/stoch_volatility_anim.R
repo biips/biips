@@ -45,7 +45,7 @@ if (interactive()) {
 n.part <- 25
 out.biips <- smc.samples(biips, "x",
                          type="filtering",
-                         n.part=n.part, backward=FALSE)
+                         n.part=n.part)
 
 # summary
 x.summ <- summary(out.biips[["x"]], fun=c("mean","quantiles"), probs=c(.025,.975))

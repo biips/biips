@@ -552,7 +552,7 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
 }
 
 
-RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -567,7 +567,7 @@ RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (!p_console->IsFilterMonitored(name, range))
+    if (!p_console->IsFilterMonitored(name, range, Rcpp::as<Bool>(check_released)))
       return Rcpp::wrap(false);
   }
 
@@ -577,7 +577,7 @@ RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SE
 }
 
 
-RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -592,7 +592,7 @@ RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lowe
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (!p_console->IsSmoothTreeMonitored(name, range))
+    if (!p_console->IsSmoothTreeMonitored(name, range, Rcpp::as<Bool>(check_released)))
       return Rcpp::wrap(false);
   }
 
@@ -602,7 +602,7 @@ RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lowe
 }
 
 
-RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -617,7 +617,7 @@ RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (!p_console->IsSmoothMonitored(name, range))
+    if (!p_console->IsSmoothMonitored(name, range, Rcpp::as<Bool>(check_released)))
       return Rcpp::wrap(false);
   }
 
@@ -872,43 +872,44 @@ RcppExport SEXP get_smooth_monitors(SEXP pConsole)
 }
 
 
-RcppExport void clear_filter_monitors(SEXP pConsole)
+RcppExport void clear_filter_monitors(SEXP pConsole, SEXP release_only)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->ClearFilterMonitors())
+  if (!p_console->ClearFilterMonitors(Rcpp::as<Bool>(release_only)))
     throw RuntimeError("Failed to clear filter monitors.");
 
   VOID_END_RBIIPS
 }
 
 
-RcppExport void clear_smooth_tree_monitors(SEXP pConsole)
+RcppExport void clear_smooth_tree_monitors(SEXP pConsole, SEXP release_only)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->ClearSmoothTreeMonitors())
+  if (!p_console->ClearSmoothTreeMonitors(Rcpp::as<Bool>(release_only)))
     throw RuntimeError("Failed to clear smooth tree monitors.");
 
   VOID_END_RBIIPS
 }
 
 
-RcppExport void clear_smooth_monitors(SEXP pConsole)
+RcppExport void clear_smooth_monitors(SEXP pConsole, SEXP release_only)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->ClearSmoothMonitors())
+  if (!p_console->ClearSmoothMonitors(Rcpp::as<Bool>(release_only)))
     throw RuntimeError("Failed to clear smooth monitors.");
 
   VOID_END_RBIIPS
 }
+
 
 
 RcppExport void run_backward_smoother(SEXP pConsole)

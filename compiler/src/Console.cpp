@@ -883,38 +883,38 @@ namespace Biips
     return true;
   }
 
-  Bool Console::IsFilterMonitored(const String & name, const IndexRange & range)
+  Bool Console::IsFilterMonitored(const String & name, const IndexRange & range, Bool check_released)
   {
     if (!pModel_)
     {
       err_ << "Can't check filter monitor. No model!" << endl;
       return false;
     }
-    return pModel_->IsFilterMonitored(name, range);
+    return pModel_->IsFilterMonitored(name, range, check_released);
   }
 
   Bool Console::IsSmoothTreeMonitored(const String & name,
-                                      const IndexRange & range)
+                                      const IndexRange & range, Bool check_released)
   {
     if (!pModel_)
     {
       err_ << "Can't check smooth tree monitor. No model!" << endl;
       return false;
     }
-    return pModel_->IsSmoothTreeMonitored(name, range);
+    return pModel_->IsSmoothTreeMonitored(name, range, check_released);
   }
 
-  Bool Console::IsSmoothMonitored(const String & name, const IndexRange & range)
+  Bool Console::IsSmoothMonitored(const String & name, const IndexRange & range, Bool check_released)
   {
     if (!pModel_)
     {
       err_ << "Can't check smooth monitor. No model!" << endl;
       return false;
     }
-    return pModel_->IsSmoothMonitored(name, range);
+    return pModel_->IsSmoothMonitored(name, range, check_released);
   }
 
-  Bool Console::ClearFilterMonitors()
+  Bool Console::ClearFilterMonitors(Bool release_only)
   {
     if (!pModel_)
     {
@@ -924,14 +924,14 @@ namespace Biips
 
     try
     {
-      pModel_->ClearFilterMonitors();
+      pModel_->ClearFilterMonitors(release_only);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
     return true;
   }
 
-  Bool Console::ClearSmoothTreeMonitors()
+  Bool Console::ClearSmoothTreeMonitors(Bool release_only)
   {
     if (!pModel_)
     {
@@ -941,14 +941,14 @@ namespace Biips
 
     try
     {
-      pModel_->ClearSmoothTreeMonitors();
+      pModel_->ClearSmoothTreeMonitors(release_only);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
     return true;
   }
 
-  Bool Console::ClearSmoothMonitors()
+  Bool Console::ClearSmoothMonitors(Bool release_only)
   {
     if (!pModel_)
     {
@@ -958,55 +958,7 @@ namespace Biips
 
     try
     {
-      pModel_->ClearSmoothMonitors();
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::ReleaseFilterMonitors()
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't clear filter monitors. No model!" << endl;
-      return false;
-    }
-    try
-    {
-      pModel_->ReleaseFilterMonitors();
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::ReleaseSmoothTreeMonitors()
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't clear smooth tree monitors. No model!" << endl;
-      return false;
-    }
-    try
-    {
-      pModel_->ReleaseSmoothTreeMonitors();
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::ReleaseSmoothMonitors()
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't clear smooth monitors. No model!" << endl;
-      return false;
-    }
-    try
-    {
-      pModel_->ReleaseSmoothMonitors();
+      pModel_->ClearSmoothMonitors(release_only);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1305,10 +1257,10 @@ namespace Biips
         pModel_->BuildSampler();
 
       lockBackward_ = true;
-      ReleaseFilterMonitors();
-      ReleaseSmoothTreeMonitors();
+      ClearFilterMonitors(true);
+      ClearSmoothTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ReleaseSmoothMonitors();
+        ClearSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1363,10 +1315,10 @@ namespace Biips
         pModel_->BuildSampler();
 
       lockBackward_ = true;
-      ReleaseFilterMonitors();
-      ReleaseSmoothTreeMonitors();
+      ClearFilterMonitors(true);
+      ClearSmoothTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ReleaseSmoothMonitors();
+        ClearSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1415,10 +1367,10 @@ namespace Biips
         pModel_->BuildSampler();
 
       lockBackward_ = true;
-      ReleaseFilterMonitors();
-      ReleaseSmoothTreeMonitors();
+      ClearFilterMonitors(true);
+      ClearSmoothTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ReleaseSmoothMonitors();
+        ClearSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 

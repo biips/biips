@@ -141,19 +141,15 @@ namespace Biips
                               NULL_RANGE);
 
     Bool IsFilterMonitored(const String & name, const IndexRange & range =
-                               NULL_RANGE);
+                               NULL_RANGE, Bool check_released = true);
     Bool IsSmoothTreeMonitored(const String & name, const IndexRange & range =
-                                   NULL_RANGE);
+                                   NULL_RANGE, Bool check_released = true);
     Bool IsSmoothMonitored(const String & name, const IndexRange & range =
-                               NULL_RANGE);
+                               NULL_RANGE, Bool check_released = true);
 
-    Bool ReleaseFilterMonitors();
-    Bool ReleaseSmoothTreeMonitors();
-    Bool ReleaseSmoothMonitors();
-
-    Bool ClearFilterMonitors();
-    Bool ClearSmoothTreeMonitors();
-    Bool ClearSmoothMonitors();
+    Bool ClearFilterMonitors(Bool release_only = false);
+    Bool ClearSmoothTreeMonitors(Bool release_only = false);
+    Bool ClearSmoothMonitors(Bool release_only = false);
 
     /*!
      * @short Builds the SMC sampler.

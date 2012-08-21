@@ -85,11 +85,11 @@ namespace Biips
                               NULL_RANGE);
 
     Bool
-    IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE, Bool check_released = true) const;
     Bool IsSmoothTreeMonitored(const String & name, IndexRange range =
-                                   NULL_RANGE) const;
+                                   NULL_RANGE, Bool check_released = true) const;
     Bool
-    IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE) const;
+    IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE, Bool check_released = true) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
 
@@ -144,9 +144,9 @@ namespace Biips
     Bool SampleSmoothTreeParticle(const Rng::Ptr & pRng,
                                   std::map<String, MultiArray> & sampledValues) const;
 
-    void virtual ClearFilterMonitors();
-    void virtual ClearSmoothTreeMonitors();
-    void virtual ClearSmoothMonitors();
+    void virtual ClearFilterMonitors(Bool release_only = false);
+    void virtual ClearSmoothTreeMonitors(Bool release_only = false);
+    void virtual ClearSmoothMonitors(Bool release_only = false);
   };
 
 }

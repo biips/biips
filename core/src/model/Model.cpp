@@ -106,49 +106,46 @@ namespace Biips
     return true;
   }
 
-  void Model::ReleaseFilterMonitors()
+
+  void Model::ClearFilterMonitors(Bool release_only)
   {
     filterMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
-        filterMonitorsMap_.begin(); it_monitors != filterMonitorsMap_.end();
-        ++it_monitors)
+    if (release_only)
     {
-      it_monitors->second.reset();
+      for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
+          filterMonitorsMap_.begin(); it_monitors != filterMonitorsMap_.end();
+          ++it_monitors)
+      {
+        it_monitors->second.reset();
+      }
+      return;
     }
-  }
-
-  void Model::ReleaseSmoothTreeMonitors()
-  {
-    pSmoothTreeMonitor_.reset();
-  }
-
-  void Model::ReleaseSmoothMonitors()
-  {
-    smoothMonitors_.clear();
-    for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
-        smoothMonitorsMap_.begin(); it_monitors != smoothMonitorsMap_.end();
-        ++it_monitors)
-    {
-      it_monitors->second.reset();
-    }
-  }
-
-  void Model::ClearFilterMonitors()
-  {
-    filterMonitors_.clear();
     filterMonitorsMap_.clear();
     defaultMonitorsSet_ = false;
   }
 
-  void Model::ClearSmoothTreeMonitors()
+  void Model::ClearSmoothTreeMonitors(Bool release_only)
   {
     pSmoothTreeMonitor_.reset();
+    if (release_only)
+      return;
     smoothTreeMonitoredNodeIds_.clear();
   }
 
-  void Model::ClearSmoothMonitors()
+  void Model::ClearSmoothMonitors(Bool release_only)
   {
     smoothMonitors_.clear();
+    if (release_only)
+    {
+      smoothMonitors_.clear();
+      for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
+          smoothMonitorsMap_.begin(); it_monitors != smoothMonitorsMap_.end();
+          ++it_monitors)
+      {
+        it_monitors->second.reset();
+      }
+      return;
+    }
     smoothMonitorsMap_.clear();
   }
 
@@ -181,9 +178,9 @@ namespace Biips
                           Scalar threshold)
   {
     // release monitors
-    ReleaseFilterMonitors();
-    ReleaseSmoothTreeMonitors();
-    ReleaseSmoothMonitors();
+    ClearFilterMonitors(true);
+    ClearSmoothTreeMonitors(true);
+    ClearSmoothMonitors(true);
 
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
 
@@ -292,7 +289,7 @@ namespace Biips
   void Model::InitBackwardSmoother()
   {
     // release monitors
-    ReleaseSmoothMonitors();
+    ClearSmoothMonitors(true);
 
     if (!defaultMonitorsSet_)
       throw LogicError("Can not initiate backward smoother: default monitors not set.");
