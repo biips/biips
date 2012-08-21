@@ -2,15 +2,25 @@ function [variables_out] = biips_smc_samples(console, variable_names, nb_part, v
 % BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
 % [variables_out] = biips_smc_samples(console, variable_names, nb_part, type, rs_thres, rs_type, seed)
 % INPUT : 
-% - console : id of the console containing the model
-% - variable_names : cell containing the names of variables to monitor
-% - nb_part : the number of particules used in smc algorithms (integer)
-% - type : strings with characters in {'f', 's', 'b'} 
-% - rs_thres : resampling threshold ( if real in  [0,1] ---> percentage of nb_particules
-%                                        integer in [1,nb_part] --> number of particules
-% - rs_type : string belonging to {'stratified', 'systematic', 'residual', 'multinomial' } indicating 
-%             the kind of algorithm used for esampling
-% - seed : seed for random number generator
+% - console : integer. Id of the console containing the model, returned by the 'biips_model' function
+% - variable_names : cell of strings. Contains the names of the unobserved variables to monitor.
+%                    Possible value: {'x', 'foo', 'bar[1]', 'x.state[1:10]', 'var[1, 5:10, 3]'}
+%                    Dimensions and indices must be a valid subset of the variables of the model.
+% - nb_part : positive integer. The number of particules used in smc algorithms
+% - type : string (default = 'fs').
+%          Its characters must be in the set {'f', 's', 'b'} for respectively 'filtering', 'smoothing' and 'backward smoothing'.
+%          Controls the desired types of SMC algorithms, hence the types of values returned in the output structure 'variables_out'.
+%          Can contain several characters, eg: 'fsb' for the three algorithms.
+%          Note that backward smoothing algorithm ('b') is costly: O(n_part²) vs filtering and smoothing O(n_part)
+% - rs_thres : positive real (default = 0.5).
+%              Threshold for controling the activation of the resampling step (adaptive SMC).
+%              if rs_thres is in [0,1] --> resampling occurs when (ESS > rs_thres * nb_part)
+%              if rs_thres is in [2,nb_part] --> resampling occurs when (ESS > rs_thres)
+% - rs_type : string (default = 'stratified')
+%             Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
+%             Indicates the type of algorithm used for the resampling step.           
+% - seed : integer (default is set randomly). Seed for random number generator.
+
 % check for optional options
 opt_argin = length(varargin);
 % default values
