@@ -12,6 +12,6 @@ function ok=run_smc_forward(p, nb_part, rs_thres, rs_type, seed)
 % OUTPUT
 % ok : boolean 
 if (~inter_biips('is_sampler_built', p))
-   inter_biips('build_smc_sampler', p, 0);
+   inter_biips('build_smc_sampler', p, false);
 end
 ok=inter_biips('run_smc_sampler', p, nb_part, seed, rs_thres, rs_type);
