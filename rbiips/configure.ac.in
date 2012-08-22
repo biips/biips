@@ -139,6 +139,13 @@ AC_CHECK_LIB(BiipsCompiler, BiipsCompiler_is_present, [],
 AC_LANG_POP()
 LDFLAGS=${OLDFLAGS}
 
+
+if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
+	BIIPS_LD_FLAGS="-L${BIIPS_LIB} -lBiipsCompiler ${BIIPS_RPATH} -lBiipsBase ${BIIPS_RPATH}  -lBiipsCore ${BIIPS_RPATH}"
+else
+	BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
+fi
+
 #Finally, set optional module directory using --with-biips-modules or
 #environment variable BIIPS_MODULES
 
@@ -158,8 +165,7 @@ LDFLAGS=${OLDFLAGS}
 #fi
 
 AC_SUBST(BIIPS_INCLUDE)
-AC_SUBST(BIIPS_LIB)
-AC_SUBST(BIIPS_RPATH)
+AC_SUBST(BIIPS_LD_FLAGS)
 #AC_SUBST(BIIPS_MODULES)
 
 AC_CONFIG_FILES([src/Makevars])
