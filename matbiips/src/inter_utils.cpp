@@ -118,8 +118,6 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
 IndexRange makeRange(const mxArray * lower, const mxArray * upper)
 {
-  
-  
   if (mxIsEmpty(lower) || mxIsEmpty(upper))
     return IndexRange();
 

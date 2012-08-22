@@ -324,8 +324,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
-       CheckArgIsNumeric(2);
-       Bool prior_flag = static_cast<Bool>(*mxGetPr(prhs[2]));
+       CheckArgIsLogical(2);
+       Bool prior_flag = static_cast<Bool>(*mxGetLogicals(prhs[2]));
 
        if (!p_console->BuildSampler(prior_flag, VERBOSITY))
          throw RuntimeError("Failed to build sampler.");
@@ -451,11 +451,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "clear_filter_monitors") {
 
-       CheckRhs(nrhs, 1, name_func);
+       CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
+       
+       CheckArgIsLogical(2);
+       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
   
-       if (!p_console->ClearFilterMonitors())
+       if (!p_console->ClearFilterMonitors(release_only))
          throw RuntimeError("Failed to clear filter monitors.");
 
     }
@@ -465,11 +468,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "clear_smooth_tree_monitors") {
 
-       CheckRhs(nrhs, 1, name_func);
+       CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
   
-       if (!p_console->ClearSmoothTreeMonitors())
+       CheckArgIsLogical(2);
+       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
+       
+       if (!p_console->ClearSmoothTreeMonitors(release_only))
          throw RuntimeError("Failed to clear smooth tree monitors.");
 
     }
@@ -479,11 +485,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "clear_smooth_monitors") {
 
-       CheckRhs(nrhs, 1, name_func);
+       CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
   
-       if (!p_console->ClearSmoothTreeMonitors())
+       CheckArgIsLogical(2);
+       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
+       
+       if (!p_console->ClearSmoothMonitors(release_only))
          throw RuntimeError("Failed to clear smooth monitors.");
 
     }
