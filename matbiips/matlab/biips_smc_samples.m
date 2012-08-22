@@ -1,6 +1,6 @@
 function [variables_out] = biips_smc_samples(console, variable_names, nb_part, varargin)
 % BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
-% [variables_out] = biips_smc_samples(console, variable_names, nb_part, type, rs_thres, rs_type, seed)
+% [variables_out] = biips_smc_samples(console, variable_names, nb_part, [ type, rs_thres, rs_type, seed ])
 % INPUT : 
 % - console : integer. Id of the console containing the model, returned by the 'biips_model' function
 % - variable_names : cell of strings. Contains the names of the unobserved variables to monitor.
@@ -25,7 +25,8 @@ function [variables_out] = biips_smc_samples(console, variable_names, nb_part, v
 opt_argin = length(varargin);
 % default values
 type='fsb';
-res_type = 'stratified';
+rs_type = 'stratified';
+rs_thres = 0.5;
 s=rng('shuffle');
 seed=randi(intmax);
 rng(s);
@@ -35,11 +36,11 @@ if opt_argin >= 1
 end
 
 if opt_argin >=2 
-   res_thres = varargin{2};
+   rs_thres = varargin{2};
 end   
 
 if opt_argin >=3
-   res_type = varargin{3};
+   rs_type = varargin{3};
 end    
 
 if opt_argin >=4
