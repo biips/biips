@@ -72,7 +72,8 @@
 
 .onLoad <- function(lib, pkg)
 {
-    if (@BIIPS_SHARED@)
+	BIIPS_SHARED <- @BIIPS_SHARED@
+    if (BIIPS_SHARED)
     {
 ### First task is to get installation directory of BiiPS
 
