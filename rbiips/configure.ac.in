@@ -36,6 +36,7 @@
 #
 
 AC_INIT([RBiips], [@Biips_VERSION_MAJOR@])
+BIIPS_SHARED="@BIIPS_SHARED@"
 
 if test -z "${R_HOME}"; then
    AC_MSG_ERROR("R_HOME is not defined")
@@ -113,7 +114,7 @@ fi
 # on the linker path then it helps to hard-code the location of BiiPS into
 # the DSO for RBiips. Suggested by Doug Bates, April 2011.
 
-if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
+if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
 	AC_ARG_ENABLE([rpath],
 	            AC_HELP_STRING([--enable-rpath],
 	                           [Hard link the location of the BiiPS libraries]))
@@ -124,7 +125,7 @@ fi
 
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
-if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
+if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
 	LDFLAGS="-L${BIIPS_LIB} -Wl,-rpath ${BIIPS_LIB}"
 else
 	LDFLAGS="-L${BIIPS_LIB}"
@@ -140,7 +141,7 @@ AC_LANG_POP()
 LDFLAGS=${OLDFLAGS}
 
 
-if test [ "@BIIPS_SHARED@" = "TRUE" ] ; then
+if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
 	BIIPS_LD_FLAGS="-L${BIIPS_LIB} -lBiipsCompiler ${BIIPS_RPATH} -lBiipsBase ${BIIPS_RPATH}  -lBiipsCore ${BIIPS_RPATH}"
 else
 	BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
