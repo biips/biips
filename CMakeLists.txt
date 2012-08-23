@@ -182,25 +182,25 @@ if (NOT WIN32)
     option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
 endif (NOT WIN32)
 
-# configure install directories
+# configure install directories and output directories
 include (GNUInstallDirs)
 if (UNIX)
 	set (Biips_INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR})
 	set (Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/biips)
 	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR}/biips)
+	
+	set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR})
+	set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR})
+	set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Biips_INSTALL_BINDIR})
 elseif (WIN32)
     set (Biips_INSTALL_BINDIR_i386 i386/${CMAKE_INSTALL_BINDIR})
     set (Biips_INSTALL_BINDIR_x64 x64/${CMAKE_INSTALL_BINDIR})
+    set (Biips_INSTALL_LIBDIR_i386 ${Biips_INSTALL_BINDIR_i386})
+    set (Biips_INSTALL_LIBIR_x64 ${Biips_INSTALL_BINDIR_x64})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
 	set (Biips_INSTALL_DATAROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
 endif (UNIX)
-
-# configure output directories
-set (Biips_LIBRARY_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
-set (Biips_EXECUTABLE_OUTPUT_PATH ${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME})
-set (LIBRARY_OUTPUT_PATH ${Biips_LIBRARY_OUTPUT_PATH})
-set (EXECUTABLE_OUTPUT_PATH ${Biips_EXECUTABLE_OUTPUT_PATH})
 
 
 # configure interfaces build
@@ -217,10 +217,13 @@ macro (add_biips_library name sources biips_libs)
             list(GET BUILD_BITNB_LIST ${offset} bitnb)
             set_target_properties(${name}-${arch}
                 PROPERTIES COMPILE_FLAGS -m${bitnb}
+                OUTPUT_NAME ${name}
+                ARCHIVE_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
                 )
             if (BUILD_SHARED_LIBS)
                 set_target_properties(${name}-${arch}
                     PROPERTIES LINK_FLAGS -m${bitnb}
+                    LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
                     )
             endif (BUILD_SHARED_LIBS)
             set (extra_libs "")
@@ -246,7 +249,7 @@ macro (install_biips_library name)
             list(FIND BUILD_ARCH_LIST ${arch} offset)
             list(GET BUILD_BITNB_LIST ${offset} bitnb)
             install (TARGETS ${name}-${arch}
-                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
+                DESTINATION ${Biips_INSTALL_LIBDIR_${arch}}
             	COMPONENT "Runtime_${bitnb}bit"
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
@@ -286,6 +289,8 @@ macro (add_biips_executable name sources extra_libs extra_libs64 biips_libs)
             set_target_properties(${name}-${arch}
                 PROPERTIES COMPILE_FLAGS -m${bitnb}
                 LINK_FLAGS -m${bitnb}
+                OUTPUT_NAME ${name}
+                RUNTIME_OUTPUT_DIRECTORY ${Biips_INSTALL_BINDIR_${arch}}
                 )
                 
             if (bitnb EQUAL 64)
