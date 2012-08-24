@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    BiipsCore subproject CMakeList
+#  \brief    BiipsCore CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -34,61 +34,56 @@
 #  Id:       $Id$
 #
 
-cmake_minimum_required (VERSION 2.8) 
 
-# project configuration
-project (BiipsCore CXX)
-set (BiipsCore_LIB_NAME ${PROJECT_NAME})
-set (PROJECT_LIB_NAME ${BiipsCore_LIB_NAME})
-string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
+set (LIB_NAME BiipsCore)
+file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set (INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
+set (${LIB_NAME}_INCLUDE_DIRS "${INCLUDE_DIRS}" PARENT_SCOPE)
 
-# find boost libraries
-find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED)
-include_directories (${Boost_INCLUDE_DIRS})
 
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-	${PROJECT_SOURCE_DIR}/include/BiipsConfig.hpp.in
-	${PROJECT_BINARY_DIR}/include/BiipsConfig.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/include/BiipsConfig.hpp.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/BiipsConfig.hpp
 )
 
 configure_file (
-	${PROJECT_SOURCE_DIR}/biips_info.in
-	${PROJECT_BINARY_DIR}/biips_info
+	${CMAKE_CURRENT_SOURCE_DIR}/biips_info.in
+	${CMAKE_CURRENT_BINARY_DIR}/biips_info
 )
 
 
 # include directories
 include_directories (
-	${PROJECT_BINARY_DIR}/include
-	${PROJECT_SOURCE_DIR}/include
+	${INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
 )
 
 # source files list generation
 file (GLOB_RECURSE SOURCE_FILES
-	${PROJECT_BINARY_DIR}/include/*.hpp
-	${PROJECT_BINARY_DIR}/include/*.h
-	${PROJECT_BINARY_DIR}/src/*.cpp
-	${PROJECT_BINARY_DIR}/src/*.cc
-	${PROJECT_SOURCE_DIR}/include/*.hpp
-	${PROJECT_SOURCE_DIR}/include/*.h
-	${PROJECT_SOURCE_DIR}/src/*.cpp
-	${PROJECT_SOURCE_DIR}/src/*.cc
+	${CMAKE_CURRENT_BINARY_DIR}/include/*.hpp
+	${CMAKE_CURRENT_BINARY_DIR}/include/*.h
+	${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/src/*.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 )
 
 # add the library
-add_biips_library(${PROJECT_LIB_NAME} SOURCE_FILES "")
+add_biips_library(${LIB_NAME} SOURCE_FILES "")
 
 # add the install targets
-install_biips_library(${PROJECT_LIB_NAME})
+install_biips_library(${LIB_NAME})
 
-install_biips_script(${PROJECT_BINARY_DIR} biips_info)
+install_biips_script(${CMAKE_CURRENT_BINARY_DIR} biips_info)
 
 install(DIRECTORY
-	${PROJECT_BINARY_DIR}/include/
-	${PROJECT_SOURCE_DIR}/include/
-	DESTINATION ${Biips_INSTALL_INCLUDEDIR}/${PROJECT_REL_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}/include/
+	${CMAKE_CURRENT_SOURCE_DIR}/include/
+	DESTINATION ${Biips_INSTALL_INCLUDEDIR}/${CURRENT_REL_DIR}
 	COMPONENT Headers
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
