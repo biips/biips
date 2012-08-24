@@ -27,7 +27,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    RBiips subproject CMakeList
+#  \brief    RBiips CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -35,63 +35,60 @@
 #  Id:       $Id$
 #
 
-cmake_minimum_required (VERSION 2.8) 
 
-# project configuration
-project (RBiips)
-set (PROJECT_PKG_NAME ${PROJECT_NAME})
-string (REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
+set (PKG_NAME RBiips)
+file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 if (BUILD_SHARED_LIBS)
     set (BIIPS_SHARED TRUE)
-else (BUILD_SHARED_LIBS)
+else ()
     set (BIIPS_SHARED FALSE)
-endif(BUILD_SHARED_LIBS)
+endif()
 
 
 # configure DESCRIPTION file
 configure_file (
 	DESCRIPTION.in
-	${PROJECT_PKG_NAME}/DESCRIPTION
+	${PKG_NAME}/DESCRIPTION
 )
 
 # configure README file
 configure_file (
 	README.in
-	${PROJECT_PKG_NAME}/README
+	${PKG_NAME}/README
 	@ONLY
 )
 
 # configure NOTICES file
 configure_file (
 	NOTICES.in
-	${PROJECT_PKG_NAME}/NOTICES
+	${PKG_NAME}/NOTICES
 )
 
 # configure R/windows/zzz.R file
 configure_file (
 	R/windows/zzz.R.in
-	${PROJECT_PKG_NAME}/R/windows/zzz.R
+	${PKG_NAME}/R/windows/zzz.R
 )
 
 # configure src/Makevars.in file
 configure_file (
 	src/Makevars.in.in
-	${PROJECT_PKG_NAME}/src/Makevars.in
+	${PKG_NAME}/src/Makevars.in
 	COPYONLY
 )
 
 # configure src/Makevars.win file
 configure_file (
 	src/Makevars.win.in
-	${PROJECT_PKG_NAME}/src/Makevars.win
+	${PKG_NAME}/src/Makevars.win
 	@ONLY
 )
 
 # configure configure.ac file
 configure_file (
 	configure.ac.in
-	${PROJECT_PKG_NAME}/configure.ac
+	${PKG_NAME}/configure.ac
 	@ONLY
 	NEWLINE_STYLE UNIX
 )
@@ -99,17 +96,17 @@ configure_file (
 # configure RBiips-package.Rd file
 configure_file (
 	man/RBiips-package.Rd.in
-	${PROJECT_PKG_NAME}/man/RBiips-package.Rd
+	${PKG_NAME}/man/RBiips-package.Rd
 	@ONLY
 )
 
 
 # copy files to binary directory
 file ( GLOB SOURCE_FILES
-	${PROJECT_SOURCE_DIR}/*
+	${CMAKE_CURRENT_SOURCE_DIR}/*
 )
 file (COPY ${SOURCE_FILES}
-	DESTINATION ${PROJECT_PKG_NAME}/
+	DESTINATION ${PKG_NAME}/
 	PATTERN CMakeLists.txt EXCLUDE
 	PATTERN *.in EXCLUDE
 	PATTERN .svn EXCLUDE
@@ -123,42 +120,42 @@ if (UNIX)
 	find_program (AUTOCONF autoconf)
 	if (AUTOCONF)
 		execute_process (COMMAND autoconf
-			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_PKG_NAME}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}
 		)
-	else (AUTOCONF)
+	else ()
 		message (SEND_ERROR "autoconf not found")
-	endif (AUTOCONF)
-endif (UNIX)
+	endif ()
+endif ()
 
-# FIXME: we need a find_package(R) command
+# FIXME: we need a FindR() module
 # and introduce dependencies between targets
 
 # add R package tools targets
-add_custom_target (${PROJECT_PKG_NAME}_check
-	R CMD check ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
+add_custom_target (${PKG_NAME}_check
+	R CMD check ${CURRENT_REL_DIR}/${PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Checking ${PROJECT_PKG_NAME} R package"
+	COMMENT "Checking ${PKG_NAME} R package"
 	VERBATIM
 )
 
-add_custom_target (${PROJECT_PKG_NAME}_build
-	R CMD build ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
+add_custom_target (${PKG_NAME}_build
+	R CMD build ${CURRENT_REL_DIR}/${PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Building ${PROJECT_PKG_NAME} R source package"
+	COMMENT "Building ${PKG_NAME} R source package"
 	VERBATIM
 )
 
-add_custom_target (${PROJECT_PKG_NAME}_INSTALL
-	R CMD INSTALL ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
+add_custom_target (${PKG_NAME}_INSTALL
+	R CMD INSTALL ${CURRENT_REL_DIR}/${PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Installing ${PROJECT_PKG_NAME} R package"
+	COMMENT "Installing ${PKG_NAME} R package"
 	VERBATIM
 )
 
-add_custom_target (${PROJECT_PKG_NAME}_INSTALL_build
-	R CMD INSTALL --build ${PROJECT_REL_DIR}/${PROJECT_PKG_NAME}
+add_custom_target (${PKG_NAME}_INSTALL_build
+	R CMD INSTALL --build ${CURRENT_REL_DIR}/${PKG_NAME}
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Building ${PROJECT_PKG_NAME} R binary package"
+	COMMENT "Building ${PKG_NAME} R binary package"
 	VERBATIM
 )
 
