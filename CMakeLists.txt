@@ -39,7 +39,7 @@ cmake_minimum_required (VERSION 2.8)
 
 # project configuration
 # =====================
-project (Biips CXX)
+project (Biips CXX C)
 
 set (Biips_VERSION_MAJOR 0)
 set (Biips_VERSION_MINOR 7)
@@ -68,7 +68,7 @@ if (NOT Biips_DATE)
 		execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
 	elseif (UNIX)
 		execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE TODAY)
-	endif (WIN32)
+	endif ()
 	if (TODAY)
 		string (REGEX REPLACE
 			"(..)/(..)/(....).*"
@@ -76,10 +76,10 @@ if (NOT Biips_DATE)
 			Biips_DATE
 			${TODAY}
 		)
-	else (TODAY)
+	else ()
 		message (SEND_ERROR "date not implemented.\nPlease set variable Biips_DATE to yyyy-mm-dd")
-	endif (TODAY)
-endif (NOT Biips_DATE)
+	endif ()
+endif ()
 message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure resource files
@@ -117,7 +117,7 @@ if (PRINT_SYSTEM_INFO)
     message (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
     message (CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
     message (CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
-endif (PRINT_SYSTEM_INFO)
+endif ()
 
 # configure build
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
@@ -136,8 +136,8 @@ if (WIN32)
         list (APPEND BUILD_ARCH_LIST x64)
         list (APPEND BUILD_BITNB_LIST 64)
         set (BUILD_x64 ON)
-    endif (BUILD_BOTH_ARCH)
-endif (WIN32)
+    endif ()
+endif ()
 
 math (EXPR ARCH_BITNB 8*${CMAKE_SIZEOF_VOID_P})
 if (ARCH_BITNB EQUAL 32)
@@ -145,42 +145,94 @@ if (ARCH_BITNB EQUAL 32)
     	list (APPEND BUILD_ARCH_LIST i386)
         list (APPEND BUILD_BITNB_LIST 32)
         set (BUILD_i386 ON)
-    endif (NOT BUILD_i386)
+    endif ()
 elseif (ARCH_BITNB EQUAL 64)
     if (NOT BUILD_x64)
     	list (APPEND BUILD_ARCH_LIST x64)
         list (APPEND BUILD_BITNB_LIST 64)
         set (BUILD_x64 ON)
-    endif (NOT BUILD_x64)
-endif (ARCH_BITNB EQUAL 32)
+    endif ()
+endif ()
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
 if (SUPPRESS_DEPRECATED_WARNINGS)
 	add_definitions (-Wno-deprecated)
 	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
-endif (SUPPRESS_DEPRECATED_WARNINGS)
+endif ()
 
 if (NOT WIN32)
   # for static compilations to work with MATLAB
     add_definitions(-fPIC)
-endif(NOT WIN32)
+endif()
 
-# configure boost
+# configure and find boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-macro (clear_boost)
+	
+macro(clear_boost_variables)
     unset (Boost_LIBRARIES)
     unset (Boost_INCLUDE_DIR CACHE)
     unset (Boost_LIBRARY_DIRS CACHE)
-endmacro (clear_boost)
+	foreach(comp ${BOOST_COMPONENTS})
+		unset(Boost_${comp}_FOUND CACHE)
+		unset(Boost_${comp}_LIBRARY CACHE)
+	endforeach()
+endmacro(clear_boost_variables)
+
+
+set (BOOST_COMPONENTS PROGRAM_OPTIONS)
+clear_boost_variables()
+find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
+	${BOOST_COMPONENTS}
+)
+
+macro(copy_boost_variables from to)
+	set (Boost_LIBRARIES${to} ${Boost_LIBRARIES${from}})
+	set (Boost_LIBRARY_DIRS${to} ${Boost_LIBRARY_DIRS${from}} CACHE FILEPATH "Boost${to} library directory" FORCE)
+	foreach(comp ${BOOST_COMPONENTS})
+		set(Boost_${comp}_FOUND${to} ${Boost_${comp}_FOUND${from}} CACHE INTERNAL "Whether the Boost ${comp} library found" FORCE)
+		set(Boost_${comp}_LIBRARY${to} ${Boost_${comp}_LIBRARY${from}} CACHE FILEPATH "The Boost ${comp} library" FORCE)
+	endforeach()
+endmacro(copy_boost_variables)
+
+	
+if (WIN32 AND BUILD_BOTH_ARCH)
+	if (NOT $ENV{BOOST_LIBRARYDIR64} STREQUAL "")
+		set(BOOST_LIBRARYDIR64 $ENV{BOOST_LIBRARYDIR64})
+	endif()
+	if (BOOST_LIBRARYDIR64)
+		set (Boost_LIBRARY_DIRS64 ${BOOST_LIBRARYDIR64})
+	else ()
+		foreach (d ${Boost_LIBRARY_DIRS})
+			set (Boost_LIBRARY_DIRS64 ${Boost_LIBRARY_DIRS64} ${d}64)
+		endforeach ()
+	endif()
+	
+	# save variables
+	copy_boost_variables("" _i386)
+	# clear variables
+	clear_boost_variables()
+	
+	# find 64-bit boost libraries
+	set (BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS64})
+	find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
+		${BOOST_COMPONENTS}
+	)
+	
+	# save variables
+	copy_boost_variables("" _x64)
+	# reset variables
+	copy_boost_variables(_i386 "")
+endif()
+
 
 # should we use qwt5-qt4
 if (NOT WIN32)
     option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
-endif (NOT WIN32)
+endif()
 
 # configure install directories and output directories
 include (GNUInstallDirs)
@@ -197,10 +249,10 @@ elseif (WIN32)
     set (Biips_INSTALL_BINDIR_i386 i386/${CMAKE_INSTALL_BINDIR})
     set (Biips_INSTALL_BINDIR_x64 x64/${CMAKE_INSTALL_BINDIR})
     set (Biips_INSTALL_LIBDIR_i386 ${Biips_INSTALL_BINDIR_i386})
-    set (Biips_INSTALL_LIBIR_x64 ${Biips_INSTALL_BINDIR_x64})
+    set (Biips_INSTALL_LIBDIR_x64 ${Biips_INSTALL_BINDIR_x64})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
 	set (Biips_INSTALL_DATAROOTDIR ${CMAKE_INSTALL_DATAROOTDIR})
-endif (UNIX)
+endif ()
 
 
 # configure interfaces build
@@ -225,21 +277,21 @@ macro (add_biips_library name sources biips_libs)
                     PROPERTIES LINK_FLAGS -m${bitnb}
                     LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
                     )
-            endif (BUILD_SHARED_LIBS)
+            endif ()
             set (extra_libs "")
             if (BUILD_SHARED_LIBS)
                 foreach (lib IN LISTS ${biips_libs})
                     list(APPEND extra_libs ${lib}-${arch})
                 endforeach (lib IN LISTS ${biips_libs})
                 target_link_libraries (${name}-${arch} ${extra_libs})
-            endif (BUILD_SHARED_LIBS)
+            endif ()
         endforeach(arch IN LISTS BUILD_ARCH_LIST)
-    else (WIN32)
+    else ()
         add_library (${name} ${${sources}})
         if (BUILD_SHARED_LIBS)
             target_link_libraries (${name} ${${biips_libs}})
-        endif (BUILD_SHARED_LIBS)
-    endif(WIN32)
+        endif ()
+    endif()
 endmacro (add_biips_library)
 
 # macro to install libraries
@@ -253,11 +305,11 @@ macro (install_biips_library name)
             	COMPONENT "Runtime_${bitnb}bit"
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else (WIN32)
+    else ()
         install (TARGETS ${name}
             DESTINATION ${Biips_INSTALL_LIBDIR}
             )
-    endif (WIN32)
+    endif ()
 endmacro (install_biips_library)
 
 # macro to install script
@@ -272,11 +324,11 @@ macro (install_biips_script dir name)
             	COMPONENT "Runtime_${bitnb}bit"
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else (WIN32)
+    else ()
         install (PROGRAMS ${dir}/${name}
             DESTINATION ${Biips_INSTALL_BINDIR}
             )
-    endif (WIN32)
+    endif ()
 endmacro (install_biips_script)
 
 # macro to add executable
@@ -298,17 +350,17 @@ macro (add_biips_executable name sources extra_libs extra_libs64 biips_libs)
                     list(APPEND ${extra_libs64} ${lib}-${arch})
                 endforeach (lib IN LISTS ${biips_libs})
                 target_link_libraries (${name}-${arch} ${${extra_libs64}})
-            else (bitnb EQUAL 64)
+            else ()
                 foreach (lib IN LISTS ${biips_libs})
                     list(APPEND ${extra_libs} ${lib}-${arch})
                 endforeach (lib IN LISTS ${biips_libs})
                 target_link_libraries (${name}-${arch} ${${extra_libs}})
-            endif (bitnb EQUAL 64)
+            endif ()
         endforeach(arch IN LISTS BUILD_ARCH_LIST)
-    else (WIN32)
+    else ()
         add_executable (${name} ${${sources}})
         target_link_libraries (${name} ${${extra_libs}} ${${biips_libs}})
-    endif(WIN32)
+    endif()
 endmacro (add_biips_executable)
 
 # macro to install test program
@@ -322,11 +374,11 @@ macro (install_biips_test_program name)
             	COMPONENT "Runtime_${bitnb}bit"
             	)
         endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else (WIN32)
+    else ()
         install (TARGETS ${name}
-            DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/bin
+            DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/bin
             )
-    endif (WIN32)
+    endif ()
 endmacro (install_biips_test_program)
 
 
@@ -335,14 +387,14 @@ macro (install_biips_test_file name dir)
     if (WIN32)
         install (FILES
         	${name}
-        	DESTINATION ${Biips_INSTALL_DATADIR}/${PROJECT_REL_DIR}/${dir}
+        	DESTINATION ${Biips_INSTALL_DATAROOTDIR}/${CURRENT_REL_DIR}/${dir}
         )
-    else (WIN32)
+    else ()
         install (FILES
         	${name}
-        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/${dir}
+        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/${dir}
         )
-    endif (WIN32)
+    endif ()
 endmacro (install_biips_test_file)
 
 # macro to install test file directories
@@ -350,25 +402,25 @@ macro (install_biips_test_dir dir patt)
     if (WIN32)
         install(DIRECTORY
         	${PROJECT_SOURCE_DIR}/${dir}/
-        	DESTINATION ${Biips_INSTALL_DATADIR}/${PROJECT_REL_DIR}/${dir}
+        	DESTINATION ${Biips_INSTALL_DATAROOTDIR}/${CURRENT_REL_DIR}/${dir}
         	FILES_MATCHING PATTERN ${patt}
         	PATTERN .svn EXCLUDE
         )
-    else (WIN32)
+    else ()
         install(DIRECTORY
         	${PROJECT_SOURCE_DIR}/${dir}/
-        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}/${dir}
+        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/${dir}
         	FILES_MATCHING PATTERN ${patt}
         	PATTERN .svn EXCLUDE
         )
-    endif (WIN32)
+    endif ()
 endmacro (install_biips_test_dir)
 
 
 enable_testing()
 # ==============================
 # ==============================
-# Add subprojects
+# Add subdirectories
 # ==============================
 # ==============================
 add_subdirectory (core)
@@ -378,11 +430,11 @@ add_subdirectory (compiler)
 add_subdirectory (testcompiler)
 if (BUILD_RBIIPS)
     add_subdirectory (rbiips)
-endif (BUILD_RBIIPS)
+endif ()
 if (BUILD_MATBIIPS)
     find_package(Mex)
     add_subdirectory (matbiips)
-endif (BUILD_MATBIIPS)
+endif ()
 
 
 #============= CPACK commands ============
@@ -394,9 +446,9 @@ set (CPACK_PACKAGE_VENDOR BiiPS)
 #if (UNIX)
 #	execute_process(COMMAND "dpkg" "--print-architecture" OUTPUT_VARIABLE SYSTEM_ARCH)
 #	string(REGEX MATCH "[^\n]*" SYSTEM_ARCH ${SYSTEM_ARCH})
-#else (UNIX)
+#else ()
 #	set (SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-#endif (UNIX)
+#endif ()
 
 # Generic package options
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_SYSTEM_NAME})
@@ -421,12 +473,12 @@ set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
-endif (NOT Boost_USE_STATIC_LIBS)
+endif ()
 set (CPACK_DEBIAN_PACKAGE_SUGGESTS "libboost-dev (>= 1.42.0), r-base (>= 2.13)")
 if (USE_Qwt5_Qt4)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
-endif (USE_Qwt5_Qt4)
+endif ()
 set (CPACK_DEBIAN_PACKAGE_SECTION math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
@@ -437,7 +489,7 @@ set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel
 if (USE_Qwt5_Qt4)
     set (CPACK_RPM_PACKAGE_REQUIRES
         "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")
-endif (USE_Qwt5_Qt4)
+endif ()
 set (CPACK_RPM_PACKAGE_RELEASE 1)
 set (CPACK_RPM_PACKAGE_LICENSE ${Biips_LICENSE})
 set (CPACK_RPM_PACKAGE_GROUP Applications/Engineering)
@@ -456,5 +508,5 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_CONTACT ${Biips_CONTACT})
   set (CPACK_NSIS_MUI_ICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-48.ico")
   set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
-endif (WIN32 AND NOT UNIX)
+endif ()
 include (CPack)

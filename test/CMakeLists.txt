@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    BiipsTest subproject CMakeList
+#  \brief    BiipsTest CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -34,92 +34,70 @@
 #  Id:       $Id$
 #
 
-cmake_minimum_required (VERSION 2.8) 
 
-# project configuration
-project (BiipsTest CXX C)
-set (BiipsTest_EXE_NAME ${PROJECT_NAME})
-set (PROJECT_EXE_NAME ${BiipsTest_EXE_NAME})
-string(REGEX MATCH [a-zA-Z0-9_.-]*$ PROJECT_REL_DIR ${PROJECT_SOURCE_DIR})
+set (EXE_NAME BiipsTest)
+file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set (INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-# find boost libraries
-clear_boost()
-find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
-	program_options
+# configure config.hpp
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/config.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/include/config.hpp
 )
+
+# include directories
+include_directories (
+	${INCLUDE_DIRS}
+	${BiipsCore_INCLUDE_DIRS}
+	${BiipsBase_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
+)
+
+# add boost libraries
 set (EXTRA_LIBS ${EXTRA_LIBS}
-	${Boost_LIBRARIES}
+	${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
-# include boost
-include_directories (${Boost_INCLUDE_DIRS})
-
-# find boost 64-bit libraries
+# add boost 64-bit libraries
 if (WIN32 AND BUILD_x64)
-    set (Boost_LIBRARYDIR64 ${Boost_LIBRARY_DIRS} CACHE PATH "The path to where the Boost 64-bit library files are.")
-    
-    clear_boost()
-    set (BOOST_LIBRARYDIR ${Boost_LIBRARYDIR64})
-    find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
-    	program_options
-    )
     set (EXTRA_LIBS64 ${EXTRA_LIBS64}
-    	${Boost_LIBRARIES}
+    	${Boost_PROGRAM_OPTIONS_LIBRARY_x64}
     )
-    unset (BOOST_LIBRARYDIR)
-    clear_boost()
-endif (WIN32 AND BUILD_x64)
-
+endif ()
 
 # find qwt5-qt4
 if (USE_Qwt5_Qt4)
     find_package(Qwt5 REQUIRED)
     if (NOT Qwt5_Qt4_FOUND)
     	message(FATAL_ERROR "Qwt5 linked with Qt4 not found")
-    endif (NOT Qwt5_Qt4_FOUND)
+    endif ()
     include_directories (${Qwt5_INCLUDE_DIR})
     include(UseQt4)
     set (EXTRA_LIBS ${EXTRA_LIBS}
     	${Qwt5_Qt4_LIBRARY}
     )
-endif (USE_Qwt5_Qt4)
-
-
-# configure config.hpp
-configure_file(
-    ${PROJECT_SOURCE_DIR}/include/config.hpp.in
-    ${PROJECT_BINARY_DIR}/include/config.hpp
-)
-
-
-# include Biips libraries
-include_directories (
-	${PROJECT_SOURCE_DIR}/include
-	${PROJECT_BINARY_DIR}/include
-	${BiipsBase_SOURCE_DIR}/include
-	${BiipsCore_SOURCE_DIR}/include
-)
+endif ()
 
 # source files list generation
 file (GLOB SOURCE_FILES
-	${PROJECT_BINARY_DIR}/include/*.hpp
-	${PROJECT_BINARY_DIR}/include/*.h
-	${PROJECT_BINARY_DIR}/src/*.cpp
-	${PROJECT_BINARY_DIR}/src/*.cc
-	${PROJECT_SOURCE_DIR}/include/*.hpp
-	${PROJECT_SOURCE_DIR}/include/*.h
-	${PROJECT_SOURCE_DIR}/src/*.cpp
-	${PROJECT_SOURCE_DIR}/src/*.cc
+	${CMAKE_CURRENT_BINARY_DIR}/include/*.hpp
+	${CMAKE_CURRENT_BINARY_DIR}/include/*.h
+	${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/src/*.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 )
 
-# linked libraries
+# add biips libraries
 set (BIIPS_LIBS	BiipsBase BiipsCore)
 
 # add the executable
-add_biips_executable (${PROJECT_EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
+add_biips_executable (${EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
 
 # add the install targets
-install_biips_test_program(${PROJECT_EXE_NAME})
+install_biips_test_program(${EXE_NAME})
 
 install_biips_test_file(biipstest.cfg .)
 
@@ -129,6 +107,6 @@ install_biips_test_dir(bench *.cfg)
 if (NOT WIN32)
     install (PROGRAMS
     	BiipsTest.sh
-    	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${PROJECT_REL_DIR}
+    	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}
     )
-endif (NOT WIN32)
+endif ()

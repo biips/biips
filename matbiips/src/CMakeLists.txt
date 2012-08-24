@@ -4,26 +4,25 @@ file(GLOB MBIIPS_H *.h)
 foreach(f ${MBIIPS_SRC})
    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${f})
 endforeach(f ${MBIIPS_SRC})
-#define includes
-set(Biips_base_INCLUDE ${CMAKE_SOURCE_DIR}/base/include)
-set(Biips_compiler_INCLUDE ${CMAKE_SOURCE_DIR}/compiler/include)
-set(Biips_core_INCLUDE ${CMAKE_SOURCE_DIR}/core/include)
 	 
 # define libraries
-
 if (WIN32)
     set(MBIIPS_LIBS BiipsBase-${MATLAB_ARCH} BiipsCompiler-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
 else (WIN32)
     set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 endif (WIN32)
 
-set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+#set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 foreach(l ${MBIIPS_LIBS})
-	get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
-	get_filename_component(COCO ${MYLIB} PATH)
-	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${COCO} -l${l}")
-	#set(EXTRA_LIBS ${EXTRA_LIBS} "-l${l}")
+	get_target_property(name ${l} PROPERTY OUTPUT_NAME)
+	if (BUILD_SHARED_LIBS)
+		get_target_property(dir ${l} PROPERTY LIBRARY_OUTPUT_DIRECTORY)
+	else(BUILD_SHARED_LIBS)
+		get_target_property(dir ${l} PROPERTY ARCHIVE_OUTPUT_DIRECTORY)
+	endif(BUILD_SHARED_LIBS)
+	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${dir} -l${name}")
+	#set(EXTRA_LIBS ${EXTRA_LIBS} "-l${name}")
 endforeach(l ${MBIIPS_LIBS})
 
 #define mexfile compilation command
@@ -33,12 +32,17 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(MEX_OPT ${MEX_OPT} "-g")
 endif()
 
+#define includes flags
+set (INCLUDE_DIRS ${BiipsCore_INCLUDE_DIRS} ${BiipsBase_INCLUDE_DIRS} ${BiipsCompiler_INCLUDE_DIRS})
+foreach(d ${INCLUDE_DIRS})
+	set(INCLUDE_FLAGS ${INCLUDE_FLAGS} -I${d})
+endforeach(d ${INCLUDE_DIRS})
+
 add_custom_command(
 OUTPUT ${INTER_OUT}
 DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
 COMMAND ${MEX_COMMAND} 
-ARGS  -v  ${MEX_OPT} -I${Biips_base_INCLUDE} -I${Biips_core_INCLUDE}
--I${Biips_compiler_INCLUDE} -L${Biips_INSTALL_LIBDIR} 
+ARGS  -v  ${MEX_OPT} ${INCLUDE_FLAGS} #${Biips_INSTALL_LIBDIR} 
 ${EXTRA_LIBS} ${SOURCES} 
 COMMENT "building mexfile")
 
