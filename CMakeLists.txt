@@ -89,8 +89,8 @@ configure_file (COPYING COPYING.txt COPYONLY)
 
 # configure NOTICES file
 configure_file (
-	${PROJECT_SOURCE_DIR}/NOTICES.in
-	${PROJECT_BINARY_DIR}/NOTICES
+	${CMAKE_SOURCE_DIR}/NOTICES.in
+	${CMAKE_BINARY_DIR}/NOTICES
 )
 
 # set dependencies versions
@@ -183,7 +183,8 @@ macro(clear_boost_variables)
 endmacro(clear_boost_variables)
 
 
-set (BOOST_COMPONENTS PROGRAM_OPTIONS)
+set (BOOST_COMPONENTS program_options)
+string (TOUPPER "${BOOST_COMPONENTS}" Boost_COMPONENTS)
 clear_boost_variables()
 find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
 	${BOOST_COMPONENTS}
@@ -192,7 +193,7 @@ find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
 macro(copy_boost_variables from to)
 	set (Boost_LIBRARIES${to} ${Boost_LIBRARIES${from}})
 	set (Boost_LIBRARY_DIRS${to} ${Boost_LIBRARY_DIRS${from}} CACHE FILEPATH "Boost${to} library directory" FORCE)
-	foreach(comp ${BOOST_COMPONENTS})
+	foreach(comp ${Boost_COMPONENTS})
 		set(Boost_${comp}_FOUND${to} ${Boost_${comp}_FOUND${from}} CACHE INTERNAL "Whether the Boost ${comp} library found" FORCE)
 		set(Boost_${comp}_LIBRARY${to} ${Boost_${comp}_LIBRARY${from}} CACHE FILEPATH "The Boost ${comp} library" FORCE)
 	endforeach()
@@ -401,14 +402,14 @@ endmacro (install_biips_test_file)
 macro (install_biips_test_dir dir patt)
     if (WIN32)
         install(DIRECTORY
-        	${PROJECT_SOURCE_DIR}/${dir}/
+        	${CMAKE_CURRENT_SOURCE_DIR}/${dir}/
         	DESTINATION ${Biips_INSTALL_DATAROOTDIR}/${CURRENT_REL_DIR}/${dir}
         	FILES_MATCHING PATTERN ${patt}
         	PATTERN .svn EXCLUDE
         )
     else ()
         install(DIRECTORY
-        	${PROJECT_SOURCE_DIR}/${dir}/
+        	${CMAKE_CURRENT_SOURCE_DIR}/${dir}/
         	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/${dir}
         	FILES_MATCHING PATTERN ${patt}
         	PATTERN .svn EXCLUDE
@@ -460,9 +461,9 @@ set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
-set (CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/README.txt)
-#set (CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/Welcome.txt)
-set (CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/COPYING.txt)
+set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.txt)
+#set (CPACK_RESOURCE_FILE_WELCOME ${CMAKE_BINARY_DIR}/Welcome.txt)
+set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt)
 set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
 
