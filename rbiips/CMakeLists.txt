@@ -49,6 +49,16 @@ macro(set_output_bindir var)
     file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CURRENT_REL_DIR}" ${var})
 endmacro(set_output_bindir)
 
+macro(copy_files_to_bindir files dir)
+    foreach(f ${${files}})
+        get_filename_component(n ${f} NAME)
+        configure_file ( ${n}
+        	${${dir}}/${n}
+        	COPYONLY
+        )
+    endforeach()
+endmacro(copy_files_to_bindir)
+
 add_subdirectory(data)
 add_subdirectory(demo)
 add_subdirectory(inst)
@@ -63,6 +73,7 @@ set_output_bindir(out_bindir)
 configure_file (
 	DESCRIPTION.in
 	${out_bindir}/DESCRIPTION
+	@ONLY
 )
 
 # configure README file
@@ -76,6 +87,7 @@ configure_file (
 configure_file (
 	NOTICES.in
 	${out_bindir}/NOTICES
+	@ONLY
 )
 
 # configure configure.ac file
@@ -89,10 +101,7 @@ configure_file (
 
 # copy files to binary directory
 set (src_files cleanup COPYING NAMESPACE)
-
-file (COPY ${src_files}
-	DESTINATION ${out_bindir}
-)
+copy_files_to_bindir (src_files out_bindir)
 
 # Generate configuration scripts
 if (UNIX)
@@ -105,7 +114,7 @@ if (UNIX)
 		    WORKING_DIRECTORY ${out_bindir}
 		    COMMENT "Autoconf generating configure file"
 	    )
-	    add_custom_target(configure
+	    add_custom_target(${PROJECT_NAME}_configure
 	        SOURCES ${out_bindir}/configure
 	    )
 	endif ()
@@ -116,55 +125,57 @@ endif ()
 # and introduce dependencies between targets
 
 # find R
-find_package(R 2.13 REQUIRED COMPONENTS Rcpp)
+find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp)
 
 
 if (R_FOUND)
     set (pkg_dir ${out_bindir})
     
     # add R package tools targets
+    
     add_custom_target (${PROJECT_NAME}_check
-    	${R_EXECUTABLE} CMD check ${pkg_dir}
-    	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    	${R_EXECUTABLE} CMD check ${PROJECT_NAME}
+    	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     	COMMENT "Checking ${PROJECT_NAME} R package"
     	VERBATIM
     )
     if (UNIX)
         add_dependencies(${PROJECT_NAME}_check
-            configure)
-    endif()
-    
-    add_custom_target (${PROJECT_NAME}_build
-    	${R_EXECUTABLE} CMD build ${pkg_dir}
-    	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    	COMMENT "Building ${PROJECT_NAME} R source package"
-    	VERBATIM
-    )
-    if (UNIX)
-        add_dependencies(${PROJECT_NAME}_build
-            configure)
+            ${PROJECT_NAME}_configure
+        )
     endif()
     
     add_custom_target (${PROJECT_NAME}_INSTALL
     	${R_EXECUTABLE} CMD INSTALL ${pkg_dir}
-    	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     	COMMENT "Installing ${PROJECT_NAME} R package"
     	VERBATIM
     )
     if (UNIX)
         add_dependencies(${PROJECT_NAME}_INSTALL
-            configure)
+            ${PROJECT_NAME}_configure
+        )
     endif()
     
-    add_custom_target (${PROJECT_NAME}_INSTALL_build
-    	${R_EXECUTABLE} CMD INSTALL --build ${pkg_dir}
-    	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    	COMMENT "Building ${PROJECT_NAME} R binary package"
-    	VERBATIM
-    )
     if (UNIX)
-        add_dependencies(${PROJECT_NAME}_INSTALL_build
-            configure)
+        add_custom_target (${PROJECT_NAME}_build
+        	${R_EXECUTABLE} CMD build ${pkg_dir}
+        	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        	COMMENT "Building ${PROJECT_NAME} R source package"
+        	VERBATIM
+        )
+        add_dependencies(${PROJECT_NAME}_build
+            ${PROJECT_NAME}_configure
+        )
+    endif()
+    
+    if (WIN32)
+        add_custom_target (${PROJECT_NAME}_INSTALL_build
+        	${R_EXECUTABLE} CMD INSTALL --build ${pkg_dir}
+        	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        	COMMENT "Building ${PROJECT_NAME} R binary package"
+        	VERBATIM
+        )
     endif()
 else ()
 	message (SEND_ERROR "R not found")

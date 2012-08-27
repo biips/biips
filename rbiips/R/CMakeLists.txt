@@ -27,7 +27,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    RBiips/demo CMakeLists
+#  \brief    RBiips/R CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -35,8 +35,11 @@
 #  Id:       $Id$
 #
 
+add_subdirectory(unix)
+add_subdirectory(windows)
+
 set_output_bindir(out_bindir)
 
 # copy files to binary directory
-file(GLOB rfiles *.R)
-file(COPY 00Index ${rfiles} DESTINATION ${out_bindir})
+file(GLOB rfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.R)
+copy_files_to_bindir (rfiles out_bindir)

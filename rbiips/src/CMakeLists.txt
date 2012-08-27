@@ -27,7 +27,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    RBiips/R/windows CMakeLists
+#  \brief    RBiips/src CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -37,5 +37,15 @@
 
 set_output_bindir(out_bindir)
 
-# configure zzz.R file
-configure_file(zzz.R.in ${out_bindir}/zzz.R)
+# configure Makevars.win file
+configure_file (
+	Makevars.win.in
+	${out_bindir}/Makevars.win
+	@ONLY
+)
+
+# copy files to binary directory
+file(GLOB cpp_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+file(GLOB h_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h)
+set(src_files Makevars.in ${cpp_files} ${h_files})
+copy_files_to_bindir (src_files out_bindir)

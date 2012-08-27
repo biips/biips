@@ -27,7 +27,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    RBiips/data CMakeLists
+#  \brief    RBiips/R/windows CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -37,6 +37,8 @@
 
 set_output_bindir(out_bindir)
 
-# copy files to binary directory
-file(GLOB rdata_files *.RData)
-file(COPY ${rdata_files} DESTINATION ${out_bindir})
+# configure zzz.R file
+configure_file(zzz.R.in
+    ${out_bindir}/zzz.R
+    @ONLY
+)
