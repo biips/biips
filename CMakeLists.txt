@@ -100,7 +100,7 @@ set (Boost_VERSION_REQUIRED 1.42.0)
 
 set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
-set (R_VERSION 2.13.0)
+set (R_VERSION_REQUIRED 2.13.0)
 
 
 # print system info
@@ -430,7 +430,7 @@ add_subdirectory (test)
 add_subdirectory (compiler)
 add_subdirectory (testcompiler)
 if (BUILD_RBIIPS)
-    add_subdirectory (RBiips)
+    add_subdirectory (rbiips)
 endif ()
 if (BUILD_MATBIIPS)
     find_package(Mex)
