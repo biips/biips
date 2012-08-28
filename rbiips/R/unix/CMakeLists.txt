@@ -39,4 +39,4 @@ set_output_bindir(out_bindir)
 
 # copy files to binary directory
 set(zzz_file zzz.R)
-copy_files_to_bindir (zzz_file out_bindir)
+copy_files_to_bindir (zzz_file ${out_bindir})

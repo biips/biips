@@ -40,4 +40,4 @@ set_output_bindir(out_bindir)
 # copy files to binary directory
 file(GLOB rfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.R)
 set(src_files 00Index ${rfiles})
-copy_files_to_bindir (src_files out_bindir)
+copy_files_to_bindir (src_files ${out_bindir})

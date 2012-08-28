@@ -417,6 +417,17 @@ macro (install_biips_test_dir dir patt)
     endif ()
 endmacro (install_biips_test_dir)
 
+# macro to copy files to binary dir
+# changes in source file are taken into account
+macro(copy_files_to_bindir files dir)
+    foreach(f ${${files}})
+        get_filename_component(n ${f} NAME)
+        configure_file ( ${n}
+        	${dir}/${n}
+        	COPYONLY
+        )
+    endforeach()
+endmacro(copy_files_to_bindir)
 
 enable_testing()
 # ==============================

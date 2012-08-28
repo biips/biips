@@ -49,16 +49,6 @@ macro(set_output_bindir var)
     file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CURRENT_REL_DIR}" ${var})
 endmacro(set_output_bindir)
 
-macro(copy_files_to_bindir files dir)
-    foreach(f ${${files}})
-        get_filename_component(n ${f} NAME)
-        configure_file ( ${n}
-        	${${dir}}/${n}
-        	COPYONLY
-        )
-    endforeach()
-endmacro(copy_files_to_bindir)
-
 add_subdirectory(data)
 add_subdirectory(demo)
 add_subdirectory(inst)
@@ -101,7 +91,7 @@ configure_file (
 
 # copy files to binary directory
 set (src_files cleanup COPYING NAMESPACE)
-copy_files_to_bindir (src_files out_bindir)
+copy_files_to_bindir (src_files ${out_bindir})
 
 # Generate configuration scripts
 if (UNIX)
