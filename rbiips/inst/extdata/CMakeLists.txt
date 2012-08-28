@@ -39,4 +39,4 @@ set_output_bindir(out_bindir)
 
 # copy files to binary directory
 file(GLOB bugs_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.bug)
-copy_files_to_bindir (bugs_files out_bindir)
+copy_files_to_bindir (bugs_files ${out_bindir})
