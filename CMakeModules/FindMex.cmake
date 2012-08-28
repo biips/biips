@@ -1,8 +1,16 @@
+if (NOT $ENV{MATLAB_ROOT} STREQUAL "")
+    set(MATLAB_ROOT $ENV{MATLAB_ROOT})
+endif()
+if (MATLAB_ROOT)
+    set(MATLAB_BINDIR ${MATLAB_ROOT}/bin)
+endif()
 # search for matlab in PATH
-find_program(MATLAB matlab)
+find_program(MATLAB matlab ${MATLAB_BINDIR})
 # Yes! found it
 if (MATLAB)
-   get_filename_component(MATLAB_BINDIR ${MATLAB} PATH)
+   if (NOT MATLAB_BINDIR)
+       get_filename_component(MATLAB_BINDIR ${MATLAB} PATH)
+   endif()
    if (WIN32)
        set(MEX_COMMAND ${MATLAB_BINDIR}/mex.bat)
        set(MEXEXT_COMMAND ${MATLAB_BINDIR}/mexext.bat)

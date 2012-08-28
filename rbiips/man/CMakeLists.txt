@@ -46,4 +46,4 @@ configure_file (
 
 # copy files to binary directory
 file(GLOB rd_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.Rd)
-copy_files_to_bindir (rd_files out_bindir)
+copy_files_to_bindir (rd_files ${out_bindir})
