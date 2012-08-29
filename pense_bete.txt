@@ -1,2 +1,2 @@
-pour compiler avec la bonne version de boost
-cmake -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" -DCMAKE_BUILD_TYPE:STRING=Debug ..
+pour compiler avec la bonne version de boost (pour marc)
+make -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" -DCMAKE_BUILD_TYPE:STRING=Debug -DR_LIBRARIES=$HOME/user_config/lib64/R/lib/ ..
