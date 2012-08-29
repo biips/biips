@@ -1,49 +1,52 @@
 #                                               -*- cmake -*-
 #
-#  FindR.cmake: Try to find R
+#  RBiips package for GNU R is an interface to BiiPS C++ libraries for
+#  Bayesian inference with interacting Particle Systems.
+#  Copyright (C) Inria, 2012
+#  Authors: Adrien Todeschini, Francois Caron
+#  
+#  RBiips is derived software based on:
+#  BiiPS, Copyright (C) Inria, 2012
+#  rjags, Copyright (C) Martyn Plummer, 2002-2010
+#  Rcpp, Copyright (C) Dirk Eddelbuettel and Romain Francois, 2009-2011
 #
-#  (C) Copyright 2005-2012 EDF-EADS-Phimeca
+#  This file is part of RBiips.
 #
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License.
+#  RBiips is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#  This library is distributed in the hope that it will be useful
+#  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  Lesser General Public License for more details.
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-#
-#  @author dutka
-#  @date   2010-02-04 16:44:49 +0100 (Thu, 04 Feb 2010)
-#  Id      Makefile.am 1473 2010-02-04 15:44:49Z dutka
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# - Try to find R
-# Once done this will define
+#  \file     FindR.cmake
+#  \brief    Try to find R
+#
+#  \author   $LastChangedBy$
+#  \date     $LastChangedDate$
+#  \version  $LastChangedRevision$
+#  Id:       $Id$
+#
+
+#  COPY: This file is derived from OpenTURNS sources (C) Copyright 2005-2012 EDF-EADS-Phimeca
+#  - Try to find R
+#  Once done this will define
 #
 #  R_FOUND - System has R
-#  R_LIBRARIES - The libraries needed to use R
-#  R_DEFINITIONS - Compiler switches required for using R
 #  R_EXECUTABLE - The R interpreter
 
 
-if ( R_EXECUTABLE AND R_LIBRARIES )
+if ( R_EXECUTABLE)
    # in cache already
    set( R_FIND_QUIETLY TRUE )
-endif ( R_EXECUTABLE AND R_LIBRARIES )
-
-#IF (NOT WIN32)
-#   # use pkg-config to get the directories and then use these values
-#   # in the FIND_PATH() and FIND_LIBRARY() calls
-#   FIND_PACKAGE(PkgConfig)
-#   PKG_CHECK_MODULES(PC_R R)
-#   SET(R_DEFINITIONS ${PC_R_CFLAGS_OTHER})
-#ENDIF (NOT WIN32)
+endif ( R_EXECUTABLE)
 
 find_program ( R_EXECUTABLE
                NAMES R R.exe
@@ -59,21 +62,17 @@ if ( R_EXECUTABLE )
                   )
 endif ( R_EXECUTABLE )
 
-find_library ( R_LIBRARIES
-  NAMES R
-  HINTS
-  ${PC_R_LIBDIR}
-  ${PC_R_LIBRARY_DIRS}
-  ${_R_HOME}/lib
-  ${_R_HOME}/lib/x86_64
-)
-
 set ( R_PACKAGES )
 if ( R_EXECUTABLE )
   foreach ( _component ${R_FIND_COMPONENTS} )
     if ( NOT R_${_component}_FOUND )
+	if (WIN32)
+		set (R_FLAGS --vanilla --quiet --slave --ess)
+	else ()
+		set (R_FLAGS --vanilla --quiet --slave --no-readline)
+	endif()
     execute_process ( COMMAND echo "library(${_component})"
-                      COMMAND ${R_EXECUTABLE} --no-save --silent --no-readline --slave
+                      COMMAND ${R_EXECUTABLE} ${R_FLAGS}
                       RESULT_VARIABLE _res
                       OUTPUT_VARIABLE _trashout
                       ERROR_VARIABLE  _trasherr
@@ -94,6 +93,6 @@ include ( FindPackageHandleStandardArgs )
 
 # handle the QUIETLY and REQUIRED arguments and set R_FOUND to TRUE if 
 # all listed variables are TRUE
-find_package_handle_standard_args ( R DEFAULT_MSG R_EXECUTABLE R_LIBRARIES ${R_PACKAGES} )
+find_package_handle_standard_args ( R DEFAULT_MSG R_EXECUTABLE ${R_PACKAGES} )
 
-mark_as_advanced ( R_EXECUTABLE R_LIBRARIES ${R_PACKAGES} )
+mark_as_advanced ( R_EXECUTABLE ${R_PACKAGES} )
