@@ -11,18 +11,12 @@ if (WIN32)
 else (WIN32)
     set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 endif (WIN32)
-
 #set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 foreach(l ${MBIIPS_LIBS})
-	get_target_property(name ${l} OUTPUT_NAME)
-	if (BUILD_SHARED_LIBS)
-		get_target_property(dir ${l} LIBRARY_OUTPUT_DIRECTORY)
-	else(BUILD_SHARED_LIBS)
-		get_target_property(dir ${l} ARCHIVE_OUTPUT_DIRECTORY)
-	endif(BUILD_SHARED_LIBS)
-	set(EXTRA_LIBS ${EXTRA_LIBS} "-L${dir} -l${name}")
-	#set(EXTRA_LIBS ${EXTRA_LIBS} "-l${name}")
+        get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
+        get_filename_component(dir ${MYLIB} PATH)
+        set(EXTRA_LIBS ${EXTRA_LIBS} "-L${dir} -l${l}")
 endforeach(l ${MBIIPS_LIBS})
 
 #define mexfile compilation command
@@ -42,7 +36,7 @@ add_custom_command(
 OUTPUT ${INTER_OUT}
 DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
 COMMAND ${MEX_COMMAND} 
-ARGS  -v  ${MEX_OPT} ${INCLUDE_FLAGS} #${Biips_INSTALL_LIBDIR} 
+ARGS  -v  ${MEX_OPT} ${INCLUDE_FLAGS} 
 ${EXTRA_LIBS} ${SOURCES} 
 COMMENT "building mexfile")
 
