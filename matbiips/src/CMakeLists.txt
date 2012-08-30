@@ -2,7 +2,6 @@
 file(GLOB MBIIPS_SRC *.cpp)
 file(GLOB MBIIPS_H *.h)
 
-
 if (WIN32)
 	# if (MATLAB)
 		# set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
@@ -55,7 +54,8 @@ if (WIN32)
 	add_custom_command(
 	OUTPUT ${INTER_OUT}
 	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC} ${EXTRA_LIBS}
-	COMMAND ${MEX_COMMAND} -v ${MEX_OPT} ${INCLUDE_FLAGS} ${LIB_FLAGS} ${MBIIPS_SRC}
+	COMMAND ${MEX_COMMAND} -v -output inter_biips
+	    ${MEX_OPT} ${INCLUDE_FLAGS} ${LIB_FLAGS} ${MBIIPS_SRC}
 	COMMENT "building mexfile")
 else()
     set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
@@ -81,7 +81,8 @@ else()
 	add_custom_command(
 	OUTPUT ${INTER_OUT}
 	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
-	COMMAND ${MEX_COMMAND} -v  ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC} 
+	COMMAND ${MEX_COMMAND} -v -output inter_biips
+	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
 	COMMENT "building mexfile")
 endif()
 

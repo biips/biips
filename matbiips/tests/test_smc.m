@@ -39,7 +39,7 @@ end
 inter_biips('run_backward_smoother', p0);
 inter_biips('clear_filter_monitors', p0, false);
 backward_smooth_monitors=inter_biips('get_smooth_monitors',p0)
-inter_biips('clear_smooth_monitors', p0), false;
+inter_biips('clear_smooth_monitors', p0, false);
 % on nettoie la console
 inter_biips('clear_console',p0); 
 exit;
