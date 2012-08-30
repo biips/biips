@@ -212,9 +212,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
-          
+         
+          CheckIsDouble(low);
+          CheckIsDouble(up);
+
           IndexRange range = makeRange(low, up);
-          Bool ok = p_console->SetFilterMonitor(name, range);
+	  Bool ok = p_console->SetFilterMonitor(name, range);
           if (ok && VERBOSITY>1)
              {
                  mbiips_cout << " " << name;
@@ -257,6 +260,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
           
+          CheckIsDouble(low);
+          CheckIsDouble(up);
+	  
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothTreeMonitor(name, range);
           if (ok && VERBOSITY>1)
@@ -300,6 +306,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
+          
+	  CheckIsDouble(low);
+          CheckIsDouble(up);
           
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothMonitor(name, range);
@@ -354,14 +363,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
 
-       CheckArgIsNumeric(2);
+       CheckArgIsDouble(2);
        Size n_part = static_cast<Size>(*mxGetPr(prhs[2]));
 
-       CheckArgIsNumeric(3);
+       CheckArgIsDouble(3);
        Size smc_rng_seed = static_cast<Size>(*mxGetPr(prhs[3]));
 
        
-       CheckArgIsNumeric(4);
+       CheckArgIsDouble(4);
        Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[4]));
        
        CheckArgIsString(5);
@@ -674,15 +683,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckIsString(str);
        String name = mxArrayToString(str);
 
-       CheckArgIsNumeric(3);
+       CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
 
-       CheckArgIsNumeric(4);
+       CheckArgIsDouble(4);
        const mxArray * upper = prhs[4];
       
        IndexRange range = makeRange(lower, upper);
 
-       CheckArgIsNumeric(5);
+       CheckArgIsDouble(5);
        double * r_vec = mxGetPr(prhs[5]);
        mwSize r_vec_nb_elems = mxGetNumberOfElements(prhs[5]);
        mwSize ndims = mxGetNumberOfDimensions(prhs[5]);
@@ -717,15 +726,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsString(2);
        String name = mxArrayToString(prhs[2]);
 
-       CheckArgIsNumeric(3);
+       CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
 
-       CheckArgIsNumeric(4);
+       CheckArgIsDouble(4);
        const mxArray * upper = prhs[4];
       
        IndexRange range = makeRange(lower, upper);
 
-       CheckArgIsNumeric(5);
+       CheckArgIsDouble(5);
        Size rngSeed = static_cast<Size>(*mxGetPr(prhs[5]));
        
        MultiArray data;
@@ -757,10 +766,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsString(2);
        String name = mxArrayToString(prhs[2]);
 
-       CheckArgIsNumeric(3);
+       CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
 
-       CheckArgIsNumeric(4);
+       CheckArgIsDouble(4);
        const mxArray * upper = prhs[4];
       
        IndexRange range = makeRange(lower, upper);
@@ -810,7 +819,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
-       CheckArgIsNumeric(2);
+       CheckArgIsDouble(2);
        Scalar logNormConst = static_cast<Scalar>(*mxGetPr(prhs[2]));
 
        p_console->SetLogNormConst(logNormConst);
@@ -824,7 +833,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
    
        CheckRhs(nrhs, 3, name_func);
        
-       CheckArgIsNumeric(1);
+       CheckArgIsDouble(1);
        unsigned long expected_count = static_cast<unsigned long>(*mxGetPr(prhs[1]));
 
        CheckArgIsString(2);
@@ -864,7 +873,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetProgressBarId(progress, prhs[1], name_func);
        ProgressBar_ptr p = progress[id];
        
-       CheckArgIsNumeric(2);
+       CheckArgIsDouble(2);
        unsigned long count = static_cast<unsigned long>(*mxGetPr(prhs[2])); 
        
        (*p) += count; 
@@ -937,7 +946,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console * p_console = consoles[id];
        
-       CheckArgIsNumeric(2);
+       CheckArgIsDouble(2);
        Size smcRngSeed = static_cast<Size>(*mxGetPr(prhs[2]));
 
        if (!p_console->SampleSmoothTreeParticle(smcRngSeed))

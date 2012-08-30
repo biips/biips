@@ -10,7 +10,7 @@ else
   z2=textscan(z1{2},'%s', 'delimiter',']');
   z2=z2{1}{1};
   chps=textscan(z2, '%s', 'delimiter', ',');
-  res=cellfun(@(x) textscan(x,'%d','delimiter',':'), chps{1});
+  res=cellfun(@(x) textscan(x,'%f','delimiter',':'), chps{1});
   s.lower=cellfun(@(x) x(1), res);
   s.upper=cellfun(@(x) x(end), res);
 end
