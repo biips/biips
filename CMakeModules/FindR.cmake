@@ -67,12 +67,11 @@ if ( R_EXECUTABLE )
   foreach ( _component ${R_FIND_COMPONENTS} )
     if ( NOT R_${_component}_FOUND )
 	if (WIN32)
-		set (R_FLAGS --vanilla --quiet --slave --ess)
+		set (R_FLAGS "--vanilla --slave --ess")
 	else ()
-		set (R_FLAGS --vanilla --quiet --slave --no-readline)
+		set (R_FLAGS "--vanilla --slave --no-readline")
 	endif()
-    execute_process ( COMMAND echo "library(${_component})"
-                      COMMAND ${R_EXECUTABLE} ${R_FLAGS}
+    execute_process ( COMMAND ${R_EXECUTABLE} ${R_FLAGS} -e "library(${_component})"
                       RESULT_VARIABLE _res
                       OUTPUT_VARIABLE _trashout
                       ERROR_VARIABLE  _trasherr
