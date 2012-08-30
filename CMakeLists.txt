@@ -160,7 +160,7 @@ if (SUPPRESS_DEPRECATED_WARNINGS)
 	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
 endif ()
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT BUILD_SHARED_LIBS)
   # for static compilations to work with MATLAB
     add_definitions(-fPIC)
 endif()
@@ -275,7 +275,7 @@ macro (add_biips_library name sources biips_libs)
                 )
             if (BUILD_SHARED_LIBS)
                 set_target_properties(${name}-${arch}
-                    PROPERTIES LINK_FLAGS -m${bitnb}
+                    PROPERTIES #LINK_FLAGS -m${bitnb}
                     LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
                     )
             endif ()

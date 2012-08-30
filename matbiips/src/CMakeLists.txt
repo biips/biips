@@ -1,64 +1,100 @@
 #define sources
-set(MBIIPS_SRC inter_biips.cpp Mostream.cpp inter_utils.cpp)
+file(GLOB MBIIPS_SRC *.cpp)
 file(GLOB MBIIPS_H *.h)
-foreach(f ${MBIIPS_SRC})
-   set(SOURCES ${SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${f})
-endforeach(f ${MBIIPS_SRC})
-	 
-# define libraries
+
+
 if (WIN32)
-    set(MBIIPS_LIBS BiipsBase-${MATLAB_ARCH} BiipsCompiler-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
-else (WIN32)
-    set(MBIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
-endif (WIN32)
-#set(Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+	# if (MATLAB)
+		# set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
+		
+		# include_directories(${BiipsCore_INCLUDE_DIRS}
+			# ${BiipsBase_INCLUDE_DIRS}
+			# ${BiipsCompiler_INCLUDE_DIRS}
+			# ${MATLAB_INCLUDE_DIR}
+			# ${Boost_INCLUDE_DIRS}
+		# )
+		
+		# add_library(inter_biips SHARED EXCLUDE_FROM_ALL ${MBIIPS_SRC})
+		# target_link_libraries(inter_biips ${BIIPS_LIBS} -Wl,--export-all-symbols ${MATLAB_LIBRARIES})
+		# set_target_properties(inter_biips PROPERTIES
+			# COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
+			# LINK_FLAGS "${MATLAB_COMPILE_FLAGS}"
+			# PREFIX ""
+			# SUFFIX .${MEX_EXT}
+		# )
+		
+		# set(INTER_OUT inter_biips)
+	# endif()
+	
+    set(BIIPS_LIBS BiipsBase-${MATLAB_ARCH} BiipsCompiler-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
+	foreach(l ${BIIPS_LIBS})
+			get_target_property(loc ${l} LOCATION)
+			get_filename_component(dir ${loc} PATH)
+			file(TO_NATIVE_PATH ${dir}/lib${l}.lib mylib)
+			add_custom_command(OUTPUT ${mylib}
+				DEPENDS ${l}
+				COMMAND ${CMAKE_COMMAND} -E copy ${loc} ${mylib}
+			)
+			set(EXTRA_LIBS ${EXTRA_LIBS} ${mylib})
+			set(LIB_FLAGS ${LIB_FLAGS} -L${dir} -l${l})
+	endforeach(l ${BIIPS_LIBS})
 
-foreach(l ${MBIIPS_LIBS})
-        get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
-        get_filename_component(dir ${MYLIB} PATH)
-        set(EXTRA_LIBS ${EXTRA_LIBS} "-L${dir} -l${l}")
-endforeach(l ${MBIIPS_LIBS})
+	#define mexfile compilation command
+	set(INTER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/inter_biips.cpp)
+	set(INTER_OUT "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(MEX_OPT ${MEX_OPT} -g)
+	endif()
 
-#define mexfile compilation command
-set(INTER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/inter_biips.cpp)
-set(INTER_OUT "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(MEX_OPT ${MEX_OPT} "-g")
+	#define includes flags
+	set (INCLUDE_DIRS ${BiipsCore_INCLUDE_DIRS} ${BiipsBase_INCLUDE_DIRS} ${BiipsCompiler_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+	foreach(d ${INCLUDE_DIRS})
+		set(INCLUDE_FLAGS ${INCLUDE_FLAGS} -I${d})
+	endforeach(d ${INCLUDE_DIRS})
+
+	add_custom_command(
+	OUTPUT ${INTER_OUT}
+	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC} ${EXTRA_LIBS}
+	COMMAND ${MEX_COMMAND} -v ${MEX_OPT} ${INCLUDE_FLAGS} ${LIB_FLAGS} ${MBIIPS_SRC}
+	COMMENT "building mexfile")
+else()
+    set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
+	foreach(l ${BIIPS_LIBS})
+			get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
+			get_filename_component(dir ${MYLIB} PATH)
+			set(EXTRA_LIBS ${EXTRA_LIBS} -L${dir} -l${l})
+	endforeach(l ${BIIPS_LIBS})
+
+	#define mexfile compilation command
+	set(INTER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/inter_biips.cpp)
+	set(INTER_OUT "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(MEX_OPT ${MEX_OPT} -g)
+	endif()
+
+	#define includes flags
+	set (INCLUDE_DIRS ${BiipsCore_INCLUDE_DIRS} ${BiipsBase_INCLUDE_DIRS} ${BiipsCompiler_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+	foreach(d ${INCLUDE_DIRS})
+		set(INCLUDE_FLAGS ${INCLUDE_FLAGS} -I${d})
+	endforeach(d ${INCLUDE_DIRS})
+
+	add_custom_command(
+	OUTPUT ${INTER_OUT}
+	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
+	COMMAND ${MEX_COMMAND} -v  ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC} 
+	COMMENT "building mexfile")
 endif()
 
-#define includes flags
-set (INCLUDE_DIRS ${BiipsCore_INCLUDE_DIRS} ${BiipsBase_INCLUDE_DIRS} ${BiipsCompiler_INCLUDE_DIRS})
-foreach(d ${INCLUDE_DIRS})
-	set(INCLUDE_FLAGS ${INCLUDE_FLAGS} -I${d})
-endforeach(d ${INCLUDE_DIRS})
-
-add_custom_command(
-OUTPUT ${INTER_OUT}
-DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
-COMMAND ${MEX_COMMAND} 
-ARGS  -v  ${MEX_OPT} ${INCLUDE_FLAGS} 
-${EXTRA_LIBS} ${SOURCES} 
-COMMENT "building mexfile")
-
-#set(INTER_INST "${CMAKE_INSTALL_PREFIX}/inter_biips.${MEX_EXT}")
-
-#add_custom_command(
-#OUTPUT ${INTER_INST}
-#DEPENDS ${INTER_OUT}
-#COMMAND ${CMAKE_COMMAND}
-#ARGS -E copy ${INTER_OUT} ${CMAKE_INSTALL_PREFIX})
-#install(FILES ${INTER_OUT} DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-# installation dans le build du mexfile
+# install mexfile in the build directory
 set(INTER_TEST "${CMAKE_BINARY_DIR}/matbiips/tests/inter_biips.${MEX_EXT}")
 message(STATUS ${INTER_TEST})
 add_custom_command(
-OUTPUT ${INTER_TEST}
-DEPENDS ${INTER_OUT}
-COMMAND ${CMAKE_COMMAND}
-ARGS -E copy ${INTER_OUT} "${CMAKE_BINARY_DIR}/matbiips/tests/")
+	OUTPUT ${INTER_TEST}
+	DEPENDS ${INTER_OUT}
+	COMMAND ${CMAKE_COMMAND} -E copy ${INTER_OUT} "${CMAKE_BINARY_DIR}/matbiips/tests/"
+)
 
 #define target
 add_custom_target(matbiips 
-DEPENDS  ${INTER_TEST}
+	DEPENDS  ${INTER_TEST}
 )
