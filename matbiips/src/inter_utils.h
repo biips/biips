@@ -91,13 +91,9 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
  if (!mxIsStruct(prhs[(nb)]))\
     mbiips_cerr << name_func  << " " << nb << " -th argument must be a struct" << endl
 
-#define CheckArgIsNumeric(nb) \
- if (!mxIsNumeric(prhs[(nb)]))\
-    mbiips_cerr << name_func  << " " << nb << " -th argument must be numeric" << endl
-
-#define CheckArgIsLogical(nb) \
- if (!mxIsLogical(prhs[(nb)]))\
-    mbiips_cerr << name_func  << " " << nb << " -th argument must be logical" << endl
+#define CheckArgIsDouble(nb) \
+ if (!mxIsDouble(prhs[(nb)]))\
+    mbiips_cerr << name_func  << " " << nb << " -th argument must be double (in matlab)" << endl
 
 #define CheckArgIsLogical(nb) \
  if (!mxIsLogical(prhs[(nb)]))\
@@ -107,6 +103,9 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
  if (!mxIsChar((m)))\
     mbiips_cerr << name_func  << " " << " some argument must be a string" << endl
 
+#define CheckIsDouble(m)\
+ if (!mxIsDouble((m)))\
+    mbiips_cerr << name_func  << " " << m << " some argument must be double precision" << endl
 
 #endif
 
