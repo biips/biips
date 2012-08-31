@@ -1,4 +1,4 @@
-function [variables_out] = biips_smc_samples(console, variable_names, nb_part, varargin)
+function [var_out] = biips_smc_samples(console, variable_names, nb_part, varargin)
 % BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
 % [variables_out] = biips_smc_samples(console, variable_names, nb_part, [ type, rs_thres, rs_type, seed ])
 % INPUT : 
@@ -61,10 +61,12 @@ end
 ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
 
 log_marg_like = inter_biips('get_log_norm_const', console);
-mon = inter_biips('get_filter_monitors', console);
-
+mon1 = inter_biips('get_filter_monitors', console);
+smon1 = structfun(@(x) struct('filtering',x), mon1, 'UniformOutput', false);
 if (~backward)
    biips_clear_monitors(console, 'f');
 end   
 
+mon2 = inter_biips('get_smooth_tree_monitors', console);
+smon2= structfun(@(x) struct('smoothing',x), mon2, 'UniformOutput', false);
 
