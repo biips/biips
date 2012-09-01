@@ -27,9 +27,16 @@ opt_argin = length(varargin);
 type='fsb';
 rs_type = 'stratified';
 rs_thres = 0.5;
-s=rng('shuffle');
-seed=randi(intmax);
-rng(s);
+if (~OCTAVE_VERSION)
+  s=rng('shuffle');
+  seed=randi(intmax);
+  rng(s);
+else
+  s=rand('state');
+  rand('state',time);
+  seed=randi(intmax);
+  rand('state',s);
+end
 
 if opt_argin >= 1
    type = varargin{1};
