@@ -1,5 +1,5 @@
 #define sources
-file(GLOB MBIIPS_SRC *.cpp)
+file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp)
 file(GLOB MBIIPS_H *.h)
 
 if (WIN32)
@@ -29,6 +29,7 @@ if (WIN32)
 					"Octave mkoct is not yet supported on Windows.\n"
 					"You should deactivate MATBIIPS compilation by setting BUILD_MATBIIPS=OFF")
 	endif()
+#non WIN32
 else()
     set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 	foreach(l ${BIIPS_LIBS})
@@ -53,7 +54,7 @@ else()
 	add_custom_command(
 	OUTPUT ${INTER_OUT}
 	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
-	COMMAND ${MEX_COMMAND} -v -output inter_biips
+	COMMAND ${MEX_COMMAND} -v 
 	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
 	COMMENT "building mexfile")
 endif()
