@@ -12,9 +12,16 @@ function [p, data] = biips_model(filename, data, varargin)
 opt_argin = length(varargin);
 % defauts values
 sample_data = true; 
-s=rng('shuffle');
-data_rng_seed=randi(intmax);
-rng(s);
+if (~OCTAVE_VERSION)
+  s=rng('shuffle');
+  data_rng_seed=randi(intmax);
+  rng(s);
+else
+  s=rand('state');
+  rand('state',time);
+  data_rng_seed=randi(intmax);
+  rand('state',s);
+end
 quiet = false;
 
 if opt_argin >= 1
