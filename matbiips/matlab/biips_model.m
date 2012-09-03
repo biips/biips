@@ -12,7 +12,7 @@ function [p, data] = biips_model(filename, data, varargin)
 opt_argin = length(varargin);
 % defauts values
 sample_data = true; 
-if (~OCTAVE_VERSION)
+if (~exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run
   s=rng('shuffle');
   data_rng_seed=randi(intmax);
   rng(s);
