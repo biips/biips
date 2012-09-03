@@ -27,7 +27,7 @@ opt_argin = length(varargin);
 type='fsb';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (~OCTAVE_VERSION)
+if (~exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run
   s=rng('shuffle');
   seed=randi(intmax);
   rng(s);
