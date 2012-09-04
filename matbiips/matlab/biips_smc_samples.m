@@ -101,4 +101,4 @@ cell_noms = cell(nb_noms,1);
 for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{:,i}}, fsb, 2);
 end   
-var_out = cell2struct(cell_noms, noms,2);
+var_out = inter_biips('cell2struct_weak_names', cell_noms, noms);
