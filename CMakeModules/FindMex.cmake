@@ -29,7 +29,7 @@
 # MATLAB_FLAGS			
 
 # Variables that can be set by the user:
-# MATLAB_ROOT			path to the root of MATLAB install. Helps finding MATLAB.
+# MATLAB_ROOT		path to the root of MATLAB install. Helps finding MATLAB.
 # MATLAB_LIBRARYDIR 	path to the MATLAB libraries (Windows only)
 # MATLAB_INCLUDEDIR 	path to the MATLAB headers (Windows only)
 
@@ -43,31 +43,44 @@ endif()
 find_program(MATLAB matlab ${MATLAB_BINDIR})
 # Yes! found it
 if (MATLAB)
-   if (NOT MATLAB_BINDIR)
-       get_filename_component(MATLAB_BINDIR ${MATLAB} PATH)
-   endif()
-   if (WIN32)
-       set(MEX_COMMAND ${MATLAB_BINDIR}/mex.bat)
-       set(MEXEXT_COMMAND ${MATLAB_BINDIR}/mexext.bat)
-   else (WIN32)
-       set(MEX_COMMAND ${MATLAB_BINDIR}/mex)
-       set(MEXEXT_COMMAND ${MATLAB_BINDIR}/mexext)
-   endif (WIN32)
-   if (EXISTS ${MEX_COMMAND})
-      message (STATUS "mex (Matlab) found : " ${MEX_COMMAND})
-      set(MEX_FOUND MATLAB)
-   endif(EXISTS ${MEX_COMMAND})
-   execute_process(COMMAND ${MEXEXT_COMMAND} OUTPUT_VARIABLE MEX_EXT  OUTPUT_STRIP_TRAILING_WHITESPACE)
-   message(STATUS "mex extension on this machine :" ${MEX_EXT})
    set(MATLAB_COMMAND ${MATLAB})
    set(MATLAB_FLAGS -nojvm -nosplash)
-   if ("${MEX_EXT}" MATCHES ".*64.*")
-	   set(MATLAB_ARCH x64)
-	   message(STATUS "Matlab 64-bit architecture!")
-	   set(MEX_OPT -largeArrayDims)
-   else("${MEX_EXT}" MATCHES ".*64.*")
-	   set(MATLAB_ARCH i386)
-   endif("${MEX_EXT}" MATCHES ".*64.*")
+   if (NOT MATLAB_BINDIR)
+	    execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
+		    -r "fprintf(fopen('_matlabroot','w'), matlabroot); exit"
+		    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+	    file (READ ${CMAKE_BINARY_DIR}/_matlabroot MATLAB_ROOT)
+	    file (REMOVE ${CMAKE_BINARY_DIR}/_matlabroot)
+        set(MATLAB_BINDIR ${MATLAB_ROOT}/bin)
+   endif()
+   find_program(MEX_COMMAND
+        NAMES mex mex.bat
+        PATHS ${MATLAB_BINDIR} 
+        NO_DEFAULT_PATH
+   )
+   if (MEX_COMMAND)
+      message (STATUS "mex (Matlab) found : " ${MEX_COMMAND})
+      set(MEX_FOUND MATLAB)
+   endif()
+   find_program(MEXEXT_COMMAND
+        NAMES mexext mexext.bat
+        PATHS ${MATLAB_BINDIR} 
+        NO_DEFAULT_PATH
+   )
+   if (MEXEXT_COMMAND)
+       execute_process(COMMAND ${MEXEXT_COMMAND}
+		    OUTPUT_VARIABLE MEX_EXT
+		    OUTPUT_STRIP_TRAILING_WHITESPACE
+       )
+       message(STATUS "mex extension on this machine :" ${MEX_EXT})
+       if ("${MEX_EXT}" MATCHES ".*64.*")
+	       set(MATLAB_ARCH x64)
+	       set(MEX_OPT -largeArrayDims)
+       else()
+	       set(MATLAB_ARCH i386)
+       endif()
+   endif()
    
    if (WIN32)
 		set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -DMATLAB_MEX_FILE")
