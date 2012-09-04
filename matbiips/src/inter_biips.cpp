@@ -972,6 +972,46 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     }
     
+    /////////////////////////////////////////
+    // CELL2STRUCT_WEAK_NAMES 
+    /////////////////////////////////////////
+    else if (name_func == "cell2struct_weak_names") {
+
+       CheckRhs(nrhs, 2, name_func);
+       
+       mwSize nb_cell = mxGetNumberOfElements(prhs[1]);
+
+       if ((nb_cell != mxGetNumberOfElements(prhs[2])))
+            mbiips_cerr << name_func <<  ": arguments 1, 2 must have the same number of Elements" << endl;
+   
+       CheckArgIsCell(1);
+       CheckArgIsCell(2);
+
+       for(int i = 0; i <  nb_cell; ++i ) {
+          const mxArray * m = mxGetCell(prhs[2], i);
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+       }
+       
+       typedef char * chaine_carac ;
+       chaine_carac* field_names= new chaine_carac[nb_cell];
+       for(int i = 0; i <  nb_cell; ++i ) {
+          const mxArray * m = mxGetCell(prhs[2], i);
+	  CheckIsString(m);
+	  String name = mxArrayToString(m);
+          field_names[i] = new char[name.size()];
+          std::strcpy(field_names[i], name.c_str());
+       }
+  
+       mwSize  dims[] = { 1 };
+       plhs[0] = mxCreateStructArray(1, dims, nb_cell, const_cast<const char **>(field_names));
+       for(int i = 0;  i < nb_cell; ++i) {
+            mxArray * contenu = mxDuplicateArray(mxGetCell(prhs[1], i));
+	    mxSetFieldByNumber(plhs[0], 0, i, contenu); 
+            delete [] field_names[i];
+       }
+       delete [] field_names;
+    }     
     else {
        mexErrMsgTxt("bad name of function\n");
 
