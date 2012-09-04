@@ -50,12 +50,12 @@ if (MATLAB)
    set(MATLAB_FLAGS -nojvm -nosplash)
    if (NOT MATLAB_BINDIR)
 	    execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
-		    -r "fprintf(fopen('_matlabroot','w'), matlabroot); exit"
+		    -r "fprintf(fopen('_matlabroot','w'), '%s', matlabroot); exit"
 		    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
-	    file (READ ${CMAKE_BINARY_DIR}/_matlabroot MATLAB_ROOT)
-	    file (REMOVE ${CMAKE_BINARY_DIR}/_matlabroot)
-        set(MATLAB_BINDIR ${MATLAB_ROOT}/bin)
+	    file (READ "${CMAKE_BINARY_DIR}/_matlabroot" MATLAB_ROOT)
+	    file (REMOVE "${CMAKE_BINARY_DIR}/_matlabroot")
+        file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
    endif()
    find_program(MEX_COMMAND
         NAMES mex mex.bat
@@ -103,7 +103,6 @@ if (MATLAB)
 				set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m64")
 			endif()
 		endif()
-		message(STATUS MATLAB_LIBRARY_DIR = ${MATLAB_LIBRARY_DIR})
 		find_library(MATLAB_MEX_LIBRARY mex
 			PATHS ${MATLAB_LIBRARY_DIR}
 		)
