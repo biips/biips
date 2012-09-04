@@ -38,8 +38,11 @@ if (NOT $ENV{MATLAB_ROOT} STREQUAL "")
 endif()
 if (MATLAB_ROOT)
     set(MATLAB_BINDIR ${MATLAB_ROOT}/bin)
+elseif(APPLE)
+    file(GLOB MATLAB_PATHS "/Applications/MATLAB_*")
+    find_path(MATLAB_ROOT "license.txt" ${MATLAB_PATHS})
+    set(MATLAB_BINDIR ${MATLAB_ROOT}/bin)
 endif()
-# search for matlab in PATH
 find_program(MATLAB matlab ${MATLAB_BINDIR})
 # Yes! found it
 if (MATLAB)

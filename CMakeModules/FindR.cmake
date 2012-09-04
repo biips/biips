@@ -47,20 +47,11 @@ if ( R_EXECUTABLE)
    # in cache already
    set( R_FIND_QUIETLY TRUE )
 endif ( R_EXECUTABLE)
-
+set (CMAKE_FIND_APPBUNDLE LAST)
 find_program ( R_EXECUTABLE
                NAMES R R.exe
                DOC "Path to the R command interpreter"
               )
-
-get_filename_component ( _R_EXE_PATH ${R_EXECUTABLE} PATH )
-
-if ( R_EXECUTABLE )
-  execute_process ( COMMAND ${R_EXECUTABLE} RHOME
-                    OUTPUT_VARIABLE _R_HOME 
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                  )
-endif ( R_EXECUTABLE )
 
 set ( R_PACKAGES )
 if ( R_EXECUTABLE )
