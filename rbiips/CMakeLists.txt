@@ -94,7 +94,7 @@ set (src_files cleanup COPYING NAMESPACE)
 copy_files_to_bindir (src_files ${out_bindir})
 
 # Generate configuration scripts
-if (UNIX)
+if (NOT WIN32)
 	find_program (AUTOCONF autoconf)
 	if (${AUTOCONF} STREQUAL AUTOCONF-NOTFOUND)
 		message (SEND_ERROR "autoconf not found")
@@ -110,13 +110,8 @@ if (UNIX)
 	endif ()
 endif ()
 
-
-# FIXME: we need a FindR() module
-# and introduce dependencies between targets
-
 # find R
 find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp)
-
 
 if (R_FOUND)
     set (pkg_dir ${out_bindir})
@@ -129,7 +124,7 @@ if (R_FOUND)
     	COMMENT "Checking ${PROJECT_NAME} R package"
     	VERBATIM
     )
-    if (UNIX)
+    if (NOT WIN32)
         add_dependencies(${PROJECT_NAME}_check
             ${PROJECT_NAME}_configure
         )
@@ -141,13 +136,25 @@ if (R_FOUND)
     	COMMENT "Installing ${PROJECT_NAME} R package"
     	VERBATIM
     )
-    if (UNIX)
+    if (NOT WIN32)
         add_dependencies(${PROJECT_NAME}_INSTALL
             ${PROJECT_NAME}_configure
         )
     endif()
     
-    if (UNIX)
+    if (WIN32 OR APPLE)
+        add_custom_target (${PROJECT_NAME}_INSTALL_build
+        	${R_EXECUTABLE} CMD INSTALL --build ${pkg_dir}
+        	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        	COMMENT "Building ${PROJECT_NAME} R binary package"
+        	VERBATIM
+        )
+        if (APPLE)
+            add_dependencies(${PROJECT_NAME}_INSTALL_build
+                ${PROJECT_NAME}_configure
+            )
+        endif()
+    elseif (UNIX)
         add_custom_target (${PROJECT_NAME}_build
         	${R_EXECUTABLE} CMD build ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -158,15 +165,6 @@ if (R_FOUND)
             ${PROJECT_NAME}_configure
         )
     endif()
-    
-    if (WIN32)
-        add_custom_target (${PROJECT_NAME}_INSTALL_build
-        	${R_EXECUTABLE} CMD INSTALL --build ${pkg_dir}
-        	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        	COMMENT "Building ${PROJECT_NAME} R binary package"
-        	VERBATIM
-        )
-    endif()
 else ()
-	message (SEND_ERROR "R not found")
+    message (SEND_ERROR "R not found")
 endif ()
