@@ -1,2 +1,28 @@
 pour compiler avec la bonne version de boost (pour marc)
 make -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" -DCMAKE_BUILD_TYPE:STRING=Debug -DR_LIBRARIES=$HOME/user_config/lib64/R/lib/ ..
+
+
+Windows system requirement:
+---------------------------
+boost 1.46.1
+cmake 2.8
+eclipse cdt
+mingw (not in PATH)
+NSIS 2.46
+PuTTY
+Tortoise SVN
+ProTeXt (MikTeX)
+R 2.15 + Rcpp package
+RTools 2.15
+RStudio
+JAGS 3.2 + rjags package
+
+Windows other software:
+-----------------------
+Microsoft security essentials
+7z
+Chrome
+Dropbox
+Foxit reader
+Notepad++
+

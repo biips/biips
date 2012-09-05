@@ -51,7 +51,7 @@ find_program(MATLAB matlab ${MATLAB_BINDIR})
 # Yes! found it
 if (MATLAB)
     set(MATLAB_COMMAND "${MATLAB}")
-    set(MATLAB_FLAGS "-nojvm -nosplash")
+    set(MATLAB_FLAGS -nojvm -nosplash)
     if (NOT MATLAB_BINDIR)
         # if matlab if found in /usr/local/bin
         # mex and mexext programs will certainly not be there
@@ -60,8 +60,9 @@ if (MATLAB)
             -r "fprintf(fopen('_matlab_root','w'), '%s', matlabroot); exit"
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
-        file (READ "${CMAKE_BINARY_DIR}/_matlab_root" MATLAB_ROOT)
-        file (REMOVE "${CMAKE_BINARY_DIR}/_matlab_root")
+        file (TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/_matlab_root" _matlab_root_file)
+        file (READ "${_matlab_root_file}" MATLAB_ROOT)
+        file (REMOVE "${_matlab_root_file}")
         file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
     endif(NOT MATLAB_BINDIR)
 
@@ -162,7 +163,7 @@ else(MATLAB) # We did not find matlab
     if(MKOCT)
         message (STATUS "mex (Octave) found : ${MKOCT}")
         set(MEX_FOUND OCTAVE)
-        set(MEX_COMMAND "${MKOCT} --mex")
+        set(MEX_COMMAND ${MKOCT} --mex)
         set(MEX_EXT mex)
         find_program(OCTAVE "octave")
         if (OCTAVE)
