@@ -2,12 +2,12 @@ pour compiler avec la bonne version de boost (pour marc)
 make -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" -DCMAKE_BUILD_TYPE:STRING=Debug -DR_LIBRARIES=$HOME/user_config/lib64/R/lib/ ..
 
 
-Windows system requirement:
----------------------------
+Windows minimum requirements:
+-----------------------------
 boost 1.46.1
-cmake 2.8
-eclipse cdt
-mingw (not in PATH)
+CMake 2.8
+Eclipse CDT
+MinGW (not in PATH)
 NSIS 2.46
 PuTTY
 Tortoise SVN
