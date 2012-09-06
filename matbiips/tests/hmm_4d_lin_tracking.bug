@@ -1,0 +1,28 @@
+var xtrue[4,tmax], vtrue[2,tmax], 
+    x[4,tmax], v[2,tmax], y[2,tmax]
+
+data
+{
+  xtrue[,1] ~ dmnorm(meanxinit, precxinit)
+  y[,1] ~ dmnorm(H %*% xtrue[,1], precy)
+  for (t in 2:tmax)
+  {
+    vtrue[,t] ~ dmnorm(meanv, precv)
+    xtrue[,t] <- F %*% xtrue[,t-1] + G %*% vtrue[,t]
+    y[,t] ~ dmnorm(H %*% xtrue[,t], precy)
+  }
+}
+
+
+model
+{
+  x[,1] ~ dmnorm(meanxinit, precxinit)
+  y[,1] ~ dmnorm(H %*% x[,1], precy)
+  for (t in 2:tmax)
+  {
+    v[,t] ~ dmnorm(meanv, precv)
+    x[,t] <- F %*% x[,t-1] + G %*% v[,t]
+    y[,t] ~ dmnorm(H %*% x[,t], precy)
+  }
+}
+
