@@ -62,10 +62,11 @@ namespace Biips
 
   DimArray Function::Dim(const Types<DimArray::Ptr>::Array & paramDims) const
   {
-    if (!CheckParamDims(paramDims))
+    if (!CheckParamDims(paramDims)) {
+      
       throw RuntimeError(String("Non-conforming parameters dimensions for function ")
           + name_);
-
+    }
     return dim(paramDims).Drop();
   }
 

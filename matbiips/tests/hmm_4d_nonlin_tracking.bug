@@ -4,7 +4,7 @@ v[2,tmax-1], x[4,tmax], xradar[2,tmax], y[2,tmax]
 data
 {
   xtrue[,1] ~ dmnorm(meanxinit, precxinit)
-  xradartrue[,1] <- xtrue[1:2,1] - xpos
+  xradartrue[,1] <- xtrue[1:2,1] -xpos
   muytrue[1,1] <- sqrt(xradartrue[1,1]^2+xradartrue[2,1]^2)
   muytrue[2,1] <- arctan(xradartrue[2,1]/xradartrue[1,1])
   y[,1] ~ dmnorm(muytrue[,1], precy)
@@ -23,7 +23,7 @@ data
 model
 {
   x[,1] ~ dmnorm(meanxinit, precxinit)
-  xradar[,1] <- x[1:2,1] - xpos
+  xradar[,1] <- x[1:2,1] -xpos
   muy[1,1] <- sqrt(xradar[1,1]^2+xradar[2,1]^2)
   muy[2,1] <- arctan(xradar[2,1]/xradar[1,1])
   y[,1] ~ dmnorm(muy[,1], precy)
@@ -32,7 +32,7 @@ model
   {
     v[,t-1] ~ dmnorm(meanv, precv)
     x[,t] <- F %*% x[,t-1] + G %*% v[,t-1]
-    xradar[,t] <- x[1:2,t] - xpos
+    xradar[,t] <- x[1:2,t] -xpos
     muy[1,t] <- sqrt(xradar[1,t]^2+xradar[2,t]^2)
     muy[2,t] <- arctan(xradar[2,t]/xradar[1,t])
     y[,t] ~ dmnorm(muy[,t], precy)
