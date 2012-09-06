@@ -11,7 +11,7 @@ data
 
   for (t in 2:tmax)
   {
-    vtrue[,t-1] ~ dmnorm(meanv, Precv)
+    vtrue[,t-1] ~ dmnorm(meanv, precv)
     xtrue[,t] <- F %*% xtrue[,t-1] + G %*% vtrue[,t-1]
     xradartrue[,t] <- xtrue[1:2,t] - xpos
     muytrue[1,t] <- sqrt(xradartrue[1,t]^2+xradartrue[2,t]^2)
@@ -30,7 +30,7 @@ model
 
   for (t in 2:tmax)
   {
-    v[,t-1] ~ dmnorm(meanv, Precv)
+    v[,t-1] ~ dmnorm(meanv, precv)
     x[,t] <- F %*% x[,t-1] + G %*% v[,t-1]
     xradar[,t] <- x[1:2,t] - xpos
     muy[1,t] <- sqrt(xradar[1,t]^2+xradar[2,t]^2)
