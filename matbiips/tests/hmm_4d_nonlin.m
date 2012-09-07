@@ -26,7 +26,7 @@ addpath('../matlab');
 tmax = 10;
 meanxinit = [0; 0; 1; 0];
 precxinit = diag(1000*ones(4,1));
-xpos = [-10 ; 0];
+xpos = [-10  0];
 meanv = zeros(2,1);
 precv = diag(1*ones(2,1));
 precy = diag([10; 100]);
