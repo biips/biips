@@ -39,7 +39,7 @@
 namespace Biips
 {
 
-  Bool Pow::checkParamValues(const NumArray::Array & paramValues) const
+  Bool Pow::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & base = paramValues[0];
     const NumArray & exponent = paramValues[1];
@@ -58,7 +58,7 @@ namespace Biips
     return true;
   }
 
-  Bool PowInfix::checkParamValues(const NumArray::Array & paramValues) const
+  Bool PowInfix::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & base = paramValues[0];
     const NumArray & exponent = paramValues[1];

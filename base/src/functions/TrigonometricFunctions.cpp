@@ -39,7 +39,7 @@
 namespace Biips
 {
 
-  Bool ArcCos::checkParamValues(const NumArray::Array & paramValues) const
+  Bool ArcCos::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
     for (Size i = 0; i < x.size(); ++i)
@@ -50,7 +50,7 @@ namespace Biips
     return true;
   }
 
-  Bool ArcSin::checkParamValues(const NumArray::Array & paramValues) const
+  Bool ArcSin::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
     for (Size i = 0; i < x.size(); ++i)
@@ -61,7 +61,7 @@ namespace Biips
     return true;
   }
 
-  Bool ArcCosh::checkParamValues(const NumArray::Array & paramValues) const
+  Bool ArcCosh::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
     for (Size i = 0; i < x.size(); ++i)
@@ -72,7 +72,7 @@ namespace Biips
     return true;
   }
 
-  Bool ArcTanh::checkParamValues(const NumArray::Array & paramValues) const
+  Bool ArcTanh::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
     for (Size i = 0; i < x.size(); ++i)

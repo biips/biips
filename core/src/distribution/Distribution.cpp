@@ -47,19 +47,6 @@ namespace Biips
 
     return checkParamDims(paramDims);
   }
-  ;
-
-  Bool Distribution::CheckParamValues(const NumArray::Array & paramValues) const
-  {
-    //    Types<DimArray::Ptr>::Array param_dims(paramValues.size());
-    //    for (Size i = 0; i<paramValues.size(); ++i)
-    //      param_dims[i] = paramValues[i].DimPtr();
-    //
-    //    if (!CheckParamDims(param_dims))
-    //      throw LogicError(String("Non-conforming parameters dimensions for distribution ") + name_);
-
-    return checkParamValues(paramValues);
-  }
 
   Bool Distribution::CheckDensityParamValues(const NumArray & x,
                                              const NumArray::Array & paramValues) const

@@ -153,12 +153,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -179,12 +179,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -205,12 +205,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -231,9 +231,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     virtual String Alias() const
     {
       return "acos";
@@ -258,9 +258,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     virtual String Alias() const
     {
       return "asin";
@@ -285,12 +285,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual String Alias() const
     {
       return "atan";
@@ -315,12 +315,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -341,12 +341,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -367,12 +367,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -393,9 +393,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     virtual String Alias() const
     {
       return "acosh";
@@ -420,12 +420,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual String Alias() const
     {
       return "asinh";
@@ -450,9 +450,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     virtual String Alias() const
     {
       return "atanh";

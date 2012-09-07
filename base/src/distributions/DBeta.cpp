@@ -37,62 +37,72 @@
 #include "distributions/DBeta.hpp"
 #include <boost/math/special_functions/gamma.hpp>
 
+#define ALPHA(paramValues) (paramValues[0].ScalarView())
+#define BETA(paramValues) (paramValues[1].ScalarView())
+
 namespace Biips
 {
 
-  Bool DBeta::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DBeta::CheckParamValues(const NumArray::Array & paramValues) const
   {
-    Scalar alpha = paramValues[0].ScalarView();
-    Scalar beta = paramValues[1].ScalarView();
-
-    return alpha > 0.0 && beta > 0.0;
+    return ALPHA(paramValues) > 0.0 && BETA(paramValues) > 0.0;
   }
 
   Bool DBeta::checkDensityParamValues(Scalar x,
                                       const NumArray::Array & paramValues) const
   {
-    if (checkParamValues(paramValues))
+    if (ALPHA(paramValues) > 0.0 && BETA(paramValues) > 0.0)
     {
-      Scalar alpha = paramValues[0].ScalarView();
-      Scalar beta = paramValues[1].ScalarView();
-      return !(x == 0 && alpha < 1) && !(x == 1 && beta < 1);
+      if (x == 0 && ALPHA(paramValues) < 1)
+        return false;
+      else if (x == 1 && BETA(paramValues) < 1)
+        return false;
+      return true;
     }
-    else
-      return false;
+    return false;
   }
 
   DBeta::MathDistType DBeta::mathDist(const NumArray::Array & paramValues) const
   {
-    Scalar alpha = paramValues[0].ScalarView();
-    Scalar beta = paramValues[1].ScalarView();
-
-    return MathDistType(alpha, beta);
+    return MathDistType(ALPHA(paramValues), BETA(paramValues));
   }
 
-  DBeta::RandomDistType DBeta::randomDist(const NumArray::Array & paramValues) const
+  DBeta::RandomDistType DBeta::randomDist(
+      const NumArray::Array & paramValues) const
   {
-    Scalar alpha = paramValues[0].ScalarView();
-    Scalar beta = paramValues[1].ScalarView();
-
-    return RandomDistType(alpha, beta);
+    return RandomDistType(ALPHA(paramValues), BETA(paramValues));
   }
 
-  Scalar DBeta::d(Scalar x, const NumArray::Array & paramValues, Bool give_log) const
+  Scalar DBeta::d(Scalar x, const NumArray::Array & paramValues,
+                  Bool give_log) const
   {
     if (give_log)
     {
-      Scalar alpha = paramValues[0].ScalarView();
-      Scalar beta = paramValues[1].ScalarView();
+      Scalar alpha = ALPHA(paramValues);
+      Scalar beta = BETA(paramValues);
 
       using std::log;
       using boost::math::lgamma;
 
       return lgamma(alpha + beta) - lgamma(alpha) - lgamma(beta)
-          + (alpha - 1.0) * log(x) + (beta - 1.0) * log(1.0 - x);
+             + (alpha - 1.0) * log(x) + (beta - 1.0) * log(1.0 - x);
     }
 
     MathDistType dist = mathDist(paramValues);
 
     return boost::math::pdf(dist, x);
+  }
+
+  Scalar DBeta::r(const NumArray::Array & paramValues, Rng & rng) const
+  {
+    typedef boost::variate_generator<Rng::GenType&, RandomDistType> GenType;
+    GenType gen(rng.GetGen(), randomDist(paramValues));
+
+    Scalar ans = 0;
+    // discard 0 and 1 values
+    // because pdf not defined
+    while (!(ans > 0 && ans < 1))
+      ans = gen();
+    return ans;
   }
 }

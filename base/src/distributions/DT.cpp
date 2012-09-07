@@ -73,7 +73,7 @@ namespace Biips
     return mu_ + boost::math::quantile(mathDist_, p) / sqrtTau_;
   }
 
-  Bool DT::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DT::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar tau = paramValues[1].ScalarView();
     Scalar k = paramValues[2].ScalarView();

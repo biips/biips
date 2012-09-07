@@ -40,7 +40,7 @@
 namespace Biips
 {
 
-  Bool DNorm::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DNorm::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar mean = paramValues[0].ScalarView();
     Scalar prec = paramValues[1].ScalarView();

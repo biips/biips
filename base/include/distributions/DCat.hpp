@@ -54,7 +54,6 @@ namespace Biips
 
     virtual Bool
     checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual void sample(ValArray & values,
                         const NumArray::Array & paramValues,
@@ -69,6 +68,7 @@ namespace Biips
                      const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Bool IsDiscreteValued(const Flags & mask) const
     {
       return true;

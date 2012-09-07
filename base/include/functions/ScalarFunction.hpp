@@ -60,11 +60,11 @@ namespace Biips
     {
       return true;
     }
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const = 0;
     virtual ~UnaryScalarFunction()
     {
     }
@@ -86,11 +86,11 @@ namespace Biips
 
     virtual Bool
     checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const = 0;
     virtual ~BinaryScalarFunction()
     {
     }
@@ -112,11 +112,11 @@ namespace Biips
 
     virtual Bool
     checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const = 0;
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const = 0;
     virtual ~VariableScalarFunction()
     {
     }
@@ -147,7 +147,7 @@ namespace Biips
     else if (paramDims[1]->IsScalar())
       return true;
     else
-      return *paramDims[0] == *paramDims[1];
+      return paramDims[0]->Drop() == paramDims[1]->Drop();
   }
 
   template<typename BinaryOperator>
@@ -204,7 +204,7 @@ namespace Biips
       else if (!p_ref_dim)
         p_ref_dim = paramDims[i];
       else
-        ans = *paramDims[i] == *p_ref_dim;
+        ans = paramDims[i]->Drop() == p_ref_dim->Drop();
     }
     return ans;
   }
@@ -227,7 +227,7 @@ namespace Biips
         }
       }
     }
-    return *p_ref_dim;
+    return p_ref_dim->Drop();
   }
 
   template<typename BinaryOperator>
