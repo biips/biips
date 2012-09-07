@@ -59,7 +59,6 @@ namespace Biips
       BaseType("dbin", 2, DIST_SPECIAL, true)
     {
     }
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
     virtual Scalar unboundedLower(const NumArray::Array & paramValues) const;
     virtual Scalar unboundedUpper(const NumArray::Array & paramValues) const;
 
@@ -71,6 +70,7 @@ namespace Biips
     {
       return "dbinom";
     }
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Bool IsSupportFixed(const Flags & fixmask) const;
     virtual Scalar d(Scalar x,
                      const NumArray::Array & paramValues,

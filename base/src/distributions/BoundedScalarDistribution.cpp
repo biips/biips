@@ -214,7 +214,7 @@ namespace Biips
   Bool BoundedScalarDistribution::checkDensityParamValues(Scalar x,
                                                           const NumArray::Array & paramValues) const
   {
-    return checkParamValues(paramValues);
+    return CheckParamValues(paramValues);
   }
 
   Bool BoundedScalarDistribution::IsSupportFixed(const Flags & fixmask) const

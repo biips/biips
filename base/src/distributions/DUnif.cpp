@@ -48,7 +48,7 @@ namespace Biips
     return lower.IsScalar() && upper.IsScalar();
   }
 
-  Bool DUnif::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DUnif::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar lower = paramValues[0].ScalarView();
     Scalar upper = paramValues[1].ScalarView();

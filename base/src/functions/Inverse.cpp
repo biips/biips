@@ -48,7 +48,7 @@ namespace Biips
     return dim.Drop().IsSquared() || dim.IsScalar();
   }
 
-  Bool Inverse::checkParamValues(const NumArray::Array & paramValues) const
+  Bool Inverse::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & m = paramValues[0];
 

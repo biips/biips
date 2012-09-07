@@ -172,12 +172,12 @@ namespace Biips
       BaseType("ddexp", 2, DIST_UNBOUNDED, false)
     {
     }
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
     virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
     virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Scalar d(Scalar x,
                      const NumArray::Array & paramValues,
                      Bool give_log) const;

@@ -40,7 +40,7 @@
 namespace Biips
 {
 
-  Bool DBin::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DBin::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar success_fraction = paramValues[0].ScalarView();
     Scalar trials = paramValues[1].ScalarView();

@@ -40,7 +40,7 @@
 namespace Biips
 {
 
-  Bool DF::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DF::CheckParamValues(const NumArray::Array & paramValues) const
   {
     return (paramValues[0].ScalarView() > 0.0) && (paramValues[1].ScalarView()
         > 0.0);
@@ -49,7 +49,7 @@ namespace Biips
   Bool DF::checkDensityParamValues(Scalar x,
                                    const NumArray::Array & paramValues) const
   {
-    return x > 0.0 && checkParamValues(paramValues);
+    return x > 0.0 && CheckParamValues(paramValues);
   }
 
   DF::MathDistType DF::mathDist(const NumArray::Array & paramValues) const

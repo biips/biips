@@ -51,7 +51,7 @@ namespace Biips
       return false;
   }
 
-  Bool DCat::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DCat::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & weights = paramValues[0];
 

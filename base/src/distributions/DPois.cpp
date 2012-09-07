@@ -40,7 +40,7 @@
 
 namespace Biips
 {
-  Bool DPois::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DPois::CheckParamValues(const NumArray::Array & paramValues) const
   {
     return LAMBDA(paramValues) >= 0.0;
   }
@@ -48,7 +48,7 @@ namespace Biips
   Bool DPois::checkDensityParamValues(Scalar x,
                                       const NumArray::Array & paramValues) const
   {
-    return checkSize(x) && checkParamValues(paramValues);
+    return checkSize(x) && CheckParamValues(paramValues);
   }
 
   DPois::MathDistType DPois::mathDist(const NumArray::Array & paramValues) const

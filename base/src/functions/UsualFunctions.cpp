@@ -39,7 +39,7 @@
 namespace Biips
 {
 
-  Bool Sqrt::checkParamValues(const NumArray::Array & paramValues) const
+  Bool Sqrt::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
 
@@ -52,7 +52,7 @@ namespace Biips
     return true;
   }
 
-  Bool Log::checkParamValues(const NumArray::Array & paramValues) const
+  Bool Log::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const ValArray & x = paramValues[0].Values();
 

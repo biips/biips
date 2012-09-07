@@ -39,7 +39,7 @@
 namespace Biips
 {
 
-  Bool DPar::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DPar::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar alpha = paramValues[0].ScalarView();
     Scalar c = paramValues[1].ScalarView();

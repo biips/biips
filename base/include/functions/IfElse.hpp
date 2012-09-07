@@ -56,15 +56,15 @@ namespace Biips
 
     virtual Bool
     checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
-    {
-      return true;
-    }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
     virtual void
         eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
     virtual Bool IsDiscreteValued(const Flags & mask) const;
     static Function::Ptr Instance()
     {

@@ -61,9 +61,8 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -83,9 +82,8 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Bool IsInfix() const
     {
       return true;
