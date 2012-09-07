@@ -54,7 +54,7 @@ namespace Biips
   {
   }
 
-  Bool DDexp::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DDexp::CheckParamValues(const NumArray::Array & paramValues) const
   {
     return RATE(paramValues) > 0.0;
   }

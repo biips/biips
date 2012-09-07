@@ -91,7 +91,7 @@ namespace Biips
     return n_factor == 1;
   }
 
-  Bool Divide::checkParamValues(const NumArray::Array & paramValues) const
+  Bool Divide::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & denominator = paramValues[1];
     for (Size i = 0; i < denominator.Values().size(); ++i)

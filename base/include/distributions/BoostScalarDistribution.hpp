@@ -59,6 +59,9 @@ namespace Biips
     typedef RandomDist RandomDistType;
 
   protected:
+    virtual Bool
+    checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const;
+
     virtual Scalar d(Scalar x,
                      const NumArray::Array & paramValues,
                      Bool give_log) const;
@@ -84,6 +87,13 @@ namespace Biips
     {
     }
   };
+
+  template<typename MathDist, typename RandomDist>
+  Bool BoostScalarDistribution<MathDist, RandomDist>::checkDensityParamValues(Scalar x,
+                                                          const NumArray::Array & paramValues) const
+  {
+    return CheckParamValues(paramValues);
+  }
 
   template<typename MathDist, typename RandomDist>
   Scalar BoostScalarDistribution<MathDist, RandomDist>::d(Scalar x,

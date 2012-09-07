@@ -40,7 +40,7 @@
 namespace Biips
 {
 
-  Bool DGamma::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DGamma::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar shape = paramValues[0].ScalarView();
     Scalar inv_scale = paramValues[1].ScalarView();

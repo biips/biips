@@ -104,12 +104,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsDiscreteValued(const Flags & mask) const
     {
       return mask[0];
@@ -134,9 +134,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -157,9 +157,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
-
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -180,12 +180,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -206,12 +206,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsDiscreteValued(const Flags & mask) const
     {
       return true;
@@ -236,12 +236,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsDiscreteValued(const Flags & mask) const
     {
       return true;

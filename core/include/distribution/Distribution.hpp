@@ -58,7 +58,6 @@ namespace Biips
 
     virtual Bool
         checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
-    virtual Bool checkParamValues(const NumArray::Array & paramDims) const = 0;
     virtual DimArray
         dim(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
     virtual void sample(ValArray & values,
@@ -96,7 +95,7 @@ namespace Biips
 
     Bool CheckParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
 
-    Bool CheckParamValues(const NumArray::Array & paramValues) const;
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const = 0;
 
     virtual Bool
         CheckDensityParamValues(const NumArray & x,

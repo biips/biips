@@ -62,12 +62,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsDiscreteValued(const Flags & mask) const
     {
       return true;

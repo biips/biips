@@ -60,7 +60,7 @@ namespace Biips
     return *paramDims[0];
   }
 
-  Bool DMNormVar::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DMNormVar::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & mean = paramValues[0];
 

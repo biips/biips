@@ -40,7 +40,7 @@
 namespace Biips
 {
 
-  Bool DChisqr::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DChisqr::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar degree = paramValues[0].ScalarView();
     return degree > 0.0;

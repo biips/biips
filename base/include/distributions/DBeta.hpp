@@ -60,7 +60,6 @@ namespace Biips
       BaseType("dbeta", 2, DIST_PROPORTION, false)
     {
     }
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
     virtual Bool
     checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const;
 
@@ -69,6 +68,9 @@ namespace Biips
 
   public:
     Scalar d(Scalar x, const NumArray::Array & paramValues, Bool give_log) const;
+    Scalar r(const NumArray::Array & paramValues, Rng & rng) const;
+
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
 
     static Distribution::Ptr Instance()
     {

@@ -59,7 +59,6 @@ namespace Biips
       BaseType("dnormvar", 2, DIST_UNBOUNDED, false)
     {
     }
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
     virtual void sample(ValArray & values,
                         const NumArray::Array & paramValues,
                         const NumArray::Pair & boundValues,
@@ -69,6 +68,7 @@ namespace Biips
     randomDist(const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Scalar d(Scalar x,
                      const NumArray::Array & paramValues,
                      Bool give_log) const;

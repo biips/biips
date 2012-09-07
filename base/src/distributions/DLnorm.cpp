@@ -43,7 +43,7 @@ namespace Biips
   using std::log;
   using std::pow;
 
-  Bool DLnorm::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DLnorm::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar tau = paramValues[1].ScalarView();
     return tau > 0.0;

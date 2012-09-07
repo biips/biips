@@ -39,7 +39,7 @@
 namespace Biips
 {
 
-  Bool DExp::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DExp::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar lambda = paramValues[0].ScalarView();
     return lambda > 0.0;

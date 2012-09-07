@@ -89,7 +89,7 @@ namespace Biips
   {
   }
 
-  Bool DGenGamma::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DGenGamma::CheckParamValues(const NumArray::Array & paramValues) const
   {
     return SHAPE(paramValues) > 0.0 && RATE(paramValues) > 0.0
         && POW(paramValues) > 0.0;

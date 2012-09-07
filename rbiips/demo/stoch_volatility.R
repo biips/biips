@@ -92,7 +92,7 @@ if (interactive()) {
   plot.dens <- (ans == "y")
 }
 if(plot.dens) {
-  par(mfcol = c(5, 2))
+  par(mfcol = c(3, 2))
   plot(density(out.biips$x, adjust=2), bty="n")
   par(mfcol = c(1,1))
 }

@@ -47,7 +47,7 @@ namespace Biips
     return p.IsScalar();
   }
 
-  Bool DBern::checkParamValues(const NumArray::Array & paramValues) const
+  Bool DBern::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar p = paramValues[0].ScalarView();
 

@@ -54,12 +54,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsInfix() const
     {
       return true;
@@ -87,12 +87,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
 
-  public:
     virtual Bool IsInfix() const
     {
       return true;
@@ -120,14 +120,14 @@ namespace Biips
       BaseType("*")
     {
     }
-    virtual Bool IsDiscreteValued(const Flags & mask) const;
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
+    virtual Bool IsDiscreteValued(const Flags & mask) const;
 
-  public:
     virtual Bool IsInfix() const
     {
       return true;
@@ -153,9 +153,9 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const;
 
   public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
     virtual Bool IsInfix() const
     {
       return true;
@@ -181,12 +181,12 @@ namespace Biips
     {
     }
 
-    virtual Bool checkParamValues(const NumArray::Array & paramValues) const
+
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
     }
-
-  public:
     virtual Bool IsPrefix() const
     {
       return true;
