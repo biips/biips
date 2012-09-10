@@ -213,8 +213,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
          
-          CheckIsDouble(low);
-          CheckIsDouble(up);
+	  if (!mxIsEmpty(low)) {
+	    CheckIsDouble(low);
+          }
+	  if (!mxIsEmpty(up)) {
+	    CheckIsDouble(up);
+	  }
 
           IndexRange range = makeRange(low, up);
 	  Bool ok = p_console->SetFilterMonitor(name, range);
@@ -260,9 +264,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
           
-          CheckIsDouble(low);
-          CheckIsDouble(up);
-	  
+          
+	  if (!mxIsEmpty(low)) {
+	    CheckIsDouble(low);
+          }
+	  if (!mxIsEmpty(up)) {
+	    CheckIsDouble(up);
+	  }
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothTreeMonitor(name, range);
           if (ok && VERBOSITY>1)
@@ -307,8 +315,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  CheckIsString(m);
 	  String name = mxArrayToString(m);
           
-	  CheckIsDouble(low);
-          CheckIsDouble(up);
+	  if (!mxIsEmpty(low)) {
+	    CheckIsDouble(low);
+          }
+	  if (!mxIsEmpty(up)) {
+	    CheckIsDouble(up);
+	  }
           
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothMonitor(name, range);
