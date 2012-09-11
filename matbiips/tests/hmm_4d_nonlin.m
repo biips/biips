@@ -27,7 +27,7 @@ tmax = 10;
 meanxinit = [0; 0; 1; 0];
 precxinit = diag(1000*ones(4,1));
 xpos = [-10  0];
-meanv = zeros(2,1);
+meanv = zeros(2, 1);
 precv = diag(1*ones(2,1));
 precy = diag([10; 100]);
 delta_t = 1;
@@ -46,7 +46,7 @@ end
 biips_init;
 inter_biips('verbosity',4);
 p=biips_model('hmm_4d_nonlin_tracking.bug', data);
-biips_smc_samples(p, {'x[1:10,]'}, 100);
+biips_smc_samples(p, {'x[2,1:10]', 'y[1,1]'}, 100);
 %% on nettoie la console
 inter_biips('clear_console', p); 
 exit;
