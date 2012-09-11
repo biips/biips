@@ -52,11 +52,13 @@ else()
 	endforeach(d ${INCLUDE_DIRS})
 
 	add_custom_command(
-	OUTPUT ${INTER_OUT}
-	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC}
-	COMMAND ${MEX_COMMAND} -v 
-	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
-	COMMENT "building mexfile")
+    	OUTPUT ${INTER_OUT}
+    	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC} ${BIIPS_LIBS}
+    	COMMAND ${MEX_COMMAND} -v 
+    	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
+    	COMMENT "Building mexfile"
+    	VERBATIM
+	)
 endif()
 
 # install mexfile in the build directory
@@ -65,6 +67,8 @@ add_custom_command(
 	OUTPUT ${INTER_TEST}
 	DEPENDS ${INTER_OUT}
 	COMMAND ${CMAKE_COMMAND} -E copy inter_biips.${MEX_EXT} "${CMAKE_BINARY_DIR}/matbiips/tests/"
+    COMMENT "Copying mexfile in build tests directory"
+    VERBATIM
 )
 
 #define target

@@ -45,7 +45,11 @@ configure_file (
 )
 
 # copy files to binary directory
-file(GLOB cpp_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
-file(GLOB h_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h)
-set(src_files Makevars.in ${cpp_files} ${h_files})
+file(GLOB cpp_files *.cpp)
+file(GLOB h_files *.h)
+set(src_files ${out_bindir}/Makevars.in ${cpp_files} ${h_files})
 copy_files_to_bindir (src_files ${out_bindir})
+
+
+# add dependencies to source files 
+add_targets_depends(src_files)

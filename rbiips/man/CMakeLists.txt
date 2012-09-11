@@ -45,5 +45,9 @@ configure_file (
 )
 
 # copy files to binary directory
-file(GLOB rd_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.Rd)
+file(GLOB rd_files *.Rd)
 copy_files_to_bindir (rd_files ${out_bindir})
+
+set(src_files ${rd_files} ${out_bindir}/RBiips-package.Rd)
+# add dependencies to source files
+add_targets_depends(src_files)
