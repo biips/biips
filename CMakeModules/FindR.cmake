@@ -57,21 +57,20 @@ find_program ( R_EXECUTABLE
 set ( R_PACKAGES )
 if ( R_EXECUTABLE )
     if (WIN32)
-        set (R_FLAGS "--vanilla --slave --ess")
+        set (R_FLAGS --vanilla --slave --ess)
     else ()
-        set (R_FLAGS "--vanilla --slave --no-readline")
+        set (R_FLAGS --vanilla --slave --no-readline)
     endif()
     
     # define R_VERSION
     execute_process( COMMAND ${R_EXECUTABLE} ${R_FLAGS}
         -e "cat(paste(R.version$major, R.version$minor, sep='.'))"
-        OUTPUT_VARIABLE R_VERSION
+        OUTPUT_VARIABLE R_VERSION_STRING
     )
+	STRING(REGEX MATCH "[0-9]+\\.[0-9]+(\\.[0-9])?" R_VERSION "${R_VERSION_STRING}")
+	message(STATUS R_VERSION=${R_VERSION})
     foreach ( _component ${R_FIND_COMPONENTS} )
         if ( NOT R_${_component}_FOUND )
-            
-            
-            # 
             execute_process ( COMMAND ${R_EXECUTABLE} ${R_FLAGS}
                 -e "library(${_component})"
                 RESULT_VARIABLE _res
