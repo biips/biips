@@ -71,8 +71,6 @@ log_marg_like = inter_biips('get_log_norm_const', console);
 mon1 = inter_biips('get_filter_monitors', console);
 noms = fieldnames(mon1);
 cz1 = struct2cell(mon1);
-cz = { cz1{:} };
-clear cz1{:} ;
 if (~backward)
    biips_clear_monitors(console, 'f');
 end   
@@ -80,8 +78,6 @@ end
 mon2 = inter_biips('get_smooth_tree_monitors', console);
 biips_clear_monitors(console, 's');
 cz2 = struct2cell(mon2);
-cz = { cz{:} ; cz2 };
-clear cz2;
 
 if (backward)
    inter_biips('run_backward_smoother', console);
@@ -89,16 +85,16 @@ if (backward)
    mon3 = inter_biips('get_smooth_tree_monitors', console);
    cz3 = struct2cell(mon3);
    biips_clear_monitors(console, 'b'); 
-   cz = { cz{:} , cz3{:} };
-   clear cz3;
 end
 
+cz = horzcat(cz1, cz2, cz3);
+
 fsb = {'f', 's', 'b' };
-fsb = {fsb{1:size(cz,1)} };
+fsb = {fsb{1:size(cz, 2)} };
 
 nb_noms = length(noms);
-cell_noms = cell(nb_noms,1);
+cell_noms = cell(nb_noms, 1);
 for i=1:nb_noms
-   cell_noms{i} = cell2struct({cz{:,i}}, fsb, 2);
+   cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
 end   
 var_out = inter_biips('cell2struct_weak_names', cell_noms, noms);
