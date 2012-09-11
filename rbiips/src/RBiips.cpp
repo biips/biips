@@ -196,7 +196,7 @@ RcppExport SEXP prompt_string(SEXP prompt)
   String old = PROMPT_STRING;
   if (!Rf_isNull(prompt))
     PROMPT_STRING = Rcpp::as<String>(prompt);
-  return Rcpp::wrap(PROMPT_STRING);
+  return Rcpp::wrap(old);
   END_RBIIPS
 }
 
@@ -210,7 +210,7 @@ RcppExport SEXP indent_size(SEXP size)
     INDENT_SIZE = Rcpp::as<Size>(size);
     INDENT_STRING = String(INDENT_SIZE, INDENT_CHAR);
   }
-  return Rcpp::wrap(INDENT_SIZE);
+  return Rcpp::wrap(old);
   END_RBIIPS
 }
 
@@ -407,7 +407,8 @@ RcppExport void remove_data(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper)
   String name(var[0]);
   IndexRange range = makeRange(lower, upper);
 
-  Bool ok = p_console->RemoveData(name, range ,VERBOSITY);
+  if (!p_console->RemoveData(name, range ,VERBOSITY))
+    throw RuntimeError("Failed to remove data.");
 
   VOID_END_RBIIPS
 }
