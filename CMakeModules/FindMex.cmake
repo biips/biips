@@ -56,12 +56,17 @@ if (MATLAB)
         # if matlab is found in /usr/local/bin
         # mex and mexext programs will certainly not be there
         # hence we define MATLAB_BINDIR using the 'matlabroot' MATLAB command
-        execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
-            -r "fprintf(fopen('_matlab_root','w'), '%s', matlabroot); exit"
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
-        file (TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/_matlab_root" _matlab_root_file)
-        file (READ "${_matlab_root_file}" MATLAB_ROOT)
+        file (TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/matlab_root" _matlab_root_file)
+		execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
+			-r "fprintf(fopen('matlab_root','w'), '%s', matlabroot); exit"
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		)
+		while (NOT MATLAB_ROOT)
+			while (NOT EXISTS ${_matlab_root_file})
+				# wait for previous execute_process
+			endwhile()
+			file (READ "${_matlab_root_file}" MATLAB_ROOT)
+		endwhile()
         file (REMOVE "${_matlab_root_file}")
         file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
     endif(NOT MATLAB_BINDIR)

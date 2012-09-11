@@ -146,10 +146,6 @@ macro(add_targets_depends src_files)
             ${${src_files}}
         )
         
-        add_dependencies(${PROJECT_NAME}_INSTALL
-            ${${src_files}}
-        )
-        
         if (WIN32 OR APPLE)
             add_dependencies(${PROJECT_NAME}_INSTALL_build
                 ${${src_files}}
@@ -158,6 +154,9 @@ macro(add_targets_depends src_files)
             add_dependencies(${PROJECT_NAME}_build
                 ${${src_files}}
             )
+			add_dependencies(${PROJECT_NAME}_INSTALL
+				${${src_files}}
+			)
         endif(WIN32 OR APPLE)
     endif(R_FOUND)
 endmacro(add_targets_depends)
