@@ -42,3 +42,7 @@ configure_file(zzz.R.in
     ${out_bindir}/zzz.R
     @ONLY
 )
+
+set(zzz_file ${out_bindir}/zzz.R)
+# add dependencies to source files 
+add_targets_depends(zzz_file)

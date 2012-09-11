@@ -47,42 +47,56 @@ if ( R_EXECUTABLE)
    # in cache already
    set( R_FIND_QUIETLY TRUE )
 endif ( R_EXECUTABLE)
+
 set (CMAKE_FIND_APPBUNDLE LAST)
 find_program ( R_EXECUTABLE
-               NAMES R R.exe
-               DOC "Path to the R command interpreter"
-              )
+    NAMES R R.exe
+    DOC "Path to the R command interpreter"
+)
 
 set ( R_PACKAGES )
 if ( R_EXECUTABLE )
-  foreach ( _component ${R_FIND_COMPONENTS} )
-    if ( NOT R_${_component}_FOUND )
-	if (WIN32)
-		set (R_FLAGS "--vanilla --slave --ess")
-	else ()
-		set (R_FLAGS "--vanilla --slave --no-readline")
-	endif()
-    execute_process ( COMMAND ${R_EXECUTABLE} ${R_FLAGS} -e "library(${_component})"
-                      RESULT_VARIABLE _res
-                      OUTPUT_VARIABLE _trashout
-                      ERROR_VARIABLE  _trasherr
-                    )
-    if ( NOT _res )
-      message ( STATUS "Looking for R package ${_component} - found" )
-      set ( R_${_component}_FOUND 1 CACHE INTERNAL "True if R package ${_component} is here" )
-    else ( NOT _res )
-      message ( STATUS "Looking for R package ${_component} - not found" )
-      set ( R_${_component}_FOUND 0 CACHE INTERNAL "True if R package ${_component} is here" )
-    endif ( NOT _res )
-    list ( APPEND R_PACKAGES R_${_component}_FOUND )
-    endif ( NOT R_${_component}_FOUND )
-  endforeach ( _component )
+    if (WIN32)
+        set (R_FLAGS "--vanilla --slave --ess")
+    else ()
+        set (R_FLAGS "--vanilla --slave --no-readline")
+    endif()
+    
+    # define R_VERSION
+    execute_process( COMMAND ${R_EXECUTABLE} ${R_FLAGS}
+        -e "cat(paste(R.version$major, R.version$minor, sep='.'))"
+        OUTPUT_VARIABLE R_VERSION
+    )
+    foreach ( _component ${R_FIND_COMPONENTS} )
+        if ( NOT R_${_component}_FOUND )
+            
+            
+            # 
+            execute_process ( COMMAND ${R_EXECUTABLE} ${R_FLAGS}
+                -e "library(${_component})"
+                RESULT_VARIABLE _res
+                OUTPUT_VARIABLE _trashout
+                ERROR_VARIABLE  _trasherr
+            )
+            if ( NOT _res )
+                message ( STATUS "Looking for R package ${_component} - found" )
+                set ( R_${_component}_FOUND 1 CACHE INTERNAL "True if R package ${_component} is here" )
+            else ( NOT _res )
+                message ( STATUS "Looking for R package ${_component} - not found" )
+                set ( R_${_component}_FOUND 0 CACHE INTERNAL "True if R package ${_component} is here" )
+            endif ( NOT _res )
+            list ( APPEND R_PACKAGES R_${_component}_FOUND )
+        endif ( NOT R_${_component}_FOUND )
+    endforeach ( _component )
 endif ( R_EXECUTABLE )
 
 include ( FindPackageHandleStandardArgs )
 
 # handle the QUIETLY and REQUIRED arguments and set R_FOUND to TRUE if 
 # all listed variables are TRUE
-find_package_handle_standard_args ( R DEFAULT_MSG R_EXECUTABLE ${R_PACKAGES} )
+find_package_handle_standard_args (R
+    REQUIRED_VARS R_EXECUTABLE ${R_PACKAGES}
+    VERSION_VAR R_VERSION
+)
 
 mark_as_advanced ( R_EXECUTABLE ${R_PACKAGES} )

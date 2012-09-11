@@ -53,7 +53,7 @@ if (MATLAB)
     set(MATLAB_COMMAND "${MATLAB}")
     set(MATLAB_FLAGS -nojvm -nosplash)
     if (NOT MATLAB_BINDIR)
-        # if matlab if found in /usr/local/bin
+        # if matlab is found in /usr/local/bin
         # mex and mexext programs will certainly not be there
         # hence we define MATLAB_BINDIR using the 'matlabroot' MATLAB command
         execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
