@@ -68,7 +68,6 @@ if ( R_EXECUTABLE )
         OUTPUT_VARIABLE R_VERSION_STRING
     )
 	STRING(REGEX MATCH "[0-9]+\\.[0-9]+(\\.[0-9])?" R_VERSION "${R_VERSION_STRING}")
-	message(STATUS R_VERSION=${R_VERSION})
     foreach ( _component ${R_FIND_COMPONENTS} )
         if ( NOT R_${_component}_FOUND )
             execute_process ( COMMAND ${R_EXECUTABLE} ${R_FLAGS}
