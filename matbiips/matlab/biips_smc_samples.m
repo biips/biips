@@ -27,14 +27,16 @@ opt_argin = length(varargin);
 type='fsb';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (~exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run
+if (~exist('OCTAVE_VERSION')) 
+  % matlab version
   s=rng('shuffle');
   seed=randi(intmax);
   rng(s);
 else
+  % octave version
   s=rand('state');
   rand('state',time);
-  seed=randi(intmax);
+  seed=double(randi(intmax));
   rand('state',s);
 end
 
