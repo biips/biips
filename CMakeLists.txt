@@ -364,58 +364,6 @@ macro (add_biips_executable name sources extra_libs extra_libs64 biips_libs)
     endif()
 endmacro (add_biips_executable)
 
-# macro to install test program
-macro (install_biips_test_program name)
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            list(FIND BUILD_ARCH_LIST ${arch} offset)
-            list(GET BUILD_BITNB_LIST ${offset} bitnb)
-            install (TARGETS ${name}-${arch}
-                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
-            	COMPONENT "Runtime_${bitnb}bit"
-            	)
-        endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else ()
-        install (TARGETS ${name}
-            DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/bin
-            )
-    endif ()
-endmacro (install_biips_test_program)
-
-
-# macro to install test files
-macro (install_biips_test_file name dir)
-    if (WIN32)
-        install (FILES
-        	${name}
-        	DESTINATION ${Biips_INSTALL_DATAROOTDIR}/${CURRENT_REL_DIR}/${dir}
-        )
-    else ()
-        install (FILES
-        	${name}
-        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/${dir}
-        )
-    endif ()
-endmacro (install_biips_test_file)
-
-# macro to install test file directories
-macro (install_biips_test_dir dir patt)
-    if (WIN32)
-        install(DIRECTORY
-        	${CMAKE_CURRENT_SOURCE_DIR}/${dir}/
-        	DESTINATION ${Biips_INSTALL_DATAROOTDIR}/${CURRENT_REL_DIR}/${dir}
-        	FILES_MATCHING PATTERN ${patt}
-        	PATTERN .svn EXCLUDE
-        )
-    else ()
-        install(DIRECTORY
-        	${CMAKE_CURRENT_SOURCE_DIR}/${dir}/
-        	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}/${dir}
-        	FILES_MATCHING PATTERN ${patt}
-        	PATTERN .svn EXCLUDE
-        )
-    endif ()
-endmacro (install_biips_test_dir)
 
 # macro to copy files to binary dir
 # changes in source file are taken into account
