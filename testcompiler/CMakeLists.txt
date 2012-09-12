@@ -98,6 +98,13 @@ set (BIIPS_LIBS	BiipsCompiler BiipsBase BiipsCore)
 
 # add the executable
 add_biips_executable (${EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
+get_target_property(exe_loc ${EXE_NAME} LOCATION)
+add_custom_command(TARGET ${EXE_NAME}
+    POST_BUILD COMMAND
+    ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/"
+    COMMENT "Copying ${EXE_NAME} in build test directory"
+    VERBATIM
+)
 
 # add the install targets
 install_biips_test_program(${EXE_NAME})
@@ -115,3 +122,26 @@ if (NOT WIN32)
     	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}
     )
 endif ()
+
+# add subdirectories
+add_subdirectory(bench)
+add_subdirectory(model)
+
+# copy cfg files to binary directory
+set (cfg_file biipstestcompiler.cfg)
+copy_files_to_bindir(cfg_file ${CMAKE_CURRENT_BINARY_DIR})
+
+
+#===========Ctest command
+file(GLOB cfg_files ${CMAKE_CURRENT_SOURCE_DIR}/bench/*.cfg)
+foreach(_cfg ${cfg_files})
+    # define name without .cfg extension
+    get_filename_component(_name ${_cfg} NAME) 
+    string (FIND ${_name} .cfg off REVERSE)
+    string (SUBSTRING ${_name} 0 ${off} _name)
+    
+    add_test (NAME ${_name}-testcompiler
+        COMMAND ${EXE_NAME} ${_cfg} --particles=100
+    )
+endforeach()
+
