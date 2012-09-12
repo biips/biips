@@ -17,9 +17,10 @@ if (~exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run
   data_rng_seed=randi(intmax);
   rng(s);
 else
+  % Octave version
   s=rand('state');
   rand('state',time);
-  data_rng_seed=randi(intmax);
+  data_rng_seed=double(randi(intmax));
   rand('state',s);
 end
 quiet = false;
