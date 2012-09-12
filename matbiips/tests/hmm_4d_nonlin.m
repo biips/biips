@@ -49,4 +49,3 @@ p=biips_model('hmm_4d_nonlin_tracking.bug', data);
 biips_smc_samples(p, {'x[2,1:10]', 'y[1,1]'}, 100);
 %% on nettoie la console
 inter_biips('clear_console', p); 
-exit;
