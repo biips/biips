@@ -429,12 +429,12 @@ set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 
 # Linux Debian package specific options
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0)")
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.42.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
 endif ()
-set (CPACK_DEBIAN_PACKAGE_SUGGESTS "libboost-dev (>= 1.42.0), r-base (>= 2.13)")
+set (CPACK_DEBIAN_PACKAGE_SUGGESTS "r-base (>= 2.13)")
 if (USE_Qwt5_Qt4)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
