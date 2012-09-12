@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    test/bench CMakeLists
+#  \brief    test/benchmarks CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$

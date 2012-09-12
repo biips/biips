@@ -95,32 +95,30 @@ set (BIIPS_LIBS	BiipsBase BiipsCore)
 
 # add the executable
 add_biips_executable (${EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
-get_target_property(exe_loc ${EXE_NAME} LOCATION)
-add_custom_command(TARGET ${EXE_NAME}
-    POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/"
-    COMMENT "Copying ${EXE_NAME} in build test directory"
-    VERBATIM
-)
 
-# add the install targets
-install_biips_test_program(${EXE_NAME})
-
-install_biips_test_file(biipstest.cfg .)
-
-install_biips_test_dir(bench *.cfg)
-
-# TODO: .bat script for windows
-if (NOT WIN32)
-    install (PROGRAMS
-    	BiipsTest.sh
-    	DESTINATION ${Biips_INSTALL_TESTROOTDIR}/${CURRENT_REL_DIR}
+if (WIN32)
+    foreach (arch IN LISTS BUILD_ARCH_LIST)
+        get_target_property(exe_loc ${EXE_NAME}-${arch} LOCATION)
+        add_custom_command(TARGET ${EXE_NAME}-${arch}
+            POST_BUILD COMMAND
+            ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/${arch}/"
+            COMMENT "Copying ${EXE_NAME} in build testcompiler/${arch} directory"
+            VERBATIM
+        )
+    endforeach()
+else()
+    get_target_property(exe_loc ${EXE_NAME} LOCATION)
+    add_custom_command(TARGET ${EXE_NAME}
+        POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/"
+        COMMENT "Copying ${EXE_NAME} in build testcompiler directory"
+        VERBATIM
     )
-endif ()
+endif()
 
 
 # add subdirectories
-add_subdirectory(bench)
+add_subdirectory(benchmarks)
 
 
 # copy cfg files to binary directory
@@ -128,15 +126,27 @@ set (cfg_file biipstest.cfg)
 copy_files_to_bindir(cfg_file ${CMAKE_CURRENT_BINARY_DIR})
 
 
-#===========Ctest command
-file(GLOB cfg_files ${CMAKE_CURRENT_SOURCE_DIR}/bench/*.cfg)
+#=========== CTest commands ===============
+file(GLOB cfg_files ${CMAKE_CURRENT_BINARY_DIR}/benchmarks/*.cfg)
 foreach(_cfg ${cfg_files})
     # define name without .cfg extension
     get_filename_component(_name ${_cfg} NAME) 
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
     
-    add_test (NAME ${_name}-test
-        COMMAND ${EXE_NAME} ${_cfg} --particles=100
-    )
+    if (WIN32)
+        foreach (arch IN LISTS BUILD_ARCH_LIST)
+            get_target_property(exe_loc ${EXE_NAME}-${arch} LOCATION)
+            get_filename_component(exe_outname ${exe_loc}-${arch} NAME)
+            add_test (NAME ${_name}-test-${arch}
+                COMMAND ${arch}/${exe_outname} ${_cfg} --particles=100
+            )
+        endforeach()
+    else ()
+        get_target_property(exe_loc ${EXE_NAME} LOCATION)
+        get_filename_component(exe_outname ${exe_loc} NAME)
+        add_test (NAME ${_name}-test
+            COMMAND ${exe_outname} ${_cfg} --particles=100
+        )
+    endif()
 endforeach()

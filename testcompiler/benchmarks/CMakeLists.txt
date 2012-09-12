@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    testcompiler/bench CMakeLists
+#  \brief    testcompiler/benchmarks CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -36,5 +36,5 @@
 
 
 # copy bench cfg files to binary directory
-file (GLOB cfg_files hmm_1d*.cfg)
+file (GLOB cfg_files *.cfg)
 copy_files_to_bindir(cfg_files ${CMAKE_CURRENT_BINARY_DIR})
