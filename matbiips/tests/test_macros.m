@@ -15,4 +15,3 @@ p=biips_model('hmm_1d_lin.bug', data);
 biips_smc_samples(p, {'x[1:2]'}, 100);
 % on nettoie la console
 inter_biips('clear_console', p); 
-exit;

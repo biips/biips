@@ -7,4 +7,3 @@ p=randperm(N);
 for i=1:N
    inter_biips('clear_console',ids(p(i)));
 end
-exit;

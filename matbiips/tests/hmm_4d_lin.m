@@ -39,4 +39,3 @@ p=biips_model('hmm_4d_lin_tracking.bug', data);
 biips_smc_samples(p, {'x', 'y'}, 100);
 %% on nettoie la console
 inter_biips('clear_console', p); 
-exit;

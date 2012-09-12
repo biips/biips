@@ -38,4 +38,3 @@ p0=inter_biips('make_console');
 %%sampl_tree = inter_biips('get_sampled_smooth_tree_particle', p0);
 %inter_biips('clear_progress_bar', pb1);
 inter_biips('clear_console',p0); 
-exit;
