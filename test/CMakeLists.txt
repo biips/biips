@@ -96,26 +96,6 @@ set (BIIPS_LIBS	BiipsBase BiipsCore)
 # add the executable
 add_biips_executable (${EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
 
-if (WIN32)
-    foreach (arch IN LISTS BUILD_ARCH_LIST)
-        get_target_property(exe_loc ${EXE_NAME}-${arch} LOCATION)
-        add_custom_command(TARGET ${EXE_NAME}-${arch}
-            POST_BUILD COMMAND
-            ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/${arch}/"
-            COMMENT "Copying ${EXE_NAME} in build testcompiler/${arch} directory"
-            VERBATIM
-        )
-    endforeach()
-else()
-    get_target_property(exe_loc ${EXE_NAME} LOCATION)
-    add_custom_command(TARGET ${EXE_NAME}
-        POST_BUILD COMMAND
-        ${CMAKE_COMMAND} -E copy ${exe_loc} "${CMAKE_CURRENT_BINARY_DIR}/"
-        COMMENT "Copying ${EXE_NAME} in build testcompiler directory"
-        VERBATIM
-    )
-endif()
-
 
 # add subdirectories
 add_subdirectory(benchmarks)
@@ -137,16 +117,14 @@ foreach(_cfg ${cfg_files})
     if (WIN32)
         foreach (arch IN LISTS BUILD_ARCH_LIST)
             get_target_property(exe_loc ${EXE_NAME}-${arch} LOCATION)
-            get_filename_component(exe_outname ${exe_loc}-${arch} NAME)
             add_test (NAME ${_name}-test-${arch}
-                COMMAND ${arch}/${exe_outname} ${_cfg} --particles=100
+                COMMAND ${exe_loc} ${_cfg} --particles=100
             )
         endforeach()
     else ()
         get_target_property(exe_loc ${EXE_NAME} LOCATION)
-        get_filename_component(exe_outname ${exe_loc} NAME)
         add_test (NAME ${_name}-test
-            COMMAND ${exe_outname} ${_cfg} --particles=100
+            COMMAND ${exe_loc} ${_cfg} --particles=100
         )
     endif()
 endforeach()
