@@ -26,7 +26,7 @@
 #
 #
 #  \file     CMakeLists.txt
-#  \brief    testcompiler/bench CMakeLists
+#  \brief    testcompiler/model CMakeLists
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -36,5 +36,5 @@
 
 
 # copy bug files to binary directory
-file (GLOB bug_files hmm_1d*.cfg)
+file (GLOB bug_files *.bug)
 copy_files_to_bindir(bug_files ${CMAKE_CURRENT_BINARY_DIR})
