@@ -17,12 +17,11 @@
 #include <cstring>
 #include <cstdio>
 #include "iostream/ProgressBar.hpp"
-
 using namespace Biips;
 using std::endl;
 extern Size VERBOSITY;
-typedef Console * Console_ptr;
-typedef ProgressBar * ProgressBar_ptr;
+typedef boost::shared_ptr<Console>  Console_ptr;
+typedef boost::shared_ptr<ProgressBar>  ProgressBar_ptr;
 
 
 template<typename StorageOrderType>

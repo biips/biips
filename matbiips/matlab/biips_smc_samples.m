@@ -100,3 +100,5 @@ for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
 end   
 var_out = inter_biips('cell2struct_weak_names', cell_noms, noms);
+var_out.('log_marg_like') = log_marg_like;
+
