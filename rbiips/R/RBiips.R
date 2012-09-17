@@ -336,10 +336,9 @@ parse.varnames <- function(varnames)
 
 smc.samples <- function(obj, variable.names, n.part, type="fs",
                         rs.thres = 0.5, rs.type = "stratified", ...)
-{  
-  if (!is.logical(backward) || !is.atomic(backward)) {
-    stop("Invalid backward argument")
-  }
+{
+  if (!is.character(type))
+    stop("'type' must be a character string with characters 'f', 's', 'b'")
   
   type <- unlist(strsplit(type, NULL))
   type <- match.arg(type, c('f', 's', 'b'), several.ok=TRUE)

@@ -45,13 +45,12 @@ namespace Biips
   {
     const DimArray & left = *paramDims[0];
     const DimArray & right = *paramDims[1];
-    if ((left.IsMatrix() && right.IsVector()) || (left.IsMatrix()
-        && right.IsMatrix()))
-      return (left[1] == right[0]);
-    else if (left.IsVector() && right.IsMatrix())
+    if ((left.size() > 2) || (right.size() > 2))
+      return false;
+    if (left.IsVector())
       return (left[0] == right[0]);
     else
-      return false;
+      return (left[1] == right[0]);
   }
 
   void MatMult::eval(ValArray & values, const NumArray::Array & paramValues) const
@@ -85,7 +84,7 @@ namespace Biips
     const DimArray & left = *paramDims[0];
     const DimArray & right = *paramDims[1];
 
-    DimArray dim;
+    DimArray dim(2, 1);
     if (left.IsMatrix())
       dim.push_back(left[0]);
     if (right.IsMatrix())
