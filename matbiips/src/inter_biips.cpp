@@ -41,7 +41,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     if (name_func == "make_console") {
    
-          consoles.push_back(new Console(mbiips_cout, mbiips_cerr));
+          consoles.push_back(Console_ptr(new Console(mbiips_cout, mbiips_cerr)));
           plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
           *mxGetPr(plhs[0]) = static_cast<double>(consoles.size()-1);
     }
@@ -53,8 +53,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       delete consoles[id];
-       consoles[id] = NULL;
+       consoles[id].reset();
        
     }       
     /////////////////////////////////////////
@@ -67,7 +66,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        char * filename = mxArrayToString(prhs[2]);
        
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id]; 
+       Console_ptr p_console = consoles[id]; 
  
        mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
        if (! p_console->CheckModel(String(filename), VERBOSITY))
@@ -81,7 +80,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsStruct(2);
 
@@ -105,7 +104,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        std::map<String, MultiArray> data_table;
 
@@ -152,7 +151,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        const Types<String>::Array & names = p_console->VariableNames();
        mwSize ndim = names.size();
@@ -174,7 +173,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
         
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
@@ -190,7 +189,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
         
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Filter monitoring variables:";
@@ -241,7 +240,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
         
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Smooth tree monitoring variables:";
@@ -292,7 +291,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
         
        if (VERBOSITY>1)
           mbiips_cout << PROMPT_STRING << "Smoother monitoring variables:";
@@ -343,7 +342,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsLogical(2);
        Bool prior_flag = static_cast<Bool>(*mxGetLogicals(prhs[2]));
@@ -359,7 +358,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        plhs[0] = mxCreateLogicalMatrix(1, 1);
        *mxGetLogicals(plhs[0]) =  (p_console->SamplerBuilt() ? 1 : 0);
@@ -373,7 +372,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 5, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
 
        CheckArgIsDouble(2);
        Size n_part = static_cast<Size>(*mxGetPr(prhs[2]));
@@ -402,7 +401,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        Scalar log_norm_const;
        if(!p_console->GetLogNormConst(log_norm_const))
@@ -420,7 +419,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        std::map<String, NodeArrayMonitor> monitors_map;
 
@@ -438,7 +437,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        std::map<String, NodeArrayMonitor> monitors_map;
 
@@ -456,7 +455,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        std::map<String, NodeArrayMonitor> monitors_map;
 
@@ -474,7 +473,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsLogical(2);
        Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
@@ -491,7 +490,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        CheckArgIsLogical(2);
        Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
@@ -508,7 +507,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        CheckArgIsLogical(2);
        Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
@@ -525,7 +524,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        if (!p_console->RunBackwardSmoother(VERBOSITY,VERBOSITY))
          throw RuntimeError("Failed to run backward smoother.");
@@ -538,7 +537,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
       
        const char *field_names[] = { "id", "names", "type", "observed" };
        mwSize  dims[] = { 1};
@@ -620,7 +619,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
       
        const char *field_names[] = { "iteration", "sampler"};
        mwSize  dims[] = { 1};
@@ -663,7 +662,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        CheckArgIsString(2);
        String dot_file_name = mxArrayToString(prhs[2]);
@@ -688,7 +687,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 6, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
 
        CheckArgIsCell(2);
        mxArray * str = mxGetCell(prhs[2], 0);
@@ -733,7 +732,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 5, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
 
        CheckArgIsString(2);
        String name = mxArrayToString(prhs[2]);
@@ -773,7 +772,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
   
        CheckArgIsString(2);
        String name = mxArrayToString(prhs[2]);
@@ -804,7 +803,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
 
        plhs[0] = mxCreateLogicalMatrix(1, 1);
        *mxGetLogicals(plhs[0]) =  (p_console->ForwardSamplerAtEnd() ? 1 : 0);
@@ -829,7 +828,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsDouble(2);
        Scalar logNormConst = static_cast<Scalar>(*mxGetPr(prhs[2]));
@@ -857,8 +856,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        String iter_name = mxArrayToString(prhs[3]);
 	  
 
-       progress.push_back(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING, 
-                                          symbol[0], iter_name));
+       progress.push_back(ProgressBar_ptr(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING, 
+                                          symbol[0], iter_name)));
        plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
        *mxGetPr(plhs[0]) = progress.size()-1;
     }
@@ -871,8 +870,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckRhs(nrhs, 1, name_func);
        Size id = GetProgressBarId(progress, prhs[1], name_func);
        
-       delete progress[id];
-       progress[id] = NULL;
+       progress[id].reset();
        
     }       
     
@@ -899,7 +897,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
         
        mwSize nbVarNames = mxGetNumberOfElements(prhs[2]);
 
@@ -938,7 +936,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
 
        std::map<String, MultiArray> sampled_value_map; 
 
@@ -956,7 +954,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsDouble(2);
        Size smcRngSeed = static_cast<Size>(*mxGetPr(prhs[2]));
@@ -973,7 +971,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
-       Console * p_console = consoles[id];
+       Console_ptr p_console = consoles[id];
        
        CheckArgIsStruct(2);
 
