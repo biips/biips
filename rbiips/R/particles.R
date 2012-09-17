@@ -459,7 +459,7 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
       ylab <- "probability"
     if (missing(main))
       main <- "discrete law histograms"
-    main.title <- paste(x[[t]]$name, main)
+    main.title <- paste(x$name, main)
     if (missing(sub))
       sub <- paste("n.part=", x$n.part)
     
@@ -471,7 +471,7 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
-    main.title <- paste(x[[t]]$name, main)
+    main.title <- paste(x$name, main)
     if (missing(sub)) {
       bw <- x$density$bw
       sub <- paste("n.part=", x$n.part, ", bw=", signif(bw, digits = 2), sep="")
@@ -538,7 +538,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
       ylab <- "probabilty"
     if (missing(main))
       main <- "discrete law histograms"
-    main.title <- paste(x[[t]]$name, main)
+    main.title <- paste(x[[1]]$name, main)
     if (missing(sub))
       sub <- paste("n.part=", x[[1]]$n.part, sep="")
     
@@ -566,7 +566,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
       ylab <- "density"
     if (missing(main))
       main <- "kernel density estimates"
-    main.title <- paste(x[[t]]$name, main)
+    main.title <- paste(x[[1]]$name, main)
     if (missing(sub)) {
       bw <- x[[1]]$density$bw
       sub <- paste("n.part=", x[[1]]$n.part, ", bw=", signif(bw, digits = 2), sep="")
