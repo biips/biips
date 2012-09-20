@@ -6,5 +6,3 @@ function data = biips_get_data(p)
 % OUTPUT
 %  - data : cell containing the current data 
 data= inter_biips('get_data', p);
-
-
