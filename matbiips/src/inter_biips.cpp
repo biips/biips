@@ -67,8 +67,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console_ptr p_console = consoles[id]; 
- 
-       mbiips_cout << PROMPT_STRING << "Parsing model in: " << filename << endl;
+
        if (! p_console->CheckModel(String(filename), VERBOSITY))
                  mexErrMsgTxt("Model syntax is incorrect.");
        mxFree(filename);
