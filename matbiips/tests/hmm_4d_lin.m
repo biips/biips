@@ -1,19 +1,27 @@
-addpath('../matlab');
-%# data
-%Prec.x.init <- matrix(0,4,4)
-%seq1 <- c(1,0,delta.t,0, 0,1,0,delta.t, 0,0,1,0, 0,0,0,1)
-%F <- matrix(seq1,4,4,byrow = T)
-%seq2 <- c(delta.t^2/2,0, 0,delta.t^2/2, delta.t,0, 0,delta.t)
-%G <- matrix(seq2, 4,2,byrow = T)
-%H <- matrix(0,2,4)
-%H[1,1] <- 1
-%H[2,2] <- 1
-%mean.v <- c(0,0)
-%Prec.v <- matrix(0,2,2)
-%Prec.v[row(Prec.v)==col(Prec.v)] <- 1
-%Prec.y <- matrix(0,2,2)
-%Prec.y[row(Prec.y)==col(Prec.y)] <- 2
 
+addpath('../matlab');
+
+%% Model Creation
+%% 
+%%$$F=\left (\begin{array}{cccc}
+%%       1 & 0 & T & 0 \\
+%%       0 & 1 & 0 & T \\
+%%       0 & 0 & 1 & 0 \\
+%%       0 & 0 & 0 & 1
+%%     \end{array}\right )$$, 
+%% $$G=\left(\begin{array}{cc}
+%%            T^2/2 & 0 \\
+%%            0 & T^2/2 \\
+%%            T & 0 \\
+%%            0 & T \\ 
+%%           \end{array} \right)$$
+%% and $$H=\left(
+%%     \begin{array}{cccc}
+%%       1 & 0 & 0 & 0 \\
+%%       0 & 1 & 0 & 0 \\
+%%     \end{array}
+%%   \right)$.\\
+%%
 tmax = 10;
 meanxinit = [0; 0; 1; 0];
 precxinit = diag(100*ones(4,1));
@@ -34,7 +42,6 @@ if (~inter_biips('load_module', 'basemod'))
 end
 %% intialisation console
 biips_init;
-inter_biips('verbosity',4);
 p=biips_model('hmm_4d_lin_tracking.bug', data);
 biips_smc_samples(p, {'x', 'y'}, 100);
 %% on nettoie la console
