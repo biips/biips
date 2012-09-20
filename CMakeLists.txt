@@ -370,7 +370,7 @@ endmacro (add_biips_executable)
 macro(copy_files_to_bindir files dir)
     foreach(f ${${files}})
         get_filename_component(n ${f} NAME)
-        configure_file ( ${n}
+        configure_file ( ${f}
         	${dir}/${n}
         	COPYONLY
         )

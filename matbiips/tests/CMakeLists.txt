@@ -1,6 +1,9 @@
 file(GLOB mfiles *.m)
-file(GLOB bugfiles *.bug)
-set(test_files ${mfiles} ${bugfiles})
+file(GLOB tuto_files ${CMAKE_SOURCE_DIR}/matbiips/tuto/*.m)
+set(mfiles ${mfiles} ${tuto_files})
+file(GLOB bfiles *.bug)
+file(GLOB bugfiles ${CMAKE_SOURCE_DIR}/matbiips/tuto/*.bug)
+set(test_files ${mfiles} ${bfiles} ${bugfiles})
 copy_files_to_bindir(test_files ${CMAKE_CURRENT_BINARY_DIR})
 
 #===========Ctest command
