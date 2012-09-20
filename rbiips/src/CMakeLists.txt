@@ -47,7 +47,7 @@ configure_file (
 # copy files to binary directory
 file(GLOB cpp_files *.cpp)
 file(GLOB h_files *.h)
-set(src_files ${out_bindir}/Makevars.win ${cpp_files} ${h_files})
+set(src_files ${CMAKE_CURRENT_SOURCE_DIR}/Makevars.in ${cpp_files} ${h_files})
 copy_files_to_bindir (src_files ${out_bindir})
 
 
