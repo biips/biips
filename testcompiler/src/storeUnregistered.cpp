@@ -346,7 +346,7 @@ map<String, MultiArray> transformStoredDataMap(const StoredDataMap & storedDataM
 
     if (it_stored->second.empty())
     {
-#ifdef BIIPS_DEBUG_ON
+#ifdef BIIPS_DEBUG
       cout << "\t" << "Skipping data variable: " << name << endl;
 #endif
       continue;

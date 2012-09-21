@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( my_test )
   using namespace std;
   using namespace Biips;
 
-#ifdef BIIPS_CATCH_ON
+#ifdef BIIPS_CATCH_TEST
   try
   {
 #endif
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE( my_test )
       store(parsed, vm);
       notify(vm);
 
-#ifdef BIIPS_DEBUG_ON
+#ifdef BIIPS_DEBUG
       if (parsed.options.size()>0)
         cout << "[Command line options]" << endl;
       for (Size op=0; op<parsed.options.size(); ++op)
@@ -258,20 +258,21 @@ BOOST_AUTO_TEST_CASE( my_test )
 
       const po::parsed_options & parsed = parsed_sources.back();
 
+#ifdef BIIPS_DEBUG
+      if (parsed.options.size()>0)
+      cout << "[Configuration options from file " << config_file_name << "]" << endl;
+      for (Size op=0; op<parsed.options.size(); ++op)
+      {
+        cout << parsed.options[op].string_key << " = ";
+        for (Size v=0; v<parsed.options[op].value.size(); ++v)
+        cout<< parsed.options[op].value[v] << endl;
+      }
+#endif
+
       store(parsed, vm);
       notify(vm);
     }
 
-#ifdef BIIPS_DEBUG_ON
-    if (parsed.options.size()>0)
-      cout << "[Configuration options from file " << config_file_name << "]" << endl;
-    for (Size op=0; op<parsed.options.size(); ++op)
-    {
-      cout << parsed.options[op].string_key << " = ";
-      for (Size v=0; v<parsed.options[op].value.size(); ++v)
-        cout<< parsed.options[op].value[v] << endl;
-    }
-#endif
 
 
     // Store unregistered
@@ -732,7 +733,7 @@ BOOST_AUTO_TEST_CASE( my_test )
       }
     }
 
-#ifdef BIIPS_CATCH_ON
+#ifdef BIIPS_CATCH_TEST
   }
   BIIPS_CATCH_ERRORS
   catch (po::error & err)

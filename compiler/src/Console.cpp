@@ -43,8 +43,7 @@ extern "C"
   }
 }
 
-//#define BIIPS_COMPILER_DEBUG_ON
-
+#include "BiipsConfig.hpp"
 #include "Console.hpp"
 #include "compiler/ParseTree.h"
 #include "compiler/Compiler.hpp"
@@ -59,7 +58,7 @@ extern "C"
 
 #include <cstdio>
 
-#ifdef BIIPS_COMPILER_DEBUG_ON
+#ifdef BIIPS_DEBUG_PARSER
 #include "printParseTree.hpp"
 #endif
 
@@ -248,7 +247,7 @@ namespace Biips
 
     fclose(model_file);
 
-#ifdef BIIPS_COMPILER_DEBUG_ON
+#ifdef BIIPS_DEBUG_PARSER
     out_ << "============================" << endl;
     out_ << "Parsed variables:" << endl;
     out_ << "-----------------" << endl;

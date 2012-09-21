@@ -124,6 +124,24 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
 option (BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 
+if (BUILD_SHARED_LIBS)
+    set (BIIPS_SHARED TRUE)
+else ()
+    set (BIIPS_SHARED FALSE)
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set (BIIPS_DEBUG TRUE)
+else ()
+    set (BIIPS_DEBUG FALSE)
+endif()
+
+option (BIIPS_DEBUG_PARSER "Print BUGS language parser output (ParseTree)." OFF)
+
+option (BIIPS_CATCH_TEST "Catch exceptions in BiipsTest program." ON)
+option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program." ON)
+
+
 set (BUILD_ARCH_LIST "")
 set (BUILD_BITNB_LIST "")
 

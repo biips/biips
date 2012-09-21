@@ -179,24 +179,24 @@ namespace boost
       // ENDCOPY
 
 
-      //! Cholesky matrix determinant
+      //! Cholesky matrix logarithmic determinant
       /*!
-       * Computes the determinant of a positive definite matrix given its cholesky factorization
+       * Computes the logarithm of the determinant of a positive definite matrix given its cholesky factorization
        * @param m cholesky factorization of a positive definite matrix
-       * @return the determinant value
+       * @return the log determinant value
        */
       template<class M>
-      typename M::value_type cholesky_det(const M & m)
+      typename M::value_type cholesky_logdet(const M & m)
       {
         typedef typename M::size_type size_type;
         typedef typename M::value_type value_type;
 
         size_type size = m.size1();
         // TODO check mat
-        value_type det = 1.0;
+        value_type logdet = 0.0;
         for (size_type i = 0; i < size; ++i)
-          det *= m(i, i);
-        return det;
+          logdet += std::log(m(i, i));
+        return logdet;
       }
 
     }

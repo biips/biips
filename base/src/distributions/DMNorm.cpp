@@ -45,72 +45,54 @@
 namespace Biips
 {
 
-  Bool DMNorm::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  Bool DMNorm::checkParamDims(
+      const Types<DimArray::Ptr>::Array & paramDims) const
   {
     const DimArray & mean_dim = *paramDims[0];
     const DimArray & prec_dim = *paramDims[1];
-    if ((mean_dim.Drop().IsVector() && prec_dim.IsSquared()))
+    if (!mean_dim.Drop().IsVector())
+      return false;
+    if (prec_dim.IsSquared())
       return (mean_dim[0] == prec_dim[0]);
     else
-      return false;
+      return mean_dim.IsScalar() && prec_dim.IsScalar();
+  }
+
+  DimArray DMNorm::dim(const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    return paramDims[0]->Drop();
   }
 
   Bool DMNorm::CheckParamValues(const NumArray::Array & paramValues) const
   {
     const NumArray & mean = paramValues[0];
-
-    for (Size i = 0; i < mean.Length(); ++i)
-    {
-      if (!isFinite(mean.Values()[i]))
-      {
-        // FIXME
-        std::cerr << "mean component " << i << " has infinite value: "
-        << mean.Values()[i] << std::endl;
-        return false;
-      }
-    }
-
     const NumArray & prec = paramValues[1];
 
     static const Scalar TOL = 1e-7;
 
-    // check symmetry and positive diagonal
-    Matrix prec_mat(prec);
-    for (Size i = 0; i < prec_mat.size1(); ++i)
+    Size n = mean.Length();
+
+    // FIXME: this is only valid for Column major order
+    for (Size i = 0; i < n; ++i)
     {
-      if (prec_mat(i, i) <= 0.0)
-      {
-        // FIXME
-        std::cerr << "precision matrix component (" << i << "," << i
-        << ") has negative value: " << prec_mat(i, i) << std::endl;
+      if (!isFinite(mean.Values()[i]))
         return false;
-      }
+      Size x_ind = i;
+      Size y_ind = n * i;
       for (Size j = 0; j < i; ++j)
       {
-        if (std::fabs(prec_mat(i, j) - prec_mat(j, i)) > TOL)
-        {
-          // FIXME
-          std::cerr << "precision matrix components (" << i << "," << j
-          << ") and (" << j << "," << i << ") are not symmetric: "
-          << prec_mat(i, j) << " != " << prec_mat(j, i) << std::endl;
+        if (std::fabs(prec.Values()[x_ind] - prec.Values()[y_ind]) > TOL)
           return false;
-        }
+        x_ind += n;
+        y_ind++;
       }
     }
-    // TODO check semi-definite positive
 
     return true;
   }
 
-  DimArray DMNorm::dim(const Types<DimArray::Ptr>::Array & paramDims) const
-  {
-    return *paramDims[0];
-  }
-
-  void DMNorm::sample(ValArray & values,
-                      const NumArray::Array & paramValues,
-                      const NumArray::Pair & boundValues,
-                      Rng & rng) const
+  void DMNorm::sample(ValArray & values, const NumArray::Array & paramValues,
+                      const NumArray::Pair & boundValues, Rng & rng) const
   {
     const NumArray & mean = paramValues[0];
     const NumArray & prec = paramValues[1];
@@ -119,7 +101,8 @@ namespace Biips
 
     Matrix prec_chol(prec);
     if (!ublas::cholesky_factorize(prec_chol))
-      throw RuntimeError("DMNorm::sample: matrix is not positive-semidefinite.");
+      throw RuntimeError(
+          "DMNorm::sample: matrix is not positive-semidefinite.");
 
     typedef boost::normal_distribution<Scalar> DistType;
     boost::variate_generator<Rng::GenType&, DistType> gen(rng.GetGen(),
@@ -129,8 +112,7 @@ namespace Biips
 
     ublas::vector<Scalar, ValArray> sample_vec(values.size(), ValArray());
     sample_vec.data().swap(values);
-    ublas::inplace_solve(ublas::trans(prec_chol),
-                         sample_vec,
+    ublas::inplace_solve(ublas::trans(prec_chol), sample_vec,
                          ublas::upper_tag());
     values.swap(sample_vec.data());
 
@@ -149,19 +131,19 @@ namespace Biips
 
     Matrix prec_chol(prec);
     if (!ublas::cholesky_factorize(prec_chol))
-      throw LogicError("DMNorm::logDensity: matrix is not positive-semidefinite.");
+      throw LogicError(
+          "DMNorm::logDensity: matrix is not positive-semidefinite.");
 
-    diff_vec =
-        ublas::prod(diff_vec,
-                    ublas::triangular_adaptor<Matrix, ublas::lower>(prec_chol));
+    diff_vec = ublas::prod(
+        diff_vec, ublas::triangular_adaptor<Matrix, ublas::lower>(prec_chol));
+
+    static const Scalar log_2_pi = std::log(2 * M_PI);
     return -0.5
-           * (diff_vec.size() * std::log(2 * M_PI)
-              - std::log(ublas::cholesky_det(prec_chol))
+           * (diff_vec.size() * log_2_pi - ublas::cholesky_logdet(prec_chol)
               + ublas::inner_prod(diff_vec, diff_vec));
   }
 
-  void DMNorm::unboundedSupport(ValArray & lower,
-                                ValArray & upper,
+  void DMNorm::unboundedSupport(ValArray & lower, ValArray & upper,
                                 const NumArray::Array & paramValues) const
   {
     std::fill(lower.begin(), lower.end(), BIIPS_NEGINF);
