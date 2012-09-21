@@ -48,4 +48,8 @@
 #define Boost_VERSION @Boost_VERSION@
 #define Boost_LIB_VERSION "@Boost_LIB_VERSION@"
 
+#cmakedefine BIIPS_SHARED
+#cmakedefine BIIPS_DEBUG
+#cmakedefine BIIPS_DEBUG_PARSER
+
 #endif /* BIIPS_CONFIG_HPP_ */

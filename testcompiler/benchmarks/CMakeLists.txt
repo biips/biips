@@ -38,3 +38,6 @@
 # copy bench cfg files to binary directory
 file (GLOB cfg_files *.cfg)
 copy_files_to_bindir(cfg_files ${CMAKE_CURRENT_BINARY_DIR})
+
+file (GLOB data_files *.R)
+copy_files_to_bindir(data_files ${CMAKE_CURRENT_BINARY_DIR})

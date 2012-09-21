@@ -149,13 +149,14 @@ namespace Biips
 
   const Int BIIPS_INTMIN = std::numeric_limits<Int>::min();
   const Int BIIPS_INTMAX = std::numeric_limits<Int>::max();
+  const Int BIIPS_INTNA = BIIPS_INTMIN + 1;
 
   const Real BIIPS_REALMIN = std::numeric_limits<Real>::min();
   const Real BIIPS_REALMAX = std::numeric_limits<Real>::max();
   const Real BIIPS_NEGINF = -std::numeric_limits<Real>::infinity();
   const Real BIIPS_POSINF = std::numeric_limits<Real>::infinity();
   const Real BIIPS_REALNAN = std::numeric_limits<Real>::quiet_NaN();
-  const Real BIIPS_REALNA = BIIPS_REALMAX * (1
+  const Real BIIPS_REALNA = -BIIPS_REALMAX * (1
       - std::numeric_limits<Real>::epsilon());
 
   const NodeId NULL_NODEID = BIIPS_SIZENA;

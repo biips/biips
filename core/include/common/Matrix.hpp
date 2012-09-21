@@ -54,25 +54,30 @@ namespace Biips
     Matrix()
     {
     }
-    Matrix(size_type sz1, size_type sz2) :
-      BaseType(sz1, sz2)
+    Matrix(size_type sz1, size_type sz2)
+        : BaseType(sz1, sz2)
     {
     }
-    Matrix(size_type sz1, size_type sz2, value_type val) :
-      BaseType(sz1, sz2, array_type(sz1 * sz2, val))
+    Matrix(size_type sz1, size_type sz2, value_type val)
+        : BaseType(sz1, sz2, array_type(sz1 * sz2, val))
     {
     }
-    Matrix(size_type sz1, size_type sz2, const array_type & value) :
-      BaseType(sz1, sz2, value)
+    Matrix(size_type sz1, size_type sz2, const array_type & value)
+        : BaseType(sz1, sz2, value)
     {
     }
-    explicit Matrix(const NumArray & data) :
-      BaseType(data.Dim()[0], data.Dim()[1], data.Values())
+    explicit Matrix(const NumArray & data)
+        :
+            BaseType(data.Dim()[0], data.IsVector() ? 1 : data.Dim()[1],
+                     data.Values())
     {
+      if (data.NDim() > 2)
+        throw LogicError(
+            "Can not construct Matrix: NumArray has more than 2 dimensions.");
     }
     template<class AE>
-    Matrix(const ublas::matrix_expression<AE> &ae) :
-      BaseType(ae)
+    Matrix(const ublas::matrix_expression<AE> &ae)
+        : BaseType(ae)
     {
     }
 
@@ -97,7 +102,7 @@ namespace Biips
     NumArray * pData_;
     mutable Bool released_;
 
-    BaseType::swap;
+	BaseType::swap;
 
   public:
     explicit MatrixRef(NumArray & dat) : BaseType(dat.Dim()[0], dat.Dim()[1], array_type()), pData_(&dat), released_(false)

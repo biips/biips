@@ -53,25 +53,28 @@ namespace Biips
     Vector()
     {
     }
-    explicit Vector(size_type sz) :
-      BaseType(sz)
+    explicit Vector(size_type sz)
+        : BaseType(sz)
     {
     }
-    Vector(size_type sz, value_type val) :
-      BaseType(sz, array_type(sz, val))
+    Vector(size_type sz, value_type val)
+        : BaseType(sz, array_type(sz, val))
     {
     }
-    Vector(size_type sz, const array_type & value) :
-      BaseType(sz, value)
+    Vector(size_type sz, const array_type & value)
+        : BaseType(sz, value)
     {
     }
-    explicit Vector(const NumArray & data) :
-      BaseType(data.Length(), data.Values())
+    explicit Vector(const NumArray & data)
+        : BaseType(data.Dim()[0], data.Values())
     {
+      if (data.NDim() > 1)
+        throw LogicError(
+            "Can not construct Vector: NumArray has more than 1 dimension.");
     }
     template<class AE>
-    Vector(const ublas::vector_expression<AE> &ae) :
-      BaseType(ae)
+    Vector(const ublas::vector_expression<AE> &ae)
+        : BaseType(ae)
     {
     }
 
@@ -95,7 +98,7 @@ namespace Biips
     NumArray * pData_;
     mutable Bool released_;
 
-    BaseType::swap;
+	BaseType::swap;
 
   public:
     explicit VectorRef(NumArray & dat) : BaseType(dat.Length(), array_type()), pData_(&dat), released_(false)

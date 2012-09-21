@@ -34,13 +34,12 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_CONFIG_HPP_
-#define BIIPS_CONFIG_HPP_
+#ifndef BIIPS_TESTCOMPILER_CONFIG_HPP_
+#define BIIPS_TESTCOMPILER_CONFIG_HPP_
 
-//#define BIIPS_VALGRIND_ON
-#define BIIPS_CATCH_ON
-//#define BIIPS_DEBUG_ON
+#include "BiipsConfig.hpp"
 
+#cmakedefine BIIPS_CATCH_TESTCOMPILER
 #cmakedefine USE_Qwt5_Qt4
 
-#endif /* BIIPS_CONFIG_HPP_ */
+#endif /* BIIPS_TESTCOMPILER_CONFIG_HPP_ */
