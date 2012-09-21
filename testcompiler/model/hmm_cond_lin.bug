@@ -1,0 +1,96 @@
+var u.true[d.u, k.max],
+    A.true[d.x, d.x, k.max],
+    B.true[d.x, d.v, k.max],
+    C.true[d.y, d.x, k.max],
+    D.true[d.y, d.w, k.max],
+    x.true[d.x, k.max],
+    y.true[d.y, k.max],
+    u[d.u, k.max],
+    A[d.x, d.x, k.max],
+    B[d.x, d.v, k.max],
+    C[d.y, d.x, k.max],
+    D[d.y, d.w, k.max],
+    x[d.x, k.max],
+    y[d.y, k.max]
+
+data
+{
+  # initialisation
+  #---------------------------
+  u.true[,1] ~ dmnorm(u.init, Prec.u)
+  #u.true[,1] ~ dnorm(u.init, Prec.u)
+  
+  # functions de u.true[,1]
+  A.true[,,1] <- a
+  B.true[,,1] <- b
+  C.true[,,1] <- c
+  D.true[,,1] <- exp(u.true[,1])
+
+  x.true[,1] ~ dmnorm(A.true[,,1] %*% x.init, inverse(B.true[,,1] %*% t(B.true[,,1])))
+  #x.true[,1] ~ dnorm(A.true[,,1] * x.init, 1/B.true[,,1]^2)
+
+  y[,1] ~ dmnorm(C.true[,,1] %*% x.true[,1], inverse(D.true[,,1] %*% t(D.true[,,1])))
+  #y[,1] ~ dnorm(C.true[,,1] * x.true[,1], 1/D.true[,,1]^2)
+  
+  # itérations
+  #---------------------------
+  for (k in 2:k.max)
+  {
+    u.true[,k] ~ dmnorm(u.true[,k-1], Prec.u)
+  	#u.true[,k] ~ dnorm(u.true[,k-1], Prec.u)
+    
+    # functions de u.true[,k]
+    A.true[,,k] <- a
+    B.true[,,k] <- b
+    C.true[,,k] <- c
+    D.true[,,k] <- exp(u.true[,k])
+
+    x.true[,k] ~ dmnorm(A.true[,,k] %*% x.true[,k-1], inverse(B.true[,,k] %*% t(B.true[,,k])))
+    #x.true[,k] ~ dnorm(A.true[,,k] * x.true[,k-1], 1/B.true[,,k]^2)
+
+    y[,k] ~ dmnorm(C.true[,,k] %*% x.true[,k], inverse(D.true[,,k] %*% t(D.true[,,k])))
+    #y[,k] ~ dnorm(C.true[,,k] * x.true[,k], 1/D.true[,,k]^2)
+  }
+}
+
+
+model
+{
+  # initialisation
+  #---------------------------
+  u[,1] ~ dmnorm(u.init, Prec.u)
+  #u[,1] ~ dnorm(u.init, Prec.u)
+  
+  # functions de u[,1]
+  A[,,1] <- a
+  B[,,1] <- b
+  C[,,1] <- c
+  D[,,1] <- exp(u[,1])
+
+  x[,1] ~ dmnorm(A[,,1] %*% x.init, inverse(B[,,1] %*% t(B[,,1])))
+  #x[,1] ~ dnorm(A[,,1] * x.init, 1/B[,,1]^2)
+
+  y[,1] ~ dmnorm(C[,,1] %*% x[,1], inverse(D[,,1] %*% t(D[,,1])))
+  #y[,1] ~ dnorm(C[,,1] * x[,1], 1/D[,,1]^2)
+  
+  # itérations
+  #---------------------------
+  for (k in 2:k.max)
+  {
+    u[,k] ~ dmnorm(u[,k-1], Prec.u)
+  	#u[,k] ~ dnorm(u[,k-1], Prec.u)
+    
+    # functions de u[,k]
+    A[,,k] <- a
+    B[,,k] <- b
+    C[,,k] <- c
+    D[,,k] <- exp(u[,k])
+
+    x[,k] ~ dmnorm(A[,,k] %*% x[,k-1], inverse(B[,,k] %*% t(B[,,k])))
+    #x[,k] ~ dnorm(A[,,k] * x[,k-1], 1/B[,,k]^2)
+
+    y[,k] ~ dmnorm(C[,,k] %*% x[,k], inverse(D[,,k] %*% t(D[,,k])))
+    #y[,k] ~ dnorm(C[,,k] * x[,k], 1/D[,,k]^2)
+  }
+}
+

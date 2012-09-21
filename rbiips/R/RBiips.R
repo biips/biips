@@ -36,6 +36,73 @@
 #
 ## COPY: Adapted from rjags module file: jags.R
 
+
+mklist <- function(names, env = parent.frame()) { 
+  # COPY: Adapted from rstan
+  # Make a list using names 
+  # Args: 
+  #   names: character strings of names of objects 
+  #   env: the environment to look for objects with names
+  # Note: we use inherits = TRUE when calling mget 
+  d <- mget(names, env, ifnotfound = NA, inherits = TRUE, mode="numeric") 
+  n <- which(is.na(d)) 
+  if (length(n) > 0) {
+    stop(paste("objects ", paste("'", names[n], "'", collapse = ', ', sep = ''), " not found", sep = ''))
+  } 
+  d 
+}
+
+is_legal_biips_vname <- function(name) {
+  TRUE
+}
+
+data_preprocess <- function(data) { # , varnames) {
+  # COPY: Adapted from rstan
+  # Preprocess the data (list or env) to list for stan
+  # 
+  # Args:
+  #  data: A list or an environment
+  #  of objects 
+  #   * stop if no-name lists; duplicate names  
+  #   * stop if the objects given name is not found  
+  #   * remove NULL, non-numeric elements 
+  
+  if (is.environment(data)) {
+    data <- as.list(data) 
+  } else if (is.list(data)) {
+    v <- names(data)
+    if (is.null(v)) 
+      stop("data must be a named list")
+
+    if (any(duplicated(v))) {
+      stop("duplicated names in data list: ", 
+           paste(v[duplicated(v)], collapse = " "))
+    }
+  } else {
+    stop("data must be a list or an environment") 
+  } 
+  
+  names <- names(data) 
+  for (n in names) { 
+    if (!is_legal_biips_vname(n))
+      stop(paste('data with name ', n, " is not allowed in Biips", sep = ''))
+  } 
+  
+  data <- lapply(data, 
+                 FUN = function(x) {
+                   ## change data.frame to array 
+                   if (is.data.frame(x)) { x <- data.matrix(x) }
+
+                   # remove those not numeric data 
+                   if (!is.numeric(x)) { x <- NULL }
+                   
+                   return(x)
+                 })
+  
+  data[!sapply(data, is.null)] 
+}
+
+
 load.biips.module <- function(name, quiet=FALSE)
 {    
   if (!is.character(name) || !is.atomic(name))
@@ -52,7 +119,7 @@ load.biips.module <- function(name, quiet=FALSE)
 }
 
 
-biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, data.rng.seed, quiet = FALSE)
+biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
 {
   if (missing(file)) {
     stop("Model file name missing")
@@ -75,45 +142,6 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
     writeLines(model.code, modfile)
   }
   
-  if (quiet) {
-    verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-    on.exit(.Call("verbosity", verb, PACKAGE="RBiips"), add = TRUE)
-  }
-  
-  p <- .Call("make_console", PACKAGE="RBiips")
-  .Call("check_model", p, modfile, PACKAGE="RBiips")
-  
-  varnames <- .Call("get_variable_names", p, PACKAGE="RBiips")
-  if (is.environment(data)) {
-    ##Get a list of numeric objects from the supplied environment
-    data <- mget(varnames, envir=data, mode="numeric",
-                 ifnotfound=list(NULL))
-    ##Strip null entries
-    data <- data[!sapply(data, is.null)]
-  }
-  else if (is.list(data)) {
-    v <- names(data)
-    if (is.null(v)) {
-      stop("data must be a named list")
-    }
-    if (any(nchar(v)==0)) {
-      stop("unnamed variables in data list")
-    }
-    if (any(duplicated(v))) {
-      stop("Duplicated names in data list: ",
-           paste(v[duplicated(v)], collapse=" "))
-    }
-    relevant.variables <- v %in% varnames
-    data <- data[relevant.variables]
-    unused.variables <- setdiff(v, varnames)
-    for (i in seq(along=unused.variables)) {
-      warning("Unused variable \"", unused.variables[i], "\" in data")
-    }
-  }
-  else {
-    stop("data must be a list or environment")
-  }
-  
   if(!is.logical(sample.data) || !is.atomic(sample.data)) {
     stop("Invalid sample.data argument.");
   }
@@ -124,8 +152,34 @@ biips.model <- function(file, data=sys.frame(sys.parent()), sample.data=TRUE, da
     stop("Invalid data.rng.seed argument.");
   }
   
+  if (quiet) {
+    verb <- .Call("verbosity", 0, PACKAGE="RBiips")
+    on.exit(.Call("verbosity", verb, PACKAGE="RBiips"), add = TRUE)
+  }
+  
+  # check data before compiling model, which typically takes more time
+  if (is.character(data)) data <- mklist(data) 
+  if (length(data) > 0) data <- data_preprocess(data)
+  
+  # make console and check model
+  p <- .Call("make_console", PACKAGE="RBiips")
+  .Call("check_model", p, modfile, PACKAGE="RBiips")
+  
+  # discard unused data
+  varnames <- .Call("get_variable_names", p, PACKAGE="RBiips")
+  
+  v <- names(data)
+  relevant.variables <- v %in% varnames
+  data <- data[relevant.variables]
+  unused.variables <- setdiff(v, varnames)
+  for (i in seq(along=unused.variables)) {
+    warning("Unused variable \"", unused.variables[i], "\" in data")
+  }
+  
+  # compile model
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
   
+  # data after possible sampling (from "data" block in the BUGS language model)
   model.data <- .Call("get_data", p, PACKAGE = "RBiips")
   
   # local initial parameters of the algorithm of adaptation

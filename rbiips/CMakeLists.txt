@@ -38,13 +38,6 @@
 
 project(RBiips)
 
-if (BUILD_SHARED_LIBS)
-    set (BIIPS_SHARED TRUE)
-else ()
-    set (BIIPS_SHARED FALSE)
-endif()
-
-
 macro(set_output_bindir var)
     file(RELATIVE_PATH CURRENT_REL_DIR ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
     file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CURRENT_REL_DIR}" ${var})

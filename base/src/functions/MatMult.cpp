@@ -32,16 +32,17 @@
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
+ *
+ * COPY: Adapted from JAGS MatMult.cc
  */
-
-//#include <boost/numeric/ublas/operation.hpp>
 
 #include "functions/MatMult.hpp"
 
 namespace Biips
 {
 
-  Bool MatMult::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+  Bool MatMult::checkParamDims(
+      const Types<DimArray::Ptr>::Array & paramDims) const
   {
     const DimArray & left = *paramDims[0];
     const DimArray & right = *paramDims[1];
@@ -53,29 +54,43 @@ namespace Biips
       return (left[1] == right[0]);
   }
 
-  void MatMult::eval(ValArray & values, const NumArray::Array & paramValues) const
+  void MatMult::eval(ValArray & values,
+                     const NumArray::Array & paramValues) const
   {
     const NumArray & left = paramValues[0];
     const NumArray & right = paramValues[1];
 
-    if (left.IsMatrix() && right.IsVector())
+
+    // FIXME: this is only valid for column major order
+    Size d1, d2, d3;
+
+    if (left.IsVector())
     {
-      Vector ans_vec = ublas::prod(Matrix(left), Vector(right));
-      values.swap(ans_vec.data());
-    }
-    else if (left.IsVector() && right.IsMatrix())
-    {
-      Vector ans_vec = ublas::prod(Vector(left), Matrix(right));
-      values.swap(ans_vec.data());
-    }
-    else if (left.IsMatrix() && right.IsMatrix())
-    {
-      Matrix ans_mat = ublas::prod(Matrix(left), Matrix(right));
-      values.swap(ans_mat.data());
+      d1 = 1;
+      d2 = left.Dim()[0];
     }
     else
-      throw LogicError(String("Invalid dimensions in function ") + Name()
-          + " evaluation.");
+    {
+      d1 = left.Dim()[0];
+      d2 = left.Dim()[1];
+    }
+    if (right.IsVector())
+      d3 = 1;
+    else
+      d3 = right.Dim()[1];
+
+    for (Size i = 0; i < d1; ++i)
+    {
+      for (Size j = 0; j < d3; ++j)
+      {
+        values[i + d1 * j] = 0;
+        for (Size k = 0; k < d2; ++k)
+        {
+          values[i + d1 * j] += left.Values()[i + d1 * k]
+                                * right.Values()[k + d2 * j];
+        }
+      }
+    }
 
   }
 
