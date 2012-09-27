@@ -451,9 +451,9 @@ namespace Biips
     x_var[t].SetPtr(P_SCALAR_DIM,
                     ValArray::Ptr(new ValArray(1, scalarAcc_.Variance())));
     x_quant_05[t].SetPtr(P_SCALAR_DIM,
-                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(0))));
+                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(0U))));
     x_quant_95[t].SetPtr(P_SCALAR_DIM,
-                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(1))));
+                         ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(1U))));
 
 #ifdef USE_Qwt5_Qt4
     pSampler_->Accumulate(x[t], densAcc_);

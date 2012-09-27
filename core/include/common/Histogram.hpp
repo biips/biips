@@ -48,7 +48,7 @@ namespace Biips
   {
   protected:
     typedef std::map<Scalar, Scalar> BaseType;
-    typedef boost::iterator_range<Types<Types<Scalar>::Pair>::Iterator>
+    typedef boost::iterator_range<Types<std::pair<LongScalar, LongScalar> >::Iterator>
         HistogramType;
 
   public:
@@ -75,7 +75,7 @@ namespace Biips
     typedef Histogram BaseType;
 
   protected:
-    Scalar normConst_;
+    LongScalar normConst_;
 
   public:
     DiscreteHistogram()

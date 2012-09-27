@@ -1,7 +1,7 @@
 k.max <-
 100
 d.u <-
-1
+2
 d.x <-
 1
 d.y <-
@@ -11,14 +11,12 @@ d.v <-
 d.w <-
 1
 u.init <-
-0
+c(0, 0)
 x.init <-
 0
 Prec.u <-
-structure(10, .Dim = c(1L, 1L))
+structure(c(10, 0, 10, 0), .Dim = c(2L, 2L))
 a <-
-1
-b <-
 1
 c <-
 1

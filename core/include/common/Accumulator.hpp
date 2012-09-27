@@ -38,6 +38,7 @@
 #define BIIPS_ACCUMULATOR_HPP_
 
 #include <list>
+#include <stdexcept>
 
 #include "common/Types.hpp"
 #include "common/Error.hpp"
@@ -50,7 +51,7 @@
 #include <boost/accumulators/statistics/weighted_moment.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
 #include <boost/accumulators/statistics/weighted_kurtosis.hpp>
-#include <boost/accumulators/statistics/weighted_extended_p_square.hpp>
+#include <boost/accumulators/statistics/extended_p_square_quantile.hpp>
 #include <boost/accumulators/statistics/weighted_density.hpp>
 
 namespace acc = boost::accumulators;
@@ -71,7 +72,7 @@ namespace Biips
     typedef acc::droppable<acc::tag::weighted_skewness> Skewness;
     typedef acc::droppable<acc::tag::weighted_kurtosis> Kurtosis;
     typedef acc::tag::weighted_density Density;
-    typedef acc::tag::weighted_extended_p_square Quantiles;
+    typedef acc::tag::weighted_extended_p_square_quantile Quantiles;
   }
 
   class Accumulator
@@ -80,9 +81,9 @@ namespace Biips
     typedef Accumulator SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef acc::accumulator_set<Scalar, acc::features<AccTags::Sum,
+    typedef acc::accumulator_set<LongScalar, acc::features<AccTags::Sum,
         AccTags::Mean, AccTags::Moment2, AccTags::Variance, AccTags::Moment3,
-        AccTags::Skewness, AccTags::Moment4, AccTags::Kurtosis>, Scalar>
+        AccTags::Skewness, AccTags::Moment4, AccTags::Kurtosis>, LongScalar>
         AccType;
 
   protected:
@@ -141,8 +142,8 @@ namespace Biips
     typedef DensityAccumulator SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef acc::accumulator_set<Scalar, acc::features<AccTags::Density>,
-        Scalar> AccType;
+    typedef acc::accumulator_set<LongScalar, acc::features<AccTags::Density>,
+        LongScalar> AccType;
 
   protected:
     Size cacheSize_;
@@ -169,8 +170,8 @@ namespace Biips
     typedef QuantileAccumulator SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
-    typedef acc::accumulator_set<Scalar, acc::features<AccTags::Quantiles>,
-        Scalar> AccType;
+    typedef acc::accumulator_set<LongScalar, acc::features<AccTags::Quantiles(acc::quadratic)>,
+        LongScalar> AccType;
 
   protected:
     std::list<Scalar> quantileProbs_;
@@ -194,6 +195,7 @@ namespace Biips
 
     Size Count() const;
     Scalar SumOfWeights() const;
+    Scalar Quantile(Scalar prob) const;
     Scalar Quantile(Size i) const;
   };
 
