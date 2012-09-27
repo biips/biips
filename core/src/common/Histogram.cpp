@@ -50,7 +50,7 @@ namespace Biips
     Types<Scalar>::Array positions(size());
     const_iterator it = begin();
     for (Size i = 0; it != end(); ++it, ++i)
-      positions[i] = it->first;
+      positions[i] = Scalar(it->first);
     return positions;
   }
 
@@ -59,7 +59,7 @@ namespace Biips
     Types<Scalar>::Array freq(size());
     const_iterator it = begin();
     for (Size i = 0; it != end(); ++it, ++i)
-      freq[i] = it->second;
+      freq[i] = Scalar(it->second);
     return freq;
   }
 
@@ -77,7 +77,7 @@ namespace Biips
     const_iterator it_max_value = std::max_element(begin(),
                                                    end(),
                                                    ScalarPairSecondCompare());
-    return it_max_value->first;
+    return Scalar(it_max_value->first);
   }
 
   void DiscreteHistogram::Push(Scalar position, Scalar value)
