@@ -17,15 +17,11 @@ data=struct('tmax', tmax, 'precxinit', precxinit,...
             'precy', precy, 'meanxinit', meanxinit,...
 	    'F', F, 'G', G, 'xpos', xpos, 'meanv', meanv, 'precv', precv);
 
-if (~inter_biips('load_module', 'basemod'))
-    error('problem loading module'); 
-end
 %% intialisation console
-
 biips_init;
 inter_biips('verbosity',4);
 p=biips_model('hmm_4d_nonlin_tracking.bug', data);
-biips_smc_samples(p, {['x[2,1:' int2str(tmax) ']'] }, 100);
+out_smc=biips_smc_samples(p, {['x[2,1:' int2str(tmax) ']'] }, 100);
 
 %% on nettoie la console
 inter_biips('clear_console', p); 
