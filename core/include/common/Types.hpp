@@ -72,6 +72,7 @@ namespace Biips
 
   //! %Numerical scalar type
   typedef Real Scalar;
+  typedef double LongScalar;
 
   //! Template structure defining usual derived types from the parameter type T
   template<typename T>
