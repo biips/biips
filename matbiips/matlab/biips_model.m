@@ -36,6 +36,29 @@ if opt_argin >=3
     quiet = varargin{3};
 end    
 
+% processing data argument
+if (isa(data, 'cell'))
+    data = reshape(data, length(data), 1);
+    
+    isch = cellfun(@(x) ischar(x), data);
+    ignored_var = data(~isch);
+    if (~isempty(ignored_var))
+        warning('ignored non character elements in ''data'' cell argument.');
+    end
+    data = data(isch);
+    
+    isnum = cellfun(@(x) isnumeric(evalin('base', x)), data, 'ErrorHandler', @(S, varargin) false);
+    ignored_var = data(~isnum);
+    if (~isempty(ignored_var))
+        varnames = sprintf('%s ',ignored_var{:});
+        warning('ignored the following (either non numeric or non existent) variables given in ''data'' cell argument: %s ', varnames);
+    end
+    
+    data = data(isnum);
+    
+    data = cell2struct(cellfun(@(x) evalin('base',x), data, 'UniformOutput', false), data, 1);
+end
+
 p = inter_biips('make_console');
 if (quiet)
   inter_biips('verbosity', 0);
@@ -44,3 +67,4 @@ end
 % load model and do some checks
 inter_biips('check_model', p, filename);
 inter_biips('compile_model', p, data, sample_data, data_rng_seed);
+data = inter_biips('get_data', p);
