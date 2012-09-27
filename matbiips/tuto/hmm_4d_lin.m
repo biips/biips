@@ -33,17 +33,14 @@ meanv = zeros(2,1);
 precv = diag(1*ones(2,1));
 precy = diag([2; 2]);
 
-data=struct('tmax', tmax, 'precxinit', precxinit,...
-            'precy', precy, 'meanxinit', meanxinit,...
-	    'F', F, 'G', G,'H',H, 'meanv', meanv, 'precv', precv);
+data={'tmax', 'precxinit', ...
+      'precy', 'meanxinit', ...
+	  'F', 'G', 'H', 'meanv', 'precv'};
 
-if (~inter_biips('load_module', 'basemod'))
-    error('problem loading module'); 
-end
 %% intialisation console
 biips_init;
 p=biips_model('hmm_4d_lin_tracking.bug', data);
-biips_smc_samples(p, {'x', 'y'}, 100);
 data_out = biips_get_data(p);
+out_smc=biips_smc_samples(p, {'x'}, 100);
 
 %% on nettoie la console

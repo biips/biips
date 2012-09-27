@@ -24,10 +24,10 @@ function [var_out] = biips_smc_samples(console, variable_names, nb_part, varargi
 % check for optional options
 opt_argin = length(varargin);
 % default values
-type='fsb';
+type='fs';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (~exist('OCTAVE_VERSION')) 
+if (~exist('OCTAVE_VERSION', 'var')) 
   % matlab version
   s=rng('shuffle');
   seed=randi(intmax);
@@ -72,24 +72,22 @@ ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
 log_marg_like = inter_biips('get_log_norm_const', console);
 mon1 = inter_biips('get_filter_monitors', console);
 noms = fieldnames(mon1);
-cz1 = struct2cell(mon1);
+cz = struct2cell(mon1);
 if (~backward)
    biips_clear_monitors(console, 'f');
 end   
 
 mon2 = inter_biips('get_smooth_tree_monitors', console);
 biips_clear_monitors(console, 's');
-cz2 = struct2cell(mon2);
+cz = horzcat(cz, struct2cell(mon2));
 
 if (backward)
    inter_biips('run_backward_smoother', console);
    biips_clear_monitors(console, 'f'); 
-   mon3 = inter_biips('get_smooth_tree_monitors', console);
-   cz3 = struct2cell(mon3);
+   mon3 = inter_biips('get_smooth_monitors', console);
    biips_clear_monitors(console, 'b'); 
+   cz = horzcat(cz, struct2cell(mon3));
 end
-
-cz = horzcat(cz1, cz2, cz3);
 
 fsb = {'f', 's', 'b' };
 fsb = {fsb{1:size(cz, 2)} };
@@ -101,4 +99,3 @@ for i=1:nb_noms
 end   
 var_out = inter_biips('cell2struct_weak_names', cell_noms, noms);
 var_out.('log_marg_like') = log_marg_like;
-
