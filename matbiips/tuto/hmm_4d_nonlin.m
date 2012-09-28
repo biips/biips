@@ -1,27 +1,71 @@
+clear
+close
 addpath('../matlab');
-nb_particules = 200;
-%DATA
-tmax = 10;
-meanxinit = [0; 0; 1; 0];
-precxinit = diag(1000*ones(4,1));
-xpos = [-10  0];
-meanv = zeros(2, 1);
-precv = diag(1*ones(2,1));
-precy = diag([10; 100]);
+
+%% define data
+t_max = 10;
+mean_x_init = [0 0 1 0]';
+prec_x_init = diag(1000*ones(4,1));
+x_pos = [-10  0];
+mean_v = zeros(2, 1);
+prec_v = diag(1*ones(2,1));
+prec_y = diag([10 100]);
 delta_t = 1;
-F = [ 1 0 delta_t 0; 0 0 1 0; delta_t 0 0 1; 0 0 0 1];
-G = [ delta_t.^2/2 0; 0 delta_t.^2/2 ; delta_t 0; 0 delta_t];
+F = [ 1 0 delta_t 0
+    0 0 1 0
+    delta_t 0 0 1
+    0 0 0 1];
+G = [ delta_t.^2/2 0
+    0 delta_t.^2/2
+    delta_t 0
+    0 delta_t];
 
-
-data=struct('tmax', tmax, 'precxinit', precxinit,...
-            'precy', precy, 'meanxinit', meanxinit,...
-	    'F', F, 'G', G, 'xpos', xpos, 'meanv', meanv, 'precv', precv);
-
-%% intialisation console
+%% create model
 biips_init;
-inter_biips('verbosity',4);
-p=biips_model('hmm_4d_nonlin_tracking.bug', data);
-out_smc=biips_smc_samples(p, {['x[2,1:' int2str(tmax) ']'] }, 100);
+[p, data] = biips_model('hmm_4d_nonlin_tracking.bug', who);
+x_true = data.x_true(1:2,:);
 
-%% on nettoie la console
-inter_biips('clear_console', p); 
+%% run SMC
+n_part = 100;
+x_name = ['x[1:2,1:' int2str(t_max) ']'];
+out_smc = biips_smc_samples(p, {x_name}, n_part, 'fsb');
+
+%% filtering stats
+x_summ_f = biips_summary(out_smc.(x_name).f);
+
+x_dens_f = cell(2,t_max);
+for i=1:2
+    for j=1:t_max
+        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).f.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).f.weights(i,j,:)));
+        x_dens_f{i,j}.x = xi;
+        x_dens_f{i,j}.y = f;
+        x_dens_f{i,j}.bw = b;
+    end
+end
+
+%% smoothing stats
+x_summ_s = biips_summary(out_smc.(x_name).s);
+
+x_dens_s = cell(2,t_max);
+for i=1:2
+    for j=1:t_max
+        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).s.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).s.weights(i,j,:)));
+        x_dens_s{i,j}.x = xi;
+        x_dens_s{i,j}.y = f;
+        x_dens_s{i,j}.bw = b;
+    end
+end
+
+%% backward smoothing stats
+x_summ_b = biips_summary(out_smc.(x_name).b);
+
+x_dens_b = cell(2,t_max);
+for i=1:2
+    for j=1:t_max
+        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).b.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).b.weights(i,j,:)));
+        x_dens_b{i,j}.x = xi;
+        x_dens_b{i,j}.y = f;
+        x_dens_b{i,j}.bw = b;
+    end
+end
+

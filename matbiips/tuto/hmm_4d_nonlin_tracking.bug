@@ -1,40 +1,40 @@
-var vtrue[2,tmax-1], xtrue[4,tmax], xradartrue[2,tmax],
-v[2,tmax-1], x[4,tmax], xradar[2,tmax], y[2,tmax]
+var v_true[2,t_max-1], x_true[4,t_max], x_radar_true[2,t_max],
+v[2,t_max-1], x[4,t_max], x_radar[2,t_max], y[2,t_max]
 
 data
 {
-  xtrue[,1] ~ dmnorm(meanxinit, precxinit)
-  xradartrue[,1] <- xtrue[1:2,1] -xpos 
-  muytrue[1,1] <- sqrt(xradartrue[1,1]^2+xradartrue[2,1]^2)
-  muytrue[2,1] <- arctan(xradartrue[2,1]/xradartrue[1,1])
-  y[,1] ~ dmnorm(muytrue[,1], precy)
+  x_true[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  x_radar_true[,1] <- x_true[1:2,1] - x_pos 
+  mu_y_true[1,1] <- sqrt(x_radar_true[1,1]^2+x_radar_true[2,1]^2)
+  mu_y_true[2,1] <- arctan(x_radar_true[2,1]/x_radar_true[1,1])
+  y[,1] ~ dmnorm(mu_y_true[,1], prec_y)
 
-  for (t in 2:tmax)
+  for (t in 2:t_max)
   {
-    vtrue[,t-1] ~ dmnorm(meanv, precv)
-    xtrue[,t] <- F %*% xtrue[,t-1] + G %*% vtrue[,t-1]
-    xradartrue[,t] <- xtrue[1:2,t] -xpos
-    muytrue[1,t] <- sqrt(xradartrue[1,t]^2+xradartrue[2,t]^2)
-    muytrue[2,t] <- arctan(xradartrue[2,t]/xradartrue[1,t])
-    y[,t] ~ dmnorm(muytrue[,t], precy)
+    v_true[,t-1] ~ dmnorm(mean_v, prec_v)
+    x_true[,t] <- F %*% x_true[,t-1] + G %*% v_true[,t-1]
+    x_radar_true[,t] <- x_true[1:2,t] - x_pos
+    mu_y_true[1,t] <- sqrt(x_radar_true[1,t]^2+x_radar_true[2,t]^2)
+    mu_y_true[2,t] <- arctan(x_radar_true[2,t]/x_radar_true[1,t])
+    y[,t] ~ dmnorm(mu_y_true[,t], prec_y)
   }
 }
 
 model
 {
-  x[,1] ~ dmnorm(meanxinit, precxinit)
-  xradar[,1] <- x[1:2,1] -xpos
-  muy[1,1] <- sqrt(xradar[1,1]^2+xradar[2,1]^2)
-  muy[2,1] <- arctan(xradar[2,1]/xradar[1,1])
-  y[,1] ~ dmnorm(muy[,1], precy)
+  x[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  x_radar[,1] <- x[1:2,1] - x_pos
+  mu_y[1,1] <- sqrt(x_radar[1,1]^2+x_radar[2,1]^2)
+  mu_y[2,1] <- arctan(x_radar[2,1]/x_radar[1,1])
+  y[,1] ~ dmnorm(mu_y[,1], prec_y)
 
-  for (t in 2:tmax)
+  for (t in 2:t_max)
   {
-    v[,t-1] ~ dmnorm(meanv, precv)
+    v[,t-1] ~ dmnorm(mean_v, prec_v)
     x[,t] <- F %*% x[,t-1] + G %*% v[,t-1]
-    xradar[,t] <- x[1:2,t] -xpos
-    muy[1,t] <- sqrt(xradar[1,t]^2+xradar[2,t]^2)
-    muy[2,t] <- arctan(xradar[2,t]/xradar[1,t])
-    y[,t] ~ dmnorm(muy[,t], precy)
+    x_radar[,t] <- x[1:2,t] - x_pos
+    mu_y[1,t] <- sqrt(x_radar[1,t]^2+x_radar[2,t]^2)
+    mu_y[2,t] <- arctan(x_radar[2,t]/x_radar[1,t])
+    y[,t] ~ dmnorm(mu_y[,t], prec_y)
   }
 }
