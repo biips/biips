@@ -173,7 +173,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const String & var_name = it_table->first;
     const NodeArrayMonitor & monitor = it_table->second;
 
-    const char * curr_field_names[] = { "values", "weigths", "ess", "discrete",
+    const char * curr_field_names[] = { "values", "weights", "ess", "discrete",
                                          "name", "lower", "upper", "type"};
     mwSize curr_dims[] = { 1 };
     mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(chaine_carac), 

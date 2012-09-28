@@ -61,10 +61,14 @@ end
 
 p = inter_biips('make_console');
 if (quiet)
-  inter_biips('verbosity', 0);
+  old_verb = inter_biips('verbosity', 0);
 end
 
 % load model and do some checks
 inter_biips('check_model', p, filename);
 inter_biips('compile_model', p, data, sample_data, data_rng_seed);
 data = inter_biips('get_data', p);
+
+if (quiet)
+  inter_biips('verbosity', old_verb);
+end

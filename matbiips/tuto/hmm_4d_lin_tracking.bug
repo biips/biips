@@ -1,28 +1,28 @@
-var xtrue[4,tmax], vtrue[2,tmax], 
-    x[4,tmax], v[2,tmax], y[2,tmax]
+var x_true[4,t_max], v_true[2,t_max], 
+    x[4,t_max], v[2,t_max], y[2,t_max]
 
 data
 {
-  xtrue[,1] ~ dmnorm(meanxinit, precxinit)
-  y[,1] ~ dmnorm(H %*% xtrue[,1], precy)
-  for (t in 2:tmax)
+  x_true[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  y[,1] ~ dmnorm(H %*% x_true[,1], prec_y)
+  for (t in 2:t_max)
   {
-    vtrue[,t] ~ dmnorm(meanv, precv)
-    xtrue[,t] <- F %*% xtrue[,t-1] + G %*% vtrue[,t]
-    y[,t] ~ dmnorm(H %*% xtrue[,t], precy)
+    v_true[,t] ~ dmnorm(mean_v, prec_v)
+    x_true[,t] <- F %*% x_true[,t-1] + G %*% v_true[,t]
+    y[,t] ~ dmnorm(H %*% x_true[,t], prec_y)
   }
 }
 
 
 model
 {
-  x[,1] ~ dmnorm(meanxinit, precxinit)
-  y[,1] ~ dmnorm(H %*% x[,1], precy)
-  for (t in 2:tmax)
+  x[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  y[,1] ~ dmnorm(H %*% x[,1], prec_y)
+  for (t in 2:t_max)
   {
-    v[,t] ~ dmnorm(meanv, precv)
+    v[,t] ~ dmnorm(mean_v, prec_v)
     x[,t] <- F %*% x[,t-1] + G %*% v[,t]
-    y[,t] ~ dmnorm(H %*% x[,t], precy)
+    y[,t] ~ dmnorm(H %*% x[,t], prec_y)
   }
 }
 
