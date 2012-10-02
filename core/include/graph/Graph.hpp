@@ -86,6 +86,7 @@ namespace Biips
     Types<Size>::Array ranks_;
 
     Bool builtFlag_;
+    Bool dataGraph_;
 
     std::map<NodeType, Size> nodesSummaryMap_;
     std::map<NodeType, Size> unobsNodesSummaryMap_;
@@ -98,7 +99,7 @@ namespace Biips
     getParamDims(const Types<NodeId>::Array parameters) const;
 
   public:
-    Graph();
+    Graph(Bool dataGraph = false);
 
     NodeId AddConstantNode(const DimArray::Ptr & pDim,
                            const Types<StorageType>::Ptr & pValue);
@@ -116,14 +117,13 @@ namespace Biips
 
     NodeId AddStochasticNode(const Distribution::Ptr & pDist,
                              const Types<NodeId>::Array & parameters,
-                             Bool observed,
-                             NodeId lower = NULL_NODEID,
+                             Bool observed, NodeId lower = NULL_NODEID,
                              NodeId upper = NULL_NODEID);
     NodeId AddStochasticNode(const Distribution::Ptr & pDist,
                              const Types<NodeId>::Array & parameters,
                              const Types<StorageType>::Ptr & pObsValue,
-                             NodeId lower = NULL_NODEID,
-                             NodeId upper = NULL_NODEID);
+                             NodeId lower = NULL_NODEID, NodeId upper =
+                                 NULL_NODEID);
 
     void PopNode();
 
@@ -188,13 +188,11 @@ namespace Biips
     void SetUnobserved(NodeId nodeId);
 
     // Sets observed values
-    void SetObsValue(NodeId nodeId,
-                     const ValArray::Ptr & pObsValue,
+    void SetObsValue(NodeId nodeId, const ValArray::Ptr & pObsValue,
                      Bool stochOnly = true);
     void SetObsValues(const NodeValues & nodeValues);
 
-    ValArray::Ptr SampleValue(NodeId nodeId,
-                              Rng * pRng = NULL,
+    ValArray::Ptr SampleValue(NodeId nodeId, Rng * pRng = NULL,
                               Bool setObsValue = false);
     // Called after changing node data
     void UpdateDiscreteness(NodeId nodeId,
@@ -236,8 +234,8 @@ namespace Biips
   public:
     typedef VertexPropertyWriter SelfType;
 
-    VertexPropertyWriter(const Graph & graph) :
-        graph_(graph)
+    VertexPropertyWriter(const Graph & graph)
+        : graph_(graph)
     {
     }
     virtual ~VertexPropertyWriter()

@@ -78,8 +78,7 @@ namespace Biips
     IndexRange getRange(ParseTree const * pTree,
                         const IndexRange & defaultRange);
 
-    void traverseTree(ParseTree const * pRelations,
-                      CompilerMemFn fun,
+    void traverseTree(ParseTree const * pRelations, CompilerMemFn fun,
                       Bool resetCounter = true);
     void allocate(ParseTree const *pRelations);
     NodeId allocateStochastic(ParseTree const *pStochRelation);

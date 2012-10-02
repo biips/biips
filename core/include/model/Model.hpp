@@ -60,15 +60,27 @@ namespace Biips
     std::set<NodeId> smoothTreeMonitoredNodeIds_;
     Bool defaultMonitorsSet_;
 
-    MultiArray extractMonitorStat(NodeId nodeId, StatTag statFeature, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
-    Histogram extractMonitorPdf(NodeId nodeId, Size numBins, Scalar cacheFraction, const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+    MultiArray extractMonitorStat(
+        NodeId nodeId, StatTag statFeature,
+        const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+    Histogram extractMonitorPdf(
+        NodeId nodeId, Size numBins, Scalar cacheFraction,
+        const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
 
   public:
 
-    Model() : pGraph_(new Graph()), defaultMonitorsSet_(false) {}
-    virtual ~Model() {};
+    Model(Bool dataModel = false)
+        : pGraph_(new Graph(dataModel)), defaultMonitorsSet_(false)
+    {
+    }
+    virtual ~Model()
+    {
+    }
 
-    const Graph::Ptr & GraphPtr() { return pGraph_; }
+    const Graph::Ptr & GraphPtr()
+    {
+      return pGraph_;
+    }
 
     void SetDefaultFilterMonitors();
 
@@ -76,15 +88,22 @@ namespace Biips
     Bool SetSmoothTreeMonitor(NodeId nodeId);
     Bool SetSmoothMonitor(NodeId nodeId);
 
-    Bool SamplerBuilt() const { return pSampler_ && pSampler_->Built(); }
+    Bool SamplerBuilt() const
+    {
+      return pSampler_ && pSampler_->Built();
+    }
     const ForwardSampler & Sampler() const;
 
     void BuildSampler();
 
-    void InitSampler(Size nParticles, const Rng::Ptr & pRng, const String & rsType, Scalar threshold);
+    void InitSampler(Size nParticles, const Rng::Ptr & pRng,
+                     const String & rsType, Scalar threshold);
     void IterateSampler();
 
-    Bool SmootherInitialized() const { return pSmoother_ && pSmoother_->Initialized(); }
+    Bool SmootherInitialized() const
+    {
+      return pSmoother_ && pSmoother_->Initialized();
+    }
     const BackwardSmoother & Smoother() const;
 
     void InitBackwardSmoother();
@@ -96,10 +115,13 @@ namespace Biips
     MultiArray ExtractSmoothStat(NodeId nodeId, StatTag statFeature) const;
 
     MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatTag statFeature) const;
-    Histogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    
-    Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    Histogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40, Scalar cacheFraction = 0.25) const;
+    Histogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40,
+                                   Scalar cacheFraction = 0.25) const;
+
+    Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40,
+                               Scalar cacheFraction = 0.25) const;
+    Histogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40,
+                               Scalar cacheFraction = 0.25) const;
 
     // release_only flag: only release monitor objects but keep nodeIds
     void virtual ClearFilterMonitors(Bool release_only = false);
