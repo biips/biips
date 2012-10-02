@@ -40,6 +40,7 @@
 #define BIIPS_DUMPREADER_HPP_
 
 #include "common/Types.hpp"
+#include <iostream>
 
 namespace Biips
 {
