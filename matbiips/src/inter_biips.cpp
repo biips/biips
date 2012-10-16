@@ -982,6 +982,45 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
+    // WEIGHTED_MEAN FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "weighted_quantiles") {
+
+       CheckRhs(nrhs, 3, name_func);
+       
+       const mxArray * values  = prhs[1];
+       const mxArray * weights = prhs[2];
+       const mxArray * probas  = prhs[3];
+       
+       
+       CheckArgIsNumeric(values);
+       CheckArgIsNumeric(weights);
+       CheckArgIsNumeric(probas);
+
+       int values_size = mxGetNumberOfElements(values);
+       int weights_size = mxGetNumberOfElements(weights);
+       int probas_size = mxGetNumberOfElements(probas);
+
+       if (values_size != weights_size)
+         throw LogicError("values and weights must have same length.");
+
+       QuantileAccumulator accu(mxGetPr(probas), mxGetPr(probas) + probas_size);
+       accu.Init();
+
+       for (int i = 0; i< values_size; ++i)
+         accu.Push(values_vec[i], weights_vec[i]);
+
+       //for (int i = 0; i<probs_size; ++i)
+       //{
+       //    stats["Median"] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
+       //  else
+       //    stats[String("Qu. ")+print(probs_vec[i])] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
+       //}
+       
+       
+    }       
+    
+    /////////////////////////////////////////
     // CELL2STRUCT_WEAK_NAMES 
     /////////////////////////////////////////
     else if (name_func == "cell2struct_weak_names") {
