@@ -12,7 +12,8 @@
 #include "inter_utils.h"
 #include <fstream>
 #include "iostream/outStream.hpp"
-#include <cstdio>
+#include "common/Accumulator.hpp"
+#include "common/Utility.hpp"
 
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
@@ -993,9 +994,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        const mxArray * probas  = prhs[3];
        
        
-       CheckArgIsNumeric(values);
-       CheckArgIsNumeric(weights);
-       CheckArgIsNumeric(probas);
+       CheckArgIsDouble(1);
+       CheckArgIsDouble(2);
+       CheckArgIsDouble(3);
+
+
+       double * values_vec = mxGetPr(values);
+       double * weights_vec = mxGetPr(weights);
+       double * probas_vec = mxGetPr(probas);
 
        int values_size = mxGetNumberOfElements(values);
        int weights_size = mxGetNumberOfElements(weights);
@@ -1009,13 +1015,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        for (int i = 0; i< values_size; ++i)
          accu.Push(values_vec[i], weights_vec[i]);
-
-       //for (int i = 0; i<probs_size; ++i)
-       //{
-       //    stats["Median"] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
-       //  else
-       //    stats[String("Qu. ")+print(probs_vec[i])] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
-       //}
+       
+       plhs[0] = mxCreateDoubleMatrix(probas_size, 1, mxREAL);
+       double * probas_out = mxGetPr(plhs[0]);
+       
+       for (int i = 0; i<probas_size; ++i) {
+           probas_out[i] = accu.Quantile(probas_vec[i]);
+       }
        
        
     }       
