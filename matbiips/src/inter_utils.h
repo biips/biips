@@ -41,7 +41,7 @@ void getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap,
 IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 inline  
-void CheckRhs(int nrhs, int nb, String name_func) { matbiips/src/inter_utils.h
+void CheckRhs(int nrhs, int nb, String name_func) { 
   if (nrhs != (nb + 1)) { 
      char id_error[1024];
      std::sprintf(id_error, "inter_biips:%s", name_func.c_str());
@@ -107,13 +107,5 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
  if (!mxIsDouble((m)))\
     mbiips_cerr << name_func  << " " <<  " some argument must be double precision" << endl
 
-#define CheckIsNumeric(m)\
- if (!mxIsNumeric((m)))\
-    mbiips_cerr << name_func  << " " << " some argument must be numeric" << endl
-
 #endif
-
-
-
-
 #endif
