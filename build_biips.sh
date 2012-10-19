@@ -4,12 +4,12 @@ set -x
 # Change these variables to fit your needs
 #-----------------------------------------
 export BIIPS_SRC=/home/adrien-alea/workspace/biips-src/trunk
-export BIIPS_BUILD=/home/adrien-alea/workspace/biips-debug
+export BIIPS_BUILD=/home/adrien-alea/workspace/biips-release
 export BIIPS_ROOT=/home/adrien-alea/biips
 export LIBnn=lib64
 export ECLIPSE=/home/adrien-alea/eclipse/eclipse
 export MATLAB_ROOT=/home/adrien-alea/MATLAB/R2012a
-export CMAKE_BUILD_TYPE=Debug
+export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
 export CMAKE_OPTIONS=-DBoost_USE_STATIC_LIBS=OFF
 export CPACK_GENERATOR=RPM
