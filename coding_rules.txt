@@ -1,13 +1,5 @@
 ========== Regles de codage ===========
 
-* smctc doit être encaplsulée et invisible :
---------------------------------------------
-- ses classes sont héritées de façon privée
-- les méthodes redéfinies doivent porter un nom différent car elles ne sont pas 
-virtuelles dans smctc. Ou alors il faut être sûr que l'objet ne sera pas 
-coverti implicitement en objet de la classe de base, car sionon la méthode
-appelée sera celle de la classe de base.
-
 * Nommage :
 -----------
 fichier source : UneClasse.cpp
@@ -60,11 +52,6 @@ item d'un enum : UN_ITEM
 - Ne pas créer un shared_ptr sur un objet non alloué dynamiquement : en effet,
  le compteur est à 1 et la destruction du shared_ptr entraîne la destruction
  de l'objet, puis deuxième destruction de l'objet à la fin de son bloc !!!
-- Ne pas affecter une expression numérique à un Numerical (variant) sans
- expliciter le type de l'expression
- ex : Real a;
- RealVector b;
- Numerical num = IntVector(a * b);
 - Ne pas définir une fonction template dans le fichier source d'une librairie (mais dans le header)
 - Ordre de lien des librairies : The traditional behavior of linkers is to search for external functions from left to right in the libraries specified on the command line. This means that a library containing the definition of a function should appear after any source files or object files which use it.
 - ne pas passer un objet polymorphique par copie.
