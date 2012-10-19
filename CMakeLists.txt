@@ -46,7 +46,7 @@ set (Biips_VERSION_MINOR 7)
 set (Biips_VERSION_PATCH 3)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
-file (WRITE VERSION ${Biips_VERSION})
+file (WRITE VERSION.txt ${Biips_VERSION})
 
 set (Biips_OWNER Inria)
 set (Biips_COPYRIGHT_YEAR 2012)
@@ -61,7 +61,7 @@ set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
  Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.
  Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
 
-file (WRITE Description ${Biips_DESCRIPTION})
+file (WRITE Description.txt ${Biips_DESCRIPTION})
 
 if (NOT Biips_DATE)
 	if (WIN32)
@@ -85,12 +85,12 @@ message (STATUS Biips_DATE=${Biips_DATE})
 # configure resource files
 configure_file (README.md.in README.txt @ONLY)
 #configure_file (Welcome Welcome.txt COPYONLY)
-configure_file (COPYING COPYING.txt COPYONLY)
+configure_file (COPYING.txt COPYING.txt COPYONLY)
 
 # configure NOTICES file
 configure_file (
-	${CMAKE_SOURCE_DIR}/NOTICES.in
-	${CMAKE_BINARY_DIR}/NOTICES
+	${CMAKE_SOURCE_DIR}/NOTICES.txt.in
+	${CMAKE_BINARY_DIR}/NOTICES.txt
 )
 
 # set dependencies versions
@@ -436,7 +436,7 @@ set (CPACK_PACKAGE_VERSION_MINOR ${Biips_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${Biips_VERSION_PATCH})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
-set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description)
+set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description.txt)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.txt)
 #set (CPACK_RESOURCE_FILE_WELCOME ${CMAKE_BINARY_DIR}/Welcome.txt)
@@ -472,7 +472,7 @@ set (CPACK_RPM_PACKAGE_RELEASE 1)
 set (CPACK_RPM_PACKAGE_LICENSE ${Biips_LICENSE})
 set (CPACK_RPM_PACKAGE_GROUP Applications/Engineering)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
-set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog)
+set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog.txt)
 
 # Windows NSIS package specific options
 if (WIN32 AND NOT UNIX)
