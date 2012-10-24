@@ -1,6 +1,6 @@
 find_program(MKOCT mkoctfile)
 if(MKOCT)
-    message (STATUS "mex (Octave) found : ${MKOCT}")
+    message (STATUS "(Octave) found : ${MKOCT}")
     set(MEX_FOUND OCTAVE)
     set(MEX_COMMAND ${MKOCT} --mex)
     set(MEX_EXT mex)
