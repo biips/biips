@@ -47,7 +47,7 @@ mklist <- function(names, env = parent.frame()) {
   d <- mget(names, env, ifnotfound = NA, inherits = TRUE, mode="numeric") 
   n <- which(is.na(d)) 
   if (length(n) > 0) {
-    stop(paste("objects ", paste("'", names[n], "'", collapse = ', ', sep = ''), " not found", sep = ''))
+    stop("objects ", paste("'", names[n], "'", collapse = ', ', sep = ''), " not found")
   } 
   d 
 }
@@ -73,7 +73,7 @@ data_preprocess <- function(data) { # , varnames) {
     v <- names(data)
     if (is.null(v)) 
       stop("data must be a named list")
-
+    
     if (any(duplicated(v))) {
       stop("duplicated names in data list: ", 
            paste(v[duplicated(v)], collapse = " "))
@@ -85,14 +85,14 @@ data_preprocess <- function(data) { # , varnames) {
   names <- names(data) 
   for (n in names) { 
     if (!is_legal_biips_vname(n))
-      stop(paste('data with name ', n, " is not allowed in Biips", sep = ''))
+      stop('data with name ', n, " is not allowed in Biips")
   } 
   
   data <- lapply(data, 
                  FUN = function(x) {
                    ## change data.frame to array 
                    if (is.data.frame(x)) { x <- data.matrix(x) }
-
+                   
                    # remove those not numeric data 
                    if (!is.numeric(x)) { x <- NULL }
                    
@@ -110,10 +110,10 @@ load.biips.module <- function(name, quiet=FALSE)
   
   ok <- .Call("load_module", name, PACKAGE="RBiips")
   if (!ok) {
-    stop("module", name, "not found\n", sep=" ")
+    stop("module ", name, " not found\n")
   }
   else if (!quiet) {
-    cat("module", name, "loaded\n", sep=" ")
+    cat("module", name, "loaded\n")
   }
   invisible(NULL)
 }
@@ -127,8 +127,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   if (is.character(file)) {
     f <- try(file(file, "rt"))
     if (inherits(f, "try-error")) {
-      stop(paste("Cannot open model file \"", file, "\"", 
-                 sep = ""))
+      stop("Cannot open model file \"", file, "\"")
     }
     close(f)
     model.code <- readLines(file, warn = FALSE)
@@ -184,19 +183,26 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   
   # local initial parameters of the algorithm of adaptation
   # of the step of random walk in the PMMH algorithm
-  rwpar <- list(adapt=TRUE,
+  rw <- list(adapt=TRUE,
                 niter=2,
                 pmean=0,
                 lstep=log(0.1),
                 prob=0.234, # Target acceptance probability. The default seems to
                 # be a fairly robust optimal value.
                 povertarget=FALSE,
-                ncrosstarget=10 #The value ncrosstarget controls the reduction in the step size when rescale is
+                ncrosstarget=10, #The value ncrosstarget controls the reduction in the step size when rescale is
                 #called. There is no reason to give it an initial value of zero. In
                 #fact this is a poor choice since the  step size would be immediately
                 #halved. We start with a value of 10 so the first change in step size
                 #is 10%.
-                )
+                count=0,
+                buffer=c(),
+                mean=c(),
+                cov=c(),
+                cov_chol=c(),
+                naccept=0,
+                nadapt=0
+  )
   
   model <- list("ptr" = function() {p},
                 "model" = function() {model.code},
@@ -246,42 +252,116 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                         FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
                   invisible(NULL)
                 },
-                ".rw.step" = function() {
-                  return(exp(rwpar$lstep))
-                },
                 ".rw.rescale" = function(p) {
-                  if (!rwpar$adapt) {
-                    invisible(NULL)
-                  }
-                  # The step size is adapted to achieve the
-                  # target acceptance rate using a noisy gradient algorithm.
-                  p <- min(p, 1.0)
-                  rwpar$lstep <<- rwpar$lstep + (p-rwpar$prob)/rwpar$niter
-                  if ((p>rwpar$prob) != rwpar$povertarget) {
-                    rwpar$povertarget <<- !rwpar$povertarget
-                    rwpar$ncrosstarget <<- rwpar$ncrosstarget+1
-                  }
                   # We keep a weighted mean estimate of the mean acceptance probability
                   # with the weights in favour of more recent iterations
-                  rwpar$pmean <<- rwpar$pmean + 2*(p-rwpar$pmean)/rwpar$niter
-                  rwpar$niter <<- rwpar$niter+1
+                  p <- min(p, 1.0)
+                  rw$pmean <<- rw$pmean + 2*(p-rw$pmean)/rw$niter
+                  rw$niter <<- rw$niter+1
+                  
+                  if (!rw$adapt) {
+                    return(NULL)
+                  }
+                  rw$nadapt <<- rw$nadapt+1
+                  
+                  # The step size is adapted to achieve the
+                  # target acceptance rate using a noisy gradient algorithm.
+                  rw$lstep <<- rw$lstep + (p-rw$prob)/rw$ncrosstarget
+                  if ((p>rw$prob) != rw$povertarget) {
+                    rw$povertarget <<- !rw$povertarget
+                    rw$ncrosstarget <<- rw$ncrosstarget+1
+                  }
+                  
                   invisible(NULL)
                 },
+                ".rw.adapt" = function() {
+                  return(rw$adapt)
+                },
                 ".rw.check.adapt" = function() {
-                  if (rwpar$pmean==0 || rwpar$pmean==1){
+                  if (rw$pmean==0 || rw$pmean==1) {
                     return(FALSE)
                   }
                   # The distance, on a logistic scale, between pmean
                   # and the target acceptance probability.
-                  d <- abs(log(rwpar$pmean/(1-rwpar$pmean))
-                           - log(rwpar$prob/(1-rwpar$prob)))
-                  return(d < 0.5)
-                },
-                ".rw.adapt" = function() {
-                  return(rwpar$adapt)
+                  dist <- abs(log(rw$pmean/(1-rw$pmean))
+                              - log(rw$prob/(1-rw$prob)))
+                  return (dist < 0.5)
                 },
                 ".rw.adapt.off" = function() {
-                  rwpar$adapt <<- FALSE
+                  rw$adapt <<- FALSE
+                  invisible(NULL)
+                },
+                ".rw.proposal" = function(sample) {
+                  sample_dim <- lapply(sample, length)
+                  sample_vec <- c()
+                  for (v in seq(along=sample)) {
+                    sample_vec <- c(sample_vec, sample[[v]])
+                  }
+                  d <- length(sample_vec)
+                  if (rw$adapt) {
+                    prop_vec <- sample_vec + 2.38/sqrt(d) * exp(rw$lstep) * rnorm(d)
+                  } else {
+                    prop_vec <- sample_vec + 2.38/sqrt(d) * rw$cov_chol %*% rnorm(d)
+                  }
+                  prop <- list()
+                  from <- 1
+                  for (name in names(sample)) {
+                    to <- from+prod(sample_dim[[name]])-1
+                    prop[[name]] <- array(prop_vec[from:to], dim=sample_dim[[name]])
+                    from <- to+1
+                  }
+                  invisible(prop)
+                },
+                ".rw.update.cov" = function(sample=list(), accepted=FALSE, update_only=FALSE) {
+                  m <- nrow(rw$buffer)
+                  
+                  if (!update_only && accepted) {
+                    # concatenate all variables in a vector
+                    sample_vec <- c()
+                    for (v in seq(along=sample)) {
+                      sample_vec <- c(sample_vec, sample[[v]])
+                    }
+                    
+                    # push sample back in buffer
+                    if (is.null(rw$buffer)) {
+                      rw$buffer <<- data.frame(t(sample_vec))
+                    } else {
+                      rw$buffer[m+1,] <<- sample_vec
+                    }
+                    rw$naccept <<- rw$naccept + accepted
+                  }
+                  
+                  d <- ncol(rw$buffer)
+                  
+                  if (update_only && length(rw$mean)==0 && length(d)>0)
+                    stop("Failed updating RW covariance.")
+                  
+                  if (length(d)>0 && (update_only || rw$naccept == 2*d)) {
+                    # empirical mean and covariance estimates
+                    mean_buff <- c(colMeans(rw$buffer))
+                    cov_buff <- var(rw$buffer)
+                    
+                    if (length(rw$mean) == 0) {
+                      rw$mean <<- mean_buff
+                      rw$cov <<- cov_buff
+                    } else {
+                      # update empirical mean and covariance estimates
+                      n <- rw$count
+                      N <- n+m
+                      rw$mean <<- n/N*rw$mean + m/N*mean_buff
+                      diff <- mean_buff - rw$mean
+                      rw$cov <<- n/N*rw$cov + m/N*cov_buff + n*m/N^2 * diff %*% t(diff)
+                    }
+                    # clear buffer
+                    rw$buffer <<- NULL
+                    rw$naccept <<- 0
+                    
+                    # compute choleski decomposition
+                    rw$cov_chol <<- t(chol(rw$cov))
+                    
+                    rw$count <<- rw$count+m
+                  }
+                  
                   invisible(NULL)
                 })
   class(model) <- "biips"
@@ -374,7 +454,7 @@ parse.varnames <- function(varnames)
   for (i in seq(along=varnames)) {
     y <- parse.varname(varnames[i])
     if (is.null(y)) {
-      stop(paste("Invalid variable subset", varnames[i]))
+      stop("Invalid variable subset ", varnames[i])
     }
     names[i] <- y$name
     if (!is.null(y$lower)) {
@@ -388,7 +468,7 @@ parse.varnames <- function(varnames)
 }
 
 
-smc.samples <- function(obj, variable.names, n.part, type="fs",
+smc.samples <- function(object, variable.names, n.part, type="fs",
                         rs.thres = 0.5, rs.type = "stratified", ...)
 {
   if (!is.character(type))
@@ -400,44 +480,44 @@ smc.samples <- function(obj, variable.names, n.part, type="fs",
   
   ## monitor
   if(backward) {
-    .Call("set_default_monitors", obj$ptr(), PACKAGE="RBiips")
+    .Call("set_default_monitors", object$ptr(), PACKAGE="RBiips")
   }
   if (!missing(variable.names))
-    monitor.biips(obj, variable.names, type)
+    monitor.biips(object, variable.names, type)
   
   ## smc forward sampler
-  run.smc.forward(obj, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type, ...)
+  run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type, ...)
   
-  log.marg.like <- .Call("get_log_norm_const", obj$ptr(), PACKAGE="RBiips")
+  log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
   ans <- list()
   
-  mon <- .Call("get_filter_monitors", obj$ptr(), PACKAGE="RBiips")
+  mon <- .Call("get_filter_monitors", object$ptr(), PACKAGE="RBiips")
   for (n in names(mon)) {
     ans[[n]][["filtering"]] <- mon[[n]]
   }
   if (!backward) {
-    clear.monitors.biips(obj, type="f")
+    clear.monitors.biips(object, type="f")
   }
   
-  mon <- .Call("get_smooth_tree_monitors", obj$ptr(), PACKAGE="RBiips")
+  mon <- .Call("get_smooth_tree_monitors", object$ptr(), PACKAGE="RBiips")
   for (n in names(mon)) {
     ans[[n]][["smoothing"]] <- mon[[n]]
   }
-  clear.monitors.biips(obj, type="s")
+  clear.monitors.biips(object, type="s")
   
   ## smc backward smoother
   if (backward)
   {
     ## run backward smoother
-    .Call("run_backward_smoother", obj$ptr(), PACKAGE="RBiips")
+    .Call("run_backward_smoother", object$ptr(), PACKAGE="RBiips")
     
-    clear.monitors.biips(obj, type="f")
+    clear.monitors.biips(object, type="f")
     
-    mon <- .Call("get_smooth_monitors", obj$ptr(), PACKAGE="RBiips")
+    mon <- .Call("get_smooth_monitors", object$ptr(), PACKAGE="RBiips")
     for (n in names(mon)) {
       ans[[n]][["backward.smoothing"]] <- mon[[n]]
     }
-    clear.monitors.biips(obj, type="b")
+    clear.monitors.biips(object, type="b")
   }
   
   for (n in names(ans)) {
@@ -449,8 +529,8 @@ smc.samples <- function(obj, variable.names, n.part, type="fs",
 }
 
 
-pmmh.samples <- function(model, variable.names, n.iter, thin=1, 
-                         n.part, max.fail=0, ...)
+pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
+                         n.part, max.fail=0, inits=list(),...)
 {  
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
@@ -465,38 +545,44 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1,
   
   ## Initialization
   #----------------
-  out <- init.pmmh.biips(model, variable.names=variable.names, n.part=n.part, ...)
+  out <- init.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
+                         n.part=n.part, inits=inits, quiet=TRUE, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like
   
-  pn <- parse.varnames(variable.names)
+  pn.param <- parse.varnames(param.names)
   
-  ## reset data to sample on exit
+  ## reset log normalizing constant on exit
   on.exit(
     if (n.iter > 0 && !accepted) {
-      .Call("set_log_norm_const", model$ptr(), log.marg.like, PACKAGE="RBiips")
+      .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
     }, add=TRUE)
   
   ans <- list()
   n.samples <- 0
   n.fail <- 0
   accepted <- TRUE
+  n.accept <- 0  
   
-  accept.rate <- list()
-  for (var in variable.names) {
-    accept.rate[[var]] <- vector(length=n.iter)
-  }
+  accept.rate <- vector(length=n.iter)
+  
+  ## check adaption
+  if (object$.rw.adapt() && !object$.rw.check.adapt())
+    cat("NOTE: Stopping adaption of the PMMH random walk.\n")
+  ## turn off adaption
+  object$.rw.adapt.off()
+  object$.rw.update.cov(update_only=TRUE)
   
   .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
-  symbol <- ifelse(model$.rw.adapt(), '+', '*')
-  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
+  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(model, variable.names=variable.names, pn=pn,
+    out <- one.update.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
+                                 pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
                                  n.part=n.part, ...)
     sample <- out$sample
@@ -504,39 +590,48 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1,
     log.marg.like <- out$log.marg.like
     accepted <- out$accepted
     n.fail <- n.fail + out$n.fail
-    
-    for (var in variable.names) {
-      accept.rate[[var]][i] <- out$accept.rate[[var]]
-    }
+    n.accept <- n.accept + out$accepted
+    accept.rate[i] <- out$accept.rate
     
     ## advance progress bar
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
     
     if (n.fail > max.fail) {
-      stop(paste("Number of failures exceeds max.fail:", n.fail, "failures."))
+      stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
     }
     
     ## Store output
     if ((i-1)%%thin == 0) {
       n.samples <- n.samples +1
-      for (var in variable.names)
+      for (var in c(param.names, latent.names))
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
   }
   
-  ## output
-  ## mean acceptance rate for each parameter
-  mean.ar <- list()
-  for (var in variable.names) {
-    mean.ar[[var]] <- mean(accept.rate[[var]])
+  ## reset log norm const and sampled value for the latent variables
+  if (n.iter > 0 && !accepted) {
+    for (v in seq(along=param.names)) {
+      var <- param.names[[v]]
+      if(!.Call("change_data", object$ptr(),
+                pn.param$names[[v]], pn.param$lower[[v]], pn.param$upper[[v]],
+                sample[[var]], TRUE, PACKAGE="RBiips"))
+        stop("can not reset previous data: ", var, "=", sample[[var]])
+    }
+    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
+    if (length(latent.names)>0)
+      .Call("set_sampled_smooth_tree_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
   }
-  ans[["mean.ar"]] <- mean.ar
+  
+  ## output
+  ## effective acceptance rate
+  ar.eff <- n.accept/n.iter
+  ans[["ar.eff"]] <- ar.eff
   
   ## number of failures
   ans[["n.fail"]] <- n.fail
   
   ## set output dimensions
-  for (var in variable.names) {
+  for (var in c(param.names, latent.names)) {
     dim(ans[[var]]) <- c(dim(sample[[var]]), n.samples)
     names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iteration")
     class(ans[[var]]) <- "mcarray"
@@ -546,10 +641,10 @@ pmmh.samples <- function(model, variable.names, n.iter, thin=1,
 }
 
 
-pimh.samples <- function(model, variable.names, n.iter, thin = 1,
+pimh.samples <- function(object, variable.names, n.iter, thin = 1,
                          n.part, ...)
 {
-  if (!is.biips(model))
+  if (!is.biips(object))
     stop("Invalid BiiPS model")
   
   ## check variable.names
@@ -570,7 +665,7 @@ pimh.samples <- function(model, variable.names, n.iter, thin = 1,
   
   ## Initialization
   ##---------------  
-  out <- init.pimh.biips(model, variable.names=variable.names,
+  out <- init.pimh.biips(object, variable.names=variable.names,
                          n.part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
@@ -585,7 +680,7 @@ pimh.samples <- function(model, variable.names, n.iter, thin = 1,
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(model, variable.names=variable.names,
+    out <- one.update.pimh.biips(object, variable.names=variable.names,
                                  n.part=n.part,
                                  sample=sample, log.marg.like=log.marg.like, ...)
     sample <- out$sample
@@ -604,12 +699,12 @@ pimh.samples <- function(model, variable.names, n.iter, thin = 1,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
-  clear.monitors.biips(model, type="s", TRUE)
+  clear.monitors.biips(object, type="s", TRUE)
   
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", model$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_smooth_tree_particle", model$ptr(), sample, PACKAGE="RBiips")
+    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
+    .Call("set_sampled_smooth_tree_particle", object$ptr(), sample, PACKAGE="RBiips")
   }
   
   
@@ -628,10 +723,10 @@ pimh.samples <- function(model, variable.names, n.iter, thin = 1,
 }
 
 
-smc.sensitivity <- function(model, params,
+smc.sensitivity <- function(object, params,
                             n.part, ...)
 {
-  if (!is.biips(model))
+  if (!is.biips(object))
     stop("Invalid BiiPS model")
   
   if (missing(n.part))
@@ -672,7 +767,7 @@ smc.sensitivity <- function(model, params,
       }
       # check parameters array length
       if (n != n.params)
-        stop(paste("Invalid params argument: different number of parameters."))
+        stop("Invalid params argument: different number of parameters.")
     }
   }
   
@@ -704,14 +799,14 @@ smc.sensitivity <- function(model, params,
       dim(param[[var]]) <- dim[[v]]
       
       ## change param value
-      if(!.Call("change_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+      if(!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
                 param[[v]], FALSE, PACKAGE="RBiips"))
-        stop(paste("data change failed: invalid parameter. variable =", var,". value =", param[v]))
+        stop("data change failed: invalid parameter. variable = ", var,". value = ", param[v])
     }
     
     log.prior <- 0
     for (v in seq(along=variable.names)) {
-      log.p <- .Call("get_log_prior_density", model$ptr(), 
+      log.p <- .Call("get_log_prior_density", object$ptr(), 
                      pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
       
       if (is.na(log.p)) {
@@ -719,20 +814,20 @@ smc.sensitivity <- function(model, params,
       }
       
       if (is.nan(log.p) || (is.infinite(log.p) && log.p<0))
-        stop(paste("Failure evaluating parameter log prior for variable",
-                   variable.names[[v]]), ". value = ", param[v])
+        stop("Failure evaluating parameter log prior for variable ",
+                   variable.names[[v]], ". value = ", param[v])
       
       log.prior <- log.prior + log.p
     }
     
     ## run smc sampler
-    ok <- run.smc.forward(model, n.part=n.part, ...)
+    ok <- run.smc.forward(object, n.part=n.part, ...)
     
     if (!ok)
-      stop(paste("Failure running smc forward sampler. param:", param))
+      stop("Failure running smc forward sampler. param: ", paste(names(param),"=", param, sep="", collapse=";"))
     
     ## log marginal likelihood
-    log.marg.like[k] <- .Call("get_log_norm_const", model$ptr(), PACKAGE="RBiips")
+    log.marg.like[k] <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
     if (log.marg.like[k] > max.log.marg.like) {
       max.log.marg.like <- log.marg.like[k]
       max.param <- param
@@ -749,12 +844,12 @@ smc.sensitivity <- function(model, params,
   
   ## restore data
   ##-------------
-  model$recompile()
+  object$recompile()
   
   # FIXME: Tentative of removing data without recompiling the model
   #   for (v in seq(along=variable.names)) {
   #     if (!(pn$names[[v]] %in% names(data))) {
-  #       ok <- .Call("remove_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
   #       if (!ok)
   #         stop("Failure restoring data")
   #       next
@@ -786,7 +881,7 @@ smc.sensitivity <- function(model, params,
   #     }
   #     
   #     if (all(is.na(data.sub))) {
-  #       ok <- .Call("remove_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
   #       if (!ok)
   #         stop("Failure restoring data")
   #       next
@@ -795,7 +890,7 @@ smc.sensitivity <- function(model, params,
   #     if (any(is.na(data.sub)))
   #       stop("Failure restoring data")
   #     
-  #     ok <- .Call("change_data", model$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+  #     ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
   #                 data.sub, FALSE, PACKAGE="RBiips")
   #     if (!ok)
   #       stop("Failure restoring data")
