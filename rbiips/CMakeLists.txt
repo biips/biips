@@ -45,6 +45,11 @@ endmacro(set_output_bindir)
 
 set_output_bindir(out_bindir)
 
+# source files list generation
+file (GLOB SOURCE_FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/src/*.h
+    ${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp
+)
 
 # find R
 find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp)
@@ -66,26 +71,37 @@ if (R_FOUND)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set (R_INSTALL_FLAGS -d)
     endif()
-		
+    
+    
+    # add clean object files command
+    add_custom_command (OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
+        DEPENDS ${BIIPS_LIBS} ${SOURCE_FILES}
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}/src/*.o
+        COMMAND ${CMAKE_COMMAND} -E touch cleaned_objects.tmp
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Cleaning ${PROJECT_NAME} object files"
+    )
+    if (NOT WIN32)
+        add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
+            DEPENDS ${out_bindir}/configure
+            APPEND
+        )
+    endif()
+    
     # add R CMD check target
     add_custom_target (${PROJECT_NAME}_check
-    	DEPENDS ${BIIPS_LIBS}
+    	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
     	COMMAND ${R_EXECUTABLE} CMD check ${PROJECT_NAME}
     	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     	COMMENT "Checking ${PROJECT_NAME} R package"
     	VERBATIM
     )
-    if (NOT WIN32)
-        add_dependencies(${PROJECT_NAME}_check
-            ${out_bindir}/configure
-        )
-    endif()
     
     
     if (WIN32)
         # add R CMD INSTALL --build target
         add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.zip
-    	    DEPENDS ${BIIPS_LIBS}
+    	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
         	COMMAND ${R_EXECUTABLE} CMD INSTALL --build ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Building ${PROJECT_NAME} R binary package"
@@ -97,19 +113,19 @@ if (R_FOUND)
     elseif (APPLE)
         # add R CMD INSTALL --build target
         add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
-    	    DEPENDS ${BIIPS_LIBS} ${out_bindir}/configure
+    	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
         	COMMAND ${R_EXECUTABLE} CMD INSTALL --build ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Building ${PROJECT_NAME} R binary package"
         	VERBATIM
         )
         add_custom_target (${PROJECT_NAME}_INSTALL_build
-    	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
+    	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
         )
     elseif (UNIX)
         # add R CMD build target
         add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
-    	    DEPENDS ${BIIPS_LIBS} ${out_bindir}/configure
+    	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
         	COMMAND ${R_EXECUTABLE} CMD build ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Building ${PROJECT_NAME} R source package"
@@ -121,7 +137,7 @@ if (R_FOUND)
         
         # add R CMD INSTALL target
         add_custom_target (${PROJECT_NAME}_INSTALL
-        	DEPENDS ${BIIPS_LIBS} ${out_bindir}/configure
+        	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
         	COMMAND ${R_EXECUTABLE} CMD INSTALL ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Installing ${PROJECT_NAME} R package"
