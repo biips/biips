@@ -14,10 +14,12 @@ foreach(_mf ${mfiles})
     if (MATLAB)
         add_test(NAME ${_name}-test
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -r "${MAT_COMS}"
+            
         )
     else()
         add_test(NAME ${_name}-test
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} --eval "${MAT_COMS}"
         )
     endif()
+    set_tests_properties(${_name}-test PROPERTIES TIMEOUT 30)
 endforeach()
