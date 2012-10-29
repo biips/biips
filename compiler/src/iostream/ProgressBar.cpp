@@ -49,7 +49,7 @@ namespace Biips
     os_(os), s1_(s1), iter_name_(iter_name), symbol_(symbol),
         display_time_(display_time)
   {
-    restart(expected_count);
+    restart(expected_count, symbol, iter_name);
   }
 
   void ProgressBar::restart(unsigned long expected_count,
