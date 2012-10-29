@@ -15,5 +15,16 @@ if (isempty(fsb)) % retrieve only the field presents in the first variable
    indices=horzcat(indices{:});
    fsb=chaine(sort(indices));
 end
+% select only the wanted variables
 s = inter_biips('cell2struct_weak_names', cellfun(@(x) parts.(x), vars,'UniformOutput',0), vars);
+cell_fsb = num2cell(fsb);
+cell_sum = cell(size(vars));
 
+for i=1:length(vars)
+  ctemp = cell(size(fsb));
+  for j=1:length(fsb)
+   ctemp{j} =  summary(s.(vars{i}).(fsb(j)),[0.025, 0.975]);
+  end
+  csum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
+end
+summ = inter_biips('cell2struct_weak_names', csum, vars);
