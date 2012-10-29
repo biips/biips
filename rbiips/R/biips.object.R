@@ -318,7 +318,7 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
 
 one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.param,
                                   sample, log.prior, log.marg.like,
-                                  n.part, ...)
+                                  n.part, rw.learn, ...)
 {  
   n.fail <- 0
   
@@ -418,7 +418,8 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
   object$.rw.rescale(accept.rate)
   
   ## update random walk covariance matrices
-  object$.rw.update.cov(sample[param.names], accepted)
+  if (rw.learn)
+    object$.rw.learn.cov(sample[param.names], accepted)
   
   ans <- list(sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
               accept.rate=accept.rate, accepted=accepted, n.fail=n.fail)
@@ -431,7 +432,8 @@ update.pmmh <- function(object, ...)
 
 
 update.pmmh.biips <- function(object, param.names, n.iter, 
-                              n.part, max.fail = 0, inits=list(), ...)
+                              n.part, max.fail=0, inits=list(),
+                              rw.step=list(), rw.adapt=TRUE, rw.learn=TRUE, ...)
 {  
   if (!is.biips(object))
     stop("Invalid BiiPS model")
@@ -439,6 +441,11 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
+  
+  if (!is.logical(rw.adapt) && ! is.atomic(rw.adapt))
+    stop("invalid rw.adapt parameter")
+  if (!is.logical(rw.learn) && ! is.atomic(rw.learn))
+    stop("invalid rw.learn parameter")
   
   ## stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
@@ -453,8 +460,14 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   
   pn.param <- parse.varnames(param.names)
   
+  if (!rw.adapt) {
+    if (object$.rw.adapt() && !object$.rw.check.adapt())
+      cat("NOTE: Stopping adaption of the PMMH random walk.\n")
+    object$.rw.adapt.off()
+  }
   
-  .Call("message", paste("Updating PMMH with", n.part, "particles"), PACKAGE="RBiips")
+  title <- ifelse(object$.rw.adapt(), "Adapting", "Updating")
+  .Call("message", paste(title, "PMMH with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
   symbol <- ifelse(object$.rw.adapt(), '+', '*')
   bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
@@ -469,7 +482,7 @@ update.pmmh.biips <- function(object, param.names, n.iter,
     out <- one.update.pmmh.biips(object, param.names=param.names,
                                  pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
-                                 n.part=n.part, ...)
+                                 n.part=n.part, rw.learn=rw.learn, ...)
     sample <- out$sample
     log.prior <- out$log.prior
     log.marg.like <- out$log.marg.like
