@@ -28,11 +28,11 @@ x_true = data.x_true(1:2,:);
 %% run SMC
 n_part = 100;
 x_name = ['x[1:2,1:' int2str(t_max) ']'];
-y_name = 'y';
+y_name = ['y[1,1:' int2str(t_max) ']'];
 out_smc = biips_smc_samples(p, {x_name, y_name}, n_part, 'fsb');
 
 %% filtering stats
-x_summ_f = biips_summary(out_smc, {x_name, y_name}, 'fsb');
+x_summ = biips_summary(out_smc, {}, 'fs');
 
 x_dens_f = cell(2,t_max);
 for i=1:2

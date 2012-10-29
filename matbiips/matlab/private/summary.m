@@ -35,9 +35,7 @@ cv = num2cell(part.values, d);
 cs = num2cell(part.weights, d);
 if (~isempty(probas))
  quantiles = cellfun(@(w,x) inter_biips('weighted_quantiles', w, x, probas), cv, cs, 'UniformOutput',0);
- summ.quants=reshape(cat(d, quantiles{:}), [length(probas) size_part(1:d-1)]);
-else
- summ.quants = [];
+ summ.quant=reshape(cat(d, quantiles{:}), [length(probas) size_part(1:d-1)]);
 end
 med = cellfun(@(w,x) inter_biips('weighted_quantiles', w, x, 0.5), cv, cs, 'UniformOutput',0);
 summ.med = reshape(cat(d, med{:}) , [1 size_part(1:d-1)]);
