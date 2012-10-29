@@ -187,7 +187,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 niter=2,
                 pmean=0,
                 lstep=log(0.1),
-                prob=0.234, # Target acceptance probability. The default seems to
+                targetprob=0.234, # Target acceptance probability. The default seems to
                 # be a fairly robust optimal value.
                 povertarget=FALSE,
                 ncrosstarget=10, #The value ncrosstarget controls the reduction in the step size when rescale is
@@ -197,11 +197,10 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 #is 10%.
                 count=0,
                 buffer=c(),
+                buff.count=c(),
                 mean=c(),
                 cov=c(),
-                cov_chol=c(),
-                naccept=0,
-                nadapt=0
+                cov_chol=c()
   )
   
   model <- list("ptr" = function() {p},
@@ -262,12 +261,11 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   if (!rw$adapt) {
                     return(NULL)
                   }
-                  rw$nadapt <<- rw$nadapt+1
                   
                   # The step size is adapted to achieve the
                   # target acceptance rate using a noisy gradient algorithm.
-                  rw$lstep <<- rw$lstep + (p-rw$prob)/rw$ncrosstarget
-                  if ((p>rw$prob) != rw$povertarget) {
+                  rw$lstep <<- rw$lstep + (p-rw$targetprob)/rw$ncrosstarget
+                  if ((p>rw$targetprob) != rw$povertarget) {
                     rw$povertarget <<- !rw$povertarget
                     rw$ncrosstarget <<- rw$ncrosstarget+1
                   }
@@ -284,7 +282,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   # The distance, on a logistic scale, between pmean
                   # and the target acceptance probability.
                   dist <- abs(log(rw$pmean/(1-rw$pmean))
-                              - log(rw$prob/(1-rw$prob)))
+                              - log(rw$targetprob/(1-rw$targetprob)))
                   return (dist < 0.5)
                 },
                 ".rw.adapt.off" = function() {
@@ -298,7 +296,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                     sample_vec <- c(sample_vec, sample[[v]])
                   }
                   d <- length(sample_vec)
-                  if (rw$adapt) {
+                  if (rw$adapt || length(rw$cov_chol) == 0) {
                     prop_vec <- sample_vec + 2.38/sqrt(d) * exp(rw$lstep) * rnorm(d)
                   } else {
                     prop_vec <- sample_vec + 2.38/sqrt(d) * rw$cov_chol %*% rnorm(d)
@@ -312,40 +310,36 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   invisible(prop)
                 },
-                ".rw.update.cov" = function(sample=list(), accepted=FALSE, update_only=FALSE) {
-                  m <- nrow(rw$buffer)
-                  
-                  if (!update_only && accepted) {
+                ".rw.learn.cov" = function(sample, accepted) {
+                  if (accepted || is.null(rw$buffer)) {
                     # concatenate all variables in a vector
                     sample_vec <- c()
                     for (v in seq(along=sample)) {
                       sample_vec <- c(sample_vec, sample[[v]])
                     }
-                    
                     # push sample back in buffer
-                    if (is.null(rw$buffer)) {
-                      rw$buffer <<- data.frame(t(sample_vec))
-                    } else {
-                      rw$buffer[m+1,] <<- sample_vec
-                    }
-                    rw$naccept <<- rw$naccept + accepted
+                    rw$buffer <<- rbind(rw$buffer, sample_vec, deparse.level=0)
+                    rw$buff.count <<- c(rw$buff.count, 1)
+                  } else {
+                    # increment last sample counter
+                    n <- nrow(rw$buffer)
+                    rw$buff.count[n] <<- rw$buff.count[n]+1
                   }
                   
+                  naccept <- nrow(rw$buffer)
                   d <- ncol(rw$buffer)
+                  m <- sum(rw$buff.count)
                   
-                  if (update_only && length(rw$mean)==0 && length(d)>0)
-                    stop("Failed updating RW covariance.")
-                  
-                  if (length(d)>0 && (update_only || rw$naccept == 2*d)) {
-                    # empirical mean and covariance estimates
-                    mean_buff <- c(colMeans(rw$buffer))
-                    cov_buff <- var(rw$buffer)
+                  if (naccept == 2*d) {
+                    # empirical mean and covariance of the buffer
+                    mean_buff <- colSums(rw$buffer*rw$buff.count/m)
+                    cov_buff <- t(rw$buffer)%*% (rw$buffer*rw$buff.count/m) - outer(mean_buff, mean_buff)
                     
                     if (length(rw$mean) == 0) {
                       rw$mean <<- mean_buff
                       rw$cov <<- cov_buff
                     } else {
-                      # update empirical mean and covariance estimates
+                      # update empirical mean and covariance
                       n <- rw$count
                       N <- n+m
                       rw$mean <<- n/N*rw$mean + m/N*mean_buff
@@ -353,8 +347,8 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                       rw$cov <<- n/N*rw$cov + m/N*cov_buff + n*m/N^2 * diff %*% t(diff)
                     }
                     # clear buffer
-                    rw$buffer <<- NULL
-                    rw$naccept <<- 0
+                    rw$buffer <<- c()
+                    rw$buff.count <<- c()
                     
                     # compute choleski decomposition
                     rw$cov_chol <<- t(chol(rw$cov))
@@ -530,7 +524,7 @@ smc.samples <- function(object, variable.names, n.part, type="fs",
 
 
 pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
-                         n.part, max.fail=0, inits=list(),...)
+                         n.part, max.fail=0, inits=list(), rw.learn=TRUE, ...)
 {  
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
@@ -538,6 +532,9 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
     stop("Invalid thin argument")
   thin <- as.integer(thin)
+  
+  if (!is.logical(rw.learn) && ! is.atomic(rw.learn))
+    stop("invalid rw.learn parameter")
   
   ## stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
@@ -572,7 +569,6 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     cat("NOTE: Stopping adaption of the PMMH random walk.\n")
   ## turn off adaption
   object$.rw.adapt.off()
-  object$.rw.update.cov(update_only=TRUE)
   
   .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
   ## progress bar
@@ -584,7 +580,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     out <- one.update.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
                                  pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
-                                 n.part=n.part, ...)
+                                 n.part=n.part, rw.learn=rw.learn, ...)
     sample <- out$sample
     log.prior <- out$log.prior
     log.marg.like <- out$log.marg.like
