@@ -1,6 +1,6 @@
-function [var_out] = biips_smc_samples(console, variable_names, nb_part, varargin)
+function [particles, log_marg_like] = biips_smc_samples(console, variable_names, nb_part, varargin)
 % BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
-% [variables_out] = biips_smc_samples(console, variable_names, nb_part, [ type, rs_thres, rs_type, seed ])
+% [particles, log_marg_like] = biips_smc_samples(console, variable_names, nb_part, [ type, rs_thres, rs_type, seed ])
 % INPUT : 
 % - console : integer. Id of the console containing the model, returned by the 'biips_model' function
 % - variable_names : cell of strings. Contains the names of the unobserved variables to monitor.
@@ -9,7 +9,7 @@ function [var_out] = biips_smc_samples(console, variable_names, nb_part, varargi
 % - nb_part : positive integer. The number of particules used in smc algorithms
 % - type : string (default = 'fs').
 %          Its characters must be in the set {'f', 's', 'b'} for respectively 'filtering', 'smoothing' and 'backward smoothing'.
-%          Controls the desired types of SMC algorithms, hence the types of values returned in the output structure 'variables_out'.
+%          Controls the desired types of SMC algorithms, hence the types of values returned in the output structure 'particles'.
 %          Can contain several characters, eg: 'fsb' for the three algorithms.
 %          Note that backward smoothing algorithm ('b') is costly: O(n_part²) vs filtering and smoothing O(n_part)
 % - rs_thres : positive real (default = 0.5).
@@ -20,7 +20,9 @@ function [var_out] = biips_smc_samples(console, variable_names, nb_part, varargi
 %             Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
 %             Indicates the type of algorithm used for the resampling step.           
 % - seed : integer (default is set randomly). Seed for random number generator.
-
+% OUTPUT
+% particles : output structure containing all the smc information
+% log_marg_like : log marginal likelihood
 % check for optional options
 opt_argin = length(varargin);
 % default values
@@ -97,5 +99,4 @@ cell_noms = cell(nb_noms, 1);
 for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
 end   
-var_out = inter_biips('cell2struct_weak_names', cell_noms, noms);
-var_out.('log_marg_like') = log_marg_like;
+particles = inter_biips('cell2struct_weak_names', cell_noms, noms);
