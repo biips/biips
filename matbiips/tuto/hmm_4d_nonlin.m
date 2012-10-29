@@ -28,10 +28,11 @@ x_true = data.x_true(1:2,:);
 %% run SMC
 n_part = 100;
 x_name = ['x[1:2,1:' int2str(t_max) ']'];
-out_smc = biips_smc_samples(p, {x_name}, n_part, 'fsb');
+y_name = 'y';
+out_smc = biips_smc_samples(p, {x_name, y_name}, n_part, 'fsb');
 
 %% filtering stats
-x_summ_f = biips_summary(out_smc.(x_name).f);
+x_summ_f = biips_summary(out_smc, {x_name, y_name}, 'fsb');
 
 x_dens_f = cell(2,t_max);
 for i=1:2
@@ -43,8 +44,6 @@ for i=1:2
     end
 end
 
-%% smoothing stats
-x_summ_s = biips_summary(out_smc.(x_name).s);
 
 x_dens_s = cell(2,t_max);
 for i=1:2
@@ -55,9 +54,6 @@ for i=1:2
         x_dens_s{i,j}.bw = b;
     end
 end
-
-%% backward smoothing stats
-x_summ_b = biips_summary(out_smc.(x_name).b);
 
 x_dens_b = cell(2,t_max);
 for i=1:2
