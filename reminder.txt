@@ -19,10 +19,12 @@ JAGS 3.2 + rjags package
 
 Windows other software:
 -----------------------
-Microsoft security essentials
+MATLAB
+Microsoft security essentials / Avast!
 7z
 Chrome
 Dropbox
 Foxit reader
 Notepad++
+PDFCreator
 
