@@ -1,26 +1,6 @@
 clear
 addpath('../matlab');
 
-%% Data
-%%$$F=\left (\begin{array}{cccc}
-%%       1 & 0 & T & 0 \\
-%%       0 & 1 & 0 & T \\
-%%       0 & 0 & 1 & 0 \\
-%%       0 & 0 & 0 & 1
-%%     \end{array}\right )$$, 
-%% $$G=\left(\begin{array}{cc}
-%%            T^2/2 & 0 \\
-%%            0 & T^2/2 \\
-%%            T & 0 \\
-%%            0 & T \\ 
-%%           \end{array} \right)$$
-%% and $$H=\left(
-%%     \begin{array}{cccc}
-%%       1 & 0 & 0 & 0 \\
-%%       0 & 1 & 0 & 0 \\
-%%     \end{array}
-%%   \right)$.\\
-%%
 t_max = 10;
 mean_x_init = [0 0 1 0]';
 prec_x_init = diag(100*ones(4,1));
