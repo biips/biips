@@ -1,10 +1,20 @@
-function [summ] = biips_density(parts, vars, varargin)
-% BIIPS_MMARY compute some statistics on selected variables
+function [dens] = biips_density(parts, vars, varargin)
+% BIIPS_DENSITY computes 1D densities 
+% dens = biips_density(particules, variables, [fsb])
+% INPUT
+% -particules : input structure containing the variables
+% -vars : variable subselection cell 
+% -fsb : string containing the characteres 'f', 's' and/or 'b'
+% OUTPUT
+% - dens : output structure
 opt_argin = length(varargin);
 fsb = '';
-probas = [];
 if opt_argin >=1
    fsb = varargin{1}; 
+end
+show = true;
+if opt_argin >=2
+   show = varargin{2}; 
 end
 if (isempty(vars))
    vars = fieldnames(parts); % vars = {}, take all fields
@@ -25,13 +35,10 @@ for i=1:length(vars)
   ctemp = cell(size(fsb));
   for j=1:length(fsb)
    particles = s.(vars{i}).(fsb(j));
-   size_curr = size(particules.values));
+   size_curr = size(particles.values);
    d = length(size_curr);
-   ctemp{j} =  cell(size_curr(1:d-1));
-   cellfun(@(x,w) kde(x,w) 
-   ctemp{j} =  summary(s.(vars{i}).(fsb(j)),probas);
+   ctemp{j} = cellfun(@(x,w) kde(x,w), num2cell(particles.values, d), num2cell(particles.weights, d));  
   end
   csum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
-summ = inter_biips('cell2struct_weak_names', csum, vars);
-
+dens = inter_biips('cell2struct_weak_names', csum, vars);

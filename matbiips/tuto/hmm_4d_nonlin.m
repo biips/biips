@@ -34,34 +34,5 @@ out_smc = biips_smc_samples(p, {x_name, y_name}, n_part, 'fsb');
 %% filtering stats
 x_summ = biips_summary(out_smc, {}, 'fs');
 
-x_dens_f = cell(2,t_max);
-for i=1:2
-    for j=1:t_max
-        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).f.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).f.weights(i,j,:)));
-        x_dens_f{i,j}.x = xi;
-        x_dens_f{i,j}.y = f;
-        x_dens_f{i,j}.bw = b;
-    end
-end
-
-
-x_dens_s = cell(2,t_max);
-for i=1:2
-    for j=1:t_max
-        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).s.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).s.weights(i,j,:)));
-        x_dens_s{i,j}.x = xi;
-        x_dens_s{i,j}.y = f;
-        x_dens_s{i,j}.bw = b;
-    end
-end
-
-x_dens_b = cell(2,t_max);
-for i=1:2
-    for j=1:t_max
-        [f, xi, b] = ksdensity(squeeze(out_smc.(x_name).b.values(i,j,:)), 'weights', squeeze(out_smc.(x_name).b.weights(i,j,:)));
-        x_dens_b{i,j}.x = xi;
-        x_dens_b{i,j}.y = f;
-        x_dens_b{i,j}.bw = b;
-    end
-end
-
+% compute densities
+x_dens = biips_density(out_smc, {}, 'fs'); 
