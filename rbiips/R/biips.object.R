@@ -167,7 +167,7 @@ init.pmmh <- function(object, ...)
   UseMethod("init.pmmh")
 
 
-init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
+init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(), rw.sd=0.1,
                             n.part, rs.thres=0.5, rs.type="stratified",
                             inits.rng.seed, quiet=FALSE,...)
 { 
@@ -199,34 +199,43 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
       stop("inits must be a list.")
     
     inames <- names(init.values)
-    if (is.null(inames) || any(nchar(inames) == 0))
-      stop("inits must be a named list.")
     
-    if (any(duplicated(inames)))
-      stop("duplicated names in inits list:", 
-           paste(inames[duplicated(inames)], sep=","))
-    
-    ## Warn missing init values
-    miss.inits <- !param.names %in% inames
-    if (any(miss.inits)) {
-      warning("Missing initial values for variable:",
-              paste(param.names[miss.inits], sep=","))
-    }
-    ## Strip unkown variables from initial values, but give a warning
-    unknown.inits <- !inames %in% param.names
-    if (any(unknown.inits)) {
-      warning("Unkown variable in initial values:",
-              paste(inames[unknown.inits], sep=","))
-      init.values <- init.values[!unknown.inits]
-      inames <- names(init.values)
-    }
-    ## Strip null initial values, but give a warning
-    null.inits <- sapply(init.values, is.null)
-    if (any(null.inits)) {
-      warning("NULL initial values supplied for variable:",
-              paste(inames[null.inits], sep=","))
-      init.values <- init.values[!null.inits]
-      inames <- names(init.values)
+    if(is.null(inames)) ## case unnamed list
+    {
+      if (length(init.values) != length(param.names))
+        stop("Invalid inits argument.")
+      names(init.values) <- param.names
+    } else  ## case named list
+    {
+      if (any(nchar(inames) == 0))
+        stop("inits must be a named list.")
+      
+      if (any(duplicated(inames)))
+        stop("duplicated names in inits list:", 
+             paste(inames[duplicated(inames)], sep=","))
+      
+      ## Warn missing init values
+      miss.inits <- !param.names %in% inames
+      if (any(miss.inits)) {
+        warning("Missing initial values for variable:",
+                paste(param.names[miss.inits], sep=","))
+      }
+      ## Strip unkown variables from initial values, but give a warning
+      unknown.inits <- !inames %in% param.names
+      if (any(unknown.inits)) {
+        warning("Unkown variable in initial values:",
+                paste(inames[unknown.inits], sep=","))
+        init.values <- init.values[!unknown.inits]
+        inames <- names(init.values)
+      }
+      ## Strip null initial values, but give a warning
+      null.inits <- sapply(init.values, is.null)
+      if (any(null.inits)) {
+        warning("NULL initial values supplied for variable:",
+                paste(inames[null.inits], sep=","))
+        init.values <- init.values[!null.inits]
+        inames <- names(init.values)
+      }
     }
     
     if (!all(sapply(init.values, is.numeric)))
@@ -234,7 +243,70 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
            paste(inames[!sapply(init.values, is.numeric)], sep=","))
   }
   
-  ## check inits.rng.seed parameter
+  ## check rw.sd
+  if (length(rw.sd)>0) {    
+    checkNumericSd <- function (sd) {
+      if (!is.numeric(sd))
+        return(FALSE)
+      if (!is.atomic) {
+        sddim <- dim(sd)
+        if (is.null(sddim))
+          sddim <- length(sd)
+        ## TODO: check dimensions
+      }
+      if (any(sd<=0))
+        return FALSE
+      if (any(is.na(sd)))
+        return(FALSE)
+      if (any(is.nan(sd)))
+        return(FALSE)
+      if (any(is.infinite(sd)))
+        return(FALSE)
+    }
+    
+    rw.sd.values <- list()
+    
+    if (checkNumericSd(rw.sd)) {
+      for (n in param.names) {
+        rw.sd.values[[n]] <- rw.sd
+      }
+    } else {
+      if (!is.list(rw.sd))
+        stop("Invalid rw.sd argument.")
+      rw.sd.values <- rw.sd
+      sdnames <- names(rw.sd.values)
+      if(is.null(sdnames)) ## case unnamed list
+      {
+        if (length(rw.sd.values) != length(param.names))
+          stop("Invalid rw.sd argument.")
+        names(rw.sd.values) <- param.names
+      } else ## case named list
+      {
+        if (any(nchar(sdnames) == 0))
+          stop("Invalid rw.sd argument.")
+        if (any(duplicated(sdnames)))
+          stop("Invalid rw.sd argument.")
+        ## check missing rw.sd
+        miss.sd <- !param.names %in% sdnames
+        if (any(miss.sd)) {
+          stop("Missing rw.sd values for variable:",
+               paste(param.names[miss.sd], sep=","))
+        }
+        ## check unkown variables from rw.sd
+        unknown.sd <- !sdnames %in% param.names
+        if (any(unknown.sd)) {
+          stop("Unkown variable in rw.sd values:",
+                  paste(sdnames[unknown.sd], sep=","))
+        }
+      }
+      if (!all(sapply(rw.sd.values, checkNumericSd)))
+        stop("Invalid rw.sd argument.")
+    }
+    ## TODO: assign rw.sd.values
+  }
+  
+  
+  ## check inits.rng.seed
   if (missing(inits.rng.seed)) {
     inits.rng.seed <- runif(1, 0, as.integer(Sys.time()));
   }
@@ -250,13 +322,13 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   sample <- list()
   for (v in seq(along=param.names)) {
     var <- param.names[[v]]
-    if (var %in% names(inits)) {
+    if (var %in% names(init.values)) {
       # take init value in inits param
       if(!.Call("change_data", object$ptr(),
                 pn.param$names[[v]], pn.param$lower[[v]], pn.param$upper[[v]],
-                inits[[var]], TRUE, PACKAGE="RBiips"))
+                init.values[[var]], TRUE, PACKAGE="RBiips"))
         stop("data change failed: invalid initial value for variable ", var)
-      sample[[var]] <- inits[[var]]
+      sample[[var]] <- init.values[[var]]
     } else {
       # or sample init value
       data <- object$.data.sync()
@@ -471,7 +543,7 @@ update.pmmh <- function(object, ...)
 
 update.pmmh.biips <- function(object, param.names, n.iter, 
                               n.part, max.fail=0, inits=list(),
-                              rw.step=list(), rw.adapt=TRUE, rw.learn=TRUE, ...)
+                              rw.sd=0.1, rw.adapt=TRUE, rw.learn=TRUE, ...)
 {  
   if (!is.biips(object))
     stop("Invalid BiiPS model")
@@ -491,7 +563,7 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   
   ## initialize
   out <- init.pmmh.biips(object, param.names=param.names, n.part=n.part,
-                         inits=inits, quiet=TRUE,...)
+                         inits=inits, rw.sd=rw.sd, quiet=TRUE,...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like
