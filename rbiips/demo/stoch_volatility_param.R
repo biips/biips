@@ -70,7 +70,7 @@ if(run.jags)
 # -------------------- BiiPS --------------------#
 require(RBiips)
 
-n.part <- 100
+n.part <- 50
 n.burn <- 100
 n.iter <- 1000
 
@@ -108,7 +108,7 @@ if(run.sens)
   
   # initialize pmmh with max
   inits <- list(alpha = out.sens$max.param$alpha)
-  init.pmmh(biips, variable.names=c("alpha"), 
+  init.pmmh(biips, param.names=c("alpha"), 
             inits=inits, n.part=n.part)
 }
 
@@ -116,11 +116,11 @@ if(run.sens)
 #---------------------
 
 # burn in
-update.pmmh(biips, variable.names=c("alpha"),
+update.pmmh(biips, param.names=c("alpha"),
             n.iter=n.burn,
             n.part=n.part)
 # sample
-out.pmmh <- pmmh.samples(biips, variable.names=c("alpha"),
+out.pmmh <- pmmh.samples(biips, param.names=c("alpha"),
                          n.iter=n.iter,
                          n.part=n.part)
 

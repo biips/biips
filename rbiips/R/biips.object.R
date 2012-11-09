@@ -187,13 +187,51 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## check inits
-  if (!is.list(inits))
-    stop("Invalid inits argument")
   if (length(inits) > 0) {
-    for (var in param.names) {
-      if (!var %in% names(inits))
-        warning("Missing init value for variable ", var, "\n")
-    }    
+    
+    if (is.function(inits)) {
+      init.values <- inits()
+    } else if (is.list(inits)) {
+      init.values <- inits
+    }
+    
+    if(!is.list(init.values))
+      stop("inits must be a list.")
+    
+    inames <- names(init.values)
+    if (is.null(inames) || any(nchar(inames) == 0))
+      stop("inits must be a named list.")
+    
+    if (any(duplicated(inames)))
+      stop("duplicated names in inits list:", 
+           paste(inames[duplicated(inames)], sep=","))
+    
+    ## Warn missing init values
+    miss.inits <- !param.names %in% inames
+    if (any(miss.inits)) {
+      warning("Missing initial values for variable:",
+              paste(param.names[miss.inits], sep=","))
+    }
+    ## Strip unkown variables from initial values, but give a warning
+    unknown.inits <- !inames %in% param.names
+    if (any(unknown.inits)) {
+      warning("Unkown variable in initial values:",
+              paste(inames[unknown.inits], sep=","))
+      init.values <- init.values[!unknown.inits]
+      inames <- names(init.values)
+    }
+    ## Strip null initial values, but give a warning
+    null.inits <- sapply(init.values, is.null)
+    if (any(null.inits)) {
+      warning("NULL initial values supplied for variable:",
+              paste(inames[null.inits], sep=","))
+      init.values <- init.values[!null.inits]
+      inames <- names(init.values)
+    }
+    
+    if (!all(sapply(init.values, is.numeric)))
+      stop("non numeric initial values supplied for variable:",
+           paste(inames[!sapply(init.values, is.numeric)], sep=","))
   }
   
   ## check inits.rng.seed parameter

@@ -171,9 +171,8 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   relevant.variables <- v %in% varnames
   data <- data[relevant.variables]
   unused.variables <- setdiff(v, varnames)
-  for (i in seq(along=unused.variables)) {
-    warning("Unused variable \"", unused.variables[i], "\" in data")
-  }
+  if (length(unused.variables)>0)
+    warning("Unused variables in data:", paste(unused.variables ,sep=","))
   
   # compile model
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
