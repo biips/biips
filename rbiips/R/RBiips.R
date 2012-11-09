@@ -290,6 +290,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 },
                 ".rw.proposal" = function(sample) {
                   sample_dim <- lapply(sample, length)
+                  # concatenate all variables in a vector
                   sample_vec <- c()
                   for (v in seq(along=sample)) {
                     sample_vec <- c(sample_vec, sample[[v]])
