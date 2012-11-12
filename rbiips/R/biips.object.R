@@ -167,7 +167,7 @@ init.pmmh <- function(object, ...)
   UseMethod("init.pmmh")
 
 
-init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(), rw.sd=0.1,
+init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
                             n.part, rs.thres=0.5, rs.type="stratified",
                             inits.rng.seed, quiet=FALSE,...)
 { 
@@ -177,12 +177,20 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   ## check param.names
   if (!is.character(param.names))
     stop("Invalid param.names argument")
+  if (any(duplicated(param.names))) {
+    stop("duplicated names in param.names: ", 
+         paste(param.names[duplicated(param.names)], collapse = " "))
+  }
   pn.param <- parse.varnames(param.names)
   
   ## check latent.names
   if (length(latent.names) > 0) {
     if (!is.character(latent.names))
       stop("Invalid latent.names argument")
+    if (any(duplicated(latent.names))) {
+      stop("duplicated names in latent.names: ", 
+           paste(latent.names[duplicated(latent.names)], collapse = " "))
+    }
     parse.varnames(latent.names)
   }
   
@@ -223,7 +231,7 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
       ## Strip unkown variables from initial values, but give a warning
       unknown.inits <- !inames %in% param.names
       if (any(unknown.inits)) {
-        warning("Unkown variable in initial values:",
+        warning("Ignoring unkown variable in initial values:",
                 paste(inames[unknown.inits], sep=","))
         init.values <- init.values[!unknown.inits]
         inames <- names(init.values)
@@ -231,78 +239,17 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
       ## Strip null initial values, but give a warning
       null.inits <- sapply(init.values, is.null)
       if (any(null.inits)) {
-        warning("NULL initial values supplied for variable:",
+        warning("Ignoring null initial values supplied for variable:",
                 paste(inames[null.inits], sep=","))
         init.values <- init.values[!null.inits]
         inames <- names(init.values)
       }
     }
     
-    if (!all(sapply(init.values, is.numeric)))
+    nonnum.inits <- !sapply(init.values, is.numeric)
+    if (any(nonnum.inits))
       stop("non numeric initial values supplied for variable:",
-           paste(inames[!sapply(init.values, is.numeric)], sep=","))
-  }
-  
-  ## check rw.sd
-  if (length(rw.sd)>0) {    
-    checkNumericSd <- function (sd) {
-      if (!is.numeric(sd))
-        return(FALSE)
-      if (!is.atomic) {
-        sddim <- dim(sd)
-        if (is.null(sddim))
-          sddim <- length(sd)
-        ## TODO: check dimensions
-      }
-      if (any(sd<=0))
-        return FALSE
-      if (any(is.na(sd)))
-        return(FALSE)
-      if (any(is.nan(sd)))
-        return(FALSE)
-      if (any(is.infinite(sd)))
-        return(FALSE)
-    }
-    
-    rw.sd.values <- list()
-    
-    if (checkNumericSd(rw.sd)) {
-      for (n in param.names) {
-        rw.sd.values[[n]] <- rw.sd
-      }
-    } else {
-      if (!is.list(rw.sd))
-        stop("Invalid rw.sd argument.")
-      rw.sd.values <- rw.sd
-      sdnames <- names(rw.sd.values)
-      if(is.null(sdnames)) ## case unnamed list
-      {
-        if (length(rw.sd.values) != length(param.names))
-          stop("Invalid rw.sd argument.")
-        names(rw.sd.values) <- param.names
-      } else ## case named list
-      {
-        if (any(nchar(sdnames) == 0))
-          stop("Invalid rw.sd argument.")
-        if (any(duplicated(sdnames)))
-          stop("Invalid rw.sd argument.")
-        ## check missing rw.sd
-        miss.sd <- !param.names %in% sdnames
-        if (any(miss.sd)) {
-          stop("Missing rw.sd values for variable:",
-               paste(param.names[miss.sd], sep=","))
-        }
-        ## check unkown variables from rw.sd
-        unknown.sd <- !sdnames %in% param.names
-        if (any(unknown.sd)) {
-          stop("Unkown variable in rw.sd values:",
-                  paste(sdnames[unknown.sd], sep=","))
-        }
-      }
-      if (!all(sapply(rw.sd.values, checkNumericSd)))
-        stop("Invalid rw.sd argument.")
-    }
-    ## TODO: assign rw.sd.values
+           paste(inames[nonnum.inits], sep=","))
   }
   
   
@@ -342,9 +289,13 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## check NA
-  if (any(is.na(sample))) {
-    stop("PMMH init have NA: ", paste(names(sample), "=", sample, sep="", collapse="; "), "\n")
+  has.na <- sapply(sample, function(x){any(is.na(x))})
+  if (any(has.na)) {
+    stop("PMMH initial values have NA: ", paste(names(sample[has.na]), "=", sample[has.na], sep="", collapse="; "), "\n")
   }
+  
+  ## initialize rw
+  object$.rw.dim(sample)
   
   ## log prior density
   log.prior <- 0
@@ -543,91 +494,146 @@ update.pmmh <- function(object, ...)
 
 update.pmmh.biips <- function(object, param.names, n.iter, 
                               n.part, max.fail=0, inits=list(),
-                              rw.sd=0.1, rw.adapt=TRUE, rw.learn=TRUE, ...)
-{  
+                              rw.step, rw.adapt=TRUE, rw.learn=TRUE, ...)
+{ 
+  ### check arguments
+  ### -------------------------------
+  
+  ## check object
   if (!is.biips(object))
     stop("Invalid BiiPS model")
-  
+  ## check n.iter
   if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  
+  ## check rw.adapt
   if (!is.logical(rw.adapt) && ! is.atomic(rw.adapt))
-    stop("invalid rw.adapt parameter")
+    stop("invalid rw.adapt argument")
+  ## check rw.learn
   if (!is.logical(rw.learn) && ! is.atomic(rw.learn))
-    stop("invalid rw.learn parameter")
+    stop("invalid rw.learn argument")
+  ## check rw.step
+  if (!missing(rw.step))
+  {
+    rw.step.values <- list()
+    
+    if (is.numeric(rw.step)) {
+      ## duplicate value for each variable
+      for (n in param.names) {
+        rw.step.values[[n]] <- rw.step
+      }
+    } else {
+      if (!is.list(rw.step))
+        stop("rw.step must be a numeric or list of numeric.")
+      rw.step.values <- rw.step
+      step.names <- names(rw.step.values)
+      if(is.null(step.names)) ## case unnamed list
+      {
+        if (length(rw.step.values) != length(param.names))
+          stop("rw.step length does not match param.names length.")
+        names(rw.step.values) <- param.names
+      } else ## case named list
+      {
+        if (any(nchar(step.names) == 0))
+          stop("rw.step has unnamed values.")
+        if (any(duplicated(step.names)))
+          stop("rw.step has duplicated names:", paste(step.names[duplicated(step.names)], collapse=", "))
+        ## check missing rw.step
+        miss.step <- !param.names %in% step.names
+        if (any(miss.step)) {
+          stop("Missing rw.step values for variable:",
+               paste(param.names[miss.step], collapse=", "))
+        }
+        ## check unkown variables from rw.step
+        unknown.step <- !step.names %in% param.names
+        if (any(unknown.step)) {
+          stop("Unkown variable in rw.step values:",
+               paste(step.names[unknown.step], collapse=", "))
+        }
+      }
+      ## check non numeric values
+      nonnum.step <- !sapply(rw.step.values, is.numeric)
+      if (any(nonnum.step))
+        stop("Non numeric rw.step values for variables:", paste(names(rw.step.values)[nonnum.step], collapse=", "))
+    }
+  }
   
-  ## stop biips verbosity
+  ### stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
   on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
   
-  ## initialize
+  ### Initialize
+  ### -------------------------------
   out <- init.pmmh.biips(object, param.names=param.names, n.part=n.part,
-                         inits=inits, rw.sd=rw.sd, quiet=TRUE,...)
-  sample <- out$sample
-  log.prior <- out$log.prior
-  log.marg.like <- out$log.marg.like
+                         inits=inits, quiet=TRUE,...)
   
   pn.param <- parse.varnames(param.names)
   
+  ### assign rw step
+  if (!missing(rw.step))
+    object$.rw.step(rw.step.values)
+  
+  ### stop adaptation if necessary
   if (!rw.adapt) {
     if (object$.rw.adapt() && !object$.rw.check.adapt())
       cat("NOTE: Stopping adaption of the PMMH random walk.\n")
     object$.rw.adapt.off()
   }
   
+  ### display message and progress bar
   title <- ifelse(object$.rw.adapt(), "Adapting", "Updating")
   .Call("message", paste(title, "PMMH with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
   symbol <- ifelse(object$.rw.adapt(), '+', '*')
   bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
   
+  ## initialize counters
   n.fail <- 0
-  accepted <- TRUE
   n.accept <- 0
   
-  ## Metropolis-Hastings iterations
-  ##-------------------------------
+  ### Metropolis-Hastings iterations
+  ### -------------------------------
+  
   for(i in 1:n.iter) {
+    ## iterate
     out <- one.update.pmmh.biips(object, param.names=param.names,
                                  pn.param=pn.param,
-                                 sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
+                                 sample=out$sample, log.prior=out$log.prior, log.marg.like=out$log.marg.like,
                                  n.part=n.part, rw.learn=rw.learn, ...)
-    sample <- out$sample
-    log.prior <- out$log.prior
-    log.marg.like <- out$log.marg.like
-    accepted <- out$accepted
-    n.fail <- n.fail + out$n.fail
-    n.accept <- n.accept + out$accepted
     
     ## advance progress bar
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
     
+    ## increment counters
+    n.fail <- n.fail + out$n.fail
+    n.accept <- n.accept + out$accepted
+    
+    ## check failures
     if (n.fail > max.fail) {
       stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
     }
   }
   
-  ## turn off adaption if checked
+  ### turn off adaption if checked
   if (object$.rw.check.adapt())
     object$.rw.adapt.off()
   
-  ## effective acceptance rate
-  ar.eff <- n.accept/n.iter
-  
+  ### release monitors memory
   clear.monitors.biips(object, type="s", TRUE)
   
-  ## reset log norm const and sampled values
-  if (n.iter > 0 && !accepted) {
+  ### reset log norm const and sampled values if not accepted
+  if (n.iter > 0 && !out$accepted) {
     for (v in seq(along=param.names)) {
       var <- param.names[[v]]
       if(!.Call("change_data", object$ptr(),
                 pn.param$names[[v]], pn.param$lower[[v]], pn.param$upper[[v]],
-                sample[[var]], TRUE, PACKAGE="RBiips"))
-        stop("can not reset previous data: ", var, "=", sample[[var]])
+                out$sample[[var]], TRUE, PACKAGE="RBiips"))
+        stop("can not reset previous data: ", var, "=", out$sample[[var]])
     }
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
+    .Call("set_log_norm_const", object$ptr(), out$log.marg.like, PACKAGE="RBiips")
   }
+  
+  ### effective acceptance rate
+  ar.eff <- n.accept/n.iter
   
   ans <- list(ar.eff=ar.eff, n.fail=n.fail)
   invisible(ans)
