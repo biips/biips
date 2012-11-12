@@ -195,6 +195,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 #halved. We start with a value of 10 so the first change in step size
                 #is 10%.
                 count=0,
+                dim=list(),
                 buffer=c(),
                 buff.count=c(),
                 mean=c(),
@@ -250,6 +251,47 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                         FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
                   invisible(NULL)
                 },
+                ## store the dimensions of the variables
+                ".rw.dim" = function(sample) {
+                  rw$dim <<- lapply(sample, dim)
+                  d.null <- sapply(rw$dim, is.null)
+                  if (any(d.null)) {
+                    len <- lapply(sample, length)
+                    rw$dim[d.null] <<- len[d.null]
+                  }
+                  invisible(NULL)
+                },
+                ## assign rw step
+                ".rw.step" = function(rw.sd) {
+                  ## check values and dimensions
+                  for (n in names(rw.sd)) {
+                    if (any(is.na(rw.sd[[n]])))
+                      stop("Missing (NA) rw step value for variable:", n)
+                    if (any(is.inf(rw.sd[[n]])))
+                      stop("Infinite rw step value for variable:", n)
+                    if (any(is.nan(rw.sd[[n]])))
+                      stop("NaN rw step value for variable:", n)
+                    if (any(rw.sd[[n]]<=0))
+                      stop("Negative or zero rw step value for variable:", n)
+                    if (is.atomic(rw.sd[[n]])) {
+                      rw.sd[[n]] <- array(rw.sd[[n]], dim=rw$dim[[n]])
+                    } else if (is.null(dim(rw.sd))) {
+                      dim(rw.sd[[n]]) <- length(rw.sd[[n]])
+                    } else {
+                      if (any(dim(rw.sd[[n]]) != rw$dim[[n]]))) {
+                        stop("Incorrect rw step dimension for variable:", n)
+                      }
+                    }
+                  }
+                  # concatenate all log values in a vector
+                  # always in the order of rw$dim
+                  rw$lstep <- c()
+                  for (n in names(rw$dim)) {
+                    rw$lstep <<- c(rw$lstep, log(rw.sd[[n]]))
+                  }
+                    
+                  invisible(NULL)
+                },
                 ".rw.rescale" = function(p) {
                   # We keep a weighted mean estimate of the mean acceptance probability
                   # with the weights in favour of more recent iterations
@@ -289,11 +331,11 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   invisible(NULL)
                 },
                 ".rw.proposal" = function(sample) {
-                  sample_dim <- lapply(sample, length)
                   # concatenate all variables in a vector
+                  # always in the order of rw$dim
                   sample_vec <- c()
-                  for (v in seq(along=sample)) {
-                    sample_vec <- c(sample_vec, sample[[v]])
+                  for (n in names(rw$dim)) {
+                    sample_vec <- c(sample_vec, sample[[n]])
                   }
                   d <- length(sample_vec)
                   if (rw$adapt || length(rw$cov_chol) == 0) {
@@ -303,9 +345,9 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   prop <- list()
                   from <- 1
-                  for (name in names(sample)) {
-                    to <- from+prod(sample_dim[[name]])-1
-                    prop[[name]] <- array(prop_vec[from:to], dim=sample_dim[[name]])
+                  for (n in names(rw$dim)) {
+                    to <- from+prod(rw$dim[[n]])-1
+                    prop[[n]] <- array(prop_vec[from:to], dim=rw$dim[[n]])
                     from <- to+1
                   }
                   invisible(prop)
@@ -313,9 +355,10 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 ".rw.learn.cov" = function(sample, accepted) {
                   if (accepted || is.null(rw$buffer)) {
                     # concatenate all variables in a vector
+                    # always in the order of rw$dim
                     sample_vec <- c()
-                    for (v in seq(along=sample)) {
-                      sample_vec <- c(sample_vec, sample[[v]])
+                    for (n in names(rw$dim)) {
+                      sample_vec <- c(sample_vec, sample[[n]])
                     }
                     # push sample back in buffer
                     rw$buffer <<- rbind(rw$buffer, sample_vec, deparse.level=0)
