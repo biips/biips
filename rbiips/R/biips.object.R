@@ -195,16 +195,17 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## check inits
+  init.values <- list()
   if (length(inits) > 0) {
-    
     if (is.function(inits)) {
       init.values <- inits()
+      if(!is.list(init.values))
+        stop("inits function must return a list.")
     } else if (is.list(inits)) {
       init.values <- inits
+    } else {
+      stop("inits must be a list or a function.")
     }
-    
-    if(!is.list(init.values))
-      stop("inits must be a list.")
     
     inames <- names(init.values)
     
