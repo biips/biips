@@ -341,7 +341,7 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
   n.part <- dim(x$values)["particle"]
   
   if (!missing(subset)) {
-    if(!is.character(subset) || !is.atomic(subset))
+    if(!is.character(subset) || length(subset)!=1)
       stop("invalid subset argument.")
     pn <- parse.varname(subset)
     if(pn$name != x$name)
@@ -379,7 +379,7 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
       discrete <- x$discrete[d]
     }
     
-    if (!is.atomic(bw))
+    if (length(bw)!=1)
       bww <- bw[[d]]
     
     if (discrete) {

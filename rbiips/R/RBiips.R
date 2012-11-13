@@ -105,7 +105,7 @@ data_preprocess <- function(data) { # , varnames) {
 
 load.biips.module <- function(name, quiet=FALSE)
 {    
-  if (!is.character(name) || !is.atomic(name))
+  if (!is.character(name) || length(name)>1)
     stop("invalid name")
   
   ok <- .Call("load_module", name, PACKAGE="RBiips")
@@ -141,13 +141,13 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
     writeLines(model.code, modfile)
   }
   
-  if(!is.logical(sample.data) || !is.atomic(sample.data)) {
+  if(!is.logical(sample.data) || length(sample.data)>1) {
     stop("Invalid sample.data argument.");
   }
   if(missing("data.rng.seed")) {
     data.rng.seed <- runif(1, 0, as.integer(Sys.time()));
   }
-  else if(!is.numeric(data.rng.seed) || !is.atomic(data.rng.seed)) {
+  else if(!is.numeric(data.rng.seed) || length(data.rng.seed)!=1) {
     stop("Invalid data.rng.seed argument.");
   }
   
@@ -223,14 +223,14 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                     sorted.nodes <- cbind(sorted.nodes, samplers)
                   }
                   if(!missing(type)) {
-                    if(!is.character(type) || !is.atomic(type)) {
+                    if(!is.character(type) || length(type)!=1) {
                       stop("Invalid type argument.");
                     }
                     type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
                     sorted.nodes <- sorted.nodes[sorted.nodes["type"]==type,]
                   }
                   if(!missing(observed)) {
-                    if(!is.logical(observed) || !is.atomic(observed)) {
+                    if(!is.logical(observed) || length(observed)!=1) {
                       stop("Invalid observed argument.");
                     }
                     sorted.nodes <- sorted.nodes[sorted.nodes["observed"]==observed,]
@@ -262,32 +262,32 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   invisible(NULL)
                 },
                 ## assign rw step
-                ".rw.step" = function(rw.sd) {
+                ".rw.step" = function(rw.step) {
                   ## check values and dimensions
-                  for (n in names(rw.sd)) {
-                    if (any(is.na(rw.sd[[n]])))
-                      stop("Missing (NA) rw step value for variable:", n)
-                    if (any(is.inf(rw.sd[[n]])))
-                      stop("Infinite rw step value for variable:", n)
-                    if (any(is.nan(rw.sd[[n]])))
-                      stop("NaN rw step value for variable:", n)
-                    if (any(rw.sd[[n]]<=0))
-                      stop("Negative or zero rw step value for variable:", n)
-                    if (is.atomic(rw.sd[[n]])) {
-                      rw.sd[[n]] <- array(rw.sd[[n]], dim=rw$dim[[n]])
-                    } else if (is.null(dim(rw.sd))) {
-                      dim(rw.sd[[n]]) <- length(rw.sd[[n]])
+                  for (n in names(rw.step)) {
+                    if (any(is.na(rw.step[[n]])))
+                      stop("Missing (NA) rw.step value for variable:", n)
+                    if (any(is.infinite(rw.step[[n]])))
+                      stop("Infinite rw.step value for variable:", n)
+                    if (any(is.nan(rw.step[[n]])))
+                      stop("NaN rw.step value for variable:", n)
+                    if (any(rw.step[[n]]<=0))
+                      stop("Negative or zero rw.step value for variable:", n)
+                    if (length(rw.step[[n]])==1) {
+                      rw.step[[n]] <- array(rw.step[[n]], dim=rw$dim[[n]])
                     } else {
-                      if (any(dim(rw.sd[[n]]) != rw$dim[[n]])) {
-                        stop("Incorrect rw step dimension for variable:", n)
-                      }
+                      if (is.null(dim(rw.step[[n]])))
+                        dim(rw.step[[n]]) <- length(rw.step[[n]])
+                      if (length(rw.step[[n]]) != length(rw$dim[[n]]) || any(dim(rw.step[[n]]) != rw$dim[[n]]))
+                        stop("Incorrect rw.step dimension for variable:", n)
                     }
                   }
+                      
                   # concatenate all log values in a vector
                   # always in the order of rw$dim
-                  rw$lstep <- c()
+                  rw$lstep <<- c()
                   for (n in names(rw$dim)) {
-                    rw$lstep <<- c(rw$lstep, log(rw.sd[[n]]))
+                    rw$lstep <<- c(rw$lstep, log(rw.step[[n]]))
                   }
                     
                   invisible(NULL)
@@ -569,14 +569,14 @@ smc.samples <- function(object, variable.names, n.part, type="fs",
 pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
                          n.part, max.fail=0, inits=list(), rw.learn=TRUE, ...)
 {  
-  if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
+  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
+  if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
     stop("Invalid thin argument")
   thin <- as.integer(thin)
   
-  if (!is.logical(rw.learn) && ! is.atomic(rw.learn))
+  if (!is.logical(rw.learn) || length(rw.learn)!=1)
     stop("invalid rw.learn parameter")
   
   ## stop biips verbosity
@@ -586,7 +586,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   ## Initialization
   #----------------
   out <- init.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
-                         n.part=n.part, inits=inits, quiet=TRUE, ...)
+                         n.part=n.part, inits=inits, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like
@@ -607,10 +607,10 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   
   accept.rate <- vector(length=n.iter)
   
-  ## check adaption
+  ## check adaptation
   if (object$.rw.adapt() && !object$.rw.check.adapt())
-    cat("NOTE: Stopping adaption of the PMMH random walk.\n")
-  ## turn off adaption
+    cat("NOTE: Stopping adaptation of the PMMH random walk.\n")
+  ## turn off adaptation
   object$.rw.adapt.off()
   
   .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
@@ -646,6 +646,8 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
         ans[[var]] <- c(ans[[var]], sample[[var]])
     }
   }
+  
+  clear.monitors.biips(object, type="s")
   
   ## reset log norm const and sampled value for the latent variables
   if (n.iter > 0 && !accepted) {
@@ -691,10 +693,10 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
     stop("Invalid variable.names argument")
   parse.varnames(variable.names)
   
-  if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
+  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || !is.atomic(thin) || thin < 1)
+  if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
     stop("Invalid thin argument")
   thin <- as.integer(thin)
   
@@ -738,7 +740,7 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
-  clear.monitors.biips(object, type="s", TRUE)
+  clear.monitors.biips(object, type="s")
   
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {

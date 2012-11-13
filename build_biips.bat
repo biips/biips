@@ -46,13 +46,13 @@ set "PATH=%RTOOLS_BINDIR%;%R_BINDIR%;%PATH%"
 choice /m "Build/install RBiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" RBiips_INSTALL_build
+	"%MAKE%" -j%NJOBS% RBiips_INSTALL_build
 )
 
 choice /m "Build MatBiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" matbiips
+	"%MAKE%" -j%NJOBS% matbiips
 	call:ask_test_matbiips
 )
 
@@ -76,7 +76,7 @@ goto:eof
 choice /m "Run BiipsTest tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\test"
-	"%MAKE%" test
+	"%MAKE%" -j%NJOBS% test
 )
 goto:eof
 
@@ -84,7 +84,7 @@ goto:eof
 choice /m "Run BiipsTestCompiler tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\testcompiler"
-	"%MAKE%" test
+	"%MAKE%" -j%NJOBS% test
 )
 goto:eof
 
@@ -101,6 +101,6 @@ goto:eof
 choice /m "Run MatBiips tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\matbiips"
-	"%MAKE%" test
+	"%MAKE%" -j%NJOBS% test
 )
 goto:eof

@@ -1237,7 +1237,7 @@ namespace Biips
         return false;
       }
       if (pModel_->SamplerBuilt() && rebuild_sampler)
-        pModel_->BuildSampler();
+        pModel_->ClearSampler();
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
@@ -1292,7 +1292,7 @@ namespace Biips
         return false;
       }
       if (pModel_->SamplerBuilt())
-        pModel_->BuildSampler();
+        pModel_->ClearSampler();
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
@@ -1343,7 +1343,7 @@ namespace Biips
         return false;
       }
       if (pModel_->SamplerBuilt())
-        pModel_->BuildSampler();
+        pModel_->ClearSampler();
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
