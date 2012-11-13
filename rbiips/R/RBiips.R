@@ -278,7 +278,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                     } else if (is.null(dim(rw.sd))) {
                       dim(rw.sd[[n]]) <- length(rw.sd[[n]])
                     } else {
-                      if (any(dim(rw.sd[[n]]) != rw$dim[[n]]))) {
+                      if (any(dim(rw.sd[[n]]) != rw$dim[[n]])) {
                         stop("Incorrect rw step dimension for variable:", n)
                       }
                     }

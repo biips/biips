@@ -179,11 +179,6 @@ namespace Biips
     /*!
      * @return the dimension array shared pointer
      */
-    const DimArray * DimPtr() const
-    {
-      return pDim_;
-    }
-
     DimArray * DimPtr()
     {
       return pDim_;
@@ -206,14 +201,6 @@ namespace Biips
     {
       checkValuesPtr();
       return *pValues_;
-    }
-    //! ValArray accessor.
-    /*!
-     * @return the values array shared pointer
-     */
-    const StorageType * ValuesPtr() const
-    {
-      return pValues_;
     }
     //! ValArray accessor.
     /*!
