@@ -1,5 +1,5 @@
 pour compiler avec la bonne version de boost (pour marc)
-make -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING="/usr/include/boost-1_46/" -DCMAKE_BUILD_TYPE:STRING=Debug 
+cmake -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING=/mnt/tests/fux/sources/boost_1_46_1/ -DCMAKE_BUILD_TYPE:STRING=Debug -DBoost_NO_SYSTEM_PATHS=ON -DMEX=mex -DBoost_USE_STATIC_LIBS=OFF ..
 
 
 Windows minimum requirements:
