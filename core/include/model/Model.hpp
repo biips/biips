@@ -94,6 +94,12 @@ namespace Biips
     }
     const ForwardSampler & Sampler() const;
 
+    void ClearSampler()
+    {
+      pSampler_.reset();
+      pSmoother_.reset();
+    }
+
     void BuildSampler();
 
     void InitSampler(Size nParticles, const Rng::Ptr & pRng,

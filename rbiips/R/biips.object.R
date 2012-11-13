@@ -111,7 +111,7 @@ build.sampler.biips <- function(object, proposal= "auto", ...)
   if (!is.biips(object))
     stop("Invalid BiiPS model")
       
-  if (!is.character(proposal) || !is.atomic(proposal)) {
+  if (!is.character(proposal) || length(proposal)!=1) {
     stop("Invalid proposal argument")
   }
   proposal <- match.arg(proposal, c("auto",
@@ -130,13 +130,13 @@ run.smc.forward <- function(object, n.part, rs.thres = 0.5, rs.type = "stratifie
   if (!is.biips(object))
     stop("Invalid BiiPS model")
       
-  if (!is.numeric(n.part) || !is.atomic(n.part) || n.part < 1) {
+  if (!is.numeric(n.part) || length(n.part)!=1 || n.part < 1) {
     stop("Invalid n.part argument")
   } 
-  if (!is.numeric(rs.thres) || !is.atomic(rs.thres) || rs.thres < 0) {
+  if (!is.numeric(rs.thres) || length(rs.thres)!=1 || rs.thres < 0) {
     stop("Invalid rs.thres argument")
   }
-  if (!is.character(rs.type) || !is.atomic(rs.type)) {
+  if (!is.character(rs.type) || length(rs.type)!=1) {
     stop("Invalid rs.type argument")
   }
   rs.type <- match.arg(rs.type, c("multinomial",
@@ -146,7 +146,7 @@ run.smc.forward <- function(object, n.part, rs.thres = 0.5, rs.type = "stratifie
   if (missing(smc.rng.seed)) {
     smc.rng.seed <- runif(1, 0, as.integer(Sys.time()));
   }
-  if (!is.numeric(smc.rng.seed) || !is.atomic(smc.rng.seed) || smc.rng.seed < 0) {
+  if (!is.numeric(smc.rng.seed) || length(smc.rng.seed)!=1 || smc.rng.seed < 0) {
     stop("Invalid smc.rng.seed argument")
   }
   
@@ -169,7 +169,7 @@ init.pmmh <- function(object, ...)
 
 init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
                             n.part, rs.thres=0.5, rs.type="stratified",
-                            inits.rng.seed, quiet=FALSE,...)
+                            inits.rng.seed, ...)
 { 
   if (!is.biips(object))
     stop("Invalid BiiPS model")
@@ -217,10 +217,10 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
     } else  ## case named list
     {
       if (any(nchar(inames) == 0))
-        stop("inits must be a named list.")
+        stop("inits has unnamed values.")
       
       if (any(duplicated(inames)))
-        stop("duplicated names in inits list:", 
+        stop("inits has duplicated names:", 
              paste(inames[duplicated(inames)], sep=","))
       
       ## Warn missing init values
@@ -258,7 +258,7 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   if (missing(inits.rng.seed)) {
     inits.rng.seed <- runif(1, 0, as.integer(Sys.time()));
   }
-  if (!is.numeric(inits.rng.seed) || !is.atomic(inits.rng.seed) || inits.rng.seed < 0) {
+  if (!is.numeric(inits.rng.seed) || length(inits.rng.seed)!=1 || inits.rng.seed < 0) {
     stop("Invalid inits.rng.seed argument")
   }
   
@@ -321,14 +321,13 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
     log.prior <- log.prior + log.p
   }
   
-  run.smc.flag <- FALSE
+  latent.monitored <- TRUE
   ## check latent variable is monitored
   if (length(latent.names) > 0) {
-    monitored <- is.monitored.biips(object, latent.names, "s", FALSE)
-    if (!monitored) {
+    if (!is.monitored.biips(object, latent.names, "s", FALSE)) {
       ## monitor variables
       monitor.biips(object, latent.names, type="s")
-      run.smc.flag <- TRUE
+      latent.monitored <- FALSE
     }
   }
   
@@ -337,13 +336,12 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
     .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
   }
   
-  if (!run.smc.flag)
-    run.smc.flag <- !.Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
+  sampler.atend <- .Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
   
   ## get log normalizing constant
-  if (run.smc.flag) {
+  if (!sampler.atend || !latent.monitored) {
     ## run smc
-    if (!quiet)
+    if (!sampler.atend)
       .Call("message", "Initializing PMMH", PACKAGE="RBiips")
     if (!run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type))
       stop("run smc forward sampler: invalid initial values.")
@@ -504,14 +502,14 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   if (!is.biips(object))
     stop("Invalid BiiPS model")
   ## check n.iter
-  if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
+  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
   ## check rw.adapt
-  if (!is.logical(rw.adapt) && ! is.atomic(rw.adapt))
+  if (!is.logical(rw.adapt) || length(rw.adapt)!=1)
     stop("invalid rw.adapt argument")
   ## check rw.learn
-  if (!is.logical(rw.learn) && ! is.atomic(rw.learn))
+  if (!is.logical(rw.learn) || length(rw.learn)!=1)
     stop("invalid rw.learn argument")
   ## check rw.step
   if (!missing(rw.step))
@@ -566,18 +564,23 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   ### Initialize
   ### -------------------------------
   out <- init.pmmh.biips(object, param.names=param.names, n.part=n.part,
-                         inits=inits, quiet=TRUE,...)
+                         inits=inits, ...)
   
   pn.param <- parse.varnames(param.names)
   
   ### assign rw step
-  if (!missing(rw.step))
-    object$.rw.step(rw.step.values)
+  if (!missing(rw.step)) {
+    if (!object$.rw.adapt()) {
+      warning("Ignoring rw.step argument: adaptation has been stopped.")
+    } else {
+      object$.rw.step(rw.step.values)
+    }
+  }
   
   ### stop adaptation if necessary
   if (!rw.adapt) {
     if (object$.rw.adapt() && !object$.rw.check.adapt())
-      cat("NOTE: Stopping adaption of the PMMH random walk.\n")
+      cat("NOTE: Stopping adaptation of the PMMH random walk.\n")
     object$.rw.adapt.off()
   }
   
@@ -614,12 +617,9 @@ update.pmmh.biips <- function(object, param.names, n.iter,
     }
   }
   
-  ### turn off adaption if checked
+  ### turn off adaptation if checked
   if (object$.rw.check.adapt())
     object$.rw.adapt.off()
-  
-  ### release monitors memory
-  clear.monitors.biips(object, type="s", TRUE)
   
   ### reset log norm const and sampled values if not accepted
   if (n.iter > 0 && !out$accepted) {
@@ -650,15 +650,14 @@ init.pimh.biips <- function(object, variable.names,
     monitor.biips(object, variable.names, type="s")
   }
   
-  built <- .Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")
-  if (!built) {
+  if (!.Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")) {
     ## build smc sampler
     .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
   }
   
   atend <- .Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
   ## get log normalizing constant
-  if (!monitored || !built || !atend) {
+  if (!monitored || !atend) {
     ## run smc sampler
     .Call("message", "Initializing PIMH", PACKAGE="RBiips")
     run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
@@ -731,7 +730,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
     stop("Invalid variable.names argument")
   parse.varnames(variable.names)
   
-  if (!is.numeric(n.iter) || !is.atomic(n.iter) || n.iter < 1)
+  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
     stop("Invalid n.iter argument")
   n.iter <- as.integer(n.iter)
   
@@ -765,6 +764,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
   }
   
+  ## release monitors memory
   clear.monitors.biips(object, type="s", TRUE)
   
   ## reset log norm const and sampled value
