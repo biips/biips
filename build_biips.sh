@@ -40,13 +40,13 @@ if [[ $ans == "y" ]]; then set -x
     set +x; echo -n "Run BiipsTest tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test
-        make test
+        make -j$NJOBS test
     fi
 
     set +x; echo -n "Run BiipsTestCompiler tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/testcompiler
-        make test
+        make -j$NJOBS test
     fi
 
     set +x; echo -n "Package Biips ? (y/n)"; read ans
@@ -63,21 +63,21 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
-    make RBiips_INSTALL
+    make -j$NJOBS RBiips_INSTALL
 
     set +x; read -p 'Press [Enter] key to continue...'; set -x
-    make RBiips_build
+    make -j$NJOBS RBiips_build
 fi
 
 set +x; echo -n "Build MatBiips ? (y/n)"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
-    make matbiips
+    make -j$NJOBS matbiips
 
     set +x; echo -n "Run MatBiips tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
-        make test
+        make -j$NJOBS test
     fi
 fi
 
