@@ -43,33 +43,41 @@ namespace Biips
 
   class MatlabFunction: public Function
   {
+    protected:
+     String fun_dim_;
+     String fun_eval_;
+     String fun_check_param_;
+     String fun_is_discrete_;
+    
+    public:         
     typedef MatlabFunction SelfType;
     typedef Function BaseType;
 
     MatlabFunction(const String & name, 
-		   Size nParam,
-		   const String & fun_dim,
-		   const String & fun_eval,
-		   const String & fun_check_param = "",
-		   const String & fun_is_discrete = "") :
+                   Size nParam,
+                   const String & fun_dim,
+                   const String & fun_eval,
+                   const String & fun_check_param = "",
+                   const String & fun_is_discrete = "") :
       BaseType(name, nParam), 
       fun_dim_(fun_dim), 
       fun_eval_(fun_eval),
       fun_check_param_(fun_check_param),
-      fun_is_discrete_(fun_is_discrete)
-      
-    {
-    }
+      fun_is_discrete_(fun_is_discrete) {}
 
+    virtual Bool IsDiscreteValued(const Flags & mask) const;
+    
     virtual Bool
-        checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const {
-	 return true;
-    }	 
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    virtual void
-    eval(ValArray & values, const NumArray::Array & paramValues);
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const 
+    {
+        return true;
+    }        
+    virtual DimArray 
+    
+    dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+    
+    virtual void eval(ValArray & values, const NumArray::Array & paramValues);
 
-  public:
     virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
     {
       return true;
@@ -80,6 +88,8 @@ namespace Biips
       return true;
     }
     virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const;
+
+    virtual ~MatlabFunction() {}
 
   };
 
