@@ -1,6 +1,6 @@
 #define sources
-file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp)
-file(GLOB MBIIPS_H *.h)
+file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp MatlabFunction.cpp)
+file(GLOB MBIIPS_H *.h *.hpp)
 
 if (WIN32)
 	if (MATLAB)

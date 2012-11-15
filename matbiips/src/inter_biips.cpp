@@ -14,7 +14,8 @@
 #include "iostream/outStream.hpp"
 #include "common/Accumulator.hpp"
 #include "common/Utility.hpp"
-
+#include "compiler/Compiler.hpp"
+#include "MatlabFunction.hpp"
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
 
@@ -160,10 +161,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        
        for (int i = 0; i < ndim ; ++i) {
             String var_name = names[i]; 
-	    mwSize  nd[] = { var_name.size() }; 
-	    mxArray * value = mxCreateCharArray(1, nd);
-	    std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
-	    mxSetCell(plhs[0], i, value);
+           mwSize  nd[] = { var_name.size() }; 
+           mxArray * value = mxCreateCharArray(1, nd);
+           std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
+           mxSetCell(plhs[0], i, value);
        }
     }      
     /////////////////////////////////////////
@@ -208,19 +209,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * m   = mxGetCell(prhs[2], i);
           const mxArray * low = mxGetCell(prhs[3], i);
           const mxArray * up  = mxGetCell(prhs[4], i);
-	  
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
          
-	  if (!mxIsEmpty(low)) {
-	    CheckIsDouble(low);
+         CheckIsString(m);
+         String name = mxArrayToString(m);
+         
+         if (!mxIsEmpty(low)) {
+           CheckIsDouble(low);
           }
-	  if (!mxIsEmpty(up)) {
-	    CheckIsDouble(up);
-	  }
+         if (!mxIsEmpty(up)) {
+           CheckIsDouble(up);
+         }
 
           IndexRange range = makeRange(low, up);
-	  Bool ok = p_console->SetFilterMonitor(name, range);
+         Bool ok = p_console->SetFilterMonitor(name, range);
           if (ok && VERBOSITY>1)
              {
                  mbiips_cout << " " << name;
@@ -259,17 +260,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * m   = mxGetCell(prhs[2], i);
           const mxArray * low = mxGetCell(prhs[3], i);
           const mxArray * up  = mxGetCell(prhs[4], i);
-	  
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
+         
+         CheckIsString(m);
+         String name = mxArrayToString(m);
           
           
-	  if (!mxIsEmpty(low)) {
-	    CheckIsDouble(low);
+         if (!mxIsEmpty(low)) {
+           CheckIsDouble(low);
           }
-	  if (!mxIsEmpty(up)) {
-	    CheckIsDouble(up);
-	  }
+         if (!mxIsEmpty(up)) {
+           CheckIsDouble(up);
+         }
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothTreeMonitor(name, range);
           if (ok && VERBOSITY>1)
@@ -310,16 +311,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * m   = mxGetCell(prhs[2], i);
           const mxArray * low = mxGetCell(prhs[3], i);
           const mxArray * up  = mxGetCell(prhs[4], i);
-	  
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
+         
+         CheckIsString(m);
+         String name = mxArrayToString(m);
           
-	  if (!mxIsEmpty(low)) {
-	    CheckIsDouble(low);
+         if (!mxIsEmpty(low)) {
+           CheckIsDouble(low);
           }
-	  if (!mxIsEmpty(up)) {
-	    CheckIsDouble(up);
-	  }
+         if (!mxIsEmpty(up)) {
+           CheckIsDouble(up);
+         }
           
           IndexRange range = makeRange(low, up);
           Bool ok = p_console->SetSmoothMonitor(name, range);
@@ -567,7 +568,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
          mxArray * names = mxCreateCellArray(name_ndim, name_dims);
          for (int i = 0;  i <  node_names_vec.size() ; ++i) {
                mxArray * str = mxCreateString(node_names_vec[i].c_str());
-   	       mxSetCell(names, i, str);
+                 mxSetCell(names, i, str);
          }
          mxSetFieldByNumber(plhs[0], 0, 1, names);
        }
@@ -581,7 +582,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
          for (Size i=0; i<graph_size; ++i)
          {
            String type_str ;
-	   switch (node_types_vec[i])
+          switch (node_types_vec[i])
            {
              case CONSTANT:
                type_str = "Constant";
@@ -596,8 +597,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                break;
            }
            mxArray * str = mxCreateString(type_str.c_str());
-   	   mxSetCell(types, i, str);
-	 }
+             mxSetCell(types, i, str);
+        }
          mxSetFieldByNumber(plhs[0], 0, 2, types);
        }
       
@@ -649,7 +650,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
          mxArray * samplers = mxCreateCellArray(name_ndim, name_dims);
          for (int i = 0;  i <  node_samplers_vec.size() ; ++i) {
                mxArray * str = mxCreateString(node_samplers_vec[i].c_str());
-   	       mxSetCell(samplers, i, str);
+                 mxSetCell(samplers, i, str);
          }
          mxSetFieldByNumber(plhs[0], 0, 1, samplers);
        }
@@ -854,7 +855,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckArgIsString(3);
        String iter_name = mxArrayToString(prhs[3]);
-	  
+         
 
        progress.push_back(ProgressBar_ptr(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING, 
                                           symbol[0], iter_name)));
@@ -914,17 +915,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * m   = mxGetCell(prhs[2], i);
           const mxArray * low = mxGetCell(prhs[3], i);
           const mxArray * up  = mxGetCell(prhs[4], i);
-	  
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
+         
+         CheckIsString(m);
+         String name = mxArrayToString(m);
           
           IndexRange range = makeRange(low, up);
         
-	  if (!p_console->IsSmoothTreeMonitored(name, range)) {
+         if (!p_console->IsSmoothTreeMonitored(name, range)) {
                *mxGetLogicals(plhs[0]) = 0; 
                return;
-	    }
-	} 
+           }
+       } 
        *mxGetLogicals(plhs[0]) = 1; 
        
     }
@@ -1043,16 +1044,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        for(int i = 0; i <  nb_cell; ++i ) {
           const mxArray * m = mxGetCell(prhs[2], i);
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
+          CheckIsString(m);
+          String name = mxArrayToString(m);
        }
        
        typedef char * chaine_carac ;
        chaine_carac* field_names= new chaine_carac[nb_cell];
        for(int i = 0; i <  nb_cell; ++i ) {
           const mxArray * m = mxGetCell(prhs[2], i);
-	  CheckIsString(m);
-	  String name = mxArrayToString(m);
+          CheckIsString(m);
+          String name = mxArrayToString(m);
           field_names[i] = new char[name.size()];
           std::strcpy(field_names[i], name.c_str());
        }
@@ -1061,11 +1062,41 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        plhs[0] = mxCreateStructArray(1, dims, nb_cell, const_cast<const char **>(field_names));
        for(int i = 0;  i < nb_cell; ++i) {
             mxArray * contenu = mxDuplicateArray(mxGetCell(prhs[1], i));
-	    mxSetFieldByNumber(plhs[0], 0, i, contenu); 
+            mxSetFieldByNumber(plhs[0], 0, i, contenu); 
             delete [] field_names[i];
        }
        delete [] field_names;
     }     
+    ////////////////////////////////////////////
+    // ADD_FUNCTION FUNCTION
+    ////////////////////////////////////////////
+    else if (name_func == "add_function") {
+
+       CheckRhs(nrhs, 5, name_func);
+       CheckArgIsString(1);
+       CheckArgIsString(2);
+       CheckArgIsString(3);
+       CheckArgIsString(4);
+       CheckArgIsString(5);
+   
+       String arg1 = mxArrayToString(prhs[1]);
+       String arg2 = mxArrayToString(prhs[2]);
+       String arg3 = mxArrayToString(prhs[3]);
+       String arg4 = mxArrayToString(prhs[4]);
+       String arg5 = mxArrayToString(prhs[5]);
+
+       
+       if (Compiler::FuncTab().Contains(arg1)) {
+             mexErrMsgTxt("add_function : try to insert an existing function");
+       }
+       else {
+       Compiler::FuncTab().Insert(new MatlabFunction(String(arg1),
+                                                     String(arg2),
+                                                     String(arg3),
+                                                     String(arg4),
+                                                     String(arg5));
+       }
+    }
     else {
        mexErrMsgTxt("bad name of function\n");
 
