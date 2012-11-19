@@ -1,3 +1,4 @@
+addpath('../matlab');
 %data=struct('y', y, 'tmax', 10, 'precxinit', 1,'precx', 10, 'precy', 1, 'meanxinit', 0);
 bool_et_un = inter_biips('load_module', 'basemod'); 
 p0=inter_biips('make_console'); 

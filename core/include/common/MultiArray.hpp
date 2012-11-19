@@ -175,11 +175,20 @@ namespace Biips
       return *pDim_;
     }
 
-    //! DimArray shared pointer accessor.
+    //! DimArray pointer accessor.
     /*!
-     * @return the dimension array shared pointer
+     * @return the dimension array  pointer
      */
     DimArray * DimPtr()
+    {
+      return pDim_;
+    }
+
+    //! DimArray pointer accessor.
+    /*!
+     * @return the dimension array pointer
+     */
+    const DimArray * DimPtr() const
     {
       return pDim_;
     }
@@ -204,9 +213,18 @@ namespace Biips
     }
     //! ValArray accessor.
     /*!
-     * @return the values array shared pointer
+     * @return the values array pointer
      */
     StorageType * ValuesPtr()
+    {
+      return pValues_;
+    }
+
+    //! ValArray accessor.
+    /*!
+     * @return the values array pointer
+     */
+    const StorageType * ValuesPtr() const
     {
       return pValues_;
     }

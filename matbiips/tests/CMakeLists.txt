@@ -23,3 +23,6 @@ foreach(_mf ${mfiles})
     endif()
     set_tests_properties(${_name}-test PROPERTIES TIMEOUT 30)
 endforeach()
+
+
+set (MATBIIPS_FILES ${MATBIIPS_FILES} ${test_files})

@@ -567,7 +567,7 @@ smc.samples <- function(object, variable.names, n.part, type="fs",
 
 
 pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
-                         n.part, max.fail=0, inits=list(), rw.learn=TRUE, ...)
+                         n.part, max.fail=0, rw.learn=TRUE, ...)
 {  
   if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
     stop("Invalid n.iter argument")
@@ -586,7 +586,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   ## Initialization
   #----------------
   out <- init.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
-                         n.part=n.part, inits=inits, ...)
+                         n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like

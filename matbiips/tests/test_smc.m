@@ -1,3 +1,4 @@
+addpath('../matlab');
 %data
 tmax=4;
 precx=1;
