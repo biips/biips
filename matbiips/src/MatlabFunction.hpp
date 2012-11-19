@@ -43,53 +43,44 @@ namespace Biips
 
   class MatlabFunction: public Function
   {
-    protected:
-     String fun_dim_;
-     String fun_eval_;
-     String fun_check_param_;
-     String fun_is_discrete_;
-    
-    public:         
+  protected:
+    String fun_dim_;
+    String fun_eval_;
+    String fun_check_param_;
+    String fun_is_discrete_;
+
+    virtual Bool checkParamDims(
+        const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return true;
+    }
+    virtual DimArray
+
+    dim(const Types<DimArray::Ptr>::Array & paramDims) const;
+
+    virtual void eval(ValArray & values, const NumArray::Array & paramValues) const;
+
+  public:
     typedef MatlabFunction SelfType;
     typedef Function BaseType;
 
-    MatlabFunction(const String & name, 
-                   Size nParam,
-                   const String & fun_dim,
-                   const String & fun_eval,
-                   const String & fun_check_param = "",
-                   const String & fun_is_discrete = "") :
-      BaseType(name, nParam), 
-      fun_dim_(fun_dim), 
-      fun_eval_(fun_eval),
-      fun_check_param_(fun_check_param),
-      fun_is_discrete_(fun_is_discrete) {}
+    MatlabFunction(const String & name, Size nParam, const String & fun_dim,
+                   const String & fun_eval, const String & fun_check_param = "",
+                   const String & fun_is_discrete = "")
+        : BaseType(name, nParam), fun_dim_(fun_dim), fun_eval_(fun_eval),
+            fun_check_param_(fun_check_param), fun_is_discrete_(fun_is_discrete)
+    {
+      // TODO: check name is valid
+      // TODO: check functions exist in matlab
+    }
 
     virtual Bool IsDiscreteValued(const Flags & mask) const;
-    
-    virtual Bool
-    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const 
-    {
-        return true;
-    }        
-    virtual DimArray 
-    
-    dim(const Types<DimArray::Ptr>::Array & paramDims) const;
-    
-    virtual void eval(ValArray & values, const NumArray::Array & paramValues);
 
-    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
-    {
-      return true;
-    }
-    
-    virtual Bool IsInfix() const
-    {
-      return true;
-    }
-    virtual Bool IsScale(const Flags & scaleMask, const Flags & knownMask) const;
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
 
-    virtual ~MatlabFunction() {}
+    virtual ~MatlabFunction()
+    {
+    }
 
   };
 

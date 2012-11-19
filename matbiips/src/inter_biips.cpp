@@ -1072,29 +1072,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     ////////////////////////////////////////////
     else if (name_func == "add_function") {
 
-       CheckRhs(nrhs, 5, name_func);
+       CheckRhs(nrhs, 6, name_func);
        CheckArgIsString(1);
-       CheckArgIsString(2);
+       CheckArgIsDouble(2);
        CheckArgIsString(3);
        CheckArgIsString(4);
        CheckArgIsString(5);
+       CheckArgIsString(6);
    
        String arg1 = mxArrayToString(prhs[1]);
-       String arg2 = mxArrayToString(prhs[2]);
+       Size arg2 = static_cast<Size>(*mxGetPr(prhs[2]));
        String arg3 = mxArrayToString(prhs[3]);
        String arg4 = mxArrayToString(prhs[4]);
        String arg5 = mxArrayToString(prhs[5]);
+       String arg6 = mxArrayToString(prhs[6]);
 
        
        if (Compiler::FuncTab().Contains(arg1)) {
-             mexErrMsgTxt("add_function : try to insert an existing function");
+             mexErrMsgTxt("biips_add_function: try to insert an existing function");
        }
        else {
-       Compiler::FuncTab().Insert(new MatlabFunction(String(arg1),
-                                                     String(arg2),
-                                                     String(arg3),
-                                                     String(arg4),
-                                                     String(arg5));
+       Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(arg1,
+                                                     arg2,
+                                                     arg3,
+                                                     arg4,
+                                                     arg5,
+                                                     arg6)));
        }
     }
     else {

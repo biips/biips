@@ -1,98 +1,253 @@
+//                                               -*- C++ -*-
+/*
+ * BiiPS software is a set of C++ libraries for
+ * Bayesian inference with interacting Particle Systems.
+ * Copyright (C) Inria, 2012
+ * Authors: Adrien Todeschini, Francois Caron
+ *
+ * BiiPS is derived software based on:
+ * JAGS, Copyright (C) Martyn Plummer, 2002-2010
+ * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
+ *
+ * This file is part of BiiPS.
+ *
+ * BiiPS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*! \file MatlabFunction.cpp
+ * \brief
+ *
+ * \author  $LastChangedBy$
+ * \date    $LastChangedDate$
+ * \version $LastChangedRevision$
+ * Id:      $Id$
+ */
+
 #include "MatlabFunction.hpp"
 #include <algorithm>
-#include <mex.h>
+#include "mex.h"
 
-namespace Biips {
-void
-MatlabFunction::eval(ValArray & values, const NumArray::Array & paramValues) {
+namespace Biips
+{
+  void MatlabFunction::eval(ValArray & values,
+                            const NumArray::Array & paramValues) const
+  {
+    // declare input
+    int nrhs = paramValues.size();
+    mxArray ** prhs = new mxArray *[nrhs];
 
-  int nrhs = paramValues.size();
-  mxArray * prhs = new mxArray[nrhs];
-  mxArray  plhs[1];
+    for (Size i = 0; i < nrhs; ++i)
+    {
+      // create zero sized array
+      mwSize zeros[2] = {0,0};
+      prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
 
-  for(i = 0; i < nrhs; ++i) {
-         mwSize zeros[2] = {0, 0 };
-         prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
-         mxSetDimensions(prhs[i], paramValues[i].DimPtr()->data(), paramValues[i]->NDim());
-         mxSetPr(prhs[i], paramValues[i].ValuesPtr()->data());
+      // copy vector<unsigned int> to vector<mwSize>
+      std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
+                               paramValues[i].DimPtr()->end());
+
+      // set array dimensions
+      mxSetDimensions(prhs[i], dims.data(), paramValues[i].NDim());
+
+      // make array values point to existing memory
+      mxSetPr(prhs[i], const_cast<double *>(paramValues[i].ValuesPtr()->data()));
+    }
+
+    // declare output
+    mxArray * plhs[1];
+
+    // call matlab function
+    mxArray * exception = NULL;
+    exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs, fun_eval_.c_str());
+    if (exception != NULL)
+    {
+      /* Throw the MException returned by mexCallMATLABWithTrap
+       * after cleaning up any dynamically allocated resources */
+      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
+    }
+
+    // get output
+    mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
+    if (size_lhs != values.size())
+    {
+      String msg =
+          String("Error evaluating MATLAB function \"") + fun_eval_
+          + "\" : output number of elements does not match the node dimension.";
+      mexErrMsgTxt(msg.c_str());
+    }
+
+    // copy output
+    for (Size i = 0; i < values.size(); ++i)
+      values[i] = mxGetPr(plhs[0])[i];
+
+    // free allocated output
+    mxDestroyArray(plhs[0]);
   }
 
-  mexCallMATLAB(1, plhs, nrhs, prhs, name_);
-  
-  for(i = 0; i < values.size(); ++i) {
-           values[i] = mxGetPr(plhs[1])[i];
+  DimArray MatlabFunction::dim(
+      const Types<DimArray::Ptr>::Array & paramDims) const
+  {
+    // declare input
+    int nrhs = paramDims.size();
+    mxArray ** prhs = new mxArray*[nrhs];
+
+    std::vector<std::vector<double> > paramDims_values(nrhs);
+    for (Size i = 0; i < nrhs; ++i)
+    {
+      // allocate input
+      prhs[i] = mxCreateDoubleMatrix(1, paramDims[i]->NDim(), mxREAL);
+
+      // fill values
+      std::copy(paramDims[i]->begin(), paramDims[i]->end(), mxGetPr(prhs[i]));
+    }
+
+    // declare output
+    mxArray * plhs[1];
+
+    // call matlab function
+    mxArray * exception = NULL;
+    exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs, fun_dim_.c_str());
+
+    // catch exception
+    if (exception != NULL)
+    {
+      /* Throw the MException returned by mexCallMATLABWithTrap
+       * after cleaning up any dynamically allocated resources */
+      for (Size i=0; i<nrhs; ++i)
+        mxDestroyArray(prhs[i]);
+      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
+    }
+
+    // get output
+    mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
+    double * lhs = mxGetPr(plhs[0]);
+
+    // free allocated input
+    for (Size i=0; i<nrhs; ++i)
+      mxDestroyArray(prhs[i]);
+
+    return DimArray(lhs, lhs + size_lhs);
   }
 
-  delete [] prhs;
-}
+  Bool MatlabFunction::IsDiscreteValued(const Flags & mask) const
+  {
+    // default implementation
+    if (fun_is_discrete_.empty())
+      return false;
 
-DimArray 
-MatlabFunction::dim(const Types<DimArray::Ptr>::Array & paramDims) const {
+    // allocate input
+    mxArray * prhs[1];
+    prhs[0] = mxCreateLogicalMatrix(1, mask.size());
 
-  int nrhs = paramDims.size();
-  mxArray * prhs = new mxArray[nrhs];
+    // fill values
+    std::copy(mask.begin(), mask.end(), mxGetPr(prhs[0]));
 
-  for(i = 0; i < nrhs; ++i) {
-         mwSize zeros[2] = {0, 0 };
-         prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
-         mxSetDimensions(prhs[i], paramDims[i]->DimPtr()->data(), paramDims->NDim());
-         mxSetPr(prhs[i], paramDims[i]->ValuesPtr()->Data());
+    // declare output
+    mxArray * plhs[1];
+
+    // call matlab function
+    mxArray * exception = NULL;
+    exception = mexCallMATLABWithTrap(1, plhs, 1, prhs,
+                                      fun_is_discrete_.c_str());
+
+    // catch exception
+    if (exception != NULL)
+    {
+      /* Throw the MException returned by mexCallMATLABWithTrap
+       * after cleaning up any dynamically allocated resources */
+      mxDestroyArray(prhs[0]);
+      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
+    }
+
+    // check output size
+    mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
+    if (size_lhs != 1)
+    {
+      String msg = String("Error evaluating MATLAB function \"")
+                   + fun_is_discrete_ + "\" : output must return a scalar.";
+      mexErrMsgTxt(msg.c_str());
+    }
+
+    // get output
+    Bool ans = *mxGetLogicals(plhs[0]);
+
+    // free allocated input and output
+    mxDestroyArray(prhs[0]);
+    mxDestroyArray(plhs[0]);
+
+    return ans;
   }
 
-  mxArray  plhs[1];
-  mexCallMATLAB(1, plhs, nrhs, prhs, fun_dim_);
-  
-  mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
-  double  * lhs = mxGetPr(plhs[0]);
-  
-  delete [] prhs;
-  return DimArray(lhs , lhs + size_lhs);
-   
-}
+  Bool MatlabFunction::CheckParamValues(
+      const NumArray::Array & paramValues) const
+  {
+    // default implementation
+    if (fun_check_param_.empty())
+      return true;
 
-virtual Bool 
-MatlabFunction::IsDiscreteValued(const Flags & mask) const {
+    // copy input
+    int nrhs = paramValues.size();
+    mxArray ** prhs = new mxArray*[nrhs];
 
-  if (fun_is_discrete_ == "")
-     return false;
-  
-  mxArray prhs[1];
-  prhs[0] = mxCreateLogicalMatrix(1, mask.size());
-  
-  std::copy(prhs[0], prhs[0] + mask.size());
-  
-  mxArray  plhs[1];
-  mexCallMATLAB(1, plhs, 1, prhs, fun_is_discrete_);
-  
-  mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
-  double  * lhs = mxGetPr(plhs[0]);
-  
-  delete [] prhs;
-  return DimArray(lhs , lhs + size_lhs);
+    for (Size i = 0; i < nrhs; ++i)
+    {
+      // create zero sized array
+      mwSize zeros[2] = {0,0};
+      prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
 
-}
+      // copy vector<unsigned int> to vector<mwSize>
+      std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
+                               paramValues[i].DimPtr()->end());
 
-Bool 
-MatlabFunction::CheckParamValues(const NumArray::Array & paramValues) const {
-  if (fun_check_param_ == "")
-     return true;
+      // set array dimensions
+      mxSetDimensions(prhs[i], dims.data(), paramValues[i].NDim());
 
-  int nrhs = paramValues.size();
-  mxArray * prhs = new mxArray[nrhs];
+      // make array values point to existing memory
+      mxSetPr(prhs[i], const_cast<double *>(paramValues[i].ValuesPtr()->data()));
+    }
 
-  for(i = 0; i < nrhs; ++i) {
-         mwSize zeros[2] = {0, 0 };
-         prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
-         mxSetDimensions(prhs[i], paramValues[i].DimPtr()->data(), paramValues[i]->NDim());
-         mxSetPr(prhs[i], paramValues[i].ValuesPtr()->data());
+    // declare output
+    mxArray * plhs[1];
+
+    // call matlab function
+    mxArray * exception = NULL;
+    exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs,
+                                      fun_check_param_.c_str());
+
+    // catch exception
+    if (exception != NULL)
+    {
+      /* Throw the MException returned by mexCallMATLABWithTrap
+       * after cleaning up any dynamically allocated resources */
+      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
+    }
+
+    // check output size
+    mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
+    if (size_lhs != 1)
+    {
+      String msg = String("Error evaluating MATLAB function \"")
+                   + fun_check_param_ + "\" : output must return a scalar.";
+      mexErrMsgTxt(msg.c_str());
+    }
+
+    // get output
+    Bool ans = *mxGetLogicals(plhs[0]);
+
+    // free allocated output
+    mxDestroyArray(plhs[0]);
+
+    return ans;
   }
-
-  mxArray  plhs[1];
-  mexCallMATLAB(1, plhs, nrhs, prhs, fun_check_param_);
-  
-  delete [] prhs;
-
-  return *mxGetLogicals(plhs[0]);
-
-}
 }

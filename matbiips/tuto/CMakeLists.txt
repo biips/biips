@@ -11,7 +11,7 @@ foreach(_tf ${tuto_files})
        set (opt_exec " --eval ") 
    endif(MATLAB)
    get_filename_component(_namewe ${_tf} NAME_WE)
-   set(MAT_COMS "addpath('../tests/');publish('${_namewe}.m');exit")
+   set(MAT_COMS "publish('${_namewe}.m');exit")
    set(OUT_TUTO "${CMAKE_CURRENT_BINARY_DIR}/html/${_namewe}.html")
    message(STATUS "malab=" ${MATLAB_COMMAND})
    add_custom_command(
