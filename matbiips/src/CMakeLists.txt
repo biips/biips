@@ -22,7 +22,7 @@ if (WIN32)
 			SUFFIX .${MEX_EXT}
 		)
 		
-		set(INTER_OUT inter_biips)
+		set(INTER_TARGET inter_biips)
 	else()
 		message (FATAL_ERROR "MATLAB not found on your computer.\n"
 					"Try setting MATLAB_ROOT to the root path of your MATLAB installation. eg: c:\Program Files\MATLAB\R2012a\n"
@@ -40,7 +40,7 @@ else()
 
 	#define mexfile compilation command
 	set(INTER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/inter_biips.cpp)
-	set(INTER_OUT "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
+	set(INTER_TARGET "${CMAKE_CURRENT_BINARY_DIR}/inter_biips.${MEX_EXT}")
 	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 		set(MEX_OPT ${MEX_OPT} -g)
 	endif()
@@ -52,7 +52,7 @@ else()
 	endforeach(d ${INCLUDE_DIRS})
 
 	add_custom_command(
-    	OUTPUT ${INTER_OUT}
+    	OUTPUT ${INTER_TARGET}
     	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC} ${BIIPS_LIBS}
     	COMMAND ${MEX_COMMAND} -v 
     	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
@@ -62,16 +62,18 @@ else()
 endif()
 
 # install mexfile in the build directory
-set(INTER_TEST "${CMAKE_BINARY_DIR}/matbiips/tests/inter_biips.${MEX_EXT}")
+set(INTER_BIN "${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT}")
 add_custom_command(
-	OUTPUT ${INTER_TEST}
-	DEPENDS ${INTER_OUT}
-	COMMAND ${CMAKE_COMMAND} -E copy inter_biips.${MEX_EXT} "${CMAKE_BINARY_DIR}/matbiips/tests/"
-    COMMENT "Copying mexfile in build tests directory"
+	OUTPUT ${INTER_BIN}
+	DEPENDS ${INTER_TARGET}
+	COMMAND ${CMAKE_COMMAND} -E copy inter_biips.${MEX_EXT} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
+    COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )
 
+set (MATBIIPS_FILES ${MATBIIPS_FILES} ${INTER_BIN})
+
 #define target
 add_custom_target(matbiips 
-	DEPENDS  ${INTER_TEST}
+	DEPENDS  ${INTER_BIN}
 )

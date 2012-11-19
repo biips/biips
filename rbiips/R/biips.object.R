@@ -343,6 +343,8 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
     ## run smc
     if (!sampler.atend)
       .Call("message", "Initializing PMMH", PACKAGE="RBiips")
+    else if (!latent.monitored)
+      .Call("message", "Initializing PMMH latent variables", PACKAGE="RBiips")
     if (!run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type))
       stop("run smc forward sampler: invalid initial values.")
   }
