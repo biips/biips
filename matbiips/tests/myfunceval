@@ -1,0 +1,6 @@
+function [v]=myfundim(x)
+if size(x,1)==4
+   error('myfuncval x must have 4 rows')
+end
+v=4;
+
