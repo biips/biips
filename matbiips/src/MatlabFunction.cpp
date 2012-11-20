@@ -49,19 +49,15 @@ namespace Biips
 
     for (Size i = 0; i < nrhs; ++i)
     {
-      // create zero sized array
-      mwSize zeros[2] = {0,0};
-      prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
-
       // copy vector<unsigned int> to vector<mwSize>
       std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
                                paramValues[i].DimPtr()->end());
-
-      // set array dimensions
-      mxSetDimensions(prhs[i], dims.data(), paramValues[i].NDim());
+      prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data() , mxDOUBLE_CLASS, mxREAL);
 
       // make array values point to existing memory
-      mxSetPr(prhs[i], const_cast<double *>(paramValues[i].ValuesPtr()->data()));
+      double * params = mxGetPr(prhs[i]);
+      mwSize params_size = mxGetNumberOfElements(prhs[i]); 
+      std::copy(const_cast<double *>(paramValues[i].ValuesPtr()->data()), params, params + params_size);  
     }
 
     // declare output
@@ -86,6 +82,10 @@ namespace Biips
           + "\" : output number of elements does not match the node dimension.";
       mexErrMsgTxt(msg.c_str());
     }
+    
+    // free allocated input
+    for (Size i=0; i<nrhs; ++i)
+      mxDestroyArray(prhs[i]);
 
     // copy output
     for (Size i = 0; i < values.size(); ++i)
@@ -202,19 +202,16 @@ namespace Biips
 
     for (Size i = 0; i < nrhs; ++i)
     {
-      // create zero sized array
-      mwSize zeros[2] = {0,0};
-      prhs[i] = mxCreateNumericArray(2, zeros, mxDOUBLE_CLASS, mxREAL);
-
       // copy vector<unsigned int> to vector<mwSize>
       std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
                                paramValues[i].DimPtr()->end());
-
-      // set array dimensions
-      mxSetDimensions(prhs[i], dims.data(), paramValues[i].NDim());
-
-      // make array values point to existing memory
-      mxSetPr(prhs[i], const_cast<double *>(paramValues[i].ValuesPtr()->data()));
+      // create zero sized array
+      prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data(), mxDOUBLE_CLASS, mxREAL);
+     
+     // make array values point to existing memory
+      double * params = mxGetPr(prhs[i]);
+      mwSize params_size = mxGetNumberOfElements(prhs[i]); 
+      std::copy(const_cast<double *>(paramValues[i].ValuesPtr()->data()), params, params + params_size);  
     }
 
     // declare output
@@ -225,7 +222,12 @@ namespace Biips
     exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs,
                                       fun_check_param_.c_str());
 
-    // catch exception
+    
+    // free allocated input
+    for (Size i=0; i<nrhs; ++i)
+      mxDestroyArray(prhs[i]);
+   
+   // catch exception
     if (exception != NULL)
     {
       /* Throw the MException returned by mexCallMATLABWithTrap
