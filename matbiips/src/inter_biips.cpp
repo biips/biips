@@ -1088,17 +1088,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        String arg6 = mxArrayToString(prhs[6]);
 
        
-       if (Compiler::FuncTab().Contains(arg1)) {
-             mexErrMsgTxt("biips_add_function: try to insert an existing function");
-       }
-       else {
-       Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(arg1,
+       if (!Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(arg1,
                                                      arg2,
                                                      arg3,
                                                      arg4,
                                                      arg5,
-                                                     arg6)));
-       }
+                                                     arg6)))) {
+             mexErrMsgTxt("add_function: can not insert the function (may already exist?)");
+       }						     
+
+    
     }
     else {
        mexErrMsgTxt("bad name of function\n");
