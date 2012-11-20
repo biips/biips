@@ -13,12 +13,12 @@ function []= biips_add_function(name, nb_param, fun_dim, fun_eval , varargin)
 % check for optional options
 opt_argin = length(varargin);
 % defauts values
-fun_check_param = @(x) true;
-fun_is_discrete = @(x) false;
+fun_check_param = '';
+fun_is_discrete = '';
 if opt_argin >= 1
    fun_check_param = varargin{1};
 end
 if opt_argin >=2 
    fun_is_discrete = varargin{2};
 end   
-inter_biips('add_function', name, nb_param, fun_dim, fun_eval, 'fun_check_param', 'fun_is_discrete'); 
+inter_biips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete); 
