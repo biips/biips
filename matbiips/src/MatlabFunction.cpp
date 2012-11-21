@@ -45,19 +45,22 @@ namespace Biips
   {
     // declare input
     int nrhs = paramValues.size();
-    mxArray ** prhs = new mxArray *[nrhs];
+    mxArray ** prhs = (mxArray **) mxCalloc(nrhs, sizeof(mxArray *));
 
     for (Size i = 0; i < nrhs; ++i)
     {
-      // copy vector<unsigned int> to vector<mwSize>
+      
       std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
                                paramValues[i].DimPtr()->end());
-      prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data() , mxDOUBLE_CLASS, mxREAL);
-
+      if (paramValues[i].NDim() > 1)  
+          prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data() , mxDOUBLE_CLASS, mxREAL);
+      else
+          prhs[i] = mxCreateDoubleMatrix(dims[0],1, mxREAL);
+   	 
       // make array values point to existing memory
-      double * params = mxGetPr(prhs[i]);
-      mwSize params_size = mxGetNumberOfElements(prhs[i]); 
-      std::copy(const_cast<double *>(paramValues[i].ValuesPtr()->data()), params, params + params_size);  
+      std::copy(paramValues[i].ValuesPtr()->begin(),
+                paramValues[i].ValuesPtr()->end(), 
+		mxGetPr(prhs[i]));  
     }
 
     // declare output
@@ -93,6 +96,7 @@ namespace Biips
 
     // free allocated output
     mxDestroyArray(plhs[0]);
+    mxFree(prhs);
   }
 
   DimArray MatlabFunction::dim(
@@ -100,7 +104,7 @@ namespace Biips
   {
     // declare input
     int nrhs = paramDims.size();
-    mxArray ** prhs = new mxArray*[nrhs];
+    mxArray ** prhs = (mxArray **) mxCalloc(nrhs, sizeof(mxArray *)); 
 
     std::vector<std::vector<double> > paramDims_values(nrhs);
     for (Size i = 0; i < nrhs; ++i)
@@ -136,7 +140,9 @@ namespace Biips
     // free allocated input
     for (Size i=0; i<nrhs; ++i)
       mxDestroyArray(prhs[i]);
-
+    
+    mxFree(prhs);
+    
     return DimArray(lhs, lhs + size_lhs);
   }
 
@@ -198,20 +204,22 @@ namespace Biips
 
     // copy input
     int nrhs = paramValues.size();
-    mxArray ** prhs = new mxArray*[nrhs];
+    mxArray ** prhs = (mxArray **)mxCalloc(nrhs, sizeof(mxArray *));
 
     for (Size i = 0; i < nrhs; ++i)
     {
       // copy vector<unsigned int> to vector<mwSize>
       std::vector<mwSize> dims(paramValues[i].DimPtr()->begin(),
                                paramValues[i].DimPtr()->end());
-      // create zero sized array
-      prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data(), mxDOUBLE_CLASS, mxREAL);
+      if (paramValues[i].NDim() > 1)  
+          prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data() , mxDOUBLE_CLASS, mxREAL);
+      else
+          prhs[i] = mxCreateDoubleMatrix(dims[0],1, mxREAL);
      
-     // make array values point to existing memory
-      double * params = mxGetPr(prhs[i]);
-      mwSize params_size = mxGetNumberOfElements(prhs[i]); 
-      std::copy(const_cast<double *>(paramValues[i].ValuesPtr()->data()), params, params + params_size);  
+      // make array values point to existing memory
+      std::copy(paramValues[i].ValuesPtr()->begin(),
+                paramValues[i].ValuesPtr()->end(), 
+		mxGetPr(prhs[i]));  
     }
 
     // declare output
@@ -226,7 +234,8 @@ namespace Biips
     // free allocated input
     for (Size i=0; i<nrhs; ++i)
       mxDestroyArray(prhs[i]);
-   
+  
+    mxFree(prhs);
    // catch exception
     if (exception != NULL)
     {
