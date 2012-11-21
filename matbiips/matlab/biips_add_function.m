@@ -8,7 +8,13 @@ function []= biips_add_function(name, nb_param, fun_dim, fun_eval , varargin)
 %  - fun_eval : functor which realize the evaluation of the function
 %  - fun_check_param : functor which checks if parameters are valid
 %  - fun_is_discrete : functor indicating if the output is discrete or no 
+if (~isa(fun_dim,'char'))
+   error('add_biips_function : 3-d argument must be a string')
+end
 
+if (~isa(fun_eval,'char'))
+   error('add_biips_function : 4-th argument must be a string')
+end
 
 if (exist(fun_dim)~=2) && (exist(fun_dim)~=3)
    error('the function %s does not exist',fun_dim);
