@@ -11,20 +11,12 @@ mean_v = zeros(2, 1);
 prec_v = diag(1*ones(2,1));
 prec_y = diag([10 100]);
 delta_t = 1;
-F = [ 1 0 delta_t 0
-    0 0 1 0
-    delta_t 0 0 1
-    0 0 0 1];
-G = [ delta_t.^2/2 0
-    0 delta_t.^2/2
-    delta_t 0
-    0 delta_t];
 
 %% create model
 biips_init;
-%myfundim = @(x,v) 4;
-%myfuneval = @(x,v) F*x+G*v;
-biips_add_function('funcmat',2,'myfuncdim', 'myfunceval', 'myfuncheck', 'myfunisdiscrete' );
+
+%% build evalutations functions
+biips_add_function('funcmat',2,'myfuncdim', 'myfunceval', 'myfuncheck', 'myfunisdiscrete');
 [p, data] = biips_model('funcmat.bug', who);
 x_true = data.x_true(1:2,:);
 
