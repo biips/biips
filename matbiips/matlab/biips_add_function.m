@@ -10,6 +10,13 @@ function []= biips_add_function(name, nb_param, fun_dim, fun_eval , varargin)
 %  - fun_is_discrete : functor indicating if the output is discrete or no 
 
 
+if (exist(fun_dim)~=2) && (exist(fun_dim)~=3)
+   error('the function %s does not exist',fun_dim);
+end   
+if (exist(fun_eval)~=2) && (exist(fun_eval)~=3)
+   error('the function %s does not exist',fun_eval);
+end   
+
 % check for optional options
 opt_argin = length(varargin);
 % defauts values
