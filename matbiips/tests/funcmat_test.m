@@ -16,7 +16,7 @@ delta_t = 1;
 biips_init;
 
 %% build evalutations functions
-biips_add_function('funcmat',2,'myfuncdim', 'myfunceval', 'myfuncheck', 'myfunisdiscrete');
+biips_add_function('funcmat',2, 'myfuncdim', 'myfunceval')
 [p, data] = biips_model('funcmat.bug', who);
 x_true = data.x_true(1:2,:);
 
