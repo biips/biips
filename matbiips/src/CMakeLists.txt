@@ -71,8 +71,6 @@ add_custom_command(
     VERBATIM
 )
 
-set (MATBIIPS_FILES ${MATBIIPS_FILES} ${INTER_BIN})
-
 #define target
 add_custom_target(matbiips 
 	DEPENDS  ${INTER_BIN}

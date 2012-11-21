@@ -14,6 +14,8 @@ add_custom_command(
       matbiips/matlab/private/*.m
       matbiips/tests/*.m
       matbiips/tests/*.bug
+      matbiips/tuto/*.m
+      matbiips/tuto/*.bug
    COMMENT "Packaging MatBiips"
    )
     
