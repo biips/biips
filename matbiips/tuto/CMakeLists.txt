@@ -1,28 +1,21 @@
-#define sources
-file(GLOB tuto_files *.m)
-file(GLOB bugfiles *.bug)
-set(a_copier ${bugfiles} ${tuto_files})
-copy_files_to_bindir(a_copier ${CMAKE_CURRENT_BINARY_DIR})
-# install mexfile in the build directory
-foreach(_tf ${tuto_files})
-   if (MATLAB)
-       set (opt_exec " -nodesktop -nosplash -r ")
-   else(MATLAB)
-       set (opt_exec " --eval ") 
-   endif(MATLAB)
-   get_filename_component(_namewe ${_tf} NAME_WE)
-   set(MAT_COMS "publish('${_namewe}.m');exit")
-   set(OUT_TUTO "${CMAKE_CURRENT_BINARY_DIR}/html/${_namewe}.html")
-   message(STATUS "malab=" ${MATLAB_COMMAND})
-   add_custom_command(
-     OUTPUT ${OUT_TUTO}
-     COMMENT "making tutorial for :" ${_tf}
-     COMMAND ${MATLAB_COMMAND} ${opt_exec} "\"${MAT_COMS}\""
-     VERBATIM)
-set(OUT_LST ${OUT_LST} ${OUT_TUTO})
-endforeach()
+file(GLOB mfiles *.m)
+file(GLOB bfiles *.bug)
+set(test_files ${mfiles} ${bfiles})
+copy_files_to_bindir(test_files ${CMAKE_CURRENT_BINARY_DIR})
 
-#define target
-add_custom_target(matbiips_tuto
-	DEPENDS  ${OUT_LST} matbiips
-)
+#===========Ctest command
+set(mtests hmm_4d_lin hmm_4d_nonlin)
+
+foreach(_test ${mtests})
+    set (MAT_COMS "${_test};exit")
+    if (MATLAB)
+        add_test(NAME ${_test}-test
+            COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -r "${MAT_COMS}"
+        )
+    else()
+        add_test(NAME ${_test}-test
+            COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} --eval "${MAT_COMS}"
+        )
+    endif()
+    set_tests_properties(${_test}-test PROPERTIES TIMEOUT 30)
+endforeach()

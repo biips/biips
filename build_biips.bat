@@ -9,13 +9,12 @@ set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\Adrien-ALEA\Documents\GForge_Inria_key.ppk
 set TORTOISE=C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
-set MAKE=C:\MinGW\bin\mingw32-make
 set RTOOLS_BINDIR=C:\Rtools\bin
 set R_BINDIR=C:\Program Files\R\R-2.15.1\bin
 set CMAKE_BUILD_TYPE=Release
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CPACK_GENERATOR=NSIS
-set NJOBS=8
+set MAKE=C:\MinGW\bin\mingw32-make -j8
 ::-----------------------------------------
 
 pause
@@ -36,7 +35,7 @@ if "%errorlevel%"=="1" (
 	rmdir /S /Q "%BIIPS_ROOT%"
 	mkdir "%BIIPS_ROOT%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" -j%NJOBS% install
+	"%MAKE%" install
 	call:ask_test
 	call:ask_testcompiler
 	call:ask_package
@@ -46,13 +45,13 @@ set "PATH=%RTOOLS_BINDIR%;%R_BINDIR%;%PATH%"
 choice /m "Build/install RBiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" -j%NJOBS% RBiips_INSTALL_build
+	"%MAKE%" RBiips_INSTALL_build
 )
 
 choice /m "Build MatBiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" -j%NJOBS% matbiips
+	"%MAKE%" matbiips_package
 	call:ask_test_matbiips
 )
 
@@ -76,7 +75,7 @@ goto:eof
 choice /m "Run BiipsTest tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\test"
-	"%MAKE%" -j%NJOBS% test
+	"%MAKE%" test
 )
 goto:eof
 
@@ -84,7 +83,7 @@ goto:eof
 choice /m "Run BiipsTestCompiler tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\testcompiler"
-	"%MAKE%" -j%NJOBS% test
+	"%MAKE%" test
 )
 goto:eof
 
@@ -101,6 +100,6 @@ goto:eof
 choice /m "Run MatBiips tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\matbiips"
-	"%MAKE%" -j%NJOBS% test
+	"%MAKE%" test
 )
 goto:eof

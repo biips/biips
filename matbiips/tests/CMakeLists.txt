@@ -1,28 +1,23 @@
 file(GLOB mfiles *.m)
-file(GLOB tuto_files ${CMAKE_SOURCE_DIR}/matbiips/tuto/*.m)
-set(mfiles ${mfiles} ${tuto_files})
 file(GLOB bfiles *.bug)
-file(GLOB bugfiles ${CMAKE_SOURCE_DIR}/matbiips/tuto/*.bug)
-set(test_files ${mfiles} ${bfiles} ${bugfiles})
+set(test_files ${mfiles} ${bfiles})
 copy_files_to_bindir(test_files ${CMAKE_CURRENT_BINARY_DIR})
 
 #===========Ctest command
-foreach(_mf ${mfiles})
-    get_filename_component(_dir ${_mf} PATH)
-    get_filename_component(_name ${_mf} NAME_WE)
-    set (MAT_COMS "${_name};exit")
+set(mtests cono console test_macros test_smc funcmat_test)
+
+foreach(_test ${mtests})
+    set (MAT_COMS "${_test};exit")
     if (MATLAB)
-        add_test(NAME ${_name}-test
+        add_test(NAME ${_test}-test
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -r "${MAT_COMS}"
-            
         )
     else()
-        add_test(NAME ${_name}-test
+        add_test(NAME ${_test}-test
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} --eval "${MAT_COMS}"
         )
     endif()
-    set_tests_properties(${_name}-test PROPERTIES TIMEOUT 30)
+    set_tests_properties(${_test}-test PROPERTIES TIMEOUT 30)
 endforeach()
 
 
-set (MATBIIPS_FILES ${MATBIIPS_FILES} ${test_files})

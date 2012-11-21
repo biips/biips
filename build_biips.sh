@@ -13,7 +13,7 @@ export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
 export CMAKE_OPTIONS=-DBoost_USE_STATIC_LIBS=OFF
 export CPACK_GENERATOR=RPM
-export NJOBS=10
+export MAKE="make -j10"
 #-----------------------------------------
 
 set +x; read -p 'Press [Enter] key to continue...'; set -x
@@ -35,18 +35,18 @@ cd $BIIPS_BUILD
 set +x; echo -n "Build/install Biips ? (y/n)"; read ans
 if [[ $ans == "y" ]]; then set -x
     rm -rf $BIIPS_ROOT; mkdir $BIIPS_ROOT
-    make -j$NJOBS install
+    $MAKE install
 
     set +x; echo -n "Run BiipsTest tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test
-        make -j$NJOBS test
+        $MAKE test
     fi
 
     set +x; echo -n "Run BiipsTestCompiler tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/testcompiler
-        make -j$NJOBS test
+        $MAKE test
     fi
 
     set +x; echo -n "Package Biips ? (y/n)"; read ans
@@ -63,21 +63,19 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
-    make -j$NJOBS RBiips_INSTALL
-
-    set +x; read -p 'Press [Enter] key to continue...'; set -x
-    make -j$NJOBS RBiips_build
+    $MAKE RBiips_INSTALL
+    $MAKE RBiips_build
 fi
 
 set +x; echo -n "Build MatBiips ? (y/n)"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
-    make -j$NJOBS matbiips
+    $MAKE matbiips_package
 
     set +x; echo -n "Run MatBiips tests ? (y/n)"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
-        make -j$NJOBS test
+        $MAKE test
     fi
 fi
 
