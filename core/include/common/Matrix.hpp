@@ -102,10 +102,11 @@ namespace Biips
     NumArray * pData_;
     mutable Bool released_;
 
-	BaseType::swap;
+BaseType    ::swap;
 
   public:
-    explicit MatrixRef(NumArray & dat) : BaseType(dat.Dim()[0], dat.Dim()[1], array_type()), pData_(&dat), released_(false)
+    explicit MatrixRef(NumArray & dat) : BaseType(dat.Dim()[0],
+        dat.IsVector() ? 1 : dat.Dim()[1], array_type()), pData_(&dat), released_(false)
     { BaseType::data().swap(pData_->Values());}
 
     MatrixRef(MatrixRef & mat_ref) : BaseType(mat_ref.size1(), mat_ref.size2(), array_type()), pData_(mat_ref.pData_), released_(mat_ref.released_)
