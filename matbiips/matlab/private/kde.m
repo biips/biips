@@ -8,8 +8,8 @@ function [s]=kde(obs, weights, varargin)
 % -bw : bandwidth
 % OUTPUT
 % s :structure with the following fields :  
+%    - x : points of the density (100 points in the range [min-4*bw, max+4*bw]
 %    - f : values of the density 
-%    - x : points of the density (100 points in the range [min, max]+4*bw
 %    - bw : bandwidth , useful only if computed
 weights=weights(:)';
 obs=obs(:)';
@@ -33,4 +33,4 @@ xmin = min(obs);
 x = linspace(xmin - 4 * bw, xmax + 4 * bw, 100);
 x_mu = bsxfun(@minus, x', obs);
 f = exp(-0.5*(x_mu./bw).^2) * weights' ./ (sqrt(2 * pi) * bw);
-s=struct('f', f, 'x', x, 'bw', bw);
+s=struct('x', x, 'f', f', 'bw', bw);

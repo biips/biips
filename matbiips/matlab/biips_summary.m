@@ -1,5 +1,15 @@
 function [summ] = biips_summary(parts, vars, varargin)
 % BIIPS_SUMMARY compute some statistics on selected variables
+% summ = biips_summary(particles, variables, [fsb, probas])
+% INPUT
+% -particles : input structure containing the particles of different variables.
+%              usually returned by biips_smc_samples function
+% -vars : cell of strings. subset of the fields of particles struct
+%         argument
+% -fsb : string containing the characters 'f', 's' and/or 'b'
+% -probas : vector of reals in ]0,1[. probability levels for quantiles
+% OUTPUT
+% -summ : output structure
 opt_argin = length(varargin);
 fsb = '';
 probas = [];
@@ -29,6 +39,6 @@ for i=1:length(vars)
   for j=1:length(fsb)
    ctemp{j} =  summary(s.(vars{i}).(fsb(j)),probas);
   end
-  csum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
+  cell_sum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
-summ = inter_biips('cell2struct_weak_names', csum, vars);
+summ = inter_biips('cell2struct_weak_names', cell_sum, vars);
