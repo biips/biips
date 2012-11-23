@@ -1,20 +1,20 @@
 function [dens] = biips_density(parts, vars, varargin)
 % BIIPS_DENSITY computes 1D densities 
-% dens = biips_density(particules, variables, [fsb])
+% dens = biips_density(particles, variables, [fsb, adjust, bw])
 % INPUT
-% -particules : input structure containing the variables
-% -vars : variable subselection cell 
-% -fsb : string containing the characteres 'f', 's' and/or 'b'
+% -particles : input structure containing the particles of different variables.
+%              usually returned by biips_smc_samples function
+% -vars : cell of strings. subset of the fields of particles struct
+%         argument
+% -fsb : string containing the characters 'f', 's' and/or 'b'
+% -adjust : time factor for the bw
+% -bw : bandwidth
 % OUTPUT
-% - dens : output structure
+% -dens : output structure
 opt_argin = length(varargin);
 fsb = '';
 if opt_argin >=1
    fsb = varargin{1}; 
-end
-show = true;
-if opt_argin >=2
-   show = varargin{2}; 
 end
 if (isempty(vars))
    vars = fieldnames(parts); % vars = {}, take all fields
@@ -37,8 +37,8 @@ for i=1:length(vars)
    particles = s.(vars{i}).(fsb(j));
    size_curr = size(particles.values);
    d = length(size_curr);
-   ctemp{j} = cellfun(@(x,w) kde(x,w), num2cell(particles.values, d), num2cell(particles.weights, d));  
+   ctemp{j} = cellfun(@(x,w) kde(x,w,varargin{2:end}), num2cell(particles.values, d), num2cell(particles.weights, d));  
   end
-  csum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
+  cell_sum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
-dens = inter_biips('cell2struct_weak_names', csum, vars);
+dens = inter_biips('cell2struct_weak_names', cell_sum, vars);
