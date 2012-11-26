@@ -47,7 +47,7 @@ for i=1:length(vars)
    particles = s.(vars{i}).(fsb(j));
    size_curr = size(particles.values);
    d = length(size_curr);
-   ctemp{j} = cellfun(@(x,w) kde(x,w,more_argin), num2cell(particles.values, d), num2cell(particles.weights, d));  
+   ctemp{j} = cellfun(@(x,w) kde(x,w,more_argin{:}), num2cell(particles.values, d), num2cell(particles.weights, d));  
   end
   cell_sum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
