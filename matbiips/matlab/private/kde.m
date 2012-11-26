@@ -4,8 +4,8 @@ function [s]=kde(obs, weights, varargin)
 % INPUT
 % -obs : observation 1D data row vector
 % -weigths : weights row vector
-% -adjust : time factor for the bw
-% -bw : bandwidth
+% -adjust : time factor for the bw. default is 1
+% -bw : bandwidth. default is estimated from the samples
 % OUTPUT
 % s :structure with the following fields :  
 %    - x : points of the density (100 points in the range [min-4*bw, max+4*bw]
