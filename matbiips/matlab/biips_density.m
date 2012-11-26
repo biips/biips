@@ -23,7 +23,7 @@ if opt_argin >=2
 end
 more_argin = {};
 if opt_argin >= 3
-    more_argin = varargin{3:end};
+    more_argin = varargin(3:end);
 end
 
 if (isempty(vars))
