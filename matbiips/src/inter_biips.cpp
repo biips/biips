@@ -59,6 +59,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        
     }       
     /////////////////////////////////////////
+    // CLEAR_ALL_CONSOLE FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "clear_all_console") {
+       consoles.clear();
+       
+    }       
+    /////////////////////////////////////////
     // CHECK_MODEL FUNCTION
     /////////////////////////////////////////
     else if (name_func == "check_model") {
@@ -892,7 +899,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }       
     
     /////////////////////////////////////////
-    // IS_SMOOTH_TREE_MONITORS FUNCTION
+    // IS_SMOOTH_TREE_MONITORED FUNCTION
     /////////////////////////////////////////
     else if (name_func == "is_smooth_tree_monitored") {
 
