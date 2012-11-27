@@ -46,14 +46,17 @@ protected:
 
 Mstreambuf::int_type Mstreambuf::overflow(int_type c)
 {
-  if (c != EOF)
+  if (c != EOF) {
     mexPrintf("%.1s", &c);
+    mexEvalString("pause(.001);");
+  }  
   return 1;
 }
 
 std::streamsize Mstreambuf::xsputn(const char* s, std::streamsize n)
 {
   mexPrintf("%.*s", n, s);
+  mexEvalString("pause(.001);");
   return n;
 }
 
@@ -64,6 +67,7 @@ MEstreambuf::int_type MEstreambuf::overflow(int_type c)
 //    std::string st(1, c);
 //    mexErrMsgTxt(st.c_str());
     mexPrintf("%.1s", &c);
+    mexEvalString("pause(.001);");
   }
   return 1;
 }
@@ -73,6 +77,7 @@ std::streamsize MEstreambuf::xsputn(const char* s, std::streamsize n)
 //  std::string st(s, n);
 //  mexErrMsgTxt(st.c_str());
   mexPrintf("%.*s", n, s);
+  mexEvalString("pause(.001);");
   return n;
 }
 
