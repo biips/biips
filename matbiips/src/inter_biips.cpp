@@ -1106,23 +1106,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     
     }
-    ////////////////////////////////////////////
-    // EVAL_FUNCTION FUNCTION
-    ////////////////////////////////////////////
-    //else if (name_func == "eval_function") {
-
-    //   CheckRhs(nrhs, 2, name_func);
-    //   CheckArgIsString(1);
-    //   CheckArgIsCell(2);
-    //   
-    //   mxArray * arg2 = prhs[2];
-    //   mwSize nbargs = mxGetNumberOfElements(arg2);
-    //   NumArray::Array entrees;
-    //   Valarray sorties;
-    //   for(int i = 0; i < nbargs ; ++i) {
-    //       mxArray * m=mxGet  
-    //   }						     
-    //   Function::Eval(sorties, entrees);
     else {
        mexErrMsgTxt("bad name of function\n");
 
