@@ -100,7 +100,7 @@ namespace Biips
         }
 
         DimArray::Ptr p_dim(new DimArray(subset_range.Dim(false)));
-        node_id = model_.GraphPtr()->AddConstantNode(p_dim, pvalues);
+        node_id = model_.graph().AddConstantNode(p_dim, pvalues);
       }
       else
       {
@@ -109,7 +109,7 @@ namespace Biips
         if (pvalues->ScalarView() == BIIPS_REALNA)
           return NULL_NODEID;
         else
-          node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pvalues);
+          node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pvalues);
       }
       indexNodeIds_.push_back(node_id);
       return node_id;
@@ -145,13 +145,13 @@ namespace Biips
     NodeId node_id = GetParameter(pTree);
     indexExpression_--;
 
-    if (node_id == NULL_NODEID || !model_.GraphPtr()->GetObserved()[node_id])
+    if (node_id == NULL_NODEID || !model_.graph().GetObserved()[node_id])
       return false;
 
-    if (!model_.GraphPtr()->GetNode(node_id).Dim().IsScalar())
+    if (!model_.graph().GetNode(node_id).Dim().IsScalar())
       throw NodeError(node_id, "Vector value in index expression");
 
-    const ValArray::Ptr & pValues = model_.GraphPtr()->GetValues()[node_id];
+    const ValArray::Ptr & pValues = model_.graph().GetValues()[node_id];
 
     if (!pValues)
       throw NodeError(node_id, "Index value not defined.");
@@ -176,11 +176,11 @@ namespace Biips
       {
         NodeId node_id = indexNodeIds_.back();
 
-        if (node_id != model_.GraphPtr()->GetSize() - 1)
+        if (node_id != model_.graph().GetSize() - 1)
           throw LogicError(
               "Can only remove the last inserted node in the graph.");
 
-        model_.GraphPtr()->PopNode();
+        model_.graph().PopNode();
         indexNodeIds_.pop_back();
       }
     }
@@ -386,14 +386,14 @@ namespace Biips
       if (indexExpression_)
       {
         ValArray::Ptr pVal(new ValArray(1, Scalar(counter[0])));
-        node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+        node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
         indexNodeIds_.push_back(node_id);
       }
       else
       {
         // TODO use ConstantFactory
         ValArray::Ptr pVal(new ValArray(1, Scalar(counter[0])));
-        node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+        node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
       }
     }
     else
@@ -483,7 +483,7 @@ namespace Biips
         if (indexExpression_)
         {
           ValArray::Ptr pVal(new ValArray(1, Scalar(subset_range.Length())));
-          NodeId node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM,
+          NodeId node_id = model_.graph().AddConstantNode(P_SCALAR_DIM,
                                                               pVal);
           indexNodeIds_.push_back(node_id);
           return node_id;
@@ -492,7 +492,7 @@ namespace Biips
         {
           // TODO use a ConstantFactory
           ValArray::Ptr pVal(new ValArray(1, Scalar(subset_range.Length())));
-          return model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+          return model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
         }
       }
     }
@@ -527,14 +527,14 @@ namespace Biips
 
         if (indexExpression_)
         {
-          NodeId node_id = model_.GraphPtr()->AddConstantNode(p_dim, p_val);
+          NodeId node_id = model_.graph().AddConstantNode(p_dim, p_val);
           indexNodeIds_.push_back(node_id);
           return node_id;
         }
         else
         {
           // TODO use a ConstantFactory
-          return model_.GraphPtr()->AddConstantNode(p_dim, p_val);
+          return model_.graph().AddConstantNode(p_dim, p_val);
         }
       }
     }
@@ -557,14 +557,14 @@ namespace Biips
         if (indexExpression_)
         {
           ValArray::Ptr pVal(new ValArray(1, Scalar(pTree->value())));
-          node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+          node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
           indexNodeIds_.push_back(node_id);
         }
         else
         {
           // TODO use ConstantFactory
           ValArray::Ptr pVal(new ValArray(1, Scalar(pTree->value())));
-          node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+          node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
         }
         break;
       case P_VAR:
@@ -594,13 +594,13 @@ namespace Biips
           if (indexExpression_)
           {
             // TODO use LogicalFactory
-            node_id = model_.GraphPtr()->AddLogicalNode(p_func, parents);
+            node_id = model_.graph().AddLogicalNode(p_func, parents);
             indexNodeIds_.push_back(node_id);
           }
           else
           {
             // TODO use LogicalFactory
-            node_id = model_.GraphPtr()->AddLogicalNode(p_func, parents);
+            node_id = model_.graph().AddLogicalNode(p_func, parents);
           }
         }
         break;
@@ -612,8 +612,8 @@ namespace Biips
     if (node_id != NULL_NODEID && indexExpression_)
     {
       //Random variables in index expressions must be observed
-      NodeType node_type = model_.GraphPtr()->GetNode(node_id).GetType();
-      if (node_type == STOCHASTIC && !model_.GraphPtr()->GetObserved()[node_id])
+      NodeType node_type = model_.graph().GetNode(node_id).GetType();
+      if (node_type == STOCHASTIC && !model_.graph().GetObserved()[node_id])
         node_id = NULL_NODEID;
     }
 
@@ -780,13 +780,13 @@ namespace Biips
 
     Bool obs = p_this_data;
 
-    NodeId snode_id = model_.GraphPtr()->AddStochasticNode(p_dist, parameters,
+    NodeId snode_id = model_.graph().AddStochasticNode(p_dist, parameters,
                                                            obs, lower_bound_id,
                                                            upper_bound_id);
 
     // If Node is observed, set the data
     if (obs)
-      model_.GraphPtr()->SetObsValue(snode_id, p_this_data, true);
+      model_.graph().SetObsValue(snode_id, p_this_data, true);
 
     return snode_id;
   }
@@ -802,7 +802,7 @@ namespace Biips
       case P_VALUE:
       {
         ValArray::Ptr pVal(new ValArray(1, Scalar(expression->value())));
-        node_id = model_.GraphPtr()->AddConstantNode(P_SCALAR_DIM, pVal);
+        node_id = model_.graph().AddConstantNode(P_SCALAR_DIM, pVal);
         /* The reason we aren't using a ConstantFactory here is to ensure
          that the nodes are correctly named */
         break;
@@ -876,7 +876,7 @@ namespace Biips
         //Undeclared array. It's size is inferred from the dimensions of
         //the newly created node
         symtab.AddVariable(var->name(),
-                           model_.GraphPtr()->GetNode(node_id).Dim());
+                           model_.graph().GetNode(node_id).Dim());
         const NodeArray & array = symtab.GetNodeArray(var->name());
         symtab.InsertNode(node_id, var->name(), array.Range()); // TODO check this code
         //array.Insert(node_id, array.Range());
@@ -1115,7 +1115,7 @@ namespace Biips
       : model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0),
           strictResolution_(false), indexExpression_(0)
   {
-    if (!model_.GraphPtr()->Empty())
+    if (!model_.graph().Empty())
       throw LogicError("Non empty graph in Compiler constructor.");
     if (!model_.GetSymbolTable().Empty())
       throw LogicError("Non empty symbol table in Compiler constructor.");
