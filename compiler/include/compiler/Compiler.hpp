@@ -44,6 +44,8 @@
 #include "common/Counter.hpp"
 #include "distribution/Distribution.hpp"
 #include "function/Function.hpp"
+#include "compiler/ConstantFactory.hpp"
+#include "compiler/LogicalFactory.hpp"
 #include <map>
 
 class ParseTree;
@@ -71,6 +73,9 @@ namespace Biips
     Int indexExpression_;
     Types<NodeId>::Array indexNodeIds_;
     std::map<String, Types<Types<Int>::Array>::Array> nodeArrayRangesMap_;
+
+    ConstantFactory constantFactory_;
+    LogicalFactory logicalFactory_;
 
     NodeId getArraySubset(ParseTree const * pTree);
     IndexRange variableSubsetRange(ParseTree const *var);
