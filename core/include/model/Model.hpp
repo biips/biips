@@ -56,8 +56,8 @@ namespace Biips
     std::map<NodeId, Monitor *> filterMonitorsMap_;
     Types<boost::shared_ptr<Monitor> >::Array backwardSmoothMonitors_;
     std::map<NodeId, Monitor *> backwardSmoothMonitorsMap_;
-    boost::scoped_ptr<Monitor> pGenTreeMonitor_;
-    std::set<NodeId> genTreeMonitoredNodeIds_;
+    boost::scoped_ptr<Monitor> pGenTreeSmoothMonitor_;
+    std::set<NodeId> genTreeSmoothMonitoredNodeIds_;
     Bool defaultMonitorsSet_;
 
     MultiArray extractMonitorStat(
@@ -85,7 +85,7 @@ namespace Biips
     void SetDefaultFilterMonitors();
 
     Bool SetFilterMonitor(NodeId nodeId);
-    Bool SetGenTreeMonitor(NodeId nodeId);
+    Bool SetGenTreeSmoothMonitor(NodeId nodeId);
     Bool SetBackwardSmoothMonitor(NodeId nodeId);
 
     Bool SamplerBuilt() const
@@ -118,19 +118,19 @@ namespace Biips
 
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatTag statFeature) const;
-    MultiArray ExtractGenTreeStat(NodeId nodeId, StatTag statFeature) const;
+    MultiArray ExtractGenTreeSmoothStat(NodeId nodeId, StatTag statFeature) const;
     MultiArray ExtractBackwardSmoothStat(NodeId nodeId, StatTag statFeature) const;
 
     Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40,
                                Scalar cacheFraction = 0.25) const;
-    Histogram ExtractGenTreePdf(NodeId nodeId, Size numBins = 40,
+    Histogram ExtractGenTreeSmoothPdf(NodeId nodeId, Size numBins = 40,
                                    Scalar cacheFraction = 0.25) const;
     Histogram ExtractBackwardSmoothPdf(NodeId nodeId, Size numBins = 40,
                                Scalar cacheFraction = 0.25) const;
 
     // release_only flag: only release monitor objects but keep nodeIds
     void virtual ClearFilterMonitors(Bool release_only = false);
-    void virtual ClearGenTreeMonitors(Bool release_only = false);
+    void virtual ClearGenTreeSmoothMonitors(Bool release_only = false);
     void virtual ClearBackwardSmoothMonitors(Bool release_only = false);
 
     Scalar GetLogPriorDensity(NodeId nodeId) const;

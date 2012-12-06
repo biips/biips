@@ -135,20 +135,20 @@ namespace Biips
 
     Bool SetFilterMonitor(const String & name, const IndexRange & range =
                               NULL_RANGE);
-    Bool SetGenTreeMonitor(const String & name, const IndexRange & range =
+    Bool SetGenTreeSmoothMonitor(const String & name, const IndexRange & range =
                                   NULL_RANGE);
     Bool SetBackwardSmoothMonitor(const String & name, const IndexRange & range =
                               NULL_RANGE);
 
     Bool IsFilterMonitored(const String & name, const IndexRange & range =
                                NULL_RANGE, Bool check_released = true);
-    Bool IsGenTreeMonitored(const String & name, const IndexRange & range =
+    Bool IsGenTreeSmoothMonitored(const String & name, const IndexRange & range =
                                    NULL_RANGE, Bool check_released = true);
     Bool IsBackwardSmoothMonitored(const String & name, const IndexRange & range =
                                NULL_RANGE, Bool check_released = true);
 
     Bool ClearFilterMonitors(Bool release_only = false);
-    Bool ClearGenTreeMonitors(Bool release_only = false);
+    Bool ClearGenTreeSmoothMonitors(Bool release_only = false);
     Bool ClearBackwardSmoothMonitors(Bool release_only = false);
 
     /*!
@@ -174,18 +174,18 @@ namespace Biips
     Bool GetLogNormConst(Scalar & logNormConst);
     Bool SetLogNormConst(Scalar logNormConst);
 
-    Bool SampleGenTreeParticle(Size rngSeed);
+    Bool SampleGenTreeSmoothParticle(Size rngSeed);
     Bool
-    DumpSampledGenTreeParticle(std::map<String, MultiArray> & sampledValueMap);
+    DumpSampledGenTreeSmoothParticle(std::map<String, MultiArray> & sampledValueMap);
     Bool
-    SetSampledGenTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
+    SetSampledGenTreeSmoothParticle(const std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Size verbosity = 1, Bool progressBar = true);
 
     Bool ExtractFilterStat(const String & name,
                            StatTag statFeature,
                            std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractGenTreeStat(const String & name,
+    Bool ExtractGenTreeSmoothStat(const String & name,
                                StatTag statFeature,
                                std::map<IndexRange, MultiArray> & statMap);
     Bool ExtractBackwardSmoothStat(const String & name,
@@ -196,7 +196,7 @@ namespace Biips
                           std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25);
-    Bool ExtractGenTreePdf(const String & name,
+    Bool ExtractGenTreeSmoothPdf(const String & name,
                               std::map<IndexRange, Histogram> & pdfMap,
                               Size numBins = 40,
                               Scalar cacheFraction = 0.25);
@@ -228,7 +228,7 @@ namespace Biips
 
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool
-    DumpGenTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    DumpGenTreeSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool DumpBackwardSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
 
     Bool DumpNodeIds(Types<NodeId>::Array & nodeIds);
