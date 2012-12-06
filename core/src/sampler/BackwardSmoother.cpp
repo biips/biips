@@ -46,7 +46,7 @@ namespace Biips
 {
 
   BackwardSmoother::BackwardSmoother(const Graph & graph,
-                                     const Types<Monitor::Ptr>::Array & filterMonitors,
+                                     const Types<Monitor*>::Array & filterMonitors,
                                      const Types<Size>::Array & nodeIterations) :
     graph_(graph), filterMonitors_(filterMonitors), initialized_(false),
         nodeIterations_(nodeIterations)
@@ -92,7 +92,7 @@ namespace Biips
   //  };
 
 
-  const Monitor::Ptr & BackwardSmoother::getParentFilterMonitor(NodeId id)
+  Monitor* BackwardSmoother::getParentFilterMonitor(NodeId id)
   {
     if (graph_.GetObserved()[id])
     {
@@ -102,7 +102,7 @@ namespace Biips
     }
     else
     {
-      Types<Monitor::Ptr>::Array::const_reverse_iterator rit =
+      Types<Monitor*>::Array::const_reverse_iterator rit =
           filterMonitors_.rbegin();
       while (!(*rit)->Contains(id) && (rit != filterMonitors_.rend()))
       {
@@ -120,7 +120,7 @@ namespace Biips
     if (!initialized_)
       throw LogicError("Can not iterate BackwardSmoother: not initialized.");
 
-    Monitor::Ptr p_last_monitor = filterMonitors_.back();
+    Monitor * p_last_monitor = filterMonitors_.back();
     filterMonitors_.pop_back();
 
     if (iter_ == 0)
@@ -147,12 +147,12 @@ namespace Biips
         dynamic_cast<const StochasticNode &> (graph_.GetNode(last_node_id));
 
     // fill parameters monitors vector
-    Types<Monitor::Ptr>::Array param_monitors;
+    Types<Monitor*>::Array param_monitors;
     for (Size p = 0; p < last_node.Parents().size(); ++p)
       param_monitors.push_back(getParentFilterMonitor(last_node.Parents()[p]));
 
     // fill bounds monitors pair
-    Types<Monitor::Ptr>::Pair bound_monitors;
+    Types<Monitor*>::Pair bound_monitors;
     if (last_node.IsLowerBounded())
       bound_monitors.second = getParentFilterMonitor(last_node.Lower());
     if (last_node.IsUpperBounded())

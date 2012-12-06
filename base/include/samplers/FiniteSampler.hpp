@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file DiscreteOptimal.hpp
+/*! \file FiniteSampler.hpp
  * \brief 
  * 
  * \author  $LastChangedBy$
@@ -34,27 +34,28 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_DISCRETEOPTIMAL_HPP_
-#define BIIPS_DISCRETEOPTIMAL_HPP_
+#ifndef BIIPS_FINITESAMPLER_HPP_
+#define BIIPS_FINITESAMPLER_HPP_
 
 #include "sampler/NodeSampler.hpp"
 
 namespace Biips
 {
 
-  class DiscreteOptimal: public NodeSampler
+  class FiniteSampler: public NodeSampler
   {
   public:
-    typedef DiscreteOptimal SelfType;
+    typedef FiniteSampler SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
   protected:
     static const String NAME_;
+    int lower_, upper_;
 
-    friend class DiscreteOptimalFactory;
+    friend class FiniteSamplerFactory;
 
-    explicit DiscreteOptimal(const Graph & graph) :
-      NodeSampler(graph)
+    explicit FiniteSampler(const Graph & graph, int lower, int upper) :
+      NodeSampler(graph), lower_(lower), upper_(upper)
     {
     }
 
@@ -66,29 +67,30 @@ namespace Biips
       return NAME_;
     }
 
-    virtual ~DiscreteOptimal()
+    virtual ~FiniteSampler()
     {
     }
   };
 
-  class DiscreteOptimalFactory: public NodeSamplerFactory
+
+  class FiniteSamplerFactory: public NodeSamplerFactory
   {
   public:
-    typedef DiscreteOptimalFactory SelfType;
+    typedef FiniteSamplerFactory SelfType;
     typedef Types<SelfType>::Ptr Ptr;
-    typedef DiscreteOptimal CreatedType;
+    typedef FiniteSampler CreatedType;
     typedef NodeSamplerFactory BaseType;
 
   protected:
-    static Ptr pDiscreteOptimalFactoryInstance_;
-    DiscreteOptimalFactory()
+    static Ptr pFiniteSamplerFactoryInstance_;
+    FiniteSamplerFactory()
     {
     }
 
   public:
     static BaseType::Ptr Instance()
     {
-      return pDiscreteOptimalFactoryInstance_;
+      return pFiniteSamplerFactoryInstance_;
     }
     virtual Bool Create(const Graph & graph,
                         NodeId nodeId,
@@ -97,4 +99,4 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_DISCRETEOPTIMAL_HPP_ */
+#endif /* BIIPS_FINITESAMPLER_HPP_ */

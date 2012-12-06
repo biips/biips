@@ -169,7 +169,7 @@ namespace Biips
     MatrixRef prior_var(prior_var_dat);
 
     Matrix kalman_gain = ublas::prod(prior_var, ublas::trans(like_A));
-    static Matrix inn_cov;
+    Matrix inn_cov;
     inn_cov = ublas::prod(like_A, kalman_gain) + like_cov;
     Matrix inn_cov_inv = inn_cov;
     if (!ublas::cholesky_factorize(inn_cov_inv))
@@ -180,23 +180,23 @@ namespace Biips
     NumArray prior_mean_dat(getNodeValue(prior_mean_id, graph_, *this));
     VectorRef prior_mean(prior_mean_dat);
 
-    static Vector obs_pred;
+    Vector obs_pred;
     obs_pred = ublas::prod(like_A, prior_mean) + like_b;
-    static Vector post_mean;
+    Vector post_mean;
     post_mean = prior_mean + ublas::prod(kalman_gain, (obs - obs_pred));
     prior_mean.Release();
 
-    static Matrix post_var;
+    Matrix post_var;
     post_var = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node,
                                                                  dim_node)
         - Matrix(ublas::prod(kalman_gain, like_A))), prior_var);
     prior_var.Release();
 
-    static NumArray::Array post_param_values(2);
-    static DimArray dim_mean(1);
+    NumArray::Array post_param_values(2);
+    DimArray dim_mean(1);
     dim_mean[0] = post_mean.size();
     post_param_values[0] = NumArray(&dim_mean, &post_mean.data());
-    static DimArray dim_cov(2);
+    DimArray dim_cov(2);
     dim_cov[0] = post_var.size1();
     dim_cov[1] = post_var.size2();
     post_param_values[1] = NumArray(&dim_cov, &post_var.data());
@@ -209,7 +209,7 @@ namespace Biips
                                   NULL_NUMARRAYPAIR,
                                   *pRng_);
 
-    static NumArray::Array norm_const_param_values(2);
+    NumArray::Array norm_const_param_values(2);
     dim_mean[0] = obs_pred.size();
     norm_const_param_values[0] = NumArray(&dim_mean, &obs_pred.data());
     dim_cov[0] = inn_cov.size1();

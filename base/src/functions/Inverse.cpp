@@ -41,6 +41,8 @@
 namespace Biips
 {
 
+  static const Scalar TOL = 1e-7;
+
   Bool Inverse::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     const DimArray & dim = *paramDims[0];
@@ -52,7 +54,6 @@ namespace Biips
   {
     const NumArray & m = paramValues[0];
 
-    static const Scalar TOL = 1e-7;
 
     // check symmetry
     Matrix m_mat(m);

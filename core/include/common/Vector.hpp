@@ -37,8 +37,8 @@
 #ifndef BIIPS_VECTOR_HPP_
 #define BIIPS_VECTOR_HPP_
 
+#include "common/NumArray.hpp"
 #include "common/MultiArray.hpp"
-
 #include <boost/numeric/ublas/vector.hpp>
 //#include <boost/numeric/ublas/vector_proxy.hpp>
 
@@ -53,28 +53,23 @@ namespace Biips
     Vector()
     {
     }
-    explicit Vector(size_type sz)
-        : BaseType(sz)
+    explicit Vector(size_type sz) :
+        BaseType(sz)
     {
     }
-    Vector(size_type sz, value_type val)
-        : BaseType(sz, array_type(sz, val))
+    Vector(size_type sz, value_type val) :
+        BaseType(sz, array_type(sz, val))
     {
     }
-    Vector(size_type sz, const array_type & value)
-        : BaseType(sz, value)
+    Vector(size_type sz, const array_type & value) :
+        BaseType(sz, value)
     {
     }
-    explicit Vector(const NumArray & data)
-        : BaseType(data.Dim()[0], data.Values())
-    {
-      if (data.NDim() > 1)
-        throw LogicError(
-            "Can not construct Vector: NumArray has more than 1 dimension.");
-    }
+    explicit Vector(const NumArray & data);
+    explicit Vector(const MultiArray & data);
     template<class AE>
-    Vector(const ublas::vector_expression<AE> &ae)
-        : BaseType(ae)
+    Vector(const ublas::vector_expression<AE> &ae) :
+        BaseType(ae)
     {
     }
 
@@ -95,47 +90,50 @@ namespace Biips
     typedef ublas::vector<ValueType, StorageType> BaseType;
 
   protected:
-    NumArray * pData_;
+    DimArray * pDim_;
+    StorageType * pValues_;
     mutable Bool released_;
 
-	BaseType::swap;
+    BaseType::swap;
 
   public:
-    explicit VectorRef(NumArray & dat) : BaseType(dat.Length(), array_type()), pData_(&dat), released_(false)
-    { BaseType::data().swap(pData_->Values());}
-
-    VectorRef(VectorRef & vec_ref) : BaseType(vec_ref.size(), array_type()), pData_(vec_ref.pData_), released_(vec_ref.released_)
+    explicit VectorRef(NumArray & dat) : BaseType(dat.Length(), array_type()),
+    pDim_(dat.DimPtr()),
+    pValues_(dat.ValuesPtr()),
+    released_(false)
     {
-      if ( !released_ )
-      {
-        swap(vec_ref);
-        vec_ref.released_ = true;
-      }
+      BaseType::data().swap(dat.Values());
+    }
+    explicit VectorRef(MultiArray & dat) : BaseType(dat.Length(), array_type()),
+    pDim_(dat.DimPtr().get()),
+    pValues_(dat.ValuesPtr().get()),
+    released_(false)
+    {
+      BaseType::data().swap(dat.Values());
     }
 
-    VectorRef(const VectorRef & vec_ref) : BaseType(vec_ref), pData_(vec_ref.pData_), released_(vec_ref.released_)
-    {
-      if ( !released_ )
-      vec_ref.released_ = true;
-    }
+    VectorRef(VectorRef & vec_ref);
+
+    VectorRef(const VectorRef & vec_ref);
 
     template<class AE>
     VectorRef & operator = (const ublas::vector_expression<AE> & ae)
-    { BaseType::operator=(ae); pData_->Dim()[0] = size(); return *this;}
-
-    // TODO put in cpp
-    void resize (size_type s, bool preserve = true)
-    { BaseType::resize(s, preserve); pData_->Dim()[0] = s;}
+    {
+      BaseType::operator=(ae);
+      return *this;
+    }
 
     virtual ~VectorRef()
-    { if (! released_) data().swap(pData_->Values());}
+    {
+      Release();
+    }
 
-    void Release()
-    { if (! released_)
-      { data().swap(pData_->Values()); released_ = true;}}
+    void Release();
 
     Bool Released() const
-    { return released_;}
+    {
+      return released_;
+    }
   };
 
 }

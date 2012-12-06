@@ -117,7 +117,6 @@ namespace Biips
   {
     graph_.VisitNode(nodeId, *this);
   }
-  ;
 
   NodeSamplerFactory::Ptr NodeSamplerFactory::pFactoryInstance_(new NodeSamplerFactory());
 

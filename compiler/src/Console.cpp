@@ -148,22 +148,19 @@ namespace Biips
   void Console::clearParseTrees()
   {
     delete pData_;
-    pData_ = NULL;
     delete pRelations_;
-    pRelations_ = NULL;
     if (pVariables_)
     {
       for (Size i = 0; i < pVariables_->size(); ++i)
         delete (*pVariables_)[i];
       delete pVariables_;
-      pVariables_ = NULL;
     }
   }
 
   Console::~Console()
   {
     clearParseTrees();
-    ClearModel(false);
+    ClearModel(0);
   }
 
   static void getVariableNames(ParseTree const * pTree,
@@ -309,7 +306,6 @@ namespace Biips
         out_ << PROMPT_STRING << "Deleting model" << endl;
 
       delete pModel_;
-      pModel_ = NULL;
     }
   }
 
@@ -323,11 +319,11 @@ namespace Biips
       ClearModel();
     }
 
-    // FIXME
-    Rng::Ptr p_datagen_rng(new Rng(dataRngSeed));
-
     if (pData_ && genData)
     {
+      // FIXME
+      boost::scoped_ptr<Rng> p_datagen_rng(new Rng(dataRngSeed));
+
       pModel_ = new BUGSModel(true);
 
       Compiler compiler(*pModel_, dataMap);
@@ -434,7 +430,7 @@ namespace Biips
           dataMap.insert(std::make_pair(name, sampled_values));
         }
 
-        ClearModel(false);
+        ClearModel(0);
       }
       BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL
     }
@@ -608,9 +604,9 @@ namespace Biips
       // filtering
 
       // FIXME
-      Rng::Ptr p_smc_rng(new Rng(smcRngSeed));
+      boost::scoped_ptr<Rng> p_smc_rng(new Rng(smcRngSeed));
 
-      pModel_->InitSampler(nParticles, p_smc_rng, rsType, essThreshold);
+      pModel_->InitSampler(nParticles, p_smc_rng.get(), rsType, essThreshold);
 
       if (p_show_progress)
         ++(*p_show_progress);
@@ -820,22 +816,22 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SetSmoothTreeMonitor(const String & name,
+  Bool Console::SetGenTreeMonitor(const String & name,
                                      const IndexRange & range)
   {
     if (!pModel_)
     {
-      err_ << "Can't set smooth tree monitor. No model!" << endl;
+      err_ << "Can't set gen tree monitor. No model!" << endl;
       return false;
     }
     // TODO: check that sampler did not start
 
     try
     {
-      Bool ok = pModel_->SetSmoothTreeMonitor(name, range);
+      Bool ok = pModel_->SetGenTreeMonitor(name, range);
       if (!ok)
       {
-        err_ << "Failed to set smooth tree monitor for variable " << name;
+        err_ << "Failed to set gen tree monitor for variable " << name;
         if (!range.IsNull())
           err_ << range;
         err_ << endl;
@@ -847,21 +843,21 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SetSmoothMonitor(const String & name, const IndexRange & range)
+  Bool Console::SetBackwardSmoothMonitor(const String & name, const IndexRange & range)
   {
     if (!pModel_)
     {
-      err_ << "Can't set smooth monitor. No model!" << endl;
+      err_ << "Can't set backward smooth monitor. No model!" << endl;
       return false;
     }
     // TODO: check that sampler did not start
 
     try
     {
-      Bool ok = pModel_->SetSmoothMonitor(name, range);
+      Bool ok = pModel_->SetBackwardSmoothMonitor(name, range);
       if (!ok)
       {
-        err_ << "Failed to set smooth monitor for variable " << name;
+        err_ << "Failed to set backward smooth monitor for variable " << name;
         if (!range.IsNull())
           err_ << range;
         err_ << endl;
@@ -884,27 +880,27 @@ namespace Biips
     return pModel_->IsFilterMonitored(name, range, check_released);
   }
 
-  Bool Console::IsSmoothTreeMonitored(const String & name,
+  Bool Console::IsGenTreeMonitored(const String & name,
                                       const IndexRange & range,
                                       Bool check_released)
   {
     if (!pModel_)
     {
-      err_ << "Can't check smooth tree monitor. No model!" << endl;
+      err_ << "Can't check gen tree monitor. No model!" << endl;
       return false;
     }
-    return pModel_->IsSmoothTreeMonitored(name, range, check_released);
+    return pModel_->IsGenTreeMonitored(name, range, check_released);
   }
 
-  Bool Console::IsSmoothMonitored(const String & name, const IndexRange & range,
+  Bool Console::IsBackwardSmoothMonitored(const String & name, const IndexRange & range,
                                   Bool check_released)
   {
     if (!pModel_)
     {
-      err_ << "Can't check smooth monitor. No model!" << endl;
+      err_ << "Can't check backward smooth monitor. No model!" << endl;
       return false;
     }
-    return pModel_->IsSmoothMonitored(name, range, check_released);
+    return pModel_->IsBackwardSmoothMonitored(name, range, check_released);
   }
 
   Bool Console::ClearFilterMonitors(Bool release_only)
@@ -924,24 +920,24 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ClearSmoothTreeMonitors(Bool release_only)
+  Bool Console::ClearGenTreeMonitors(Bool release_only)
   {
     if (!pModel_)
     {
-      err_ << "Can't clear smooth tree monitors. No model!" << endl;
+      err_ << "Can't clear gen tree monitors. No model!" << endl;
       return false;
     }
 
     try
     {
-      pModel_->ClearSmoothTreeMonitors(release_only);
+      pModel_->ClearGenTreeMonitors(release_only);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
     return true;
   }
 
-  Bool Console::ClearSmoothMonitors(Bool release_only)
+  Bool Console::ClearBackwardSmoothMonitors(Bool release_only)
   {
     if (!pModel_)
     {
@@ -951,7 +947,7 @@ namespace Biips
 
     try
     {
-      pModel_->ClearSmoothMonitors(release_only);
+      pModel_->ClearBackwardSmoothMonitors(release_only);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -993,34 +989,34 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothTreeStat(
+  Bool Console::ExtractGenTreeStat(
       const String & name, StatTag statFeature,
       std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't extract smooth tree statistic. No model!" << endl;
+      err_ << "Can't extract gen tree statistic. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth tree statistic. SMC sampler not built!"
+      err_ << "Can't extract gen tree statistic. SMC sampler not built!"
            << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract smooth tree statistic. SMC sampler still running!"
+      err_ << "Can't extract gen tree statistic. SMC sampler still running!"
            << endl;
       return false;
     }
 
     try
     {
-      Bool ok = pModel_->ExtractSmoothTreeStat(name, statFeature, statMap);
+      Bool ok = pModel_->ExtractGenTreeStat(name, statFeature, statMap);
       if (!ok)
       {
-        err_ << "Failed to extract smooth tree statistic for variable " << name
+        err_ << "Failed to extract gen tree statistic for variable " << name
              << endl;
         return false;
       }
@@ -1030,7 +1026,7 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothStat(const String & name, StatTag statFeature,
+  Bool Console::ExtractBackwardSmoothStat(const String & name, StatTag statFeature,
                                   std::map<IndexRange, MultiArray> & statMap)
   {
     if (!pModel_)
@@ -1055,7 +1051,7 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->ExtractSmoothStat(name, statFeature, statMap);
+      Bool ok = pModel_->ExtractBackwardSmoothStat(name, statFeature, statMap);
       if (!ok)
       {
         err_ << "Failed to extract backward smoother statistic for variable "
@@ -1102,34 +1098,34 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothTreePdf(const String & name,
+  Bool Console::ExtractGenTreePdf(const String & name,
                                      std::map<IndexRange, Histogram> & pdfMap,
                                      Size numBins, Scalar cacheFraction)
   {
     if (!pModel_)
     {
-      err_ << "Can't extract smooth tree pdf. No model!" << endl;
+      err_ << "Can't extract gen tree pdf. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth tree pdf. SMC sampler not built!" << endl;
+      err_ << "Can't extract gen tree pdf. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract smooth tree pdf. SMC sampler still running!"
+      err_ << "Can't extract gen tree pdf. SMC sampler still running!"
            << endl;
       return false;
     }
 
     try
     {
-      Bool ok = pModel_->ExtractSmoothTreePdf(name, pdfMap, numBins,
+      Bool ok = pModel_->ExtractGenTreePdf(name, pdfMap, numBins,
                                               cacheFraction);
       if (!ok)
       {
-        err_ << "Failed to extract smooth tree pdf for variable " << name
+        err_ << "Failed to extract gen tree pdf for variable " << name
              << endl;
         return false;
       }
@@ -1139,7 +1135,7 @@ namespace Biips
     return true;
   }
 
-  Bool Console::ExtractSmoothPdf(const String & name,
+  Bool Console::ExtractBackwardSmoothPdf(const String & name,
                                  std::map<IndexRange, Histogram> & pdfMap,
                                  Size numBins, Scalar cacheFraction)
   {
@@ -1164,7 +1160,7 @@ namespace Biips
 
     try
     {
-      Bool ok = pModel_->ExtractSmoothPdf(name, pdfMap, numBins, cacheFraction);
+      Bool ok = pModel_->ExtractBackwardSmoothPdf(name, pdfMap, numBins, cacheFraction);
       if (!ok)
       {
         err_ << "Failed to extract backward smoother pdf for variable " << name
@@ -1241,9 +1237,9 @@ namespace Biips
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
-      ClearSmoothTreeMonitors(true);
+      ClearGenTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ClearSmoothMonitors(true);
+        ClearBackwardSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1284,7 +1280,7 @@ namespace Biips
       }
 
       // FIXME
-      Rng::Ptr p_rng(new Rng(rngSeed));
+      boost::scoped_ptr<Rng> p_rng(new Rng(rngSeed));
 
       if (!pModel_->SampleData(variable, range, data, p_rng.get()))
       {
@@ -1296,9 +1292,9 @@ namespace Biips
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
-      ClearSmoothTreeMonitors(true);
+      ClearGenTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ClearSmoothMonitors(true);
+        ClearBackwardSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1347,9 +1343,9 @@ namespace Biips
 
       lockBackward_ = true;
       ClearFilterMonitors(true);
-      ClearSmoothTreeMonitors(true);
+      ClearGenTreeMonitors(true);
       if (pModel_->SmootherInitialized())
-        ClearSmoothMonitors(true);
+        ClearBackwardSmoothMonitors(true);
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1390,32 +1386,32 @@ namespace Biips
     return true;
   }
 
-  Bool Console::DumpSmoothTreeMonitors(
+  Bool Console::DumpGenTreeMonitors(
       std::map<String, NodeArrayMonitor> & particlesMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't dump smooth tree monitors. No model!" << endl;
+      err_ << "Can't dump gen tree monitors. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't dump smooth tree monitors. SMC sampler not built!" << endl;
+      err_ << "Can't dump gen tree monitors. SMC sampler not built!" << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't dump smooth tree monitors. SMC sampler still running!"
+      err_ << "Can't dump gen tree monitors. SMC sampler still running!"
            << endl;
       return false;
     }
 
     try
     {
-      Bool ok = pModel_->DumpSmoothTreeMonitors(particlesMap);
+      Bool ok = pModel_->DumpGenTreeMonitors(particlesMap);
       if (!ok)
       {
-        err_ << "Failed to dump smooth tree monitors" << endl;
+        err_ << "Failed to dump gen tree monitors" << endl;
         return false;
       }
     }
@@ -1424,31 +1420,31 @@ namespace Biips
     return true;
   }
 
-  Bool Console::DumpSmoothMonitors(
+  Bool Console::DumpBackwardSmoothMonitors(
       std::map<String, NodeArrayMonitor> & particlesMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't dump smooth monitors. No model!" << endl;
+      err_ << "Can't dump backward smooth monitors. No model!" << endl;
       return false;
     }
     if (!pModel_->SmootherInitialized())
     {
-      err_ << "Can't dump smooth monitors. Smoother not initialized!" << endl;
+      err_ << "Can't dump backward smooth monitors. Smoother not initialized!" << endl;
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't dump smooth monitors. Smoother still running!" << endl;
+      err_ << "Can't dump backward smooth monitors. Smoother still running!" << endl;
       return false;
     }
 
     try
     {
-      Bool ok = pModel_->DumpSmoothMonitors(particlesMap);
+      Bool ok = pModel_->DumpBackwardSmoothMonitors(particlesMap);
       if (!ok)
       {
-        err_ << "Failed to dump smooth monitors" << endl;
+        err_ << "Failed to dump backward smooth monitors" << endl;
         return false;
       }
     }
@@ -1457,22 +1453,22 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SampleSmoothTreeParticle(Size rngSeed)
+  Bool Console::SampleGenTreeParticle(Size rngSeed)
   {
     if (!pModel_)
     {
-      err_ << "Can't sample smooth tree particle. No model!" << endl;
+      err_ << "Can't sample gen tree particle. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler not built!"
+      err_ << "Can't sample gen tree particle. SMC sampler not built!"
            << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler still running!"
+      err_ << "Can't sample gen tree particle. SMC sampler still running!"
            << endl;
       return false;
     }
@@ -1480,12 +1476,12 @@ namespace Biips
     try
     {
       // FIXME
-      Rng::Ptr p_rng(new Rng(rngSeed));
+      boost::scoped_ptr<Rng> p_rng(new Rng(rngSeed));
 
-      Bool ok = pModel_->SampleSmoothTreeParticle(p_rng, sampledValueMap_);
+      Bool ok = pModel_->SampleGenTreeParticle(p_rng.get(), sampledValueMap_);
       if (!ok)
       {
-        err_ << "Failed to sample smooth tree particle" << endl;
+        err_ << "Failed to sample gen tree particle" << endl;
         return false;
       }
     }
@@ -1494,23 +1490,23 @@ namespace Biips
     return true;
   }
 
-  Bool Console::DumpSampledSmoothTreeParticle(
+  Bool Console::DumpSampledGenTreeParticle(
       std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't sample smooth tree particle. No model!" << endl;
+      err_ << "Can't sample gen tree particle. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler not built!"
+      err_ << "Can't sample gen tree particle. SMC sampler not built!"
            << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't sample smooth tree particle. SMC sampler still running!"
+      err_ << "Can't sample gen tree particle. SMC sampler still running!"
            << endl;
       return false;
     }
@@ -1524,24 +1520,24 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SetSampledSmoothTreeParticle(
+  Bool Console::SetSampledGenTreeParticle(
       const std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
     {
-      err_ << "Can't set sampled smooth tree particle. No model!" << endl;
+      err_ << "Can't set sampled gen tree particle. No model!" << endl;
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't set sampled smooth tree particle. SMC sampler not built!"
+      err_ << "Can't set sampled gen tree particle. SMC sampler not built!"
            << endl;
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_
-          << "Can't set sampled smooth tree particle. SMC sampler still running!"
+          << "Can't set sampled gen tree particle. SMC sampler still running!"
           << endl;
       return false;
     }

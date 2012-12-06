@@ -487,7 +487,7 @@ RcppExport void set_filter_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
 }
 
 
-RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+RcppExport void set_gen_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -505,7 +505,7 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    Bool ok = p_console->SetSmoothTreeMonitor(name, range);
+    Bool ok = p_console->SetGenTreeMonitor(name, range);
     if (ok && VERBOSITY>1)
     {
       rbiips_cout << " " << name;
@@ -520,7 +520,7 @@ RcppExport void set_smooth_tree_monitors(SEXP pConsole, SEXP varNames, SEXP lowe
 }
 
 
-RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
+RcppExport void set_backward_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -529,7 +529,7 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
   Rcpp::List monitored_upper(upper);
 
   if (VERBOSITY>1)
-    rbiips_cout << PROMPT_STRING << "Smoother monitoring variables:";
+    rbiips_cout << PROMPT_STRING << "Backward smoother monitoring variables:";
 
   Rcpp::StringVector monitored_var(varNames);
 
@@ -538,7 +538,7 @@ RcppExport void set_smooth_monitors(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    Bool ok = p_console->SetSmoothMonitor(name, range);
+    Bool ok = p_console->SetBackwardSmoothMonitor(name, range);
     if (ok && VERBOSITY>1)
     {
       rbiips_cout << " " << name;
@@ -578,7 +578,7 @@ RcppExport SEXP is_filter_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SE
 }
 
 
-RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
+RcppExport SEXP is_gen_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -593,7 +593,7 @@ RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lowe
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (!p_console->IsSmoothTreeMonitored(name, range, Rcpp::as<Bool>(check_released)))
+    if (!p_console->IsGenTreeMonitored(name, range, Rcpp::as<Bool>(check_released)))
       return Rcpp::wrap(false);
   }
 
@@ -603,7 +603,7 @@ RcppExport SEXP is_smooth_tree_monitored(SEXP pConsole, SEXP varNames, SEXP lowe
 }
 
 
-RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
+RcppExport SEXP is_backward_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SEXP upper, SEXP check_released)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -618,7 +618,7 @@ RcppExport SEXP is_smooth_monitored(SEXP pConsole, SEXP varNames, SEXP lower, SE
     String name(monitored_var[i]);
     IndexRange range = makeRange(monitored_lower[i], monitored_upper[i]);
 
-    if (!p_console->IsSmoothMonitored(name, range, Rcpp::as<Bool>(check_released)))
+    if (!p_console->IsBackwardSmoothMonitored(name, range, Rcpp::as<Bool>(check_released)))
       return Rcpp::wrap(false);
   }
 
@@ -712,20 +712,20 @@ RcppExport void set_log_norm_const(SEXP pConsole, SEXP logNormConst)
 }
 
 
-RcppExport void sample_smooth_tree_particle(SEXP pConsole, SEXP smcRngSeed)
+RcppExport void sample_gen_tree_particle(SEXP pConsole, SEXP smcRngSeed)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->SampleSmoothTreeParticle(Rcpp::as<Size>(smcRngSeed)))
-    throw RuntimeError("Failed to sample smooth tree particle.");
+  if (!p_console->SampleGenTreeParticle(Rcpp::as<Size>(smcRngSeed)))
+    throw RuntimeError("Failed to sample gen tree particle.");
 
   VOID_END_RBIIPS
 }
 
 
-RcppExport SEXP get_sampled_smooth_tree_particle(SEXP pConsole)
+RcppExport SEXP get_sampled_gen_tree_particle(SEXP pConsole)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -733,8 +733,8 @@ RcppExport SEXP get_sampled_smooth_tree_particle(SEXP pConsole)
 
   std::map<String, MultiArray> sampled_value_map;
 
-  if(!p_console->DumpSampledSmoothTreeParticle(sampled_value_map))
-    throw RuntimeError("Failed to get sampled smooth tree particle.");
+  if(!p_console->DumpSampledGenTreeParticle(sampled_value_map))
+    throw RuntimeError("Failed to get sampled gen tree particle.");
 
   return readDataTable<MultiArray::StorageOrderType>(sampled_value_map);
 
@@ -742,7 +742,7 @@ RcppExport SEXP get_sampled_smooth_tree_particle(SEXP pConsole)
 }
 
 
-RcppExport void set_sampled_smooth_tree_particle(SEXP pConsole, SEXP sampledValue)
+RcppExport void set_sampled_gen_tree_particle(SEXP pConsole, SEXP sampledValue)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -750,8 +750,8 @@ RcppExport void set_sampled_smooth_tree_particle(SEXP pConsole, SEXP sampledValu
 
   std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(sampledValue);
 
-  if(!p_console->SetSampledSmoothTreeParticle(sampled_value_map))
-    throw RuntimeError("Failed to set sampled smooth tree particle.");
+  if(!p_console->SetSampledGenTreeParticle(sampled_value_map))
+    throw RuntimeError("Failed to set sampled gen tree particle.");
 
   VOID_END_RBIIPS
 }
@@ -841,7 +841,7 @@ RcppExport SEXP get_filter_monitors(SEXP pConsole)
 }
 
 
-RcppExport SEXP get_smooth_tree_monitors(SEXP pConsole)
+RcppExport SEXP get_gen_tree_monitors(SEXP pConsole)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -849,15 +849,15 @@ RcppExport SEXP get_smooth_tree_monitors(SEXP pConsole)
 
   std::map<String, NodeArrayMonitor> monitors_map;
 
-  if (!p_console->DumpSmoothTreeMonitors(monitors_map))
-    throw RuntimeError("Failed to dump smooth tree monitors.");
+  if (!p_console->DumpGenTreeMonitors(monitors_map))
+    throw RuntimeError("Failed to dump gen tree monitors.");
 
   return getMonitors<MultiArray::StorageOrderType>(monitors_map, "smoothing");
   END_RBIIPS
 }
 
 
-RcppExport SEXP get_smooth_monitors(SEXP pConsole)
+RcppExport SEXP get_backward_smooth_monitors(SEXP pConsole)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -865,7 +865,7 @@ RcppExport SEXP get_smooth_monitors(SEXP pConsole)
 
   std::map<String, NodeArrayMonitor> monitors_map;
 
-  if (!p_console->DumpSmoothMonitors(monitors_map))
+  if (!p_console->DumpBackwardSmoothMonitors(monitors_map))
     throw RuntimeError("Failed to dump smooth monitors.");
 
   return getMonitors<MultiArray::StorageOrderType>(monitors_map, "backward.smoothing");
@@ -886,26 +886,26 @@ RcppExport void clear_filter_monitors(SEXP pConsole, SEXP release_only)
 }
 
 
-RcppExport void clear_smooth_tree_monitors(SEXP pConsole, SEXP release_only)
+RcppExport void clear_gen_tree_monitors(SEXP pConsole, SEXP release_only)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->ClearSmoothTreeMonitors(Rcpp::as<Bool>(release_only)))
-    throw RuntimeError("Failed to clear smooth tree monitors.");
+  if (!p_console->ClearGenTreeMonitors(Rcpp::as<Bool>(release_only)))
+    throw RuntimeError("Failed to clear gen tree monitors.");
 
   VOID_END_RBIIPS
 }
 
 
-RcppExport void clear_smooth_monitors(SEXP pConsole, SEXP release_only)
+RcppExport void clear_backward_smooth_monitors(SEXP pConsole, SEXP release_only)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
   Rcpp::XPtr<Console> p_console(pConsole);
 
-  if (!p_console->ClearSmoothMonitors(Rcpp::as<Bool>(release_only)))
+  if (!p_console->ClearBackwardSmoothMonitors(Rcpp::as<Bool>(release_only)))
     throw RuntimeError("Failed to clear smooth monitors.");
 
   VOID_END_RBIIPS

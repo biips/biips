@@ -50,10 +50,10 @@ monitor.biips <- function(object, variable.names, type)
     .Call("set_filter_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
   if ("s" %in% type) {
-    .Call("set_smooth_tree_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    .Call("set_gen_tree_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
   if ("b" %in% type) {
-    .Call("set_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    .Call("set_backward_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
   }
   invisible(NULL)
 }
@@ -74,10 +74,10 @@ is.monitored.biips <- function(object, variable.names, type, check.released=TRUE
     ok <- .Call("is_filter_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
   else if (type == "s") {
-    ok <- .Call("is_smooth_tree_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
+    ok <- .Call("is_gen_tree_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
   else if (type == "b") {
-    ok <- .Call("is_smooth_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
+    ok <- .Call("is_backward_smooth_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
   }
   return(ok)
 }
@@ -93,10 +93,10 @@ clear.monitors.biips <- function(object, type, release.only=FALSE)
     .Call("clear_filter_monitors", object$ptr(), release.only, PACKAGE="RBiips")
   }
   if ("s" %in% type) {
-    .Call("clear_smooth_tree_monitors", object$ptr(), release.only, PACKAGE="RBiips")
+    .Call("clear_gen_tree_monitors", object$ptr(), release.only, PACKAGE="RBiips")
   }
   if ("b" %in% type) {
-    .Call("clear_smooth_monitors", object$ptr(), release.only, PACKAGE="RBiips")
+    .Call("clear_backward_smooth_monitors", object$ptr(), release.only, PACKAGE="RBiips")
   }
   invisible(NULL)
 }
@@ -359,13 +359,13 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   
   ## get latent variable sampled value
   if (length(latent.names) > 0) {
-    sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
     if (length(sampled.value)==0) {
       ## sample one particle
       rng.seed <- runif(1, 0, as.integer(Sys.time()))
-      .Call("sample_smooth_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+      .Call("sample_gen_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
       
-      sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+      sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
     }
     for (var in latent.names) {
       sample[[var]] <- sampled.value[[var]]
@@ -466,10 +466,10 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
     if (length(latent.names) > 0) {
       ## sample one particle for the latent variables
       rng.seed <- runif(1, 0, as.integer(Sys.time()))
-      .Call("sample_smooth_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+      .Call("sample_gen_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
       
       ## get sampled value
-      sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+      sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
       for (var in latent.names) {
         sample[[var]] <- sampled.value[[var]]
       }
@@ -667,13 +667,13 @@ init.pimh.biips <- function(object, variable.names,
   log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
   
   ## get sampled value
-  sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+  sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
   if (length(sampled.value)==0) {
     ## sample one particle
     rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_smooth_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+    .Call("sample_gen_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
     
-    sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
   }
   sample <- list()
   for (var in variable.names) {
@@ -703,10 +703,10 @@ one.update.pimh.biips <- function(object, variable.names,
     
     ## sample one particle
     rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_smooth_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+    .Call("sample_gen_tree_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
     
     ## get sampled value
-    sampled.value <- .Call("get_sampled_smooth_tree_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- .Call("get_sampled_gen_tree_particle", object$ptr(), PACKAGE="RBiips")
     for (var in variable.names) {
       sample[[var]] <- sampled.value[[var]]
     }
@@ -772,7 +772,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {
     .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_smooth_tree_particle", object$ptr(), sample, PACKAGE="RBiips")
+    .Call("set_sampled_gen_tree_particle", object$ptr(), sample, PACKAGE="RBiips")
   }
   
   invisible(NULL)

@@ -174,7 +174,7 @@ namespace Biips
     ublas::cholesky_invert(like_cov);
 
     Matrix kalman_gain = ublas::prod(prior_cov, ublas::trans(like_A));
-    static Matrix inn_prec;
+    Matrix inn_prec;
     inn_prec = ublas::prod(like_A, kalman_gain) + like_cov;
     if (!ublas::cholesky_factorize(inn_prec))
       throw LogicError("ConjugateMNormalLinear::sample: matrix inn_prec is not positive-semidefinite.");
@@ -184,13 +184,13 @@ namespace Biips
     NumArray prior_mean_dat(getNodeValue(prior_mean_id, graph_, *this));
     VectorRef prior_mean(prior_mean_dat);
 
-    static Vector obs_pred;
+    Vector obs_pred;
     obs_pred = ublas::prod(like_A, prior_mean) + like_b;
-    static Vector post_mean;
+    Vector post_mean;
     post_mean = prior_mean + ublas::prod(kalman_gain, (obs - obs_pred));
     prior_mean.Release();
 
-    static Matrix post_prec;
+    Matrix post_prec;
     post_prec = ublas::prod(Matrix(ublas::identity_matrix<Scalar>(dim_node,
                                                                   dim_node)
         - Matrix(ublas::prod(kalman_gain, like_A))), prior_cov);
@@ -198,11 +198,11 @@ namespace Biips
       throw LogicError("ConjugateMNormalLinear::sample: matrix post_prec is not positive-semidefinite.");
     ublas::cholesky_invert(post_prec);
 
-    static NumArray::Array post_param_values(2);
-    static DimArray dim_mean(1);
+    NumArray::Array post_param_values(2);
+    DimArray dim_mean(1);
     dim_mean[0] = post_mean.size();
     post_param_values[0] = NumArray(&dim_mean, &post_mean.data());
-    static DimArray dim_prec(2);
+    DimArray dim_prec(2);
     dim_prec[0] = post_prec.size1();
     dim_prec[1] = post_prec.size2();
     post_param_values[1] = NumArray(&dim_prec, &post_prec.data());
@@ -216,7 +216,7 @@ namespace Biips
                                NULL_NUMARRAYPAIR,
                                *pRng_); // FIXME Boundaries
 
-    static NumArray::Array norm_const_param_values(2);
+    NumArray::Array norm_const_param_values(2);
     dim_mean[0] = obs_pred.size();
     norm_const_param_values[0] = NumArray(&dim_mean, &obs_pred.data());
     dim_prec[0] = inn_prec.size1();

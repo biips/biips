@@ -66,17 +66,17 @@ namespace Biips
     template<typename StorageOrderType>
     void addMonitoredNode(NodeId id,
                           const IndexRange & subRange,
-                          const Monitor::Ptr & pMonitor);
+                          const Monitor* pMonitor);
 
   public:
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
-                     const std::map<NodeId, Monitor::Ptr> & monitorsMap,
+                     const std::map<NodeId, Monitor*> & monitorsMap,
                      Size nParticles,
                      const Graph & graph);
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
-                     const Monitor::Ptr & pMonitor,
+                     const Monitor* pMonitor,
                      Size nParticles,
                      const Graph & graph);
 
@@ -127,13 +127,13 @@ namespace Biips
     template<typename StorageOrderType>
     void addMonitoredNode(NodeId id,
                           const IndexRange & subRange,
-                          const Monitor::Ptr & pMonitor,
+                          const Monitor* pMonitor,
                           Size particleIndex);
 
   public:
     NodeArrayValue(const NodeArray & nodeArray,
                    const IndexRange & range,
-                   const Monitor::Ptr & pMonitor,
+                   const Monitor* pMonitor,
                    Size particleIndex,
                    const Graph & graph);
 

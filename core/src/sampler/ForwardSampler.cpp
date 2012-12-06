@@ -317,7 +317,7 @@ namespace Biips
     sampledFlagsAfter_ = sampledFlagsBefore_;
     (*iterNodeSampler_)->SetMembers(lastParticle.Value(),
                                     sampledFlagsAfter_,
-                                    pRng_.get());
+                                    pRng_);
     (*iterNodeSampler_)->Sample(iterNodeId_->front());
 
     // update particle log weight
@@ -387,7 +387,7 @@ namespace Biips
   }
 
   void ForwardSampler::Initialize(Size nbParticles,
-                                  const Rng::Ptr & pRng,
+                                  Rng * pRng,
                                   const String & rsType,
                                   Scalar threshold)
   {

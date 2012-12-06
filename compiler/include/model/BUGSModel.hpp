@@ -59,10 +59,10 @@ namespace Biips
     SymbolTable symbolTable_;
     Types<String>::Array filterMonitorsNames_;
     Types<IndexRange>::Array filterMonitorsRanges_;
-    Types<String>::Array smoothTreeMonitorsNames_;
-    Types<IndexRange>::Array smoothTreeMonitorsRanges_;
-    Types<String>::Array smoothMonitorsNames_;
-    Types<IndexRange>::Array smoothMonitorsRanges_;
+    Types<String>::Array genTreeMonitorsNames_;
+    Types<IndexRange>::Array genTreeMonitorsRanges_;
+    Types<String>::Array backwardSmoothMonitorsNames_;
+    Types<IndexRange>::Array backwardSmoothMonitorsRanges_;
 
   public:
     BUGSModel(Bool dataModel = false)
@@ -79,19 +79,19 @@ namespace Biips
 
     Bool SetFilterMonitor(const String & name, const IndexRange & range =
         NULL_RANGE);
-    Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
+    Bool SetGenTreeMonitor(const String & name, const IndexRange & range =
         NULL_RANGE);
-    Bool SetSmoothMonitor(const String & name, const IndexRange & range =
+    Bool SetBackwardSmoothMonitor(const String & name, const IndexRange & range =
         NULL_RANGE);
 
     Bool
     IsFilterMonitored(const String & name, IndexRange range = NULL_RANGE,
                       Bool check_released = true) const;
-    Bool IsSmoothTreeMonitored(const String & name, IndexRange range =
+    Bool IsGenTreeMonitored(const String & name, IndexRange range =
         NULL_RANGE,
                                Bool check_released = true) const;
     Bool
-    IsSmoothMonitored(const String & name, IndexRange range = NULL_RANGE,
+    IsBackwardSmoothMonitored(const String & name, IndexRange range = NULL_RANGE,
                       Bool check_released = true) const;
 
     void PrintSamplersSequence(std::ostream & out) const;
@@ -101,19 +101,19 @@ namespace Biips
     // TODO manage multi statFeature
     Bool ExtractFilterStat(String name, StatTag statFeature,
                            std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothTreeStat(
+    Bool ExtractGenTreeStat(
         String name, StatTag statFeature,
         std::map<IndexRange, MultiArray> & statMap) const;
-    Bool ExtractSmoothStat(String name, StatTag statFeature,
+    Bool ExtractBackwardSmoothStat(String name, StatTag statFeature,
                            std::map<IndexRange, MultiArray> & statMap) const;
 
     Bool ExtractFilterPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40, Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothTreePdf(String name,
+    Bool ExtractGenTreePdf(String name,
                               std::map<IndexRange, Histogram> & pdfMap,
                               Size numBins = 40,
                               Scalar cacheFraction = 0.25) const;
-    Bool ExtractSmoothPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
+    Bool ExtractBackwardSmoothPdf(String name, std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40, Scalar cacheFraction = 0.25) const;
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
@@ -128,18 +128,18 @@ namespace Biips
     Bool
     DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
-    DumpSmoothTreeMonitors(
+    DumpGenTreeMonitors(
         std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool
-    DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
+    DumpBackwardSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
 
-    Bool SampleSmoothTreeParticle(
-        const Rng::Ptr & pRng,
+    Bool SampleGenTreeParticle(
+        Rng * pRng,
         std::map<String, MultiArray> & sampledValues) const;
 
     void virtual ClearFilterMonitors(Bool release_only = false);
-    void virtual ClearSmoothTreeMonitors(Bool release_only = false);
-    void virtual ClearSmoothMonitors(Bool release_only = false);
+    void virtual ClearGenTreeMonitors(Bool release_only = false);
+    void virtual ClearBackwardSmoothMonitors(Bool release_only = false);
   };
 
 }

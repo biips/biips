@@ -91,7 +91,7 @@ namespace Biips
       return -std::log(upper - lower);
   }
 
-  void DUnif::unboundedSupport(ValArray & lower,
+  void DUnif::fixedUnboundedSupport(ValArray & lower,
                                ValArray & upper,
                                const NumArray::Array & paramValues) const
   {

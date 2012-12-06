@@ -67,9 +67,9 @@ namespace Biips
     virtual Scalar logDensity(const NumArray & x,
                               const NumArray::Array & paramValues,
                               const NumArray::Pair & boundValues) const = 0;
-    virtual void unboundedSupport(ValArray & lower,
+    virtual void fixedUnboundedSupport(ValArray & lower,
                                   ValArray & upper,
-                                  const NumArray::Array & paramValues) const = 0;
+                                  const NumArray::Array & fixedParamValues) const = 0;
 
   public:
     typedef Distribution SelfType;
@@ -113,7 +113,7 @@ namespace Biips
                       const NumArray::Array & paramValues,
                       const NumArray::Pair & boundValues) const;
 
-    void UnboundedSupport(ValArray & lower,
+    void FixedUnboundedSupport(ValArray & lower,
                           ValArray & upper,
                           const NumArray::Array & paramValues) const;
 

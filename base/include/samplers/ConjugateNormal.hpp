@@ -59,17 +59,17 @@ namespace Biips
     {
     }
 
-    virtual NumArray::Array initLikeParamContrib() const;
+    virtual MultiArray::Array initLikeParamContrib() const;
     virtual void formLikeParamContrib(NodeId likeId,
-                                      NumArray::Array & likeParamContribValues);
-    virtual NumArray::Array
+                                      MultiArray::Array & likeParamContribValues);
+    virtual MultiArray::Array
     postParam(const NumArray::Array & priorParamContribValues,
-              const NumArray::Array & likeParamContribValues) const;
+              const MultiArray::Array & likeParamContribValues) const;
     virtual Scalar
     computeLogIncrementalWeight(const NumArray & sampledData,
                                 const NumArray::Array & priorParamValues,
                                 const NumArray::Array & postParamValues,
-                                const NumArray::Array & LikeParamContrib);
+                                const MultiArray::Array & LikeParamContrib);
 
   public:
     virtual const String & Name() const
