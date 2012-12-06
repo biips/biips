@@ -20,7 +20,7 @@ if (~isempty(indices{1})) % filtering
   inter_biips('clear_filter_monitors', p, release_only);
 end 
 if (~isempty(indices{2})) % smoothing
-  inter_biips('clear_gen_tree_monitors', p, release_only);
+  inter_biips('clear_gen_tree_smooth_monitors', p, release_only);
 end  
 if (~isempty(indices{3})) %backward_smoothing
   inter_biips('clear_backward_smooth_monitors', p, release_only);

@@ -65,7 +65,7 @@ namespace Biips
 {
   const String BIIPSTEST_CONFIG_FILE_NAME = "biipstest.cfg";
 
-  const Size INDENT_SIZE = 4;
+  const Size INDENT_SIZE = 2;
   const String INDENT_STRING(INDENT_SIZE, ' ');
 }
 

@@ -96,13 +96,13 @@ namespace Biips
     return true;
   }
 
-  Bool Model::SetGenTreeMonitor(NodeId nodeId)
+  Bool Model::SetGenTreeSmoothMonitor(NodeId nodeId)
   {
     // FIXME: it is no use monitoring observed nodes
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
-    genTreeMonitoredNodeIds_.insert(nodeId);
+    genTreeSmoothMonitoredNodeIds_.insert(nodeId);
     return true;
   }
 
@@ -123,12 +123,12 @@ namespace Biips
     defaultMonitorsSet_ = false;
   }
 
-  void Model::ClearGenTreeMonitors(Bool release_only)
+  void Model::ClearGenTreeSmoothMonitors(Bool release_only)
   {
-    pGenTreeMonitor_.reset();
+    pGenTreeSmoothMonitor_.reset();
     if (release_only)
       return;
-    genTreeMonitoredNodeIds_.clear();
+    genTreeSmoothMonitoredNodeIds_.clear();
   }
 
   void Model::ClearBackwardSmoothMonitors(Bool release_only)
@@ -178,7 +178,7 @@ namespace Biips
   {
     // release monitors
     ClearFilterMonitors(true);
-    ClearGenTreeMonitors(true);
+    ClearGenTreeSmoothMonitors(true);
     ClearBackwardSmoothMonitors(true);
 
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
@@ -186,10 +186,10 @@ namespace Biips
     if (pSampler_->NIterations() == 0)
       return;
 
-    // lock GenTree monitored nodes
+    // lock GenTreeSmooth monitored nodes
     for (std::set<NodeId>::const_iterator it_nodes =
-        genTreeMonitoredNodeIds_.begin();
-        it_nodes != genTreeMonitoredNodeIds_.end(); ++it_nodes)
+        genTreeSmoothMonitoredNodeIds_.begin();
+        it_nodes != genTreeSmoothMonitoredNodeIds_.end(); ++it_nodes)
       pSampler_->LockNode(*it_nodes);
 
     Size t = pSampler_->Iteration();
@@ -221,11 +221,11 @@ namespace Biips
     // Smooth tree Monitors
     // FIXME Do we create monitor object even if no nodes are monitored ?
     p_monitor = new FilterMonitor(t, sampled_nodes);
-    pGenTreeMonitor_.reset(p_monitor);
+    pGenTreeSmoothMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        genTreeMonitoredNodeIds_.begin();
-        it_ids != genTreeMonitoredNodeIds_.end(); ++it_ids)
+        genTreeSmoothMonitoredNodeIds_.begin();
+        it_ids != genTreeSmoothMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
@@ -272,11 +272,11 @@ namespace Biips
     // Smooth tree Monitors
     // FIXME Do we create monitor object even if no nodes are monitored ?
     p_monitor = new FilterMonitor(t, sampled_nodes);
-    pGenTreeMonitor_.reset(p_monitor);
+    pGenTreeSmoothMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        genTreeMonitoredNodeIds_.begin();
-        it_ids != genTreeMonitoredNodeIds_.end(); ++it_ids)
+        genTreeSmoothMonitoredNodeIds_.begin();
+        it_ids != genTreeSmoothMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
@@ -468,11 +468,11 @@ namespace Biips
   }
 
   // FIXME Still valid after optimization ?
-  MultiArray Model::ExtractGenTreeStat(NodeId nodeId,
+  MultiArray Model::ExtractGenTreeSmoothStat(NodeId nodeId,
                                           StatTag statFeature) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract gen tree statistic: no ForwardSampler.");
+      throw LogicError("Can not extract smooth statistic: no ForwardSampler.");
 
     ArrayAccumulator elem_acc;
     elem_acc.AddFeature(statFeature);
@@ -516,15 +516,15 @@ namespace Biips
 
   // TODO manage dicrete variable cases
   // FIXME Still valid after optimization ?
-  Histogram Model::ExtractGenTreePdf(NodeId nodeId,
+  Histogram Model::ExtractGenTreeSmoothPdf(NodeId nodeId,
                                         Size numBins,
                                         Scalar cacheFraction) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract gen tree pdf: no ForwardSampler.");
+      throw LogicError("Can not extract smooth pdf: no ForwardSampler.");
 
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
-      throw LogicError("Can not extract gen tree pdf: node is not scalar.");
+      throw LogicError("Can not extract smooth pdf: node is not scalar.");
 
     DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
                                           * cacheFraction),

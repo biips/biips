@@ -132,7 +132,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::SetGenTreeMonitor(const String & name,
+  Bool BUGSModel::SetGenTreeSmoothMonitor(const String & name,
                                        const IndexRange & range)
   {
     // TODO use Monitor Factory
@@ -157,11 +157,11 @@ namespace Biips
         node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
       if (range_valid.Overlaps(it->right))
-        BaseType::SetGenTreeMonitor(it->left);
+        BaseType::SetGenTreeSmoothMonitor(it->left);
     }
 
-    genTreeMonitorsNames_.push_back(name);
-    genTreeMonitorsRanges_.push_back(range);
+    genTreeSmoothMonitorsNames_.push_back(name);
+    genTreeSmoothMonitorsRanges_.push_back(range);
 
     return true;
   }
@@ -234,7 +234,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::IsGenTreeMonitored(const String & name,
+  Bool BUGSModel::IsGenTreeSmoothMonitored(const String & name,
                                         IndexRange range, Bool check_released) const
   {
     if (!symbolTable_.Contains(name))
@@ -243,7 +243,7 @@ namespace Biips
     if (range.IsNull())
       range = symbolTable_.GetNodeArray(name).Range();
     else if (!symbolTable_.GetNodeArray(name).Range().Contains(range))
-      throw LogicError(String("IsGenTreeMonitored: range ") + print(range)
+      throw LogicError(String("IsGenTreeSmoothMonitored: range ") + print(range)
                        + " is not contained in variable " + name);
 
     const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
@@ -254,13 +254,13 @@ namespace Biips
     {
       if (!range.Overlaps(it->right))
         continue;
-      if (!genTreeMonitoredNodeIds_.count(it->left))
+      if (!genTreeSmoothMonitoredNodeIds_.count(it->left))
         return false;
 
       if (!check_released)
         continue;
 
-      if (!pGenTreeMonitor_ || pGenTreeMonitor_->Contains(it->left))
+      if (!pGenTreeSmoothMonitor_ || pGenTreeSmoothMonitor_->Contains(it->left))
         return false;
     }
 
@@ -328,14 +328,14 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractGenTreeStat(String name,
+  Bool BUGSModel::ExtractGenTreeSmoothStat(String name,
                                         StatTag statFeature,
                                         std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
-      throw LogicError("Can not extract gen tree statistic: statistics map is not empty.");
+      throw LogicError("Can not extract smooth statistic: statistics map is not empty.");
 
-    if (!IsGenTreeMonitored(name, NULL_RANGE))
+    if (!IsGenTreeSmoothMonitored(name, NULL_RANGE))
       return false;
 
     const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
@@ -347,7 +347,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      MultiArray stat_marray(BaseType::ExtractGenTreeStat(node_id,
+      MultiArray stat_marray(BaseType::ExtractGenTreeSmoothStat(node_id,
                                                              statFeature));
       statMap.insert(std::make_pair(index_range, stat_marray));
     }
@@ -421,15 +421,15 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::ExtractGenTreePdf(String name,
+  Bool BUGSModel::ExtractGenTreeSmoothPdf(String name,
                                        std::map<IndexRange, Histogram> & pdfMap,
                                        Size numBins,
                                        Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
-      throw LogicError("Can not extract gen tree pdf: pdf map is not empty.");
+      throw LogicError("Can not extract smooth pdf: pdf map is not empty.");
 
-    if (!IsGenTreeMonitored(name, NULL_RANGE))
+    if (!IsGenTreeSmoothMonitored(name, NULL_RANGE))
       return false;
 
     const boost::bimap<NodeId, IndexRange> & node_id_range_bimap =
@@ -452,7 +452,7 @@ namespace Biips
     {
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
-      Histogram pdf_hist = BaseType::ExtractGenTreePdf(node_id,
+      Histogram pdf_hist = BaseType::ExtractGenTreeSmoothPdf(node_id,
                                                           numBins,
                                                           cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
@@ -568,22 +568,22 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::DumpGenTreeMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
+  Bool BUGSModel::DumpGenTreeSmoothMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const
   {
     if (!pSampler_)
       return false;
     if (!pSampler_->AtEnd())
       return false;
 
-    for (Size i = 0; i < genTreeMonitorsNames_.size(); ++i)
+    for (Size i = 0; i < genTreeSmoothMonitorsNames_.size(); ++i)
     {
-      const String & var_name = genTreeMonitorsNames_[i];
+      const String & var_name = genTreeSmoothMonitorsNames_[i];
       if (!symbolTable_.Contains(var_name))
         throw LogicError(String("Monitored array ") + var_name
                          + " does not exist in the symbol table.");
 
       String name = var_name;
-      IndexRange range = genTreeMonitorsRanges_[i];
+      IndexRange range = genTreeSmoothMonitorsRanges_[i];
       if (range.IsNull())
         range = symbolTable_.GetNodeArray(name).Range();
       else
@@ -592,7 +592,7 @@ namespace Biips
       monitorsMap.insert(std::make_pair(name,
                                         NodeArrayMonitor(symbolTable_.GetNodeArray(var_name),
                                                          range,
-                                                         pGenTreeMonitor_.get(),
+                                                         pGenTreeSmoothMonitor_.get(),
                                                          pSampler_->NParticles(),
                                                          *pGraph_)));
     }
@@ -600,7 +600,7 @@ namespace Biips
     return true;
   }
 
-  Bool BUGSModel::SampleGenTreeParticle(Rng * pRng,
+  Bool BUGSModel::SampleGenTreeSmoothParticle(Rng * pRng,
                                            std::map<String, MultiArray> & sampledValues) const
   {
     if (!pSampler_)
@@ -610,21 +610,21 @@ namespace Biips
 
     // sample one particle according to the weights
     typedef boost::random::discrete_distribution<Int, Scalar> CategoricalDist;
-    CategoricalDist dist(pGenTreeMonitor_->GetUnnormWeights().begin(),
-                         pGenTreeMonitor_->GetUnnormWeights().end());
+    CategoricalDist dist(pGenTreeSmoothMonitor_->GetUnnormWeights().begin(),
+                         pGenTreeSmoothMonitor_->GetUnnormWeights().end());
     typedef boost::variate_generator<Rng::GenType&, CategoricalDist> CategoricalGen;
     CategoricalGen gen(pRng->GetGen(), dist);
     Size chosen_particle = gen();
 
-    for (Size i = 0; i < genTreeMonitorsNames_.size(); ++i)
+    for (Size i = 0; i < genTreeSmoothMonitorsNames_.size(); ++i)
     {
-      const String & var_name = genTreeMonitorsNames_[i];
+      const String & var_name = genTreeSmoothMonitorsNames_[i];
       if (!symbolTable_.Contains(var_name))
         throw LogicError(String("Monitored array ") + var_name
                          + " does not exist in the symbol table.");
 
       String name = var_name;
-      IndexRange range = genTreeMonitorsRanges_[i];
+      IndexRange range = genTreeSmoothMonitorsRanges_[i];
       if (range.IsNull())
         range = symbolTable_.GetNodeArray(name).Range();
       else
@@ -632,7 +632,7 @@ namespace Biips
 
       sampledValues[name] = NodeArrayValue(symbolTable_.GetNodeArray(var_name),
                                            range,
-                                           pGenTreeMonitor_.get(),
+                                           pGenTreeSmoothMonitor_.get(),
                                            chosen_particle,
                                            *pGraph_).GetValue();
     }
@@ -755,13 +755,13 @@ namespace Biips
     filterMonitorsRanges_.clear();
   }
 
-  void BUGSModel::ClearGenTreeMonitors(Bool release_only)
+  void BUGSModel::ClearGenTreeSmoothMonitors(Bool release_only)
   {
-    BaseType::ClearGenTreeMonitors(release_only);
+    BaseType::ClearGenTreeSmoothMonitors(release_only);
     if (release_only)
       return;
-    genTreeMonitorsNames_.clear();
-    genTreeMonitorsRanges_.clear();
+    genTreeSmoothMonitorsNames_.clear();
+    genTreeSmoothMonitorsRanges_.clear();
   }
 
   void BUGSModel::ClearBackwardSmoothMonitors(Bool release_only)
