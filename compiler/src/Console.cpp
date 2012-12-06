@@ -346,7 +346,7 @@ namespace Biips
           out_ << INDENT_STRING << "Allocating nodes" << endl;
         compiler.WriteRelations(pData_);
 
-        Graph & data_graph = *(pModel_->GraphPtr());
+        Graph & data_graph = pModel_->graph();
         data_graph.Build();
 
         /* Check validity of data generating model */
@@ -466,7 +466,7 @@ namespace Biips
       // FIXME
       if (pModel_)
       {
-        Graph & model_graph = *(pModel_->GraphPtr());
+        Graph & model_graph = pModel_->graph();
         if (verbosity > 1)
         {
           out_ << INDENT_STRING << "Building and checking graph" << endl;
@@ -524,7 +524,7 @@ namespace Biips
       err_ << "Can't build SMC sampler. No model!" << endl;
       return false;
     }
-    if (pModel_->GraphPtr()->Empty())
+    if (pModel_->graph().Empty())
     {
       err_
           << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)"
@@ -1202,7 +1202,7 @@ namespace Biips
       err_ << "Can't change data. No model!" << endl;
       return false;
     }
-    if (pModel_->GraphPtr()->Empty())
+    if (pModel_->graph().Empty())
     {
       err_
           << "Can't change data. No nodes in graph (Have you compiled the model?)"
@@ -1254,7 +1254,7 @@ namespace Biips
       err_ << "Can't sample data. No model!" << endl;
       return false;
     }
-    if (pModel_->GraphPtr()->Empty())
+    if (pModel_->graph().Empty())
     {
       err_
           << "Can't sample data. No nodes in graph (Have you compiled the model?)"
@@ -1309,7 +1309,7 @@ namespace Biips
       err_ << "Can't remove data. No model!" << endl;
       return false;
     }
-    if (pModel_->GraphPtr()->Empty())
+    if (pModel_->graph().Empty())
     {
       err_
           << "Can't remove data. No nodes in graph (Have you compiled the model?)"
@@ -1587,7 +1587,7 @@ namespace Biips
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
       boost::tie(it_nodes, it_nodes_end) =
-          pModel_->GraphPtr()->GetSortedNodes();
+          pModel_->graph().GetSortedNodes();
 
       nodeIds.assign(it_nodes, it_nodes_end);
     }
@@ -1607,7 +1607,7 @@ namespace Biips
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
       boost::tie(it_nodes, it_nodes_end) =
-          pModel_->GraphPtr()->GetSortedNodes();
+          pModel_->graph().GetSortedNodes();
 
       nodeNames.resize(std::distance(it_nodes, it_nodes_end));
 
@@ -1630,12 +1630,12 @@ namespace Biips
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
       boost::tie(it_nodes, it_nodes_end) =
-          pModel_->GraphPtr()->GetSortedNodes();
+          pModel_->graph().GetSortedNodes();
 
       nodeTypes.resize(std::distance(it_nodes, it_nodes_end));
 
       for (Size i = 0; it_nodes != it_nodes_end; ++it_nodes, ++i)
-        nodeTypes[i] = pModel_->GraphPtr()->GetNode(*it_nodes).GetType();
+        nodeTypes[i] = pModel_->graph().GetNode(*it_nodes).GetType();
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1653,12 +1653,12 @@ namespace Biips
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
       boost::tie(it_nodes, it_nodes_end) =
-          pModel_->GraphPtr()->GetSortedNodes();
+          pModel_->graph().GetSortedNodes();
 
       nodeObserved.resize(std::distance(it_nodes, it_nodes_end));
 
       for (Size i = 0; it_nodes != it_nodes_end; ++it_nodes, ++i)
-        nodeObserved[i] = pModel_->GraphPtr()->GetObserved()[*it_nodes];
+        nodeObserved[i] = pModel_->graph().GetObserved()[*it_nodes];
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1682,13 +1682,13 @@ namespace Biips
     {
       Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
       boost::tie(it_nodes, it_nodes_end) =
-          pModel_->GraphPtr()->GetSortedNodes();
+          pModel_->graph().GetSortedNodes();
 
       nodeIterations.resize(std::distance(it_nodes, it_nodes_end));
 
       for (Size i = 0; it_nodes != it_nodes_end; ++it_nodes, ++i)
       {
-        if (pModel_->GraphPtr()->GetObserved()[*it_nodes])
+        if (pModel_->graph().GetObserved()[*it_nodes])
           nodeIterations[i] = BIIPS_SIZENA;
         else
           nodeIterations[i] = pModel_->Sampler().GetNodeSamplingIteration(
@@ -1715,14 +1715,14 @@ namespace Biips
     try
     {
       nodeSamplers.clear();
-      nodeSamplers.resize(pModel_->GraphPtr()->GetSize());
+      nodeSamplers.resize(pModel_->graph().GetSize());
 
       Types<std::pair<NodeId, String> >::Array samplers_sequence = pModel_
           ->Sampler().GetSamplersSequence();
       for (Size i = 0; i < samplers_sequence.size(); ++i)
       {
         NodeId id = samplers_sequence[i].first;
-        Size rank = pModel_->GraphPtr()->GetRanks()[id];
+        Size rank = pModel_->graph().GetRanks()[id];
         const String & sampler_name = samplers_sequence[i].second;
         nodeSamplers[rank] = sampler_name;
       }
@@ -1741,7 +1741,7 @@ namespace Biips
     }
     try
     {
-      s = pModel_->GraphPtr()->GetSize();
+      s = pModel_->graph().GetSize();
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 

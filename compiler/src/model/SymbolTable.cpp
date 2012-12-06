@@ -55,7 +55,7 @@ namespace Biips
       throw RuntimeError(String("Name ") + name
                          + " already in use in symbol table");
 
-    NodeArray::Ptr p_node_array(new NodeArray(name, *(model_.GraphPtr()), dim));
+    NodeArray::Ptr p_node_array(new NodeArray(name, model_.graph(), dim));
     nodeArraysMap_[name] = p_node_array;
   }
 
@@ -133,13 +133,13 @@ namespace Biips
     DirectParentNodeIdIterator it_parents, it_parents_end;
 
     boost::tie(it_parents, it_parents_end) =
-        model_.GraphPtr()->GetParents(nodeId);
+        model_.graph().GetParents(nodeId);
     Size n_par = std::distance(it_parents, it_parents_end);
     Types<String>::Array par_names(n_par);
     for (Size i = 0; it_parents != it_parents_end; ++it_parents, ++i)
       par_names[i] = GetName(*it_parents);
 
-    return deparse(nodeId, *(model_.GraphPtr()), par_names);
+    return deparse(nodeId, model_.graph(), par_names);
   }
 
   void SymbolTable::WriteData(std::map<String, MultiArray> const & dataMap)
@@ -165,22 +165,22 @@ namespace Biips
         it != logicChildrenByRank.end(); ++it)
     {
       NodeId id = it->second;
-      model_.GraphPtr()->SampleValue(id, NULL, true);
+      model_.graph().SampleValue(id, NULL, true);
       if (!mcmc)
-        model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
+        model_.graph().UpdateDiscreteness(id, stoChildrenByRank);
     }
 
     if (mcmc)
       return;
 
     // update stochastic children discreteness
-    for (Size rank = 0; rank < model_.GraphPtr()->GetRanks().back(); ++rank)
+    for (Size rank = 0; rank < model_.graph().GetRanks().back(); ++rank)
     {
       if (!stoChildrenByRank.count(rank))
         continue;
 
       NodeId id = stoChildrenByRank.at(rank);
-      model_.GraphPtr()->UpdateDiscreteness(id, stoChildrenByRank);
+      model_.graph().UpdateDiscreteness(id, stoChildrenByRank);
     }
   }
 
