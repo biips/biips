@@ -88,7 +88,7 @@ if (~backward)
    biips_clear_monitors(console, 'f');
 end   
 
-mon2 = inter_biips('get_gen_tree_monitors', console);
+mon2 = inter_biips('get_gen_tree_smooth_monitors', console);
 biips_clear_monitors(console, 's');
 cz = horzcat(cz, struct2cell(mon2));
 

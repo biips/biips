@@ -242,9 +242,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
-    // SET_GEN_TREE_MONITORS FUNCTION
+    // SET_GEN_TREE_SMOOTH_MONITORS FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "set_gen_tree_monitors") {
+    else if (name_func == "set_gen_tree_smooth_monitors") {
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -279,7 +279,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
            CheckIsDouble(up);
          }
           IndexRange range = makeRange(low, up);
-          Bool ok = p_console->SetGenTreeMonitor(name, range);
+          Bool ok = p_console->SetGenTreeSmoothMonitor(name, range);
           if (ok && VERBOSITY>1)
              {
                  mbiips_cout << " " << name;
@@ -439,9 +439,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
-    // GET_GEN_TREE_MONITORS FUNCTION
+    // GET_GEN_TREE_SMOOTH_MONITORS FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "get_gen_tree_monitors") {
+    else if (name_func == "get_gen_tree_smooth_monitors") {
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -449,8 +449,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   
        std::map<String, NodeArrayMonitor> monitors_map;
 
-       if (!p_console->DumpGenTreeMonitors(monitors_map))
-         throw RuntimeError("Failed to dump gen tree monitors.");
+       if (!p_console->DumpGenTreeSmoothMonitors(monitors_map))
+         throw RuntimeError("Failed to dump smooth monitors.");
        
        getMonitors<ColumnMajorOrder>(monitors_map, "smoothing", &plhs[0]);
 
@@ -492,9 +492,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
-    // CLEAR_GEN_TREE_MONITORS FUNCTION
+    // CLEAR_GEN_TREE_SMOOTH_MONITORS FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "clear_gen_tree_monitors") {
+    else if (name_func == "clear_gen_tree_smooth_monitors") {
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -503,8 +503,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsLogical(2);
        Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
        
-       if (!p_console->ClearGenTreeMonitors(release_only))
-         throw RuntimeError("Failed to clear gen tree monitors.");
+       if (!p_console->ClearGenTreeSmoothMonitors(release_only))
+         throw RuntimeError("Failed to clear smooth monitors.");
 
     }
     
@@ -899,9 +899,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }       
     
     /////////////////////////////////////////
-    // IS_GEN_TREE_MONITORED FUNCTION
+    // IS_GEN_TREE_SMOOTH_MONITORED FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "is_gen_tree_monitored") {
+    else if (name_func == "is_gen_tree_smooth_monitored") {
 
        CheckRhs(nrhs, 4, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -928,7 +928,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           
           IndexRange range = makeRange(low, up);
         
-         if (!p_console->IsGenTreeMonitored(name, range)) {
+         if (!p_console->IsGenTreeSmoothMonitored(name, range)) {
                *mxGetLogicals(plhs[0]) = 0; 
                return;
            }
@@ -938,9 +938,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////////
-    // GET_SAMPLED_GEN_TREE_PARTICLE FUNCTION
+    // GET_SAMPLED_GEN_TREE_SMOOTH_PARTICLE FUNCTION
     /////////////////////////////////////////////
-    else if (name_func == "get_sampled_gen_tree_particle") {
+    else if (name_func == "get_sampled_gen_tree_smooth_particle") {
 
        CheckRhs(nrhs, 1, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -948,17 +948,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        std::map<String, MultiArray> sampled_value_map; 
 
-       if(!p_console->DumpSampledGenTreeParticle(sampled_value_map))
-         throw RuntimeError("Failed to get sampled gen tree particle.");
+       if(!p_console->DumpSampledGenTreeSmoothParticle(sampled_value_map))
+         throw RuntimeError("Failed to get sampled smooth particle.");
 
        readDataTable<MultiArray::StorageOrderType>(sampled_value_map, &plhs[0]);
     
     }
     
     ////////////////////////////////////////////
-    // SAMPLE_GEN_TREE_PARTICLE FUNCTION
+    // SAMPLE_GEN_TREE_SMOOTH_PARTICLE FUNCTION
     ////////////////////////////////////////////
-    else if (name_func == "sample_gen_tree_particle") {
+    else if (name_func == "sample_gen_tree_smooth_particle") {
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -967,15 +967,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsDouble(2);
        Size smcRngSeed = static_cast<Size>(*mxGetPr(prhs[2]));
 
-       if (!p_console->SampleGenTreeParticle(smcRngSeed))
-         throw RuntimeError("Failed to sample gen tree particle.");
+       if (!p_console->SampleGenTreeSmoothParticle(smcRngSeed))
+         throw RuntimeError("Failed to sample smooth particle.");
     
     }
     
     ////////////////////////////////////////////
-    // SET_SAMPLED_GEN_TREE_PARTICLE FUNCTION
+    // SET_SAMPLED_GEN_TREE_SMOOTH_PARTICLE FUNCTION
     ////////////////////////////////////////////
-    else if (name_func == "set_sampled_gen_tree_particle") {
+    else if (name_func == "set_sampled_gen_tree_smooth_particle") {
 
        CheckRhs(nrhs, 2, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
@@ -985,8 +985,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
 
-       if(!p_console->SetSampledGenTreeParticle(sampled_value_map))
-         throw RuntimeError("Failed to set sampled gen tree particle.");
+       if(!p_console->SetSampledGenTreeSmoothParticle(sampled_value_map))
+         throw RuntimeError("Failed to set sampled smooth particle.");
     
     }
     

@@ -536,7 +536,7 @@ smc.samples <- function(object, variable.names, n.part, type="fs",
     clear.monitors.biips(object, type="f")
   }
   
-  mon <- .Call("get_gen_tree_monitors", object$ptr(), PACKAGE="RBiips")
+  mon <- .Call("get_gen_tree_smooth_monitors", object$ptr(), PACKAGE="RBiips")
   for (n in names(mon)) {
     ans[[n]][["smoothing"]] <- mon[[n]]
   }
@@ -660,7 +660,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     }
     .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
     if (length(latent.names)>0)
-      .Call("set_sampled_gen_tree_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
+      .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
   }
   
   ## output
@@ -745,7 +745,7 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
   ## reset log norm const and sampled value
   if (n.iter > 0 && !accepted) {
     .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_gen_tree_particle", object$ptr(), sample, PACKAGE="RBiips")
+    .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample, PACKAGE="RBiips")
   }
   
   
