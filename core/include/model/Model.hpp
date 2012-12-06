@@ -77,9 +77,9 @@ namespace Biips
     {
     }
 
-    Graph * GraphPtr()
+    Graph & graph()
     {
-      return pGraph_.get();
+      return *pGraph_;
     }
 
     void SetDefaultFilterMonitors();
