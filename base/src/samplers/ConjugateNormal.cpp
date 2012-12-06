@@ -43,21 +43,19 @@ namespace Biips
   const String ConjugateNormal::NAME_ =
       "Conjugate Normal (with known precision)";
 
-  NumArray::Array ConjugateNormal::initLikeParamContrib() const
+  MultiArray::Array ConjugateNormal::initLikeParamContrib() const
   {
-    static NumArray::Array paramContribValues(2);
-    static ValArray mean_val(1);
-    mean_val[0] = 0.0;
-    static ValArray prec_val(1);
-    prec_val[0] = 0.0;
-    paramContribValues[0].SetPtr(P_SCALAR_DIM.get(), &mean_val);
-    paramContribValues[1].SetPtr(P_SCALAR_DIM.get(), &prec_val);
+    MultiArray::Array paramContribValues(2);
+    ValArray::Ptr mean_valptr(new ValArray(1, 0.0));
+    ValArray::Ptr prec_valptr(new ValArray(1, 0.0));
+    paramContribValues[0].SetPtr(P_SCALAR_DIM, mean_valptr);
+    paramContribValues[1].SetPtr(P_SCALAR_DIM, prec_valptr);
 
     return paramContribValues;
   }
 
   void ConjugateNormal::formLikeParamContrib(NodeId likeId,
-                                             NumArray::Array & likeParamContribValues)
+                                             MultiArray::Array & likeParamContribValues)
   {
     GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
@@ -68,36 +66,36 @@ namespace Biips
     likeParamContribValues[1].ScalarView() += like_prec;
   }
 
-  NumArray::Array ConjugateNormal::postParam(const NumArray::Array & priorParamValues,
-                                             const NumArray::Array & likeParamContribValues) const
+  MultiArray::Array ConjugateNormal::postParam(const NumArray::Array & priorParamValues,
+                                             const MultiArray::Array & likeParamContribValues) const
   {
-    static ValArray post_prec_val(1);
-    post_prec_val[0] = priorParamValues[1].ScalarView()
+    ValArray::Ptr post_prec_val(new ValArray(1));
+    (*post_prec_val)[0] = priorParamValues[1].ScalarView()
         + likeParamContribValues[1].ScalarView();
-    static ValArray post_mean_val(1);
-    post_mean_val[0] = (priorParamValues[0].ScalarView()
+    ValArray::Ptr post_mean_val(new ValArray(1));
+    (*post_mean_val)[0] = (priorParamValues[0].ScalarView()
         * priorParamValues[1].ScalarView()
-        + likeParamContribValues[0].ScalarView()) / post_prec_val[0];
+        + likeParamContribValues[0].ScalarView()) / (*post_prec_val)[0];
 
-    static NumArray::Array post_param_values(2);
-    post_param_values[0].SetPtr(P_SCALAR_DIM.get(), &post_mean_val);
-    post_param_values[1].SetPtr(P_SCALAR_DIM.get(), &post_prec_val);
+    MultiArray::Array post_param_values(2);
+    post_param_values[0].SetPtr(P_SCALAR_DIM, post_mean_val);
+    post_param_values[1].SetPtr(P_SCALAR_DIM, post_prec_val);
     return post_param_values;
   }
 
   Scalar ConjugateNormal::computeLogIncrementalWeight(const NumArray & sampledData,
                                                       const NumArray::Array & priorParamValues,
                                                       const NumArray::Array & postParamValues,
-                                                      const NumArray::Array & LikeParamContrib)
+                                                      const MultiArray::Array & LikeParamContrib)
   {
     Scalar like_mean_contrib = LikeParamContrib[0].ScalarView();
     Scalar like_prec_contrib = LikeParamContrib[1].ScalarView();
     Scalar prior_prec = priorParamValues[1].ScalarView();
-    static NumArray::Array norm_const_param_values(2);
-    static ValArray norm_const_mean_val(1);
+    NumArray::Array norm_const_param_values(2);
+    ValArray norm_const_mean_val(1);
     norm_const_mean_val[0] = like_mean_contrib / like_prec_contrib;
     norm_const_param_values[0].SetPtr(P_SCALAR_DIM.get(), &norm_const_mean_val);
-    static ValArray norm_const_prec_val(1);
+    ValArray norm_const_prec_val(1);
     norm_const_prec_val[0] = 1.0 / (1.0 / prior_prec + 1.0 / like_prec_contrib);
     norm_const_param_values[1].SetPtr(P_SCALAR_DIM.get(), &norm_const_prec_val);
 

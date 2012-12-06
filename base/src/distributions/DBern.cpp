@@ -85,7 +85,7 @@ namespace Biips
     return my_point * log(p) + (1.0 - my_point) * log(1.0 - p);
   }
 
-  void DBern::unboundedSupport(ValArray & lower,
+  void DBern::fixedUnboundedSupport(ValArray & lower,
                                ValArray & upper,
                                const NumArray::Array & paramValues) const
   {

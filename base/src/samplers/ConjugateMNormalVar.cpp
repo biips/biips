@@ -45,7 +45,7 @@ namespace Biips
       "Conjugate Multivariate Normal (with known covariance matrix)";
 
   void ConjugateMNormalVar::formLikeParamContrib(NodeId likeId,
-                                                 NumArray::Array & likeParamContribValues)
+                                                 MultiArray::Array & likeParamContribValues)
   {
     VectorRef like_mean(likeParamContribValues[0]);
     MatrixRef like_prec(likeParamContribValues[1]);
@@ -68,58 +68,56 @@ namespace Biips
     like_prec += prec_i_mat;
   }
 
-  NumArray::Array ConjugateMNormalVar::postParam(const NumArray::Array & priorParamValues,
-                                                 const NumArray::Array & likeParamContribValues) const
+  MultiArray::Array ConjugateMNormalVar::postParam(const NumArray::Array & priorParamValues,
+                                                 const MultiArray::Array & likeParamContribValues) const
   {
-    static Matrix post_cov;
-    post_cov = Matrix(priorParamValues[1]);
+    MultiArray::Array post_param_values(2);
+    ValArray::Ptr post_mean_val(new ValArray(likeParamContribValues[0].Values()));
+    post_param_values[0].SetPtr(likeParamContribValues[0].DimPtr(), post_mean_val);
+
+    ValArray::Ptr post_cov_val(new ValArray(priorParamValues[1].Values()));
+    post_param_values[1].SetPtr(likeParamContribValues[1].DimPtr(), post_cov_val);
+
+    VectorRef post_mean(post_param_values[0]);
+    MatrixRef post_cov(post_param_values[1]);
 
     if (!ublas::cholesky_factorize(post_cov))
-      throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov is not positive-semidefinite.");
+      throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov_mat is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
-    static Vector post_mean;
-    post_mean = ublas::prod(post_cov, Vector(priorParamValues[0]))
-        + Vector(likeParamContribValues[0]);
+    post_mean += ublas::prod(post_cov, Vector(priorParamValues[0]));
 
     post_cov += Matrix(likeParamContribValues[1]);
+
     if (!ublas::cholesky_factorize(post_cov))
-      throw LogicError("ConjugateMNormalVar::postParam: matrix post_cov is not positive-semidefinite.");
+      throw LogicError("ConjugateMNormal::postParam: matrix post_cov is not positive-semidefinite.");
     ublas::cholesky_invert(post_cov);
 
     post_mean = ublas::prod(post_cov, post_mean);
 
-    static NumArray::Array post_param_values(2);
-    static DimArray dim_mean(1);
-    dim_mean[0] = post_mean.size();
-    post_param_values[0] = NumArray(&dim_mean, &post_mean.data());
-    static DimArray dim_prec(2);
-    dim_prec[0] = post_cov.size1();
-    dim_prec[1] = post_cov.size2();
-    post_param_values[1] = NumArray(&dim_prec, &post_cov.data());
     return post_param_values;
   }
 
   Scalar ConjugateMNormalVar::computeLogIncrementalWeight(const NumArray & sampledData,
                                                           const NumArray::Array & priorParamValues,
                                                           const NumArray::Array & postParamValues,
-                                                          const NumArray::Array & LikeParamContrib)
+                                                          const MultiArray::Array & likeParamContrib)
   {
-    static Matrix norm_const_cov;
-    norm_const_cov = Matrix(LikeParamContrib[1]);
+    Matrix norm_const_cov;
+    norm_const_cov = Matrix(likeParamContrib[1]);
     if (!ublas::cholesky_factorize(norm_const_cov))
       throw LogicError("ConjugateMNormalVar::computeLogIncrementalWeight: matrix norm_const_cov is not positive-semidefinite.");
     ublas::cholesky_invert(norm_const_cov);
 
-    static Vector norm_const_mean;
-    norm_const_mean = ublas::prod(norm_const_cov, Vector(LikeParamContrib[0]));
+    Vector norm_const_mean;
+    norm_const_mean = ublas::prod(norm_const_cov, Vector(likeParamContrib[0]));
     norm_const_cov += Matrix(priorParamValues[1]);
 
-    static NumArray::Array norm_const_param_values(2);
-    static DimArray dim_mean(1);
+    NumArray::Array norm_const_param_values(2);
+    DimArray dim_mean(1);
     dim_mean[0] = norm_const_mean.size();
     norm_const_param_values[0] = NumArray(&dim_mean, &norm_const_mean.data());
-    static DimArray dim_cov(2);
+    DimArray dim_cov(2);
     dim_cov[0] = norm_const_cov.size1();
     dim_cov[1] = norm_const_cov.size2();
     norm_const_param_values[1] = NumArray(&dim_cov, &norm_const_cov.data());

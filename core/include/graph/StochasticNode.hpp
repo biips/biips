@@ -80,11 +80,11 @@ namespace Biips
     {
       return pPrior_->LogDensity(x, paramValues, boundValues);
     }
-    void UnboundedSupport(ValArray & lower,
+    void FixedUnboundedSupport(ValArray & lower,
                           ValArray & upper,
-                          const NumArray::Array & paramValues) const
+                          const NumArray::Array & fixedParamValues) const
     {
-      pPrior_->UnboundedSupport(lower, upper, paramValues);
+      pPrior_->FixedUnboundedSupport(lower, upper, fixedParamValues);
     }
 
     NodeId Lower() const

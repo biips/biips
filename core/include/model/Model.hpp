@@ -49,23 +49,23 @@ namespace Biips
   class Model
   {
   protected:
-    Graph::Ptr pGraph_;
-    ForwardSampler::Ptr pSampler_;
-    BackwardSmoother::Ptr pSmoother_;
-    Types<Monitor::Ptr>::Array filterMonitors_;
-    std::map<NodeId, Monitor::Ptr> filterMonitorsMap_;
-    Types<Monitor::Ptr>::Array smoothMonitors_;
-    std::map<NodeId, Monitor::Ptr> smoothMonitorsMap_;
-    Monitor::Ptr pSmoothTreeMonitor_;
-    std::set<NodeId> smoothTreeMonitoredNodeIds_;
+    boost::scoped_ptr<Graph> pGraph_;
+    boost::scoped_ptr<ForwardSampler> pSampler_;
+    boost::scoped_ptr<BackwardSmoother> pSmoother_;
+    Types<boost::shared_ptr<Monitor> >::Array filterMonitors_;
+    std::map<NodeId, Monitor *> filterMonitorsMap_;
+    Types<boost::shared_ptr<Monitor> >::Array backwardSmoothMonitors_;
+    std::map<NodeId, Monitor *> backwardSmoothMonitorsMap_;
+    boost::scoped_ptr<Monitor> pGenTreeMonitor_;
+    std::set<NodeId> genTreeMonitoredNodeIds_;
     Bool defaultMonitorsSet_;
 
     MultiArray extractMonitorStat(
         NodeId nodeId, StatTag statFeature,
-        const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+        const std::map<NodeId, Monitor *> & monitorsMap) const;
     Histogram extractMonitorPdf(
         NodeId nodeId, Size numBins, Scalar cacheFraction,
-        const std::map<NodeId, Monitor::Ptr> & monitorsMap) const;
+        const std::map<NodeId, Monitor *> & monitorsMap) const;
 
   public:
 
@@ -77,16 +77,16 @@ namespace Biips
     {
     }
 
-    const Graph::Ptr & GraphPtr()
+    Graph * GraphPtr()
     {
-      return pGraph_;
+      return pGraph_.get();
     }
 
     void SetDefaultFilterMonitors();
 
     Bool SetFilterMonitor(NodeId nodeId);
-    Bool SetSmoothTreeMonitor(NodeId nodeId);
-    Bool SetSmoothMonitor(NodeId nodeId);
+    Bool SetGenTreeMonitor(NodeId nodeId);
+    Bool SetBackwardSmoothMonitor(NodeId nodeId);
 
     Bool SamplerBuilt() const
     {
@@ -102,7 +102,7 @@ namespace Biips
 
     void BuildSampler();
 
-    void InitSampler(Size nParticles, const Rng::Ptr & pRng,
+    void InitSampler(Size nParticles, Rng * pRng,
                      const String & rsType, Scalar threshold);
     void IterateSampler();
 
@@ -118,21 +118,20 @@ namespace Biips
 
     // TODO manage multi statFeature
     MultiArray ExtractFilterStat(NodeId nodeId, StatTag statFeature) const;
-    MultiArray ExtractSmoothStat(NodeId nodeId, StatTag statFeature) const;
-
-    MultiArray ExtractSmoothTreeStat(NodeId nodeId, StatTag statFeature) const;
-    Histogram ExtractSmoothTreePdf(NodeId nodeId, Size numBins = 40,
-                                   Scalar cacheFraction = 0.25) const;
+    MultiArray ExtractGenTreeStat(NodeId nodeId, StatTag statFeature) const;
+    MultiArray ExtractBackwardSmoothStat(NodeId nodeId, StatTag statFeature) const;
 
     Histogram ExtractFilterPdf(NodeId nodeId, Size numBins = 40,
                                Scalar cacheFraction = 0.25) const;
-    Histogram ExtractSmoothPdf(NodeId nodeId, Size numBins = 40,
+    Histogram ExtractGenTreePdf(NodeId nodeId, Size numBins = 40,
+                                   Scalar cacheFraction = 0.25) const;
+    Histogram ExtractBackwardSmoothPdf(NodeId nodeId, Size numBins = 40,
                                Scalar cacheFraction = 0.25) const;
 
     // release_only flag: only release monitor objects but keep nodeIds
     void virtual ClearFilterMonitors(Bool release_only = false);
-    void virtual ClearSmoothTreeMonitors(Bool release_only = false);
-    void virtual ClearSmoothMonitors(Bool release_only = false);
+    void virtual ClearGenTreeMonitors(Bool release_only = false);
+    void virtual ClearBackwardSmoothMonitors(Bool release_only = false);
 
     Scalar GetLogPriorDensity(NodeId nodeId) const;
   };

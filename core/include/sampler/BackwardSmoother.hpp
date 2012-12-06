@@ -53,7 +53,7 @@ namespace Biips
 
   protected:
     const Graph & graph_;
-    Types<Monitor::Ptr>::Array filterMonitors_;
+    Types<Monitor*>::Array filterMonitors_;
     //    ValArray logWeights_;
     ValArray weights_;
     Scalar sumOfWeights_;
@@ -63,11 +63,11 @@ namespace Biips
     Types<Size>::Array nodeIterations_;
 
     void sumOfWeightsAndEss();
-    const Monitor::Ptr & getParentFilterMonitor(NodeId id);
+    Monitor * getParentFilterMonitor(NodeId id);
 
   public:
     BackwardSmoother(const Graph & graph,
-                     const Types<Monitor::Ptr>::Array & filterMonitors,
+                     const Types<Monitor *>::Array & filterMonitors,
                      const Types<Size>::Array & nodeIterations);
 
     void Initialize();

@@ -88,10 +88,10 @@ namespace Biips
     virtual Scalar logDensity(const NumArray & x,
                               const NumArray::Array & paramValues,
                               const NumArray::Pair & boundValues) const;
-    virtual Scalar unboundedLower(const NumArray::Array & paramValues) const;
-    virtual Scalar unboundedUpper(const NumArray::Array & paramValues) const;
+    virtual Scalar fixedUnboundedLower(const NumArray::Array & paramValues) const;
+    virtual Scalar fixedUnboundedUpper(const NumArray::Array & paramValues) const;
     virtual void
-    unboundedSupport(ValArray & lower,
+    fixedUnboundedSupport(ValArray & lower,
                      ValArray & upper,
                      const NumArray::Array & paramValues) const;
 

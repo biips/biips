@@ -298,7 +298,7 @@ namespace Biips
                          Bool showProgress,
                          Size numBins)
   {
-    Rng::Ptr p_rng(new Rng(rngSeed));
+    boost::scoped_ptr<Rng> p_rng(new Rng(rngSeed));
 
     if (verbose_ >= 2)
     {
@@ -324,7 +324,7 @@ namespace Biips
       os_ << "SMC sampler's progress: " << std::endl;
 
     // filtering
-    pSampler_->Initialize(nParticles, p_rng, rsType, essThreshold);
+    pSampler_->Initialize(nParticles, p_rng.get(), rsType, essThreshold);
 
     initFilterAccumulators(nParticles, numBins);
     filterAccumulate(0);

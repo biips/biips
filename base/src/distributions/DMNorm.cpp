@@ -45,6 +45,9 @@
 namespace Biips
 {
 
+  static const Scalar TOL = 1e-7;
+  static const Scalar LOG_2PI = std::log(2 * M_PI);
+
   Bool DMNorm::checkParamDims(
       const Types<DimArray::Ptr>::Array & paramDims) const
   {
@@ -68,7 +71,6 @@ namespace Biips
     const NumArray & mean = paramValues[0];
     const NumArray & prec = paramValues[1];
 
-    static const Scalar TOL = 1e-7;
 
     Size n = mean.Length();
 
@@ -137,13 +139,12 @@ namespace Biips
     diff_vec = ublas::prod(
         diff_vec, ublas::triangular_adaptor<Matrix, ublas::lower>(prec_chol));
 
-    static const Scalar log_2_pi = std::log(2 * M_PI);
     return -0.5
-           * (diff_vec.size() * log_2_pi - ublas::cholesky_logdet(prec_chol)
+           * (diff_vec.size() * LOG_2PI - ublas::cholesky_logdet(prec_chol)
               + ublas::inner_prod(diff_vec, diff_vec));
   }
 
-  void DMNorm::unboundedSupport(ValArray & lower, ValArray & upper,
+  void DMNorm::fixedUnboundedSupport(ValArray & lower, ValArray & upper,
                                 const NumArray::Array & paramValues) const
   {
     std::fill(lower.begin(), lower.end(), BIIPS_NEGINF);

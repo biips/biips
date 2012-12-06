@@ -59,8 +59,8 @@ namespace Biips
       BaseType("dpar", 2, DIST_SPECIAL, false)
     {
     }
-    virtual Scalar unboundedLower(const NumArray::Array & paramValues) const;
-    virtual Scalar unboundedUpper(const NumArray::Array & paramValues) const;
+    virtual Scalar fixedUnboundedLower(const NumArray::Array & paramValues) const;
+    virtual Scalar fixedUnboundedUpper(const NumArray::Array & paramValues) const;
 
     virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
     virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;

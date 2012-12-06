@@ -63,7 +63,7 @@ namespace Biips
                               const NumArray::Array & paramValues,
                               const NumArray::Pair & boundValues) const;
     virtual void
-    unboundedSupport(ValArray & lower,
+    fixedUnboundedSupport(ValArray & lower,
                      ValArray & upper,
                      const NumArray::Array & paramValues) const;
 

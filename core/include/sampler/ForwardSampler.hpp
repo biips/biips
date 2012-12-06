@@ -67,7 +67,7 @@ namespace Biips
     Size nParticles_;
     ///The current iteration
     Size iter_;
-    Rng::Ptr pRng_;
+    Rng * pRng_;
     Resampler::Ptr pResampler_;
 
     ///The ESS threshold under which resampling will be done.
@@ -177,7 +177,7 @@ namespace Biips
     void UnlockAllNodes();
 
     void Initialize(Size nbParticles,
-                    const Rng::Ptr & pRng,
+                    Rng * pRng,
                     const String & rsType = "stratified",
                     Scalar threshold = 0.5);
     void Iterate();

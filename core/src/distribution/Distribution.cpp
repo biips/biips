@@ -86,15 +86,16 @@ namespace Biips
     return logDensity(x, paramValues, boundValues);
   }
 
-  void Distribution::UnboundedSupport(ValArray & lower,
+  void Distribution::FixedUnboundedSupport(ValArray & lower,
                                       ValArray & upper,
-                                      const NumArray::Array & paramValues) const
+                                      const NumArray::Array & fixedParamValues) const
   {
-    if (!CheckParamValues(paramValues))
-      throw RuntimeError(String("Invalid parameters values in UnboundedSupport method for distribution ")
-          + name_);
+    // FIXME
+//    if (!CheckParamValues(fixedParamValues))
+//      throw RuntimeError(String("Invalid parameters values in fixedUnboundedSupport method for distribution ")
+//          + name_);
 
-    unboundedSupport(lower, upper, paramValues);
+    fixedUnboundedSupport(lower, upper, fixedParamValues);
   }
 
 }

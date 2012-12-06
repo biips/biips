@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MultiArray.cpp
+/*! \file Vector.cpp
  * \brief
  *
  * \author  $LastChangedBy$
@@ -34,33 +34,52 @@
  * Id:      $Id$
  */
 
-#include "common/MultiArray.hpp"
 #include "common/Vector.hpp"
-#include "common/Matrix.hpp"
 
 namespace Biips
 {
-  Bool allMissing(const MultiArray & marray)
+
+  Vector::Vector(const NumArray & data) :
+    Vector::BaseType(data.Dim()[0], data.Values())
   {
-    Size N = marray.Length();
-    const ValArray & v = marray.Values();
-    for (Size i = 0; i < N; ++i)
-    {
-      if (v[i] != BIIPS_REALNA)
-        return false;
-    }
-    return true;
+    if (data.NDim() > 1)
+      throw LogicError("Can not construct Vector: NumArray has more than 1 dimension.");
+  }
+  Vector::Vector(const MultiArray & data) :
+    Vector::BaseType(data.Dim()[0], data.Values())
+  {
+    if (data.NDim() > 1)
+      throw LogicError("Can not construct Vector: MultiArray has more than 1 dimension.");
   }
 
-  Bool anyMissing(const MultiArray & marray)
+  VectorRef::VectorRef(VectorRef & vec_ref) :
+    VectorRef::BaseType(vec_ref.size(), array_type()), pDim_(vec_ref.pDim_), pValues_(vec_ref.pValues_), released_(vec_ref.released_)
   {
-    Size N = marray.Length();
-    const ValArray & v = marray.Values();
-    for (Size i = 0; i < N; ++i)
+    if (!released_)
     {
-      if (v[i] == BIIPS_REALNA)
-        return true;
+      swap(vec_ref);
+      vec_ref.released_ = true;
     }
-    return false;
   }
+
+  VectorRef::VectorRef(const VectorRef & vec_ref) :
+    VectorRef::BaseType(vec_ref), pDim_(vec_ref.pDim_), pValues_(vec_ref.pValues_), released_(vec_ref.released_)
+  {
+    if (!released_)
+    {
+      vec_ref.released_ = true;
+    }
+  }
+
+  void VectorRef::Release()
+  {
+    if (!released_)
+    {
+      (*pDim_)[0] = size();
+      data().swap(*pValues_);
+      released_ = true;
+    }
+  }
+
 }
+

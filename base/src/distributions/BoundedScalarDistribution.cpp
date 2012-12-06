@@ -161,7 +161,7 @@ namespace Biips
       values[0] = r(paramValues, rng);
   }
 
-  Scalar BoundedScalarDistribution::unboundedLower(const NumArray::Array & paramValues) const
+  Scalar BoundedScalarDistribution::fixedUnboundedLower(const NumArray::Array & paramValues) const
   {
     switch (support_)
     {
@@ -179,7 +179,7 @@ namespace Biips
     return 0.0; //Wall
   }
 
-  Scalar BoundedScalarDistribution::unboundedUpper(const NumArray::Array & paramValues) const
+  Scalar BoundedScalarDistribution::fixedUnboundedUpper(const NumArray::Array & paramValues) const
   {
     switch (support_)
     {
@@ -197,12 +197,12 @@ namespace Biips
     return 0.0; //Wall
   }
 
-  void BoundedScalarDistribution::unboundedSupport(ValArray & lower,
+  void BoundedScalarDistribution::fixedUnboundedSupport(ValArray & lower,
                                                    ValArray & upper,
                                                    const NumArray::Array & paramValues) const
   {
-    lower[0] = unboundedLower(paramValues);
-    upper[0] = unboundedUpper(paramValues);
+    lower[0] = fixedUnboundedLower(paramValues);
+    upper[0] = fixedUnboundedUpper(paramValues);
   }
 
   Bool BoundedScalarDistribution::CheckDensityParamValues(const NumArray & x,

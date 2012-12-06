@@ -81,13 +81,13 @@ namespace Biips
     return boost::math::pdf(dist, x);
   }
 
-  Scalar DPar::unboundedLower(const NumArray::Array & paramValues) const
+  Scalar DPar::fixedUnboundedLower(const NumArray::Array & paramValues) const
   {
     Scalar c = paramValues[1].ScalarView();
     return c;
   }
 
-  Scalar DPar::unboundedUpper(const NumArray::Array & paramValues) const
+  Scalar DPar::fixedUnboundedUpper(const NumArray::Array & paramValues) const
   {
     return BIIPS_POSINF;
   }

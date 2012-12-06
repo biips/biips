@@ -30,16 +30,25 @@ type='fs';
 rs_type = 'stratified';
 rs_thres = 0.5;
 if (~exist('OCTAVE_VERSION', 'var')) 
-  % matlab version
+  % octave version
   s=rng('shuffle');
   seed=randi(intmax);
   rng(s);
 else
-  % octave version
-  s=rand('state');
-  rand('state',time);
-  seed=double(randi(intmax));
-  rand('state',s);
+  % matlab version
+%%%%%%%%% Modif CEA (30/11/12)
+    if verLessThan('matlab', '7.12')
+        s=rand('state'); 
+        rand('state',sum(100*clock)); 
+        data_rng_seed=double(randi(intmax)); 
+        rand('state',s); 
+%%%%%%%%%
+    else 
+      s=rand('state');
+      rand('state',time);
+      seed=double(randi(intmax));
+      rand('state',s);
+    end
 end
 
 if opt_argin >= 1
@@ -79,14 +88,14 @@ if (~backward)
    biips_clear_monitors(console, 'f');
 end   
 
-mon2 = inter_biips('get_smooth_tree_monitors', console);
+mon2 = inter_biips('get_gen_tree_monitors', console);
 biips_clear_monitors(console, 's');
 cz = horzcat(cz, struct2cell(mon2));
 
 if (backward)
    inter_biips('run_backward_smoother', console);
    biips_clear_monitors(console, 'f'); 
-   mon3 = inter_biips('get_smooth_monitors', console);
+   mon3 = inter_biips('get_backward_smooth_monitors', console);
    biips_clear_monitors(console, 'b'); 
    cz = horzcat(cz, struct2cell(mon3));
 end

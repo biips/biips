@@ -67,23 +67,23 @@ namespace Biips
     friend class LikeFormVisitor<SelfType> ;
 
     explicit ConjugateSampler(const Graph & graph) :
-      NodeSampler(graph)
+        NodeSampler(graph)
     {
     }
 
-    virtual NumArray::Array initLikeParamContrib() const;
+    virtual MultiArray::Array initLikeParamContrib() const;
     virtual void
     formLikeParamContrib(NodeId likeId,
-                         NumArray::Array & likeParamContribValues) = 0;
-    virtual NumArray::Array
+                         MultiArray::Array & likeParamContribValues) = 0;
+    virtual MultiArray::Array
     postParam(const NumArray::Array & priorParamContribValues,
-              const NumArray::Array & likeParamContribValues) const = 0;
+              const MultiArray::Array & likeParamContribValues) const = 0;
     virtual Scalar
-    computeLogIncrementalWeight(const NumArray & sampfedData,
+    computeLogIncrementalWeight(const NumArray & sampledData,
                                 const NumArray::Array & priorParamValues,
                                 const NumArray::Array & postParamValues,
-                                const NumArray::Array & LikeParamContrib =
-                                    NumArray::Array());
+                                const MultiArray::Array & likeParamContrib =
+                                    MultiArray::Array());
     virtual void sample(const StochasticNode & node);
 
   public:
@@ -129,23 +129,18 @@ namespace Biips
   };
 
   template<typename PriorDist, typename LikeDist, Size paramIndex>
-  NumArray::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
+  MultiArray::Array ConjugateSampler<PriorDist, LikeDist, paramIndex>::initLikeParamContrib() const
   {
     Size n_par = PriorDist::Instance()->NParam();
-    static NumArray::Array paramContribValues;
-    paramContribValues.resize(n_par);
-    static Types<DimArray *>::Array dim_ptrs;
-    dim_ptrs.resize(n_par);
-    static Types<ValArray>::Array vals;
-    vals.resize(n_par);
+    MultiArray::Array paramContribValues(n_par);
 
     GraphTypes::ParentIterator it_parents, it_parents_end;
     boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
     for (Size i = 0; i < n_par; ++it_parents, ++i)
     {
-      dim_ptrs[i] = graph_.GetNode(*it_parents).DimPtr().get();
-      vals[i] = ValArray(dim_ptrs[i]->Length());
-      paramContribValues[i] = NumArray(dim_ptrs[i], &vals[i]);
+      DimArray::Ptr dim_ptr = graph_.GetNode(*it_parents).DimPtr();
+      ValArray::Ptr val_ptr(new ValArray(dim_ptr->Length()));
+      paramContribValues[i].SetPtr(dim_ptr, val_ptr);
     }
     return paramContribValues;
   }
@@ -154,7 +149,7 @@ namespace Biips
   Scalar ConjugateSampler<PriorDist, LikeDist, paramIndex>::computeLogIncrementalWeight(const NumArray & sampledData,
                                                                                         const NumArray::Array & priorParamValues,
                                                                                         const NumArray::Array & postParamValues,
-                                                                                        const NumArray::Array & LikeParamContrib)
+                                                                                        const MultiArray::Array & likeParamContrib)
   {
     // Prior
     Scalar log_prior = PriorDist::Instance()->LogDensity(sampledData,
@@ -208,7 +203,7 @@ namespace Biips
 
     const Graph & graph_;
     ConjugateSampler & nodeSampler_;
-    NumArray::Array paramContribValues_;
+    MultiArray::Array & paramContribValues_;
 
     virtual void visit(const StochasticNode & node)
     {
@@ -216,14 +211,10 @@ namespace Biips
     }
 
   public:
-    const NumArray::Array & GetParamContribValues() const
-    {
-      return paramContribValues_;
-    }
-
-    LikeFormVisitor(const Graph & graph, ConjugateSampler & nodeSampler) :
-      graph_(graph), nodeSampler_(nodeSampler),
-          paramContribValues_(nodeSampler.initLikeParamContrib())
+    LikeFormVisitor(const Graph & graph,
+                    ConjugateSampler & nodeSampler,
+                    MultiArray::Array & paramContribValues) :
+        graph_(graph), nodeSampler_(nodeSampler), paramContribValues_(paramContribValues)
     {
     }
   };
@@ -234,24 +225,25 @@ namespace Biips
     NumArray::Array prior_param_values = getParamValues(nodeId_, graph_, *this);
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
-    boost::tie(it_offspring, it_offspring_end)
-        = graph_.GetLikelihoodChildren(nodeId_);
-    LikeFormVisitor<SelfType> like_form_vis(graph_, *this);
+    boost::tie(it_offspring, it_offspring_end) =
+        graph_.GetLikelihoodChildren(nodeId_);
+
+    MultiArray::Array like_param_contrib = initLikeParamContrib();
+    LikeFormVisitor<SelfType> like_form_vis(graph_, *this, like_param_contrib);
     for (; it_offspring != it_offspring_end; ++it_offspring)
     {
       graph_.VisitNode(*it_offspring, like_form_vis);
     }
-    NumArray::Array like_param_contrib = like_form_vis.GetParamContribValues();
 
-    NumArray::Array post_param_values = postParam(prior_param_values,
-                                                  like_param_contrib);
+    MultiArray::Array post_param_values = postParam(prior_param_values,
+                                                    like_param_contrib);
 
     // allocate memory
     nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
 
     // sample
     PriorDist::Instance()->Sample(*nodeValuesMap()[nodeId_],
-                                  post_param_values,
+                                  NumArray::Array(post_param_values),
                                   NULL_NUMARRAYPAIR,
                                   *pRng_); // FIXME Boundaries
     sampledFlagsMap()[nodeId_] = true;
@@ -260,7 +252,7 @@ namespace Biips
 
     logIncrementalWeight_ = computeLogIncrementalWeight(sampled_data,
                                                         prior_param_values,
-                                                        post_param_values,
+                                                        NumArray::Array(post_param_values),
                                                         like_param_contrib);
   }
 
@@ -312,7 +304,7 @@ namespace Biips
     }
 
     IsConjugateVisitor(const Graph & graph, NodeId myId) :
-      graph_(graph), priorId_(myId), conjugate_(false)
+        graph_(graph), priorId_(myId), conjugate_(false)
     {
     }
   };
@@ -342,8 +334,8 @@ namespace Biips
         return;
 
       GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
-      boost::tie(it_offspring, it_offspring_end)
-          = graph_.GetLikelihoodChildren(nodeId_);
+      boost::tie(it_offspring, it_offspring_end) =
+          graph_.GetLikelihoodChildren(nodeId_);
 
       IsConjugateVisitor<ConjugateSampler> child_vis(graph_, nodeId_);
 
@@ -363,7 +355,7 @@ namespace Biips
     }
 
     CanSampleVisitor(const Graph & graph) :
-      graph_(graph), canSample_(false)
+        graph_(graph), canSample_(false)
     {
     }
   };
@@ -386,8 +378,8 @@ namespace Biips
   }
 
   template<typename ConjugateSampler>
-  typename ConjugateSamplerFactory<ConjugateSampler>::Ptr
-      ConjugateSamplerFactory<ConjugateSampler>::pConjugateSamplerFactoryInstance_(new SelfType());
+  typename ConjugateSamplerFactory<ConjugateSampler>::Ptr ConjugateSamplerFactory<
+      ConjugateSampler>::pConjugateSamplerFactoryInstance_(new SelfType());
 
 }
 
