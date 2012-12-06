@@ -42,16 +42,6 @@
 namespace Biips
 {
 
-  static Vector toVector(const MultiArray & marray)
-  {
-    return Vector(NumArray(marray.DimPtr().get(), marray.ValuesPtr().get()));
-  }
-
-  static Matrix toMatrix(const MultiArray & marray)
-  {
-    return Matrix(NumArray(marray.DimPtr().get(), marray.ValuesPtr().get()));
-  }
-
   void KalmanFilter::updateCore() // TODO optimize (using effective uBlas functions)
   {
     if (stateType_ == UPDATED)
@@ -94,13 +84,13 @@ namespace Biips
     stateType_ = stateType;
     if (stateType_ == UPDATED)
     {
-      xtminus1_ = toVector(xtminus1);
-      Ptminus1_ = toMatrix(Ptminus1);
+      xtminus1_ = Vector(xtminus1);
+      Ptminus1_ = Matrix(Ptminus1);
     }
     else
     {
-      xtPred_ = toVector(xtminus1);
-      PtPred_ = toMatrix(Ptminus1);
+      xtPred_ = Vector(xtminus1);
+      PtPred_ = Matrix(Ptminus1);
     }
   }
 
@@ -108,16 +98,16 @@ namespace Biips
                                        const MultiArray & Bt,
                                        const MultiArray & Qt)
   {
-    Ft_ = toMatrix(Ft);
-    Bt_ = toMatrix(Bt);
-    Qt_ = toMatrix(Qt);
+    Ft_ = Matrix(Ft);
+    Bt_ = Matrix(Bt);
+    Qt_ = Matrix(Qt);
   }
 
   void KalmanFilter::SetObservationModel(const MultiArray & Ht,
                                          const MultiArray & Rt)
   {
-    Ht_ = toMatrix(Ht);
-    Rt_ = toMatrix(Rt);
+    Ht_ = Matrix(Ht);
+    Rt_ = Matrix(Rt);
   }
 
   void KalmanFilter::Init(Scalar xtminus1, Scalar Ptminus1, StateType stateType)
@@ -151,12 +141,12 @@ namespace Biips
 
   void KalmanFilter::Update(const MultiArray & zt)
   {
-    zt_ = toVector(zt);
+    zt_ = Vector(zt);
     updateCore();
   }
   void KalmanFilter::Update(const MultiArray & zt, const MultiArray & ut)
   {
-    ut_ = toVector(ut);
+    ut_ = Vector(ut);
     Update(zt);
   }
 
@@ -178,24 +168,23 @@ namespace Biips
                              StateType stateType) :
     t_(0), dimx_(xtminus1.Length()), dimz_(Rt.Dim()[0]), xtminus1_(dimx_),
         Ptminus1_(dimx_, dimx_), Ft_(ublas::identity_matrix<Scalar>(dimx_)),
-        ut_(1, 0.0), Bt_(dimx_, 1, 0.0), Qt_(toMatrix(Ptminus1)), zt_(dimz_),
-        Ht_(ublas::identity_matrix<Scalar>(dimx_)), Rt_(toMatrix(Rt)),
+        ut_(1, 0.0), Bt_(dimx_, 1, 0.0), Qt_(Ptminus1), zt_(dimz_),
+        Ht_(ublas::identity_matrix<Scalar>(dimx_)), Rt_(Rt),
         xtPred_(dimx_), PtPred_(dimx_, 1), ztPred_(dimz_),
         StPred_(dimz_, dimz_), Kt_(dimx_, dimz_), xt_(dimx_),
         Pt_(dimx_, dimx_), stateType_(stateType)
   {
     if (stateType_ == UPDATED)
     {
-      xtminus1_ = toVector(xtminus1);
-      Ptminus1_ = toMatrix(Ptminus1);
+      xtminus1_ = Vector(xtminus1);
+      Ptminus1_ = Matrix(Ptminus1);
     }
     else
     {
-      xtPred_ = toVector(xtminus1);
-      PtPred_ = toMatrix(Ptminus1);
+      xtPred_ = Vector(xtminus1);
+      PtPred_ = Matrix(Ptminus1);
     }
-  }
-  ; // TODO check values
+  }// TODO check values
 
 
   KalmanFilter::KalmanFilter(Scalar xtminus1,
@@ -217,7 +206,6 @@ namespace Biips
       xtPred_ = Vector(1, xtminus1);
       PtPred_ = Matrix(1, 1, Ptminus1);
     }
-  }
-  ; // TODO check values
+  }// TODO check values
 
 }

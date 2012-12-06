@@ -84,12 +84,12 @@ namespace Biips
     return pdf(dist, x);
   }
 
-  Scalar DBin::unboundedLower(const NumArray::Array & paramValues) const
+  Scalar DBin::fixedUnboundedLower(const NumArray::Array & paramValues) const
   {
     return 0.0;
   }
 
-  Scalar DBin::unboundedUpper(const NumArray::Array & paramValues) const
+  Scalar DBin::fixedUnboundedUpper(const NumArray::Array & paramValues) const
   {
     const Scalar trials = paramValues[1].ScalarView();
     return trials;

@@ -105,12 +105,12 @@ namespace Biips
     NodeId prior_mean_id = node.Parents()[0];
     NodeId prior_prec_id = node.Parents()[1];
 
-    static ValArray prior_mean;
+    ValArray prior_mean;
     prior_mean = getNodeValue(prior_mean_id, graph_, *this).Values();
     Scalar prior_prec = getNodeValue(prior_prec_id, graph_, *this).ScalarView();
 
     Scalar like_prec = 0.0;
-    static ValArray like_mean(1);
+    ValArray like_mean(1);
     like_mean[0] = 0.0;
 
     GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
@@ -125,13 +125,13 @@ namespace Biips
       ++it_offspring;
     }
 
-    static ValArray post_prec(1);
+    ValArray post_prec(1);
     post_prec[0] = prior_prec + like_prec;
-    static ValArray post_mean(1);
+    ValArray post_mean(1);
     post_mean[0] = (prior_mean[0] * prior_prec + like_mean[0]) / post_prec[0];
     like_mean[0] /= like_prec;
 
-    static NumArray::Array post_param_values(2);
+    NumArray::Array post_param_values(2);
     post_param_values[0].SetPtr(P_SCALAR_DIM.get(), &post_mean);
     post_param_values[1].SetPtr(P_SCALAR_DIM.get(), &post_prec);
 
@@ -143,9 +143,9 @@ namespace Biips
                               NULL_NUMARRAYPAIR,
                               *pRng_);
 
-    static NumArray::Array norm_const_param_values(2);
+    NumArray::Array norm_const_param_values(2);
     norm_const_param_values[0].SetPtr(P_SCALAR_DIM.get(), &like_mean);
-    static ValArray norm_const_prec(1);
+    ValArray norm_const_prec(1);
     norm_const_prec[0] = 1.0 / (1.0 / prior_prec + 1.0 / like_prec);
     norm_const_param_values[1].SetPtr(P_SCALAR_DIM.get(), &norm_const_prec);
     logIncrementalWeight_

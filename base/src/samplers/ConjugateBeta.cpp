@@ -43,7 +43,7 @@ namespace Biips
   const String ConjugateBeta::NAME_ = "ConjugateBeta";
 
   void ConjugateBeta::formLikeParamContrib(NodeId likeId,
-                                           NumArray::Array & likeParamContribValues)
+                                           MultiArray::Array & likeParamContribValues)
   {
     GraphTypes::ParentIterator it_parents = graph_.GetParents(likeId).first;
 
@@ -56,27 +56,28 @@ namespace Biips
         += graph_.GetValues()[likeId]->ScalarView();
   }
 
-  NumArray::Array ConjugateBeta::postParam(const NumArray::Array & priorParamValues,
-                                           const NumArray::Array & likeParamContribValues) const
+  MultiArray::Array ConjugateBeta::postParam(const NumArray::Array & priorParamValues,
+                                           const MultiArray::Array & likeParamContribValues) const
   {
-    static ValArray post_alpha_val(1);
-    static ValArray post_beta_val(1);
-    post_alpha_val[0] = priorParamValues[0].ScalarView()
+    ValArray::Ptr post_alpha_val(new ValArray(1));
+    (*post_alpha_val)[0] = priorParamValues[0].ScalarView()
         + likeParamContribValues[1].ScalarView();
-    post_beta_val[0] = priorParamValues[1].ScalarView()
+
+    ValArray::Ptr post_beta_val(new ValArray(1));
+    (*post_beta_val)[0] = priorParamValues[1].ScalarView()
         + likeParamContribValues[0].ScalarView()
         - likeParamContribValues[1].ScalarView();
 
-    static NumArray::Array post_param_values(2);
-    post_param_values[0].SetPtr(P_SCALAR_DIM.get(), &post_alpha_val);
-    post_param_values[1].SetPtr(P_SCALAR_DIM.get(), &post_beta_val);
+    MultiArray::Array post_param_values(2);
+    post_param_values[0].SetPtr(P_SCALAR_DIM, post_alpha_val);
+    post_param_values[1].SetPtr(P_SCALAR_DIM, post_beta_val);
     return post_param_values;
   }
 
   Scalar ConjugateBeta::computeLogIncrementalWeight(const NumArray & sampledData,
                                                     const NumArray::Array & priorParamValues,
                                                     const NumArray::Array & postParamValues,
-                                                    const NumArray::Array & LikeParamContrib)
+                                                    const MultiArray::Array & likeParamContrib)
   {
     // Prior
     Scalar log_prior = DBeta::Instance()->LogDensity(sampledData,
@@ -86,11 +87,11 @@ namespace Biips
       throw NodeError(nodeId_, "Failure to calculate log prior density.");
 
     // Likelihood
-    static NumArray::Array like_param_values(2);
-    like_param_values[0] = LikeParamContrib[0];
+    NumArray::Array like_param_values(2);
+    like_param_values[0] = NumArray(likeParamContrib[0]);
     like_param_values[1] = sampledData;
 
-    Scalar log_like = DBin::Instance()->LogDensity(LikeParamContrib[1],
+    Scalar log_like = DBin::Instance()->LogDensity(NumArray(likeParamContrib[1]),
                                                    like_param_values,
                                                    NULL_NUMARRAYPAIR); // FIXME Boundaries
     if (isNan(log_like))

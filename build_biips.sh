@@ -1,6 +1,6 @@
 #!/bin/bash
-set -x
 
+set -x
 # Change these variables to fit your needs
 #-----------------------------------------
 export BIIPS_SRC=/home/adrien-alea/workspace/biips-src/trunk
@@ -19,9 +19,9 @@ export MAKE="make -j10"
 set +x; read -p 'Press [Enter] key to continue...'; set -x
 svn up $BIIPS_SRC
 
-set +x; echo -n "Run CMake ? (y/n)"; read ans
+set +x; echo -n "Run CMake ? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then
-	echo -n "Clear build directory ? (y/n)"; read ans
+	echo -n "Clear build directory ? (y/[n])"; read ans
 	if [[ $ans == "y" ]]; then set -x
 	    rm -rf $BIIPS_BUILD; mkdir $BIIPS_BUILD
 	fi
@@ -32,24 +32,24 @@ fi
 
 cd $BIIPS_BUILD
 
-set +x; echo -n "Build/install Biips ? (y/n)"; read ans
+set +x; echo -n "Build/install Biips ? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     rm -rf $BIIPS_ROOT; mkdir $BIIPS_ROOT
     $MAKE install
 
-    set +x; echo -n "Run BiipsTest tests ? (y/n)"; read ans
+    set +x; echo -n "Run BiipsTest tests ? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test
         $MAKE test
     fi
 
-    set +x; echo -n "Run BiipsTestCompiler tests ? (y/n)"; read ans
+    set +x; echo -n "Run BiipsTestCompiler tests ? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/testcompiler
         $MAKE test
     fi
 
-    set +x; echo -n "Package Biips ? (y/n)"; read ans
+    set +x; echo -n "Package Biips ? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD
         cpack -G $CPACK_GENERATOR
@@ -58,7 +58,7 @@ if [[ $ans == "y" ]]; then set -x
 fi
 
 
-set +x; echo -n "Install/build RBiips ? (y/n)"; read ans
+set +x; echo -n "Install/build RBiips ? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
@@ -67,12 +67,12 @@ if [[ $ans == "y" ]]; then set -x
     $MAKE RBiips_build
 fi
 
-set +x; echo -n "Build MatBiips ? (y/n)"; read ans
+set +x; echo -n "Build MatBiips ? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
     $MAKE matbiips_package
 
-    set +x; echo -n "Run MatBiips tests ? (y/n)"; read ans
+    set +x; echo -n "Run MatBiips tests ? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
         $MAKE test

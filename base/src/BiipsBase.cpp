@@ -79,7 +79,7 @@ extern "C" {
 //#include "distributions/DDexp.hpp"
 //#include "distributions/DGenGamma.hpp"
 
-#include "samplers/DiscreteOptimal.hpp"
+#include "samplers/FiniteSampler.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
 #include "samplers/ConjugateNormal.hpp"
 #include "samplers/ConjugateBeta.hpp"
@@ -191,7 +191,7 @@ namespace Biips
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalVarFactory::Instance(),
                                                                      true));
 
-    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(DiscreteOptimalFactory::Instance(),
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(FiniteSamplerFactory::Instance(),
                                                                      true));
   }
 

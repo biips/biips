@@ -37,8 +37,8 @@
 #ifndef BIIPS_MATRIX_HPP_
 #define BIIPS_MATRIX_HPP_
 
+#include "common/NumArray.hpp"
 #include "common/MultiArray.hpp"
-
 #include <boost/numeric/ublas/matrix.hpp>
 
 namespace Biips
@@ -66,15 +66,8 @@ namespace Biips
         : BaseType(sz1, sz2, value)
     {
     }
-    explicit Matrix(const NumArray & data)
-        :
-            BaseType(data.Dim()[0], data.IsVector() ? 1 : data.Dim()[1],
-                     data.Values())
-    {
-      if (data.NDim() > 2)
-        throw LogicError(
-            "Can not construct Matrix: NumArray has more than 2 dimensions.");
-    }
+    explicit Matrix(const NumArray & data);
+    explicit Matrix(const MultiArray & data);
     template<class AE>
     Matrix(const ublas::matrix_expression<AE> &ae)
         : BaseType(ae)
@@ -89,8 +82,9 @@ namespace Biips
     }
   };
 
+
   class MatrixRef: public ublas::matrix<NumArray::ValueType,
-      NumArray::StorageOrderType, NumArray::StorageType>
+  NumArray::StorageOrderType, NumArray::StorageType>
   {
   public:
     typedef NumArray::ValueType ValueType;
@@ -99,48 +93,52 @@ namespace Biips
     typedef ublas::matrix<ValueType, StorageOrder, StorageType> BaseType;
 
   protected:
-    NumArray * pData_;
+    DimArray * pDim_;
+    ValArray * pValues_;
     mutable Bool released_;
 
-BaseType    ::swap;
+    BaseType::swap;
 
   public:
     explicit MatrixRef(NumArray & dat) : BaseType(dat.Dim()[0],
-        dat.IsVector() ? 1 : dat.Dim()[1], array_type()), pData_(&dat), released_(false)
-    { BaseType::data().swap(pData_->Values());}
-
-    MatrixRef(MatrixRef & mat_ref) : BaseType(mat_ref.size1(), mat_ref.size2(), array_type()), pData_(mat_ref.pData_), released_(mat_ref.released_)
+        dat.IsVector() ? 1 : dat.Dim()[1], array_type()),
+        pDim_(dat.DimPtr()),
+        pValues_(dat.ValuesPtr()),
+        released_(false)
     {
-      if ( !released_ )
-      {
-        swap(mat_ref);
-        mat_ref.released_ = true;
-      }
+      BaseType::data().swap(dat.Values());
+    }
+    explicit MatrixRef(MultiArray & dat) : BaseType(dat.Dim()[0],
+        dat.IsVector() ? 1 : dat.Dim()[1], array_type()),
+        pDim_(dat.DimPtr().get()),
+        pValues_(dat.ValuesPtr().get()),
+        released_(false)
+    {
+      BaseType::data().swap(dat.Values());
     }
 
-    MatrixRef(const MatrixRef & mat_ref) : BaseType(mat_ref), pData_(mat_ref.pData_), released_(mat_ref.released_)
-    {
-      if ( !released_ )
-      mat_ref.released_ = true;
-    }
+    MatrixRef(MatrixRef & mat_ref);
+
+    MatrixRef(const MatrixRef & mat_ref);
 
     template<class AE>
     MatrixRef & operator = (const ublas::matrix_expression<AE> & ae)
-    { BaseType::operator=(ae); pData_->Dim()[0] = size1(); pData_->Dim()[1] = size2(); return *this;}
-
-    // TODO put in cpp
-    void resize (size_type size_1, size_type size_2, bool preserve = true)
-    { BaseType::resize(size_1, size_2, preserve); pData_->Dim()[0] = size_1; pData_->Dim()[1] = size_2;}
+    {
+      BaseType::operator=(ae);
+      return *this;
+    }
 
     virtual ~MatrixRef()
-    { if (! released_) data().swap(pData_->Values());}
+    {
+      Release();
+    }
 
-    void Release()
-    { if (! released_)
-      { data().swap(pData_->Values()); released_ = true;}}
+    void Release();
 
     Bool Released() const
-    { return released_;}
+    {
+      return released_;
+    }
   };
 
 }

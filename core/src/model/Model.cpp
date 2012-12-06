@@ -84,7 +84,7 @@ namespace Biips
     return true;
   }
 
-  Bool Model::SetSmoothMonitor(NodeId nodeId)
+  Bool Model::SetBackwardSmoothMonitor(NodeId nodeId)
   {
     SetFilterMonitor(nodeId);
 
@@ -92,31 +92,30 @@ namespace Biips
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
-    smoothMonitorsMap_[nodeId];
+    backwardSmoothMonitorsMap_[nodeId];
     return true;
   }
 
-  Bool Model::SetSmoothTreeMonitor(NodeId nodeId)
+  Bool Model::SetGenTreeMonitor(NodeId nodeId)
   {
     // FIXME: it is no use monitoring observed nodes
     if (pGraph_->GetObserved()[nodeId])
       return false;
 
-    smoothTreeMonitoredNodeIds_.insert(nodeId);
+    genTreeMonitoredNodeIds_.insert(nodeId);
     return true;
   }
-
 
   void Model::ClearFilterMonitors(Bool release_only)
   {
     filterMonitors_.clear();
     if (release_only)
     {
-      for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
+      for (std::map<NodeId, Monitor*>::iterator it_monitors =
           filterMonitorsMap_.begin(); it_monitors != filterMonitorsMap_.end();
           ++it_monitors)
       {
-        it_monitors->second.reset();
+        it_monitors->second = NULL;
       }
       return;
     }
@@ -124,29 +123,29 @@ namespace Biips
     defaultMonitorsSet_ = false;
   }
 
-  void Model::ClearSmoothTreeMonitors(Bool release_only)
+  void Model::ClearGenTreeMonitors(Bool release_only)
   {
-    pSmoothTreeMonitor_.reset();
+    pGenTreeMonitor_.reset();
     if (release_only)
       return;
-    smoothTreeMonitoredNodeIds_.clear();
+    genTreeMonitoredNodeIds_.clear();
   }
 
-  void Model::ClearSmoothMonitors(Bool release_only)
+  void Model::ClearBackwardSmoothMonitors(Bool release_only)
   {
-    smoothMonitors_.clear();
+    backwardSmoothMonitors_.clear();
     if (release_only)
     {
-      smoothMonitors_.clear();
-      for (std::map<NodeId, Monitor::Ptr>::iterator it_monitors =
-          smoothMonitorsMap_.begin(); it_monitors != smoothMonitorsMap_.end();
+      backwardSmoothMonitors_.clear();
+      for (std::map<NodeId, Monitor*>::iterator it_monitors =
+          backwardSmoothMonitorsMap_.begin(); it_monitors != backwardSmoothMonitorsMap_.end();
           ++it_monitors)
       {
-        it_monitors->second.reset();
+        it_monitors->second = NULL;
       }
       return;
     }
-    smoothMonitorsMap_.clear();
+    backwardSmoothMonitorsMap_.clear();
   }
 
   const ForwardSampler & Model::Sampler() const
@@ -167,30 +166,30 @@ namespace Biips
 
   void Model::BuildSampler()
   {
-    pSampler_ = ForwardSampler::Ptr(new ForwardSampler(*pGraph_));
+    pSampler_.reset(new ForwardSampler(*pGraph_));
 
     pSampler_->Build();
   }
 
   void Model::InitSampler(Size nParticles,
-                          const Rng::Ptr & pRng,
+                          Rng * pRng,
                           const String & rsType,
                           Scalar threshold)
   {
     // release monitors
     ClearFilterMonitors(true);
-    ClearSmoothTreeMonitors(true);
-    ClearSmoothMonitors(true);
+    ClearGenTreeMonitors(true);
+    ClearBackwardSmoothMonitors(true);
 
     pSampler_->Initialize(nParticles, pRng, rsType, threshold);
 
     if (pSampler_->NIterations() == 0)
       return;
 
-    // lock SmoothTree monitored nodes
+    // lock GenTree monitored nodes
     for (std::set<NodeId>::const_iterator it_nodes =
-        smoothTreeMonitoredNodeIds_.begin();
-        it_nodes != smoothTreeMonitoredNodeIds_.end(); ++it_nodes)
+        genTreeMonitoredNodeIds_.begin();
+        it_nodes != genTreeMonitoredNodeIds_.end(); ++it_nodes)
       pSampler_->LockNode(*it_nodes);
 
     Size t = pSampler_->Iteration();
@@ -198,7 +197,9 @@ namespace Biips
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes);
+    filterMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSampler_->InitMonitor(*p_monitor);
     for (Size i = 0; i < sampled_nodes.size(); ++i)
     {
@@ -210,8 +211,6 @@ namespace Biips
       }
     }
 
-    filterMonitors_.push_back(p_monitor);
-
     if (!pSampler_->AtEnd())
     {
       // release memory
@@ -220,16 +219,17 @@ namespace Biips
     }
 
     // Smooth tree Monitors
-    p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    p_monitor = new FilterMonitor(t, sampled_nodes);
+    pGenTreeMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        smoothTreeMonitoredNodeIds_.begin();
-        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+        genTreeMonitoredNodeIds_.begin();
+        it_ids != genTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
     }
-    pSmoothTreeMonitor_ = p_monitor;
 
     // release memory
     pSampler_->UnlockAllNodes();
@@ -248,7 +248,9 @@ namespace Biips
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    FilterMonitor::Ptr p_monitor(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes);
+    filterMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSampler_->InitMonitor(*p_monitor);
     for (Size i = 0; i < sampled_nodes.size(); ++i)
     {
@@ -260,8 +262,6 @@ namespace Biips
       }
     }
 
-    filterMonitors_.push_back(p_monitor);
-
     if (!pSampler_->AtEnd())
     {
       // release memory
@@ -270,16 +270,17 @@ namespace Biips
     }
 
     // Smooth tree Monitors
-    p_monitor = FilterMonitor::Ptr(new FilterMonitor(t, sampled_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    p_monitor = new FilterMonitor(t, sampled_nodes);
+    pGenTreeMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
-        smoothTreeMonitoredNodeIds_.begin();
-        it_ids != smoothTreeMonitoredNodeIds_.end(); ++it_ids)
+        genTreeMonitoredNodeIds_.begin();
+        it_ids != genTreeMonitoredNodeIds_.end(); ++it_ids)
     {
       pSampler_->MonitorNode(*it_ids, *p_monitor);
       pSampler_->UnlockNode(*it_ids);
     }
-    pSmoothTreeMonitor_ = p_monitor;
 
     // release memory
     pSampler_->UnlockAllNodes();
@@ -289,7 +290,7 @@ namespace Biips
   void Model::InitBackwardSmoother()
   {
     // release monitors
-    ClearSmoothMonitors(true);
+    ClearBackwardSmoothMonitors(true);
 
     if (!defaultMonitorsSet_)
       throw LogicError("Can not initiate backward smoother: default monitors not set.");
@@ -297,10 +298,12 @@ namespace Biips
     if (!pSampler_)
       throw LogicError("Can not initiate backward smoother: no ForwardSampler.");
 
-    pSmoother_ =
-        BackwardSmoother::Ptr(new BackwardSmoother(*pGraph_,
-                                                   filterMonitors_,
-                                                   pSampler_->GetNodeSamplingIterations()));
+    Types<Monitor*>::Array f_monitors(filterMonitors_.size());
+    for (Size i = 0; i < f_monitors.size(); ++i)
+      f_monitors[i] = filterMonitors_[i].get();
+    pSmoother_.reset(new BackwardSmoother(*pGraph_,
+                                          f_monitors,
+                                          pSampler_->GetNodeSamplingIterations()));
 
     pSmoother_->Initialize();
 
@@ -309,19 +312,20 @@ namespace Biips
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    SmoothMonitor * p_monitor = new SmoothMonitor(t, updated_nodes);
+    backwardSmoothMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSmoother_->InitMonitor(*p_monitor);
     for (Size i = 0; i < updated_nodes.size(); ++i)
     {
       node_id = updated_nodes[i];
-      if (smoothMonitorsMap_.count(node_id))
+      if (backwardSmoothMonitorsMap_.count(node_id))
       {
         pSmoother_->MonitorNode(node_id, *p_monitor);
-        smoothMonitorsMap_[node_id] = p_monitor;
+        backwardSmoothMonitorsMap_[node_id] = p_monitor;
       }
     }
 
-    smoothMonitors_.push_back(p_monitor);
   }
 
   void Model::IterateBackwardSmoother()
@@ -336,24 +340,25 @@ namespace Biips
 
     // Smooth Monitors
     NodeId node_id = NULL_NODEID;
-    SmoothMonitor::Ptr p_monitor(new SmoothMonitor(t, updated_nodes)); // FIXME Do we create monitor object even if no nodes are monitored ?
+    // FIXME Do we create monitor object even if no nodes are monitored ?
+    SmoothMonitor * p_monitor = new SmoothMonitor(t, updated_nodes);
+    backwardSmoothMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSmoother_->InitMonitor(*p_monitor);
     for (Size i = 0; i < updated_nodes.size(); ++i)
     {
       node_id = updated_nodes[i];
-      if (smoothMonitorsMap_.count(node_id))
+      if (backwardSmoothMonitorsMap_.count(node_id))
       {
         pSmoother_->MonitorNode(node_id, *p_monitor);
-        smoothMonitorsMap_[node_id] = p_monitor;
+        backwardSmoothMonitorsMap_[node_id] = p_monitor;
       }
     }
 
-    smoothMonitors_.push_back(p_monitor);
   }
 
   MultiArray Model::extractMonitorStat(NodeId nodeId,
                                        StatTag statFeature,
-                                       const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
+                                       const std::map<NodeId, Monitor*> & monitorsMap) const
   {
     if (monitorsMap.find(nodeId) == monitorsMap.end())
       throw LogicError("Node is not yet monitored.");
@@ -408,19 +413,19 @@ namespace Biips
     return extractMonitorStat(nodeId, statFeature, filterMonitorsMap_);
   }
 
-  MultiArray Model::ExtractSmoothStat(NodeId nodeId, StatTag statFeature) const
+  MultiArray Model::ExtractBackwardSmoothStat(NodeId nodeId, StatTag statFeature) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract backward smoother statistic: no ForwardSampler.");
 
-    return extractMonitorStat(nodeId, statFeature, smoothMonitorsMap_);
+    return extractMonitorStat(nodeId, statFeature, backwardSmoothMonitorsMap_);
   }
 
   // TODO manage discrete variable cases
   Histogram Model::extractMonitorPdf(NodeId nodeId,
                                      Size numBins,
                                      Scalar cacheFraction,
-                                     const std::map<NodeId, Monitor::Ptr> & monitorsMap) const
+                                     const std::map<NodeId, Monitor*> & monitorsMap) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract filter pdf: no ForwardSampler.");
@@ -452,22 +457,22 @@ namespace Biips
   }
 
   // TODO manage discrete variable cases
-  Histogram Model::ExtractSmoothPdf(NodeId nodeId,
+  Histogram Model::ExtractBackwardSmoothPdf(NodeId nodeId,
                                     Size numBins,
                                     Scalar cacheFraction) const
   {
     if (!pSampler_)
       throw LogicError("Can not extract backward smooth pdf: no ForwardSampler.");
 
-    return extractMonitorPdf(nodeId, numBins, cacheFraction, smoothMonitorsMap_);
+    return extractMonitorPdf(nodeId, numBins, cacheFraction, backwardSmoothMonitorsMap_);
   }
 
   // FIXME Still valid after optimization ?
-  MultiArray Model::ExtractSmoothTreeStat(NodeId nodeId,
+  MultiArray Model::ExtractGenTreeStat(NodeId nodeId,
                                           StatTag statFeature) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract smooth tree statistic: no ForwardSampler.");
+      throw LogicError("Can not extract gen tree statistic: no ForwardSampler.");
 
     ArrayAccumulator elem_acc;
     elem_acc.AddFeature(statFeature);
@@ -511,15 +516,15 @@ namespace Biips
 
   // TODO manage dicrete variable cases
   // FIXME Still valid after optimization ?
-  Histogram Model::ExtractSmoothTreePdf(NodeId nodeId,
+  Histogram Model::ExtractGenTreePdf(NodeId nodeId,
                                         Size numBins,
                                         Scalar cacheFraction) const
   {
     if (!pSampler_)
-      throw LogicError("Can not extract smooth tree pdf: no ForwardSampler.");
+      throw LogicError("Can not extract gen tree pdf: no ForwardSampler.");
 
     if (!pGraph_->GetNode(nodeId).Dim().IsScalar())
-      throw LogicError("Can not extract smooth tree pdf: node is not scalar.");
+      throw LogicError("Can not extract gen tree pdf: node is not scalar.");
 
     DensityAccumulator dens_acc(roundSize(pSampler_->NParticles()
                                           * cacheFraction),

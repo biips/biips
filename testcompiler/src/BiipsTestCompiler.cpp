@@ -548,7 +548,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     {
       const String & name = monitored_var[i];
 
-      if (!console.SetSmoothMonitor(name))
+      if (!console.SetBackwardSmoothMonitor(name))
         throw RuntimeError(String("Failed to monitor variable ") + name);
 
       if (verbosity > 0)
@@ -1062,7 +1062,7 @@ namespace Biips
       }
       else
       {
-        if (!console.ExtractSmoothStat(name, tag, stat_map[name]))
+        if (!console.ExtractBackwardSmoothStat(name, tag, stat_map[name]))
           throw RuntimeError(
               String("Failed to extract smoothing stat of variable ") + name);
       }

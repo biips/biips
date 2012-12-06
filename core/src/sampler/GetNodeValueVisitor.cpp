@@ -256,7 +256,7 @@ namespace Biips
 
   NumArray::Array getParamValues(NodeId nodeId,
                                  const Graph & graph,
-                                 const Types<Monitor::Ptr>::Array & monitors,
+                                 const Types<Monitor*>::Array & monitors,
                                  Size particleIndex)
   {
     GraphTypes::ParentIterator it_param, it_param_end;
@@ -343,7 +343,7 @@ namespace Biips
 
   NumArray::Pair getBoundValues(NodeId nodeId,
                                 const Graph & graph,
-                                const Types<Monitor::Ptr>::Pair & monitors,
+                                const Types<Monitor*>::Pair & monitors,
                                 Size particleIndex)
   {
     GraphTypes::ParentIterator it_param, it_param_end;
@@ -380,144 +380,171 @@ namespace Biips
     return bound_values;
   }
 
-  // -----------------------------------------------------------------
-  // Unbounded Support
-  // -----------------------------------------------------------------
-
-  class UnboundedSupportVisitor: public ConstNodeVisitor
-  {
-  protected:
-    NumArray::Array paramValues_;
-    ValArray & lower_;
-    ValArray & upper_;
-
-    virtual void visit(const StochasticNode & node);
-
-  public:
-    UnboundedSupportVisitor(const NumArray::Array & paramValues,
-                            ValArray & lower,
-                            ValArray & upper) :
-      paramValues_(paramValues), lower_(lower), upper_(upper)
-    {
-    }
-  };
-
-  void UnboundedSupportVisitor::visit(const StochasticNode & node)
-  {
-    node.UnboundedSupport(lower_, upper_, paramValues_);
-  }
+//  // -----------------------------------------------------------------
+//  // Unbounded Support
+//  // -----------------------------------------------------------------
+//
+//  class fixedUnboundedSupportVisitor: public ConstNodeVisitor
+//  {
+//  protected:
+//    NumArray::Array paramValues_;
+//    ValArray & lower_;
+//    ValArray & upper_;
+//
+//    virtual void visit(const StochasticNode & node);
+//
+//  public:
+//    fixedUnboundedSupportVisitor(const NumArray::Array & paramValues,
+//                            ValArray & lower,
+//                            ValArray & upper) :
+//      paramValues_(paramValues), lower_(lower), upper_(upper)
+//    {
+//    }
+//  };
+//
+//  void fixedUnboundedSupportVisitor::visit(const StochasticNode & node)
+//  {
+//    node.fixedUnboundedSupport(lower_, upper_, paramValues_);
+//  }
 
   // -----------------------------------------------------------------
   // Get Support Values
   // -----------------------------------------------------------------
 
-  class GetSupportValuesVisitor: public ConstNodeVisitor
+  class GetFixedSupportValuesVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
-    NodeSampler & nodeSampler_;
     ValArray & lower_;
     ValArray & upper_;
 
     virtual void visit(const StochasticNode & node);
 
   public:
-    explicit GetSupportValuesVisitor(const Graph & graph,
-                                     NodeSampler & nodeSampler,
+    explicit GetFixedSupportValuesVisitor(const Graph & graph,
                                      ValArray & lower,
                                      ValArray & upper) :
-      graph_(graph), nodeSampler_(nodeSampler), lower_(lower), upper_(upper)
+      graph_(graph), lower_(lower), upper_(upper)
     {
     }
   };
 
-  void GetSupportValuesVisitor::visit(const StochasticNode & node)
+  void GetFixedSupportValuesVisitor::visit(const StochasticNode & node)
   {
-    node.UnboundedSupport(lower_, upper_, getParamValues(nodeId_,
-                                                         graph_,
-                                                         nodeSampler_));
-
-    if (node.IsBounded())
+    // get observed parents values
+    Types<NodeId>::Array par = node.Parents();
+    NumArray::Array par_values(par.size());
+    for (Size i=0; i<par.size(); ++i)
     {
-      NumArray::Pair bound_values = getBoundValues(nodeId_,
-                                                   graph_,
-                                                   nodeSampler_);
+      NodeId id = par[i];
+      DimArray * pdim = graph_.GetNode(id).DimPtr().get();
+      ValArray * pval = NULL;
+      // unobserved parents have null value
+      if (graph_.GetObserved()[id])
+        pval = graph_.GetValues()[id].get();
+      par_values[i].SetPtr(pdim, pval);
+    }
 
-      if (!bound_values.first.IsNULL())
+    // get bounds values
+    NumArray::Pair bound_values;
+    if (node.IsUpperBounded())
+    {
+      bound_values.second = par_values.back();
+      par_values.pop_back();
+
+      // check bound is observed
+      if (!bound_values.second.ValuesPtr())
+        throw LogicError("GetFixedSupportValuesVisitor::visit : node has unobserved upper bound.");
+    }
+    if (node.IsLowerBounded())
+    {
+      bound_values.first = par_values.back();
+      par_values.pop_back();
+
+      // check bound is observed
+      if (!bound_values.first.ValuesPtr())
+        throw LogicError("GetFixedSupportValuesVisitor::visit : node has unobserved upper bound.");
+    }
+
+    // get unbounded support limits
+    node.FixedUnboundedSupport(lower_, upper_, par_values);
+
+    // check there is a lower bound
+    if (!bound_values.first.IsNULL())
+    {
+      // compare support with bounds and replace if necessary
+      for (Size i = 0; i < lower_.size(); ++i)
       {
-        for (Size i = 0; i < lower_.size(); ++i)
-        {
-          if (lower_[i] < bound_values.first.Values()[i])
-            lower_[i] = bound_values.first.Values()[i];
-        }
+        if (lower_[i] < bound_values.first.Values()[i])
+          lower_[i] = bound_values.first.Values()[i];
       }
-      if (!bound_values.second.IsNULL())
+    }
+    // check there is an upper bound
+    if (!bound_values.second.IsNULL())
+    {
+      // compare support with bounds and replace if necessary
+      for (Size i = 0; i < upper_.size(); ++i)
       {
-        for (Size i = 0; i < upper_.size(); ++i)
-        {
-          if (upper_[i] > bound_values.second.Values()[i])
-            upper_[i] = bound_values.second.Values()[i];
-        }
+        if (upper_[i] > bound_values.second.Values()[i])
+          upper_[i] = bound_values.second.Values()[i];
       }
     }
   }
 
-  void getSupportValues(ValArray & lower,
+  void getFixedSupportValues(ValArray & lower,
                         ValArray & upper,
                         NodeId nodeId,
-                        const Graph & graph,
-                        NodeSampler & nodeSampler)
+                        const Graph & graph)
   {
-    GetSupportValuesVisitor get_support_val_vis(graph,
-                                                nodeSampler,
+    GetFixedSupportValuesVisitor get_support_val_vis(graph,
                                                 lower,
                                                 upper);
     graph.VisitNode(nodeId, get_support_val_vis);
   }
 
-  void getSupportValues(ValArray & lower,
-                        ValArray & upper,
-                        NodeId nodeId,
-                        const Graph & graph,
-                        const Types<Monitor::Ptr>::Array & paramMonitors,
-                        const Types<Monitor::Ptr>::Pair & boundMonitors,
-                        Size particleIndex)
-  {
-    NumArray::Array param_values = getParamValues(nodeId,
-                                                  graph,
-                                                  paramMonitors,
-                                                  particleIndex);
-    UnboundedSupportVisitor unbound_support_vis(param_values, lower, upper);
-    graph.VisitNode(nodeId, unbound_support_vis);
-
-    IsBoundedVisitor is_bounded_vis;
-    graph.VisitNode(nodeId, is_bounded_vis);
-
-    if (is_bounded_vis.IsBounded())
-    {
-      NumArray::Pair bound_values = getBoundValues(nodeId,
-                                                   graph,
-                                                   boundMonitors,
-                                                   particleIndex);
-
-      if (!bound_values.first.IsNULL())
-      {
-        for (Size i = 0; i < lower.size(); ++i)
-        {
-          if (lower[i] < bound_values.first.Values()[i])
-            lower[i] = bound_values.first.Values()[i];
-        }
-      }
-      if (!bound_values.second.IsNULL())
-      {
-        for (Size i = 0; i < upper.size(); ++i)
-        {
-          if (upper[i] > bound_values.second.Values()[i])
-            upper[i] = bound_values.second.Values()[i];
-        }
-      }
-    }
-  }
+//  void getSupportValues(ValArray & lower,
+//                        ValArray & upper,
+//                        NodeId nodeId,
+//                        const Graph & graph,
+//                        const Types<Monitor*>::Array & paramMonitors,
+//                        const Types<Monitor*>::Pair & boundMonitors,
+//                        Size particleIndex)
+//  {
+//    NumArray::Array param_values = getParamValues(nodeId,
+//                                                  graph,
+//                                                  paramMonitors,
+//                                                  particleIndex);
+//    fixedUnboundedSupportVisitor unbound_support_vis(param_values, lower, upper);
+//    graph.VisitNode(nodeId, unbound_support_vis);
+//
+//    IsBoundedVisitor is_bounded_vis;
+//    graph.VisitNode(nodeId, is_bounded_vis);
+//
+//    if (is_bounded_vis.IsBounded())
+//    {
+//      NumArray::Pair bound_values = getBoundValues(nodeId,
+//                                                   graph,
+//                                                   boundMonitors,
+//                                                   particleIndex);
+//
+//      if (!bound_values.first.IsNULL())
+//      {
+//        for (Size i = 0; i < lower.size(); ++i)
+//        {
+//          if (lower[i] < bound_values.first.Values()[i])
+//            lower[i] = bound_values.first.Values()[i];
+//        }
+//      }
+//      if (!bound_values.second.IsNULL())
+//      {
+//        for (Size i = 0; i < upper.size(); ++i)
+//        {
+//          if (upper[i] > bound_values.second.Values()[i])
+//            upper[i] = bound_values.second.Values()[i];
+//        }
+//      }
+//    }
+//  }
 
   // -----------------------------------------------------------------
   // Is Support Fixed

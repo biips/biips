@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MultiArray.hpp
+/*! \file NumArray.hpp
  * \brief A n-dimensional data object class
  *
  * \author  $LastChangedBy$
@@ -34,8 +34,8 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_MULTIARRAY_HPP_
-#define BIIPS_MULTIARRAY_HPP_
+#ifndef BIIPS_NUMARRAY_HPP_
+#define BIIPS_NUMARRAY_HPP_
 
 #include "common/Types.hpp"
 #include "common/DimArray.hpp"
@@ -44,27 +44,16 @@
 
 namespace Biips
 {
-  class Vector;
-  class Matrix;
-
-  class VectorRef;
-  class MatrixRef;
-
   // -----------------------------------------------------------------------------
-  // MultiArray
+  // NumArray
   // -----------------------------------------------------------------------------
 
-  class MultiArrayArray;
-  class MultiArrayPair;
+  class NumArrayArray;
+  class NumArrayPair;
 
-  //! A n-dimensional data object class
-  /*!
-   * MultiArray represents a wholly defined n-dimensional data object,
-   * aggregating its dimension and its values.
-   * Those two members are aggregated with shared pointers, so MultiArray
-   * objects are light weight objects providing a convenient interface.
-   */
-  class MultiArray
+  class MultiArray;
+
+  class NumArray
   {
   public:
     //! The Values storage Type is ValArray
@@ -72,44 +61,44 @@ namespace Biips
     typedef StorageType::value_type ValueType;
     typedef StorageOrder StorageOrderType;
 
-    typedef MultiArray SelfType;
+    typedef NumArray SelfType;
     //! An array of MultiArray
-    typedef MultiArrayArray Array;
+    typedef NumArrayArray Array;
     //! A pair of MultiArray
-    typedef MultiArrayPair Pair;
+    typedef NumArrayPair Pair;
 
   protected:
-    //! Shared pointer of the dimensions array of the data
-    Types<DimArray>::Ptr pDim_;
-    //! Shared pointer of the values array of the data
-    Types<StorageType>::Ptr pValues_;
+    //! pointer of the dimensions array of the data
+    DimArray * pDim_;
+    //! pointer of the values array of the data
+    StorageType * pValues_;
 
     void checkDimPtr() const
     {
       if (!pDim_)
-        throw LogicError("Can not access dimension of MultiArray: null pointer.");
+        throw LogicError("Can not access dimension of NumArray: null pointer.");
     }
     void checkValuesPtr() const
     {
       if (!pValues_)
-        throw LogicError("Can not access values of MultiArray: null pointer.");
+        throw LogicError("Can not access values of NumArray: null pointer.");
     }
 
   public:
-    MultiArray()
+    NumArray() :
+      pDim_(NULL), pValues_(NULL)
     {
     }
-    /*!
-     * Creates a MultiArray with DimArray pointed by pDim
-     * and ValArray pointed by pValue.
-     * @param pDim dimension array shared pointer
-     * @param pValue values array shared pointer
-     */
-    MultiArray(const DimArray::Ptr & pDim,
-               const Types<StorageType>::Ptr & pValue) :
-      pDim_(pDim), pValues_(pValue)
+    explicit NumArray(DimArray * pDim, StorageType * pVal) :
+      pDim_(pDim), pValues_(pVal)
     {
-    } // TODO check dims
+      }
+      explicit NumArray(const MultiArray & marray);
+
+    //! Number of dimensions accessor
+    /*!
+     * @return the size of the DimArray
+     */
     Size NDim() const
     {
       checkDimPtr();
@@ -119,7 +108,7 @@ namespace Biips
     //! Length of the DatType
     /*!
      * Computes the product of the sizes of each dimension
-     * @return the number of elements of the MultiArray
+     * @return the number of elements of the NumArray
      */
     Size Length() const
     {
@@ -128,7 +117,7 @@ namespace Biips
     }
 
     /*!
-     * Indicates whether the MultiArray corresponds to a scalar object,
+     * Indicates whether the NumArray corresponds to a scalar object,
      * i.e. containing only one element.
      */
     Bool IsScalar() const
@@ -137,7 +126,7 @@ namespace Biips
       return pDim_->IsScalar();
     }
     /*!
-     * Indicates whether the MultiArray corresponds to a vector object,
+     * Indicates whether the NumArray corresponds to a vector object,
      * i.e. only one dimension.
      */
     Bool IsVector() const
@@ -146,7 +135,7 @@ namespace Biips
       return pDim_->IsVector();
     }
     /*!
-     * Indicates whether the MultiArray corresponds to a matrix object,
+     * Indicates whether the NumArray corresponds to a matrix object,
      * i.e. exactly two dimensions.
      */
     Bool IsMatrix() const
@@ -155,7 +144,7 @@ namespace Biips
       return pDim_->IsMatrix();
     }
     /*!
-     * Indicates whether the MultiArray corresponds to a squared matrix.
+     * Indicates whether the NumArray corresponds to a squared matrix.
      */
     Bool IsSquared() const
     {
@@ -183,11 +172,20 @@ namespace Biips
       return *pDim_;
     }
 
-    //! DimArray shared pointer accessor.
+    //! DimArray pointer accessor.
     /*!
-     * @return the dimension array shared pointer
+     * @return the dimension array  pointer
      */
-    const DimArray::Ptr & DimPtr() const
+    DimArray * DimPtr()
+    {
+      return pDim_;
+    }
+
+    //! DimArray pointer accessor.
+    /*!
+     * @return the dimension array pointer
+     */
+    const DimArray * DimPtr() const
     {
       return pDim_;
     }
@@ -201,7 +199,6 @@ namespace Biips
       checkValuesPtr();
       return *pValues_;
     }
-
     //! ValArray accessor.
     /*!
      * @return a reference to the values array
@@ -211,18 +208,43 @@ namespace Biips
       checkValuesPtr();
       return *pValues_;
     }
-
     //! ValArray accessor.
     /*!
-     * @return the values array shared pointer
+     * @return the values array pointer
      */
-    const Types<StorageType>::Ptr & ValuesPtr() const
+    StorageType * ValuesPtr()
     {
       return pValues_;
     }
 
+    //! ValArray accessor.
     /*!
-     * Most of the MultiArray objects will contain one scalar value.
+     * @return the values array pointer
+     */
+    const StorageType * ValuesPtr() const
+    {
+      return pValues_;
+    }
+
+    SelfType & SetPtr(DimArray * pDim)
+    {
+      pDim_ = pDim;
+      return *this;
+    }
+    SelfType & SetPtr(StorageType * pVal)
+    {
+      pValues_ = pVal;
+      return *this;
+    }
+    SelfType & SetPtr(DimArray * pDim, StorageType * pVal)
+    {
+      pDim_ = pDim;
+      pValues_ = pVal;
+      return *this;
+    }
+
+    /*!
+     * Most of the NumArray objects will contain one scalar value.
      * This method gives a convenient Scalar handle of the ValArray.
      * @return The first value of the ValArray if size is 1
      */
@@ -231,7 +253,7 @@ namespace Biips
       return (*pValues_)[0];
     } // TODO throw exception
     /*!
-     * Most of the MultiArray objects will contain one scalar value.
+     * Most of the NumArray objects will contain one scalar value.
      * This method gives a convenient Scalar handle of the ValArray.
      * @return  A reference to the first value of the ValArray if size is 1
      */
@@ -240,109 +262,73 @@ namespace Biips
       return (*pValues_)[0];
     } // TODO throw exception
 
-    SelfType & SetPtr(const DimArray::Ptr & pDim)
-    {
-      pDim_ = pDim;
-      return *this;
-    }
-    SelfType & SetPtr(const StorageType::Ptr & pVal)
-    {
-      pValues_ = pVal;
-      return *this;
-    }
-    SelfType & SetPtr(const DimArray::Ptr pDim, const StorageType::Ptr & pVal)
-    {
-      pDim_ = pDim;
-      pValues_ = pVal;
-      return *this;
-    }
-
-    MultiArray Clone() const
-    {
-      DimArray::Ptr p_dim_clone(new DimArray(*pDim_));
-      StorageType::Ptr p_val_clone(new StorageType(*pValues_));
-      return MultiArray(p_dim_clone, p_val_clone);
-    }
-
     Bool IsNULL() const
     {
-      return !(pDim_ || pValues_);
+      return !pValues_;
     }
   };
 
   // -----------------------------------------------------------------------------
-  // NULL_MULTIARRAY
+  // NULL_NUMARRAY
   // -----------------------------------------------------------------------------
 
-  const MultiArray NULL_MULTIARRAY = MultiArray();
+  const NumArray NULL_NUMARRAY = NumArray();
 
   // -----------------------------------------------------------------------------
-  // MultiArrayArray
+  // NumArrayArray
   // -----------------------------------------------------------------------------
 
-  class MultiArrayArray: public std::vector<MultiArray>
+  class MultiArrayArray;
+
+  class NumArrayArray: public std::vector<NumArray>
   {
   public:
-    typedef MultiArrayArray SelfType;
-    typedef std::vector<MultiArray> BaseType;
+    typedef NumArrayArray SelfType;
+    typedef std::vector<NumArray> BaseType;
 
-    MultiArrayArray()
+    NumArrayArray()
     {
     }
-    MultiArrayArray(Size s) :
+    NumArrayArray(Size s) :
       BaseType(s)
     {
     }
-
-    MultiArrayArray Clone() const
-    {
-      MultiArrayArray clone(size());
-      for (Size i = 0; i < size(); ++i)
-        clone[i] = (*this)[i].Clone();
-      return clone;
-    }
+    explicit NumArrayArray(const MultiArrayArray & marray);
   };
 
   // -----------------------------------------------------------------------------
-  // MultiArrayPair
+  // NumArrayPair
   // -----------------------------------------------------------------------------
 
-  class MultiArrayPair: public std::pair<MultiArray, MultiArray>
+  class NumArrayPair: public std::pair<NumArray, NumArray>
   {
   public:
-    typedef MultiArrayPair SelfType;
-    typedef std::pair<MultiArray, MultiArray> BaseType;
-    MultiArrayPair()
-    {
-    }
+    typedef NumArrayPair SelfType;
+    typedef std::pair<NumArray, NumArray> BaseType;
 
-    MultiArrayPair Clone() const
+    NumArrayPair()
     {
-      MultiArrayPair clone;
-      clone.first = first.Clone();
-      clone.second = second.Clone();
-      return clone;
     }
   };
 
-  const MultiArrayPair NULL_MULTIARRAYPAIR;
+  const NumArrayPair NULL_NUMARRAYPAIR;
 
-  Bool allMissing(const MultiArray & marray);
-  Bool anyMissing(const MultiArray & marray);
+  Bool allMissing(const NumArray & marray);
+  Bool anyMissing(const NumArray & marray);
 
   // -----------------------------------------------------------------------------
-  // MultiArray Types
+  // NumArray Types
   // -----------------------------------------------------------------------------
 
   template<>
-  struct Types<MultiArray>
+  struct Types<NumArray>
   {
-    typedef MultiArray SelfType; //!< The template type itself
+    typedef NumArray SelfType; //!< The template type itself
 
     //! Smart pointer type defined with a boost::shared_ptr<>
     typedef boost::shared_ptr<SelfType> Ptr;
 
-    typedef MultiArrayArray Array; //!< Array type
+    typedef NumArrayArray Array; //!< Array type
     typedef Array::iterator Iterator; //!< Iterator type of the Array type
     typedef Array::reverse_iterator ReverseIterator; //!< Reverse iterator type of the Array type
     typedef Array::const_iterator ConstIterator; //!< Const iterator type of the Array type
@@ -350,11 +336,11 @@ namespace Biips
 
     typedef std::vector<Ptr> PtrArray; //!< Array of pointers defined with a std::vector<boost::shared_ptr<> >
 
-    typedef MultiArrayPair Pair;
+    typedef NumArrayPair Pair;
     typedef std::pair<Iterator, Iterator> IteratorPair;
     typedef std::pair<ConstIterator, ConstIterator> ConstIteratorPair; //!< Pair of ConstIterators type, used to define a range
   };
 
 }
 
-#endif /* BIIPS_MULTIARRAY_HPP_ */
+#endif /* BIIPS_NUMARRAY_HPP_ */

@@ -56,7 +56,7 @@ namespace Biips
     Bool discrete_;
 
   public:
-    NodeMonitor(NodeId id, const Monitor::Ptr & pMonitor);
+    NodeMonitor(NodeId id, const Monitor* & pMonitor);
 
     NodeId GetNodeId() const
     {
@@ -92,7 +92,7 @@ namespace Biips
     }
   };
 
-  NodeMonitor::NodeMonitor(NodeId id, const Monitor::Ptr & pMonitor) :
+  NodeMonitor::NodeMonitor(NodeId id, const Monitor* & pMonitor) :
     nodeId_(id), iter_(pMonitor->GetIteration()),
         sampledNodeId_(pMonitor->GetSampledNodes().front()),
         ess_(pMonitor->GetNodeESS(id)), weights_(pMonitor->GetWeights()),
@@ -137,10 +137,10 @@ namespace Biips
   template<>
   void NodeArrayMonitor::addMonitoredNode<ColumnMajorOrder>(NodeId id,
                                                             const IndexRange & subRange,
-                                                            const Monitor::Ptr & pMonitor)
+                                                            const Monitor* pMonitor)
   {
     if (!pMonitor)
-      throw LogicError("Monitor::Ptr is null, in NodeArrayMonitor::addMonitoredNode.");
+      throw LogicError("Monitor pointer is null, in NodeArrayMonitor::addMonitoredNode.");
     if (!pMonitor->Contains(id))
       throw LogicError("Node is not monitored, in NodeArrayMonitor::addMonitoredNode.");
     if (pMonitor->NParticles() != nParticles_)
@@ -177,7 +177,7 @@ namespace Biips
 
   NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
                                      const IndexRange & range,
-                                     const std::map<NodeId, Monitor::Ptr> & monitorsMap,
+                                     const std::map<NodeId, Monitor*> & monitorsMap,
                                      Size nParticles,
                                      const Graph & graph) :
     name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
@@ -229,7 +229,7 @@ namespace Biips
 
   NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
                                      const IndexRange & range,
-                                     const Monitor::Ptr & pMonitor,
+                                     const Monitor* pMonitor,
                                      Size nParticles,
                                      const Graph & graph) :
     name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
@@ -299,7 +299,7 @@ namespace Biips
   template<>
   void NodeArrayValue::addMonitoredNode<ColumnMajorOrder>(NodeId id,
                                                         const IndexRange & subRange,
-                                                        const Monitor::Ptr & pMonitor,
+                                                        const Monitor* pMonitor,
                                                         Size particleIndex)
   {
     if (!pMonitor)
@@ -328,7 +328,7 @@ namespace Biips
 
   NodeArrayValue::NodeArrayValue(const NodeArray & nodeArray,
                                  const IndexRange & range,
-                                 const Monitor::Ptr & pMonitor,
+                                 const Monitor* pMonitor,
                                  Size particleIndex,
                                  const Graph & graph) :
     range_(range)

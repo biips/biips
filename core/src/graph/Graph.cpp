@@ -135,6 +135,7 @@ namespace Biips
     return node_id;
   }
 
+  // TODO: to be exposed like getParamValues
   Types<DimArray::Ptr>::Array Graph::getParamDims(const Types<NodeId>::Array parameters) const
   {
     Types<DimArray::Ptr>::Array param_dims(parameters.size());
@@ -818,11 +819,12 @@ namespace Biips
 
     NodeValues node_values(GetSize());
     Flags sampled_flags(GetSize());
-    for (NodeId id = 0; id < GetSize(); ++id)
+    for (Size id=0; id<GetSize(); ++id)
     {
       node_values[id] = values_map[id];
       sampled_flags[id] = observed_map[id];
     }
+
     DataNodeSampler sample_node_vis(*this);
     sample_node_vis.SetMembers(node_values, sampled_flags, pRng);
     VisitGraph(sample_node_vis);
@@ -841,7 +843,7 @@ namespace Biips
 
     NodeValues node_values(GetSize());
     Flags sampled_flags(GetSize());
-    for (NodeId id = 0; id < GetSize(); ++id)
+    for (Size id=0; id<GetSize(); ++id)
     {
       node_values[id] = values_map[id];
       sampled_flags[id] = observed_map[id];

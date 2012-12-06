@@ -20,17 +20,27 @@ function [p, data] = biips_model(filename, data, varargin)
 opt_argin = length(varargin);
 % defauts values
 sample_data = true; 
-if (~exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run
-  s=rng('shuffle');
-  data_rng_seed=randi(intmax);
-  rng(s);
-else
-  % Octave version
-  s=rand('state');
-  rand('state',time);
-  data_rng_seed=double(randi(intmax));
-  rand('state',s);
-end
+if (exist('OCTAVE_VERSION')) % check MATLAB/OCTAVE run 
+    % octave version 
+    s=rand('state'); 
+    rand('state',time); 
+    data_rng_seed=double(randi(intmax)); 
+    rand('state',s);
+else 
+    % matlab version
+%%%%%%%%% Modif CEA (30/11/12)
+    if verLessThan('matlab', '7.12')
+        s=rand('state'); 
+        rand('state',sum(100*clock)); 
+        data_rng_seed=double(randi(intmax)); 
+        rand('state',s); 
+%%%%%%%%%
+    else 
+        s=rng('shuffle'); 
+        data_rng_seed=randi(intmax); 
+        rng(s); 
+    end;
+end;
 quiet = false;
 
 if opt_argin >= 1

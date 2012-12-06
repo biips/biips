@@ -95,12 +95,12 @@ namespace Biips
         - log(weights.Values().Sum());
   }
 
-  void DCat::unboundedSupport(ValArray & lower,
+  void DCat::fixedUnboundedSupport(ValArray & lower,
                               ValArray & upper,
                               const NumArray::Array & paramValues) const
   {
     const NumArray & weights = paramValues[0];
-    lower[0] = 0.0;
+    lower[0] = 1.0;
     upper[0] = Scalar(weights.Length());
   }
 

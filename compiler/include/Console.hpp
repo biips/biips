@@ -135,21 +135,21 @@ namespace Biips
 
     Bool SetFilterMonitor(const String & name, const IndexRange & range =
                               NULL_RANGE);
-    Bool SetSmoothTreeMonitor(const String & name, const IndexRange & range =
+    Bool SetGenTreeMonitor(const String & name, const IndexRange & range =
                                   NULL_RANGE);
-    Bool SetSmoothMonitor(const String & name, const IndexRange & range =
+    Bool SetBackwardSmoothMonitor(const String & name, const IndexRange & range =
                               NULL_RANGE);
 
     Bool IsFilterMonitored(const String & name, const IndexRange & range =
                                NULL_RANGE, Bool check_released = true);
-    Bool IsSmoothTreeMonitored(const String & name, const IndexRange & range =
+    Bool IsGenTreeMonitored(const String & name, const IndexRange & range =
                                    NULL_RANGE, Bool check_released = true);
-    Bool IsSmoothMonitored(const String & name, const IndexRange & range =
+    Bool IsBackwardSmoothMonitored(const String & name, const IndexRange & range =
                                NULL_RANGE, Bool check_released = true);
 
     Bool ClearFilterMonitors(Bool release_only = false);
-    Bool ClearSmoothTreeMonitors(Bool release_only = false);
-    Bool ClearSmoothMonitors(Bool release_only = false);
+    Bool ClearGenTreeMonitors(Bool release_only = false);
+    Bool ClearBackwardSmoothMonitors(Bool release_only = false);
 
     /*!
      * @short Builds the SMC sampler.
@@ -174,21 +174,21 @@ namespace Biips
     Bool GetLogNormConst(Scalar & logNormConst);
     Bool SetLogNormConst(Scalar logNormConst);
 
-    Bool SampleSmoothTreeParticle(Size rngSeed);
+    Bool SampleGenTreeParticle(Size rngSeed);
     Bool
-    DumpSampledSmoothTreeParticle(std::map<String, MultiArray> & sampledValueMap);
+    DumpSampledGenTreeParticle(std::map<String, MultiArray> & sampledValueMap);
     Bool
-    SetSampledSmoothTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
+    SetSampledGenTreeParticle(const std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Size verbosity = 1, Bool progressBar = true);
 
     Bool ExtractFilterStat(const String & name,
                            StatTag statFeature,
                            std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothTreeStat(const String & name,
+    Bool ExtractGenTreeStat(const String & name,
                                StatTag statFeature,
                                std::map<IndexRange, MultiArray> & statMap);
-    Bool ExtractSmoothStat(const String & name,
+    Bool ExtractBackwardSmoothStat(const String & name,
                            StatTag statFeature,
                            std::map<IndexRange, MultiArray> & statMap);
 
@@ -196,11 +196,11 @@ namespace Biips
                           std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothTreePdf(const String & name,
+    Bool ExtractGenTreePdf(const String & name,
                               std::map<IndexRange, Histogram> & pdfMap,
                               Size numBins = 40,
                               Scalar cacheFraction = 0.25);
-    Bool ExtractSmoothPdf(const String & name,
+    Bool ExtractBackwardSmoothPdf(const String & name,
                           std::map<IndexRange, Histogram> & pdfMap,
                           Size numBins = 40,
                           Scalar cacheFraction = 0.25);
@@ -228,8 +228,8 @@ namespace Biips
 
     Bool DumpFilterMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
     Bool
-    DumpSmoothTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
-    Bool DumpSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    DumpGenTreeMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
+    Bool DumpBackwardSmoothMonitors(std::map<String, NodeArrayMonitor> & particlesMap);
 
     Bool DumpNodeIds(Types<NodeId>::Array & nodeIds);
     Bool DumpNodeNames(Types<String>::Array & nodeNames);

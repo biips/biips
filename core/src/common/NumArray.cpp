@@ -25,22 +25,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MultiArray.cpp
- * \brief
- *
+/*! \file   NumArray.cpp
+ * \brief   
+ * 
  * \author  $LastChangedBy$
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
  */
 
+#include "common/NumArray.hpp"
 #include "common/MultiArray.hpp"
 #include "common/Vector.hpp"
 #include "common/Matrix.hpp"
 
 namespace Biips
 {
-  Bool allMissing(const MultiArray & marray)
+
+  NumArray::NumArray(const MultiArray & marray) :
+      pDim_(marray.DimPtr().get()), pValues_(marray.ValuesPtr().get())
+  {
+
+  }
+
+  Bool allMissing(const NumArray & marray)
   {
     Size N = marray.Length();
     const ValArray & v = marray.Values();
@@ -52,7 +60,7 @@ namespace Biips
     return true;
   }
 
-  Bool anyMissing(const MultiArray & marray)
+  Bool anyMissing(const NumArray & marray)
   {
     Size N = marray.Length();
     const ValArray & v = marray.Values();
@@ -63,4 +71,12 @@ namespace Biips
     }
     return false;
   }
+
+  NumArrayArray::NumArrayArray(const MultiArrayArray & marray) :
+      NumArrayArray::BaseType(marray.size())
+  {
+    for (Size i = 0; i < size(); ++i)
+      at(i).SetPtr(marray[i].DimPtr().get(), marray[i].ValuesPtr().get());
+  }
+
 }
