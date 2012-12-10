@@ -29,26 +29,15 @@ opt_argin = length(varargin);
 type='fs';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (~exist('OCTAVE_VERSION', 'var')) 
-  % octave version
-  s=rng('shuffle');
-  seed=randi(intmax);
-  rng(s);
+if (exist('OCTAVE_VERSION', 'var') || verLessThan('matlab', '7.12')) 
+   s=rand('state');
+   rand('state',sum(100*clock)); 
+   seed=double(randi(intmax));
+   rand('state',s);
 else
-  % matlab version
-%%%%%%%%% Modif CEA (30/11/12)
-    if verLessThan('matlab', '7.12')
-        s=rand('state'); 
-        rand('state',sum(100*clock)); 
-        data_rng_seed=double(randi(intmax)); 
-        rand('state',s); 
-%%%%%%%%%
-    else 
-      s=rand('state');
-      rand('state',time);
-      seed=double(randi(intmax));
-      rand('state',s);
-    end
+   s=rng('shuffle');
+   seed=randi(intmax);
+   rng(s);
 end
 
 if opt_argin >= 1
