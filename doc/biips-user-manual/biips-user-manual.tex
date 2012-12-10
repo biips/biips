@@ -1,0 +1,1413 @@
+\documentclass[11pt, a4paper, titlepage]{report}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{a4wide}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage{lmodern}
+\newcommand{\biips}{\textsf{BiiPS}}
+\newcommand{\rbiips}{\textsf{rbiips}}
+\newcommand{\release}{0.7.3}
+% \newcommand{\release}{@Biips_VERSION@}
+\newcommand{\email}{\url{biips-project@lists.gforge.inria.fr}}
+% \newcommand{\email}{\url{@Biips_EMAIL@}}
+
+\newcommand{\JAGS}{\textsf{JAGS}}
+\newcommand{\rjags}{\textsf{rjags}}
+\newcommand{\BUGS}{\textsf{BUGS}}
+\newcommand{\OpenBUGS}{\textsf{OpenBUGS}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\CODA}{\textsf{coda}}
+\begin{document}
+
+\title{\biips\ Version \release\ user manual}
+\author{Adrien Todeschini, Marc Fuentes, Fran\c{}ois Caron}
+%\date{1 October 2012}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+% \biips\ is Just Another Gibbs Sampler.  It is a program for the analysis
+% of Bayesian models using Markov Chain Monte Carlo (MCMC) which is not
+% wholly unlike
+% \OpenBUGS\ (\url{http://www.openbugs.info}). \JAGS\ was written
+% with three aims in mind: to have an engine for the BUGS language
+% that runs on Unix; to be extensible, allowing users to write their own
+% functions, distributions, and samplers; and to be a platform for
+% experimentation with ideas in Bayesian modelling.
+% 
+% \JAGS\ is designed to work closely with the \R\ language and
+% environment for statistical computation and graphics
+% (\url{http://www.r-project.org}).  You will find it useful to install
+% the \CODA\ package for \R\ to analyze the output. You can also use the
+% \rjags\ package to work directly with \JAGS\ from within R (but note
+% that the \rjags\ package is not described in this manual).
+
+\biips\ is licensed under the GNU General Public License
+version 3. You may freely modify and redistribute it under certain
+conditions (see the file \texttt{COPYING} for details).
+
+\chapter{Running a model in \biips}
+
+\biips\ is designed for inference on Bayesian models using Sequential
+Monte Carlo (SMC) simulation.  Running a model refers to generating
+samples from the posterior distribution of the model parameters.  This
+takes place in three steps:
+\begin{enumerate}
+\item Definition of the model
+\item Compilation
+\item Sampling and monitoring
+\end{enumerate}
+The next stages of analysis are done outside of \biips: diagnostics,
+model criticism, and summarizing the samples.
+
+\biips\ can be used from within \R\ using the \rbiips\ package.
+
+\section{Definition}
+
+There are two parts to the definition of a model in \biips: a
+description of the model and the definition of the data.
+
+\subsection{Model definition}
+
+The model is defined in a text file using a dialect of the
+BUGS language.  The model definition consists of a series of
+relations inside a block delimited by curly brackets \verb+{+ and
+\verb+}+ and preceded by the keyword \verb+model+. Here is the standard
+linear regression example:
+
+\begin{verbatim}
+model {
+    for (i in 1:N) {
+          Y[i]   ~ dnorm(mu[i], tau)
+          mu[i] <- alpha + beta * (x[i] - x.bar)
+    }
+    x.bar   <- mean(x)
+    alpha    ~ dnorm(0.0, 1.0E-4)
+    beta     ~ dnorm(0.0, 1.0E-4)
+    sigma   <- 1.0/sqrt(tau)
+    tau      ~ dgamma(1.0E-3, 1.0E-3)
+}
+\end{verbatim}
+
+Each relation defines a node in the model in terms of other nodes that
+appear on the right hand side. These are referred to as the parent
+nodes. Taken together, the nodes in the model (together with the
+parent/child relationships represented as directed edges) form a
+directed acyclic graph. The very top-level nodes in the graph, with no
+parents, are constant nodes, which are defined either in the model
+definition ({\em e.g.}  \verb+1.0E-3+), or in the data file ({\em
+  e.g.}  \verb+x[1]+).
+
+Relations can be of two types. A {\em stochastic relation} (\verb+~+)
+defines a stochastic node, representing a random variable in the
+model. A {\em deterministic relation} (\verb+<-+) defines a
+deterministic node, the value of which is determined exactly by the
+values of its parents.
+
+Nodes defined by a relation are embedded in named arrays. Array names may
+contain letters, numbers, decimal points and underscores, but they must
+start with a letter.  The node array \verb+mu+ is a vector of length
+$N$ containing $N$ nodes (\verb+mu[1]+, $\ldots$, \verb+mu[N]+). The
+node array \verb+alpha+ is a scalar.  \biips\ follows the S language
+convention that scalars are considered as vectors of length 1. Hence
+the array \verb+alpha+ contains a single node \verb+alpha[1]+.
+
+Deterministic nodes do not need to be embedded in node arrays. The
+node \verb+Y[i]+ could equivalently be defined as
+\begin{verbatim}
+Y[i] ~ dnorm(alpha + beta * (x[i] - x.bar), tau)
+\end{verbatim}
+In this version of the model definition, the node previously defined
+as \verb+mu[i]+ still exists, but is not accessible to the user as it
+does not have a name.  This ability to hide deterministic nodes by
+embedding them in other expressions underscores an important fact:
+only the stochastic nodes in a model are really
+important. Deterministic nodes are merely a syntactically convenient
+way of describing the relations between stochastic nodes, or
+transformations of them.
+
+\subsection{Data}
+\label{section:data}
+
+% The data are defined in a separate file from the model definition, in
+% the format created by the \texttt{dump()} function in \R . % (see appendix \ref{appendix:data}).
+Data values may be supplied for stochastic
+nodes and constants (including constant values used inside for
+loops).
+It is an error to supply a data value for a deterministic
+node.
+% (See, however, section \ref{section:obfun} on observable functions).
+
+Here are the data for the \verb+LINE+ example:
+\begin{verbatim}
+`x` <- c(1, 2, 3, 4, 5)
+#R-style comments, like this one, can be embedded in the data file
+`Y` <- c(1, 3, 3, 3, 5)
+`N` <- 5
+\end{verbatim}
+
+The unobserved stochastic nodes are referred to as the {\em
+  parameters} of the model. The data file therefore defines the
+parameters of the model by omission. In the \verb+LINE+ example, the
+parameters are \texttt{alpha}, \texttt{beta} and \texttt{tau}.
+
+If a node array contains both observed and unobserved nodes, then the
+data should contain missing values (\texttt{NA}) for the unobserved
+elements. In the \verb+LINE+ example, if \verb+Y[2]+ and \verb+Y[5]+
+were unobserved, then the data would be
+\begin{verbatim}
+`Y` <- c(1, NA, 3, 3, NA)
+\end{verbatim}
+Multivariate nodes cannot be partially observed, so if a node takes up
+two or more elements of a node array, then the corresponding data
+values must be all present or all missing.
+
+\subsection{Node Array dimensions}
+
+\subsubsection*{Array declarations}
+
+\biips\ allows the option of declaring the dimensions of node arrays in
+the model file. The declarations consist of the keyword \texttt{var}
+(for variable) followed by a comma-separated list of array names, with
+their dimensions in square brackets. The dimensions may be given in
+terms of any expression of the data that returns a single integer
+value.
+
+In the linear regression example, the model block could be preceded by
+\begin{verbatim}
+var x[N], Y[N], mu[N], alpha, beta, tau, sigma, x.bar;
+\end{verbatim}
+
+\subsubsection*{Undeclared nodes}
+
+If a node array is not declared then \biips\ has three methods of
+determining its size.
+\begin{enumerate}
+\item {\bf Using the data.}  The dimension of an undeclared node array
+  may be inferred if it is supplied in the data file.
+\item {\bf Using the left hand side of the relations.}  The maximal
+  index values on the left hand side of a relation are taken to be the
+  dimensions of the node array.  For example, in this case:
+\begin{verbatim}
+for (i in 1:N) {
+   for (j in 1:M) {
+      Y[i,j] ~ dnorm(mu[i,j], tau)
+   }
+}
+\end{verbatim}
+$Y$ would be inferred to be an $N \times M$ matrix. This method cannot 
+be used when there are empty indices ({\em e.g.} \verb+Y[i,]+) on the left
+hand side of the relation.
+\item {\bf Using the dimensions of the parents} If a whole node array
+  appears on the left hand side of a relation, then its dimensions can
+  be inferred from the dimensions of the nodes on the right hand side.
+  For example, if \verb+A+ is known to be an $N \times N$ matrix
+  and
+\begin{verbatim}
+B <- inverse(A)
+\end{verbatim}
+Then \verb+B+ is also an $N \times N$ matrix.
+\end{enumerate}
+
+\subsubsection*{Querying array dimensions}  
+
+The \biips\ compiler has two built-in functions for querying array
+sizes.  The \verb+length()+ function returns the number of elements in
+a node array, and the \verb+dim()+ function returns a vector
+containing the dimensions of an array.  These two functions may be
+used to simplify the data preparation. For example, if \verb+Y+
+represents a vector of observed values, then using the \verb+length()+
+function in a for loop:
+\begin{verbatim}
+for (i in 1:length(Y)) {
+    Y[i] ~ dnorm(mu[i], tau)
+}
+\end{verbatim}
+avoids the need to put a separate data value \verb+N+ in the file
+representing the length of \verb+Y+.  
+
+For multi-dimensional arrays, the \verb+dim+ function serves a similar
+purpose. The \verb+dim+ function returns a vector, which must be stored
+in an array before its elements can be accessed. For this reason, calls
+to the \verb+dim+ function must always be in a data block (see section
+\ref{section:data:tranformations}).
+\begin{verbatim}
+data {
+   D <- dim(Z)
+}
+model {
+   for (i in 1:D[1]) {
+      for (j in 1:D[2]) {
+         Z[i,j] <- dnorm(alpha[i] + beta[j], tau)
+      }
+   }
+   ...
+}
+\end{verbatim}
+Clearly, the \verb+length()+ and \verb+dim()+ functions can only
+work if the size of the node array can be inferred, using one of the
+three methods outlined above.
+
+Note: the \verb+length()+ and \verb+dim()+ functions are different
+from all other functions in \biips: they do not act on nodes, but only
+on node {\em arrays}. As a consequence, an expression such as
+\verb+dim(a %*% b)+ is syntactically incorrect.
+
+\section{Compilation}
+
+When a model is compiled, a graph representing the model is created in
+computer memory. Compilation can fail for a number of reasons:
+\begin{enumerate}
+\item The graph contains a directed cycle.  These are forbidden
+in \biips.
+\item A top-level parameter is undefined. Any node that is used on
+the right hand side of a relation, but is not defined on the left
+hand side of any relation, is assumed to be a constant node. Its value
+must be supplied in the data file. 
+\item The model uses a function or distribution that has not been
+defined in any of the loaded modules.
+\end{enumerate}
+The number of parallel chains to be run by \biips\ is also defined at
+compilation time.  Each parallel chain should produce an independent
+sequence of samples from the posterior distribution. By default,
+\biips\ only runs a single chain.
+
+% \subsection{Parameter values}
+% 
+% The user may supply initial value files -- one for each chain --
+% containing initial values for the model parameters. The files may not
+% contain values for logical or constant nodes. The format is the same
+% as the data file. % (see appendix \ref{appendix:data}).
+% % Section \ref{parameters:in} describes how to read the initial value
+% % files into the model.
+% 
+% As with the data file, you may supply missing values in the initial
+% values file.  This need typically arises with contrast parameters.
+% Suppose $X$ is a categorical covariate taking values from 1 to
+% 4. There is one parameter for each level of x ($\beta_1 \ldots
+% \beta_4$) , but the first parameter $\beta_1$ is set to zero for
+% identifiability. The remaining parameters $\beta_2 \ldots \beta_4$
+% represent contrasts with respect to the first level of $X$.
+% \begin{verbatim}
+% for (i in 1:N) {
+%    Y[i] ~ alpha + beta[x[i]]
+% }
+% # Prior distribution
+% alpha ~ dnorm(0, 1.0E-3)
+% beta[1] <- 0
+% for(i in 2:4) {
+%    beta[i] ~ dnorm(0, 1.0E-3)
+% }
+% \end{verbatim}
+% A suitable initial value for \verb+beta+ would be
+% \begin{verbatim}
+% `beta` <- c(NA, 1.03, -2.03, 0.52)
+% \end{verbatim}
+% This allows parameter values to be supplied for the stochastic
+% elements of \verb+beta+ but not the constant first element.
+% 
+% If initial values are not supplied by the user, then each parameter
+% chooses its own initial value based on the values of its parents.  The
+% initial value is chosen to be a ``typical value'' from the prior
+% distribution. The exact meaning of ``typical value'' depends on the
+% distribution of the stochastic node, but is usually the mean, median,
+% or mode.
+% 
+% If you rely on automatic initial value generation and are running
+% multiple parallel chains, then the initial values will be the same in
+% all chains.  You may not want this behaviour, especially if you are
+% using the Gelman and Rubin convergence diagnostic, which assumes that
+% the initial values are over-dispersed with respect to the posterior
+% distribution. In this case, you are advised to set the starting values
+% manually using the "parameters in" statement.
+
+% \subsection{Samplers}
+% 
+% A Sampler is an object that acts on a set of parameters and updates
+% them from one iteration to the next. During initialization of the
+% model, Samplers are chosen automatically for all parameters. 
+% 
+% The Model holds an internal list of {\em Sampler Factory} objects,
+% which inspect the graph, recognize sets of parameters that can be
+% updated with specific methods, and generate Sampler objects for
+% them. The list of Sampler Factories is traversed in order, starting with
+% sampling methods that are efficient, but limited to certain specific
+% model structures and ending with the most generic, possibly
+% inefficient, methods. If no suitable Sampler can be generated for one
+% of the model parameters, an error message is generated.
+% 
+% The user has no direct control over the process of choosing
+% Samplers. However, you may indirectly control the process by loading a
+% module that defines a new Sampler Factory. The module will insert the
+% new Sampler Factory at the beginning of the list, where it will be
+% queried before all of the other Sampler Factories. You can also 
+% optionally turn on and off sampler factories using the ``SET FACTORY''
+% command. See \ref{set:factory}.
+% 
+% A report on the samplers chosen by the model, and the stochastic nodes
+% they act on, can be generated using the ``SAMPLERS TO'' command. See 
+% section \ref{samplers:to}.
+
+\section{Errors}
+
+There are two kinds of errors in \biips: runtime errors, which are due to
+mistakes in the model specification, and logic errors which are internal
+errors in the \biips program. 
+
+Logic errors are generally created in the lower-level parts of the \biips\
+library, where it is not possible to give an informative error message.
+The upper layers of the \biips\ program are supposed to catch such errors
+before they occur, and return a useful error message that will help you
+diagnose the problem.  Inevitably, some errors slip through. Hence,
+if you get a logic error, there is probably an error in your input to
+\biips, although it may not be obvious what it is. Please send a bug
+report (see ``Feedback'' below) whenever you get a logic error.
+
+Error messages may also be generated when parsing files (model files,
+data files, command files).  The error messages generated in this case
+are created automatically by the program \texttt{bison}. They
+generally take the form ``syntax error, unexpected FOO, expecting BAR''
+and are not always abundantly clear.
+
+% If a model compiles and initializes correctly, but an error occurs
+% during updating, then the current state of the model will be dumped
+% to a file named \verb+jags.dumpN.R+ where $N$ is the chain number.
+% You should then load the dumped data into R to inspect the state of
+% each chain when the error occurred.
+
+\chapter{Modules}
+\label{section:modules}
+
+The \biips\ library is distributed along with certain dynamically
+loadable modules that extend its functionality. A module can define
+new objects of the following classes:
+\begin{enumerate}
+\item {\bf functions} and {\bf distributions}, the basic building
+blocks of the BUGS language.
+\item {\bf samplers}, the objects which update the parameters of the
+model at each iteration, and {\bf sampler factories}, the objects that 
+create new samplers for specific model structures.  If the module
+defines a new distribution, then it will typically also define a new
+sampler for that distribution.
+\end{enumerate}
+
+The \verb+base+ module and the \verb+bugs+ module are loaded automatically
+at start time.  Others may be loaded by the user.
+
+\section{The base module}
+
+The base module supply the base functionality for the \biips\ library
+to function correctly. It is loaded first by default.  
+
+\subsection{Base Samplers}
+
+The \verb+base+ module defines samplers that use highly generic update
+methods.  These sampling methods only require basic information about
+the stochastic nodes they sample.  Conversely, they may not be fully
+efficient.
+
+Three samplers currently defined:
+\begin{enumerate}
+\item The Finite sampler can sample a discrete-valued node with
+fixed support of less than 20 possible values. The node must not
+be bounded using the \verb+T(,)+ construct
+% \item The Real Slice Sampler can sample any scalar real-valued 
+% stochastic node.
+% \item The Discrete Slice Sampler can sample any scalar
+% discrete-valued stochastic node.
+\end{enumerate}
+
+\chapter{Functions}
+\label{section:functions}
+
+Functions allow deterministic nodes to be defined using the \verb+<-+
+(``gets'') operator.  Most of the functions in \biips\ are scalar
+functions taking scalar arguments. However, \biips\ also allows
+arbitrary vector- and array-valued functions, such as the matrix
+multiplication operator \verb+%*%+ and the transpose function
+\verb+t()+ defined in the \verb+bugs+ module.
+%, and the matrix exponential function \verb+mexp()+ defined in the \verb+msm+ module.
+\biips\ also uses an enriched dialect of the BUGS language with
+a number of operators that are used in the S language.
+
+Scalar functions taking scalar arguments are automatically vectorized.
+They can also be called when the arguments are arrays with conforming
+dimensions, or scalars. So, for example, the scalar $c$ can be added to
+the matrix $A$ using
+\begin{verbatim}
+B <- A + c
+\end{verbatim}
+instead of the more verbose form
+\begin{verbatim}
+D <- dim(A)
+for (i in 1:D[1])
+   for (j in 1:D[2]) {
+      B[i,j] <- A[i,j] + c
+   }
+}
+\end{verbatim}
+Inverse link functions are an exception to this rule ({\em i.e.} exp,
+icloglog, ilogit, phi) and cannot be vectorized. 
+
+\section{Base functions}
+\label{section:functions:base}
+
+The functions defined by the \verb+base+ module all appear as infix or
+prefix operators. The syntax of these operators is built into the
+\biips\ parser. They are therefore considered part of the modelling
+language.  Table \ref{table:base:functions} lists them in reverse
+order of precedence.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Type & Usage & Description\\ 
+\hline
+Logical           & \verb+x || y+ & Or \\
+operators         & \verb+x && y+ & And \\
+                  & \verb+!x+     & Not \\
+\hline
+Comparison  & \verb+x > y+ & Greater than\\
+operators   & \verb+x >= y+ & Greater than or equal to  \\
+            & \verb+x < y+ & Less than \\
+            & \verb+x <= y+ & Less than or equal to \\
+            & \verb+x == y+ & Equal \\
+            & \verb+x != y+ & Not equal \\
+\hline
+Arithmetic  & \verb-x + y- & Addition \\
+operators   & \verb+x - y+ & Subtraction\\
+            & \verb+x * y+ & Multiplication \\
+            & \verb+x / y+ & Division \\
+            & \verb+x %special% y+ &User-defined operators\\
+            & \verb+-x+ & Unary minus\\
+\hline
+Power function & \verb+x^y+ & \\
+\hline
+\end{tabular}
+\caption{Base functions listed in reverse order of precedence 
+  \label{table:base:functions}}
+\end{center}
+\end{table}
+
+Logical operators convert numerical arguments to logical values: zero
+arguments are converted to FALSE and non-zero arguments to
+TRUE. Logical and comparison operators return the value 1 if the
+result is TRUE and 0 if the result is FALSE.  Comparison operators are
+non-associative: the expression \verb+x < y < z+, for example, is
+syntactically incorrect.
+
+The \verb+%special%+ function is an exception in table
+\ref{table:base:functions}. It is not a function defined by the
+\verb+base+ module, but is a place-holder for any function
+with a name starting and ending with the character ``\verb+%+'' Such
+functions are automatically recognized as infix operators by the
+\biips\ model parser, with precedence defined by table
+\ref{table:base:functions}.
+
+\section{Functions in the bugs module}
+\label{section:functions:bugs}
+
+\subsection{Scalar functions}
+
+Table \ref{table:bugs:scalar} lists the scalar-valued functions in the
+\texttt{bugs} module that also have scalar arguments.  These functions
+are automatically vectorized when they are given vector, matrix, or
+array arguments with conforming dimensions.
+
+% Table \ref{table:bugs:link} lists the link functions in the
+% \texttt{bugs} module.  These are smooth scalar-valued functions that
+% may be specified using an S-style replacement function notation. So,
+% for example, the log link
+% \begin{verbatim}
+% log(y) <- x
+% \end{verbatim}
+% is equivalent to the more direct use of its inverse, the exponential
+% function:
+% \begin{verbatim}
+% y <- exp(x)
+% \end{verbatim}
+% This usage comes from the use of link functions in generalized linear
+% models.
+
+% Table \ref{table:bugs:dpq} shows functions to calculate the
+% probability density, probability function, and quantiles of some of
+% the distributions provided by the \texttt{bugs} module. These
+% functions are parameterized in the same way as the corresponding
+% distribution.  For example, if $x$ has a normal distribution with mean
+% $\mu$ and precision $\tau$
+% \begin{verbatim}
+% x ~ dnorm(mu, tau)
+% \end{verbatim}
+% Then the usage of the corresponding density, probability, and quantile
+% functions is: 
+% \begin{verbatim}
+% density.x  <- dnorm(x, mu, tau)     # Density of normal distribution at x
+% prob.x     <- pnorm(x, mu, tau)     # P(X <= x)
+% quantile90.x <- qnorm(0.9, mu, tau) # 90th percentile
+% \end{verbatim}
+% For details of the parameterization of the other distributions, see
+% tables \ref{table:bugs:distributions:real} and
+% \ref{table:bugs:distributions:discrete}.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Usage  & Description & Value & Restrictions on arguments \\ 
+\hline
+\verb+abs(x)+       & Absolute value        & Real & \\
+\verb+arccos(x)+    & Arc-cosine            & Real & $-1 < x < 1$\\
+\verb+arccosh(x)+   & Hyperbolic arc-cosine & Real & $1 < x$ \\
+\verb+arcsin(x)+    & Arc-sine              & Real & $-1 < x < 1$\\
+\verb+arcsinh(x)+   & Hyperbolic arc-sine   & Real &\\
+\verb+arctan(x)+    & Arc-tangent           & Real &\\
+\verb+arctanh(x)+   & Hyperbolic arc-tangent & Real & $-1 < x < 1$\\
+\verb+cos(x)+       & Cosine              & Real & \\
+\verb+cosh(x)+      & Hyperbolic Cosine   & Real & \\
+% \verb+cloglog(x)+    & Complementary log log & Real & $0 < x < 1$ \\
+\verb+equals(x,y)+   & Test for equality   & Logical & \\
+\verb+exp(x)+       & Exponential         & Real & \\
+% \verb+icloglog(x)+  & Inverse complementary & Real & \\
+%                     & log log function    & \\
+\verb+ifelse(x,a,b)+ & If $x$ then $a$ else $b$ & Real & \\
+% \verb+ilogit(x)+    & Inverse logit       & Real & \\
+\verb+log(x)+       & Log function        & Real & $x > 0$ \\
+% \verb+logfact(x)+   & Log factorial       & Real & $x > -1$ \\
+% \verb+loggam(x)+    & Log gamma           & Real & $x > 0$ \\
+% \verb+logit(x)+     & Logit               & Real & $0 < x < 1$ \\
+% \verb+phi(x)+       & Standard normal cdf & Real & \\
+\verb+pow(x,z)+     & Power function      & Real & If $x < 0$ then $z$ is integer \\ 
+% \verb+probit(x)+    & Probit              & Real & $0 < x < 1$ \\
+\verb+round(x)+     & Round to integer    & Integer & \\
+                    & away from zero      &      & \\
+\verb+sin(x)+       & Sine                & Real & \\
+\verb+sinh(x)+      & Hyperbolic Sine     & Real & \\
+\verb+sqrt(x)+      & Square-root         & Real & $x >= 0$ \\
+\verb+step(x)+      & Test for $x \geq 0$ & Logical & \\
+\verb+tan(x)+       & Tangent             & Real & \\
+\verb+tanh(x)+      & Hyperbolic Tangent  & Real & \\
+\verb+trunc(x)+     & Round to integer    & Integer & \\
+                    & towards zero        & \\
+\hline
+\end{tabular}
+\caption{Scalar functions in the \texttt{bugs} module \label{table:bugs:scalar}}
+\end{center}
+\end{table}
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Distribution & Density & Distribution & Quantile \\
+\hline
+Bernoulli          & dbern     & pbern     & qbern \\
+Beta               & dbeta     & pbeta     & qbeta \\
+Binomial           & dbin      & pbin      & qbin \\
+Chi-square         & dchisqr   & pchisqr   & qchisqr \\
+% Double exponential & ddexp     & pdexp     & qdexp \\
+Exponential        & dexp      & pexp      & qexp \\
+F                  & df        & pf        & qf \\
+Gamma              & dgamma    & pgamma    & qgamma \\
+% Generalized gamma  & dgen.gamma & pgen.gamma & qgen.gamma \\
+% Noncentral hypergeometric     & dhyper    & phyper    & qhyper \\
+% Logistic           & dlogis    & plogis    & qlogis \\
+Log-normal         & dlnorm    & plnorm    & qlnorm \\
+% Negative binomial  & dnegbin   & pnegbin   & qnegbin \\
+% Noncentral Chi-square & dnchisqr   & pnchisqr   & qnchisqr \\
+Normal             & dnorm     & pnorm     & qnorm \\
+% Pareto             & dpar      & ppar      & qpar \\
+Poisson            & dpois     & ppois     & qpois \\
+Student t          & dt        & pt        & qt \\
+Weibull            & dweib     & pweib     & qweib \\
+\hline
+\end{tabular}
+\caption{Functions to calculate the probability density, probability
+  function, and quantiles of some of the distributions provided by the
+  \texttt{bugs} module. \label{table:bugs:dpq}}
+\end{center}
+\end{table}
+
+% \begin{table}[h!]
+% \begin{center}
+% \begin{tabular}{llll}
+% \hline
+% Link function         & Description & Range & Inverse \\
+% \hline
+% \verb+cloglog(y) <- x+ & Complementary log log & $0 < y < 1$ & \verb+y <- icloglog(x)+ \\
+% \verb+log(y) <- x+    & Log           & $0 < y$ &  \verb+y <- exp(x)+ \\
+% \verb+logit(y) <- x+  & Logit         & $0 < y < 1$ &  \verb+y <- ilogit(x)+ \\
+% \verb+probit(y) <- x+ & Probit        & $0 < y < 1$ &  \verb+y <- phi(x)+\\
+% \hline
+% \end{tabular}
+% \caption{Link functions in the \texttt{bugs} module \label{table:bugs:link}}
+% \end{center}
+% \end{table}
+
+\subsection{Scalar-valued functions with vector arguments}
+
+Table \ref{table:bugs:scalar2} lists the scalar-valued functions in the
+\texttt{bugs} module that take general arguments. Unless otherwise
+stated in table \ref{table:bugs:scalar2}, the arguments to these functions
+may be scalar, vector, or higher-dimensional arrays.
+
+The \verb+max()+ and \verb+min()+ functions work like the
+corresponding \R\ functions. They take a variable number of arguments
+and return the maximum/minimum element over all supplied
+arguments. This usage is  compatible with \OpenBUGS, although more general.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Function & Description & Restrictions \\
+\hline
+% \verb+inprod(x1,x2)+ & Inner product & Dimensions of $x1$, $x2$ conform \\
+% \verb+interp.lin(e,v1,v2)+ & Linear Interpolation & $e$ scalar, \\
+%                           &                     & $v1,v2$ conforming vectors \\
+% \verb+logdet(m)+ & Log determinant & $m$ is a symmetric positive definite matrix \\
+\verb+max(x1,x2,...)+ & Maximum element among all arguments & \\
+% \verb+mean(x)+  & Mean of elements of $x$ & \\
+\verb+min(x1,x2,...)+ & Minimum element among all arguments & \\
+\verb+prod(x)+  & Product of elements of $x$ & \\
+\verb+sum(x)+   & Sum of elements of $x$& \\
+% \verb+sd(x)+    & Standard deviation of elements of $x$ & \\
+\hline
+\end{tabular}
+\caption{Scalar-valued functions with general
+  arguments in the \texttt{bugs} module \label{table:bugs:scalar2}}
+\end{center}
+\end{table}
+
+\subsection{Vector- and array-valued functions}
+
+Table \ref{table:bugs:vector} lists vector- or matrix-valued functions
+in the \texttt{bugs} module.
+
+The \texttt{sort} and \texttt{rank} functions behaves like their R
+namesakes: \texttt{sort} accepts a vector and returns the same values
+sorted in ascending order; \texttt{rank} returns a vector of ranks.
+This is distinct from \OpenBUGS, which has two scalar-valued functions
+\verb+rank+ and \verb+ranked+.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Usage & Description & Restrictions \\
+\hline
+\verb+inverse(a)+ & Matrix inverse & $a$ is a symmetric positive definite matrix  \\
+%\verb+mexp(a)+ & Matrix exponential & $a$ is a square matrix \\
+% \verb+rank(v)+ & Ranks of elements of $v$ & $v$ is a vector   \\
+% \verb+sort(v)+ & Elements of $v$ in order & $v$ is a vector  \\
+\verb+t(a)+    & Transpose                & $a$ is a matrix \\
+\verb+a %*% b+  & Matrix multiplication & $a,b$ conforming vector or matrices\\
+
+\hline
+\end{tabular}
+\caption{Vector- or matrix-valued functions in the \texttt{bugs}
+  module \label{table:bugs:vector}}
+\end{center}
+\end{table}
+
+\section{Function aliases}
+
+A function may optionally have an alias, which can be used in the
+model definition in place of the canonical name. Aliases are used to
+to avoid confusion with other software in which functions may have
+different names. Table \ref{table:bugs:functions:alias} shows the
+functions in the \texttt{bugs} module with an alias.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Function               & Canonical & Alias & Compatible  \\
+                       & name      &       & with         \\
+\hline
+Arc-cosine             & arccos    & acos  & R \\
+Hyperbolic arc-cosine  & arccosh   & acosh & R \\
+Arc-sine               & arcsin    & asin  & R \\
+Hyperbolic arc-sine    & arcsinh   & asinh & R \\
+Arc-tangent            & arctan    & atan  & R \\
+\hline
+\end{tabular}
+\caption{Functions with aliases in \texttt{bugs} module
+  \label{table:bugs:functions:alias}}
+\end{center}
+\end{table}
+
+\chapter{Distributions}
+\label{section:distributions}
+
+Distributions are used to define stochastic nodes using the \verb+~+
+operator. The distributions defined in the bugs module are listed in
+tables \ref{table:bugs:distributions:real} (real-valued distributions),
+\ref{table:bugs:distributions:discrete} (discrete-valued
+distributions), and \ref{table:bugs:distributions:multi}
+(multivariate distributions).
+
+Some distributions have restrictions on the valid parameter values,
+and these are indicated in the tables. If a Distribution is
+given invalid parameter values when evaluating the log-likelihood, it
+returns $-\infty$. When a model is initialized, all stochastic nodes
+are checked to ensure that the initial parameter values are valid for
+their distribution.
+
+\begin{table}[h!]
+  \begin{center}
+    \begin{tabular}{llcll}
+      \hline
+      Name & Usage & Density & Lower & Upper \\
+      \hline
+      Beta & \verb+dbeta(a,b)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle x^{a-1}(1-x)^{b-1}}{\textstyle \beta(a,b)}$
+      } & \multirow{2}{*}{$0$} & \multirow{2}{*}{$1$} \\
+      & $a > 0$, $b > 0$ \\
+      Chi-square & \verb+dchisqr(k)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle x^{\frac{k}{2} - 1} \exp(-x/2)}
+        {\textstyle 2^{\frac{k}{2}} \Gamma({\scriptstyle \frac{k}{2}})}$
+      } & \multirow{2}{*}{$0$} & \\
+      & $k > 0$ \\
+%       Double  & \verb+ddexp(mu,tau)+ & 
+%       \multirow{2}{*}{$\tau \exp(-\tau | x-\mu |)/2$} & & \\
+%       exponential & $\tau > 0$ \\
+      Exponential & \verb+dexp(lambda)+ & 
+      \multirow{2}{*}{$\lambda \exp(-\lambda x)$} & \multirow{2}{*}{0} & \\ 
+      & $\lambda > 0$ \\
+      F   & \verb+df(n,m)+ & 
+      \multirow{2}{*}{
+        $\textstyle \frac{\Gamma(\frac{n + m}{2})}
+                         {\Gamma(\frac{n}{2}) \Gamma(\frac{m}{2})}
+        \left(\frac{n}{m} \right)^{\frac{n}{2}} x^{\frac{n}{2} - 1} 
+        \left\{1 + \frac{nx}{m} \right\}^{-\frac{(n + m)}{2}}$} & \multirow{2}{*}{0} & \\
+      & $n > 0$, $m > 0$ \\
+      Gamma       & \verb+dgamma(r, lambda)+ & 
+      \multirow{2}{*}{
+        $\frac{\textstyle \lambda^r x^{r - 1} \exp(-\lambda x)}
+        {\textstyle \Gamma(r)}$} & \multirow{2}{*}{0} & \\
+      & $\lambda > 0$, $r > 0$ \\
+%       Generalized & \verb+dgen.gamma(r,lambda,b)+ &  
+%       \multirow{2}{*}{
+%         $\frac
+%         {\textstyle b \lambda^{b r} x^{b r - 1}  \exp\{-(\lambda x)^{b}\}}
+%         {\textstyle \Gamma(r)}$
+%       } & $0$ & \\
+%       gamma       & $\lambda >0$, $b > 0$, $r > 0$ \\
+%       Logistic    & \verb+dlogis(mu, tau)+ &
+%       \multirow{2}{*}{
+%         $\frac{\textstyle \tau \exp\{(x - \mu) \tau\}}
+%         {\textstyle  \left[1 + \exp\{(x - \mu) \tau\}\right]^2}$
+%       } &  & \\
+%       ~ & $\tau > 0$ \\
+      Log-normal  & \verb+dlnorm(mu,tau)+ & 
+      \multirow{2}{*}{
+        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} x^{-1} \exp \left\{-\tau (\log(x) - \mu)^2 / 2 \right\}$} & \multirow{2}{*}{0} \\
+      ~ & $\tau > 0$ \\
+%       Noncentral & \verb+dnchisqr(k, delta)+ & 
+%       \multirow{2}{*}{
+%         $\sum_{r=0}^{\infty} 
+%         \frac{ \exp(-\frac{\delta}{2}) (\frac{\delta}{2})^r}{\textstyle r!} \,
+%         \frac{ x^{(k/2 + r - 1)} \exp(-\frac{x}{2})}
+%              { 2^{(k/2 + r)} \Gamma({ \frac{k}{2} + r})}
+%         $
+%       } & 0 & \\
+%       Chi-squre & $k > 0, \delta \geq 0$ \\
+      Normal   & \verb+dnorm(mu,tau)+ & 
+      \multirow{2}{*}{
+        $\left(\frac{\tau}{2\pi}\right)^{\frac{1}{2}} \exp\{- \tau (x - \mu)^2 / 2\}$} & & \\
+      ~ & $\tau > 0$ \\
+%       Pareto      & \verb+dpar(alpha, c)+ & 
+%       \multirow{2}{*}{
+%         $\alpha c^{\alpha} x^{-(\alpha + 1)}$
+%       } & $c$ & \\
+%       ~ & $\alpha > 0$, $c > 0$ \\
+      Student t   & \verb+dt(mu,tau,k)+ & 
+      \multirow{2}{*}{
+        $\textstyle \frac{\Gamma(\frac{k+1}{2})}{\Gamma(\frac{k}{2})} 
+        \left(\frac{\tau}{k\pi} \right)^{\frac{1}{2}} 
+        \left\{1 + \frac{\tau (x - \mu)^2}{k} \right\}^{-\frac{(k+1)}{2}}$} & & \\
+      ~ & $\tau > 0$, $k > 0$ \\
+      Uniform     & \verb+dunif(a,b)+ & 
+      \multirow{2}{*}{$\frac{\textstyle 1}{\textstyle b - a}$} & \multirow{2}{*}{$a$} & \multirow{2}{*}{$b$} \\
+      ~ & $a < b$ \\ 
+      Weibull     & \verb+dweib(v, lambda)+ & 
+      \multirow{2}{*}{$v  \lambda  x^{v - 1} \exp (- \lambda x^v)$} & \multirow{2}{*}{0} & \\
+      ~ & $v > 0$, $\lambda > 0$ \\
+      \hline
+    \end{tabular}
+    \caption{Univariate real-valued distributions in the \texttt{bugs} module
+      \label{table:bugs:distributions:real}}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \begin{tabular}{llccc}
+      \hline
+      Name & Usage & Density & Lower & Upper \\
+      \hline
+      Beta & \verb+dbetabin(a, b, n)+ &
+     \multirow{2}{*}{
+        $\textstyle {a+x-1 \choose x} {b+n-x-1 \choose n - x} {a+b+n-1 \choose n}^{-1}$
+                    } & \multirow{2}{*}{$0$} & \multirow{2}{*}{$n$} \\
+      binomial & $a > 0, b > 0, n \in \mathbb{N}^*$ \\
+      Bernoulli & \verb+dbern(p)+ & 
+      \multirow{2}{*}{$p^x (1 - p)^{1 -x}$} & 
+      \multirow{2}{*}{$0$} & \multirow{2}{*}{$1$} \\
+      ~ & $0 < p < 1$ \\
+      Binomial  & \verb+dbin(p,n)+ & 
+      \multirow{2}{*}{${n \choose x}  p^x (1-p)^{n-x}$}
+      ~  & \multirow{2}{*}{$0$} & \multirow{2}{*}{$n$} \\
+      ~ & $0 < p < 1$, $n \in \mathbb{N}^*$ \\
+      Categorical & \verb+dcat(pi)+ & 
+      \multirow{2}{*}{$\frac{\textstyle \pi_x}{\textstyle \sum_i \pi_i}$} & 
+      \multirow{2}{*}{$1$} & \multirow{2}{*}{$N$} \\
+      ~ & $\pi \in (\mathbb{R}^+)^N$  \\
+%       Noncentral & \verb+dhyper(n1,n2,m1,psi)+ &
+%       \multirow{2}{*}{
+%         $\frac{ {n_1 \choose x} {n_2 \choose m_1 - x} \psi^x}
+%               { \sum_i {n_1 \choose i} {n_2 \choose m_1 - i} \psi^i}$
+%       } &
+%       $\scriptstyle \text{max}(0,n_+ - m_1)$ & 
+%       $\scriptstyle \text{min}(n_1,m_1)$ \\
+%       hypergeometric & $0 \leq n_i$, $0 < m_1 \leq n_+$  \\
+%       Negative & \verb+dnegbin(p, r)+ &
+%       \multirow{2}{*}{${x + r -1 \choose x} p^r (1-p)^x$} & 0 & \\
+%       binomial & $0 < p < 1$, $r \in \mathbb{N}^+$ \\
+      Poisson & \verb+dpois(lambda)+ & 
+      \multirow{2}{*}{$\frac{\textstyle \exp(-\lambda) \lambda^x}{\textstyle x!}$} & \multirow{2}{*}{0} & \\
+      ~ & $\lambda > 0$ \\
+      \hline
+    \end{tabular}
+  \caption{Discrete univariate distributions in the \texttt{bugs} module
+    \label{table:bugs:distributions:discrete}}
+  \end{center}
+\end{table}
+
+
+\begin{table}[h!]
+  \begin{center}
+    \begin{tabular}{lll}
+      \hline
+      Name & Usage & Density \\
+      \hline
+%       Dirichlet & \verb+p ~ ddirch(alpha)+ & 
+%       \multirow{2}{*}{$\Gamma(\sum_i \alpha_i) \prod_j 
+%         \frac{\textstyle p_j^{\alpha_j - 1}}{\textstyle \Gamma(\alpha_j)}$} \\
+%       ~ & $\alpha_j \geq 0$ \\
+%       & \\
+      Multivariate & \verb+x ~ dmnorm(mu,Omega)+ &
+      \multirow{2}{*}{
+        $\left(\frac{|\Omega|}{2\pi}\right)^{\frac{1}{2}} \exp\{-(x-\mu)^T \Omega (x-\mu) / 2\}$} \\
+      normal & $\Omega$ positive definite \\
+%       Wishart & \verb+Omega ~ dwish(R,k)+ &
+%       \multirow{2}{*}{
+%         $\frac{\textstyle |\Omega|^{(k-p-1)/2} |R|^{k/2} \exp\{-\text{Tr}(R\Omega/2)\}}
+%                {\textstyle 2^{pk/2} \Gamma_p (k/2)}$
+%       } \\
+%       & $R \; p \times p$ pos. def., $k \geq p$ \\
+%       Multivariate & \verb+x ~ dmt(mu,Omega,k)+ &
+%       \multirow{2}{*}{
+%         $\frac{\textstyle \Gamma \{(k+p)/2\}}{\textstyle \Gamma(k/2) (n\pi)^{p/2}}
+%         |\Omega|^{1/2}
+%         \left\{1 + \frac{1}{k} (x - \mu)^T \Omega (x - \mu) \right\}^{-\frac{(k+p)}{2}}$   } \\
+%       Student t &  $\Omega$ pos. def. & \\
+%       Multinomial  & \verb+x ~ dmulti(pi, n)+ & 
+%       \multirow{2}{*}{$n! \prod_j 
+%         \frac{\textstyle \pi_j^{x_j}}{\textstyle x_j!}$} \\
+%       ~ & $\sum_j x_j = n$ \\
+%       & \\
+    \hline
+    \end{tabular}
+    \caption{Multivariate distributions in the \texttt{bugs} module
+      \label{table:bugs:distributions:multi}}
+  \end{center}
+\end{table}
+
+\section{Distribution aliases}
+\label{subsection:distributions:aliases}
+
+A distribution may optionally have an alias, which can be used in the
+model definition in place of the canonical name. Aliases are used to
+to avoid confusion with other statistical software in which
+distributions may have different names. Table
+\ref{table:bugs:distributions:alias} shows the distributions in the
+\texttt{bugs} module with an alias.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{llll}
+\hline
+Distribution & Canonical & Alias & Compatibile  \\
+             & name      &       & with         \\
+\hline
+Binomial           & dbin      & dbinom   & R   \\
+Chi-square         & dchisqr   & dchisq   & R   \\ 
+% Negative binomial  & dnegbin   & dnbinom  & R   \\
+Weibull            & dweib     & dweibull & R   \\ 
+% Dirichlet          & ddirch    & ddirich  & \OpenBUGS\ \\
+\hline
+\end{tabular}
+\caption{Distributions with aliases in \texttt{bugs} module
+  \label{table:bugs:distributions:alias}}
+\end{center}
+\end{table}
+
+\chapter{Differences between \biips\ and \OpenBUGS}
+
+Although \biips\ aims for the same functionality as \OpenBUGS, there are
+a number of important differences.
+
+\subsection{Data format}
+
+There is no need to transpose matrices and arrays when transferring
+data between \R\ and \biips, since \biips\ stores the values of an array
+in ``column major'' order, like \R\ and FORTRAN ({\em i.e.} filling
+the left-hand index first).
+
+If you have an \textsf{S}-style data file for \OpenBUGS\ and you wish
+to convert it for \biips, then use the command \texttt{bugs2jags},
+which is supplied with the \CODA\ package.
+
+\subsection{Distributions}
+
+% Structural zeros are allowed in the Dirichlet distribution. If
+% \begin{verbatim}
+% p ~ ddirch(alpha)
+% \end{verbatim}
+% and some of the elements of alpha are zero, then the corresponding
+% elements of p will be fixed to zero.
+
+% The Multinomial (\verb+dmulti+) and Categorical (\verb+dcat+)
+% distributions, which take a vector of probabilities as a parameter,
+% may use unnormalized probabilities. The probability vector is
+% normalized internally so that
+% \[
+% p_i \rightarrow \frac{p_i}{\sum_j p_j}
+% \]
+
+% The non-central hypergeometric distribution (\verb+dhyper+) uses the
+% same parameterization as R, which is different from the
+% parameterization used in \OpenBUGS\ 3.2.2. \OpenBUGS\ is parameterized as
+% \begin{verbatim}
+% X ~ dhyper(n, m, N, psi)     #OpenBUGS
+% \end{verbatim}
+% where $n, m, N$ are the following table margins:
+% \begin{center}
+% \begin{tabular}{|cc|c|}
+% \hline
+% x & - & n \\
+% -  & - & -  \\
+% \hline
+% m & - & N \\
+% \hline
+% \end{tabular}
+% \end{center}
+% This parameterization is symmetric in $n$, $m$. In \biips\, \verb+dhyper+
+% is parameterized as
+% \begin{verbatim}
+% X ~ dhyper(n1, n2, m1, psi) #BiiPS
+% \end{verbatim}
+% where $n1, n2, m1$ are
+% \begin{center}
+% \begin{tabular}{|cc|c|}
+% \hline
+% x & - & m1 \\
+% -  & - & -   \\
+% \hline
+% n1 & n2 & - \\
+% \hline
+% \end{tabular}
+% \end{center}
+
+% \subsection{Observable Functions}
+% \label{section:obfun}
+% 
+% Logical nodes in the BUGS language are a convenient way of
+% describing the relationships between observables (constant and
+% stochastic nodes), but are not themselves observable. You cannot
+% supply data values for a logical node.  
+% 
+% This restriction can occasionally be inconvenient, as there are
+% important cases where the data are a deterministic function of
+% unobserved variables.  Three important examples are
+% \begin{enumerate}
+% \item Censored data, which commonly occurs in survival analysis. In
+% the most general case, we know that unobserved failure time $T$
+% lies in the interval $(L,U]$.
+% \item Rounded data, when there is a discrete underlying distribution
+% but the measurements are rounded to a fixed number of decimal places.
+% \item Aggregate data when we observe the sum of two or more
+% unobserved variables.
+% \end{enumerate}
+% \biips\ contains novel distributions to handle these situations.  
+
+% \subsubsection{Interval censored data: \texttt{dinterval}}
+% 
+% \begin{verbatim}
+% t <- c(1.2, 4.7, NA, NA, 3.2)
+% is.censored <- c(0, 0, 1, 1, 0)
+% cutpoint <- 5
+% \end{verbatim}
+% 
+% The \texttt{dinterval} distribution represents interval-censored
+% data. It has two parameters: $t$ the original continuous variable, and
+% $c[]$, a vector of cut points of length $M$, say. If \texttt{Y $\sim$
+%   dinterval(t, c)} then
+% 
+% \begin{tabular}{lll}
+% $Y=0$   & if & $t \leq c[1]$\\
+% $Y=m$   & if & $c[m] < t \leq c[m+1]$ for $1 \leq m < M$\\
+% $Y = M$ & if & $c[M] < t$.
+% \end{tabular}
+
+% \subsubsection{Rounded data: \texttt{dround}}
+% 
+% The \texttt{dround} distribution represents rounded data. It has two
+% parameters: $t$ the original continuous variable and $d$, the number
+% of decimal places to which the measurements are rounded. Thus if
+% $t=1.2345$ and $d=2$ then the rounded value is $1.23$. Note that $d$
+% can be negative: if $d=-2$ then the data are rounded to the nearest
+% $100$.
+
+% \subsubsection{Summed data: \texttt{dsum}}
+% 
+% The \texttt{dsum} distribution represents the sum of two or more
+% variables.  It takes a variable number of parameters. If \texttt{Y $\sim$
+% dsum(x1,x2,x3)} then $Y=x1+x2+x3$.
+% 
+% These distributions exist to give a likelihood to data that is, in fact,
+% a deterministic function of the parameters.  The relation
+% \begin{verbatim}
+% Y ~ dsum(x1, x2)
+% \end{verbatim}
+% is logically equivalent to
+% \begin{verbatim}
+% Y <- x1 + x2
+% \end{verbatim}
+% But the latter form does not create a contribution to the likelihood,
+% and does not allow you to define $Y$ as data.  The likelihood function
+% is trivial: it is 1 if the parameters are consistent with the data and
+% 0 otherwise.  The \texttt{dsum} distribution also requires a special
+% sampler, which can currently only handle the case where the parameters
+% of \texttt{dsum} are unobserved stochastic nodes, and where the
+% parameters are either all discrete-valued or all continuous-valued. A node
+% cannot be subject to more than one \texttt{dsum} constraint.
+
+\subsection{Data transformations}
+\label{section:data:tranformations}
+
+\biips\ allows data transformations, but the syntax is different from
+\BUGS.  \BUGS\ allows you to put a stochastic node twice on the left
+hand side of a relation, as in this example taken from the manual
+\begin{verbatim}
+   for (i in 1:N) {
+      z[i] <- sqrt(y[i])
+      z[i] ~ dnorm(mu, tau)
+   }
+\end{verbatim}
+This is forbidden in \biips. You must put data transformations in a 
+separate block of relations preceded by the keyword \texttt{data}:
+\begin{verbatim}
+data {
+   for (i in 1:N) {
+      z[i] <- sqrt(y[i])
+   }
+}
+model {
+   for (i in 1:N) {
+      z[i] ~ dnorm(mu, tau)
+   }
+   ...
+}
+\end{verbatim}
+This syntax preserves the declarative nature of the BUGS language.
+In effect, the data block defines a distinct model, which describes
+how the data is generated. Each node in this model is forward-sampled
+once, and then the node values are read back into the data table. The
+data block is not limited to logical relations, but may also include
+stochastic relations. You may therefore use it in simulations,
+generating data from a stochastic model that is different from the one
+used to analyse the data in the \texttt{model} statement.
+
+This example shows a simple location-scale problem in which the ``true''
+values of the parameters \texttt{mu} and \texttt{tau} are generated
+from a given prior in the \texttt{data} block, and the generated
+data is analyzed in the \texttt{model} block.
+\begin{verbatim}
+data {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu.true, tau.true) 
+   }
+   mu.true ~ dnorm(0,1);
+   tau.true ~ dgamma(1,3);
+}
+model {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu, tau)
+   }
+   mu ~ dnorm(0, 1.0E-3)
+   tau ~ dgamma(1.0E-3, 1.0E-3)
+}
+\end{verbatim}
+Beware, however, that every node in the \texttt{data} statement will
+be considered as data in the subsequent \texttt{model} statement. This
+example, although superficially similar, has a quite different interpretation.
+\begin{verbatim}
+data {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu, tau) 
+   }
+   mu ~ dnorm(0,1);
+   tau ~ dgamma(1,3);
+}
+model {
+   for (i in 1:N) {
+      y[i] ~ dnorm(mu, tau)
+   }
+   mu ~ dnorm(0, 1.0E-3)
+   tau ~ dgamma(1.0E-3, 1.0E-3)
+}
+\end{verbatim}
+Since the names \texttt{mu} and \texttt{tau} are used in both
+\texttt{data} and \texttt{model} blocks, these nodes will be
+considered as {\em observed} in the model and their values will be
+fixed at those values generated in the \texttt{data} block.
+
+\subsection{Directed cycles}
+
+Directed cycles are forbidden in \biips. There are two important
+instances where directed cycles are used in \BUGS.
+\begin{itemize}
+\item Defining autoregressive priors
+\item Defining ordered priors
+\end{itemize}
+For the first case, the \texttt{GeoBUGS} extension to \OpenBUGS\ provides
+some convenient ways of defining autoregressive priors.
+% These should be available in a future version of \biips.
+
+\subsection{Censoring, truncation and prior ordering}
+\label{section:censoring}
+
+These are three, closely related issues that are all handled using
+the \texttt{I(,)} construct in \BUGS.
+
+Censoring occurs when a variable $X$ is not observed directly,
+but is observed only to lie in the range $(L,U]$.  Censoring is
+an {\em a posteriori} restriction of the data, and is represented
+in \OpenBUGS\ by the \texttt{I(,)} construct, {\em e.g.}
+\begin{verbatim}
+X ~ dnorm(theta, tau) I(L,U)
+\end{verbatim}
+where $L$ and $U$ are constant nodes.
+
+Truncation occurs when a variable is known {\em a priori} to lie in
+a certain range.  Although \BUGS\ has no construct for representing
+truncated variables, it turns out that there is no difference between
+censoring and truncation for top-level parameters ({\em i.e.} variables
+with no unobserved parents).  Hence, for example, this
+\begin{verbatim}
+theta ~ dnorm(0, 1.0E-3) I(0, )
+\end{verbatim}
+is a perfectly valid way to describe a parameter $\theta$ with a
+half-normal prior distribution.
+
+Prior ordering occurs when a vector of nodes is known {\em a priori}
+to be strictly increasing or decreasing. It can be represented in
+\OpenBUGS\ with symmetric $I(,)$ constructs,  {\em e.g.}
+\begin{verbatim}
+X[1] ~ dnorm(0, 1.0E-3) I(,X[2])
+X[2] ~ dnorm(0, 1.0E-3) I(X[1],)
+\end{verbatim}
+ensures that $X[1] \leq X[2]$.
+
+\biips\ makes an attempt to separate these three concepts.
+
+% Censoring is handled in \biips\ using the new distribution
+% \texttt{dinterval} (section \ref{section:obfun}). This can be
+% illustrated with a survival analysis example.  A right-censored
+% survival time $t_i$ with a Weibull distribution is described in
+% \OpenBUGS\ as follows:
+% \begin{verbatim}
+% t[i] ~ dweib(r, mu[i]) I(c[i], )
+% \end{verbatim}
+% where $t_i$ is unobserved if $t_i > c_i$.  In \biips\ this becomes
+% \begin{verbatim}
+% is.censored[i] ~ dinterval(t[i], c[i])
+% t[i] ~ dweib(r, mu[i])
+% \end{verbatim}
+% where \verb+is.censored[i]+ is an indicator variable that takes the
+% value 1 if $t_i$ is censored and 0 otherwise. See the MICE and KIDNEY
+% examples in the ``classic bugs'' set of examples.
+
+Truncation is represented in \biips\ using the \texttt{T(,)} construct,
+which has the same syntax as the \texttt{I(,)} construct in \OpenBUGS,
+but has a different interpretation. If
+\begin{verbatim}
+X ~ dfoo(theta) T(L,U)
+\end{verbatim}
+then {\em a priori} $X$ is known to lie between $L$ and $U$. This
+generates a likelihood
+\[
+\frac{p(x \mid \theta)}{P(L \leq X \leq U \mid \theta)}
+\]
+if $L \leq X \leq U$ and zero otherwise, where $p(x \mid \theta)$ is
+the density of $X$ given $\theta$ according to the distribution
+\texttt{foo}. Note that calculation of the denominator may be
+computationally expensive.
+
+For compatibility with \OpenBUGS\, \biips\ permits the use of \texttt{I(,)}
+for truncation when the the parameters of the truncated distribution
+are fixed.  For example, this is permitted:
+\begin{verbatim}
+mu ~ dnorm(0, 1.0E-3) I(0, )
+\end{verbatim}
+because the truncated distribution has fixed parameters (mean 0,
+precision 1.0E-3).  In this case, there is no difference between 
+censoring and truncation.  Conversely, this is not permitted:
+\begin{verbatim}
+for (i in 1:N) {
+   x[i] ~ dnorm(mu, tau) I(0, )
+}
+mu ~ dnorm(0, 1.0E-3)
+tau ~ dgamma(1, 1)
+}
+\end{verbatim}
+because the mean and precision of $x_1 \dots x_N$ are parameters to be
+estimated.  \biips\ does not know if the aim is to model truncation or censoring
+and so the compiler will reject the model.
+
+Use either \texttt{T(,)} or the \texttt{dinterval} distribution to resolve the ambiguity.
+
+% Prior ordering of top-level parameters in the model can be achieved
+% using the \texttt{sort} function, which sorts a vector in ascending
+% order.
+% 
+% Symmetric truncation relations like this
+% \begin{verbatim}
+% alpha[1] ~ dnorm(0, 1.0E-3) I(,alpha[2])
+% alpha[2] ~ dnorm(0, 1.0E-3) I(alpha[1],alpha[3])
+% alpha[3] ~ dnorm(0, 1.0E-3) I(alpha[2],)
+% \end{verbatim}
+% Should be replaced by this
+% \begin{verbatim}
+% for (i in 1:3) {
+%    alpha0[i] ~ dnorm(0, 1.0E-3)
+% }
+% alpha[1:3] <- sort(alpha0)
+% \end{verbatim}
+
+\chapter{Feedback}
+
+Please send feedback to \email{}.
+We are particularly interested in the following problems:
+
+\begin{itemize}
+\item Crashes, including both segmentation faults and uncaught exceptions.
+\item Incomprehensible error messages
+\item Models that should compile, but don't 
+% \item Output that cannot be validated against \OpenBUGS
+\item Documentation errors
+\end{itemize}
+
+If you want to send a bug report, it must be reproducible. Send the
+model file, the data file, the initial value file and a script file
+that will reproduce the problem. Describe what you think should
+happen, and what did happen.
+
+% \chapter{Acknowledgments}
+% 
+% Many thanks to the \BUGS\ development team, without whom \biips\ would
+% not exist.  Thanks also to Simon Frost for pioneering \biips\ on
+% Windows and Bill Northcott for getting \biips\ on Mac OS X to
+% work. Kostas Oikonomou found many bugs while getting \biips\ to work on
+% Solaris using Sun development tools and libraries.  Bettina Gruen,
+% Chris Jackson, Greg Ridgeway and Geoff Evans also provided useful
+% feedback.  Special thanks to Jean-Baptiste Denis who has been very
+% diligent in providing feedback on \biips\.
+
+% \appendix
+% \chapter{Data format}
+% \label{appendix:data}
+% 
+% The file format used by \biips\ for representing data and initial values
+% is the \verb+dump()+ format used by R.  This format is valid R code,
+% so a \biips\ data file can be read into R using the \verb+source()+ function.
+% Since R is a functional language, the code consists of a sequence
+% of assignments and function calls.
+% \begin{description}
+% \item[Assignments] are represented by a left arrow (\verb+<-+) with
+%   the variable name on the left hand side and a numeric value or
+%   function call on the right hand side. The variable name may
+%   optionally be enclosed in single quotes, double quotes, or back-ticks.
+% \item[Function calls] are represented by the function name, followed
+%   by a list of comma-separated arguments inside round brackets.
+%   Optional arguments need to be tagged (i.e. given in the form
+%   tag=value).
+% \end{description}
+% The \biips\ parser ignores all white space.  Long expressions can
+% therefore be split over several lines.
+% 
+% Scalar values are represented by a simple assignment statement 
+% \begin{verbatim}
+% theta <- 0.1243
+% \end{verbatim}
+% All numeric values are read in to \biips\ as doubles, even if they are
+% represented as integers (i.e. `12' and `12.0' are
+% equivalent). Engineering notation may be used to represent large or
+% small values (e.g 1.5e-3 is equivalent to 0.0015).
+% 
+% Vectors are denoted by the \R\ collection function ``c'', which takes
+% a number of arguments equal to the length of the vector.  The
+% following code denotes a vector of length 4:
+% \begin{verbatim}
+% x <- c(2, 3.5, 1.3e-2, 88)
+% \end{verbatim}
+% There is no distinction between row and column-vectors. 
+% 
+% Matrices and higher-dimensional arrays in R are created by adding a
+% dimension attribute (\verb+.Dim+) to a vector. In the R dump format
+% this is done using the ``structure'' function.  The first argument to
+% the structure function is a vector of numeric values of the matrix,
+% given in column major order (i.e. filling the left index first). The
+% second argument, which must be given the tag \verb+.Dim+, is the
+% number of dimensions of the array, represented by a vector of integer
+% values. For example, if the matrix ``A'' takes values
+% \[
+% \left(
+% \begin{array}{cc}
+%   1 & 4 \\
+%   2 & 5 \\
+%   3 & 6 
+% \end{array}
+% \right)
+% \]
+% it is represented as
+% \begin{verbatim}
+% `A` <- structure(c(1, 2, 3, 4, 5, 6), .Dim=c(3,2))
+% \end{verbatim}
+% 
+% The simplest way to prepare your data is to read them into \R\ and
+% then dump them.  Only numeric vectors, matrices and arrays are
+% allowed. More complex data structures such as factors, lists and data
+% frames cannot be parsed by \biips\, nor can non-numeric vectors.  Any
+% \R\ attributes of the data (such as names and dimnames) are ignored
+% when they are read into \biips. 
+
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{biips-user-manual}
+
+\end{document}
+
+
+
