@@ -27,8 +27,8 @@ item d'un enum : UN_ITEM
 
 * Code
 ======
-- destructeur virtual
-- déclaration virtual des méthodes virtual héritées
+- destructeur virtuel
+- déclaration virtuel des méthodes virtuelles héritées
 
 * A Faire
 ---------
@@ -52,7 +52,8 @@ item d'un enum : UN_ITEM
 - Ne pas créer un shared_ptr sur un objet non alloué dynamiquement : en effet,
  le compteur est à 1 et la destruction du shared_ptr entraîne la destruction
  de l'objet, puis deuxième destruction de l'objet à la fin de son bloc !!!
-- Ne pas définir une fonction template dans le fichier source d'une librairie (mais dans le header)
-- Ordre de lien des librairies : The traditional behavior of linkers is to search for external functions from left to right in the libraries specified on the command line. This means that a library containing the definition of a function should appear after any source files or object files which use it.
+- Ne pas définir une fonction template dans le fichier source d'une
+  bibliothèque (mais dans l'entete)
+- Ordre de lien des bibliothèques : The traditional behavior of linkers is to search for external functions from left to right in the libraries specified on the command line. This means that a library containing the definition of a function should appear after any source files or object files which use it.
 - ne pas passer un objet polymorphique par copie.
 
