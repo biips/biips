@@ -45,7 +45,7 @@ namespace Biips
 {
 
   typedef boost::math::binomial_distribution<Scalar> BinMathDistType;
-  typedef boost::binomial_distribution<Scalar> BinRandomDistType;
+  typedef boost::binomial_distribution<Int,Scalar> BinRandomDistType;
 
   class DBin: public BoostScalarDistribution<BinMathDistType, BinRandomDistType>
   {
