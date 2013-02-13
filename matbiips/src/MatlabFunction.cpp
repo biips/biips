@@ -67,14 +67,16 @@ namespace Biips
     mxArray * plhs[1];
 
     // call matlab function
+    #ifndef OCTAVE
     mxArray * exception = NULL;
     exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs, fun_eval_.c_str());
     if (exception != NULL)
     {
-      /* Throw the MException returned by mexCallMATLABWithTrap
-       * after cleaning up any dynamically allocated resources */
       mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
     }
+    #else
+    mexCallMATLAB(1, plhs, nrhs, prhs, fun_eval_.c_str());
+    #endif
 
     // get output
     mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
@@ -120,19 +122,21 @@ namespace Biips
     mxArray * plhs[1];
 
     // call matlab function
+    #ifndef OCTAVE
     mxArray * exception = NULL;
     exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs, fun_dim_.c_str());
 
     // catch exception
     if (exception != NULL)
     {
-      /* Throw the MException returned by mexCallMATLABWithTrap
-       * after cleaning up any dynamically allocated resources */
-      for (Size i=0; i<nrhs; ++i)
-        mxDestroyArray(prhs[i]);
       mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
     }
-
+    #else
+    mexCallMATLAB(1, plhs, nrhs, prhs, fun_dim_.c_str());
+    #endif
+    
+    for (Size i=0; i<nrhs; ++i)
+      mxDestroyArray(prhs[i]);
     // get output
     mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
     double * lhs = mxGetPr(plhs[0]);
@@ -163,6 +167,7 @@ namespace Biips
     mxArray * plhs[1];
 
     // call matlab function
+    #ifndef OCTAVE
     mxArray * exception = NULL;
     exception = mexCallMATLABWithTrap(1, plhs, 1, prhs,
                                       fun_is_discrete_.c_str());
@@ -172,10 +177,12 @@ namespace Biips
     {
       /* Throw the MException returned by mexCallMATLABWithTrap
        * after cleaning up any dynamically allocated resources */
-      mxDestroyArray(prhs[0]);
       mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
     }
-
+    #else
+    mexCallMATLAB(1, plhs, 1, prhs, fun_is_discrete_.c_str());
+    #endif
+    mxDestroyArray(prhs[0]);
     // check output size
     mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
     if (size_lhs != 1)
@@ -225,25 +232,26 @@ namespace Biips
     // declare output
     mxArray * plhs[1];
 
+    #ifndef OCTAVE 
     // call matlab function
     mxArray * exception = NULL;
     exception = mexCallMATLABWithTrap(1, plhs, nrhs, prhs,
                                       fun_check_param_.c_str());
-
+   // catch exception
+    if (exception != NULL)
+    {
+      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
+    }
+    #else
+    mexCallMATLAB(1, plhs, nrhs, prhs, fun_check_param_.c_str());
+    #endif
+    
     
     // free allocated input
     for (Size i=0; i<nrhs; ++i)
       mxDestroyArray(prhs[i]);
   
     mxFree(prhs);
-   // catch exception
-    if (exception != NULL)
-    {
-      /* Throw the MException returned by mexCallMATLABWithTrap
-       * after cleaning up any dynamically allocated resources */
-      mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
-    }
-
     // check output size
     mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
     if (size_lhs != 1)
