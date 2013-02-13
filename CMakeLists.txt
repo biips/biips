@@ -62,6 +62,9 @@ set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
  Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
 
 file (WRITE Description.txt ${Biips_DESCRIPTION})
+if (UNIX)
+   add_definitions(-fPIC)
+endif(UNIX)	
 
 if (NOT Biips_DATE)
 	if (WIN32)
@@ -122,14 +125,6 @@ endif ()
 # configure build
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
-option (BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
-
-if (BUILD_SHARED_LIBS)
-    set (BIIPS_SHARED TRUE)
-else ()
-    set (BIIPS_SHARED FALSE)
-endif()
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set (BIIPS_DEBUG TRUE)
 else ()
@@ -177,11 +172,6 @@ if (SUPPRESS_DEPRECATED_WARNINGS)
 	add_definitions (-Wno-deprecated)
 	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
 endif ()
-
-if (NOT WIN32 AND NOT BUILD_SHARED_LIBS)
-  # for static compilations to work with MATLAB
-    add_definitions(-fPIC)
-endif()
 
 # configure and find boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
@@ -291,25 +281,10 @@ macro (add_biips_library name sources biips_libs)
                 OUTPUT_NAME ${name}
                 ARCHIVE_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
                 )
-            if (BUILD_SHARED_LIBS)
-                set_target_properties(${name}-${arch}
-                    PROPERTIES #LINK_FLAGS -m${bitnb}
-                    LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
-                    )
-            endif ()
             set (extra_libs "")
-            if (BUILD_SHARED_LIBS)
-                foreach (lib IN LISTS ${biips_libs})
-                    list(APPEND extra_libs ${lib}-${arch})
-                endforeach (lib IN LISTS ${biips_libs})
-                target_link_libraries (${name}-${arch} ${extra_libs})
-            endif ()
         endforeach(arch IN LISTS BUILD_ARCH_LIST)
     else ()
         add_library (${name} ${${sources}})
-        if (BUILD_SHARED_LIBS)
-            target_link_libraries (${name} ${${biips_libs}})
-        endif ()
     endif()
 endmacro (add_biips_library)
 
