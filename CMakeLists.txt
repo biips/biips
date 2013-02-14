@@ -29,24 +29,6 @@ if (UNIX)
    add_definitions(-fPIC)
 endif(UNIX)	
 
-if (NOT Biips_DATE)
-	if (WIN32)
-		execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
-	elseif (UNIX)
-		execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE TODAY)
-	endif ()
-	if (TODAY)
-		string (REGEX REPLACE
-			"(..)/(..)/(....).*"
-			"\\3-\\2-\\1"
-			Biips_DATE
-			${TODAY}
-		)
-	else ()
-		message (SEND_ERROR "date not implemented.\nPlease set variable Biips_DATE to yyyy-mm-dd")
-	endif ()
-endif ()
-message (STATUS Biips_DATE=${Biips_DATE})
 
 # configure resource files
 configure_file (README.md.in README.txt @ONLY)
@@ -100,36 +82,6 @@ option (BIIPS_CATCH_TEST "Catch exceptions in BiipsTest program." ON)
 option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program." ON)
 
 
-set (BUILD_ARCH_LIST "")
-set (BUILD_BITNB_LIST "")
-
-if (WIN32)
-    option (BUILD_BOTH_ARCH "Force i386 (32bit) and x64 (64bit) compilation." ON)
-    if (BUILD_BOTH_ARCH)
-        list (APPEND BUILD_ARCH_LIST i386)
-        list (APPEND BUILD_BITNB_LIST 32)
-        set (BUILD_i386 ON)
-        list (APPEND BUILD_ARCH_LIST x64)
-        list (APPEND BUILD_BITNB_LIST 64)
-        set (BUILD_x64 ON)
-    endif ()
-endif ()
-
-math (EXPR ARCH_BITNB 8*${CMAKE_SIZEOF_VOID_P})
-if (ARCH_BITNB EQUAL 32)
-    if (NOT BUILD_i386)
-    	list (APPEND BUILD_ARCH_LIST i386)
-        list (APPEND BUILD_BITNB_LIST 32)
-        set (BUILD_i386 ON)
-    endif ()
-elseif (ARCH_BITNB EQUAL 64)
-    if (NOT BUILD_x64)
-    	list (APPEND BUILD_ARCH_LIST x64)
-        list (APPEND BUILD_BITNB_LIST 64)
-        set (BUILD_x64 ON)
-    endif ()
-endif ()
-
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
 if (SUPPRESS_DEPRECATED_WARNINGS)
 	add_definitions (-Wno-deprecated)
@@ -142,32 +94,11 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-	
-	
-if (WIN32 AND BUILD_BOTH_ARCH)
-	if (NOT $ENV{BOOST_LIBRARYDIR64} STREQUAL "")
-		set(BOOST_LIBRARYDIR64 $ENV{BOOST_LIBRARYDIR64})
-	endif()
-	if (BOOST_LIBRARYDIR64)
-		set (Boost_LIBRARY_DIRS64 ${BOOST_LIBRARYDIR64})
-	else ()
-		foreach (d ${Boost_LIBRARY_DIRS})
-			set (Boost_LIBRARY_DIRS64 ${Boost_LIBRARY_DIRS64} ${d}64)
-		endforeach ()
-	endif()
-	
-	# find 64-bit boost libraries
-	set (BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS64})
-	find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
-		${BOOST_COMPONENTS}
-	)
-	
-endif()
-
-
-# should we use qwt5-qt4
-if (NOT WIN32)
-    option(USE_Qwt5_Qt4 "Use qwt5-qt4 library to plot results of tests" OFF)
+find_package(Boost COMPONENTS program_options)
+if(Boost_FOUND)
+  set(EXTRA_LIBS ${Boost_LIBRARIES})
+else()
+   message(FATAL_ERROR "Boost Not Found!") 	
 endif()
 
 # configure install directories and output directories
@@ -196,106 +127,6 @@ option (BUILD_RBIIPS "Activate RBiips (BiiPS interface for GNU R) build" ON)
 option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
 
 
-# macro to add libraries
-macro (add_biips_library name sources biips_libs)
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            add_library (${name}-${arch} ${${sources}})
-            list(FIND BUILD_ARCH_LIST ${arch} offset)
-            list(GET BUILD_BITNB_LIST ${offset} bitnb)
-            set_target_properties(${name}-${arch}
-                PROPERTIES COMPILE_FLAGS -m${bitnb}
-                OUTPUT_NAME ${name}
-                ARCHIVE_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR_${arch}}
-                )
-            set (extra_libs "")
-        endforeach(arch IN LISTS BUILD_ARCH_LIST)
-    else ()
-        add_library (${name} ${${sources}})
-    endif()
-endmacro (add_biips_library)
-
-# macro to install libraries
-macro (install_biips_library name)
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            list(FIND BUILD_ARCH_LIST ${arch} offset)
-            list(GET BUILD_BITNB_LIST ${offset} bitnb)
-            install (TARGETS ${name}-${arch}
-                DESTINATION ${Biips_INSTALL_LIBDIR_${arch}}
-            	COMPONENT "Runtime_${bitnb}bit"
-            	)
-        endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else ()
-        install (TARGETS ${name}
-            DESTINATION ${Biips_INSTALL_LIBDIR}
-            )
-    endif ()
-endmacro (install_biips_library)
-
-# macro to install script
-macro (install_biips_script dir name)
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            list(FIND BUILD_ARCH_LIST ${arch} offset)
-            list(GET BUILD_BITNB_LIST ${offset} bitnb)
-            install (PROGRAMS ${dir}/${name}
-                DESTINATION ${Biips_INSTALL_BINDIR_${arch}}
-                RENAME ${name}.bat
-            	COMPONENT "Runtime_${bitnb}bit"
-            	)
-        endforeach (arch IN LISTS BUILD_ARCH_LIST)
-    else ()
-        install (PROGRAMS ${dir}/${name}
-            DESTINATION ${Biips_INSTALL_BINDIR}
-            )
-    endif ()
-endmacro (install_biips_script)
-
-# macro to add executable
-macro (add_biips_executable name sources extra_libs extra_libs64 biips_libs)
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            add_executable (${name}-${arch} ${${sources}})
-            list(FIND BUILD_ARCH_LIST ${arch} offset)
-            list(GET BUILD_BITNB_LIST ${offset} bitnb)
-            set_target_properties(${name}-${arch}
-                PROPERTIES COMPILE_FLAGS -m${bitnb}
-                LINK_FLAGS -m${bitnb}
-                OUTPUT_NAME ${name}
-                RUNTIME_OUTPUT_DIRECTORY ${Biips_INSTALL_BINDIR_${arch}}
-                )
-                
-            if (bitnb EQUAL 64)
-                foreach (lib IN LISTS ${biips_libs})
-                    list(APPEND ${extra_libs64} ${lib}-${arch})
-                endforeach (lib IN LISTS ${biips_libs})
-                target_link_libraries (${name}-${arch} ${${extra_libs64}})
-            else ()
-                foreach (lib IN LISTS ${biips_libs})
-                    list(APPEND ${extra_libs} ${lib}-${arch})
-                endforeach (lib IN LISTS ${biips_libs})
-                target_link_libraries (${name}-${arch} ${${extra_libs}})
-            endif ()
-        endforeach(arch IN LISTS BUILD_ARCH_LIST)
-    else ()
-        add_executable (${name} ${${sources}})
-        target_link_libraries (${name} ${${extra_libs}} ${${biips_libs}})
-    endif()
-endmacro (add_biips_executable)
-
-
-# macro to copy files to binary dir
-# changes in source file are taken into account
-macro(copy_files_to_bindir files dir)
-    foreach(f ${${files}})
-        get_filename_component(n ${f} NAME)
-        configure_file ( ${f}
-        	${dir}/${n}
-        	COPYONLY
-        )
-    endforeach()
-endmacro(copy_files_to_bindir)
 
 enable_testing()
 # ==============================

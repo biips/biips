@@ -1,2 +1,2 @@
 file(GLOB mfiles *.m)
-copy_files_to_bindir(mfiles ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${mfiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
