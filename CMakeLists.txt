@@ -1,41 +1,4 @@
-#                                               -*- cmake -*-
-#
-#  BiiPS software is a set of C++ libraries for
-#  Bayesian inference with interacting Particle Systems.
-#  Copyright (C) Inria, 2012
-#  Authors: Adrien Todeschini, Francois Caron
-#  
-#  BiiPS is derived software based on:
-#  JAGS, Copyright (C) Martyn Plummer, 2002-2010
-#  SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
-#
-#  This file is part of BiiPS.
-#
-#  BiiPS is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-#
-#  \file     CMakeLists.txt
-#  \brief    Top level Biips project CMakeList
-#
-#  \author   $LastChangedBy$
-#  \date     $LastChangedDate$
-#  \version  $LastChangedRevision$
-#  Id:       $Id$
-#
-
 cmake_minimum_required (VERSION 2.8)
-
 
 # project configuration
 # =====================
@@ -180,33 +143,6 @@ option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
 	
-macro(clear_boost_variables)
-    unset (Boost_LIBRARIES)
-    unset (Boost_INCLUDE_DIR CACHE)
-    unset (Boost_LIBRARY_DIRS CACHE)
-	foreach(comp ${BOOST_COMPONENTS})
-		unset(Boost_${comp}_FOUND CACHE)
-		unset(Boost_${comp}_LIBRARY CACHE)
-	endforeach()
-endmacro(clear_boost_variables)
-
-
-set (BOOST_COMPONENTS program_options)
-string (TOUPPER "${BOOST_COMPONENTS}" Boost_COMPONENTS)
-clear_boost_variables()
-find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
-	${BOOST_COMPONENTS}
-)
-
-macro(copy_boost_variables from to)
-	set (Boost_LIBRARIES${to} ${Boost_LIBRARIES${from}})
-	set (Boost_LIBRARY_DIRS${to} ${Boost_LIBRARY_DIRS${from}} CACHE FILEPATH "Boost${to} library directory" FORCE)
-	foreach(comp ${Boost_COMPONENTS})
-		set(Boost_${comp}_FOUND${to} ${Boost_${comp}_FOUND${from}} CACHE INTERNAL "Whether the Boost ${comp} library found" FORCE)
-		set(Boost_${comp}_LIBRARY${to} ${Boost_${comp}_LIBRARY${from}} CACHE FILEPATH "The Boost ${comp} library" FORCE)
-	endforeach()
-endmacro(copy_boost_variables)
-
 	
 if (WIN32 AND BUILD_BOTH_ARCH)
 	if (NOT $ENV{BOOST_LIBRARYDIR64} STREQUAL "")
@@ -220,21 +156,12 @@ if (WIN32 AND BUILD_BOTH_ARCH)
 		endforeach ()
 	endif()
 	
-	# save variables
-	copy_boost_variables("" _i386)
-	# clear variables
-	clear_boost_variables()
-	
 	# find 64-bit boost libraries
 	set (BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS64})
 	find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED
 		${BOOST_COMPONENTS}
 	)
 	
-	# save variables
-	copy_boost_variables("" _x64)
-	# reset variables
-	copy_boost_variables(_i386 "")
 endif()
 
 
@@ -372,9 +299,25 @@ endmacro(copy_files_to_bindir)
 
 enable_testing()
 # ==============================
+# define INCLUDE VARIABLES
+# ==============================
+set(Core_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/core 
+	              ${CMAKE_SOURCE_DIR}/core/include 
+		      ${CMAKE_BINARY_DIR}/core/include # for Config.hpp 
+			   
+)
+
+set(Base_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/base
+	              ${CMAKE_SOURCE_DIR}/base/include 
+			   
+)
+set(Compiler_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/compiler
+	                  ${CMAKE_SOURCE_DIR}/compiler/include 
+			   
+)
+
 # ==============================
 # Add subdirectories
-# ==============================
 # ==============================
 add_subdirectory (core)
 add_subdirectory (base)
