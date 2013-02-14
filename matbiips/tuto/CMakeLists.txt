@@ -1,7 +1,8 @@
+if (EXISTS ${INTER_BIN})
 file(GLOB mfiles *.m)
 file(GLOB bfiles *.bug)
 set(test_files ${mfiles} ${bfiles})
-copy_files_to_bindir(test_files ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 #===========Ctest command
 set(mtests hmm_4d_lin hmm_4d_nonlin)
@@ -19,3 +20,4 @@ foreach(_test ${mtests})
     endif()
     set_tests_properties(${_test}-test PROPERTIES TIMEOUT 30)
 endforeach()
+endif(EXISTS ${INTER_BIN})
