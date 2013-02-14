@@ -7,8 +7,8 @@ if (WIN32)
 		set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
 		
 		include_directories(${BiipsCore_INCLUDE_DIRS}
-			${BiipsBase_INCLUDE_DIRS}
-			${BiipsCompiler_INCLUDE_DIRS}
+			${Base_INCLUDE_DIRS}
+			${Compiler_INCLUDE_DIRS}
 			${MATLAB_INCLUDE_DIR}
 			${Boost_INCLUDE_DIRS}
 		)
@@ -46,7 +46,7 @@ else()
 	endif()
 
 	#define includes flags
-	set (INCLUDE_DIRS ${BiipsCore_INCLUDE_DIRS} ${BiipsBase_INCLUDE_DIRS} ${BiipsCompiler_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+	set (INCLUDE_DIRS ${Core_INCLUDE_DIRS} ${Base_INCLUDE_DIRS} ${Compiler_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 	foreach(d ${INCLUDE_DIRS})
 		set(INCLUDE_FLAGS ${INCLUDE_FLAGS} -I${d})
 	endforeach(d ${INCLUDE_DIRS})
@@ -55,18 +55,18 @@ else()
     	OUTPUT ${INTER_TARGET}
     	DEPENDS ${INTER_SRC} ${MBIIPS_H} ${MBIIPS_SRC} ${BIIPS_LIBS}
     	COMMAND ${MEX_COMMAND} -v 
-    	    ${MEX_OPT} ${INCLUDE_FLAGS} ${EXTRA_LIBS} ${MBIIPS_SRC}
+    	    ${MEX_OPT} ${INCLUDE_FLAGS} ${MBIIPS_SRC} ${EXTRA_LIBS} 
     	COMMENT "Building mexfile"
     	VERBATIM
 	)
 endif()
 
 # install mexfile in the build directory
-set(INTER_BIN "${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT}")
+set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
 add_custom_command(
 	OUTPUT ${INTER_BIN}
 	DEPENDS ${INTER_TARGET}
-	COMMAND ${CMAKE_COMMAND} -E copy inter_biips.${MEX_EXT} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
+	COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )

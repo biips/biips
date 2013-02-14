@@ -1,40 +1,3 @@
-#                                               -*- cmake -*-
-#
-#  BiiPS software is a set of C++ libraries for
-#  Bayesian inference with interacting Particle Systems.
-#  Copyright (C) Inria, 2012
-#  Authors: Adrien Todeschini, Francois Caron
-#  
-#  BiiPS is derived software based on:
-#  JAGS, Copyright (C) Martyn Plummer, 2002-2010
-#  SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
-#
-#  This file is part of BiiPS.
-#
-#  BiiPS is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-#
-#  \file     CMakeLists.txt
-#  \brief    BiipsTestCompiler CMakeLists
-#
-#  \author   $LastChangedBy$
-#  \date     $LastChangedDate$
-#  \version  $LastChangedRevision$
-#  Id:       $Id$
-#
-
-
 set (EXE_NAME BiipsTestCompiler)
 file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set (INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -48,65 +11,35 @@ configure_file(
 # include directories
 include_directories (
 	${INCLUDE_DIRS}
-	${BiipsCompiler_INCLUDE_DIRS}
-	${BiipsBase_INCLUDE_DIRS}
-	${BiipsCore_INCLUDE_DIRS}
+	${Compiler_INCLUDE_DIRS}
+	${Base_INCLUDE_DIRS}
+	${Core_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
 )
 
 # add boost libraries
-set (EXTRA_LIBS ${EXTRA_LIBS}
-	${Boost_PROGRAM_OPTIONS_LIBRARY}
-)
-
-# find boost 64-bit libraries
-if (WIN32 AND BUILD_x64)
-    set (EXTRA_LIBS64 ${EXTRA_LIBS64}
-    	${Boost_PROGRAM_OPTIONS_LIBRARY_x64}
-    )
-endif ()
-
-
-# find qwt5-qt4
-if (USE_Qwt5_Qt4)
-    find_package(Qwt5 REQUIRED)
-    if (NOT Qwt5_Qt4_FOUND)
-    	message(FATAL_ERROR "Qwt5 linked with Qt4 not found")
-    endif ()
-    include_directories (${Qwt5_INCLUDE_DIR})
-    include(UseQt4)
-    set (EXTRA_LIBS ${EXTRA_LIBS}
-    	${Qwt5_Qt4_LIBRARY}
-    )
-endif ()
-
+set (EXTRA_LIBS ${EXTRA_LIBS})
 
 # source files list generation
 file (GLOB SOURCE_FILES
-	${CMAKE_CURRENT_BINARY_DIR}/src/*.cpp
-	${CMAKE_CURRENT_BINARY_DIR}/src/*.cc
 	${CMAKE_CURRENT_BINARY_DIR}/include/*.hpp
 	${CMAKE_CURRENT_BINARY_DIR}/include/*.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
 )
 
 # add biips libraries
 set (BIIPS_LIBS	BiipsCompiler BiipsBase BiipsCore)
 
 # add the executable
-add_biips_executable (${EXE_NAME} SOURCE_FILES EXTRA_LIBS EXTRA_LIBS64 BIIPS_LIBS)
-
+add_executable(BiipsTestCompiler ${SOURCE_FILES})
+target_link_libraries(BiipsTestCompiler ${BIIPS_LIBS} ${EXTRA_LIBS})
 # add subdirectories
 add_subdirectory(benchmarks)
 add_subdirectory(model)
 
 # copy cfg files to binary directory
-set (cfg_file biipstestcompiler.cfg)
-copy_files_to_bindir(cfg_file ${CMAKE_CURRENT_BINARY_DIR})
-
+file(COPY  biipstestcompiler.cfg DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 #=========== CTest commands ===============
 file(GLOB cfg_files ${CMAKE_CURRENT_BINARY_DIR}/benchmarks/hmm_1d*.cfg)
@@ -115,19 +48,9 @@ foreach(_cfg ${cfg_files})
     get_filename_component(_name ${_cfg} NAME) 
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
-    
-    if (WIN32)
-        foreach (arch IN LISTS BUILD_ARCH_LIST)
-            get_target_property(exe_loc ${EXE_NAME}-${arch} LOCATION)
-            add_test (NAME ${_name}-testcompiler-${arch}
-                COMMAND ${exe_loc} ${_cfg} --particles=100
-            )
-        endforeach()
-    else ()
-        get_target_property(exe_loc ${EXE_NAME} LOCATION)
-        add_test (NAME ${_name}-testcompiler
-            COMMAND ${exe_loc} ${_cfg} --particles=100
-        )
-    endif()
+    get_target_property(exe_loc ${EXE_NAME} LOCATION)
+    add_test (NAME ${_name}-testcompiler
+        COMMAND ${exe_loc} ${_cfg} --particles=100
+    )
 endforeach()
 
