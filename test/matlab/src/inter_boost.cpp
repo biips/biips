@@ -1,8 +1,10 @@
 #include <deque>
 #include "mex.h" 
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <common/Types.hpp>
+#include <boost/math/distributions/uniform.hpp>
 #include <cstring>
 #include <boost/random.hpp>
 
@@ -66,7 +68,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 
    
-    if (name_func == "dnorm") {
+    if (name_func == "rnorm") {
 
        CheckRhs(nrhs, 3, name_func);
        //CheckArgsIsDouble(1);
@@ -81,6 +83,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
        normal_distribution<> norm_dist;
        variate_generator<mt19937&, normal_distribution<> > norm_gen(rng, norm_dist)  ;
+      
+       plhs[0] = mxCreateDoubleMatrix(m, n, mxREAL);
+       double * mytab = mxGetPr(plhs[0]);
+       std::generate(mytab , mytab + n*m, norm_gen);
+    }
+    
+    if (name_func == "runif") {
+
+       CheckRhs(nrhs, 3, name_func);
+       Size id = GetRngId(generateurs, prhs[1], name_func);
+       mt19937 rng = generateurs[id];
+
+       Size m = static_cast<Size> (*mxGetPr(prhs[2])); 
+       Size n = static_cast<Size> (*mxGetPr(prhs[3]));
+
+       uniform_real<>  unif_dist;
+       variate_generator<mt19937&, uniform_real<> > norm_gen(rng, unif_dist)  ;
       
        plhs[0] = mxCreateDoubleMatrix(m, n, mxREAL);
        double * mytab = mxGetPr(plhs[0]);
