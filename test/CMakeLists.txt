@@ -56,5 +56,6 @@ foreach(_cfg ${cfg_files})
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
     get_target_property(exe_loc BiipsTest LOCATION)
-    add_test (NAME ${_name}-test COMMAND ${exe_loc} ${_cfg} --particles=100)
+    add_test (NAME ${_name}-test COMMAND ${exe_loc} ${_cfg} --particles=100
+	    --data-rng-seed=42 --smc-rng-seed=42)
 endforeach()
