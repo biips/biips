@@ -68,15 +68,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 
    
+    /////////////////////////////////////////
+    // RNORM FUNCTION
+    /////////////////////////////////////////
     if (name_func == "rnorm") {
 
        CheckRhs(nrhs, 3, name_func);
-       //CheckArgsIsDouble(1);
        Size id = GetRngId(generateurs, prhs[1], name_func);
        mt19937 rng = generateurs[id];
-
-       //CheckArgIsDouble(2);
-       //CheckArgIsDouble(3);
 
        Size m = static_cast<Size> (*mxGetPr(prhs[2])); 
        Size n = static_cast<Size> (*mxGetPr(prhs[3]));
@@ -89,6 +88,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
        std::generate(mytab , mytab + n*m, norm_gen);
     }
     
+    /////////////////////////////////////////
+    // RUNIF FUNCTION
+    /////////////////////////////////////////
     if (name_func == "runif") {
 
        CheckRhs(nrhs, 3, name_func);
