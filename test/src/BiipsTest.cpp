@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 2: \tHMM Normal non linear 1D.\n"
             " 3: \tHMM multivariate Normal linear.\n"
             " 4: \tHMM multivariate Normal linear 4D.")
-        ("data-rng-seed", po::value<Size>(&data_rng_seed), "data sampler rng seed. default=time().")
+        ("data-rng-seed", po::value<Size>(&data_rng_seed)->default_value(42), "data sampler rng seed. default=time().")
         ("resampling", po::value<String>(&resample_type)->default_value("stratified"), "resampling method.\n"
             "values:\n"
             " multinomial\n"
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " prior: \tuse prior mutation.\n"
             " <other>: \tpossible model-specific mutation.")
         ("repeat-smc", po::value<Size>(&n_smc)->default_value(1), "number of independent SMC executions for each mutation and number of particles.")
-        ("smc-rng-seed", po::value<Size>(&smc_rng_seed), "SMC sampler rng seed. default=time().\n"
+        ("smc-rng-seed", po::value<Size>(&smc_rng_seed)->default_value(42), "SMC sampler rng seed. default=time().\n"
             "applies when repeat-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
         ("alpha", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
