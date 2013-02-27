@@ -34,6 +34,7 @@
 %  Id:       $Id$
 %
 
+
 function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
 %RUN_BENCH_ALL Runs all implemented benches
 %   [errors_filter_all, errors_smooth_all, norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
@@ -59,6 +60,10 @@ function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models
 %   Output will be written in 'hmm_1d_lin_gauss.cfg' file for model 1 and in
 %   'hmm_1d_non_lin_gauss.cfg' file for model 2.
 
+global id1;
+id1 = inter_boost('create_rng', 42);
+global id2;
+id2 = inter_boost('create_rng', 12);
 models = {};
 errors_filter_all = {};
 errors_smooth_all = {};
@@ -73,16 +78,16 @@ if (sum(model_ids == 1))
     dimx = 1;
     dimy = 1;
     
-    t_max = 20;
+    t_max = 3;
     mu_x_0 = 0;
     var_x_0 = 1;
     var_x = 1;
     var_y = 0.5;
     
-    
-    initiate = @(n) mu_x_0 + sqrt(var_x_0) * randn(1,n);
-    evolution_model = @(x_t, t) x_t + sqrt(var_x) * randn(size(x_t));
-    measure_model = @(x_t, t) x_t + sqrt(var_y) * randn(size(x_t));
+      
+    initiate = @(n) mu_x_0 + sqrt(var_x_0) * myrandn(id1, 1,n);
+    evolution_model = @(x_t, t) x_t + sqrt(var_x) * myrandn(id1, size(x_t,1),size(x_t,2));
+    measure_model = @(x_t, t) x_t + sqrt(var_y) * myrandn(id1, size(x_t,1), size(x_t,2));
     
     sample_param = @(model_const, model_dim) generate_state(model_dim(1), model_const(1), initiate, evolution_model);
     sample_obs = @(model_const, model_dim, x_gen) generate_measures(model_dim(2), model_const(1), x_gen, measure_model);
@@ -96,7 +101,7 @@ if (sum(model_ids == 1))
     
     prior_mutation = @(x_t, y_tplus1, t) prior_mutation_hmm(x_t, y_tplus1, t, evolution_model, log_like_pdf);
     optimal_mutation = @(x_t, y_tplus1, t) optimal_mutation_1D_lin(x_t, y_tplus1, 1, sqrt(var_x), 1, sqrt(var_y));
-%     bad_mutation = @(x_t, y_tplus1, t) bad_mutation_hmm(x_t, y_tplus1, t, evolution_model);
+%   bad_mutation = @(x_t, y_tplus1, t) bad_mutation_hmm(x_t, y_tplus1, t, evolution_model);
     
     backward_smoother = @(x_PF_t, x_PF_tplus1, w_PF_t, w_PS_tplus1, t) backward_smoother_hmm_1d(x_PF_t, x_PF_tplus1, w_PF_t, w_PS_tplus1, t, log_prior_pdf);
     
@@ -136,9 +141,9 @@ if (sum(model_ids == 2))
     f_evolution = @(x, t) 1/2*x + 25*x./(1+x.^2) + 8*cos(1.2*t);
     g_measure = @(x, t) x.^2/20;
     
-    initiate = @(n) mu_x_0 + sqrt(var_x_0) * randn(1,n);
-    evolution_model = @(x_t, t) f_evolution(x_t, t) + sqrt(var_x) * randn(size(x_t));
-    measure_model = @(x_t, t) g_measure(x_t, t) + sqrt(var_y) * randn(size(x_t));
+    initiate = @(n) mu_x_0 + sqrt(var_x_0) * myrandn(id1, 1,n);
+    evolution_model = @(x_t, t) f_evolution(x_t, t) + sqrt(var_x) * myrandn(id1, size(x_t,1), size(x_t,2));
+    measure_model = @(x_t, t) g_measure(x_t, t) + sqrt(var_y) * myrandn(id1, size(x_t,1), size(x_t,2));
     
     sample_param = @(model_const, model_dim) generate_state(model_dim(1), model_const(1), initiate, evolution_model);
     sample_obs = @(model_const, model_dim, x_gen) generate_measures(model_dim(2), model_const(1), x_gen, measure_model);
@@ -203,10 +208,10 @@ for i = 1:length(models)
     n_bin = 40;
     
     fig_title = sprintf('%s\nParticle filter: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
-    plot_error_dist(errors_filter, h_fig, 1, n_bin, fig_title, n_part, mutation_names, k_degree)
+    %plot_error_dist(errors_filter, h_fig, 1, n_bin, fig_title, n_part, mutation_names, k_degree)
     
     fig_title = sprintf('%s\nParticle smoother: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
-    plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
+    %plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
     
     % print results
     print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
@@ -283,50 +288,50 @@ xsup(2:end) = xcenter(2:end) + xdelta;
 end
 
 
-function plot_error_dist(errors, h_fig, i_sub, n_bin, fig_title, n_part, mutation_names, k_degree)
-
-    err_max = max(max(max(errors)));
-    delta = err_max/(n_bin-1);
-    edges = 0:delta:err_max;
-    pos = edges + delta/2;
-    
-    % filter errors distributions
-    n_N_part = size(errors, 2);
-    n_mut = size(errors, 3);
-    err_hist = zeros(n_bin, n_N_part, n_mut);
-    for j=1:n_N_part
-        for k = 1 : n_mut
-            err_hist(:,j,k) = histc(errors(:,j,k), edges);
-            err_hist(:,j,k) = err_hist(:,j,k)/ sum(err_hist(:,j,k)) / delta;
-        end
-    end
-    err_hist = reshape(err_hist, n_bin, n_N_part*n_mut);
-    
-    figure(h_fig)
-    subplot(2,1,i_sub)
-    plot(pos, err_hist)
-    title(fig_title)
-    leg_mut = zeros(n_mut*n_N_part,10);
-    for j = 1 : n_mut
-        leg_mut((j-1)*n_N_part+1:j*n_N_part,:) = repmat(sprintf('%10.10s', mutation_names{j}), n_N_part, 1);
-    end
-    leg = [repmat('N = ',n_N_part*n_mut,1) repmat(int2str(n_part'),n_mut,1), repmat(' ',n_N_part*n_mut,1), leg_mut];
-    legend(leg)
-    axis tight
-    
-    hold on
-    % chi squared curve
-    n = 50000;
-    chi_sq = sum(randn(k_degree, n).^2);
-    chi_sq_hist = histc(chi_sq, edges);
-    chi_sq_hist = chi_sq_hist/sum(chi_sq_hist) / delta;
-    plot(pos, chi_sq_hist, 'b--', 'LineWidth', 2)
-    
-    % normal approximation curve
-%     normpdf = @(x, mu, sig) 1/(sqrt(2*pi)*sig)*exp(-0.5*(x-mu).^2./sig.^2);
-%     npdf = normpdf(pos,k_degree, sqrt(2*k_degree));
-%     plot(pos, npdf, 'g--', 'LineWidth', 2)
-end
+%function plot_error_dist(errors, h_fig, i_sub, n_bin, fig_title, n_part, mutation_names, k_degree)
+%
+%    err_max = max(max(max(errors)));
+%    delta = err_max/(n_bin-1);
+%    edges = 0:delta:err_max;
+%    pos = edges + delta/2;
+%    
+%    % filter errors distributions
+%    n_N_part = size(errors, 2);
+%    n_mut = size(errors, 3);
+%    err_hist = zeros(n_bin, n_N_part, n_mut);
+%    for j=1:n_N_part
+%        for k = 1 : n_mut
+%            err_hist(:,j,k) = histc(errors(:,j,k), edges);
+%            err_hist(:,j,k) = err_hist(:,j,k)/ sum(err_hist(:,j,k)) / delta;
+%        end
+%    end
+%    err_hist = reshape(err_hist, n_bin, n_N_part*n_mut);
+%    
+%    figure(h_fig)
+%    subplot(2,1,i_sub)
+%    plot(pos, err_hist)
+%    title(fig_title)
+%    leg_mut = zeros(n_mut*n_N_part,10);
+%    for j = 1 : n_mut
+%        leg_mut((j-1)*n_N_part+1:j*n_N_part,:) = repmat(sprintf('%10.10s', mutation_names{j}), n_N_part, 1);
+%    end
+%    leg = [repmat('N = ',n_N_part*n_mut,1) repmat(int2str(n_part'),n_mut,1), repmat(' ',n_N_part*n_mut,1), leg_mut];
+%    legend(leg)
+%    axis tight
+%    
+%    hold on
+%    % chi squared curve
+%    n = 50000;
+%    chi_sq = sum(myrandn(id1, k_degree, n).^2);
+%    chi_sq_hist = histc(chi_sq, edges);
+%    chi_sq_hist = chi_sq_hist/sum(chi_sq_hist) / delta;
+%    plot(pos, chi_sq_hist, 'b--', 'LineWidth', 2)
+%    
+%    % normal approximation curve
+%%     normpdf = @(x, mu, sig) 1/(sqrt(2*pi)*sig)*exp(-0.5*(x-mu).^2./sig.^2);
+%%     npdf = normpdf(pos,k_degree, sqrt(2*k_degree));
+%%     plot(pos, npdf, 'g--', 'LineWidth', 2)
+%end
 
 
 function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth)
