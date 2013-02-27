@@ -75,7 +75,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
        CheckRhs(nrhs, 3, name_func);
        Size id = GetRngId(generateurs, prhs[1], name_func);
-       mt19937 rng = generateurs[id];
+       mt19937 & rng = generateurs[id];
 
        Size m = static_cast<Size> (*mxGetPr(prhs[2])); 
        Size n = static_cast<Size> (*mxGetPr(prhs[3]));
@@ -95,7 +95,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
        CheckRhs(nrhs, 3, name_func);
        Size id = GetRngId(generateurs, prhs[1], name_func);
-       mt19937 rng = generateurs[id];
+       mt19937 & rng = generateurs[id];
 
        Size m = static_cast<Size> (*mxGetPr(prhs[2])); 
        Size n = static_cast<Size> (*mxGetPr(prhs[3]));
