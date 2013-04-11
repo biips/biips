@@ -40,14 +40,6 @@
 #include "distributions/BoundedScalarDistribution.hpp"
 #include <boost/random/variate_generator.hpp>
 
-namespace boost
-{
-  namespace math
-  {
-  // FIXME : pas normal
-  }
-}
-
 namespace Biips
 {
 
@@ -103,11 +95,10 @@ namespace Biips
   {
     MathDistType dist = mathDist(paramValues);
 
-    using namespace boost::math;
     if (give_log)
-      return std::log(pdf(dist, x));
+      return std::log(boost::math::pdf(dist, x));
 
-    return pdf(dist, x);
+    return boost::math::pdf(dist, x);
   }
 
   template<typename MathDist, typename RandomDist>
@@ -118,12 +109,11 @@ namespace Biips
   {
     MathDistType dist = mathDist(paramValues);
 
-    using namespace boost::math;
     Scalar p;
     if (lower)
-      p = cdf(dist, x);
+      p = boost::math::cdf(dist, x);
     else
-      p = cdf(complement(dist, x));
+      p = boost::math::cdf(boost::math::complement(dist, x));
 
     if (give_log)
       return std::log(p);
@@ -142,12 +132,10 @@ namespace Biips
     if (log_p)
       return p = std::exp(p);
 
-    using namespace boost::math;
-
     if (lower)
-      return quantile(dist, p);
+      return boost::math::quantile(dist, p);
     else
-      return quantile(complement(dist, p));
+      return boost::math::quantile(boost::math::complement(dist, p));
   }
 
   template<typename MathDist, typename RandomDist>

@@ -37,15 +37,15 @@
 #ifndef BIIPS_DF_HPP_
 #define BIIPS_DF_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/fisher_f_distribution.hpp>
 #include <boost/math/distributions/fisher_f.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
 
   typedef boost::math::fisher_f_distribution<Scalar> FMathDistType;
-  typedef boost::fisher_f_distribution<Scalar> FRandomDistType;
+  typedef boost::random::fisher_f_distribution<Scalar> FRandomDistType;
 
   class DF: public BoostScalarDistribution<FMathDistType, FRandomDistType>
   {

@@ -37,15 +37,15 @@
 #ifndef BIIPS_DWEIB_HPP_
 #define BIIPS_DWEIB_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/weibull_distribution.hpp>
 #include <boost/math/distributions/weibull.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
 
   typedef boost::math::weibull_distribution<Scalar> WeibMathDistType;
-  typedef boost::weibull_distribution<Scalar> WeibRandomDistType;
+  typedef boost::random::weibull_distribution<Scalar> WeibRandomDistType;
 
   class DWeib: public BoostScalarDistribution<WeibMathDistType,
       WeibRandomDistType>

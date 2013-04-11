@@ -37,9 +37,9 @@
 #ifndef BIIPS_DNORMVAR_HPP_
 #define BIIPS_DNORMVAR_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {

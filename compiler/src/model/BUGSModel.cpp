@@ -38,6 +38,7 @@
 #include "common/IndexRangeIterator.hpp"
 #include "iostream/outStream.hpp"
 #include <boost/random/discrete_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
 
 namespace Biips
 {
@@ -612,7 +613,7 @@ namespace Biips
     typedef boost::random::discrete_distribution<Int, Scalar> CategoricalDist;
     CategoricalDist dist(pGenTreeSmoothMonitor_->GetUnnormWeights().begin(),
                          pGenTreeSmoothMonitor_->GetUnnormWeights().end());
-    typedef boost::variate_generator<Rng::GenType&, CategoricalDist> CategoricalGen;
+    typedef boost::random::variate_generator<Rng::GenType&, CategoricalDist> CategoricalGen;
     CategoricalGen gen(pRng->GetGen(), dist);
     Size chosen_particle = gen();
 

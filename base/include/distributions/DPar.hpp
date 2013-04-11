@@ -37,9 +37,9 @@
 #ifndef BIIPS_DPAR_HPP_
 #define BIIPS_DPAR_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
-#include <boost/random/pareto_distribution.hpp>
+#include "boost/random/pareto_distribution.hpp"
 #include <boost/math/distributions/pareto.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {

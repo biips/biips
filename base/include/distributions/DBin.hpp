@@ -37,9 +37,10 @@
 #ifndef BIIPS_DBIN_HPP_
 #define BIIPS_DBIN_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/binomial_distribution.hpp>
 #include <boost/math/distributions/binomial.hpp>
+
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {

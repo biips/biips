@@ -37,9 +37,10 @@
 #ifndef BIIPS_DT_HPP_
 #define BIIPS_DT_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
-#include <boost/random/students_t_distribution.hpp>
+#include <boost/random/student_t_distribution.hpp>
 #include <boost/math/distributions/students_t.hpp>
+
+#include "common/Types.hpp"
 
 namespace Biips
 {
@@ -47,11 +48,12 @@ namespace Biips
   class TDistType
   {
   public:
+    typedef Scalar value_type;
     typedef Scalar input_type;
     typedef Scalar result_type;
 
     typedef boost::math::students_t_distribution<result_type> MathDistType;
-    typedef boost::students_t_distribution<result_type> RandomDistType;
+    typedef boost::random::student_t_distribution<result_type> RandomDistType;
 
   protected:
     Scalar mu_;
@@ -64,7 +66,7 @@ namespace Biips
     TDistType(Scalar mu, Scalar tau, Scalar k);
 
     Scalar pdf(Scalar t) const;
-    Scalar logpdf(Scalar t) const;
+    Scalar log_pdf(Scalar t) const;
     Scalar cdf(Scalar t) const;
     Scalar quantile(Scalar p) const;
 
@@ -77,36 +79,44 @@ namespace Biips
 
 }
 
+#include "distributions/BoostScalarDistribution.hpp"
+
 namespace boost
 {
   namespace math
   {
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType pdf(const Biips::TDistType& dist, const RealType& t)
     {
       return dist.pdf(t);
     }
 
     template<class RealType>
+    inline RealType log_pdf(const Biips::TDistType& dist, const RealType& t)
+    {
+      return dist.log_pdf(t);
+    }
+
+    template<class RealType, class Policy>
     inline RealType cdf(const Biips::TDistType& dist, const RealType& t)
     {
       return dist.cdf(t);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const Biips::TDistType& dist, const RealType& p)
     {
       return dist.quantile(p);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType cdf(const complemented2_type<Biips::TDistType, RealType>& c)
     {
       return cdf(c.dist, -c.param);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const complemented2_type<Biips::TDistType,
         RealType>& c)
     {

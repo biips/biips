@@ -37,10 +37,10 @@
 #ifndef BIIPS_DDEXP_HPP_
 #define BIIPS_DDEXP_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/exponential_distribution.hpp>
 #include <boost/math/distributions/laplace.hpp>
 #include <boost/random/uniform_real.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
@@ -48,6 +48,7 @@ namespace Biips
   class DexpDistType
   {
   public:
+    typedef Scalar value_type;
     typedef Scalar input_type;
     typedef Scalar result_type;
 
@@ -119,7 +120,7 @@ namespace boost
   namespace math
   {
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType pdf(const Biips::DexpDistType& dist, const RealType& t)
     {
       return dist.pdf(t);
@@ -131,25 +132,25 @@ namespace boost
       return dist.log_pdf(t);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType cdf(const Biips::DexpDistType& dist, const RealType& t)
     {
       return dist.cdf(t);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const Biips::DexpDistType& dist, const RealType& p)
     {
       return dist.quantile(p);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType cdf(const complemented2_type<Biips::DexpDistType, RealType>& c)
     {
       return c.dist.cdf_cmplt(c.param);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const complemented2_type<Biips::DexpDistType,
         RealType>& c)
     {

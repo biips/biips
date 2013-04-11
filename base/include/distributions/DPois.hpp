@@ -37,9 +37,9 @@
 #ifndef BIIPS_DPOIS_HPP_
 #define BIIPS_DPOIS_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/poisson_distribution.hpp>
 #include <boost/math/distributions/poisson.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {

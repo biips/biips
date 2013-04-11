@@ -37,15 +37,15 @@
 #ifndef BIIPS_DCHISQR_HPP_
 #define BIIPS_DCHISQR_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/chi_squared_distribution.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
 
   typedef boost::math::chi_squared_distribution<Scalar> ChisqrMathDistType;
-  typedef boost::chi_squared_distribution<Scalar> ChisqrRandomDistType;
+  typedef boost::random::chi_squared_distribution<Scalar> ChisqrRandomDistType;
 
   class DChisqr: public BoostScalarDistribution<ChisqrMathDistType,
       ChisqrRandomDistType>

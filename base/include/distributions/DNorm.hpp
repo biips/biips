@@ -37,14 +37,14 @@
 #ifndef BIIPS_DNORM_HPP_
 #define BIIPS_DNORM_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
   typedef boost::math::normal_distribution<Scalar> NormalMathDistType;
-  typedef boost::normal_distribution<Scalar> NormalRandomDistType;
+  typedef boost::random::normal_distribution<Scalar> NormalRandomDistType;
 
   class DNorm: public BoostScalarDistribution<NormalMathDistType,
       NormalRandomDistType>

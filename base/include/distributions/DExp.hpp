@@ -37,9 +37,9 @@
 #ifndef BIIPS_DEXP_HPP_
 #define BIIPS_DEXP_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
 #include <boost/random/exponential_distribution.hpp>
 #include <boost/math/distributions/exponential.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
