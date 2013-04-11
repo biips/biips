@@ -51,7 +51,7 @@ namespace Biips
     return sqrtTau_ * boost::math::pdf(mathDist_, y);
   }
 
-  Scalar TDistType::logpdf(Scalar t) const
+  Scalar TDistType::log_pdf(Scalar t) const
   {
     Scalar y = (t - mu_) * sqrtTau_;
     using std::log;
@@ -101,8 +101,8 @@ namespace Biips
     MathDistType dist = mathDist(paramValues);
 
     if (give_log)
-      return dist.logpdf(x);
+      return boost::math::log_pdf(dist, x);
     else
-      return dist.pdf(x);
+      return boost::math::pdf(dist, x);
   }
 }

@@ -75,7 +75,7 @@ namespace boost {
         friend std::basic_ostream<CharT, Traits>&
         operator<<(std::basic_ostream<CharT, Traits>& os, const beta_distribution& dist)
         {
-            os << dist.m_a << dist.m_b;
+            os << dist._a << dist._b;
             return os;
         }
 
@@ -83,7 +83,7 @@ namespace boost {
         friend std::basic_istream<CharT, Traits>&
         operator>>(std::basic_istream<CharT,Traits>& is, beta_distribution& dist)
         {
-            is >> std::ws >> dist.m_a >> std::ws >> dist.m_b;
+            is >> std::ws >> dist._a >> std::ws >> dist._b;
             dist.init();
             return is;
         }
