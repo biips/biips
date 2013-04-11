@@ -3,6 +3,7 @@ BiiPS code is Copyright (C) Inria, 2012
 Authors:
 - Adrien TODESCHINI, software designer and developer
 - Francois CARON, probability expertise and specifications
+- Marc FUENTES, software designer and developer
 
 BiiPS code is adapted from:
 - JAGS, Copyright (C) Martyn Plummer, 2002-2010
