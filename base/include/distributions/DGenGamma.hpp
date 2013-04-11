@@ -37,9 +37,10 @@
 #ifndef BIIPS_DGENGAMMA_HPP_
 #define BIIPS_DGENGAMMA_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
-#include "boost/random/gamma_distribution_2par.hpp"
+#include <boost/random/gamma_distribution.hpp>
 #include <boost/math/distributions/gamma.hpp>
+
+#include "common/Types.hpp"
 
 namespace Biips
 {
@@ -47,11 +48,12 @@ namespace Biips
   class GenGammaDistType
   {
   public:
+    typedef Scalar value_type;
     typedef Scalar input_type;
     typedef Scalar result_type;
 
     typedef boost::math::gamma_distribution<result_type> MathDistType;
-    typedef boost::gamma_distribution<result_type> RandomDistType;
+    typedef boost::random::gamma_distribution<result_type> RandomDistType;
 
   protected:
     Scalar shape_;
@@ -113,12 +115,14 @@ namespace Biips
 
 }
 
+#include "distributions/BoostScalarDistribution.hpp"
+
 namespace boost
 {
   namespace math
   {
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType pdf(const Biips::GenGammaDistType& dist, const RealType& t)
     {
       return dist.pdf(t);
@@ -131,27 +135,27 @@ namespace boost
       return dist.log_pdf(t);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType cdf(const Biips::GenGammaDistType& dist, const RealType& t)
     {
       return dist.cdf(t);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const Biips::GenGammaDistType& dist,
                              const RealType& p)
     {
       return dist.quantile(p);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType cdf(const complemented2_type<Biips::GenGammaDistType,
         RealType>& c)
     {
       return c.dist.cdf_cmplt(c.param);
     }
 
-    template<class RealType>
+    template<class RealType, class Policy>
     inline RealType quantile(const complemented2_type<Biips::GenGammaDistType,
         RealType>& c)
     {

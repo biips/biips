@@ -37,15 +37,15 @@
 #ifndef BIIPS_DGAMMA_HPP_
 #define BIIPS_DGAMMA_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
-#include "boost/random/gamma_distribution_2par.hpp"
+#include <boost/random/gamma_distribution.hpp>
 #include <boost/math/distributions/gamma.hpp>
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {
 
   typedef boost::math::gamma_distribution<Scalar> GammaMathDistType;
-  typedef boost::gamma_distribution<Scalar> GammaRandomDistType;
+  typedef boost::random::gamma_distribution<Scalar> GammaRandomDistType;
 
   class DGamma: public BoostScalarDistribution<GammaMathDistType,
       GammaRandomDistType>

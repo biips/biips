@@ -37,10 +37,10 @@
 #ifndef BIIPS_DBETA_HPP_
 #define BIIPS_DBETA_HPP_
 
-#include "distributions/BoostScalarDistribution.hpp"
-
-#include <boost/random/beta_distribution.hpp>
+#include "boost/random/beta_distribution.hpp"
 #include <boost/math/distributions/beta.hpp>
+
+#include "distributions/BoostScalarDistribution.hpp"
 
 namespace Biips
 {

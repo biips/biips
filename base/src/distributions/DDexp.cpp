@@ -74,9 +74,7 @@ namespace Biips
     MathDistType dist = mathDist(paramValues);
 
     if (give_log)
-    {
       return boost::math::log_pdf(dist, x);
-    }
     else
       return boost::math::pdf(dist, x);
   }
