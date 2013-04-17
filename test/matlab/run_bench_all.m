@@ -59,11 +59,6 @@ function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models
 %   - Multinomial resampling when ESS/N <= 0.5
 %   Output will be written in 'hmm_1d_lin_gauss.cfg' file for model 1 and in
 %   'hmm_1d_non_lin_gauss.cfg' file for model 2.
-
-global id1;
-id1 = inter_boost('create_rng', 42);
-global id2;
-id2 = inter_boost('create_rng', 12);
 models = {};
 errors_filter_all = {};
 errors_smooth_all = {};
@@ -201,24 +196,24 @@ for i = 1:length(models)
     % plot errors distributions
 %     scrsz = get(0, 'ScreenSize');
 %     figure('Position', [1 1 scrsz(3)/2 scrsz(4)])
-    h_fig = figure();
+    %h_fig = figure();
     
-    t_max = model_const(1);
-    k_degree = floor((t_max+1)/period);
-    n_bin = 40;
-    
-    fig_title = sprintf('%s\nParticle filter: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
-    %plot_error_dist(errors_filter, h_fig, 1, n_bin, fig_title, n_part, mutation_names, k_degree)
-    
-    fig_title = sprintf('%s\nParticle smoother: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
-    %plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
-    
-    % print results
-    print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
-    
-    errors_filter_all = [errors_filter_all, {errors_filter} ];
-    errors_smooth_all = [errors_smooth_all, {errors_smooth} ];
-    log_norm_const_bench_all = [log_norm_const_bench_all, {log_norm_const_bench(end)} ];
+    %t_max = model_const(1);
+    %k_degree = floor((t_max+1)/period);
+    %n_bin = 40;
+    %
+    %fig_title = sprintf('%s\nParticle filter: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
+    %%plot_error_dist(errors_filter, h_fig, 1, n_bin, fig_title, n_part, mutation_names, k_degree)
+    %
+    %fig_title = sprintf('%s\nParticle smoother: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
+    %%plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
+    %
+    %% print results
+    %print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
+    %
+    %errors_filter_all = [errors_filter_all, {errors_filter} ];
+    %errors_smooth_all = [errors_smooth_all, {errors_smooth} ];
+    %log_norm_const_bench_all = [log_norm_const_bench_all, {log_norm_const_bench(end)} ];
 end
 
 end
