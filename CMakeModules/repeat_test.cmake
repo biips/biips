@@ -12,10 +12,11 @@ endif(NOT config)
 
 execute_process(COMMAND ${name_test} ${config} --particles=100
                 RESULT_VARIABLE test_failed OUTPUT_VARIABLE sortie1)
-message(STATUS ${sortie1})
-
-if(test_not_failed)
+if(${sortie1} MATCHES ".*failed.*")
+   message(WARNING "premier essai foire")
    execute_process(COMMAND ${name_test} ${config} --particles=100
-                   RESULT_VARIABLE test_failed_two ${sortie2})
-   message(STATUS ${sortie2})
-endif(test_not_failed)
+       RESULT_VARIABLE test_failed_two OUTPUT_VARIABLE sortie2)
+   if(${sortie2} MATCHES ".*failed.*")
+       message(SEND_ERROR "Ayaye planté 2 fois")
+   endif() 
+endif()

@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( my_test )
         ("smc-rng-seed", po::value<Size>(&smc_rng_seed)->default_value(time(0)), "SMC sampler rng seed. default=time().\n"
             "applies when repeat-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
-        ("alpha", po::value<Scalar>(&reject_level)->default_value(0.01), "accepted level of rejection in checks.")
+        ("alpha", po::value<Scalar>(&reject_level)->default_value(0.05), "accepted level of rejection in checks.")
 #ifdef USE_Qwt5_Qt4
         ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
             "applies when repeat-smc=1.")
