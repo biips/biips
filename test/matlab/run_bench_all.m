@@ -73,16 +73,16 @@ if (sum(model_ids == 1))
     dimx = 1;
     dimy = 1;
     
-    t_max = 3;
+    t_max = 20;
     mu_x_0 = 0;
     var_x_0 = 1;
     var_x = 1;
     var_y = 0.5;
     
       
-    initiate = @(n) mu_x_0 + sqrt(var_x_0) * myrandn(id1, 1,n);
-    evolution_model = @(x_t, t) x_t + sqrt(var_x) * myrandn(id1, size(x_t,1),size(x_t,2));
-    measure_model = @(x_t, t) x_t + sqrt(var_y) * myrandn(id1, size(x_t,1), size(x_t,2));
+    initiate = @(n) mu_x_0 + sqrt(var_x_0) * randn(1, n);
+    evolution_model = @(x_t, t) x_t + sqrt(var_x) * randn(size(x_t));
+    measure_model = @(x_t, t) x_t + sqrt(var_y) * randn(size(x_t));
     
     sample_param = @(model_const, model_dim) generate_state(model_dim(1), model_const(1), initiate, evolution_model);
     sample_obs = @(model_const, model_dim, x_gen) generate_measures(model_dim(2), model_const(1), x_gen, measure_model);
@@ -136,9 +136,9 @@ if (sum(model_ids == 2))
     f_evolution = @(x, t) 1/2*x + 25*x./(1+x.^2) + 8*cos(1.2*t);
     g_measure = @(x, t) x.^2/20;
     
-    initiate = @(n) mu_x_0 + sqrt(var_x_0) * myrandn(id1, 1,n);
-    evolution_model = @(x_t, t) f_evolution(x_t, t) + sqrt(var_x) * myrandn(id1, size(x_t,1), size(x_t,2));
-    measure_model = @(x_t, t) g_measure(x_t, t) + sqrt(var_y) * myrandn(id1, size(x_t,1), size(x_t,2));
+    initiate = @(n) mu_x_0 + sqrt(var_x_0) * randn(1, n);
+    evolution_model = @(x_t, t) f_evolution(x_t, t) + sqrt(var_x) * randn(size(x_t));
+    measure_model = @(x_t, t) g_measure(x_t, t) + sqrt(var_y) * randn(size(x_t));
     
     sample_param = @(model_const, model_dim) generate_state(model_dim(1), model_const(1), initiate, evolution_model);
     sample_obs = @(model_const, model_dim, x_gen) generate_measures(model_dim(2), model_const(1), x_gen, measure_model);
@@ -317,7 +317,7 @@ end
 %    hold on
 %    % chi squared curve
 %    n = 50000;
-%    chi_sq = sum(myrandn(id1, k_degree, n).^2);
+%    chi_sq = sum(randn(k_degree, n).^2);
 %    chi_sq_hist = histc(chi_sq, edges);
 %    chi_sq_hist = chi_sq_hist/sum(chi_sq_hist) / delta;
 %    plot(pos, chi_sq_hist, 'b--', 'LineWidth', 2)
