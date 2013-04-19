@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 2: \tHMM Normal non linear 1D.\n"
             " 3: \tHMM multivariate Normal linear.\n"
             " 4: \tHMM multivariate Normal linear 4D.")
-        ("data-rng-seed", po::value<Size>(&data_rng_seed)->default_value(time(0)), "data sampler rng seed. default=time().")
+        ("data-rng-seed", po::value<Size>(&data_rng_seed)->default_value(clock()), "data sampler rng seed. default=time().")
         ("resampling", po::value<String>(&resample_type)->default_value("stratified"), "resampling method.\n"
             "values:\n"
             " multinomial\n"
@@ -161,10 +161,10 @@ BOOST_AUTO_TEST_CASE( my_test )
             " prior: \tuse prior mutation.\n"
             " <other>: \tpossible model-specific mutation.")
         ("repeat-smc", po::value<Size>(&n_smc)->default_value(1), "number of independent SMC executions for each mutation and number of particles.")
-        ("smc-rng-seed", po::value<Size>(&smc_rng_seed)->default_value(time(0)), "SMC sampler rng seed. default=time().\n"
+        ("smc-rng-seed", po::value<Size>(&smc_rng_seed)->default_value(clock()), "SMC sampler rng seed. default=time().\n"
             "applies when repeat-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
-        ("alpha", po::value<Scalar>(&reject_level)->default_value(0.05), "accepted level of rejection in checks.")
+        ("alpha", po::value<Scalar>(&reject_level)->default_value(1e-4), "accepted level of rejection in checks.")
 #ifdef USE_Qwt5_Qt4
         ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
             "applies when repeat-smc=1.")
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE( my_test )
     if (data_map.empty())
     {
       if (!vm.count("data-rng-seed"))
-        data_rng_seed = time(0);
+        data_rng_seed = clock();
       if (verbosity>0)
       {
         cout << "Sampling data graph values..." << endl;
@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE( my_test )
           p_model_test->ClearSMC();
 
           if (n_smc>1 || !vm.count("smc-rng-seed"))
-            smc_rng_seed = time(0)+i_smc+1;
+            smc_rng_seed = clock()+i_smc+1;
           if (n_smc==1 && verbosity>0)
             cout << INDENT_STRING << "rng seed: " << smc_rng_seed << endl;
 
@@ -663,8 +663,11 @@ BOOST_AUTO_TEST_CASE( my_test )
             acc_ref_type errors_filter_ref_acc;
 
             errors_filter_ref_acc = acc_ref_type(quantile_probability = 1-reject_level);
+            
+            cout << "sample size = " << errors_filter_ref_map[mut][n_part].size() << endl;
             for (Size i =0; i<errors_filter_ref_map[mut][n_part].size(); ++i)
               errors_filter_ref_acc(errors_filter_ref_map[mut][n_part][i]);
+            
             error_filter_threshold = p_square_quantile(errors_filter_ref_acc);
 
             if (verbosity>0)
@@ -678,8 +681,10 @@ BOOST_AUTO_TEST_CASE( my_test )
             acc_ref_type errors_smooth_ref_acc;
 
             errors_smooth_ref_acc = acc_ref_type(quantile_probability = 1-reject_level);
+            
             for (Size i =0; i<errors_smooth_ref_map[mut][n_part].size(); ++i)
               errors_smooth_ref_acc(errors_smooth_ref_map[mut][n_part][i]);
+            
             error_smooth_threshold = p_square_quantile(errors_smooth_ref_acc);
 
             if (verbosity>0)
