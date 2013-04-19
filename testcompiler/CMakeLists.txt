@@ -49,9 +49,7 @@ foreach(_cfg ${cfg_files})
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
     get_target_property(exe_loc ${EXE_NAME} LOCATION)
-    add_test (NAME ${_name}-testcompiler
-        COMMAND ${CMAKE_COMMAND} -Dname_test=${exe_loc} -Dconfig=${_cfg}
-        -P
-        ${CMAKE_SOURCE_DIR}/CMakeModules/repeat_test.cmake)
+    add_test (NAME ${_name}-testcompiler COMMAND ${exe_loc} ${_cfg}
+        --particles=100 --alpha=1e-6)
 endforeach()
 
