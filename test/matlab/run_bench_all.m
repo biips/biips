@@ -209,7 +209,7 @@ for i = 1:length(models)
     %%plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
     %
     %% print results
-    %print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
+    print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
     %
     %errors_filter_all = [errors_filter_all, {errors_filter} ];
     %errors_smooth_all = [errors_smooth_all, {errors_smooth} ];
