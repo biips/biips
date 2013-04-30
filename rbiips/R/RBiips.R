@@ -102,7 +102,10 @@ data_preprocess <- function(data) { # , varnames) {
   data[!sapply(data, is.null)] 
 }
 
-
+#' load the corresponding module into the Biips environment
+#' @param the module name
+#' @param quiet verbose flag
+#' @return null
 load.biips.module <- function(name, quiet=FALSE)
 {    
   if (!is.character(name) || length(name)>1)
@@ -115,6 +118,7 @@ load.biips.module <- function(name, quiet=FALSE)
   else if (!quiet) {
     cat("module", name, "loaded\n")
   }
+  # je ne vois pas a quoi ca sert
   invisible(NULL)
 }
 
@@ -436,11 +440,11 @@ print.biips <- function(x,...)
   }
 }
 
-
+#' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
+#' variable name and n,p,q,r are integers
+#' @param varname string containing the name of the variable to sparse
 parse.varname <- function(varname) {
   
-  ## Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
-  ## variable name and n,p,q,r are integers
   
   v <- try(parse(text=varname, n=1), silent=TRUE)
   if (!is.expression(v) || length(v) != 1)
@@ -561,122 +565,6 @@ smc.samples <- function(object, variable.names, n.part, type="fs",
     class(ans[[n]]) <- "particles.list"
   }
   ans[["log.marg.like"]] <- log.marg.like
-  
-  return(ans)
-}
-
-
-pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
-                         n.part, max.fail=0, rw.learn=TRUE, ...)
-{  
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
-  n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
-    stop("Invalid thin argument")
-  thin <- as.integer(thin)
-  
-  if (!is.logical(rw.learn) || length(rw.learn)!=1)
-    stop("invalid rw.learn parameter")
-  
-  ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
-  
-  ## Initialization
-  #----------------
-  out <- init.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
-                         n.part=n.part, ...)
-  sample <- out$sample
-  log.prior <- out$log.prior
-  log.marg.like <- out$log.marg.like
-  
-  pn.param <- parse.varnames(param.names)
-  
-  ## reset log normalizing constant on exit
-  on.exit(
-    if (n.iter > 0 && !accepted) {
-      .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    }, add=TRUE)
-  
-  ans <- list()
-  n.samples <- 0
-  n.fail <- 0
-  accepted <- TRUE
-  n.accept <- 0  
-  
-  accept.rate <- vector(length=n.iter)
-  
-  ## check adaptation
-  if (object$.rw.adapt() && !object$.rw.check.adapt())
-    cat("NOTE: Stopping adaptation of the PMMH random walk.\n")
-  ## turn off adaptation
-  object$.rw.adapt.off()
-  
-  .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
-  
-  ## Metropolis-Hastings iterations
-  ##-------------------------------
-  for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
-                                 pn.param=pn.param,
-                                 sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
-                                 n.part=n.part, rw.learn=rw.learn, ...)
-    sample <- out$sample
-    log.prior <- out$log.prior
-    log.marg.like <- out$log.marg.like
-    accepted <- out$accepted
-    n.fail <- n.fail + out$n.fail
-    n.accept <- n.accept + out$accepted
-    accept.rate[i] <- out$accept.rate
-    
-    ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
-    
-    if (n.fail > max.fail) {
-      stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
-    }
-    
-    ## Store output
-    if ((i-1)%%thin == 0) {
-      n.samples <- n.samples +1
-      for (var in c(param.names, latent.names))
-        ans[[var]] <- c(ans[[var]], sample[[var]])
-    }
-  }
-  
-  clear.monitors.biips(object, type="s")
-  
-  ## reset log norm const and sampled value for the latent variables
-  if (n.iter > 0 && !accepted) {
-    for (v in seq(along=param.names)) {
-      var <- param.names[[v]]
-      if(!.Call("change_data", object$ptr(),
-                pn.param$names[[v]], pn.param$lower[[v]], pn.param$upper[[v]],
-                sample[[var]], TRUE, PACKAGE="RBiips"))
-        stop("can not reset previous data: ", var, "=", sample[[var]])
-    }
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    if (length(latent.names)>0)
-      .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
-  }
-  
-  ## output
-  ## effective acceptance rate
-  ar.eff <- n.accept/n.iter
-  ans[["ar.eff"]] <- ar.eff
-  
-  ## number of failures
-  ans[["n.fail"]] <- n.fail
-  
-  ## set output dimensions
-  for (var in c(param.names, latent.names)) {
-    dim(ans[[var]]) <- c(dim(sample[[var]]), n.samples)
-    names(dim(ans[[var]])) <- c(rep("", length(dim(sample[[var]]))), "iteration")
-    class(ans[[var]]) <- "mcarray"
-  }
   
   return(ans)
 }
