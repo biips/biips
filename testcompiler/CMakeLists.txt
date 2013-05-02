@@ -15,8 +15,8 @@ include_directories (
 	${Base_INCLUDE_DIRS}
 	${Core_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
-)
-
+    ${CMAKE_SOURCE_DIR}/testcompiler/include
+    )
 # add boost libraries
 set (EXTRA_LIBS ${EXTRA_LIBS})
 
@@ -26,6 +26,7 @@ file (GLOB SOURCE_FILES
 	${CMAKE_CURRENT_BINARY_DIR}/include/*.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+    ${CMAKE_SOURCE_DIR}/testcompiler/include/storeUnregistered.hpp
 )
 
 # add biips libraries
