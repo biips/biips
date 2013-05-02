@@ -1,4 +1,5 @@
 #include "BiipsVersion.hpp"
+#include "storeUnregistered.hpp"
 #include "Console.hpp"
 #include "common/Types.hpp"
 #include "common/DimArray.hpp"
@@ -16,6 +17,8 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/p_square_quantile.hpp>
 #include <boost/math/distributions/students_t.hpp>
+#include <boost/program_options.hpp>
+
 
 using std::cout;
 using std::cerr;
@@ -23,47 +26,37 @@ using std::endl;
 using std::ifstream;
 using namespace std;
 using namespace Biips;
-typedef map<string, DimArray::Ptr> StoredDimMap;
-typedef map<string, vector<MultiArray> > StoredDataMap;
-typedef map<string, map<Size, vector<Scalar> > > StoredErrorsMap;
 
+namespace po = boost::program_options;
 
 int main(int argc, char ** argv) 
 {
   using namespace Biips;
 
-  String model_file_name = "hmm_1d_lin.bug";
-  Size exec_step;
   String do_smooth_str;
   Size check_mode;
   Size data_rng_seed;
   Size smc_rng_seed;
-  vector<Size> n_particles;
   Scalar ess_threshold;
-  String resample_type;
+  String resample_type = "stratified" ;
   Scalar reject_level;
   String dot_file_name;
   String config_file_name;
-  vector<String> mutations;
-  Size verbosity;
+  Size verbosity = 2;
   Size num_bins;
-  String data_file_name = "data.txt";
-
-
-  cout << "BiipsTestCompiler, version " << BIIPS_VERSION() << endl;
+  if (argc < 4) {
+      cout << "usage : " << argv[0]  << " model-file data-file nb_particles" << endl;
+      return 0;
+  }
+  String model_file_name = argv[1] ;
+  String data_file_name = argv[2];
+  Size n_part = atoi(argv[3]);
+  
 
   vector<String> monitored_var;
-  StoredDimMap dim_map_stored;
-  StoredDataMap data_map_stored;
+  monitored_var.push_back(string("x"));
   Scalar log_norm_const_bench = 0.0;
-  StoredDataMap bench_filter_map_stored;
-  StoredDataMap bench_smooth_map_stored;
-  StoredErrorsMap errors_filter_ref_map_stored;
-  StoredErrorsMap errors_smooth_ref_map_stored;
-
-
-  Bool interactive = false; 
-
+  
   Bool do_smooth = true;
 
   // Read data
@@ -155,12 +148,9 @@ int main(int argc, char ** argv)
   if (verbosity > 0)
     cout << INDENT_STRING << "data-rng-seed = " << data_rng_seed << endl;
 
-  if (!console.Compile(data_map, true, data_rng_seed, verbosity))
+  if (!console.Compile(data_map, false, data_rng_seed, verbosity))
     throw RuntimeError("Failed to compile model.");
 
-
-  if (exec_step < 1)
-    return 0;
 
   // Monitor variables
   if (verbosity > 0)
@@ -207,121 +197,87 @@ int main(int argc, char ** argv)
 
   // Run SMC samplers
   //----------------------
-  for (Size i_n_part = 0; i_n_part < n_particles.size(); ++i_n_part)
+  string mut = "prior";
+
+  if (verbosity > 0)
   {
-    Size n_part = n_particles[i_n_part];
-    for (Size i_mut = 0; i_mut < mutations.size(); ++i_mut)
-    {
-      string mut = mutations[i_mut];
-
-      if (verbosity > 0)
-      {
-        cout << endl;
-        cout << INDENT_STRING << "mutation = " << mut << endl;
-        cout << INDENT_STRING << "particles = " << n_part << endl;
-        cout << INDENT_STRING << "resampling = " << resample_type << endl;
-        cout << INDENT_STRING << "ess-threshold = " << ess_threshold << endl;
-      }
+    cout << endl;
+    cout << INDENT_STRING << "mutation = " << mut << endl;
+    cout << INDENT_STRING << "particles = " << n_part << endl;
+    cout << INDENT_STRING << "resampling = " << resample_type << endl;
+    cout << INDENT_STRING << "ess-threshold = " << ess_threshold << endl;
+  }
 
 
-      Types<ProgressBar>::Ptr p_show_progress;
+  Types<ProgressBar>::Ptr p_show_progress;
 
-      vector<Scalar> errors_filter_new;
-      vector<Scalar> errors_smooth_new;
-      vector<Scalar> log_norm_const_smc;
+  vector<Scalar> errors_filter_new;
+  vector<Scalar> errors_smooth_new;
+  vector<Scalar> log_norm_const_smc;
 
-      if (!console.BuildSampler(mut == "prior",
-                                verbosity * (verbosity > 1)))
-        throw RuntimeError("Failed to build sampler.");
-
-
-      // Build sampler
-      //----------------------
-      if (verbosity > 0)
-        cout << INDENT_STRING << "smc-rng-seed = " << smc_rng_seed << endl;
-      
-      // Run sampler
-      //----------------------
-      Bool verbose_run_smc = verbosity > 1 || (verbosity > 0);
-      if (!console.RunForwardSampler(n_part, smc_rng_seed, resample_type,
-                                     ess_threshold, verbose_run_smc,
-                                     verbose_run_smc))
-        throw RuntimeError("Failed to run SMC sampler.");
-
-      Scalar log_norm_const;
-      if (!console.GetLogNormConst(log_norm_const))
-        throw RuntimeError("Failed to get log normalizing constant.");
-
-      if (verbosity > 0)
-        cout << INDENT_STRING << "log-normalizing constant = "
-             << log_norm_const << endl;
-
-      log_norm_const_smc.push_back(log_norm_const);
-
-      if (exec_step < 2)
-        continue;
-
-      // Compute filter mean error of monitored values
-      //----------------------------------------------
-      Scalar error_filter = 0.0;
-
-      for (Size i = 0; i < monitored_var.size(); ++i)
-      {
-        const String & name = monitored_var[i];
-
-        if (verbosity > 0)
-          cout << PROMPT_STRING << "Computing filtering error of variable "
-               << name << endl;
-
-      }
-
-      error_filter *= n_part;
-
-      if (verbosity > 0)
-        cout << INDENT_STRING << "filtering error = " << error_filter << endl;
-
-      errors_filter_new.push_back(error_filter);
+  if (!console.BuildSampler(mut == "prior",
+                            verbosity * (verbosity > 1)))
+    throw RuntimeError("Failed to build sampler.");
 
 
-      // Run backward smoother
-      //-------------------------------------------------
-      if (do_smooth)
-      {
-        Bool verbose_run_back = verbosity > 1
-                                || (verbosity > 0);
-        if (!console.RunBackwardSmoother(verbose_run_back, verbose_run_back))
+  // Build sampler
+  //----------------------
+  if (verbosity > 0)
+    cout << INDENT_STRING << "smc-rng-seed = " << smc_rng_seed << endl;
+  
+  // Run sampler
+  //----------------------
+  Bool verbose_run_smc = verbosity > 1 || (verbosity > 0);
+  if (!console.RunForwardSampler(n_part, smc_rng_seed, resample_type,
+                                 ess_threshold, verbose_run_smc,
+                                 verbose_run_smc))
+    throw RuntimeError("Failed to run SMC sampler.");
 
-        if (verbosity == 1)
-          ++(*p_show_progress);
+  Scalar log_norm_const;
+  if (!console.GetLogNormConst(log_norm_const))
+    throw RuntimeError("Failed to get log normalizing constant.");
 
-        if (exec_step < 2)
-          continue;
+  if (verbosity > 0)
+    cout << INDENT_STRING << "log-normalizing constant = "
+         << log_norm_const << endl;
 
-        // Compute smooth mean error of monitored values
-        //----------------------------------------------
-        Scalar error_smooth = 0.0;
-
-        for (Size i = 0; i < monitored_var.size(); ++i)
-        {
-          const String & name = monitored_var[i];
-
-          if (verbosity > 0)
-            cout << PROMPT_STRING << "Computing smoothing error of variable "
-                 << name << endl;
-
-        }
-
-        error_smooth *= n_part;
-
-        if (verbosity > 0)
-          cout << INDENT_STRING << "smoothing error = " << error_smooth
-               << endl;
-
-        errors_smooth_new.push_back(error_smooth);
+  log_norm_const_smc.push_back(log_norm_const);
 
 
-    }
-    }
+  // Compute filter mean error of monitored values
+  //----------------------------------------------
+  Scalar error_filter = 0.0;
+
+  for (Size i = 0; i < monitored_var.size(); ++i)
+  {
+    const String & name = monitored_var[i];
+
+    if (verbosity > 0)
+      cout << PROMPT_STRING << "Computing filtering error of variable "
+           << name << endl;
+
+  }
+
+  error_filter *= n_part;
+
+  if (verbosity > 0)
+    cout << INDENT_STRING << "filtering error = " << error_filter << endl;
+
+  errors_filter_new.push_back(error_filter);
+
+
+  // Run backward smoother
+  //-------------------------------------------------
+  if (do_smooth)
+  {
+    Bool verbose_run_back = verbosity > 1
+                            || (verbosity > 0);
+    if (!console.RunBackwardSmoother(verbose_run_back, verbose_run_back))
+
+    if (verbosity == 1)
+      ++(*p_show_progress);
+
+
   }
 } // fin main
 
