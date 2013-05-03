@@ -1,5 +1,4 @@
 #include "BiipsVersion.hpp"
-#include "storeUnregistered.hpp"
 #include "Console.hpp"
 #include "common/Types.hpp"
 #include "common/DimArray.hpp"
@@ -12,11 +11,6 @@
 #include <ctime>
 #include <map>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/accumulators/statistics/p_square_quantile.hpp>
-#include <boost/math/distributions/students_t.hpp>
 #include <boost/program_options.hpp>
 
 
