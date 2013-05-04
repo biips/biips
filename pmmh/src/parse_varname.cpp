@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <boost/regex.hpp>
-#include <boost/algorithm/string_regex.hpp>
+#include <boost/algorithm/string.hpp>
 using namespace std;
 
 void parse_varname(const string & to_parse,
@@ -9,31 +9,35 @@ void parse_varname(const string & to_parse,
                   vector<size_t> lower,
                   vector<size_t> upper) {
 
+   using boost::regex;
+   using boost::algorithm::split;
+   using boost::is_any_of;
+
    // regexp alpha sequence not beginning with
    // a number followed eventually by some characters,
-   // between bracketds
-   using boost::regex;
-   using boost::regex_match;
-   using boost::cmatch;
-
+   // between brackets
    regex re("(\\D.*[^\\[\\]]){1}(\\[(.+)\\])?");
-   cmatch matches;
+   boost::cmatch matches;
 
-   if (regex_match(to_parse.c_str(), matches, re))
+   if (boost::regex_match(to_parse.c_str(), matches, re))
    {
      var_name = string(matches[1].first, matches[1].second);
      cout << var_name << endl;
+     
      if(matches[3].first !=  matches[3].second){
+        
         string tmp = string(matches[3].first, matches[3].second); 
-        cmatch tmp_match;
-        if (regex_match(tmp.c_str(), tmp_match, regex(".*,.*"))) {
-           vector<string> result;
-           boost::algorithm::split_regex( result, tmp, regex(",") );
-           copy( result.begin(), result.end(), ostream_iterator<string>( cout, "\n" ) ) ;
-        }
-        else if (regex_match(tmp.c_str(), tmp_match, regex("\\d+"))) {
-             cout << string(tmp_match[1].first, tmp_match[1].second)  << endl;
-        }
+        
+        vector<string> result;
+        split(result, tmp, is_any_of(","));
+        lower.resize(result.size());
+        upper.resize(result.size());
+        for( auto & str : result) {
+            vector<string> res2;
+            split(res2, str, is_any_of(":"));
+            copy(res2.begin(),res2.end(), ostream_iterator<string>(cout,"\n"));
+        } 
+
      }
 
    }
