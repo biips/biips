@@ -77,17 +77,3 @@ void parse_varname(const string & to_parse,
       cout << "The regexp \"" << re << "\" does not match \"" << to_parse << "\"" << endl;
    }
 }                  
-
-//int main( ) {
-//
-//   string s, var;
-//   cin >> s;
-//   vector<size_t> lower,upper;
-//   parse_varname(s, var, lower, upper);
-//   cout << var << endl;
-//   for(int i = 0; i < lower.size() ; ++i) {
-//          cout << "lower[" << i << "] = " << lower[i] << endl;
-//          cout << "upper[" << i << "] = " << upper[i] << endl;
-//   }
-//   return 0;
-//}   
