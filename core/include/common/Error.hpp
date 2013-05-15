@@ -38,7 +38,6 @@
 #define BIIPS_ERROR_HPP_
 
 #include <exception>
-
 #include "common/Types.hpp"
 
 //! A macro defining the catch instruction of biips errors

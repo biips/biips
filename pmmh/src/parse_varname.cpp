@@ -3,8 +3,9 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include "include/common/Error.hpp"
 using namespace std;
-
+using namespace Biips;
 void parse_varname(const string & to_parse,
                   string & var_name,
                   vector<size_t> & lower,
@@ -18,7 +19,7 @@ void parse_varname(const string & to_parse,
    // regexp alpha sequence not beginning with
    // a number followed eventually by some characters,
    // between brackets
-   regex re("(\\D.*[^\\[\\]]){1}(\\[([\\d|,|:]+)\\])?", boost::regex::perl);
+   regex re("(\\D[^\\[\\]]*){1}(\\[([\\d|,|:]+)\\])?", boost::regex::perl);
    boost::cmatch matches;
 
    if (boost::regex_match(to_parse.c_str(), matches, re))
@@ -50,7 +51,7 @@ void parse_varname(const string & to_parse,
                       upper[i] = lower[i] = lexical_cast<size_t>(result[i]);
                     }
                     catch (boost::bad_lexical_cast const&) {
-                       cerr << "bad bound conversion number" << endl;
+                       throw RuntimeError("bad bound conversion number in a a:b domaine");
                     }
                 }    
                 // trouve un ":"
@@ -60,12 +61,12 @@ void parse_varname(const string & to_parse,
                       upper[i] = lexical_cast<size_t>(res2[1]);
                     }
                     catch (boost::bad_lexical_cast const&){
-                       cerr << "bad bound conversion number" << endl;
+                       throw RuntimeError("bad bound conversion number in a a:b domaine");
                     }
                     assert(lower[i]<=upper[i]);
                 }
                 else {
-                    cerr << "the domain variable is not correct : to much : between ," << endl;
+                    throw RuntimeError("the domain variable is not correct : to much : between ,");
                 }
             }
         } 
@@ -74,6 +75,7 @@ void parse_varname(const string & to_parse,
    }
    else
    {
-      cout << "The regexp \"" << re << "\" does not match \"" << to_parse << "\"" << endl;
+      string message = to_parse  + string("does not corresponds to a valid variable expression");
+      throw Biips::RuntimeError(message.c_str());
    }
 }                  
