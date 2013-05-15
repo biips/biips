@@ -94,7 +94,7 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-find_package(Boost COMPONENTS program_options)
+find_package(Boost COMPONENTS program_options regex exception)
 if(Boost_FOUND)
   set(EXTRA_LIBS ${Boost_LIBRARIES})
 else()
