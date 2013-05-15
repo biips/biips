@@ -33,8 +33,8 @@ file (GLOB SOURCE_FILES
 set (BIIPS_LIBS	BiipsCompiler BiipsBase BiipsCore)
 
 # add the executable
-add_executable(BiipsTestCompiler ${SOURCE_FILES})
-target_link_libraries(BiipsTestCompiler ${BIIPS_LIBS} ${EXTRA_LIBS})
+add_executable(${EXE_NAME} ${SOURCE_FILES})
+target_link_libraries(${EXE_NAME} ${BIIPS_LIBS} ${EXTRA_LIBS})
 # add subdirectories
 add_subdirectory(benchmarks)
 add_subdirectory(model)
