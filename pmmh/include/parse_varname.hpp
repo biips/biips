@@ -5,10 +5,10 @@
 
 using namespace std;
 
-void parse_varname(const string & to_parse,
-                  string & var_name,
-                  vector<size_t> & lower,
-                  vector<size_t> & upper);
+void parse_one_varname(const string & to_parse,
+                       string & var_name,
+                       vector<size_t> & lower,
+                       vector<size_t> & upper);
 
                   
 #endif
