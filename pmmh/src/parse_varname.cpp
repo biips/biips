@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include "include/common/Error.hpp"
+
 using namespace std;
 using namespace Biips;
 
@@ -83,3 +84,17 @@ void parse_one_varname(const string & to_parse,
       throw Biips::RuntimeError(message.c_str());
    }
 }                  
+
+void parse_varnames(const vector<string> & to_parse,
+                   vector<string> & var_names,
+                   vector<vector<size_t> > & lower,
+                   vector<vector<size_t> > & upper) {
+     
+     var_names.resize(to_parse.size());
+     lower.resize(to_parse.size());
+     upper.resize(to_parse.size());
+     
+     for(int i = 0; i < to_parse.size(); ++i) 
+         parse_one_varname(to_parse[i], var_names[i], lower[i], upper[i]);
+}
+
