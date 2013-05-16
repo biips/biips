@@ -10,5 +10,9 @@ void parse_one_varname(const string & to_parse,
                        vector<size_t> & lower,
                        vector<size_t> & upper);
 
+void parse_varnames(const vector<string> & to_parse,
+                   vector<string> & var_names,
+                   vector<vector<size_t> > & lower,
+                   vector<vector<size_t> > & upper); 
                   
 #endif

@@ -126,8 +126,6 @@ IndexRange makeRange(const mxArray * lower, const mxArray * upper)
   if (lowerSize != upperSize)
     throw LogicError("length mismatch between lower and upper limits");
 
-
-
   IndexRange::Indices lind(mxGetPr(lower), mxGetPr(lower) + lowerSize);
   IndexRange::Indices uind(mxGetPr(upper), mxGetPr(upper) + upperSize);
 
