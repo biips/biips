@@ -6,7 +6,8 @@
 #include "include/common/Error.hpp"
 using namespace std;
 using namespace Biips;
-void parse_varname(const string & to_parse,
+
+void parse_one_varname(const string & to_parse,
                   string & var_name,
                   vector<size_t> & lower,
                   vector<size_t> & upper) {
@@ -59,6 +60,9 @@ void parse_varname(const string & to_parse,
                     try {
                       lower[i] = lexical_cast<size_t>(res2[0]);
                       upper[i] = lexical_cast<size_t>(res2[1]);
+                      if (lower[i] > upper[i])
+                       throw RuntimeError("a must be strictly less than b in a  a:b domaine");
+                    
                     }
                     catch (boost::bad_lexical_cast const&){
                        throw RuntimeError("bad bound conversion number in a a:b domaine");
@@ -75,7 +79,7 @@ void parse_varname(const string & to_parse,
    }
    else
    {
-      string message = to_parse  + string("does not corresponds to a valid variable expression");
+      string message = to_parse  + string("does not correspond to a valid variable expression");
       throw Biips::RuntimeError(message.c_str());
    }
 }                  
