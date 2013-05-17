@@ -22,12 +22,13 @@ namespace Biips
                   const string & resample_type = "stratified",
                   size_t init_rng_seed):
                   _console_ptr(console_ptr),
-                  _latent_names(param_names),
+                  _param_names(param_names),
+                  _latent_names(latent_names),
                   _init_values(init_values),
                   _nb_particles(nb_particles),
                   _resample_threshold(resample_threshold),
                   _resample_type(resample_type),
-                  _init_rnd_seed(init_rng_seed){ post_init();}
+                  _init_rng_seed(init_rng_seed){ post_init();}
          
        
              void update(size_t n_iter);
@@ -45,6 +46,8 @@ namespace Biips
              string _resample_type = "stratified";
              size_t _init_rng_seed;
              MultiArray data;
+             map<String, MultiArray> _sampled_value_map;
+             
 
              // prevent to copy a pmmh
              Pmmh(const Pmmh &);
