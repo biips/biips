@@ -36,12 +36,12 @@ namespace Biips {
             auto p_val = new ValArray(r_vec_nb_elems);
             replace_copy(r_vec ,r_vec + r_vec_nb_elems, p_val->begin(), numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
             marray.SetPtr(p_dim, p_val);
-            _console_ptr->ChangeData(param_varnames[i], range, marray, mcmc, VERBOSITY);
+            _console.ChangeData(param_varnames[i], range, marray, mcmc, VERBOSITY);
         
             // log prior density 
             double log_p;
             string message1 = "for variable " + parse_varnames[i] + "cannot compute log prior";
-            if (!_console_ptr->GetLogPriorDensity(log_p, param_varnames[i], range))
+            if (!_console.GetLogPriorDensity(log_p, param_varnames[i], range))
                throwLogicError(message1.c_str());
             string message2 = "variable " + parse_varnames[i] + " has a NaN log_prior";
             if (isnan(log_p))
@@ -62,30 +62,30 @@ namespace Biips {
             IndexRange::Indices uind(latent_upper[i].begin(), latent_upper[i].end());
             auto latent_range = IndexRange(lind, uind);
             
-            if (!_console_ptr->IsGenTreeSmoothMonitored(latent_varnames[i], latent_range, false)) {
-                _console_ptr->SetGenTreeSmoothMonitor(latent_varnames[i], latent_range);
+            if (!_console.IsGenTreeSmoothMonitored(latent_varnames[i], latent_range, false)) {
+                _console.SetGenTreeSmoothMonitor(latent_varnames[i], latent_range);
                 latent_monitored = false; 
             }
         }
 
     
 
-        if (!_console_ptr->SamplerBuilt()) {
-           _console_ptr->BuildSampler(false, VERBOSITY);
+        if (!_console.SamplerBuilt()) {
+           _console.BuildSampler(false, VERBOSITY);
         }
 
-        bool sampler_at_end = _console_ptr->ForwardSamplerAtEnd();
+        bool sampler_at_end = _console.ForwardSamplerAtEnd();
 
         // run smc
         if (!sampler_at_end || !latent_monitored) {
             if (!sampler_at_end) {
-                if (!_console_ptr->RunForwardSampler(_nb_particles, _init_rng_seed, 
+                if (!_console.RunForwardSampler(_nb_particles, _init_rng_seed, 
                                                     _resample_type, _resample_threshold, VERBOSITY, false);
             }
         }
        
         double log_marg_like;
-        if (!console_ptr->GetLogNormConst(log_marg_like))
+        if (!console.GetLogNormConst(log_marg_like))
              throw RuntimeError("Failed to get log normalizing constant.");
          
         if (isnan(log_marg_like))
@@ -100,7 +100,7 @@ namespace Biips {
             
             if(_sampled_value_map.size() == 0) {
                   int rng_seed = 42;
-                  _console_ptr->SampleGenTreeSmoothParticle(rng_seed);
+                  _console.SampleGenTreeSmoothParticle(rng_seed);
                   if(!p_console->DumpSampledGenTreeSmoothParticle(_sampled_value_map))
                     throw RuntimeError("Failed to get sampled smooth particle.");
             }
