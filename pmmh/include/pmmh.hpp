@@ -13,7 +13,7 @@ namespace Biips
     class Pmmh {
          public: 
           
-             Pmmh(Console * console_ptr,
+             Pmmh(Console & console,
                   vector<string> & param_names,
                   vector<string> & latent_names,
                   vector<MultiArray> & init_values,
@@ -21,7 +21,7 @@ namespace Biips
                   double resample_threshold = 0.5,
                   const string & resample_type = "stratified",
                   size_t init_rng_seed):
-                  _console_ptr(console_ptr),
+                  _console(console),
                   _param_names(param_names),
                   _latent_names(latent_names),
                   _init_values(init_values),
@@ -37,7 +37,7 @@ namespace Biips
 
           protected:
 
-             Console * _console_ptr;
+             Console & _console;
              vector<string> _param_names;
              vector<string> _latent_names;
              vector<MultiArray> _init_values;
