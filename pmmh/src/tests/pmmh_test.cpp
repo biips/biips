@@ -4,6 +4,7 @@
 #include "include/common/Error.hpp"
 #include <boost/assign/list_of.hpp>
 #include <iostream>
+
 using namespace std;
 using namesspace Biips;
 
@@ -13,7 +14,7 @@ struct nireFixture {
     nireFixture() {
         map<String, MultiArray> data_map;
 
-        string data_file_name = ""
+        string data_file_name = "data_jags.R"
         string model_file_name = "hmm_1d_nonlin_param.bug"
 
         ifstream ifs_dump(data_file_name.c_str());
@@ -35,9 +36,9 @@ struct nireFixture {
             if (dump_reader.has_na())
             {
               val_ptr->resize(dump_reader.int_values().size());
-              std::replace_copy(dump_reader.int_values().begin(),
-                                dump_reader.int_values().end(), val_ptr->begin(),
-                                Scalar(BIIPS_INTNA), BIIPS_REALNA);
+              replace_copy(dump_reader.int_values().begin(),
+                           dump_reader.int_values().end(), val_ptr->begin(),
+                           Scalar(BIIPS_INTNA), BIIPS_REALNA);
             }
             else
             {
@@ -84,22 +85,18 @@ struct nireFixture {
 
         vector<string> param_names = list_of("log_prec_y").to_adapter();
         
-
-
      } 
-
-
 }
 
 BOOST_FIXTURE_TEST_SUITE(s, nireFixture)
 
-//BOOST_AUTO_TEST_CASE(constructeur) {
-//
-//   Pmmh pmm1(&console,
-//                     
-//
-//
-//
-//
-//}
+BOOST_AUTO_TEST_CASE(constructeur) {
+
+   Pmmh pmm1(console,
+                     
+
+
+
+
+}
 BOOST_AUTO_TEST_SUITE_END()
