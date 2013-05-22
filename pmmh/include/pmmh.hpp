@@ -20,7 +20,7 @@ namespace Biips
                   int nb_particles,
                   double resample_threshold = 0.5,
                   const string & resample_type = "stratified",
-                  size_t init_rng_seed):
+                  size_t init_rng_seed = 42):
                   _console(console),
                   _param_names(param_names),
                   _latent_names(latent_names),
@@ -42,8 +42,8 @@ namespace Biips
              vector<string> _latent_names;
              vector<MultiArray> _init_values;
              int _nb_particles;
-             double _resample_threshold = 0.5;
-             string _resample_type = "stratified";
+             double _resample_threshold;
+             string _resample_type;
              size_t _init_rng_seed;
              MultiArray data;
              map<String, MultiArray> _sampled_value_map;

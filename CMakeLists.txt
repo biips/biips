@@ -26,7 +26,7 @@ set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
 
 file (WRITE Description.txt ${Biips_DESCRIPTION})
 if (UNIX)
-   add_definitions(-fPIC)
+   add_definitions(-fPIC -Wfatal-errors)
 endif(UNIX)	
 
 
