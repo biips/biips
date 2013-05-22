@@ -3,20 +3,23 @@
 #include "pmmh.hpp"
 #include "include/common/Error.hpp"
 #include <boost/assign/list_of.hpp>
+#include "iostream/DumpReader.hpp"
 #include <iostream>
 
 using namespace std;
-using namesspace Biips;
-
+using namespace Biips;
+using namespace boost::assign;
 
 struct nireFixture {
 
-    nireFixture() {
+    nireFixture(): 
+        console(Console(cout, cerr)) {
         map<String, MultiArray> data_map;
 
-        string data_file_name = "data_jags.R"
-        string model_file_name = "hmm_1d_nonlin_param.bug"
+        string data_file_name = "data_jags.R";
+        string model_file_name = "hmm_1d_nonlin_param.bug";
 
+        Size verbosity = 2;
         ifstream ifs_dump(data_file_name.c_str());
         if (ifs_dump.fail())
           throw RuntimeError(String("Failed to open file ") + data_file_name);
@@ -66,7 +69,6 @@ struct nireFixture {
         }
         // Make a console
         // ------------------
-        Console console(cout, cerr);
 
         // Check model syntax
         // ------------------
@@ -83,20 +85,29 @@ struct nireFixture {
 
         data_rng_seed = 42;
 
-        vector<string> param_names = list_of("log_prec_y").to_adapter();
-        
-     } 
-}
+        vector<string> param_names = list_of("log_prec_y");
+        vector<MultiArray> init_values = list_of(MultiArray(0.));
+        size_t nb_particles = 100;
+   } 
+
+   Console console;
+   vector<string> param_names;
+   vector<string> latent_names; 
+   vector<MultiArray> init_values; 
+   size_t nb_particles;
+   int data_rng_seed; 
+
+};
 
 BOOST_FIXTURE_TEST_SUITE(s, nireFixture)
 
 BOOST_AUTO_TEST_CASE(constructeur) {
 
    Pmmh pmm1(console,
-                     
-
-
-
+             param_names,
+             latent_names,
+             init_values,
+             nb_particles); 
 
 }
 BOOST_AUTO_TEST_SUITE_END()

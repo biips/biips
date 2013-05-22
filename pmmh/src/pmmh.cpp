@@ -1,11 +1,14 @@
 #include "pmmh.hpp"
-
+#include "parse_varname.hpp"
+#include "boost/typeof/typeof.hpp"
 namespace Biips {
 
     void Pmmh::post_init(void) {
   
         vector<vector<size_t> > param_lower, param_upper;
         vector<string> param_varnames;
+
+        Size VERBOSITY = 2;
 
         parse_varnames(_param_names, param_varnames, param_lower, param_upper); 
      
@@ -23,29 +26,30 @@ namespace Biips {
 
             IndexRange::Indices lind(param_lower[i].begin(), param_lower[i].end());
             IndexRange::Indices uind(param_upper[i].begin(), param_upper[i].end());
-            auto range = IndexRange(lind, uind);
+            BOOST_AUTO(range, IndexRange(lind, uind));
             
-            Multiarray marray;
-            auto ndims = _init_values[i].NDim():
-            auto dims = _init_values[i].DimPtr();
-            auto r_vec =  _init_values[i].ValuesPtr(); 
+            MultiArray marray;
+            Size ndims = _init_values[i].NDim();
+            BOOST_AUTO(dims, _init_values[i].Dim());
+            BOOST_AUTO(r_vec, _init_values[i].Values()); 
             
-            auto p_dim = new DimArray(ndims);
-            copy(dims, dims + ndims , p_dim->begin());
+            DimArray::Ptr p_dim (new DimArray(ndims));
+            copy(dims.begin(), dims.end(), p_dim->begin());
 
-            auto p_val = new ValArray(r_vec_nb_elems);
-            replace_copy(r_vec ,r_vec + r_vec_nb_elems, p_val->begin(), numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
+            Size r_vec_nb_elems = _init_values[i].Length();
+            ValArray::Ptr p_val (new ValArray(r_vec_nb_elems));
+            replace_copy(r_vec.begin() ,r_vec.end(), p_val->begin(), numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
             marray.SetPtr(p_dim, p_val);
             _console.ChangeData(param_varnames[i], range, marray, mcmc, VERBOSITY);
         
             // log prior density 
             double log_p;
-            string message1 = "for variable " + parse_varnames[i] + "cannot compute log prior";
+            string message1 = string("for variable ") + param_varnames[i] + string("cannot compute log prior");
             if (!_console.GetLogPriorDensity(log_p, param_varnames[i], range))
-               throwLogicError(message1.c_str());
-            string message2 = "variable " + parse_varnames[i] + " has a NaN log_prior";
+               throw LogicError(message1.c_str());
+            string message2 = string("variable ") + param_varnames[i] + string(" has a NaN log_prior");
             if (isnan(log_p))
-               throw LogicalError(message2.c_str());
+               throw LogicError(message2.c_str());
             log_prior += log_p;
         }
         // latent_names
@@ -60,7 +64,7 @@ namespace Biips {
             
             IndexRange::Indices lind(latent_lower[i].begin(), latent_lower[i].end());
             IndexRange::Indices uind(latent_upper[i].begin(), latent_upper[i].end());
-            auto latent_range = IndexRange(lind, uind);
+            BOOST_AUTO(latent_range, IndexRange(lind, uind));
             
             if (!_console.IsGenTreeSmoothMonitored(latent_varnames[i], latent_range, false)) {
                 _console.SetGenTreeSmoothMonitor(latent_varnames[i], latent_range);
@@ -80,12 +84,13 @@ namespace Biips {
         if (!sampler_at_end || !latent_monitored) {
             if (!sampler_at_end) {
                 if (!_console.RunForwardSampler(_nb_particles, _init_rng_seed, 
-                                                    _resample_type, _resample_threshold, VERBOSITY, false);
+                                                    _resample_type, _resample_threshold, VERBOSITY, false))
+                   throw RuntimeError("Failed to run forward sampler");
             }
         }
        
         double log_marg_like;
-        if (!console.GetLogNormConst(log_marg_like))
+        if (!_console.GetLogNormConst(log_marg_like))
              throw RuntimeError("Failed to get log normalizing constant.");
          
         if (isnan(log_marg_like))
@@ -95,13 +100,13 @@ namespace Biips {
    
         if (latent_varnames.size() > 0) {
             
-            if(!p_console->DumpSampledGenTreeSmoothParticle(_sampled_value_map))
+            if(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map))
               throw RuntimeError("Failed to get sampled smooth particle.");
             
             if(_sampled_value_map.size() == 0) {
                   int rng_seed = 42;
                   _console.SampleGenTreeSmoothParticle(rng_seed);
-                  if(!p_console->DumpSampledGenTreeSmoothParticle(_sampled_value_map))
+                  if(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map))
                     throw RuntimeError("Failed to get sampled smooth particle.");
             }
         }

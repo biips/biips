@@ -99,6 +99,20 @@ namespace Biips
     MultiArray()
     {
     }
+    
+    /*!
+     * Creates a MultiArray corresponding to a Scalar value,
+     * with dimension equal to one
+     * @param value : the value store in r
+     */
+    explicit MultiArray(const Scalar & value):
+      pDim_(new DimArray(1)),
+      pValues_(new ValArray()){
+      (*pDim_)[0] = 1;
+      (*pValues_)[0] = value;
+    }
+    
+    
     /*!
      * Creates a MultiArray with DimArray pointed by pDim
      * and ValArray pointed by pValue.
@@ -250,7 +264,7 @@ namespace Biips
       pValues_ = pVal;
       return *this;
     }
-    SelfType & SetPtr(const DimArray::Ptr pDim, const StorageType::Ptr & pVal)
+    SelfType & SetPtr(const DimArray::Ptr & pDim, const StorageType::Ptr & pVal)
     {
       pDim_ = pDim;
       pValues_ = pVal;
