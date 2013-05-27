@@ -36,5 +36,5 @@ set(pmmh_test_files ${current_pmm}/tests/pmmh_test.cpp ${current_pmm}/pmmh.cpp $
 add_executable(pmmh_test ${pmmh_test_files})
 target_link_libraries(pmmh_test ${EXTRA_LIBS} ${BIIPS_LIBS})
 get_target_property(exe_loc pmmh_test LOCATION)
+file(COPY data_jags.R hmm_1d_nonlin_param.bug DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME pmmh_test COMMAND ${exe_loc})
-
