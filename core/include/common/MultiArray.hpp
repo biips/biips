@@ -107,7 +107,7 @@ namespace Biips
      */
     explicit MultiArray(const Scalar & value):
       pDim_(new DimArray(1)),
-      pValues_(new ValArray()){
+      pValues_(new ValArray(1)){
       (*pDim_)[0] = 1;
       (*pValues_)[0] = value;
     }
