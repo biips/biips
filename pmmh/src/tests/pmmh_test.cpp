@@ -13,7 +13,8 @@ using namespace boost::assign;
 struct nireFixture {
 
     nireFixture(): 
-        console(Console(cout, cerr)) {
+        console(Console(cout, cerr))
+        {
         map<String, MultiArray> data_map;
 
         string data_file_name = "data_jags.R";
@@ -82,19 +83,23 @@ struct nireFixture {
 
         // Compile model
         // ------------------
-
         data_rng_seed = 42;
+        if (!console.Compile(data_map, false, data_rng_seed, verbosity))
+           throw RuntimeError("Failed to compile model.");
+        
+        
+        param_names.push_back("log.prec.y");
+        init_values.push_back(MultiArray(0.));
+        nb_particles = 100;
 
-        vector<string> param_names = list_of("log_prec_y");
-        vector<MultiArray> init_values = list_of(MultiArray(0.));
-        size_t nb_particles = 100;
+
    } 
 
    Console console;
    vector<string> param_names;
-   vector<string> latent_names; 
    vector<MultiArray> init_values; 
    size_t nb_particles;
+   vector<string> latent_names; 
    int data_rng_seed; 
 
 };
@@ -103,6 +108,7 @@ BOOST_FIXTURE_TEST_SUITE(s, nireFixture)
 
 BOOST_AUTO_TEST_CASE(constructeur) {
 
+   int z =12;
    Pmmh pmm1(console,
              param_names,
              latent_names,
