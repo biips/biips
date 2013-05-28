@@ -47,7 +47,7 @@ namespace Biips
              size_t _init_rng_seed;
              MultiArray data;
              map<String, MultiArray> _sampled_value_map;
-             
+             size_t params_total_size; 
 
              // prevent to copy a pmmh
              Pmmh(const Pmmh &);
