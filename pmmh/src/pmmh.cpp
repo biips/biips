@@ -1,6 +1,8 @@
 #include "pmmh.hpp"
 #include "parse_varname.hpp"
 #include "boost/typeof/typeof.hpp"
+#include "boost/lambda/lambda.hpp"
+#include "boost/range/numeric.hpp"
 namespace Biips {
 
     void Pmmh::post_init(void) {
@@ -18,11 +20,15 @@ namespace Biips {
         // loop on parameters
         // we copy the init_values into the smc
         double log_prior = 0.;
+        params_total_size = 0;
         for(int i = 0; i < param_varnames.size() ;  ++i) {
               
             // a remplacer
             int VERBOSITY = 2;
             Bool mcmc = false;
+
+            // calcul de la taille totale du vecteur de parametres
+            params_total_size += _init_values[i].Length();
 
             IndexRange::Indices lind(param_lower[i].begin(), param_lower[i].end());
             IndexRange::Indices uind(param_upper[i].begin(), param_upper[i].end());
@@ -72,8 +78,6 @@ namespace Biips {
             }
         }
 
-    
-
         if (!_console.SamplerBuilt()) {
            _console.BuildSampler(false, VERBOSITY);
         }
@@ -111,4 +115,25 @@ namespace Biips {
             }
         }
     } // fin Pmmh::pos_init
-}
+
+   void one_update(const vector<double> & sample) {
+
+      //int fails = 0;
+      //size_t & d = params_total_size;
+      //vector<double> param_vec(d), prop(d);
+      //double coef = 2.38 / sqrt(d) * exp( 
+      //for (auto i : irange(0,d))
+      //       prop[i] = sample[i] + 2.
+      //
+      // version avec composantes independantes
+      
+
+   }
+
+
+
+} // fin namespace Biips
+
+
+
+

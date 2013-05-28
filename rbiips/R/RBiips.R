@@ -343,6 +343,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   d <- length(sample_vec)
                   if (rw$adapt || length(rw$cov_chol) == 0) {
+                    # modification with independent components
                     prop_vec <- sample_vec + 2.38/sqrt(d) * exp(rw$lstep) * rnorm(d)
                   } else {
                     prop_vec <- sample_vec + 2.38/sqrt(d) * rw$cov_chol %*% rnorm(d)
