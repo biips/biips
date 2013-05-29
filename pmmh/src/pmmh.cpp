@@ -3,6 +3,12 @@
 #include "boost/typeof/typeof.hpp"
 #include "boost/lambda/lambda.hpp"
 #include "boost/range/numeric.hpp"
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/range/irange.hpp>
+#include <cmath>
+using namespace boost;
+
 namespace Biips {
 
     void Pmmh::post_init(void) {
@@ -20,7 +26,7 @@ namespace Biips {
         // loop on parameters
         // we copy the init_values into the smc
         double log_prior = 0.;
-        params_total_size = 0;
+        _params_total_size = 0;
         for(int i = 0; i < param_varnames.size() ;  ++i) {
               
             // a remplacer
@@ -28,7 +34,7 @@ namespace Biips {
             Bool mcmc = false;
 
             // calcul de la taille totale du vecteur de parametres
-            params_total_size += _init_values[i].Length();
+            _params_total_size += _init_values[i].Length();
 
             IndexRange::Indices lind(param_lower[i].begin(), param_lower[i].end());
             IndexRange::Indices uind(param_upper[i].begin(), param_upper[i].end());
@@ -47,19 +53,21 @@ namespace Biips {
             replace_copy(r_vec.begin() ,r_vec.end(), p_val->begin(), numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
             marray.SetPtr(p_dim, p_val);
             _console.ChangeData(param_varnames[i], range, marray, mcmc, VERBOSITY);
-        
+            _sampled_value_map[param_varnames[i]] = marray;
+
             // log prior density 
             double log_p;
             string message1 = string("for variable ") + param_varnames[i] + string("cannot compute log prior");
             if (!_console.GetLogPriorDensity(log_p, param_varnames[i], range))
                throw LogicError(message1.c_str());
             string message2 = string("variable ") + param_varnames[i] + string(" has a NaN log_prior");
-            if (isnan(log_p))
+            if (std::isnan(log_p))
                throw LogicError(message2.c_str());
             log_prior += log_p;
         }
         // latent_names
 
+        _lstep.resize(_params_total_size, log(0.1)); 
         vector<vector<size_t> > latent_lower, latent_upper;
         vector<string> latent_varnames;
 
@@ -97,9 +105,9 @@ namespace Biips {
         if (!_console.GetLogNormConst(log_marg_like))
              throw RuntimeError("Failed to get log normalizing constant.");
          
-        if (isnan(log_marg_like))
+        if (std::isnan(log_marg_like))
              throw RuntimeError("Failed to get log marginal likelihood: NaN.");
-        if (isinf(log_marg_like))
+        if (std::isinf(log_marg_like))
              throw RuntimeError("Failed to get log marginal likelihood: infinite value.");
    
         if (latent_varnames.size() > 0) {
@@ -114,18 +122,29 @@ namespace Biips {
                     throw RuntimeError("Failed to get sampled smooth particle.");
             }
         }
+        int v = 15;
     } // fin Pmmh::pos_init
 
-   void one_update(const vector<double> & sample) {
+   void Pmmh::one_step_update() {
 
-      //int fails = 0;
-      //size_t & d = params_total_size;
-      //vector<double> param_vec(d), prop(d);
-      //double coef = 2.38 / sqrt(d) * exp( 
-      //for (auto i : irange(0,d))
-      //       prop[i] = sample[i] + 2.
-      //
+      int fails = 0;
+      size_t & d = _params_total_size;
+      vector<double> param_vec(d), prop(d), rnorm(d);
+      double coef = 2.38 / sqrt(d);  
+      
+      random::mt19937 mt;
+      normal_distribution<double> norm_dist;
+      variate_generator<random::mt19937 & , normal_distribution<double> > norm_gen(mt, norm_dist);
       // version avec composantes independantes
+      for (int i = 0; i < d; ++i)
+             prop[i] = _sample[i] + coef * exp(_lstep[i]) * norm_gen();
+             
+      //if (find_if(prop, std::isnan))
+      //   throw RuntimeError("PMMH proposal have NAN values");
+         
+     double log_prior_prop = 0;
+
+      
       
 
    }
