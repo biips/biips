@@ -45,10 +45,12 @@ namespace Biips
              double _resample_threshold;
              string _resample_type;
              size_t _init_rng_seed;
-             MultiArray data;
+             MultiArray _data;
              map<String, MultiArray> _sampled_value_map;
-             size_t params_total_size; 
-
+             
+             size_t _params_total_size; 
+             vector<double> _sample;
+             vector<double> _lstep;
              // prevent to copy a pmmh
              Pmmh(const Pmmh &);
 
