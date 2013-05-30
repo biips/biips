@@ -270,6 +270,10 @@ namespace Biips
       pValues_ = pVal;
       return *this;
     }
+    /*!
+     * this method is useful to copy by value a MultiArray
+     * @return A copy of the MultiArray (same Values, same Dimensions)
+     */
 
     MultiArray Clone() const
     {
