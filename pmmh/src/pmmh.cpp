@@ -29,7 +29,7 @@ namespace Biips {
         double log_prior = 0.;
         _params_total_size = 0;
         
-        for(i = 0; i < param_varnames.size() ;  ++i) {
+        for(int i = 0; i < param_varnames.size() ;  ++i) {
               
             // a remplacer
             int VERBOSITY = 2;
@@ -46,7 +46,10 @@ namespace Biips {
             MultiArray marray;
             Size ndims = _init_values[i].NDim();
             BOOST_AUTO(dims, _init_values[i].Dim());
-            BOOST_AUTO(r_vec, _init_values[i].Values()); 
+            BOOST_AUTO(r_vec, _init_values[i].Values());        f
+        
+}
+
             
             DimArray::Ptr p_dim (new DimArray(ndims));
             copy(dims.begin(), dims.end(), p_dim->begin());
@@ -61,8 +64,8 @@ namespace Biips {
             // a verifier si pas trop long
             _proposal[var_name] = marray.Clone();
             _l_step[var_name] = marray.Clone();
-            _lstep[var_name] = marray.Clone();
-            _step[var_name].Values().assign(marray.Length(), log(0.1));
+            _l_step[var_name] = marray.Clone();
+            _l_step[var_name].Values().assign(marray.Length(), log(0.1));
 
 
             // log prior density 
@@ -71,7 +74,7 @@ namespace Biips {
             string message1 = string("for variable ") + var_name + string("cannot compute log prior");
             if (!_console.GetLogPriorDensity(log_p, var_name, range)) throw LogicError(message1.c_str());
             
-            string message2 = string("variable ") + varname + string(" has a NaN log_prior");
+            string message2 = string("variable ") + var_name + string(" has a NaN log_prior");
             if (std::isnan(log_p)) throw LogicError(message2.c_str());
             
             log_prior += log_p;
@@ -139,33 +142,32 @@ namespace Biips {
         int v = 15;
     } // fin Pmmh::pos_init
 
-   void Pmmh::one_step_update() {
+   //void Pmmh::one_step_update() {
 
-      int fails = 0;
-      size_t & d = _params_total_size;
-      double coef = 2.38 / sqrt(d);  
-      
-      random::mt19937 mt;
-      normal_distribution<double> norm_dist;
-      variate_generator<random::mt19937 & , normal_distribution<double> > norm_gen(mt, norm_dist);
-      
-      
-      // version avec composantes independantes
-      for (int i = 0; i < param_names.size(); ++i) {
-             auto param = _sampled_value_map[param_names[i]].second;
-             auto ptr = param.Values();
-             for(int j = 0; j < param.Length() ; ++j) {
-              prop[j] = ptr[i] + coef * exp(_lstep[i]) * norm_gen();
-      }
-      }           
-         throw RuntimeError("PMMH proposal have NAN values");
-         
-      double log_prior_prop = 0;
+   //   int fails = 0;
+   //   size_t & d = _params_total_size;
+   //   double coef = 2.38 / sqrt(d);  
+   //   
+   //   random::mt19937 mt;
+   //   normal_distribution<double> norm_dist;
+   //   variate_generator<random::mt19937 & , normal_distribution<double> > norm_gen(mt, norm_dist);
+   //   
+   //   
+   //   // version avec composantes independantes
+   //   for (int i = 0; i < params_varnames.size(); ++i) {
+   //          auto param = _sampled_value_map[params_varnames[i]].second;
+   //          auto ptr = param.Values();
+   //   //       for(int j = 0; j < param.Length() ; ++j) {
+   //   //        prop[j] = ptr[i] + coef * exp(_lstep[i]) * norm_gen();
+   //   //}
+   //   }           
+   //      
+   //   double log_prior_prop = 0;
 
-      
-      
+   //   
+   //   
 
-   }
+   //}
 
 
 
