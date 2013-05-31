@@ -28,14 +28,24 @@ namespace Biips
                   _nb_particles(nb_particles),
                   _resample_threshold(resample_threshold),
                   _resample_type(resample_type),
-                  _init_rng_seed(init_rng_seed){ post_init();}
+                  _init_rng_seed(init_rng_seed),
+                  _pmean(0),
+                  _n_iter(0),
+                  _VERBOSITY(2)
+                  { post_init(); }
          
        
              void update(size_t n_iter);
 
              ~Pmmh(void) {}
 
-          protected:
+             // this function realizes one step of the pmmh algorithm
+             // ie, it apply the selection of one proposal, after
+             // evaluating his likelyhood trought the smc.
+             
+             void one_step_update(void);
+
+           protected:
 
              Console & _console;
              vector<string> _param_names;
@@ -45,18 +55,34 @@ namespace Biips
              double _resample_threshold;
              string _resample_type;
              size_t _init_rng_seed;
-             MultiArray _data;
+             double _pmean;
+             size_t _n_iter;
+             Size _VERBOSITY;
+             
+             double _log_marg_like;
+             double _log_prior;
+             
+             
+             vector<string> _param_varnames,
+                            _latent_varnames;
+             
+             vector<vector<size_t> > _param_lower, 
+                                     _param_upper,
+                                     _latent_lower, 
+                                     _latent_upper;
+             
+             
              map<String, MultiArray> _sampled_value_map,
                                      _l_step,
                                      _proposal;
              
              size_t _params_total_size; 
-             // prevent to copy a pmmh
+            
+            // prevent to copy a pmmh
              Pmmh(const Pmmh &);
 
              void post_init(void); 
 
-             void one_step_update(void);
     };
 }
 #endif
