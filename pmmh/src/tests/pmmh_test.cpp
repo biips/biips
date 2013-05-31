@@ -5,6 +5,7 @@
 #include <boost/assign/list_of.hpp>
 #include "iostream/DumpReader.hpp"
 #include <iostream>
+#include <map>
 
 using namespace std;
 using namespace Biips;
@@ -108,12 +109,16 @@ BOOST_FIXTURE_TEST_SUITE(s, nireFixture)
 
 BOOST_AUTO_TEST_CASE(constructeur) {
 
-   int z =12;
    Pmmh pmm1(console,
              param_names,
              latent_names,
              init_values,
              nb_particles); 
 
+   for(int i = 0; i < 10; ++i) {
+       pmm1.one_step_update();
+   }
 }
+
+
 BOOST_AUTO_TEST_SUITE_END()
