@@ -140,7 +140,7 @@ namespace Biips {
         }
     } // fin Pmmh::pos_init
    
-   void Pmmh::one_step_update() {
+   bool Pmmh::one_step_update() {
 
       size_t & d = _params_total_size;
       double coef = 2.38 / sqrt(d);  
@@ -205,8 +205,8 @@ namespace Biips {
 
    variate_generator<random::mt19937 & , uniform_real<> > unif_gen(mt, uniform_real<>());
 
-   // on accepte la proposal
-   if (unif_gen() < acceptance_rate) {
+   bool accept = unif_gen() < acceptance_rate;
+   if (accept) {
 
        for (auto & m : _sampled_value_map) {
                // sample <- prop
@@ -229,13 +229,43 @@ namespace Biips {
    } // fin proposal accepte
 
    // rescale step
-   _pmean += 2 * (std::min(acceptance_rate, 1.) - _pmean) / _n_iter;
+   double p_modif = std::min(acceptance_rate, 1.); 
+   _pmean += 2 * (p_modif - _pmean) / _n_iter;
    _n_iter++;
 
+   if (_adapt) {
+      double modif = (p_modif - _target_prob)/ _cross_target;
+      for(auto & s : _param_varnames) {
+          ValArray & step = _l_step[s].Values();
+          step += modif;
+      }
+      if ( (p_modif > _target_prob) != _pover_target) {
+           _pover_target = ! _pover_target; // a expliquer ca fait un peu magie noire
+           _cross_target++;
+      }
+   }
+
+   // penser a rajouter le code concernant la covariance avec le proposal
+   // 
+   return accept;
 } // fin one_update
 
+   void Pmmh::update(size_t nb_iter) {
+
+      // think to count acceptations
+      size_t accept_count = 0;
+      for(int i = 0; i < nb_iter; ++i) {
+         if (one_step_update()) accept_count++;
+      }     
+
+      // no more need to adapt, just burn!
+      if (abs(log(_pmean / (1. - _pmean)) - log( _target_prob/ (1. - _target_prob))) < 0.5)
+          _adapt = false;
+
+
+   }
+
+
+
 } // fin namespace Biips
-
-
-
 

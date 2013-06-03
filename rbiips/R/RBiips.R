@@ -191,7 +191,9 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                 pmean=0,
                 lstep=log(0.1),
                 targetprob=0.234, # Target acceptance probability. The default seems to
-                # be a fairly robust optimal value.
+                # be a fairly robust optimal value. Comes From (Rosenthal 2009, Examples 
+                #of Adaptives MCMC, p 16. Beware , in one-dimensional case, 
+                # it would be better to take ~0.44 
                 povertarget=FALSE,
                 ncrosstarget=10, #The value ncrosstarget controls the reduction in the step size when rescale is
                 #called. There is no reason to give it an initial value of zero. In

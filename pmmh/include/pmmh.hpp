@@ -31,7 +31,11 @@ namespace Biips
                   _init_rng_seed(init_rng_seed),
                   _pmean(0),
                   _n_iter(0),
-                  _VERBOSITY(2)
+                  _VERBOSITY(2),
+                  _pover_target(false),
+                  _target_prob(0.234), // cf Rosenthal
+                  _cross_target(10),
+                  _adapt(true)
                   { post_init(); }
          
        
@@ -42,8 +46,9 @@ namespace Biips
              // this function realizes one step of the pmmh algorithm
              // ie, it apply the selection of one proposal, after
              // evaluating his likelyhood trought the smc.
-             
-             void one_step_update(void);
+             // @return a boolean indication if the current update
+             // was a accept (true) or a reject(false)
+             bool one_step_update(void);
 
            protected:
 
@@ -58,10 +63,14 @@ namespace Biips
              double _pmean;
              size_t _n_iter;
              Size _VERBOSITY;
-             
+             bool _pover_target;
+             double _target_prob;
+             int _cross_target;
+            
+             bool adapt;
              double _log_marg_like;
              double _log_prior;
-             
+               
              
              vector<string> _param_varnames,
                             _latent_varnames;
@@ -77,7 +86,9 @@ namespace Biips
                                      _proposal;
              
              size_t _params_total_size; 
-            
+           
+             bool _adapt;
+
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);
 
