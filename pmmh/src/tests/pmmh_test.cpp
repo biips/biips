@@ -115,9 +115,7 @@ BOOST_AUTO_TEST_CASE(constructeur) {
              init_values,
              nb_particles); 
 
-   for(int i = 0; i < 10; ++i) {
-       pmm1.one_step_update();
-   }
+   pmm1.update(100);
 }
 
 
