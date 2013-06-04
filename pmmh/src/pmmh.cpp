@@ -11,6 +11,7 @@
 #include <boost/range/algorithm/find_if.hpp>
 
 
+#include "iostream/ProgressBar.hpp"
 #include "common/ValArray.hpp"
 #include <cmath>
 #include <functional>
@@ -190,7 +191,7 @@ namespace Biips {
 
 
    // compute log marginal likelihood: run smc sampler
-  
+ 
    if (!_console.RunForwardSampler(_nb_particles, _init_rng_seed, _resample_type, _resample_threshold, 0, false))
       throw RuntimeError("Unable to run smc on proposal");
    
@@ -245,24 +246,49 @@ namespace Biips {
       }
    }
 
-   // penser a rajouter le code concernant la covariance avec le proposal
+   // penser a rajouter le code concernant la covariance avec la proposal
    // 
    return accept;
 } // fin one_update
 
-   void Pmmh::update(size_t nb_iter) {
+   int Pmmh::update(size_t nb_iter) {
 
+      if (nb_iter == 0) return 0;
       // think to count acceptations
-      size_t accept_count = 0;
+      int accept_count = 0;
+      ProgressBar barre(nb_iter);
+      bool drapeau = false;
       for(int i = 0; i < nb_iter; ++i) {
-         if (one_step_update()) accept_count++;
+         drapeau = one_step_update();
+         if (drapeau) 
+            accept_count++;
+         barre += 1; 
       }     
 
       // no more need to adapt, just burn!
-      if (abs(log(_pmean / (1. - _pmean)) - log( _target_prob/ (1. - _target_prob))) < 0.5)
+      if (abs(log(_pmean / (1. - _pmean)) - log(_target_prob / (1. - _target_prob))) < 0.5)
           _adapt = false;
 
+      // before to return we need to check if last update was accepted
+      // if not, we need store manually the loglikelihood in the biips model
+      // using set_log_norm const because the SMC updated to a false value
+      if (!drapeau) {
+          for (int i  = 0; i <  _param_varnames.size() ; ++i) {
+             
+              IndexRange::Indices lind(_param_lower[i].begin(), _param_lower[i].end());
+              IndexRange::Indices uind(_param_upper[i].begin(), _param_upper[i].end());
+              IndexRange range_i = IndexRange(lind, uind);
+             
+             // on injecte la proposal en  entree du smc
+             if (!_console.ChangeData(_param_varnames[i], range_i, _sampled_value_map[_param_varnames[i]], true, 0))
+                throw RuntimeError("Failed to change data in proposal");
 
+          }
+
+      }
+
+
+      return accept_count;
    }
 
 

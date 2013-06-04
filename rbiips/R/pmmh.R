@@ -466,6 +466,7 @@ update.pmmh.biips <- function(object, param.names, n.iter,
     object$.rw.adapt.off()
   
   ### reset log norm const and sampled values if not accepted
+  ### to store the last value of loglikelihood in the biips model(using set_log_norm_const)
   if (n.iter > 0 && !out$accepted) {
     for (v in seq(along=param.names)) {
       var <- param.names[[v]]

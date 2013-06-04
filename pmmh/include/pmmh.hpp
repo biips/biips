@@ -6,7 +6,10 @@
 #include <vector>
 
 using namespace std;
-
+/*! @file pmmh.hpp
+ *  @ brief class implementing the pmmh algorihtm
+ *
+ */
 namespace Biips
 {
 
@@ -38,16 +41,27 @@ namespace Biips
                   _adapt(true)
                   { post_init(); }
          
-       
-             void update(size_t n_iter);
+             /*! @brief method to realize adapt/burn iterations
+              * 
+              *  this method essentialy iterates the one_step_update method 
+              *  counting the accepted step, and checks at the end
+              *  that adapt phase is finished!   
+              *
+              *  @param n_iter number of iterations
+              *  @return the number of accepted step
+              */
+             int update(size_t n_iter);
 
              ~Pmmh(void) {}
 
-             // this function realizes one step of the pmmh algorithm
-             // ie, it apply the selection of one proposal, after
-             // evaluating his likelyhood trought the smc.
-             // @return a boolean indication if the current update
-             // was a accept (true) or a reject(false)
+             /*! @brief implements one Metropolis-Hastings step of the PMMH algorithm
+              *! 
+              *! this methode updates all internal parameters (_l_step, _sampled_value_map
+              *! to realize one step of the MH algorithme embedded in the PMMH
+              *! currently the strategy is componentwise independent : 
+              *!  prop <- sample + 2.38/sqrt(d) * exp(step) * rnorm()
+              *!
+              */
              bool one_step_update(void);
 
            protected:
@@ -66,7 +80,9 @@ namespace Biips
              bool _pover_target;
              double _target_prob;
              int _cross_target;
+             bool _adapt;
             
+             
              bool adapt;
              double _log_marg_like;
              double _log_prior;
@@ -87,7 +103,6 @@ namespace Biips
              
              size_t _params_total_size; 
            
-             bool _adapt;
 
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);
