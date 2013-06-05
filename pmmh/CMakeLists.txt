@@ -23,7 +23,7 @@ file(COPY hmm_1d_lin.bug dumpdata.R DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 # for testing
 set(current_pmm ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(prs_src_files ${current_pmm}/parse_varname.cpp ${current_pmm}/tests/parse_test.cpp)
+set(prs_src_files ${current_pmm}/tests/parse_test.cpp)
 add_executable(prs_test ${prs_src_files})
 target_link_libraries(prs_test ${EXTRA_LIBS})
 
@@ -31,7 +31,7 @@ get_target_property(exe_loc prs_test LOCATION)
 add_test(NAME parse_test COMMAND ${exe_loc})
 
 
-set(pmmh_test_files ${current_pmm}/tests/pmmh_test.cpp ${current_pmm}/pmmh.cpp ${current_pmm}/parse_varname.cpp)
+set(pmmh_test_files ${current_pmm}/tests/pmmh_test.cpp ${current_pmm}/pmmh.cpp)
 add_executable(pmmh_test ${pmmh_test_files})
 target_link_libraries(pmmh_test ${EXTRA_LIBS} ${BIIPS_LIBS})
 get_target_property(exe_loc pmmh_test LOCATION)
