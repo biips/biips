@@ -13,10 +13,13 @@
 
 #include "iostream/ProgressBar.hpp"
 #include "common/ValArray.hpp"
+#include "common/IndexRange.hpp"
 #include <cmath>
 #include <functional>
 #include <map>
 using namespace boost;
+using namespace Biips;
+
 namespace Biips {
 
     void Pmmh::post_init(void) {
@@ -44,9 +47,7 @@ namespace Biips {
             // calcul de la taille totale du vecteur de parametres
             _params_total_size += _init_values[i].Length();
 
-            IndexRange::Indices lind(_param_lower[i].begin(), _param_lower[i].end());
-            IndexRange::Indices uind(_param_upper[i].begin(), _param_upper[i].end());
-            BOOST_AUTO(range, IndexRange(lind, uind));
+            IndexRange range = IndexRange(_param_lower[i], _param_upper[i]);
             
             MultiArray marray;
             Size ndims = _init_values[i].NDim();
@@ -61,7 +62,7 @@ namespace Biips {
             replace_copy(r_vec.begin() ,r_vec.end(), p_val->begin(), numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
             marray.SetPtr(p_dim, p_val);
             
-            _console.ChangeData(var_name, range, marray, mcmc, _VERBOSITY);
+            _console.ChangeData(var_name, range , marray, mcmc, _VERBOSITY);
             _sampled_value_map[var_name] = marray;
             
             // a verifier si pas trop long
@@ -73,7 +74,6 @@ namespace Biips {
 
             // log prior density 
             double log_p;
-           
             
             if (!_console.GetLogPriorDensity(log_p, var_name, range)) 
                  throw LogicError((string("for variable ") + var_name + string("cannot compute log prior")).c_str());
@@ -92,9 +92,7 @@ namespace Biips {
         bool latent_monitored = true;
         for(int i = 0; i < _latent_varnames.size(); ++i){
             
-            IndexRange::Indices lind(_latent_lower[i].begin(), _latent_lower[i].end());
-            IndexRange::Indices uind(_latent_upper[i].begin(), _latent_upper[i].end());
-            BOOST_AUTO(latent_range, IndexRange(lind, uind));
+            IndexRange latent_range = IndexRange(_latent_lower[i], _latent_upper[i]);
             
             if (!_console.IsGenTreeSmoothMonitored(_latent_varnames[i], latent_range, false)) {
                 _console.SetGenTreeSmoothMonitor(_latent_varnames[i], latent_range);
@@ -171,10 +169,7 @@ namespace Biips {
       
       for (int i  = 0; i <  _param_varnames.size() ; ++i) {
              
-              IndexRange::Indices lind(_param_lower[i].begin(), _param_lower[i].end());
-              IndexRange::Indices uind(_param_upper[i].begin(), _param_upper[i].end());
-              IndexRange range_i = IndexRange(lind, uind);
-             
+              auto range_i = IndexRange(_param_lower[i], _param_upper[i]);
              
              // on injecte la proposal en  entree du smc
              if (!_console.ChangeData(_param_varnames[i], range_i, _proposal[_param_varnames[i]], true, 0))
@@ -274,19 +269,13 @@ namespace Biips {
       // using set_log_norm const because the SMC updated to a false value
       if (!drapeau) {
           for (int i  = 0; i <  _param_varnames.size() ; ++i) {
-             
-              IndexRange::Indices lind(_param_lower[i].begin(), _param_lower[i].end());
-              IndexRange::Indices uind(_param_upper[i].begin(), _param_upper[i].end());
-              IndexRange range_i = IndexRange(lind, uind);
-             
-             // on injecte la proposal en  entree du smc
-             if (!_console.ChangeData(_param_varnames[i], range_i, _sampled_value_map[_param_varnames[i]], true, 0))
+             if (!_console.ChangeData(_param_varnames[i], IndexRange(_param_lower[i], _param_upper[i]), 
+                                      _sampled_value_map[_param_varnames[i]], true, 0))
                 throw RuntimeError("Failed to change data in proposal");
 
           }
 
       }
-
 
       return accept_count;
    }
