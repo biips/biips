@@ -86,15 +86,17 @@ namespace Biips
              bool adapt;
              double _log_marg_like;
              double _log_prior;
-               
+           
+             typedef IndexRange::IndexType IndexType;
+
              
              vector<string> _param_varnames,
                             _latent_varnames;
              
-             vector<vector<size_t> > _param_lower, 
-                                     _param_upper,
-                                     _latent_lower, 
-                                     _latent_upper;
+             vector<vector<IndexType> > _param_lower, 
+                                        _param_upper,
+                                        _latent_lower, 
+                                        _latent_upper;
              
              
              map<String, MultiArray> _sampled_value_map,
