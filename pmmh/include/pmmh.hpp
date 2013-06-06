@@ -5,17 +5,48 @@
 #include <string>
 #include <vector>
 
+
+#define CheckRuntime(cond, msg) \
+   if (cond) throw Biips::RuntimeError(msg)
+
+
 using namespace std;
-/*! @file pmmh.hpp
- *  @ brief class implementing the pmmh algorihtm
- *
- */
 namespace Biips
 {
 
+    /**  @class Pmmh 
+     **  @brief class implementing the pmmh algorithm
+     **
+     **  This class implements a PMMH algorithm with an adaptive phase <br>
+     **  based on the Step Adapter class in JAGS. <br>
+     **  Roughly speaking, as other MCMC methods, <br>
+     **  the core of the algorithm is a MH algorithm (realizes by <br>
+     **  \c one_step_update method) wich embeds a call to a SMC <br>
+     **
+     **  At this moment, we keep a stepping strategy which is uniform <br>
+     **  for all variables (params + latent_variables). This step can evoluate <br>
+     **  according the following rules
+     */
     class Pmmh {
          public: 
           
+             /** @brief Constructor for Pmmh
+              * 
+              *  this constructor needs a Biips model available trough \\
+              *  the console ref. 
+              *  @param console reference on the console containing the \\
+              *  biips model
+              *  @param param_names vector of string containing variables and index, 
+              *    - e.g. y[1,] or x[1,1] - for the parameter whom we want apply
+              *    the PMMH algorithm
+              *  @param latent vector of string  containing latent variables (hidden states)
+              *  with indexes
+              *  @param init_values vector of \c Multiarray, contains initial values for param
+              *  @param nb_particles : number of particles
+              *  @param resample_threshold value to compare with ESS
+              *  @param resample_type kind of resampling must belong to (...)
+              *  @param init_rng_seed value to init the random number generator
+              */
              Pmmh(Console & console,
                   vector<string> & param_names,
                   vector<string> & latent_names,
@@ -41,7 +72,7 @@ namespace Biips
                   _adapt(true)
                   { post_init(); }
          
-             /*! @brief method to realize adapt/burn iterations
+             /** @brief method to realize adapt/burn iterations
               * 
               *  this method essentialy iterates the one_step_update method 
               *  counting the accepted step, and checks at the end
@@ -52,15 +83,23 @@ namespace Biips
               */
              int update(size_t n_iter);
 
+             /** @brief method to sample from the MCMC
+              * 
+              *  @param n_iter number of iterations
+              */
+               
+             void sample(size_t n_iter, size_t  thin); 
+
+
              ~Pmmh(void) {}
 
-             /*! @brief implements one Metropolis-Hastings step of the PMMH algorithm
-              *! 
-              *! this methode updates all internal parameters (_l_step, _sampled_value_map
-              *! to realize one step of the MH algorithme embedded in the PMMH
-              *! currently the strategy is componentwise independent : 
-              *!  prop <- sample + 2.38/sqrt(d) * exp(step) * rnorm()
-              *!
+             /** @brief implements one Metropolis-Hastings step of the PMMH algorithm
+              ** 
+              ** this methode updates all internal parameters _l_step, _sampled_value_map
+              ** to realize one step of the MH algorithme embedded in the PMMH
+              ** currently the strategy is componentwise independent : 
+              ** \f$ prop \rightarrow sample + \frac{2.38}{\sqrt{d}} * exp(step_i) * u \f$
+              **
               */
              bool one_step_update(void);
 
@@ -109,6 +148,10 @@ namespace Biips
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);
 
+             /** @brief \em adhoc method which initialize the rest of members \\
+              * after calling destructor
+              */
+             
              void post_init(void); 
 
     };
