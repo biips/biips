@@ -29,8 +29,7 @@ namespace Biips {
 
         parse_varnames(_param_names, _param_varnames, _param_lower, _param_upper); 
      
-        if (_init_values.size() != _param_varnames.size())
-           throw LogicError("init_values and param_names must have the same size!");
+        CheckRuntime(_init_values.size() != _param_varnames.size(), "init_values and param_names must have the same size!");
         
         // loop on parameters
         // we copy the init_values into the smc
@@ -75,11 +74,10 @@ namespace Biips {
             // log prior density 
             double log_p;
             
-            if (!_console.GetLogPriorDensity(log_p, var_name, range)) 
-                 throw LogicError((string("for variable ") + var_name + string("cannot compute log prior")).c_str());
+            CheckRuntime(!_console.GetLogPriorDensity(log_p, var_name, range),
+                 (string("for variable ") + var_name + string("cannot compute log prior")).c_str());
             
-            if (std::isnan(log_p)) 
-                  throw LogicError((string("variable ") + var_name + string(" has a NaN log_prior")).c_str());
+            CheckRuntime(std::isnan(log_p), (string("variable ") + var_name + string(" has a NaN log_prior")).c_str());
             
             _log_prior += log_p;
         
@@ -109,32 +107,30 @@ namespace Biips {
         // run smc
         if (!sampler_at_end || !latent_monitored) {
             if (!sampler_at_end) {
-                if (!_console.RunForwardSampler(_nb_particles, _init_rng_seed, 
-                                                    _resample_type, _resample_threshold, _VERBOSITY, false))
-                   throw RuntimeError("Failed to run forward sampler");
+                CheckRuntime(!_console.RunForwardSampler(_nb_particles, _init_rng_seed, 
+                                                         _resample_type, _resample_threshold, _VERBOSITY, false), "Failed to run forward sampler");
             }
         }
        
         _log_marg_like = 0;
-        if (!_console.GetLogNormConst(_log_marg_like))
-             throw RuntimeError("Failed to get log normalizing constant.");
+        
+        CheckRuntime(!_console.GetLogNormConst(_log_marg_like), "Failed to get log normalizing constant.");
          
-        if (std::isnan(_log_marg_like))
-             throw RuntimeError("Failed to get log marginal likelihood: NaN.");
-        if (std::isinf(_log_marg_like))
-             throw RuntimeError("Failed to get log marginal likelihood: infinite value.");
+        CheckRuntime(std::isnan(_log_marg_like), "Failed to get log marginal likelihood: NaN.");
+        
+        CheckRuntime(std::isinf(_log_marg_like), "Failed to get log marginal likelihood: infinite value.");
    
         if (_latent_varnames.size() > 0) {
             
-            if(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map))
-              throw RuntimeError("Failed to get sampled smooth particle.");
+            CheckRuntime(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map), 
+               "Failed to get sampled smooth particle.");
             
 
             if(_sampled_value_map.size() == 0) {
                   int rng_seed = 42;
                   _console.SampleGenTreeSmoothParticle(rng_seed);
-                  if(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map))
-                    throw RuntimeError("Failed to get sampled smooth particle.");
+                  CheckRuntime(!_console.DumpSampledGenTreeSmoothParticle(_sampled_value_map), 
+                               "Failed to get sampled smooth particle.");
             }
         }
     } // fin Pmmh::pos_init
@@ -158,8 +154,7 @@ namespace Biips {
              
              for(int j = 0; j < _proposal[s].Length() ; ++j) {
                  prop[j] = sample[j] + coef * exp(step[j]) * norm_gen();
-                 if (std::isnan(prop[j]))
-                    throw LogicError("proposal PMMH as NaN value:");
+                 CheckRuntime(std::isnan(prop[j]), "proposal PMMH as NaN value:");
              }
              
            
@@ -172,84 +167,84 @@ namespace Biips {
               auto range_i = IndexRange(_param_lower[i], _param_upper[i]);
              
              // on injecte la proposal en  entree du smc
-             if (!_console.ChangeData(_param_varnames[i], range_i, _proposal[_param_varnames[i]], true, 0))
-                throw RuntimeError("Failed to change data in proposal");
+             CheckRuntime(!_console.ChangeData(_param_varnames[i], range_i, _proposal[_param_varnames[i]], true, 0),
+                "Failed to change data in proposal");
      
              double log_p;
              _console.GetLogPriorDensity(log_p, _param_varnames[i], range_i);
 
-             if (std::isnan(log_p)) 
-                throw RuntimeError((string("Failed to get log prior density node ")+ _param_varnames[i] + string("is not stochastic.")).c_str());
+             CheckRuntime(std::isnan(log_p), 
+                (string("Failed to get log prior density node ")+ _param_varnames[i] + string("is not stochastic.")).c_str());
 
              log_prior_prop += log_p;
-   }
+       } // fin loop param
 
 
-   // compute log marginal likelihood: run smc sampler
+       // compute log marginal likelihood: run smc sampler
  
-   if (!_console.RunForwardSampler(_nb_particles, _init_rng_seed, _resample_type, _resample_threshold, 0, false))
-      throw RuntimeError("Unable to run smc on proposal");
-   
-   double log_marg_like_prop  = 0;
-   if (!_console.GetLogNormConst(log_marg_like_prop))
-      throw RuntimeError("Unable to retrieve log marginal likelyhood on proposal");
-   
-   if (std::isnan(log_marg_like_prop) || (std::isinf(log_marg_like_prop)))
-      throw RuntimeError("log marginal likelyhood is infinite or NaN for a proposal");
-
-   double acceptance_rate = exp(log_marg_like_prop - _log_marg_like + log_prior_prop - _log_prior);
-
-   variate_generator<random::mt19937 & , uniform_real<> > unif_gen(mt, uniform_real<>());
-
-   bool accept = unif_gen() < acceptance_rate;
-   if (accept) {
-
-       for (auto & m : _sampled_value_map) {
-               // sample <- prop
-               m.second.Values() =  _proposal[m.first].Values();
-       }
+       CheckRuntime(!_console.RunForwardSampler(_nb_particles, _init_rng_seed, _resample_type, _resample_threshold, 0, false),
+          "Unable to run smc on proposal");
        
-       _log_prior = log_prior_prop;
-       _log_marg_like = log_marg_like_prop;
-   
-       if ( _latent_names.size() > 0) {
-           // FIXME
-           _console.SampleGenTreeSmoothParticle(42);
-           std::map<string, MultiArray> sampled_val;
-           _console.DumpSampledGenTreeSmoothParticle(sampled_val);
-           for(int i = 0 ; i < _latent_names.size(); ++i) {
-               _sampled_value_map[_latent_names[i]].Values() = sampled_val[_latent_names[i]].Values();
+       double log_marg_like_prop  = 0;
+       CheckRuntime(!_console.GetLogNormConst(log_marg_like_prop),
+          "Unable to retrieve log marginal likelihood on proposal");
+       
+       CheckRuntime(std::isnan(log_marg_like_prop) || std::isinf(log_marg_like_prop),
+         "log marginal likelihood is infinite or NaN for a proposal");
+
+       double acceptance_rate = exp(log_marg_like_prop - _log_marg_like + log_prior_prop - _log_prior);
+
+       variate_generator<random::mt19937 & , uniform_real<> > unif_gen(mt, uniform_real<>());
+
+       bool accept = unif_gen() < acceptance_rate;
+       if (accept) {
+
+           for (auto & m : _sampled_value_map) {
+                   // sample <- prop
+                   m.second.Values() =  _proposal[m.first].Values();
            }
-       }  
-   
-   } // fin proposal accepte
+           
+           _log_prior = log_prior_prop;
+           _log_marg_like = log_marg_like_prop;
+       
+           if ( _latent_names.size() > 0) {
+               // FIXME
+               _console.SampleGenTreeSmoothParticle(42);
+               std::map<string, MultiArray> sampled_val;
+               _console.DumpSampledGenTreeSmoothParticle(sampled_val);
+               for(int i = 0 ; i < _latent_names.size(); ++i) {
+                   _sampled_value_map[_latent_names[i]].Values() = sampled_val[_latent_names[i]].Values();
+               }
+           }  
+       
+       } // fin proposal accepte
 
-   // rescale step
-   double p_modif = std::min(acceptance_rate, 1.); 
-   _pmean += 2 * (p_modif - _pmean) / _n_iter;
-   _n_iter++;
+       // rescale step
+       double p_modif = std::min(acceptance_rate, 1.); 
+       _pmean += 2 * (p_modif - _pmean) / _n_iter;
+       _n_iter++;
 
-   if (_adapt) {
-      double modif = (p_modif - _target_prob)/ _cross_target;
-      for(auto & s : _param_varnames) {
-          ValArray & step = _l_step[s].Values();
-          step += modif;
-      }
-      if ( (p_modif > _target_prob) != _pover_target) {
-           _pover_target = ! _pover_target; // a expliquer ca fait un peu magie noire
-           _cross_target++;
-      }
-   }
+       if (_adapt) {
+          double modif = (p_modif - _target_prob)/ _cross_target;
+          for(auto & s : _param_varnames) {
+              ValArray & step = _l_step[s].Values();
+              step += modif;
+          }
+          if ( (p_modif > _target_prob) != _pover_target) {
+               _pover_target = ! _pover_target; // a expliquer ca fait un peu magie noire
+               _cross_target++;
+          }
+       }
 
-   // penser a rajouter le code concernant la covariance avec la proposal
-   // 
-   return accept;
-} // fin one_update
+       // penser a rajouter le code concernant la covariance avec la proposal
+       // 
+      return accept;
+   } // fin one_step _update
 
    int Pmmh::update(size_t nb_iter) {
 
       if (nb_iter == 0) return 0;
-      // think to count acceptations
+      
       int accept_count = 0;
       ProgressBar barre(nb_iter);
       bool drapeau = false;
@@ -269,9 +264,10 @@ namespace Biips {
       // using set_log_norm const because the SMC updated to a false value
       if (!drapeau) {
           for (int i  = 0; i <  _param_varnames.size() ; ++i) {
-             if (!_console.ChangeData(_param_varnames[i], IndexRange(_param_lower[i], _param_upper[i]), 
-                                      _sampled_value_map[_param_varnames[i]], true, 0))
-                throw RuntimeError("Failed to change data in proposal");
+             auto range_i =  IndexRange(_param_lower[i], _param_upper[i]);
+             CheckRuntime(!_console.ChangeData(_param_varnames[i], range_i, 
+                                               _sampled_value_map[_param_varnames[i]], true, 0), 
+                           "Failed to change data in sample");
 
           }
 
@@ -280,6 +276,23 @@ namespace Biips {
       return accept_count;
    }
 
+   int Pmmh::sample(size_t nb_iter, size_t thin) {
+
+      if (_adapt) {
+         std::cout << "WARNING : adaptation not finish before to start sampling" << endl
+                   << "so we force to stop adaptation" << endl;
+         _adapt = false;
+      }
+      ProgressBar barre(nb_iter);
+      
+      for(int i = 0; i < nb_iter; ++i) {
+         one_step_update();
+         barre += 1; 
+      }     
+     
+
+
+   }
 
 
 } // fin namespace Biips
