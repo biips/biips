@@ -88,7 +88,7 @@ namespace Biips
               *  @param n_iter number of iterations
               */
                
-             void sample(size_t n_iter, size_t  thin); 
+             int sample(size_t n_iter, size_t thin); 
 
 
              ~Pmmh(void) {}
@@ -122,9 +122,10 @@ namespace Biips
              bool _adapt;
             
              
-             bool adapt;
+             // moving parameters
              double _log_marg_like;
              double _log_prior;
+             double _acceptance_rate;
            
              typedef IndexRange::IndexType IndexType;
 
@@ -143,7 +144,6 @@ namespace Biips
                                      _proposal;
              
              size_t _params_total_size; 
-           
 
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);
