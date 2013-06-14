@@ -192,11 +192,11 @@ namespace Biips {
        CheckRuntime(std::isnan(log_marg_like_prop) || std::isinf(log_marg_like_prop),
          "log marginal likelihood is infinite or NaN for a proposal");
 
-       double acceptance_rate = exp(log_marg_like_prop - _log_marg_like + log_prior_prop - _log_prior);
+       _acceptance_rate = exp(log_marg_like_prop - _log_marg_like + log_prior_prop - _log_prior);
 
        variate_generator<random::mt19937 & , uniform_real<> > unif_gen(mt, uniform_real<>());
 
-       bool accept = unif_gen() < acceptance_rate;
+       bool accept = unif_gen() < _acceptance_rate;
        if (accept) {
 
            for (auto & m : _sampled_value_map) {
@@ -220,7 +220,7 @@ namespace Biips {
        } // fin proposal accepte
 
        // rescale step
-       double p_modif = std::min(acceptance_rate, 1.); 
+       double p_modif = std::min(_acceptance_rate, 1.); 
        _pmean += 2 * (p_modif - _pmean) / _n_iter;
        _n_iter++;
 
@@ -252,7 +252,8 @@ namespace Biips {
          drapeau = one_step_update();
          if (drapeau) 
             accept_count++;
-         barre += 1; 
+         ++barre; 
+         cout << flush; 
       }     
 
       // no more need to adapt, just burn!
@@ -278,20 +279,56 @@ namespace Biips {
 
    int Pmmh::sample(size_t nb_iter, size_t thin) {
 
+      if (nb_iter == 0) 
+           return 0;
+
       if (_adapt) {
          std::cout << "WARNING : adaptation not finish before to start sampling" << endl
                    << "so we force to stop adaptation" << endl;
          _adapt = false;
       }
-      ProgressBar barre(nb_iter);
       
+      int n_samples = 0;
+      int accept_count = 0;
+      ProgressBar barre(nb_iter);
+      bool drapeau = false;
+      vector<double> accept_rate(nb_iter);
       for(int i = 0; i < nb_iter; ++i) {
-         one_step_update();
+         drapeau = one_step_update();
+         if (drapeau) 
+            accept_count++;
+         accept_rate[i] = _acceptance_rate;   
          barre += 1; 
+         cout << flush; 
+         if ((i - 1) % thin == 0) {
+              n_samples++;
+         }
       }     
-     
+    
+      _console.ClearGenTreeSmoothMonitors(false);
 
+      if (!drapeau) {
+          for (int i  = 0; i <  _param_varnames.size() ; ++i) {
+              auto range_i =  IndexRange(_param_lower[i], _param_upper[i]);
+              CheckRuntime(!_console.ChangeData(_param_varnames[i], range_i, 
+                                                _sampled_value_map[_param_varnames[i]], true, 0), 
+                            "Failed to change data in sample");
 
+          }
+      
+          _console.SetLogNormConst(_log_marg_like);
+      
+          if (_latent_names.size() > 0) {
+             std::map<string, MultiArray> a_map;
+             for(auto & s :  _latent_names) {
+                     a_map[s] = _sampled_value_map[s];
+             }
+             _console.SetSampledGenTreeSmoothParticle(a_map);
+          }
+      
+      
+      }
+      return accept_count; 
    }
 
 
