@@ -116,6 +116,7 @@ BOOST_AUTO_TEST_CASE(constructeur) {
              nb_particles); 
 
    pmm1.update(100);
+   pmm1.sample(100, 1);
 }
 
 
