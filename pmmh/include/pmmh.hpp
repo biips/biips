@@ -15,17 +15,33 @@ namespace Biips
 {
 
     /**  @class Pmmh 
-     **  @brief class implementing the pmmh algorithm
-     **
-     **  This class implements a PMMH algorithm with an adaptive phase <br>
-     **  based on the Step Adapter class in JAGS. <br>
-     **  Roughly speaking, as other MCMC methods, <br>
-     **  the core of the algorithm is a MH algorithm (realizes by <br>
-     **  \c one_step_update method) wich embeds a call to a SMC <br>
-     **
-     **  At this moment, we keep a stepping strategy which is uniform <br>
-     **  for all variables (params + latent_variables). This step can evoluate <br>
-     **  according the following rules
+     *  @brief class implementing the pmmh algorithm
+     *
+     *  This class implements a PMMH algorithm under the form of <br>
+     *  a \bf Metropolis-Hastings(MH) algorithm with a burning-adaptive phase <br> 
+     *
+     *  the key ingredients 
+     *  ------------------- 
+     *   
+     *     * a classical MH algorithm used in context of MCMC to <BR>
+     *        sample along a target density <BR>
+     *     * a noisy gradient algorithm to adapt \em parameters until <BR>
+     *        achieving a target acceptance ratio (0.234) <BR>
+     *     * a black-box use of an SMC implemented by Biips <BR>
+     *  
+     * 
+     *  
+     *  noisy gradient algorithm
+     *  ------------------------
+     *
+     *    During the several phases of the algorithm, we need to change the \em parameters <br>
+     *    of the proposal : these \em params will change according the following rule
+     *    \f$ \theta \leftarrow \theta + \frac{2.38}{\sqrt{d}} * exp(l_step) * u \f$
+     *
+     *
+     *    
+     *  
+     *
      */
     class Pmmh {
          public: 
@@ -86,6 +102,7 @@ namespace Biips
              /** @brief method to sample from the MCMC
               * 
               *  @param n_iter number of iterations
+                 @param thin modulo step index to pick the sample trough the iterations
               */
                
              int sample(size_t n_iter, size_t thin); 
@@ -98,34 +115,31 @@ namespace Biips
               ** this methode updates all internal parameters _l_step, _sampled_value_map
               ** to realize one step of the MH algorithme embedded in the PMMH
               ** currently the strategy is componentwise independent : 
-              ** \f$ prop \rightarrow sample + \frac{2.38}{\sqrt{d}} * exp(step_i) * u \f$
               **
               */
              bool one_step_update(void);
 
            protected:
 
-             Console & _console;
-             vector<string> _param_names;
+             Console & _console;  /**< console reference to use Biips */
+             vector<string> _param_names; 
              vector<string> _latent_names;
-             vector<MultiArray> _init_values;
-             int _nb_particles;
+             vector<MultiArray> _init_values; /**< initial values for param*/
+             int _nb_particles; 
              double _resample_threshold;
              string _resample_type;
              size_t _init_rng_seed;
              double _pmean;
              size_t _n_iter;
              Size _VERBOSITY;
-             bool _pover_target;
+             bool _pover_target; 
              double _target_prob;
              int _cross_target;
-             bool _adapt;
-            
+             bool _adapt; /**<boolean used to switch the adaptation phase */
              
-             // moving parameters
-             double _log_marg_like;
-             double _log_prior;
-             double _acceptance_rate;
+             double _log_marg_like; /**< the marginal log-likelihood computed each iterations by smc*/
+             double _log_prior; /**< the log proposal */
+             double _acceptance_rate; /**< the varying acceptance ratio */ 
            
              typedef IndexRange::IndexType IndexType;
 
@@ -139,11 +153,11 @@ namespace Biips
                                         _latent_upper;
              
              
-             map<String, MultiArray> _sampled_value_map,
-                                     _l_step,
-                                     _proposal;
+             map<String, MultiArray> _sampled_value_map, /**< the map containing parameters and latent variables */
+                                     _l_step, /**< a "vector" of stepsize */
+                                     _proposal; /** the vector of proposal */
              
-             size_t _params_total_size; 
+             size_t _params_total_size;  
 
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);

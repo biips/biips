@@ -24,7 +24,6 @@ namespace Biips {
 
     void Pmmh::post_init(void) {
   
-
         _VERBOSITY = 2;
 
         parse_varnames(_param_names, _param_varnames, _param_lower, _param_upper); 
@@ -299,7 +298,6 @@ namespace Biips {
             accept_count++;
          accept_rate[i] = _acceptance_rate;   
          barre += 1; 
-         cout << flush; 
          if ((i - 1) % thin == 0) {
               n_samples++;
          }
@@ -330,7 +328,5 @@ namespace Biips {
       }
       return accept_count; 
    }
-
-
 } // fin namespace Biips
 
