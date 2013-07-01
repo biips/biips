@@ -113,7 +113,7 @@ namespace Biips
              /** @brief implements one Metropolis-Hastings step of the PMMH algorithm
               ** 
               ** this methode updates all internal parameters _l_step, _sampled_value_map
-              ** to realize one step of the MH algorithme embedded in the PMMH
+              ** to realize one step of the MH algorithm embedded in the PMMH
               ** currently the strategy is componentwise independent : 
               **
               */
@@ -163,7 +163,7 @@ namespace Biips
              Pmmh(const Pmmh &);
 
              /** @brief \em adhoc method which initialize the rest of members \\
-              * after calling destructor
+              * after calling constructor
               */
              
              void post_init(void); 
