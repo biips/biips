@@ -20,7 +20,7 @@ function [p, data] = biips_model(filename, data, varargin)
 opt_argin = length(varargin);
 % defauts values
 sample_data = true; 
-if (check_octave_old)
+if (isoctave)
    s=rand('state');
    rand('state',sum(100*clock)); 
    seed=double(randi(intmax));
