@@ -29,7 +29,7 @@ opt_argin = length(varargin);
 type='fs';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (check_octave_old)
+if (isoctave)
    s=rand('state');
    rand('state',sum(100*clock)); 
    seed=double(randi(intmax));
