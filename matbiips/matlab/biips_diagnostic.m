@@ -36,7 +36,7 @@ end
 if (isempty(vars))
     vars = fieldnames(parts); % vars = {}, take all fields
 end
-presents = fieldnames(parts.(vars{1}));
+presents = fieldnames(getfield(parts, vars{1}));
 if (isempty(fsb)) % retrieve only the field presents in the first variable
     chaine='fsb';
     indices=arrayfun(@(x) strfind(strcat(presents{:}),x), chaine, 'UniformOutput', 0);
@@ -44,7 +44,7 @@ if (isempty(fsb)) % retrieve only the field presents in the first variable
     fsb=chaine(sort(indices));
 end
 % select only the wanted variables
-s = inter_biips('cell2struct_weak_names', cellfun(@(x) parts.(x), vars,'UniformOutput',0), vars);
+s = inter_biips('cell2struct_weak_names', cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
 cell_fsb = num2cell(fsb);
 cell_diagn = cell(size(vars));
 
@@ -54,7 +54,7 @@ for i=1:length(vars)
     end
     ctemp = cell(size(fsb));
     for j=1:length(fsb)
-        ctemp{j} =  diagnostic_biips(s.(vars{i}).(fsb(j)), ess_thres, quiet, fsb(j));
+        ctemp{j} =  diagnostic_biips(getfield(getfield(s, vars{i}), fsb(j)), ess_thres, quiet, fsb(j));
     end
     cell_diagn{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
