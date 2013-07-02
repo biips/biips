@@ -1,6 +1,8 @@
-pour compiler avec la bonne version de boost (pour marc)
-cmake -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DBOOST_ROOT:STRING=/mnt/tests/fux/sources/boost_1_46_1/ -DCMAKE_BUILD_TYPE:STRING=Debug -DBoost_NO_SYSTEM_PATHS=ON -DMEX=mex -DBoost_USE_STATIC_LIBS=OFF ..
-
+pour compiler 
+# octave
+cmake -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mkoctfile ..
+# matlab
+cmake -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mex ..
 
 Windows minimum requirements:
 -----------------------------
@@ -28,4 +30,5 @@ Foxit reader
 Notepad++
 PDFCreator
 
+pour compiler RBiips
 BOOST_ROOT=/home/fux/sources/boost_1_46_0 BIIPS_LIB=/home/fux/biips/lib64 BIIPS_INCLUDE=/home/fux/biips/include/biips make RBiips_INSTALL

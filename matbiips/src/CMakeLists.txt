@@ -6,7 +6,7 @@ if (WIN32)
 	if (MATLAB)
 		set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
 		
-		include_directories(${BiipsCore_INCLUDE_DIRS}
+        include_directories(${BiipsCore_INCLUDE_DIRS}
 			${Base_INCLUDE_DIRS}
 			${Compiler_INCLUDE_DIRS}
 			${MATLAB_INCLUDE_DIR}
@@ -63,15 +63,12 @@ endif()
 
 # install mexfile in the build directory
 set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
-add_custom_command(
-	OUTPUT ${INTER_BIN}
+add_custom_command(OUTPUT ${INTER_BIN}
 	DEPENDS ${INTER_TARGET}
 	COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )
 
-#define target
-add_custom_target(matbiips 
-	DEPENDS  ${INTER_BIN}
-)
+add_custom_target(matbiips ALL DEPENDS ${INTER_BIN} BiipsCore BiipsCompiler
+    BiipsBase)
