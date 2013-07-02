@@ -45,7 +45,7 @@ cell_sum = cell(size(vars));
 for i=1:length(vars)
   ctemp = cell(size(fsb));
   for j=1:length(fsb)
-   ctemp{j} =  summary(getfield(s, vars{i}).(fsb(j)), more_argin{:});
+   ctemp{j} =  summary(getfield(getfield(s, vars{i}), fsb(j)), more_argin{:});
   end
   cell_sum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
 end
