@@ -135,8 +135,6 @@ namespace Biips
     mexCallMATLAB(1, plhs, nrhs, prhs, fun_dim_.c_str());
     #endif
     
-    for (Size i=0; i<nrhs; ++i)
-      mxDestroyArray(prhs[i]);
     // get output
     mwSize size_lhs = mxGetNumberOfElements(plhs[0]);
     double * lhs = mxGetPr(plhs[0]);
