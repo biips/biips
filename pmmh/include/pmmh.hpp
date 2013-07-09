@@ -70,23 +70,7 @@ namespace Biips
                   int nb_particles,
                   double resample_threshold = 0.5,
                   const string & resample_type = "stratified",
-                  size_t init_rng_seed = 42):
-                  _console(console),
-                  _param_names(param_names),
-                  _latent_names(latent_names),
-                  _init_values(init_values),
-                  _nb_particles(nb_particles),
-                  _resample_threshold(resample_threshold),
-                  _resample_type(resample_type),
-                  _init_rng_seed(init_rng_seed),
-                  _pmean(0),
-                  _n_iter(0),
-                  _VERBOSITY(2),
-                  _pover_target(false),
-                  _target_prob(0.234), // cf Rosenthal
-                  _cross_target(10),
-                  _adapt(true)
-                  { post_init(); }
+                  size_t init_rng_seed = 42);
          
              /** @brief method to realize adapt/burn iterations
               * 
@@ -162,11 +146,6 @@ namespace Biips
             // prevent to copy a pmmh
              Pmmh(const Pmmh &);
 
-             /** @brief \em adhoc method which initialize the rest of members \\
-              * after calling constructor
-              */
-             
-             void post_init(void); 
 
     };
 }
