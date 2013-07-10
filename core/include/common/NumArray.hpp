@@ -62,9 +62,9 @@ namespace Biips
     typedef StorageOrder StorageOrderType;
 
     typedef NumArray SelfType;
-    //! An array of MultiArray
+    //! An array of NumArray
     typedef NumArrayArray Array;
-    //! A pair of MultiArray
+    //! A pair of NumArray
     typedef NumArrayPair Pair;
 
   protected:
