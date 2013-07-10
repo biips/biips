@@ -321,29 +321,6 @@ namespace Biips
     }
   };
 
-  // -----------------------------------------------------------------------------
-  // MultiArrayPair
-  // -----------------------------------------------------------------------------
-
-  class MultiArrayPair: public std::pair<MultiArray, MultiArray>
-  {
-  public:
-    typedef MultiArrayPair SelfType;
-    typedef std::pair<MultiArray, MultiArray> BaseType;
-    MultiArrayPair()
-    {
-    }
-
-    MultiArrayPair Clone() const
-    {
-      MultiArrayPair clone;
-      clone.first = first.Clone();
-      clone.second = second.Clone();
-      return clone;
-    }
-  };
-
-  const MultiArrayPair NULL_MULTIARRAYPAIR;
 
   Bool allMissing(const MultiArray & marray);
   Bool anyMissing(const MultiArray & marray);
@@ -368,7 +345,6 @@ namespace Biips
 
     typedef std::vector<Ptr> PtrArray; //!< Array of pointers defined with a std::vector<boost::shared_ptr<> >
 
-    typedef MultiArrayPair Pair;
     typedef std::pair<Iterator, Iterator> IteratorPair;
     typedef std::pair<ConstIterator, ConstIterator> ConstIteratorPair; //!< Pair of ConstIterators type, used to define a range
   };
