@@ -55,7 +55,7 @@ namespace Biips
       if (paramValues[i].NDim() > 1)  
           prhs[i] = mxCreateNumericArray(paramValues[i].NDim(), dims.data() , mxDOUBLE_CLASS, mxREAL);
       else
-          prhs[i] = mxCreateDoubleMatrix(dims[0],1, mxREAL);
+          prhs[i] = mxCreateDoubleMatrix(dims[0], 1, mxREAL);
    	 
       // make array values point to existing memory
       std::copy(paramValues[i].ValuesPtr()->begin(),

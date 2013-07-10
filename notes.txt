@@ -1,0 +1,3 @@
+Difference NumArray - MultiArray ?
+le NumArray herites de plusieurs trucs bien pour faire des calculs
+Attention au stockage  a voir
