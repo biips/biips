@@ -35,7 +35,7 @@ namespace Biips
     dim(const Types<DimArray::Ptr>::Array & paramDims) const = 0;
 
     virtual void
-        eval(ValArray & values, const NumArray::Array & paramValues) const = 0;
+        eval(ValArray & outputs, const NumArray::Array & params) const = 0;
 
   public:
     typedef Function SelfType;
