@@ -55,7 +55,6 @@ namespace Biips
   // -----------------------------------------------------------------------------
 
   class MultiArrayArray;
-  class MultiArrayPair;
 
   //! A n-dimensional data object class
   /*!
@@ -75,8 +74,6 @@ namespace Biips
     typedef MultiArray SelfType;
     //! An array of MultiArray
     typedef MultiArrayArray Array;
-    //! A pair of MultiArray
-    typedef MultiArrayPair Pair;
 
   protected:
     //! Shared pointer of the dimensions array of the data

@@ -1,3 +1,6 @@
 Difference NumArray - MultiArray ?
 le NumArray herites de plusieurs trucs bien pour faire des calculs
-Attention au stockage  a voir
+les deux sont un couple Dimensions, Valeurs
+Le multiArray utilise des pointeurs partages, tandis que NumArray utilise
+des vrais pointeurs
+
