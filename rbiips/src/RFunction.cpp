@@ -14,21 +14,47 @@ void convArrayVector(const NumArray & array,  NumericVector & vec) {
 }
 
 
-
-
-
 namespace Biips 
 {
 
-   void RFunction::eval(ValArray & outputs,
+   void RFunction::eval(ValArray & output,
                         const NumArray::Array & params) {
    
       int nhrs  = params.size();
+      std::vector<NumericVector> vecParams;
       for(int i = 0; i < nhrs ; ++i ){
-          NumericVector v;
-          convArrayVector(params[i], v);
+          convArrayVector(params[i], vec[i]);
       }
-   
+      
+      NumericVector outvec;
+
+      switch(nrhs) {
+
+       1 : outvec = fun_eval_(vecParams[0]); 
+           break;
+       2 : outvec = fun_eval_(vecParams[0],
+                              vecParams[1]);
+           break;
+       3 : outvec = fun_eval_(vecParams[0],
+                              vecParams[1],
+                              vecParams[2]);
+           break;                              
+       4 : outvec = fun_eval_(vecParams[0],
+                              vecParams[1],
+                              vecParams[2],
+                              vecParams[3]);
+           break;                              
+       5 : outvec = fun_eval_(vecParams[0],
+                              vecParams[1],
+                              vecParams[2],
+                              vecParams[3],
+                              vecParams[4]);
+           break;                              
+       default: throw LogicError("Too much arguments in RFunction must be <= 5");
+                break;
+      }
+      
+
    }
 
 
