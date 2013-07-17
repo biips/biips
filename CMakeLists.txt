@@ -43,8 +43,6 @@ configure_file (
 
 # set dependencies versions
 set (JAGS_VERSION 3.2.0)
-set (SMCTC_VERSION 1.0-RC4)
-set (Boost_VERSION_REQUIRED 1.49.0)
 
 set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
