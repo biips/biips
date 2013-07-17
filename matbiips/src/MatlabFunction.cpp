@@ -102,13 +102,12 @@ namespace Biips
   }
 
   DimArray MatlabFunction::dim(
-      const Types<DimArray::Ptr>::Array & paramDims) const
+      const std::vector<DimArray::Ptr> & paramDims) const
   {
     // declare input
     int nrhs = paramDims.size();
     mxArray ** prhs = (mxArray **) mxCalloc(nrhs, sizeof(mxArray *)); 
 
-    std::vector<std::vector<double> > paramDims_values(nrhs);
     for (Size i = 0; i < nrhs; ++i)
     {
       // allocate input

@@ -284,6 +284,19 @@ RcppExport void check_model(SEXP pConsole, SEXP modelFileName)
   VOID_END_RBIIPS
 }
 
+RcppExport void add_function(SEXP f_name, SEXP nargs, SEXP fun_eval, SEXP fun_dim, SEXP fun_check_param, SEXP fun_is_discrete) {
+       string name = Rcpp::as<string>(f_name);
+       int nrhs = Rcpp::as<int>(nargs);
+       Function feval = Rcpp::as<Rcpp::Function>(fun_eval);
+       Function fdim = Rcpp::as<Rcpp::Function>(fundim);
+       Function fcheckparam = Rcpp::as<Rcpp::Function>(fun_check_param);
+       Function fisdiscrete = Rcpp::as<Rcpp::Function>(fun_is_discrete);
+       //if (!Compiler::FuncTab().Insert(Function::Ptr(new RFunction(name, nrhs, feval, fdim, fcheckparam, fisdiscrete)))) 
+      //    R 
+}
+
+
+
 
 RcppExport void compile_model(SEXP pConsole, SEXP data, SEXP sampleData, SEXP dataRngSeed)
 {
