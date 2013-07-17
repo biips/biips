@@ -38,7 +38,9 @@
 #define RBIIPSCOMMON_H_
 
 #include <Rcpp.h>
+#include <vector>
 #include "Rostream.h"
+#include  "common/Error.hpp"
 
 #ifndef BEGIN_RBIIPS
 #define BEGIN_RBIIPS BEGIN_RCPP
@@ -68,21 +70,21 @@ void load_base_module();
 
 
 template <class OutType, class InType> 
-void apply(OutType & outvec, std::vector<IntType> & invec, Function & f, int nrhs) {
+void apply(OutType & outvec, std::vector<InType> & invec, Rcpp::Function & fun, int nrhs) {
       
       switch(nrhs) {
 
-       1 : outvec = fun_eval_(invec[0]); 
+       case 1: outvec = fun(invec[0]); 
            break;
-       2 : outvec = fun_eval_(invec[0], invec[1]);
+       case 2: outvec = fun(invec[0], invec[1]);
            break;
-       3 : outvec = fun_eval_(invec[0], invec[1], invec[2]);
+       case 3: outvec = fun(invec[0], invec[1], invec[2]);
+           break;                        
+       case 4: outvec = fun(invec[0], invec[1], invec[2], invec[3]);
+           break;                        
+       case 5: outvec = fun(invec[0], invec[1], invec[2], invec[3], invec[4]);
            break;                              
-       4 : outvec = fun_eval_(invec[0], invec[1], invec[2], invec[3]);
-           break;                              
-       5 : outvec = fun_eval_(invec[0], invec[1], invec[2], invec[3], invec[4]);
-           break;                              
-       default: throw LogicError("Too much arguments in RFunction must be <= 5");
+       default: throw Biips::LogicError("Too much arguments in RFunction must be <= 5");
                 break;
       }
 }

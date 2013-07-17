@@ -37,6 +37,8 @@
 
 #include "Console.hpp"
 #include "RBiipsCommon.h"
+#include "RFunction.h"
+#include "compiler/Compiler.hpp"
 #include <fstream>
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
@@ -285,14 +287,13 @@ RcppExport void check_model(SEXP pConsole, SEXP modelFileName)
 }
 
 RcppExport void add_function(SEXP f_name, SEXP nargs, SEXP fun_eval, SEXP fun_dim, SEXP fun_check_param, SEXP fun_is_discrete) {
-       string name = Rcpp::as<string>(f_name);
+       String name = Rcpp::as<String>(f_name);
        int nrhs = Rcpp::as<int>(nargs);
-       Function feval = Rcpp::as<Rcpp::Function>(fun_eval);
-       Function fdim = Rcpp::as<Rcpp::Function>(fundim);
-       Function fcheckparam = Rcpp::as<Rcpp::Function>(fun_check_param);
-       Function fisdiscrete = Rcpp::as<Rcpp::Function>(fun_is_discrete);
-       //if (!Compiler::FuncTab().Insert(Function::Ptr(new RFunction(name, nrhs, feval, fdim, fcheckparam, fisdiscrete)))) 
-      //    R 
+       Rcpp::Function feval = Rcpp::as<Rcpp::Function>(fun_eval);
+       Rcpp::Function fdim = Rcpp::as<Rcpp::Function>(fun_dim);
+       Rcpp::Function fcheckparam = Rcpp::as<Rcpp::Function>(fun_check_param);
+       Rcpp::Function fisdiscrete = Rcpp::as<Rcpp::Function>(fun_is_discrete);
+       bool ret = Compiler::FuncTab().Insert(Function::Ptr(new RFunction(name, nrhs, feval, fdim, fcheckparam, fisdiscrete))); 
 }
 
 
