@@ -67,4 +67,28 @@
 void load_base_module();
 
 
+template <class OutType, class InType> 
+void apply(OutType & outvec, std::vector<IntType> & invec, Function & f, int nrhs) {
+      
+      switch(nrhs) {
+
+       1 : outvec = fun_eval_(invec[0]); 
+           break;
+       2 : outvec = fun_eval_(invec[0], invec[1]);
+           break;
+       3 : outvec = fun_eval_(invec[0], invec[1], invec[2]);
+           break;                              
+       4 : outvec = fun_eval_(invec[0], invec[1], invec[2], invec[3]);
+           break;                              
+       5 : outvec = fun_eval_(invec[0], invec[1], invec[2], invec[3], invec[4]);
+           break;                              
+       default: throw LogicError("Too much arguments in RFunction must be <= 5");
+                break;
+      }
+}
+
+
+
+
+
 #endif /* RBIIPSCOMMON_H_ */
