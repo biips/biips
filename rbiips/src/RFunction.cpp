@@ -4,7 +4,7 @@
 #include "RBiipsCommon.h"
 
 // FIXME a tester!
-static void convArrayVector(const NumArray & array,  NumericVector & vec) {
+static void convArrayVector(const Biips::NumArray & array,  Rcpp::NumericVector & vec) {
    ValArray & values = array.Values();
    DimArray & dims = array.Dim();
    
@@ -18,23 +18,23 @@ namespace Biips
 {
 
     void RFunction::eval(ValArray & output,
-                        const NumArray::Array & params) {
+                        const NumArray::Array & params) const {
    
         int nhrs  = params.size();
-        std::vector<NumericVector> vecParams;
+        std::vector<Rcpp::NumericVector> vecParams;
         for(int i = 0; i < nhrs ; ++i ){
-            convArrayVector(params[i], vec[i]);
+            convArrayVector(params[i], vecParams[i]);
         }
         
-        NumericVector outvec;
+        Rcpp::NumericVector outvec;
         apply(outvec, vecParams, fun_eval_, nhrs); 
         output.assign(outvec.begin(), outvec.end()); 
     }
 
     DimArray RFunction::dim(const std::vector<DimArray::Ptr> & paramDims) const {
-        int nrhs = paramDims.size()
-        std::vector<Rcpp::IntegerVector> paramvec;
-        for(int i = 0; i < nhrs; ++i) {
+        int nrhs = paramDims.size();
+        std::vector<Rcpp::IntegerVector> paramvec(nrhs);
+        for(int i = 0; i < nrhs; ++i) {
             paramvec[i].assign(paramDims[i]->begin(), paramDims[i]->end());
 
         }
@@ -50,7 +50,7 @@ namespace Biips
          if (fun_is_discret_.empty())
             return false;
 
-         Rcpp::IntegerVector bool_vect = as<int>(mask);
+         Rcpp::IntegerVector bool_vect(mask.begin(), mask.end());
          int res;
          apply(res, bool_vect, fun_is_discrete_, mask.size());
          return res; 

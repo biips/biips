@@ -31,10 +31,10 @@ namespace Biips
     typedef Function BaseType;
 
     RFunction(const String & name, Size nParam, 
-              const Rcpp:Function & fun_dim,
-              const Rcpp:Function & fun_eval, 
-              const Rcpp:Function & fun_check_param = Rcpp::Function(),
-              const Rcpp:Function & fun_is_discrete = Rcpp::Function())
+              const Rcpp::Function & fun_dim,
+              const Rcpp::Function & fun_eval, 
+              const Rcpp::Function & fun_check_param = Rcpp::Function(),
+              const Rcpp::Function & fun_is_discrete = Rcpp::Function())
         : BaseType(name, nParam), 
           fun_dim_(fun_dim), 
           fun_eval_(fun_eval),
