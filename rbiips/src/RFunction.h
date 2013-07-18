@@ -10,10 +10,10 @@ namespace Biips
   class RFunction: public Function
   {
   protected:
-    Rcpp::Function fun_dim_;
-    Rcpp::Function fun_eval_;
-    Rcpp::Function fun_check_param_;
-    Rcpp::Function fun_is_discrete_;
+    const Rcpp::Function fun_dim_;
+    const Rcpp::Function fun_eval_;
+    const Rcpp::Function fun_check_param_;
+    const Rcpp::Function fun_is_discrete_;
 
     virtual Bool checkParamDims(
         const Types<DimArray::Ptr>::Array & paramDims) const
