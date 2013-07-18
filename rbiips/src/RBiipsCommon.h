@@ -69,9 +69,10 @@
 void load_base_module();
 
 
-template <class OutType, class InType> 
-void apply(OutType & outvec, std::vector<InType> & invec, Rcpp::Function & fun, int nrhs) {
-      
+template <class InType> 
+InType apply(const std::vector<InType> & invec, const Rcpp::Function & fun, int nrhs) {
+     
+      InType outvec;
       switch(nrhs) {
 
        case 1: outvec = fun(invec[0]); 
@@ -87,6 +88,7 @@ void apply(OutType & outvec, std::vector<InType> & invec, Rcpp::Function & fun, 
        default: throw Biips::LogicError("Too much arguments in RFunction must be <= 5");
                 break;
       }
+    return outvec;
 }
 
 
