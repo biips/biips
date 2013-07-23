@@ -23,7 +23,7 @@ namespace Biips
                         const NumArray::Array & params) const {
    
         int nhrs  = params.size();
-        const std::vector<Rcpp::NumericVector> vecParams;
+        std::vector<Rcpp::NumericVector> vecParams;
         for(int i = 0; i < nhrs ; ++i ){
             vecParams[i] = convArrayVector(params[i]);
         }
@@ -34,7 +34,7 @@ namespace Biips
 
     DimArray RFunction::dim(const std::vector<DimArray::Ptr> & paramDims) const {
         int nrhs = paramDims.size();
-        const std::vector<Rcpp::IntegerVector> paramvec(nrhs);
+        std::vector<Rcpp::IntegerVector> paramvec(nrhs);
         for(int i = 0; i < nrhs; ++i) {
             paramvec[i].assign(paramDims[i]->begin(), paramDims[i]->end());
 
@@ -44,11 +44,24 @@ namespace Biips
         return DimArray(outvec.begin(), outvec.end());
     }
 
+    Bool RFunction::CheckParamValues(const NumArray::Array & paramValues) const {
+       if (is_identity(fun_check_param_))
+          return true;
+
+       int nrhs = paramValues.size();
+       std::vector<Rcpp::NumericVector> vecParamValues;
+       for(int i = 0; i < nrhs; ++i) {
+        vecParamValues[i] = convArrayVector(paramValues[i]);
+       }
+       int res = Rcpp::as<int>(apply(vecParamValues, fun_check_param_, nrhs));
+       return res;
+
+    }
 
     Bool RFunction::IsDiscreteValued(const std::vector<bool> & mask) const {
        
-         //if (fun_is_discrete_.empty())
-         //   return false;
+         if (is_identity(fun_is_discrete_))
+            return false;
 
          int res = apply(mask, fun_is_discrete_, mask.size());
          return res; 
