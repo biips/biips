@@ -1,0 +1,10 @@
+file(GLOB Rfiles *.R)
+file(GLOB bfiles *.bug)
+set(test_files ${Rfiles} ${bfiles})
+file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+set(rtests funcmat_test)
+foreach(_test ${rtests})
+    add_test(NAME ${_test}-R COMMAND ${R_EXECUTABME} -f ${_test})
+    #set_tests_properties(${_test}-R PROPERTIES TIMEOUT 30)
+endforeach()
