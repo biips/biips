@@ -5,8 +5,7 @@ model.title <- "Radar tracking"
 # data
 t.max <- 100
 mean.x.init <- c(0,0,1,0)
-Prec.x.init <- matrix(0,4,4)
-Prec.x.init[row(Prec.x.init)==col(Prec.x.init)] <- 1000
+Prec.x.init <- 1000*diag(4)
 delta.t <- 1
 seq1 <- c(1,0,delta.t,0, 0,1,0,delta.t, 0,0,1,0, 0,0,0,1)
 F <- matrix(seq1,4,4,byrow = T)
@@ -14,11 +13,8 @@ seq2 <- c(delta.t^2/2,0, 0,delta.t^2/2, delta.t,0, 0,delta.t)
 G <- matrix(seq2, 4,2,byrow = T)
 x.pos <- c(-10,0)
 mean.v <- c(0,0)
-Prec.v <- matrix(0,2,2)
-Prec.v[row(Prec.v)==col(Prec.v)] <- 1
-Prec.y <- matrix(0,2,2)
-Prec.y[1,1] = 10
-Prec.y[2,2] = 100
+Prec.v <-diag(2) 
+Prec.y <- diag(c(10,100)) 
 
 data <- list(t.max = t.max,
              mean.x.init = mean.x.init,
