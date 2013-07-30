@@ -140,6 +140,7 @@ add_subdirectory(inst)
 add_subdirectory(man)
 add_subdirectory(R)
 add_subdirectory(src)
+add_subdirectory(tests)
 
 
 # Generate configuration scripts
