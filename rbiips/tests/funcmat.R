@@ -3,18 +3,32 @@ require(RBiips)
 data <- list(
         t.max = 10,
         mean.x.init = c(0,0,1,0),
-        prec.x.init = diag(1000*ones(4,1)),
-        x.pos = [-10  0],
-        mean.v = zeros(2, 1),
-        prec.v = diag(1*ones(2,1)),
-        prec.y = diag([10 100]),
-        delta.t = 1)
+        prec.x.init = diag(4)*1000,
+        x.pos = c(-10, 0),
+        mean.v = c(0, 0),
+        prec.v = diag(2),
+        prec.y = diag(c(10,100)),
+        delta.t = 1.)
+
+delta_t = 1;
+F <- matrix(c(  1, 0, delta_t, 0,
+                0, 0, 1,       0,
+                delta_t, 0, 0, 1,
+                0, 0,       0, 1),
+                ncol=4)
+G <- matrix(c(delta_t^2/2, 0,
+              0, delta_t^2/2,
+              delta_t,      0,
+              0, delta_t),ncol = 2)
+
+myfuncdim = function (x,v) { c(4,1) };
+myfunceval = function (x,v) { F%*%x +G%*%v } 
 
 ## build evaluation functions
-.Call("add_function", funcmat, 2, 'myfuncdim', 'myfunceval')
+.Call("add_function", "funcmat", 2, myfuncdim , myfunceval)
 biips <- biips.model('funcmat.bug', data=data, sample.data=FALSE);
 x.true = biips$data()$x.true;
 
 ## run SMC
 
-build.sampler(p, proposal="auto")
+build.sampler(biips, proposal="prior")
