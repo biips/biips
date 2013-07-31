@@ -45,8 +45,6 @@ namespace Biips
     }
 
     Bool RFunction::CheckParamValues(const NumArray::Array & paramValues) const {
-       if (is_identity(fun_check_param_))
-          return true;
 
        int nrhs = paramValues.size();
        std::vector<Rcpp::NumericVector> vecParamValues;
@@ -60,9 +58,6 @@ namespace Biips
 
     Bool RFunction::IsDiscreteValued(const std::vector<bool> & mask) const {
        
-         if (is_identity(fun_is_discrete_))
-            return false;
-
          int res = apply(mask, fun_is_discrete_, mask.size());
          return res; 
     }

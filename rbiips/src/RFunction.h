@@ -8,10 +8,6 @@
 namespace Biips
 {
 
-    inline bool is_identity(const Rcpp::Function & g) {
-      return (Rcpp::as<int>(g(2)) == 2);
-    }
-
     class RFunction: public Function
     {
         protected:
@@ -38,8 +34,8 @@ namespace Biips
         RFunction(const String & name, Size nParam, 
                   const Rcpp::Function & fun_dim,
                   const Rcpp::Function & fun_eval, 
-                  const Rcpp::Function & fun_check_param = Rcpp::Function("identity"),
-                  const Rcpp::Function & fun_is_discrete = Rcpp::Function("identity"))
+                  const Rcpp::Function & fun_check_param,
+                  const Rcpp::Function & fun_is_discrete)
             : BaseType(name, nParam), 
               fun_dim_(fun_dim), 
               fun_eval_(fun_eval),
