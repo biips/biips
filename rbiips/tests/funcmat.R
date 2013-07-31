@@ -23,9 +23,12 @@ G <- matrix(c(delta_t^2/2, 0,
 
 myfuncdim = function (x,v) { c(4,1) };
 myfunceval = function (x,v) { F%*%x +G%*%v } 
+myfuncheckparam = function (x,v) { TRUE }
+myfunisdiscrete = function (x,v) { FALSE }
+
 
 ## build evaluation functions
-.Call("add_function", "funcmat", 2, myfuncdim , myfunceval)
+.Call("add_function", "funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
 biips <- biips.model('funcmat.bug', data=data, sample.data=FALSE);
 x.true = biips$data()$x.true;
 
