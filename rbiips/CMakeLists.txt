@@ -86,8 +86,8 @@ if (R_FOUND)
         	VERBATIM
         )
         add_custom_target (${PROJECT_NAME}_build
-    	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
-        )
+        	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
+            )
         
         # add R CMD INSTALL target
         add_custom_target (${PROJECT_NAME}_INSTALL ALL 
@@ -99,7 +99,7 @@ if (R_FOUND)
         	VERBATIM
         )
         # add R CMD check target
-        add_custom_target (${PROJECT_NAME}_check ALL 
+        add_custom_target (${PROJECT_NAME}_check  
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp BiipsCompiler ${PROJECT_NAME}_INSTALL 
         	COMMAND ${R_EXECUTABLE} CMD check ${PROJECT_NAME}
         	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
