@@ -7,19 +7,18 @@ data <- list(
         x.pos = c(-10, 0),
         mean.v = c(0, 0),
         prec.v = diag(2),
-        prec.y = diag(c(10,100)),
-        delta.t = 1.)
+        prec.y = diag(c(10,100)))
 
-delta_t = 1;
-F <- matrix(c(  1, 0, delta_t, 0,
+delta.t = 1;
+F <- matrix(c(  1, 0, delta.t, 0,
                 0, 0, 1,       0,
-                delta_t, 0, 0, 1,
+                delta.t, 0, 0, 1,
                 0, 0,       0, 1),
                 ncol=4)
-G <- matrix(c(delta_t^2/2, 0,
-              0, delta_t^2/2,
-              delta_t,      0,
-              0, delta_t),ncol = 2)
+G <- matrix(c(delta.t^2/2, 0,
+              0, delta.t^2/2,
+              delta.t,      0,
+              0, delta.t),ncol = 2)
 
 myfuncdim = function (x,v) { c(4,1) };
 myfunceval = function (x,v) { F%*%x +G%*%v } 
@@ -28,7 +27,7 @@ myfunisdiscrete = function (x,v) { FALSE }
 
 
 ## build evaluation functions
-.Call("add_function", "funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
+zut <- .Call("add_function", "funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
 biips <- biips.model('funcmat.bug', data=data, sample.data=FALSE);
 x.true = biips$data()$x.true;
 
