@@ -53,7 +53,6 @@ namespace Biips
        }
        int res = Rcpp::as<int>(apply(vecParamValues, fun_check_param_, nrhs));
        return res;
-
     }
 
     Bool RFunction::IsDiscreteValued(const std::vector<bool> & mask) const {
