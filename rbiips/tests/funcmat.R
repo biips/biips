@@ -1,7 +1,8 @@
 require(RBiips)
 ## define data
+t.max <- 10
 data <- list(
-        t.max = 10,
+        t.max = t.max,
         mean.x.init = c(0,0,1,0),
         prec.x.init = diag(4)*1000,
         x.pos = c(-10, 0),
@@ -34,3 +35,16 @@ x.true = biips$data()$x.true;
 ## run SMC
 
 build.sampler(biips, proposal="prior")
+
+#run biips 
+n.part <- 1000
+type <- 'fsb'
+out.biips <- smc.samples(biips, paste("x[1:2,1:",t.max,"]"),
+                         n.part=n.part, type=type)
+# summary
+x.summ <- summary(out.biips$x)
+print(x.summ)
+
+# diagnostic
+print(diagnostic(out.biips$x))
+
