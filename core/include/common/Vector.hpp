@@ -94,7 +94,7 @@ namespace Biips
     StorageType * pValues_;
     mutable Bool released_;
 
-    BaseType::swap;
+    using BaseType::swap;
 
   public:
     explicit VectorRef(NumArray & dat) : BaseType(dat.Length(), array_type()),

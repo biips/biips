@@ -97,7 +97,7 @@ namespace Biips
     ValArray * pValues_;
     mutable Bool released_;
 
-    BaseType::swap;
+    using BaseType::swap;
 
   public:
     explicit MatrixRef(NumArray & dat) : BaseType(dat.Dim()[0],
