@@ -1,3 +1,4 @@
+file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # include directories
 include_directories (
 	${Compiler_INCLUDE_DIRS}
