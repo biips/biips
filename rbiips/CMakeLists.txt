@@ -90,7 +90,7 @@ if (R_FOUND)
             )
         
         # add R CMD INSTALL target
-        add_custom_target (${PROJECT_NAME}_INSTALL ALL 
+        add_custom_target (${PROJECT_NAME}_INSTALL
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
             BiipsCompiler BiipsBase
         	COMMAND ${R_EXECUTABLE} CMD INSTALL ${R_INSTALL_FLAGS} ${pkg_dir}
