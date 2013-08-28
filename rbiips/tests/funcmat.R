@@ -37,7 +37,7 @@ x.true = biips$data()$x.true;
 build.sampler(biips, proposal="prior")
 
 #run biips 
-n.part <- 1000
+n.part <- 100
 type <- 'fsb'
 out.biips <- smc.samples(biips, paste("x[1:2,1:",t.max,"]"),
                          n.part=n.part, type=type)

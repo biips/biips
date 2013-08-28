@@ -4,14 +4,20 @@
 #include "RBiipsCommon.h"
 
 // FIXME a tester!
-static Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) { 
+Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) { 
    const Biips::ValArray & values = array.Values();
    const Biips::DimArray & dims = array.Dim();
-   
-   Rcpp::IntegerVector dim(dims.begin(), dims.end());
-   Rcpp::NumericVector vec;
-   vec.attr("dim") = dim;
+   const int ndim = dims.size();  
+   Rcpp::Dimension * pdim;
+   switch (ndim) {
+        case 1: pdim = new Rcpp::Dimension(dims[0]); break;
+        case 2: pdim = new Rcpp::Dimension(dims[0], dims[1]); break;
+        case 3: pdim = new Rcpp::Dimension(dims[0], dims[1], dims[2]); break;
+        default : throw Biips::RuntimeError("Array limited to 3 dims max in RFunction"); break;
+   }
+   Rcpp::NumericVector vec(*pdim);
    vec.assign(values.begin(), values.end());
+   delete pdim;
    return vec;
 }
 
@@ -22,13 +28,13 @@ namespace Biips
     void RFunction::eval(ValArray & output,
                         const NumArray::Array & params) const {
    
-        int nhrs  = params.size();
-        std::vector<Rcpp::NumericVector> vecParams;
-        for(int i = 0; i < nhrs ; ++i ){
+        int nrhs  = params.size();
+        std::vector<Rcpp::NumericVector> vecParams(nrhs);
+        for(int i = 0; i < nrhs ; ++i ){
             vecParams[i] = convArrayVector(params[i]);
         }
         
-        Rcpp::NumericVector outvec = apply(vecParams, fun_eval_, nhrs); 
+        Rcpp::NumericVector outvec = apply(vecParams, fun_eval_, nrhs); 
         output.assign(outvec.begin(), outvec.end()); 
     }
 
@@ -47,18 +53,20 @@ namespace Biips
     Bool RFunction::CheckParamValues(const NumArray::Array & paramValues) const {
 
        int nrhs = paramValues.size();
-       std::vector<Rcpp::NumericVector> vecParamValues;
+       std::vector<Rcpp::NumericVector> vecParamValues(nrhs);
        for(int i = 0; i < nrhs; ++i) {
         vecParamValues[i] = convArrayVector(paramValues[i]);
        }
-       int res = Rcpp::as<int>(apply(vecParamValues, fun_check_param_, nrhs));
-       return res;
+       Rcpp::NumericVector res = apply(vecParamValues, fun_check_param_, nrhs);
+       
+       int mybool = static_cast<int>(res[0]);
+       return mybool;
     }
 
     Bool RFunction::IsDiscreteValued(const std::vector<bool> & mask) const {
        
-         int res = apply(mask, fun_is_discrete_, mask.size());
-         return res; 
+         bool res = apply(mask, fun_is_discrete_, mask.size());
+         return static_cast<bool>(res); 
     }
       
 }
