@@ -36,7 +36,6 @@
 #
 
 AC_INIT([RBiips], [@Biips_VERSION_MAJOR@])
-BIIPS_SHARED="@BIIPS_SHARED@"
 
 if test -z "${R_HOME}"; then
    AC_MSG_ERROR("R_HOME is not defined")
@@ -110,27 +109,11 @@ else
    fi
 fi
 
-# Support for private installations of BiiPS. If the biips libraries are not
-# on the linker path then it helps to hard-code the location of BiiPS into
-# the DSO for RBiips. Suggested by Doug Bates, April 2011.
-
-if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
-	AC_ARG_ENABLE([rpath],
-	            AC_HELP_STRING([--enable-rpath],
-	                           [Hard link the location of the BiiPS libraries]))
-	if test [ "x$enable_rpath" = "xyes"]; then
-	   BIIPS_RPATH="-Wl,-rpath ${BIIPS_LIB}"
-	fi
-fi
 
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
-if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
-	LDFLAGS="-L${BIIPS_LIB} -Wl,-rpath ${BIIPS_LIB}"
-else
-	LDFLAGS="-L${BIIPS_LIB}"
-	LIBS="-lm -lstdc++"
-fi
+LDFLAGS="-L${BIIPS_LIB}"
+LIBS="-lm -lstdc++"
 AC_CHECK_LIB(BiipsCore, BiipsCore_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsCore library in ${BIIPS_LIB}")])
 AC_CHECK_LIB(BiipsBase, BiipsBase_is_present, [],
@@ -141,11 +124,7 @@ AC_LANG_POP()
 LDFLAGS=${OLDFLAGS}
 
 
-if test [ ${BIIPS_SHARED} = "TRUE" ] ; then
-	BIIPS_LD_FLAGS="-L${BIIPS_LIB} -lBiipsCompiler ${BIIPS_RPATH} -lBiipsBase ${BIIPS_RPATH}  -lBiipsCore ${BIIPS_RPATH}"
-else
-	BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
-fi
+BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
 
 #Finally, set optional module directory using --with-biips-modules or
 #environment variable BIIPS_MODULES
