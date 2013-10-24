@@ -2,11 +2,13 @@
 file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp MatlabFunction.cpp)
 file(GLOB MBIIPS_H *.h *.hpp)
 
-if (WIN32)
-	if (MATLAB)
-		set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
-		
-        include_directories(${BiipsCore_INCLUDE_DIRS}
+if (MATLAB)
+        if (WIN32)
+          set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
+        else(WIN32)
+          set(BIIPS_LIBS  BiipsCompiler BiipsBase BiipsCore)
+        endif(WIN32)
+        include_directories(${Core_INCLUDE_DIRS}
 			${Base_INCLUDE_DIRS}
 			${Compiler_INCLUDE_DIRS}
 			${MATLAB_INCLUDE_DIR}
@@ -22,14 +24,17 @@ if (WIN32)
 			SUFFIX .${MEX_EXT}
 		)
 		
-		set(INTER_TARGET inter_biips)
-	else()
+    set(INTER_TARGET inter_biips)
+    get_target_property(INTER_TARGET_L inter_biips LOCATION )
+    message(STATUS ${INTER_TARGET_L}) 
+    else()
 		message (FATAL_ERROR "MATLAB not found on your computer.\n"
 					"Try setting MATLAB_ROOT to the root path of your MATLAB installation. eg: c:\Program Files\MATLAB\R2012a\n"
 					"Octave mkoct is not yet supported on Windows.\n"
 					"You should deactivate MATBIIPS compilation by setting BUILD_MATBIIPS=OFF")
-	endif()
-#non WIN32
+
+                
+                #octave
 else()
     set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 	foreach(l ${BIIPS_LIBS})
@@ -65,7 +70,7 @@ endif()
 set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
 add_custom_command(OUTPUT ${INTER_BIN}
 	DEPENDS ${INTER_TARGET}
-	COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
+    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_L} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )

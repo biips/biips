@@ -13,13 +13,13 @@
 # MEX_OPT
 # MEXEXT_COMMAND		
 # MATLAB_ARCH			equals to "i386" or "x64"
-# MATLAB_LIBRARY_DIR 	(Windows only)
-# MATLAB_INCLUDE_DIR 	(Windows only)
-# MATLAB_COMPILE_FLAGS 	(Windows only)
-# MATLAB_LIBRARIES		(Windows only)
-# MATLAB_MEX_LIBRARY	(Windows only)
-# MATLAB_MX_LIBRARY		(Windows only)
-# MATLAB_MAT_LIBRARY	(Windows only)
+# MATLAB_LIBRARY_DIR 	
+# MATLAB_INCLUDE_DIR 	
+# MATLAB_COMPILE_FLAGS 	
+# MATLAB_LIBRARIES		
+# MATLAB_MEX_LIBRARY	
+# MATLAB_MX_LIBRARY		
+# MATLAB_MAT_LIBRARY	
 
 # Variables defined if MEX_FOUND is "OCTAVE":
 # MKOCT					path to mkoctfile exectuable or "MKOCT-NOTFOUND"
@@ -110,58 +110,69 @@ if (MATLAB)
     # On Windows, do not use mex program (gcc not supported)
     # to compile mex-files but use cmake commands instead
     # hence, define compile flags and find MATLAB libraries to link with
-    if (WIN32)
-        # define compile flags
-        set(MATLAB_COMPILE_FLAGS -DMATLAB_MEX_FILE)
+    # define compile flags
+    set(MATLAB_COMPILE_FLAGS -DMATLAB_MEX_FILE)
 
-        if (NOT $ENV{MATLAB_LIBRARYDIR} STREQUAL "")
-            file (TO_CMAKE_PATH $ENV{MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
+    if (NOT $ENV{MATLAB_LIBRARYDIR} STREQUAL "")
+        file (TO_CMAKE_PATH $ENV{MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
+    endif()
+    if (MATLAB_LIBRARYDIR)
+        file (TO_CMAKE_PATH ${MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
+    else(MATLAB_LIBRARYDIR)
+        if (WIN32)
+        if (${MATLAB_ARCH} STREQUAL "i386")
+            file(TO_CMAKE_PATH "${MATLAB_BINDIR}/win32" MATLAB_LIBRARY_DIR)
+            set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m32")
+            set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m32")
+        elseif (${MATLAB_ARCH} STREQUAL "x64")
+            file(TO_CMAKE_PATH "${MATLAB_BINDIR}/win64" MATLAB_LIBRARY_DIR)
+            set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m64")
+            set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m64")
         endif()
-        if (MATLAB_LIBRARYDIR)
-            file (TO_CMAKE_PATH ${MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
-        else(MATLAB_LIBRARYDIR)
-            if (${MATLAB_ARCH} STREQUAL "i386")
-                file(TO_CMAKE_PATH "${MATLAB_BINDIR}/win32" MATLAB_LIBRARY_DIR)
-                set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m32")
-                set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m32")
-            elseif (${MATLAB_ARCH} STREQUAL "x64")
-                file(TO_CMAKE_PATH "${MATLAB_BINDIR}/win64" MATLAB_LIBRARY_DIR)
-                set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m64")
-                set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m64")
-            endif()
-        endif(MATLAB_LIBRARYDIR)
+        else() #nonwin32
+        if (${MATLAB_ARCH} STREQUAL "i386")
+            file(TO_CMAKE_PATH "${MATLAB_BINDIR}/glnx86" MATLAB_LIBRARY_DIR)
+            set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m32")
+            set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m32")
+        elseif (${MATLAB_ARCH} STREQUAL "x64")
+            file(TO_CMAKE_PATH "${MATLAB_BINDIR}/glnxa64" MATLAB_LIBRARY_DIR)
+            set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -m64")
+            set(MATLAB_LINK_FLAGS "${MATLAB_LINK_FLAGS} -m64")
+        endif()
+    
+        endif(WIN32)
+    endif(MATLAB_LIBRARYDIR)
 
-        # find MATLAB libaraies
-        find_library(MATLAB_MEX_LIBRARY mex
-            PATHS ${MATLAB_LIBRARY_DIR}
-        )
-        find_library(MATLAB_MX_LIBRARY mx
-            PATHS ${MATLAB_LIBRARY_DIR}
-        )
-            find_library(MATLAB_MAT_LIBRARY mat
+    # find MATLAB libaries
+    find_library(MATLAB_MEX_LIBRARY mex
         PATHS ${MATLAB_LIBRARY_DIR}
-        )
-        set(MATLAB_LIBRARIES
-            "${MATLAB_MEX_LIBRARY}"
-            "${MATLAB_MX_LIBRARY}"
-            "${MATLAB_MAT_LIBRARY}"
-        )
+    )
+    find_library(MATLAB_MX_LIBRARY mx
+        PATHS ${MATLAB_LIBRARY_DIR}
+    )
+        find_library(MATLAB_MAT_LIBRARY mat
+    PATHS ${MATLAB_LIBRARY_DIR}
+    )
+    set(MATLAB_LIBRARIES
+        "${MATLAB_MEX_LIBRARY}"
+        "${MATLAB_MX_LIBRARY}"
+        "${MATLAB_MAT_LIBRARY}"
+    )
 
-        # find MATLAB includes
-        if (NOT $ENV{MATLAB_INCLUDEDIR} STREQUAL "")
-            file(TO_CMAKE_PATH $ENV{MATLAB_INCLUDEDIR} MATLAB_INCLUDEDIR)
-        endif()
-        if (MATLAB_INCLUDEDIR)
-            find_path(MATLAB_INCLUDE_DIR mex.h
-                PATHS ${MATLAB_INCLUDEDIR}
-            )
-        else(MATLAB_INCLUDEDIR)
-            file(TO_CMAKE_PATH "${MATLAB_BINDIR}/../extern/include" MATLAB_INCLUDEDIR)
-            find_path(MATLAB_INCLUDE_DIR mex.h
-                PATHS ${MATLAB_INCLUDEDIR}
-            )
-        endif(MATLAB_INCLUDEDIR)
-    endif(WIN32)
+    # find MATLAB includes
+    if (NOT $ENV{MATLAB_INCLUDEDIR} STREQUAL "")
+        file(TO_CMAKE_PATH $ENV{MATLAB_INCLUDEDIR} MATLAB_INCLUDEDIR)
+    endif()
+    if (MATLAB_INCLUDEDIR)
+        find_path(MATLAB_INCLUDE_DIR mex.h
+            PATHS ${MATLAB_INCLUDEDIR}
+        )
+    else(MATLAB_INCLUDEDIR)
+        file(TO_CMAKE_PATH "${MATLAB_BINDIR}/../extern/include" MATLAB_INCLUDEDIR)
+        find_path(MATLAB_INCLUDE_DIR mex.h
+            PATHS ${MATLAB_INCLUDEDIR}
+        )
+    endif(MATLAB_INCLUDEDIR)
 
 else(MATLAB) # We did not find matlab
     # try with octave	

@@ -13,13 +13,13 @@
 # MEX_OPT
 # MEXEXT_COMMAND		
 # MATLAB_ARCH			equals to "i386" or "x64"
-# MATLAB_LIBRARY_DIR 	(Windows only)
-# MATLAB_INCLUDE_DIR 	(Windows only)
-# MATLAB_COMPILE_FLAGS 	(Windows only)
-# MATLAB_LIBRARIES		(Windows only)
-# MATLAB_MEX_LIBRARY	(Windows only)
-# MATLAB_MX_LIBRARY		(Windows only)
-# MATLAB_MAT_LIBRARY	(Windows only)
+# MATLAB_LIBRARY_DIR 	
+# MATLAB_INCLUDE_DIR 	
+# MATLAB_COMPILE_FLAGS 	
+# MATLAB_LIBRARIES		
+# MATLAB_MEX_LIBRARY	
+# MATLAB_MX_LIBRARY		
+# MATLAB_MAT_LIBRARY	
 
 # Variables defined if MEX_FOUND is "OCTAVE":
 # MKOCT					path to mkoctfile exectuable or "MKOCT-NOTFOUND"
@@ -34,7 +34,6 @@
 # MATLAB_INCLUDEDIR 	path to the MATLAB headers (Windows only)
 
 
-
 if (MEX)
 	if (${MEX} MATCHES "mkoctfile")
              find_package(Octave)
@@ -44,14 +43,14 @@ if (MEX)
 		message(FATAL_ERROR "I do not understand your MEX definitions : try mkoctfile or mex")
         endif(${MEX} MATCHES "mkoctfile")
 else(MEX)
-        find_package(MATLAB)
+    find_package(MATLAB)
 	find_package(Octave)
 	if (MATLAB)
-	 message("USE matlab as mexfile compiler")
+	    message("USE matlab as mexfile compiler")
 	elseif(Octave)
-	     message("USE mkoctfile as mexfile compiler")
-        else(MATLAB)
-           message(FATAL_ERROR "No Matlab or Octave mex compiler found") 
+	    message("USE mkoctfile as mexfile compiler")
+    else(MATLAB)
+        message(FATAL_ERROR "No Matlab or Octave mex compiler found") 
    endif(MATLAB)
 endif(MEX)	
 
