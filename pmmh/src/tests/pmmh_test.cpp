@@ -89,7 +89,7 @@ struct nireFixture {
            throw RuntimeError("Failed to compile model.");
         
         
-        param_names.push_back("log.prec.y");
+        param_names.push_back("log_prec_y");
         init_values.push_back(MultiArray(0.));
         nb_particles = 100;
 
