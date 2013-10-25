@@ -54,3 +54,22 @@ foreach(_cfg ${cfg_files})
         --particles=100 --alpha=1e-6)
 endforeach()
 
+#add target for parse_test
+set(parse_src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/parse_test/parse_test.cpp)
+add_executable(parse_test ${prs_src_files})
+target_link_libraries(parse_test ${EXTRA_LIBS})
+
+#add test for parse_test
+get_target_property(exe_loc prs_test LOCATION)
+add_test(NAME parse_test COMMAND ${exe_loc})
+
+#add target for pmmh 
+add_executable(pmmh_test ${CMAKE_CURRENT_SOURCE_DIR}/src/pmmh/pmm_test.cpp)
+target_link_libraries(pmmh_test ${BIIPS_LIBS} ${EXTRA_LIBS})
+
+#add test for pmmh
+get_target_property(exe_loc pmmh_test LOCATION)
+file(COPY data_jags.R hmm_1d_nonlin_param.bug DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME pmmh_test COMMAND ${exe_loc})
+
+
