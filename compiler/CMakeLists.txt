@@ -16,9 +16,6 @@ file (GLOB_RECURSE SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 )
 
-# add biips libraries
-#set(BIIPS_LIBS	BiipsBase BiipsCore)
-
 # add the library
 add_library(BiipsCompiler ${SOURCE_FILES})
 
@@ -32,4 +29,3 @@ install(DIRECTORY
 	PATTERN .svn EXCLUDE
 	PATTERN *.in EXCLUDE
 )
-
