@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE pmmh_test
 #include <boost/test/included/unit_test.hpp>
-#include "pmmh.hpp"
+#include "pmmh/pmmh.hpp"
 #include "include/common/Error.hpp"
 #include <boost/assign/list_of.hpp>
 #include "iostream/DumpReader.hpp"
