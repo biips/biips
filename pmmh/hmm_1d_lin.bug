@@ -1,9 +1,0 @@
-model
-{
-  x[1] ~ dnorm(1, 2)
-  for (t in 2:tmax+1)
-  {
-    x[t] ~ dnormvar(x[t-1], 3)
-    y[t-1] ~ dnormvar(x[t], 1)
-  }
-}
