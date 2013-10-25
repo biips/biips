@@ -1,4 +1,4 @@
-#include "pmmh.hpp"
+#include "pmmh/pmmh.hpp"
 #include "parse_varname.hpp"
 
 #include "boost/typeof/typeof.hpp"
