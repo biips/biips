@@ -61,7 +61,7 @@ if (MATLAB)
 		execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
 			-r "fprintf(fopen('matlab_root','w'), '%s', matlabroot); exit"
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		)
+            OUTPUT_QUIET)
 		while (NOT MATLAB_ROOT)
 			while (NOT EXISTS ${_matlab_root_file})
 				# wait for previous execute_process
