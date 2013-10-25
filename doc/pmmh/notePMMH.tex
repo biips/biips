@@ -1,0 +1,204 @@
+\documentclass{article}%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+%TCIDATA{Created=Tuesday, October 22, 2013 14:22:32}
+%TCIDATA{LastRevised=Tuesday, October 22, 2013 16:55:08}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+%EndMSIPreambleData
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\begin{document}
+
+\title{Details on the implementation of the Particle Marginal Metropolis Hastings
+algorithm in Biips}
+\author{F.\ Caron, A. Todeschini, M. Fuentes }
+\maketitle
+
+In the particle marginal Metropolis-Hastings (PMMH) sampler, we are interested
+in sampling from a distribution $p(\theta,x_{1:T}|y_{1:T})$ where $\theta
+\in\mathbb{R}^{d}$. The algorithm constructs a Markov chain $(\theta
+^{(1)},x_{1:T}^{(1)})\rightarrow(\theta^{(2)},x_{1:T}^{(2)})\rightarrow
+(\theta^{(3)},x_{1:T}^{(3)})$\ldots\ of invariant/limiting distribution
+$p(\theta,x_{1:T}|y_{1:T})$. It uses the following proposal distribution for
+the joint update of $(\theta,x_{1:T})$%
+\[
+q((\theta^{\ast},x_{1:T}^{\ast})|(\theta,x_{1:T}))=q(\theta^{\ast}%
+|\theta)q(x_{1:T}^{\ast}|\theta^{\ast},y_{1:T})
+\]
+For the proposal $q(x_{1:T}^{\ast}|\theta^{\ast},y_{1:T})$, we will use a SMC
+algorithm targeting the conditional distribution $p(x_{1:T}|\theta^{\ast
+},y_{1:T})$. The choice of the proposal distribution $q(\theta^{\ast}|\theta)$
+is quite sensible for the mixing time of the Markov chain (as in standard
+MCMC\ algorithms), and we will use an adaptive method by iteratively adapting
+the proposal distribution $q_{i}(\theta^{\ast}|\theta)$ during the first
+$N_{adapt}$ iterations. \bigskip
+
+We'll use the following proposal distributions in the adaptation stage. For
+$i=1,\ldots,2d$%
+\begin{equation}
+q_{i}(\theta^{\ast}|\theta)=\mathcal{N}\left(  \theta^{\ast};\theta,\Sigma
+_{0}\right)
+\end{equation}
+where $\Sigma_{0}=\frac{0.1^{2}}{d}I_{d}$ , $\mathcal{N}(x;\mu,\Sigma)$
+denotes the Gaussian pdf of mean $\mu$, covariance $\Sigma$ evaluated at $x$.
+Set $\varepsilon_{2d+1}=\frac{2.38^{2}}{d}$. For $i=2d+1,\ldots
+,N_{\text{adapt}}$%
+\begin{equation}
+q_{i}(\theta^{\ast}|\theta)=(1-\beta)\mathcal{N}\left(  \theta^{\ast}%
+;\theta,\varepsilon_{i}\left(  \frac{i-1}{i}\Sigma_{i}+\frac{1}{i}\Sigma
+_{0}\right)  \right)  +\beta\mathcal{N}\left(  \theta^{\ast};\theta
+,\frac{0.1^{2}}{d}I_{d}\right)
+\end{equation}
+where $\beta=0.05$, $\Sigma_{i}$ is the empirical correlation of
+$(\theta^{(1)},\ldots\theta^{(i-1)})$, and the scale parameter $\varepsilon
+_{i}$ is updated by
+\begin{equation}
+\varepsilon_{i+1}=\exp(\log(\varepsilon_{i})+\alpha^{i}(A_{i}-0.234))
+\end{equation}
+where $\alpha=0.999$ and $A_{i}$ is the acceptance rate up to iteration $i$.
+
+After the adaptation, we do not update the proposal and simply use the final
+parameters $\varepsilon_{N_{adapt}}$ and $\Sigma_{N_{adapt}}.$
+
+\bigskip
+
+The full algorithm is as follows
+
+\begin{enumerate}
+\item \textbf{Initialization}
+
+\begin{enumerate}
+\item Set $\theta^{(0)}$ to some value.
+
+\item Run an SMC algorithm targeting $p(x_{1:T}|\theta^{(0)},y_{1:T})$. Let
+$\widehat{p}(x_{1:T}|\theta^{(0)},y_{1:T})$ be the particle
+representation.\ Sample $X_{1:T}^{(0)}\sim\widehat{p}(x_{1:T}|\theta
+^{(0)},y_{1:T})$ and let $\widehat{p}(y_{1:T}|\theta^{(0)})$ be the marginal
+likelihood estimate.
+\end{enumerate}
+
+\item \textbf{Adaptation}.
+
+For $i=1,\ldots,N_{adapt}$
+
+\begin{enumerate}
+\item Proposal for $\theta$
+
+\begin{itemize}
+\item If $i\leq2d$, sample
+\[
+\theta^{\ast}|\theta^{(i-1)}\sim\mathcal{N}\left(  \theta^{(i-1)},\Sigma
+_{0}\right)
+\]
+
+
+\item If $2d<i\leq N_{\text{adapt}}$
+
+\begin{itemize}
+\item Compute $\Sigma_{i}$ the empirical correlation matrix of $(\theta
+^{(0)},\theta^{(1)},\ldots,\theta^{(i-1)})$
+
+\item Compute $\varepsilon_{i}=\exp(\log(\varepsilon_{i-1})+\alpha
+^{i-1}(A_{i-1}-0.234))$
+
+\item Sample
+\[
+\theta^{\ast}|\theta^{(i-1)}\sim(1-\beta)\mathcal{N}\left(  \theta
+^{(i-1)},\varepsilon_{i}\left(  \frac{i-1}{i}\Sigma_{i}+\frac{1}{i}\Sigma
+_{0}\right)  \right)  +\beta\mathcal{N}\left(  \theta^{(i-1)},\Sigma
+_{0}\right)
+\]
+
+\end{itemize}
+\end{itemize}
+
+\item Run an SMC algorithm targeting $p(x_{1:T}|\theta^{\ast},y_{1:T})$. Let
+$\widehat{p}(x_{1:T}|\theta^{\ast},y_{1:T})$ be the particle
+representation.\ Sample $X_{1:T}^{\ast}\sim\widehat{p}(x_{1:T}|\theta^{\ast
+},y_{1:T})$ and let $\widehat{p}(y_{1:T}|\theta^{\ast})$ be the marginal
+likelihood estimate
+
+\item with probability%
+\begin{equation}
+\min\left(  1,\frac{\widehat{p}(y_{1:T}|\theta^{\ast})}{\widehat{p}%
+(y_{1:T}|\theta^{(i-1)})}\frac{p(\theta^{\ast})}{p(\theta^{(i-1)})}\right)
+\end{equation}
+set $\theta^{(i)}=\theta^{\ast}$, $X_{1:T}^{(i)}=X_{1:T}^{\ast}$ . Otherwise,
+set $\theta^{(i)}=\theta^{(i-1)}$, $X_{1:T}^{(i)}=X_{1:T}^{(i-1)}$.
+\end{enumerate}
+
+\item \textbf{Iterations} (includes burn-in)
+
+Let $\widehat{\varepsilon}=\varepsilon_{_{N_{\text{adapt}}}}$ and
+$\widehat{\Sigma}=\Sigma_{N_{\text{adapt}}}$. For $i=N_{adapt}+1,\ldots$
+
+\begin{enumerate}
+\item Sample
+\[
+\theta^{\ast}|\theta^{(i-1)}\sim(1-\beta)\mathcal{N}(\theta^{(i-1)}%
+,\widehat{\varepsilon}\widehat{\Sigma})+\beta\mathcal{N}\left(  \theta
+^{(i-1)},\Sigma_{0}\right)
+\]
+
+
+\item Run an SMC algorithm targeting $p(x_{1:T}|\theta^{\ast},y_{1:T})$. Let
+$\widehat{p}(x_{1:T}|\theta^{\ast},y_{1:T})$ be the particle
+representation.\ Sample $X_{1:T}^{\ast}\sim\widehat{p}(x_{1:T}|\theta^{\ast
+},y_{1:T})$ and let $\widehat{p}(y_{1:T}|\theta^{\ast})$ be the marginal
+likelihood estimate
+
+\item with probability%
+\begin{equation}
+\min\left(  1,\frac{\widehat{p}(y_{1:T}|\theta^{\ast})}{\widehat{p}%
+(y_{1:T}|\theta^{(i-1)})}\frac{p(\theta^{\ast})}{p(\theta^{(i-1)})}\right)
+\end{equation}
+set $\theta^{(i)}=\theta^{\ast}$, $X_{1:T}^{(i)}=X_{1:T}^{\ast}$ . Otherwise,
+set $\theta^{(i)}=\theta^{(i-1)}$, $X_{1:T}^{(i)}=X_{1:T}^{(i-1)}$.\bigskip
+\end{enumerate}
+\end{enumerate}
+
+\bigskip
+
+References:
+
+C. Andrieu, A. Doucet, R. Holenstein. Particle Markov Chain Monte Carlo
+methods. Journal of the Royal\ Statistical Society B, 2010.
+
+G.\ Roberts and J.\ Rosenthal. Examples of adaptive MCMC.
+
+J.\ Dureau, K. Kalogeropoulos and M. Baguelin. Capturing the time-varying
+drivers of an epidemic using stochastic dynamical systems.
+
+
+\end{document}
