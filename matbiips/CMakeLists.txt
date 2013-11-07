@@ -5,12 +5,12 @@ add_subdirectory(tests)
 add_subdirectory(tuto)
 
 # create archive
-set(MATBIIPS_ARCHIVE "${CMAKE_BINARY_DIR}/matbiips_${Biips_VERSION}.zip")
+set(MATBIIPS_ARCHIVE "${CMAKE_BINARY_DIR}/matbiips_${Biips_VERSION}.tar.gz")
 add_custom_command(
    OUTPUT ${MATBIIPS_ARCHIVE}
    DEPENDS matbiips
    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-   COMMAND ${CMAKE_COMMAND} -E tar caf ${MATBIIPS_ARCHIVE}
+   COMMAND ${CMAKE_COMMAND} -E tar czfv ${MATBIIPS_ARCHIVE}
       matbiips/matlab/inter_biips.${MEX_EXT} matbiips/matlab/*.m
       matbiips/matlab/private/*.m
       matbiips/tests/*.m
