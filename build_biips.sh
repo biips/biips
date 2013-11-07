@@ -3,21 +3,27 @@
 set -x
 # Change these variables to fit your needs
 #-----------------------------------------
-export BIIPS_SRC=/home/adrien-alea/workspace/biips-src/trunk
-export BIIPS_BUILD=/home/adrien-alea/workspace/biips-release
+# prefer absolute over relative paths
+export BIIPS_SRC=/home/adrien-alea/workspace/biips-git/
+export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
 export BIIPS_ROOT=/home/adrien-alea/biips
-export LIBnn=lib64
-export ECLIPSE=/home/adrien-alea/eclipse/eclipse
-export MATLAB_ROOT=/home/adrien-alea/MATLAB/R2012a
+export LIBnn=lib/x86_64
+# OpenSuse: use lib or lib64
+# Ubuntu: use lib/x86 or lib/x86_64
+export ECLIPSE=/home/adrien-alea/eclipse_4.3
+export MATLAB_ROOT=/usr/local/MATLAB/R2012b
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-export CMAKE_OPTIONS=-DBoost_USE_STATIC_LIBS=OFF
-export CPACK_GENERATOR=RPM
-export MAKE="make -j10"
+export CMAKE_OPTIONS="-DBoost_USE_STATIC_LIBS=ON -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j20"
+# OpenSuse: use OFF
+export CPACK_GENERATOR=DEB
+# OpenSuse: use RPM
+export MAKE="make -j20"
 #-----------------------------------------
 
 set +x; read -p 'Press [Enter] key to continue...'; set -x
-svn up $BIIPS_SRC
+cd $BIIPS_SRC
+git pull origin master
 
 set +x; echo -n "Run CMake ? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then
