@@ -24,30 +24,45 @@ set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
  Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.
  Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
 
+if (NOT Biips_DATE)
+    if (WIN32)
+        execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
+    elseif (UNIX)
+        execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE TODAY)
+    endif ()
+    if (TODAY)
+        string (REGEX REPLACE
+            "(..)/(..)/(....).*"
+            "\\3-\\2-\\1"
+            Biips_DATE
+            ${TODAY}
+        )
+    else ()
+        message (SEND_ERROR "date not implemented.\nPlease set variable Biips_DATE to yyyy-mm-dd")
+    endif ()
+endif ()
+message (STATUS Biips_DATE=${Biips_DATE})
+
 file (WRITE Description.txt ${Biips_DESCRIPTION})
-if (UNIX)
-   add_definitions(--std=c++0x -fPIC -Wfatal-errors)
-endif(UNIX)	
 
-
-# configure resource files
-configure_file (README.md.in README.txt @ONLY)
-#configure_file (Welcome Welcome.txt COPYONLY)
-configure_file (COPYING.txt COPYING.txt COPYONLY)
-
-# configure NOTICES file
-configure_file (
-	${CMAKE_SOURCE_DIR}/NOTICES.txt.in
-	${CMAKE_BINARY_DIR}/NOTICES.txt
-)
 
 # set dependencies versions
+set (Boost_VERSION_REQUIRED 1.49.0)
 set (JAGS_VERSION 3.2.0)
-
 set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.9.4)
 set (R_VERSION_REQUIRED 2.13.0)
 
+
+# configure resource files
+configure_file (README.md.in README.txt @ONLY)
+configure_file (README.md.in ${CMAKE_SOURCE_DIR}/README.txt @ONLY)
+#configure_file (Welcome Welcome.txt COPYONLY)
+configure_file (COPYING.txt COPYING.txt COPYONLY)
+
+# configure NOTICES file
+configure_file (NOTICES.txt.in NOTICES.txt)
+configure_file (NOTICES.txt.in ${CMAKE_SOURCE_DIR}/NOTICES.txt)
 
 # print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
@@ -66,6 +81,11 @@ if (PRINT_SYSTEM_INFO)
 endif ()
 
 # configure build
+if (UNIX)
+   add_definitions(--std=c++0x -fPIC -Wfatal-errors)
+endif(UNIX) 
+
+
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

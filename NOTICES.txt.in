@@ -3,9 +3,9 @@ The following is a list of these components (full copies of the license
 agreements or notices used by these components are included below):
 
 - JAGS @JAGS_VERSION@
-- SMCTC @SMCTC_VERSION@
+- SMCTC 1.00
 - Boost >= @Boost_VERSION_REQUIRED@
-- BiiPS test programs use (optional) Qt widgets from 
+- BiiPS test programs can use (optional) Qt widgets from 
   the Qwt project (http://qwt.sf.net).
 
 ================================================================================
