@@ -72,3 +72,57 @@ Pull (remote)
 
     git pull origin my_branch
 
+Continuous integration
+==========================
+Continuous integration is hosted on Inria CI website: https://ci.inria.fr/biips
+
+You first need an account on CI website.
+
+After logging in the CI website, go to *MyAccount* page and add your ssh public key.
+
+Ask the Biips administrators to give you access to the project.
+
+Slaves
+--------------
+* Ubuntu 12.04 amd64
+* Windows 7 64bit
+
+Connect to slaves
+--------------
+On CI website, go to your *Dashbord*.
+
+In the Biips box, click *Manage Project* and then click *Salves* on the left panel.
+
+Click the *Connect* button on the desired slave to get connection commands that include your username.
+
+Connect to Ubuntu
+-----------------
+
+You can add hosts to your .ssh/config:
+
+    Host *.ci 
+    ProxyCommand ssh <username>@ci-ssh.inria.fr "/usr/bin/nc `basename %h .ci` %p" 
+
+    Host biips-ubuntu
+    ProxyCommand ssh <username>@ci-ssh.inria.fr "/usr/bin/nc biips-ubuntu-64 %p"
+    User ci
+
+Connect va ssh:
+
+    ssh -X biips-ubuntu
+    
+Default password for ci user: ci
+
+Default password for root user: password
+
+Connect to Windows
+--------------------
+
+Create SSH tunnel:
+
+    ssh <username>@ci-ssh.inria.fr -L 3380:biips-window-64:3389
+    
+Use remote desktop on the given IP:
+
+    rdesktop 127.0.0.1:3380
+    
