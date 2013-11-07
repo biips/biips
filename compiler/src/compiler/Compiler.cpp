@@ -769,7 +769,7 @@ namespace Biips
     //        }
     //    }
 
-    Bool obs = p_this_data;
+    Bool obs(p_this_data);
 
     NodeId snode_id = model_.graph().AddStochasticNode(p_dist,
                                                        parameters,
