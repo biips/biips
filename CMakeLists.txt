@@ -87,12 +87,12 @@ if (SUPPRESS_DEPRECATED_WARNINGS)
 endif ()
 
 # configure and find boost
-option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
+option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" OFF)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-find_package(Boost COMPONENTS program_options regex exception)
+find_package(Boost COMPONENTS program_options regex)
 if(Boost_PROGRAM_OPTIONS_FOUND)
     set(EXTRA_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} ${EXTRA_LIBS})
 else()
@@ -103,12 +103,6 @@ if(Boost_REGEX_FOUND)
     set(EXTRA_LIBS ${Boost_REGEX_LIBRARY_RELEASE} ${EXTRA_LIBS})
 else()
     message(FATAL_ERROR "Boost Regex Not Found!") 	
-endif()
-
-if(Boost_EXCEPTION_FOUND)
-    set(EXTRA_LIBS ${Boost_EXCEPTION_LIBRARY_RELEASE} ${EXTRA_LIBS})
-else()
-    message(FATAL_ERROR "Boost exception Not Found!") 	
 endif()
 
 # configure install directories and output directories
