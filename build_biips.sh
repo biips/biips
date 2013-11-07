@@ -7,15 +7,15 @@ set -x
 export BIIPS_SRC=/home/adrien-alea/workspace/biips-git/
 export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
 export BIIPS_ROOT=/home/adrien-alea/biips
-export LIBnn=lib/x86_64
+export LIBnn=lib/x86_64-linux-gnu
+# Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
 # OpenSuse: use lib or lib64
-# Ubuntu: use lib/x86 or lib/x86_64
 export ECLIPSE=/home/adrien-alea/eclipse_4.3
 export MATLAB_ROOT=/usr/local/MATLAB/R2012b
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-export CMAKE_OPTIONS="-DBoost_USE_STATIC_LIBS=ON -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j20"
-# OpenSuse: use OFF
+export CMAKE_OPTIONS="-DBoost_USE_STATIC_LIBS=ON -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j20"
+# OpenSuse: use -DBoost_USE_STATIC_LIBS=OFF
 export CPACK_GENERATOR=DEB
 # OpenSuse: use RPM
 export MAKE="make -j20"
