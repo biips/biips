@@ -28,6 +28,22 @@ Some of its features include:
 
 For more information on BiiPS please visit the [project website](@Biips_URL@).
 
+Authors
+-----------------------------------------------------------------------------
+BiiPS code is Copyright (C) Inria, 2012 
+
+Authors:
+- Adrien TODESCHINI, software designer and developer
+- Francois CARON, probability expertise and specifications
+- Marc FUENTES, software designer and developer
+
+BiiPS code is adapted from:
+- JAGS, Copyright (C) Martyn Plummer, 2002-2010
+- SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
+  
+Additional information concerning adapted open source software
+is included in the file NOTICES.
+
 Getting the Code
 -----------------------------------------------------------------------------
 BiiPS is licensed under the @Biips_LICENSE@, the terms of which are included in the file COPYING.
@@ -48,3 +64,15 @@ See also the following files included with the distribution:
   
 If you have problems or want to share feedback with us please visit [our website](@Biips_URL@).
 For other inquiries you can also email us at [@Biips_CONTACT@](mailto:@Biips_CONTACT@).
+
+Thanks
+-----------------------------------------------------------------------------
+Thanks for supporting the project:
+- ALEA project-team at Inria Bordeaux (http://alea.bordeaux.inria.fr)
+and especially:
+- Pierre Del Moral (Head of ALEA team): guidelines, probability expertise, testing methodology
+- Pierrick Legrand: continuous project monitoring, software deployment expertise
+
+Logo design:
+- Timothee Del Moral
+
