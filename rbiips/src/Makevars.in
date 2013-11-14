@@ -1,4 +1,4 @@
-PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/compiler
+PKG_CPPFLAGS = --std=c++0x -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/compiler
 
 ## Use the R_HOME indirection to support installations of multiple R version
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @BIIPS_LD_FLAGS@
