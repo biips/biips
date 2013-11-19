@@ -38,7 +38,5 @@ add_custom_command(TARGET rbiips_shlib
 
 set(src_files ${CMAKE_CURRENT_SOURCE_DIR}/Makevars.in ${cpp_files} ${h_files})
 file(COPY ${src_files} DESTINATION ${out_bindir})
-
-
 # add dependencies to source files 
 add_targets_depends(src_files)
