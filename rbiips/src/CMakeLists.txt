@@ -29,7 +29,12 @@ set_target_properties(rbiips_shlib PROPERTIES
 	PREFIX ""
 	SUFFIX .so
 )
-
+#copy the library into tests directory
+get_target_property(shlib_loc rbiips_shlib LOCATION)
+add_custom_command(TARGET rbiips_shlib
+                   POST_BUILD 
+                   COMMAND ${CMAKE_COMMAND} 
+                   ARGS -E copy ${shlib_loc} ${CMAKE_BINARY_DIR}/rbiips/tests)
 
 set(src_files ${CMAKE_CURRENT_SOURCE_DIR}/Makevars.in ${cpp_files} ${h_files})
 file(COPY ${src_files} DESTINATION ${out_bindir})
