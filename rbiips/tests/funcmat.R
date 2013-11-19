@@ -1,4 +1,3 @@
-require(RBiips)
 ## define data
 t.max <- 10
 data <- list(
