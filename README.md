@@ -4,7 +4,7 @@ BiiPS software is a set of C++ libraries for
 Bayesian inference with interacting Particle Systems.
 
 - Version:       0.8.1
-- Last modified: 2013-11-14
+- Last modified: 2013-11-19
 - Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
 - License:       GPL-3
 - Website:       http://alea.bordeaux.inria.fr/biips
