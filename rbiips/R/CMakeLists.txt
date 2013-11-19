@@ -13,13 +13,18 @@ if (sed_exe)
     # convert the files
     foreach(f ${rfiles})
         get_filename_component(fic ${f} NAME)
-        message(STATUS "${CMAKE_CURRENT_BINARY_DIR}/${fic}")
-        execute_process(COMMAND ${sed_exe} -e 
-        "s/PACKAGE\ *=\ *\"RBiips\"/\"rbiips_shlib.so\"/g" ${f}
-        OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${fic}")
-        file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/${fic}" "${CMAKE_BINARY_DIR}/rbiips/tests/${fic}")
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${fic}"
+        COMMAND ${sed_exe} 
+        ARGS -e "s/PACKAGE\ *=\ *\"RBiips\"/\"rbiips_shlib.so\"/g" ${f} > "${CMAKE_CURRENT_BINARY_DIR}/${fic}"
+        COMMENT "converting ${f}" VERBATIM)
+        add_custom_command(OUTPUT  "${CMAKE_BINARY_DIR}/rbiips/tests/${fic}"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${fic}"
+        COMMAND ${CMAKE_COMMAND}
+        ARGS -E copy "${CMAKE_CURRENT_BINARY_DIR}/${fic}" "${CMAKE_BINARY_DIR}/rbiips/tests/${fic}")
+        set(target_modified  "${CMAKE_BINARY_DIR}/rbiips/tests/${fic}"
+        ${target_modified})
     endforeach()
+add_custom_target(files_modified ALL DEPENDS ${target_modified})
 endif(sed_exe)
-
 # add dependencies to source files 
 add_targets_depends(rfiles)
