@@ -19,16 +19,6 @@ RTools 2.15
 RStudio
 JAGS 3.2 + rjags package
 
-Windows other software:
------------------------
-MATLAB
-Microsoft security essentials / Avast!
-7z
-Chrome
-Dropbox
-Foxit reader
-Notepad++
-PDFCreator
 
 pour compiler RBiips
 BOOST_ROOT=/home/fux/sources/boost_1_46_0 BIIPS_LIB=/home/fux/biips/lib64 BIIPS_INCLUDE=/home/fux/biips/include/biips make RBiips_INSTALL

@@ -2,7 +2,7 @@ set_output_bindir(out_bindir)
 
 # configure Makevars.win file
 configure_file (
-	Makevars.win.in
+	Makevars.win.IN
 	${out_bindir}/Makevars.win
 	@ONLY
 )

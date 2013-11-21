@@ -2,21 +2,18 @@ BiiPS
 =============================================================================
 BiiPS is a general software for Bayesian inference with interacting Particle Systems.
 
-- Version:       0.8.1
-- Last modified: 2013-11-20
-- Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
-- License:       GPL-3
-- Website:       http://alea.bordeaux.inria.fr/biips
+- Version:       @Biips_VERSION@
+- Last modified: @Biips_DATE@
+- Maintainer:    @Biips_CONTACT@
+- License:       @Biips_LICENSE@
+- Website:       @Biips_URL@
 
 The project has started on Dec. 2009 and is supported by the [team ALEA](http://alea.bordeaux.inria.fr/) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux).
 Its main objective is to popularize the use of particle methods to researchers, practicians and students by developing a user-friendly software similar to BUGS/JAGS.
 
 Overview
 -----------------------------------------------------------------------------
- BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
- It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine.
- It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
- Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).
+@Biips_DESCRIPTION@
 
 More context
 -----------------------------------------------------------------------------
@@ -60,7 +57,7 @@ A Matlab toolbox provides similar capabilities.
 
 The BiiPS source code is hosted on a git repository at Sourceforge. If you want to keep track of the development version, you can find downloading instructions here
 
-  https://gforge.inria.fr/projects/biips/
+  @Biips_SOURCES_URL@
 
 License
 ----------------------------------------------------------------------------- 
