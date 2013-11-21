@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$1" ]; then
+    echo "Usage:   ./build_biips.sh [-jN]"
+    echo "By default, N=1"
+fi
+
 set -x
 # Change these variables to fit your needs
 #-----------------------------------------
@@ -14,11 +19,11 @@ export ECLIPSE=/home/adrien-alea/eclipse_4.3
 export MATLAB_ROOT=/usr/local/MATLAB/R2012b
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-export CMAKE_OPTIONS="-DBoost_USE_STATIC_LIBS=ON -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j20"
+export CMAKE_OPTIONS="-DBoost_USE_STATIC_LIBS=ON -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1"
 # OpenSuse: use -DBoost_USE_STATIC_LIBS=OFF
 export CPACK_GENERATOR=DEB
 # OpenSuse: use RPM
-export MAKE="make -j20"
+export MAKE="make $1"
 #-----------------------------------------
 
 set +x; read -p 'Press [Enter] key to continue...'; set -x
@@ -69,7 +74,7 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
-    $MAKE RBiips_INSTALL
+    $MAKE VERBOSE=1 RBiips_INSTALL
     $MAKE RBiips_build
 fi
 

@@ -1,6 +1,3 @@
-add_subdirectory(unix)
-add_subdirectory(windows)
-
 set_output_bindir(out_bindir)
 
 # copy files to binary directory
