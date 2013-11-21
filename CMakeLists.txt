@@ -104,7 +104,7 @@ option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program.
 
 
 # configure and find boost
-option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" OFF)
+option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
@@ -212,16 +212,27 @@ set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.md)
 #set (CPACK_RESOURCE_FILE_WELCOME ${CMAKE_BINARY_DIR}/Welcome.txt)
 set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt)
-set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
+
+# Source packages specific options
+set (CPACK_SOURCE_GENERATOR TGZ;ZIP)
+set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
+"/\\\\.git/"
+"\\\\.Rhistory$" 
+"\\\\.gitignore$" 
+"\\\\.project$" 
+"/\\\\.settings/" 
+".*\\\\.html$" 
+".*~" 
+${CPACK_SOURCE_IGNORE_FILES})
 
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 
 # Linux Debian package specific options
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.42.0)")
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.49.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.49.0)")
 endif ()
 set (CPACK_DEBIAN_PACKAGE_SUGGESTS "r-base (>= 2.13)")
 if (USE_Qwt5_Qt4)
@@ -234,7 +245,7 @@ set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips-test")
 
 # Linux RPM package specific options
-set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
+set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.49.0")
 if (USE_Qwt5_Qt4)
     set (CPACK_RPM_PACKAGE_REQUIRES
         "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")
