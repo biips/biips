@@ -11,8 +11,10 @@ the variables BIIPS_ROOT and BOOST_ROOOT.
 
 You can specify BIIPS_ROOT and BOOST_ROOOT as environment variables, e.g.:
 
-set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-@Biips_VERSION@
-set BOOST_ROOT=c:\Program Files\boost\boost-@Boost_VERSION@
+set BIIPS_ROOT=c:\Program Files\BiiPS\BiiPS-X.XX
+set BOOST_ROOT=c:\Program Files\boost\boost-X.XX
+
+where X.XX are the version numbers.
 
 In R >= 2.12.0 you will be able to set BIIPS_ROOT and BOOST_ROOT as a (platform-
 specific) make variable in etc${R_ARCH}/Makevars.win.

@@ -19,10 +19,11 @@ set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Systems")
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
-set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
+
+set (Biips_DESCRIPTION " BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+ It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
- Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.
- Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
+ Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).")
 
 if (NOT Biips_DATE)
     if (WIN32)
@@ -55,14 +56,10 @@ set (R_VERSION_REQUIRED 2.13.0)
 
 
 # configure resource files
-configure_file (README.md.in README.md @ONLY)
-configure_file (README.md.in ${CMAKE_SOURCE_DIR}/README.md @ONLY)
+configure_file (README.md.IN README.md @ONLY)
+configure_file (README.md.IN ${CMAKE_SOURCE_DIR}/README.md @ONLY)
 #configure_file (Welcome Welcome.txt COPYONLY)
 configure_file (COPYING.txt COPYING.txt COPYONLY)
-
-# configure NOTICES file
-configure_file (NOTICES.txt.in NOTICES.txt)
-configure_file (NOTICES.txt.in ${CMAKE_SOURCE_DIR}/NOTICES.txt)
 
 # print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
@@ -82,9 +79,15 @@ endif ()
 
 # configure build
 if (UNIX)
-   add_definitions(--std=c++0x -fPIC -Wfatal-errors)
-endif(UNIX) 
+   set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+endif(UNIX)
 
+option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
+if (SUPPRESS_DEPRECATED_WARNINGS)
+	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
+endif ()
+
+add_definitions(${EXTRA_COMPILE_FLAGS})
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
@@ -99,12 +102,6 @@ option (BIIPS_DEBUG_PARSER "Print BUGS language parser output (ParseTree)." OFF)
 option (BIIPS_CATCH_TEST "Catch exceptions in BiipsTest program." ON)
 option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program." ON)
 
-
-option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
-if (SUPPRESS_DEPRECATED_WARNINGS)
-	add_definitions (-Wno-deprecated)
-	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
-endif ()
 
 # configure and find boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" OFF)

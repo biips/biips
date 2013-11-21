@@ -1,6 +1,6 @@
 # configure config.hpp
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/config.hpp.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/config.hpp.IN
     ${CMAKE_CURRENT_BINARY_DIR}/include/config.hpp
 )
 
