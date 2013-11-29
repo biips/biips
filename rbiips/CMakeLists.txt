@@ -1,5 +1,7 @@
 project(RBiips)
 
+# define a directory for the configured package sources
+# not polluted by cmake
 macro(set_output_bindir var)
     file(RELATIVE_PATH CURRENT_REL_DIR ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
     file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CURRENT_REL_DIR}" ${var})
@@ -98,6 +100,7 @@ if (R_FOUND)
         	COMMENT "Installing ${PROJECT_NAME} R package"
         	VERBATIM
         )
+        
         # add R CMD check target
         add_custom_target (${PROJECT_NAME}_check  
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp BiipsCompiler ${PROJECT_NAME}_INSTALL 
@@ -161,31 +164,15 @@ endif ()
 
 # configure DESCRIPTION file
 configure_file (
-	DESCRIPTION.in
+	DESCRIPTION.IN
 	${out_bindir}/DESCRIPTION
 	@ONLY
 )
 set (RBiips_SOURCES ${RBiips_SOURCES} ${CMAKE_CURRENTBINARY_DIR}/DESCRIPTION)
 
-# configure README file
-configure_file (
-	README.in
-	${out_bindir}/README
-	@ONLY
-)
-set (RBiips_SOURCES ${RBiips_SOURCES} ${CMAKE_CURRENTBINARY_DIR}/README)
-
-# configure NOTICES file
-configure_file (
-	NOTICES.in
-	${out_bindir}/NOTICES
-	@ONLY
-)
-set (RBiips_SOURCES ${RBiips_SOURCES} ${CMAKE_CURRENTBINARY_DIR}/README)
-
 # configure configure.ac file
 configure_file (
-	configure.ac.in
+	configure.ac.IN
 	${out_bindir}/configure.ac
 	@ONLY
 	NEWLINE_STYLE UNIX
@@ -193,15 +180,13 @@ configure_file (
 
 
 # copy files to binary directory
-set (src_files cleanup COPYING NAMESPACE)
+set (src_files cleanup COPYING NAMESPACE README NOTICES)
 file(COPY ${src_files} DESTINATION ${out_bindir})
 
 
 # add dependencies to source files
 set (src_files ${src_files}
     ${out_bindir}/DESCRIPTION
-    ${out_bindir}/README
-    ${out_bindir}/NOTICES
     ${out_bindir}/configure.ac
 )
 

@@ -98,22 +98,5 @@ macro(copy_files_to_bindir files dir)
         )
     endforeach()
 endmacro(copy_files_to_bindir)
-if (NOT Biips_DATE)
-	if (WIN32)
-		execute_process (COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE TODAY)
-	elseif (UNIX)
-		execute_process(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE TODAY)
-	endif ()
-	if (TODAY)
-		string (REGEX REPLACE
-			"(..)/(..)/(....).*"
-			"\\3-\\2-\\1"
-			Biips_DATE
-			${TODAY}
-		)
-	else ()
-		message (SEND_ERROR "date not implemented.\nPlease set variable Biips_DATE to yyyy-mm-dd")
-	endif ()
-endif ()
-message (STATUS Biips_DATE=${Biips_DATE})
+
 

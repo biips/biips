@@ -2,7 +2,7 @@ set_output_bindir(out_bindir)
 
 # configure RBiips-package.Rd file
 configure_file (
-	RBiips-package.Rd.in
+	RBiips-package.Rd.IN
 	${out_bindir}/RBiips-package.Rd
 	@ONLY
 )

@@ -2,9 +2,9 @@ BiiPS is derived software based on other open source software components.
 The following is a list of these components (full copies of the license
 agreements or notices used by these components are included below):
 
-- JAGS 3.2.0
+- JAGS 
 - SMCTC 1.00
-- Boost >= 1.49.0
+- Boost
 - BiiPS test programs can use (optional) Qt widgets from 
   the Qwt project (http://qwt.sf.net).
 

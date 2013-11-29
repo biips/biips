@@ -1,12 +1,12 @@
 Requirements
 ======================
-To compile Biips, you need:
 * git
 * cmake
 * gcc (>= 4.7)
-* boost-X.XX (X>=1.49)
+* boost (>=1.49.0)
+* R (>= 2.13)
+* Rcpp package
 * Matlab or Octave
-* R with RCpp package
 
 Manage sources
 ======================
@@ -95,8 +95,7 @@ In the Biips box, click *Manage Project* and then click *Salves* on the left pan
 
 Click the *Connect* button on the desired slave to get connection commands that include your username.
 
-Connect to Ubuntu
------------------
+### Connect to Ubuntu
 
 You can add hosts to your .ssh/config:
 
@@ -115,8 +114,7 @@ Default password for ci user: ci
 
 Default password for root user: password
 
-Connect to Windows
---------------------
+### Connect to Windows
 
 Create SSH tunnel:
 
