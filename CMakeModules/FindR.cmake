@@ -86,6 +86,9 @@ if ( R_EXECUTABLE )
             list ( APPEND R_PACKAGES R_${_component}_FOUND )
         endif ( NOT R_${_component}_FOUND )
     endforeach ( _component )
+    # chomp the string
+    #string(REGEX REPLACE "[ \t\n]+" \; R_INCLUDE "${R_INCLUDE}")
+    #message(STATUS "INCLUDE for R =" ${R_INCLUDE})
 endif ( R_EXECUTABLE )
 
 include ( FindPackageHandleStandardArgs )
@@ -97,4 +100,17 @@ find_package_handle_standard_args (R
     VERSION_VAR R_VERSION
 )
 
-mark_as_advanced ( R_EXECUTABLE ${R_PACKAGES} )
+# find Rscript to extract PKG_CXXFLAGS
+get_filename_component(PATH_TO_R ${R_EXECUTABLE} PATH)
+find_program (R_SCRIPT NAMES Rscript PATHS ${PATH_TO_R})
+if (R_SCRIPT)
+  message(STATUS "found R_SCRIPT")
+  execute_process(COMMAND ${R_SCRIPT} -e "Rcpp:::CxxFlags()" OUTPUT_VARIABLE RCPP_CXXFLAGS)
+  execute_process(COMMAND ${R_SCRIPT} -e "Rcpp:::LdFlags()" OUTPUT_VARIABLE RCPP_LIBS)
+  execute_process(COMMAND ${R_SCRIPT} -e "cat(R.home(\"include\"))" OUTPUT_VARIABLE R_INCLUDE)
+  message(STATUS "Rcpp_FLAGS = " ${RCPP_CXXFLAGS})
+  message(STATUS "R_INCLUDE = " ${R_INCLUDE})
+  message(STATUS "Rcpp_LIBS = " ${RCPP_LIBS})
+endif(R_SCRIPT)
+
+mark_as_advanced (R_EXECUTABLE ${R_PACKAGES})

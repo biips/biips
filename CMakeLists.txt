@@ -19,10 +19,11 @@ set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Systems")
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
-set (Biips_DESCRIPTION " BiiPS is free software, licensed under the GPL.
+
+set (Biips_DESCRIPTION " BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+ It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
- Both tools can be used by non-statisticians, via their automated \"black box\" inference engines.
- Unlike BUGS oriented MCMC (Markov chain Monte Carlo), BiiPS software is based on sequential Monte Carlo algorithms (SMC), also referred to as \"interacting particles\" or \"particle filtering\" and is thus more adapted to dynamic problems (tracking, signal filtering, etc).")
+ Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).")
 
 if (NOT Biips_DATE)
     if (WIN32)
@@ -55,14 +56,10 @@ set (R_VERSION_REQUIRED 2.13.0)
 
 
 # configure resource files
-configure_file (README.md.in README.md @ONLY)
-configure_file (README.md.in ${CMAKE_SOURCE_DIR}/README.md @ONLY)
+configure_file (README.md.IN README.md @ONLY)
+configure_file (README.md.IN ${CMAKE_SOURCE_DIR}/README.md @ONLY)
 #configure_file (Welcome Welcome.txt COPYONLY)
 configure_file (COPYING.txt COPYING.txt COPYONLY)
-
-# configure NOTICES file
-configure_file (NOTICES.txt.in NOTICES.txt)
-configure_file (NOTICES.txt.in ${CMAKE_SOURCE_DIR}/NOTICES.txt)
 
 # print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
@@ -82,9 +79,15 @@ endif ()
 
 # configure build
 if (UNIX)
-   add_definitions(--std=c++0x -fPIC -Wfatal-errors)
-endif(UNIX) 
+   set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+endif(UNIX)
 
+option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
+if (SUPPRESS_DEPRECATED_WARNINGS)
+	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
+endif ()
+
+add_definitions(${EXTRA_COMPILE_FLAGS})
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
@@ -100,14 +103,8 @@ option (BIIPS_CATCH_TEST "Catch exceptions in BiipsTest program." ON)
 option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program." ON)
 
 
-option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
-if (SUPPRESS_DEPRECATED_WARNINGS)
-	add_definitions (-Wno-deprecated)
-	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
-endif ()
-
 # configure and find boost
-option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" OFF)
+option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
@@ -215,16 +212,27 @@ set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.md)
 #set (CPACK_RESOURCE_FILE_WELCOME ${CMAKE_BINARY_DIR}/Welcome.txt)
 set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt)
-set (CPACK_SOURCE_IGNORE_FILES /\\\\.svn/;.*~;${CPACK_SOURCE_IGNORE_FILES})
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
+
+# Source packages specific options
+set (CPACK_SOURCE_GENERATOR TGZ;ZIP)
+set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
+"/\\\\.git/"
+"\\\\.Rhistory$" 
+"\\\\.gitignore$" 
+"\\\\.project$" 
+"/\\\\.settings/" 
+".*\\\\.html$" 
+".*~" 
+${CPACK_SOURCE_IGNORE_FILES})
 
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
 
 # Linux Debian package specific options
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.42.0)")
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.7), libstdc++6 (>= 4.4.0), libboost-dev (>= 1.49.0)")
 if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.42.0)")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev (>= 1.49.0)")
 endif ()
 set (CPACK_DEBIAN_PACKAGE_SUGGESTS "r-base (>= 2.13)")
 if (USE_Qwt5_Qt4)
@@ -237,7 +245,7 @@ set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
 set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips-test")
 
 # Linux RPM package specific options
-set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.42.0")
+set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel >= 1.49.0")
 if (USE_Qwt5_Qt4)
     set (CPACK_RPM_PACKAGE_REQUIRES
         "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")

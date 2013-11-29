@@ -2,12 +2,12 @@ file(RELATIVE_PATH CURRENT_REL_DIR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DI
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-	${CMAKE_CURRENT_SOURCE_DIR}/include/BiipsConfig.hpp.in
+	${CMAKE_CURRENT_SOURCE_DIR}/include/BiipsConfig.hpp.IN
 	${CMAKE_CURRENT_BINARY_DIR}/include/BiipsConfig.hpp
 )
 
 configure_file (
-	${CMAKE_CURRENT_SOURCE_DIR}/biips_info.in
+	${CMAKE_CURRENT_SOURCE_DIR}/biips_info.IN
 	${CMAKE_CURRENT_BINARY_DIR}/biips_info
 )
 
@@ -34,5 +34,5 @@ install(DIRECTORY
 	DESTINATION ${Biips_INSTALL_INCLUDEDIR}/${CURRENT_REL_DIR}
 	COMPONENT Headers
 	PATTERN .svn EXCLUDE
-	PATTERN *.in EXCLUDE
+	PATTERN *.IN EXCLUDE
 )
