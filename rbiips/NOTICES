@@ -2,9 +2,9 @@ RBiips is derived software based on other open source software components.
 The following is a list of these components (full copies of the license
 agreements or notices used by these components are included below):
 
-- BiiPS @Biips_VERSION@
-- rjags @rjags_VERSION@
-- Rcpp @Rcpp_VERSION@
+- BiiPS
+- rjags
+- Rcpp
 
 
 ================================================================================
