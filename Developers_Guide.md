@@ -95,29 +95,3 @@ In the Biips box, click *Manage Project* and then click *Slaves* on the left pan
 
 Click the *Connect* button on the desired slave to get connection commands that include your username.
 
-### Connect to Ubuntu
-
-You can add hosts to your .ssh/config:
-
-    Host *.ci 
-    ProxyCommand ssh <username>@ci-ssh.inria.fr "/usr/bin/nc `basename %h .ci` %p" 
-
-    Host biips-ubuntu
-    ProxyCommand ssh <username>@ci-ssh.inria.fr "/usr/bin/nc biips-ubuntu-64 %p"
-    User ci
-
-Connect va ssh:
-
-    ssh -X biips-ubuntu
-    
-
-### Connect to Windows
-
-Create SSH tunnel:
-
-    ssh <username>@ci-ssh.inria.fr -L 3380:biips-window-64:3389
-    
-Use remote desktop on the given IP:
-
-    rdesktop 127.0.0.1:3380
-    
