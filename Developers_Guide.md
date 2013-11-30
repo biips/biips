@@ -89,9 +89,9 @@ Slaves
 
 Connect to slaves
 --------------
-On CI website, go to your *Dashbord*.
+On CI website, go to your *Dashboard*.
 
-In the Biips box, click *Manage Project* and then click *Salves* on the left panel.
+In the Biips box, click *Manage Project* and then click *Slaves* on the left panel.
 
 Click the *Connect* button on the desired slave to get connection commands that include your username.
 
@@ -110,9 +110,6 @@ Connect va ssh:
 
     ssh -X biips-ubuntu
     
-Default password for ci user: ci
-
-Default password for root user: password
 
 ### Connect to Windows
 
