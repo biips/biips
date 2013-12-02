@@ -27,7 +27,7 @@ myfunisdiscrete = function (x,v) { FALSE }
 
 
 ## build evaluation functions
-zut <- .Call("add_function", "funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
+zut <- biips.add.function("funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
 biips <- biips.model('funcmat.bug', data=data, sample.data=FALSE);
 x.true = biips$data()$x.true;
 
