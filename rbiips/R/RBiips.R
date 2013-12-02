@@ -123,6 +123,21 @@ load.biips.module <- function(name, quiet=FALSE)
 }
 
 
+#' Add the corresponding R function to the bugs model
+#' @param name of the new  function
+#' @param number of arguments of the new function
+#' @param R function returning a vector containg arguments sizes
+#' @param R function computing the result of function
+#' @param R function checking the arguments 
+#' @param R function telling is new function is discrete wrt its arguments
+biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
+{    
+  if (!is.character(name) || length(name)>1)
+    stop("invalid name")
+  .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete)
+  
+}
+
 biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
 {
   if (missing(file)) {
