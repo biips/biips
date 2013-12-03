@@ -118,7 +118,6 @@ load.biips.module <- function(name, quiet=FALSE)
   else if (!quiet) {
     cat("module", name, "loaded\n")
   }
-  # je ne vois pas a quoi ca sert
   invisible(NULL)
 }
 
@@ -133,9 +132,10 @@ load.biips.module <- function(name, quiet=FALSE)
 biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
 {    
   if (!is.character(name) || length(name)>1)
+  {
     stop("invalid name")
-  .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete)
-  
+  }
+  ok <- .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
 }
 
 biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
