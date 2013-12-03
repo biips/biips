@@ -2,6 +2,7 @@ importFrom(stats, variable.names, density)
 
 export ( 
   biips.model,
+  biips.add.function,
   smc.samples,
   pmmh.samples,
   pimh.samples,
