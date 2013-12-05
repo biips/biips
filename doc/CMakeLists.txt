@@ -7,4 +7,3 @@
 #    ${CMAKE_CURRENT_BINARY_DIR} 
 #    COMMENT "Generating API documentation with Doxygen" VERBATIM)
 #endif(DOXYGEN_FOUND)
-#add_subdirectory(pmmh)
