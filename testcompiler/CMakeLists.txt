@@ -63,14 +63,3 @@ target_link_libraries(parse_test ${EXTRA_LIBS})
 get_target_property(exe_loc parse_test LOCATION)
 add_test(NAME parse_test COMMAND ${exe_loc})
 
-#add target for pmmh 
-add_executable(pmmh_test ${CMAKE_CURRENT_SOURCE_DIR}/src/pmmh/pmmh_test.cpp)
-target_link_libraries(pmmh_test ${BIIPS_LIBS} ${EXTRA_LIBS})
-
-#add test for pmmh
-get_target_property(exe_loc pmmh_test LOCATION)
-set(model_root ${CMAKE_CURRENT_SOURCE_DIR}/model)
-file(COPY "${model_root}/data_jags.R" "${model_root}/hmm_1d_nonlin_param.bug" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_test(NAME pmmh_test COMMAND ${exe_loc})
-
-
