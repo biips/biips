@@ -2,7 +2,7 @@ pour compiler
 # octave
 cmake -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mkoctfile ..
 # matlab
-cmake -DCMAKE_CXX_COMPILER="/usr/bin/g++-4.7.3" -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mex .
+cmake  -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mex ..
 
 Windows minimum requirements:
 -----------------------------

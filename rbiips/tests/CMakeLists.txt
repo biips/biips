@@ -1,5 +1,6 @@
 file(GLOB Rfiles *.R)
-file(GLOB bfiles *.bug)
+file(COPY "${CMAKE_SOURCE_DIR}/examples/funcmat.bug" DESTINATION
+${CMAKE_CURRENT_BINARY_DIR})
 set(test_files ${Rfiles} ${bfiles})
 file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 set(rtests funcmat)
