@@ -1,10 +1,8 @@
 file(GLOB mfiles *.m)
-set(mbiips_bug hmm_4d_lin_tracking 
-                hmm_4d_nonlin_tracking)
+set(mbiips_bug hmm_4d_lin_tracking hmm_4d_nonlin_tracking)
 foreach(bug ${mbiips_bug})
      set (bfiles ${bugs_files} "${CMAKE_SOURCE_DIR}/examples/${bug}.bug")
 endforeach()
-set(GLOB bfiles 
 set(test_files ${mfiles} ${bfiles})
 file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
