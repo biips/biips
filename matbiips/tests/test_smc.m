@@ -1,15 +1,15 @@
 addpath('../matlab');
 %data
-tmax=4;
-precx=1;
-precxinit=1;
-meanxinit=0;
-precy=10;
-data=struct('tmax', tmax, 'precxinit', precxinit, 'precx', precx,  'precy', precy, 'meanxinit', meanxinit);
+t_max=4;
+prec_x=1;
+prec_x_init=1;
+mean_x_init=0;
+prec_y=10;
+data=struct('t_max', t_max, 'prec_x_init', prec_x_init, 'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
 if (~inter_biips('load_module', 'basemod'))
     error('problem loading module'); 
 end
-% intialisation console
+% console init
 p0=inter_biips('make_console'); 
 inter_biips('verbosity',2);
 
@@ -17,9 +17,9 @@ inter_biips('verbosity',2);
 inter_biips('check_model', p0, 'hmm_1d_lin.bug'); 
 inter_biips('compile_model', p0, data, true, 12);
 inter_biips('set_default_monitors',p0);
-inter_biips('set_filter_monitors', p0, {'x'} , {1 }, { tmax });
-inter_biips('set_gen_tree_smooth_monitors', p0, {'x'}, {1}, {tmax});
-inter_biips('set_backward_smooth_monitors', p0, {'x'}, {1}, {tmax });
+inter_biips('set_filter_monitors', p0, {'x'} , {1 }, { t_max });
+inter_biips('set_gen_tree_smooth_monitors', p0, {'x'}, {1}, {t_max});
+inter_biips('set_backward_smooth_monitors', p0, {'x'}, {1}, {t_max });
 if (~inter_biips('is_sampler_built',p0))
   inter_biips('build_smc_sampler',p0, false);
   sort_nodes=inter_biips('get_sorted_nodes', p0)
