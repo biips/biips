@@ -38,7 +38,7 @@ if (isempty(fsb)) % retrieve only the field presents in the first variable
    fsb=chaine(sort(indices));
 end
 % select only the wanted variables
-s = inter_biips('cell2struct_weak_names', cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
+s = biips_cell2struct(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
 cell_fsb = num2cell(fsb);
 cell_sum = cell(size(vars));
 
@@ -47,6 +47,6 @@ for i=1:length(vars)
   for j=1:length(fsb)
    ctemp{j} =  summary(getfield(getfield(s, vars{i}), fsb(j)), more_argin{:});
   end
-  cell_sum{i} = inter_biips('cell2struct_weak_names', ctemp, cell_fsb);
+  cell_sum{i} = biips_cell2struct(ctemp, cell_fsb);
 end
-summ = inter_biips('cell2struct_weak_names', cell_sum, vars);
+summ = biips_cell2struct(cell_sum, vars);

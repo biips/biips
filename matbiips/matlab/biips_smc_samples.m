@@ -97,4 +97,4 @@ cell_noms = cell(nb_noms, 1);
 for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
 end   
-particles = inter_biips('cell2struct_weak_names', cell_noms, noms);
+particles = biips_cell2struct(cell_noms, noms);
