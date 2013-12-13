@@ -1,0 +1,157 @@
+\documentclass[12pt,twoside,french]{article}
+\usepackage[a4paper]{geometry}
+\usepackage[latin1]{inputenc} % ou \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} % ou \usepackage[OT1]{fontenc}
+
+\usepackage{hyperref}
+\usepackage[frenchb]{babel} % optionnel
+%\usepackage[round]{natbib} % optionnel
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+\usepackage{epstopdf}
+\usepackage{fancybox}
+\usepackage{verbatim}
+%\usepackage{float}
+%\usepackage{here}
+\usepackage{lmodern}
+\usepackage{color}
+%%%%%%%%%%%%%%%%%%%
+%%%%% en tete marc
+%%%%%%%%%%%%%%%%%%
+\usepackage{listings}
+\usepackage{relsize}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\newcommand{\biips}{\bf Biips{}}
+\newcommand{\matlab}{\bf MATLAB{}}
+\lstset{ %
+  framerule=0pt,
+  basicstyle=\relsize{-2}\ttfamily,  % the size of the fonts that are used for the code
+  backgroundcolor=\color{gray},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  %frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{dkgreen},   % comment style
+  stringstyle=\color{mauve}
+}
+
+\begin{document}
+
+\section{Interface Matlab au logiciel \biips{}}
+
+  Biips has a \matlab interface, based on mexfiles (\matlab Executables). Mexfiles are binaries dynamically loaded by the \matlab interpretor, and
+  enable us to call speed C or Fortran code. Since Biips, is statically included in the mexfiles, the only dependencies we need at execution, 
+  are those from \matlab (libmat, libmex and libstdc++)
+  
+
+  \subsection{Application Program Interface}
+
+   The \matlab Biips API, contains about ten functions permitting to the user to build a graphical bayesian model, run smc algorithms
+   and compute statistics.
+
+  \begin{figure}[H]
+  \begin{tabular}{|l|l|}
+  \hline
+   nom de fonction & action(s) réalisée(s) \\
+  \hline
+   \texttt{biips\_init} & initialisation \\
+   \texttt{biips\_model} & model compilation \\
+   \texttt{biips\_smc\_samples} & run SMC algorithm following the model \\
+   \texttt{biips\_diagnostic} & results diagnostic \\
+   \texttt{biips\_summary} & compute a statistical summary \\ 
+   \texttt{biips\_density} & univariate density estimator computation \\ 
+   \texttt{biips\_clear} & clear the compiled model \\
+  \hline
+   \texttt{biips\_add\_function} & add a external function \\
+   \texttt{biips\_build\_sampler} & assign samples to the graph nodes \\ 
+   \texttt{biips\_get\_nodes} & retrieve information about nodes \\ 
+   \texttt{biips\_get\_data} & retrieve model data (constants and observations) \\
+   \texttt{biips\_get\_variables} & retrieve model variables name \\ 
+   \texttt{biips\_print\_dot} & write the model graph in a \texttt{dot} file\\
+   \hline
+  \end{tabular}
+  \end{figure}
+
+   First category functions are well suited for basic usage, whereas thoses from second are reserved for a advanced usage
+   
+   \subsubsection{example}
+
+   let assume that the user of \biips{} wrote his model in \verb!model.bug! file , the matbiips session
+   could be similar to the following 
+
+\begin{lstlisting}[language=matlab]
+% initial loading 
+addpath('repertoire/de/matbiips');
+biips_init;
+% data definition 
+data = struct('var1', value, 'var2', value, ...);
+% model compilation
+[p, data] = biips_model('model.bug', data);
+% SMC run
+nb_part = 1000;
+out_smc = biips_smc_samples(p, {'var3', 'var4[1,1:10]', ...}, nb_part, 'fsb')
+% statistics computation
+out_summ = biips_summary(out_smc, {}, 'fsb');
+\end{lstlisting}
+
+   Concerning functions previously used, we can isolate severals general principles
+     \begin{itemize}
+       \item first output argument \texttt{p} returned by \texttt{biips\_model} is the index of the console in the console table 
+       of \biips{}; In the following, it will be used by the other functions of the API to exchange messages with \biips{}
+       , so you have to save it after a \texttt{biips\_model} call.
+       \item string arguments like \verb!'fs'! or \verb!'fsb'! match with the kind of the SMC algorithm : 
+        {\em filtering} (\verb!f!), {\em smoothing} (\verb!s!) or {\em backward smoothing} (\verb!b!) 
+     \end{itemize}
+
+
+  \subsection{About output structures}
+  
+  The function \verb!biips_smc_samples! enable us to monitor some variables, by listing
+  them in a \verb!cell! of strings given as a second argument. This function and others, using the same mechanism, return a structure with fields
+  which are the name of monitored variables. Each field, contains subfields for each variant ('fsb') of the SMC (given by the $4^{\mbox{th}}$
+  argument) 
+  \paragraph{}
+  
+  the user can also monitor a subpart of a variable : e.g., if \verb!X! is an array $5\times100$, it is possible to monitor the $5^{\mbox{th}}$ component 
+  in the following manner 
+\begin{lstlisting}[language=matlab]
+out_smc = biips_smc_samples(p, {'X[5,1:100]'}, nb_part, 'fsb')
+\end{lstlisting}
+  
+  \paragraph{}
+     The \matlab interface was created after the R interface. R has slacker rules for name fields than \matlab, you can use
+     brackets or commas in the fields names of a cell. In \matlab, if you wan to use these illegal names, we provide 
+     an {\em ad-hoc} function
+\begin{lstlisting}[language=matlab]
+biips_cell2struct({ fields }, { weak_names }) 
+\end{lstlisting}
+     which has the same signature that \verb!cell2struct!.
+     
+  \paragraph{}
+     After one can retrieve filter results (variante\verb!f!) of \verb!'X[5,1:100]'! with the following call : 
+\begin{lstlisting}
+>> out_smc.('X[5,1:191]').f
+
+ans = 
+
+      values: [1x100x1000 double]
+     weights: [1x100x1000 double]
+         ess: [1x100 double]
+    discrete: [1x100 double]
+        name: 'X'
+       lower: [5 1]
+       upper: [5 100]
+        type: 'filtering'
+\end{lstlisting}
+
+\end{document}
