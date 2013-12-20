@@ -106,7 +106,7 @@ option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program.
 
 
 # configure and find boost
-option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" OFF)
+option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
 option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
