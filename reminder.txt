@@ -4,6 +4,14 @@ cmake -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_
 # matlab
 cmake  -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mex ..
 
+# under windows
+---------------
+-install Rtools
+-install boost
+-install Mingw for make
+
+
+
 Windows minimum requirements:
 -----------------------------
 boost 1.46.1
