@@ -80,6 +80,8 @@ if ( R_EXECUTABLE )
                 message ( STATUS "Looking for R package ${_component} - found" )
                 set ( R_${_component}_FOUND 1 CACHE INTERNAL "True if R package ${_component} is here" )
             else ( NOT _res )
+                message(WARNING ${_trasherr})
+                message(WARNING ${_trashout}
                 message ( STATUS "Looking for R package ${_component} - not found" )
                 set ( R_${_component}_FOUND 0 CACHE INTERNAL "True if R package ${_component} is here" )
             endif ( NOT _res )
