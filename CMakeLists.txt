@@ -78,9 +78,11 @@ if (PRINT_SYSTEM_INFO)
 endif ()
 
 # configure build
-if (UNIX)
+if (APPLE)
+   set(EXTRA_COMPILE_FLAGS "-fPIC")
+elseif(UNIX)
    set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
-endif(UNIX)
+endif()
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
 if (SUPPRESS_DEPRECATED_WARNINGS)
