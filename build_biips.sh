@@ -25,6 +25,20 @@ export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS
 export CPACK_GENERATOR=DEB
 # OpenSuse: use RPM
 export MAKE="make $1"
+
+# environment variables for Mac
+if [ "$(uname)" == "Darwin" ]; then
+    export BIIPS_BUILD=/Users/adrien/workspace/biips-build
+    export BIIPS_ROOT=/Users/adrien/biips
+    export BOOST_ROOT=/Users/adrien/boost_1_49_0
+	export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
+	export CMAKE_GENERATOR="Unix Makefiles"
+    export CMAKE_BUILD_TYPE=Release
+	export CMAKE_OPTIONS=""
+    export CPACK_GENERATOR="PackageMaker"
+    export LIBnn=lib
+fi
+
 #-----------------------------------------
 
 set +x; read -p 'Press [Enter] key to continue...'; set -x
@@ -80,7 +94,11 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
     $MAKE VERBOSE=1 RBiips_INSTALL
-    $MAKE RBiips_build
+	if [ "$(uname)" == "Darwin" ]; then
+	    $MAKE RBiips_INSTALL_build
+	else
+        $MAKE RBiips_build
+	fi
 fi
 
 set +x; echo -n "Build MatBiips ? (y/[n])"; read ans
