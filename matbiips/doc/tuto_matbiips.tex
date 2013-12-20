@@ -18,7 +18,6 @@
 \usepackage{verbatim}
 %\usepackage{float}
 %\usepackage{here}
-\usepackage{lmodern}
 \usepackage{color}
 %%%%%%%%%%%%%%%%%%%
 %%%%% en tete marc
@@ -28,8 +27,8 @@
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.8,0.8,0.8}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
-\newcommand{\biips}{\bf Biips{}}
-\newcommand{\matlab}{\bf MATLAB{}}
+\newcommand{\biips}{{\bf Biips\ }{}}
+\newcommand{\matlab}{{\bf MATLAB\ }{}}
 \lstset{ %
   framerule=0pt,
   basicstyle=\relsize{-2}\ttfamily,  % the size of the fonts that are used for the code
@@ -44,10 +43,15 @@
   commentstyle=\color{dkgreen},   % comment style
   stringstyle=\color{mauve}
 }
-
+\pagestyle{empty}
 \begin{document}
 
-\section{Interface Matlab au logiciel \biips{}}
+\begin{center}
+{\Large matBiips tutorial}
+\end{center}
+
+
+\section{Matlab Interface for \biips{}}
 
   Biips has a \matlab interface, based on mexfiles (\matlab Executables). Mexfiles are binaries dynamically loaded by the \matlab interpretor, and
   enable us to call speed C or Fortran code. Since Biips, is statically included in the mexfiles, the only dependencies we need at execution, 
@@ -72,7 +76,7 @@
    \texttt{biips\_density} & univariate density estimator computation \\ 
    \texttt{biips\_clear} & clear the compiled model \\
   \hline
-   \texttt{biips\_add\_function} & add a external function \\
+   \texttt{biips\_add\_function} & add an external function \\
    \texttt{biips\_build\_sampler} & assign samples to the graph nodes \\ 
    \texttt{biips\_get\_nodes} & retrieve information about nodes \\ 
    \texttt{biips\_get\_data} & retrieve model data (constants and observations) \\
@@ -84,10 +88,10 @@
 
    First category functions are well suited for basic usage, whereas thoses from second are reserved for a advanced usage
    
-   \subsubsection{example}
+   \subsubsection{Example}
 
-   let assume that the user of \biips{} wrote his model in \verb!model.bug! file , the matbiips session
-   could be similar to the following 
+   Let us assume that the user of \biips{} wrote his model in \verb!model.bug! file , one example of a matbiips session
+   could be the following 
 
 \begin{lstlisting}[language=matlab]
 % initial loading 
@@ -104,11 +108,11 @@ out_smc = biips_smc_samples(p, {'var3', 'var4[1,1:10]', ...}, nb_part, 'fsb')
 out_summ = biips_summary(out_smc, {}, 'fsb');
 \end{lstlisting}
 
-   Concerning functions previously used, we can isolate severals general principles
+   Concerning functions previously used, we can isolate two rules :
      \begin{itemize}
        \item first output argument \texttt{p} returned by \texttt{biips\_model} is the index of the console in the console table 
        of \biips{}; In the following, it will be used by the other functions of the API to exchange messages with \biips{}
-       , so you have to save it after a \texttt{biips\_model} call.
+       , so you {\bf have to save it after a \texttt{biips\_model} call.}
        \item string arguments like \verb!'fs'! or \verb!'fsb'! match with the kind of the SMC algorithm : 
         {\em filtering} (\verb!f!), {\em smoothing} (\verb!s!) or {\em backward smoothing} (\verb!b!) 
      \end{itemize}
@@ -128,7 +132,8 @@ out_summ = biips_summary(out_smc, {}, 'fsb');
 out_smc = biips_smc_samples(p, {'X[5,1:100]'}, nb_part, 'fsb')
 \end{lstlisting}
   
-  \paragraph{}
+  \subsection{"weak" structures names} 
+     
      The \matlab interface was created after the R interface. R has slacker rules for name fields than \matlab, you can use
      brackets or commas in the fields names of a cell. In \matlab, if you wan to use these illegal names, we provide 
      an {\em ad-hoc} function
@@ -153,5 +158,105 @@ ans =
        upper: [5 100]
         type: 'filtering'
 \end{lstlisting}
+
+   \subsection{Internal functions}
+
+    The mexfile used to call \biips is \texttt{inter\_biips.cpp} : in that mexfile, we have one entry point function \texttt{inter\_biips} which takes as a first 
+    argument the name of the \biips routine we want to call and after the arguments to pass to the routine. Here there is a list of theses internal routines
+
+  \begin{figure}[H]
+   \tiny
+  \begin{tabular}{|l|l|l|}
+    name & args & return value \\
+   \hline
+    make\_console & & console\_id 
+   \hline
+    clear\_console & console\_id  &  \\
+   \hline
+    clear\_all\_console & &  \\ 
+   \hline
+    check\_model & console\_id, file\_name & \\
+   \hline
+    compile\_model & console\_id, var\_values\_struct, sample\_flag, seed & \\
+   \hline
+    get\_data & & \\
+   \hline
+    load\_module & \\
+   \hline
+   verbosity & \\
+   \hline
+    get\_variable\_names & \\
+   \hline
+    set\_default\_monitors & \\
+   \hline
+    set\_filter\_monitors & \\
+   \hline
+    set\_gen\_tree\_smooth\_monitors & \\
+   \hline
+    set\_backward\_smooth\_monitors & \\
+   \hline
+    build\_smc\_sampler & \\
+   \hline
+    is\_sampler\_built & \\
+   \hline
+    run\_smc\_sampler & \\
+   \hline
+    get\_log\_norm\_const & \\
+   \hline
+    get\_filter\_monitors & \\
+   \hline
+    get\_gen\_tree\_smooth\_monitors & \\
+   \hline
+    get\_backward\_smooth\_monitors & \\
+   \hline
+    clear\_filter\_monitors & \\
+   \hline
+    clear\_gen\_tree\_smooth\_monitors & \\
+   \hline
+    clear\_backward\_smooth\_monitors & \\
+   \hline
+    run\_backward\_smoother & \\
+   \hline
+    get\_sorted\_nodes & \\
+   \hline
+    get\_nodes\_samplers & \\
+   \hline
+    print\_graphviz & \\
+   \hline
+    change\_data & \\
+   \hline
+    sample\_data & \\
+   \hline
+    get\_log\_prior\_density & \\
+   \hline
+    is\_smc\_sampler\_at\_end & \\
+   \hline
+   message & \\
+   \hline
+    set\_log\_norm\_const & \\
+   \hline
+    make\_progress\_bar & \\
+   \hline
+    clear\_progress\_bar & \\
+   \hline
+    advance\_progress\_bar & \\
+   \hline
+    is\_gen\_tree\_smooth\_monitored & \\
+   \hline
+    get\_sampled\_gen\_tree\_smooth\_particle & \\
+   \hline
+    sample\_gen\_tree\_smooth\_particle & \\
+   \hline
+    set\_sampled\_gen\_tree\_smooth\_particle & \\
+   \hline
+    weighted\_quantiles & \\
+   \hline
+    cell2struct\_weak\_names & \\
+   \hline
+    add\_function & \\
+   \hline
+  \end{tabular}
+  \end{figure}
+
 
 \end{document}
