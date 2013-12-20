@@ -52,6 +52,16 @@ if (R_FOUND)
         )
     endif()
     
+	
+	# add R CMD check target
+	add_custom_target (${PROJECT_NAME}_check  
+		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp BiipsCompiler ${PROJECT_NAME}_INSTALL 
+		COMMAND ${R_EXECUTABLE} CMD check ${PROJECT_NAME}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+		COMMENT "Checking ${PROJECT_NAME} R package"
+		VERBATIM
+	)
+
     
     
     if (WIN32)
@@ -63,7 +73,7 @@ if (R_FOUND)
         	COMMENT "Building ${PROJECT_NAME} R binary package"
         	VERBATIM
         )
-        add_custom_target (${PROJECT_NAME}_INSTALL_build ALL 
+        add_custom_target (${PROJECT_NAME}_INSTALL_build 
     	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.zip
         )
     elseif (APPLE)
@@ -75,8 +85,8 @@ if (R_FOUND)
         	COMMENT "Building ${PROJECT_NAME} R binary package"
         	VERBATIM
         )
-     add_custom_target (${PROJECT_NAME}_INSTALL_build ALL
-    	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
+     add_custom_target (${PROJECT_NAME}_INSTALL_build
+    	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
         )
     elseif (UNIX)
         # add R CMD build target
@@ -98,15 +108,6 @@ if (R_FOUND)
         	COMMAND ${R_EXECUTABLE} CMD INSTALL ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Installing ${PROJECT_NAME} R package"
-        	VERBATIM
-        )
-        
-        # add R CMD check target
-        add_custom_target (${PROJECT_NAME}_check  
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp BiipsCompiler ${PROJECT_NAME}_INSTALL 
-        	COMMAND ${R_EXECUTABLE} CMD check ${PROJECT_NAME}
-        	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        	COMMENT "Checking ${PROJECT_NAME} R package"
         	VERBATIM
         )
         endif()

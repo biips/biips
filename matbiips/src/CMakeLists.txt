@@ -76,5 +76,5 @@ add_custom_command(OUTPUT ${INTER_BIN}
     VERBATIM
 )
 
-add_custom_target(matbiips ALL DEPENDS ${INTER_BIN} BiipsCore BiipsCompiler
+add_custom_target(matbiips DEPENDS ${INTER_BIN} BiipsCore BiipsCompiler
     BiipsBase)
