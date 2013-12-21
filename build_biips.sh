@@ -93,12 +93,12 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
-    $MAKE VERBOSE=1 RBiips_INSTALL
-	if [ "$(uname)" == "Darwin" ]; then
-	    $MAKE RBiips_INSTALL_build
-	else
+    if [ "$(uname)" == "Darwin" ]; then
+        $MAKE VERBOSE=1 RBiips_INSTALL_build
+    else
+        $MAKE VERBOSE=1 RBiips_INSTALL
         $MAKE RBiips_build
-	fi
+    fi
 fi
 
 set +x; echo -n "Build MatBiips ? (y/[n])"; read ans
