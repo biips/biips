@@ -56,8 +56,8 @@ set (R_VERSION_REQUIRED 2.13.0)
 
 
 # configure resource files
-configure_file (README.md.IN README.md @ONLY)
-configure_file (README.md.IN ${CMAKE_SOURCE_DIR}/README.txt @ONLY)
+configure_file (README.md.IN README.txt @ONLY)
+configure_file (README.md.IN ${CMAKE_SOURCE_DIR}/README.md @ONLY)
 #configure_file (Welcome Welcome.txt COPYONLY)
 configure_file (COPYING.txt COPYING.txt COPYONLY)
 
