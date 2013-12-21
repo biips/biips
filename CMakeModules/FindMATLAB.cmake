@@ -150,12 +150,15 @@ if (MATLAB)
     # find MATLAB libaries
     find_library(MATLAB_MEX_LIBRARY mex
         PATHS ${MATLAB_LIBRARY_DIR}
+        NO_DEFAULT_PATH
     )
     find_library(MATLAB_MX_LIBRARY mx
         PATHS ${MATLAB_LIBRARY_DIR}
+        NO_DEFAULT_PATH
     )
-        find_library(MATLAB_MAT_LIBRARY mat
-    PATHS ${MATLAB_LIBRARY_DIR}
+    find_library(MATLAB_MAT_LIBRARY mat
+        PATHS ${MATLAB_LIBRARY_DIR}
+        NO_DEFAULT_PATH
     )
     set(MATLAB_LIBRARIES
         "${MATLAB_MEX_LIBRARY}"

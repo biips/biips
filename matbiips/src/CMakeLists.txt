@@ -3,11 +3,11 @@ file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp MatlabFunction
 file(GLOB MBIIPS_H *.h *.hpp)
 
 if (MATLAB)
-        if (WIN32)
-          set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
-        else(WIN32)
+#        if (WIN32)
+#          set(BIIPS_LIBS  BiipsCompiler-${MATLAB_ARCH} BiipsBase-${MATLAB_ARCH} BiipsCore-${MATLAB_ARCH})
+#        else(WIN32)
           set(BIIPS_LIBS  BiipsCompiler BiipsBase BiipsCore)
-        endif(WIN32)
+#        endif(WIN32)
         include_directories(${Core_INCLUDE_DIRS}
 			${Base_INCLUDE_DIRS}
 			${Compiler_INCLUDE_DIRS}
@@ -26,7 +26,8 @@ if (MATLAB)
 		
     set(INTER_TARGET inter_biips)
     get_target_property(INTER_TARGET_L inter_biips LOCATION)
-    else()
+
+else()
     message (FATAL_ERROR "MATLAB not found on your computer.\n"
 			 "Try setting MATLAB_ROOT to the root path of 
 your MATLAB installation. eg: c:\\Program Files\\MATLAB\\R2012a\n"

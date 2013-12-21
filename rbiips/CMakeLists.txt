@@ -78,7 +78,7 @@ if (R_FOUND)
         )
     elseif (APPLE)
         # add R CMD INSTALL --build target
-        add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
+        add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tgz
     	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
         	COMMAND ${R_EXECUTABLE} CMD INSTALL --build ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -86,7 +86,7 @@ if (R_FOUND)
         	VERBATIM
         )
      add_custom_target (${PROJECT_NAME}_INSTALL_build
-    	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tar.gz
+    	    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.tgz
         )
     elseif (UNIX)
         # add R CMD build target
