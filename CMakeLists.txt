@@ -82,6 +82,8 @@ if (APPLE)
    set(EXTRA_COMPILE_FLAGS "-fPIC")
 elseif(UNIX)
    set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+elseif(WIN32)
+   set(EXTRA_COMPILE_FLAGS "-m64 -fPIC")
 endif()
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
