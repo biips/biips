@@ -83,7 +83,7 @@ if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD
         cpack -G $CPACK_GENERATOR
         cpack -G TGZ
-	$MAKE package_source
+	    $MAKE package_source
     fi
 fi
 

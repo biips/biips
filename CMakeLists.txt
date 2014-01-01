@@ -83,7 +83,8 @@ if (APPLE)
 elseif(UNIX)
    set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
 elseif(WIN32)
-   set(EXTRA_COMPILE_FLAGS "-m64")
+  add_definitions("-m64")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m64")
 endif()
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
@@ -92,6 +93,7 @@ if (SUPPRESS_DEPRECATED_WARNINGS)
 endif ()
 
 add_definitions(${EXTRA_COMPILE_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
