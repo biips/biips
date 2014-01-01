@@ -68,7 +68,7 @@ if (R_FOUND)
         # add R CMD INSTALL --build target
         add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${Biips_VERSION}.zip
     	    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cleaned_objects.tmp
-        	COMMAND ${R_EXECUTABLE} CMD INSTALL --build ${R_INSTALL_FLAGS} ${pkg_dir}
+        	COMMAND ${R_EXECUTABLE} --arch 64 CMD INSTALL --build --no-multiarch ${R_INSTALL_FLAGS} ${pkg_dir}
         	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         	COMMENT "Building ${PROJECT_NAME} R binary package"
         	VERBATIM
