@@ -3,22 +3,22 @@ model <- file.path(find.package("RBiips"), "extdata", "hmm_1d_nonlin.bug")
 model.title <- "Nonlinear gaussian univariate HMM"
 
 # data
-x.true <- c(2.18058, 13.0408, 4.5904, 0.0172347, 0.0416116, 11.638, 5.31703, 3.56488, 0.494195, 9.97843, 7.31315, 11.3852, 8.14421, 5.3909, -4.92422, 2.57024, 22.0909, 12.6866, 3.02204, 7.16082, 9.8559)
+x_true <- c(2.18058, 13.0408, 4.5904, 0.0172347, 0.0416116, 11.638, 5.31703, 3.56488, 0.494195, 9.97843, 7.31315, 11.3852, 8.14421, 5.3909, -4.92422, 2.57024, 22.0909, 12.6866, 3.02204, 7.16082, 9.8559)
 y <- c(9.25676, 1.16413, 0.687314, 2.98908, 6.68515, 2.59973, -0.86668, -0.137264, 5.93527, 2.4605, 5.84379, 1.3678, 0.634563, -0.376496, 2.00287, 24.3569, 8.40757, 1.47439, 2.79131, 4.42062)
 
-data <- list(t.max = length(y),
-             mean.x.init = 0,
-             prec.x.init = 1/5,
-             prec.x = 1/10,
-             prec.y = 1,
+data <- list(t_max = length(y),
+             mean_x_init = 0,
+             prec_x_init = 1/5,
+             prec_x = 1/10,
+             prec_y = 1,
              y=y)
 
 par(bty = "n")
 # -------------------- Exact solution (fine grid method) --------------------#
 # True filtering posterior mean
-x.gridf.mean = c(-2.93367e-17, 7.33609, 2.52861, 0.950226, 1.74819, 11.6619, 7.74044, 1.20363, 0.899005, 2.41347, -0.00242989, 9.10795, 4.23131, -0.118862, 1.61354, -1.67851, 21.9493, 12.8648, 1.21059, 3.96411, 8.03155)
+x_gridf_mean = c(-2.93367e-17, 7.33609, 2.52861, 0.950226, 1.74819, 11.6619, 7.74044, 1.20363, 0.899005, 2.41347, -0.00242989, 9.10795, 4.23131, -0.118862, 1.61354, -1.67851, 21.9493, 12.8648, 1.21059, 3.96411, 8.03155)
 # True smoothing posterior mean
-x.grids.mean = c(1.86667, 13.5568, 3.33718, 3.37443, 7.58229, 11.5843, 7.79238, 2.37667, 0.285016, 1.28586, 6.47747, 10.8999, 4.52618, 1.94444, 0.126584, 4.20127, 21.9551, 12.8964, 2.54215, 5.63901, 8.03155)
+x_grids_mean = c(1.86667, 13.5568, 3.33718, 3.37443, 7.58229, 11.5843, 7.79238, 2.37667, 0.285016, 1.28586, 6.47747, 10.8999, 4.52618, 1.94444, 0.126584, 4.20127, 21.9551, 12.8964, 2.54215, 5.63901, 8.03155)
 
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
@@ -113,13 +113,13 @@ lty=1:5; lwd=2; col=1:6; type='l';
 bty="n"; inset=c(0.01,0.01);
 xlab="time"; ylab = "mean state x";
 main = paste(model.title,"filtering mean estimates", sep="\n")
-t.max <- data$t.max
+t_max <- data$t_max
 
-matplot(matrix(c(x.true, x.gridf.mean, x.summ$filtering$Mean), nrow=t.max+1),
+matplot(matrix(c(x_true, x_gridf_mean, x.summ$filtering$Mean), nrow=t_max+1),
         lty=lty, lwd=lwd, col=col,
         type=type, xlab=xlab, ylab=ylab, main=main)
 legend(x="topright",
-       legend=list("x.true", "Grid method filter",
+       legend=list("x_true", "Grid method filter",
                    paste("Particle filtering (n.part=",n.part,")", sep="")),
        bty=bty, inset=inset, lty=lty, lwd=lwd, col=col)
 
@@ -146,23 +146,23 @@ if(run.pimh)
 # -------------------- plot smoothing results --------------------#
 main = paste(model.title,"smoothing mean estimates", sep="\n")
 
-mat <- matrix(c(x.true, x.grids.mean, x.summ$smoothing$Mean), nrow=t.max+1)
-leg <- list("x.true", "Grid method smoother",
+mat <- matrix(c(x_true, x_grids_mean, x.summ$smoothing$Mean), nrow=t_max+1)
+leg <- list("x_true", "Grid method smoother",
             paste("Particle smoothing (n.part=",n.part,")", sep=""))
 
 if (backward)
 {
-  mat <- matrix(c(mat, x.summ$backward.smoothing$Mean), nrow=t.max+1)
+  mat <- matrix(c(mat, x.summ$backward.smoothing$Mean), nrow=t_max+1)
   leg <- c(leg, list(paste("Particle backward-smoothing (n.part=",n.part,")", sep="")))
 }
 if (run.jags)
 {
-  mat <- matrix(c(mat, x.mean.jags), nrow=t.max+1)
+  mat <- matrix(c(mat, x.mean.jags), nrow=t_max+1)
   leg <- c(leg, list(paste("MCMC (n.chains=",n.chains,", n.burn=",n.burn,", n.iter=",n.iter,")", sep="")))
 }
 if (run.pimh)
 {
-  mat <- matrix(c(mat, x.mean.pimh), nrow=t.max+1)
+  mat <- matrix(c(mat, x.mean.pimh), nrow=t_max+1)
   leg <- c(leg, list(paste("Particle IMH (n.part=",n.part.pimh,", n.burn=",n.burn.pimh,", n.iter=",n.iter.pimh,")", sep="")))
 }
 matplot(mat,

@@ -3,11 +3,11 @@ model <- file.path(find.package("RBiips"), "extdata", "hmm_1d_lin.bug")
 model.title <- "Linear gaussian univariate HMM"
 
 # data
-data <- list(t.max = 100,
-             mean.x.init = 0,
-             prec.x.init = 1,
-             prec.x = 100,
-             prec.y = 1)
+data <- list(t_max = 100,
+             mean_x_init = 0,
+             prec_x_init = 1,
+             prec_x = 100,
+             prec_y = 1)
 
 par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
@@ -57,7 +57,7 @@ if (!run.jags) {
 }
 
 # generated data
-x.true <- biips$data()$x.true
+x_true <- biips$data()$x_true
 y <- biips$data()$y
 
 # build biips
@@ -110,11 +110,11 @@ if(run.kalman)
   require(sspir)
   model.sspir <- sspir::SS(Fmat = function(tt, x, phi) {return(matrix(1))},
                         Gmat = function(tt, x, phi) {return(matrix(1))},
-                        Vmat = matrix(1/data$prec.y),
-                        Wmat = matrix(1/data$prec.x),
+                        Vmat = matrix(1/data$prec_y),
+                        Wmat = matrix(1/data$prec_x),
                         y=as.matrix(y),
-                        m0=matrix(data$mean.x.init),
-                        C0=matrix(1/data$prec.x.init))
+                        m0=matrix(data$mean_x_init),
+                        C0=matrix(1/data$prec_x_init))
   
   # Kalman filter
   kf.sspir <- sspir::kfilter(model.sspir)
@@ -135,15 +135,15 @@ lty.leg=1:2; lwd.leg=c(2,2); col.leg=1:2;
 type='l'; bty="n"; inset=c(0.01,0.01);
 xlab="time"; ylab = "mean state x";
 main = paste(model.title, "filtering mean estimates", sep="\n")
-t.max <- data$t.max
+t_max <- data$t_max
 
-mat <- matrix(c(x.true, x.summ$filtering$Mean), nrow=t.max)
-leg <- list("x.true",
+mat <- matrix(c(x_true, x.summ$filtering$Mean), nrow=t_max)
+leg <- list("x_true",
             paste("Particle filtering (n.part=",n.part,")", sep=""))
 
 if (run.kalman)
 {
-  mat <- matrix(c(mat, x.kf.mean, x.kf.inf, x.kf.sup), nrow=t.max)
+  mat <- matrix(c(mat, x.kf.mean, x.kf.inf, x.kf.sup), nrow=t_max)
   leg <- c(leg, list("Kalman filter",
                      "Kalman filter 95% CI"))
   lty <- c(lty, 4,3,3)
@@ -185,13 +185,13 @@ lty=1:2; lwd=c(2,2); col=1:2;
 lty.leg=1:2; lwd.leg=c(2,2); col.leg=1:2;
 main = paste(model.title, "smoothing mean estimates", sep="\n")
 
-mat <- matrix(c(x.true, x.summ$smoothing$Mean), nrow=t.max)
-leg <- list("x.true",
+mat <- matrix(c(x_true, x.summ$smoothing$Mean), nrow=t_max)
+leg <- list("x_true",
             paste("Particle smoothing (n.part=",n.part,")", sep=""))
 
 if (backward)
 {
-  mat <- matrix(c(mat, x.summ$backward.smoothing$Mean), nrow=t.max)
+  mat <- matrix(c(mat, x.summ$backward.smoothing$Mean), nrow=t_max)
   leg <- c(leg, list(paste("Particle backward-smoothing (n.part=",n.part,")", sep="")))
   lty <- c(lty, 5)
   lty.leg <- c(lty.leg, 5)
@@ -202,7 +202,7 @@ if (backward)
 }
 if (run.kalman)
 {
-  mat <- matrix(c(mat, x.ks.mean, x.ks.inf, x.ks.sup), nrow=t.max)
+  mat <- matrix(c(mat, x.ks.mean, x.ks.inf, x.ks.sup), nrow=t_max)
   leg <- c(leg, list("Kalman smoother",
                      "Kalman smoother 95% CI"))
   lty <- c(lty, 3,3,3)
@@ -214,7 +214,7 @@ if (run.kalman)
 }
 if (run.jags)
 {
-  mat <- matrix(c(mat, x.mean.jags), nrow=t.max)
+  mat <- matrix(c(mat, x.mean.jags), nrow=t_max)
   leg <- c(leg, list(paste("MCMC (n.chains=",n.chains,", n.burn=",n.burn,", n.iter=",n.iter,")", sep="")))
   lty <- c(lty, 4)
   lty.leg <- c(lty.leg, 4)
@@ -225,7 +225,7 @@ if (run.jags)
 }
 if (run.pimh)
 {
-  mat <- matrix(c(mat, x.mean.pimh), nrow=t.max)
+  mat <- matrix(c(mat, x.mean.pimh), nrow=t_max)
   leg <- c(leg, list(paste("Particle IMH (n.part=",n.part.pimh,", n.burn=",n.burn.pimh,", n.iter=",n.iter.pimh,")", sep="")))
   lty <- c(lty, 5)
   lty.leg <- c(lty.leg, 5)
