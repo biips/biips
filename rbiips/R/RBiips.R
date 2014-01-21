@@ -37,24 +37,32 @@
 ## COPY: Adapted from rjags module file: jags.R
 
 
-mklist <- function(names, env = parent.frame()) { 
-  # COPY: Adapted from rstan
-  # Make a list using names 
-  # Args: 
-  #   names: character strings of names of objects 
-  #   env: the environment to look for objects with names
-  # Note: we use inherits = TRUE when calling mget 
-  d <- mget(names, env, ifnotfound = NA, inherits = TRUE, mode="numeric") 
-  n <- which(is.na(d)) 
-  if (length(n) > 0) {
-    stop("objects ", paste("'", names[n], "'", collapse = ', ', sep = ''), " not found")
-  } 
-  d 
+#' load the corresponding module into the Biips environment
+#' @param the module name
+#' @param quiet verbose flag
+#' @return null
+load.biips.module <- function(name, quiet=FALSE)
+{    
+  if (!is.character(name) || length(name)>1)
+    stop("invalid name")
+  
+  ok <- .Call("load_module", name, PACKAGE="RBiips")
+  if (!ok) {
+    stop("module ", name, " not found\n")
+  }
+  else if (!quiet) {
+    cat("module", name, "loaded\n")
+  }
+  invisible(NULL)
 }
 
+
+
+# TODO
 is_legal_biips_vname <- function(name) {
   TRUE
 }
+
 
 data_preprocess <- function(data) { # , varnames) {
   # COPY: Adapted from rstan
@@ -102,41 +110,24 @@ data_preprocess <- function(data) { # , varnames) {
   data[!sapply(data, is.null)] 
 }
 
-#' load the corresponding module into the Biips environment
-#' @param the module name
-#' @param quiet verbose flag
-#' @return null
-load.biips.module <- function(name, quiet=FALSE)
-{    
-  if (!is.character(name) || length(name)>1)
-    stop("invalid name")
-  
-  ok <- .Call("load_module", name, PACKAGE="RBiips")
-  if (!ok) {
-    stop("module ", name, " not found\n")
-  }
-  else if (!quiet) {
-    cat("module", name, "loaded\n")
-  }
-  invisible(NULL)
+
+mklist <- function(names, env = parent.frame()) { 
+  # COPY: Adapted from rstan
+  # Make a list using names 
+  # Args: 
+  #   names: character strings of names of objects 
+  #   env: the environment to look for objects with names
+  # Note: we use inherits = TRUE when calling mget 
+  d <- mget(names, env, ifnotfound = NA, inherits = TRUE, mode="numeric") 
+  n <- which(is.na(d)) 
+  if (length(n) > 0) {
+    stop("objects ", paste("'", names[n], "'", collapse = ', ', sep = ''), " not found")
+  } 
+  d 
 }
 
 
-#' Add the corresponding R function to the bugs model
-#' @param name of the new  function
-#' @param number of arguments of the new function
-#' @param R function returning a vector containg arguments sizes
-#' @param R function computing the result of function
-#' @param R function checking the arguments 
-#' @param R function telling is new function is discrete wrt its arguments
-biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
-{    
-  if (!is.character(name) || length(name)>1)
-  {
-    stop("invalid name")
-  }
-  ok <- .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
-}
+
 
 biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
 {
@@ -429,424 +420,20 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
 }
 
 
-is.biips <- function(object)
-{
-  return(class(object) == "biips")
-}
 
 
-print.biips <- function(x,...)
-{
-  if (!is.biips(x))
-    stop("Invalid BiiPS model.")
-  
-  cat("BiiPS model:\n\n")
-  
-  model <- x$model()
-  for (i in 1:length(model)) {
-    cat(model[i],"\n",sep="")
-  }
-  
-  data <- x$data()
-  full <- !sapply(lapply(data, is.na), any)
-  if (any(full)) {
-    cat("\n\nFully observed variables:\n", names(data)[full], "\n")
-  }
-  part <- !full & !sapply(lapply(data, is.na), all)
-  if (any(part)) {
-    cat("\nPartially observed variables:\n", names(data)[part], "\n")
-  }
-}
-
-#' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
-#' variable name and n,p,q,r are integers
-#' @param varname string containing the name of the variable to sparse
-parse.varname <- function(varname) {
-  
-  
-  v <- try(parse(text=varname, n=1), silent=TRUE)
-  if (!is.expression(v) || length(v) != 1)
-    return(NULL)
-  
-  v <- v[[1]]
-  if (is.name(v)) {
-    ## Full node array requested
-    return(list(name=deparse(v)))
-  }
-  else if (is.call(v) && identical(deparse(v[[1]]), "[") && length(v) > 2) {
-    ## Subset requested
-    ndim <- length(v) - 2
-    lower <- upper <- numeric(ndim)
-    if (any(nchar(sapply(v, deparse)) == 0)) {
-      ## We have to catch empty indices here or they will cause trouble
-      ## below
-      return(NULL)
-    }
-    for (i in 1:ndim) {
-      index <- v[[i+2]]
-      if (is.numeric(index)) {
-        ## Single index
-        lower[i] <- upper[i] <- index
-      }
-      else if (is.call(index) && length(index) == 3 &&
-        identical(deparse(index[[1]]), ":") &&
-        is.numeric(index[[2]]) && is.numeric(index[[3]]))
-      {
-        ## Index range
-        lower[i] <- index[[2]]
-        upper[i] <- index[[3]]
-      }
-      else return(NULL)
-    }
-    if (any(upper < lower))
-      return (NULL)
-    return(list(name = deparse(v[[2]]), lower=lower, upper=upper))
-  }
-  return(NULL)
-}
-
-
-parse.varnames <- function(varnames)
-{
-  names <- character(length(varnames))
-  lower <- upper <- vector("list", length(varnames))
-  for (i in seq(along=varnames)) {
-    y <- parse.varname(varnames[i])
-    if (is.null(y)) {
-      stop("Invalid variable subset ", varnames[i])
-    }
-    names[i] <- y$name
-    if (!is.null(y$lower)) {
-      lower[[i]] <- y$lower
-    }
-    if (!is.null(y$upper)) {
-      upper[[i]] <- y$upper
-    }
-  }
-  return(list(names=names, lower=lower, upper=upper))
-}
-
-
-smc.samples <- function(object, variable.names, n.part, type="fs",
-                        rs.thres = 0.5, rs.type = "stratified", ...)
-{
-  if (!is.character(type))
-    stop("'type' must be a character string with characters 'f', 's', 'b'")
-  
-  type <- unlist(strsplit(type, NULL))
-  type <- match.arg(type, c('f', 's', 'b'), several.ok=TRUE)
-  backward <- ('b' %in% type)
-  
-  ## monitor
-  if(backward) {
-    .Call("set_default_monitors", object$ptr(), PACKAGE="RBiips")
-  }
-  if (!missing(variable.names))
-    monitor.biips(object, variable.names, type)
-  
-  ## smc forward sampler
-  run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type, ...)
-  
-  log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
-  ans <- list()
-  
-  mon <- .Call("get_filter_monitors", object$ptr(), PACKAGE="RBiips")
-  for (n in names(mon)) {
-    ans[[n]][["filtering"]] <- mon[[n]]
-  }
-  if (!backward) {
-    clear.monitors.biips(object, type="f")
-  }
-  
-  mon <- .Call("get_gen_tree_smooth_monitors", object$ptr(), PACKAGE="RBiips")
-  for (n in names(mon)) {
-    ans[[n]][["smoothing"]] <- mon[[n]]
-  }
-  clear.monitors.biips(object, type="s")
-  
-  ## smc backward smoother
-  if (backward)
+#' Add the corresponding R function to the bugs model
+#' @param name of the new  function
+#' @param number of arguments of the new function
+#' @param R function returning a vector containg arguments sizes
+#' @param R function computing the result of function
+#' @param R function checking the arguments 
+#' @param R function telling is new function is discrete wrt its arguments
+biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
+{    
+  if (!is.character(name) || length(name)>1)
   {
-    ## run backward smoother
-    .Call("run_backward_smoother", object$ptr(), PACKAGE="RBiips")
-    
-    clear.monitors.biips(object, type="f")
-    
-    mon <- .Call("get_backward_smooth_monitors", object$ptr(), PACKAGE="RBiips")
-    for (n in names(mon)) {
-      ans[[n]][["backward.smoothing"]] <- mon[[n]]
-    }
-    clear.monitors.biips(object, type="b")
+    stop("invalid name")
   }
-  
-  for (n in names(ans)) {
-    class(ans[[n]]) <- "particles.list"
-  }
-  ans[["log.marg.like"]] <- log.marg.like
-  
-  return(ans)
-}
-
-
-pimh.samples <- function(object, variable.names, n.iter, thin = 1,
-                         n.part, ...)
-{
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-  
-  ## check variable.names
-  if (!is.character(variable.names))
-    stop("Invalid variable.names argument")
-  parse.varnames(variable.names)
-  
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
-  n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
-    stop("Invalid thin argument")
-  thin <- as.integer(thin)
-  
-  ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
-  
-  ## Initialization
-  ##---------------  
-  out <- init.pimh.biips(object, variable.names=variable.names,
-                         n.part=n.part, ...)
-  sample <- out$sample
-  log.marg.like <- out$log.marg.like
-  
-  ans <- list()
-  n.samples <- 0
-  
-  .Call("message", paste("Generating PIMH samples with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
-  
-  ## Independant Metropolis-Hastings iterations
-  ##-------------------------------------------
-  for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(object, variable.names=variable.names,
-                                 n.part=n.part,
-                                 sample=sample, log.marg.like=log.marg.like, ...)
-    sample <- out$sample
-    log.marg.like <- out$log.marg.like
-    accepted <- out$accepted
-    
-    ## Store output
-    if ((i-1)%%thin == 0) {
-      n.samples <- n.samples + 1
-      ans[["log.marg.like"]][n.samples] <- log.marg.like
-      for (var in variable.names)
-        ans[[var]] <- c(ans[[var]], sample[[var]])
-    }
-    
-    ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
-  }
-  
-  clear.monitors.biips(object, type="s")
-  
-  ## reset log norm const and sampled value
-  if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample, PACKAGE="RBiips")
-  }
-  
-  
-  ## set output dimensions
-  for (var in variable.names) {
-    n.dim <- length(dim(sample[[var]]))
-    dim(ans[[var]]) <- c(dim(sample[[var]]), n.samples)
-    names(dim(ans[[var]])) <- c(rep("", n.dim), "iteration")
-    class(ans[[var]]) <- "mcarray"
-  }
-  dim(ans[["log.marg.like"]]) <- c(1, n.samples)
-  names(dim(ans[["log.marg.like"]])) <- c("", "iteration")
-  class(ans[["log.marg.like"]]) <- "mcarray"
-  
-  return(ans)
-}
-
-
-smc.sensitivity <- function(object, params,
-                            n.part, ...)
-{
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-  
-  if (missing(n.part))
-    stop("missing n.part argument")
-  
-  ## check params
-  if (!is.list(params) || length(params) == 0)
-    stop("Invalid params argument")
-  variable.names <- names(params)
-  pn <- parse.varnames(variable.names)
-  
-  ## get parameters array length
-  dim <- list()
-  len <- list()
-  d <- dim(params[[1]])
-  if (is.null(d)) {
-    n.params <- length(params[[1]])
-    dim[[names(params)[1]]] <- 1
-    len[[names(params)[1]]] <- 1
-  } else {
-    n.params <- d[[length(d)]]
-    d <- d[1:(length(d)-1)]
-    dim[[names(params)[1]]] <- d
-    len[[names(params)[1]]] <- prod(d)
-  }
-  if (length(params) > 1) {
-    for (i in 2:length(params)) {
-      d <- dim(params[[i]])
-      if (is.null(d)) {
-        n <- length(params[[i]])
-        dim[[names(params)[i]]] <- 1
-        len[[names(params)[i]]] <- 1
-      } else {
-        n <- d[[length(d)]]
-        d <- d[1:(length(d)-1)]
-        dim[[names(params)[i]]] <- d
-        len[[names(params)[i]]] <- prod(d)
-      }
-      # check parameters array length
-      if (n != n.params)
-        stop("Invalid params argument: different number of parameters.")
-    }
-  }
-  
-  ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
-  
-  ## initialize
-  ##-----------
-  log.marg.like <- vector(length=n.params)
-  log.marg.like.pen <- vector(length=n.params)
-  max.log.marg.like <- -Inf
-  max.log.marg.like.pen <- -Inf
-  
-  .Call("message", paste("Analyzing sensitivity with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
-  bar <- .Call("progress_bar", n.params, '*', "iterations", PACKAGE="RBiips")
-  
-  ## Iterate 
-  ##--------
-  for (k in 1:n.params) {
-    
-    ## make one param
-    param <- list()
-    for (v in seq(along=variable.names)) {
-      var <- variable.names[[v]]
-      ind <- seq(from=(k-1)*len[[v]]+1, to=k*len[[v]])
-      param[[var]] <- params[[v]][ind]
-      dim(param[[var]]) <- dim[[v]]
-      
-      ## change param value
-      if(!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
-                param[[v]], FALSE, PACKAGE="RBiips"))
-        stop("data change failed: invalid parameter. variable = ", var,". value = ", param[v])
-    }
-    
-    log.prior <- 0
-    for (v in seq(along=variable.names)) {
-      log.p <- .Call("get_log_prior_density", object$ptr(), 
-                     pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-      
-      if (is.na(log.p)) {
-        next
-      }
-      
-      if (is.nan(log.p) || (is.infinite(log.p) && log.p<0))
-        stop("Failure evaluating parameter log prior for variable ",
-                   variable.names[[v]], ". value = ", param[v])
-      
-      log.prior <- log.prior + log.p
-    }
-    
-    ## run smc sampler
-    ok <- run.smc.forward(object, n.part=n.part, ...)
-    
-    if (!ok)
-      stop("Failure running smc forward sampler. param: ", paste(names(param),"=", param, sep="", collapse=";"))
-    
-    ## log marginal likelihood
-    log.marg.like[k] <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
-    if (log.marg.like[k] > max.log.marg.like) {
-      max.log.marg.like <- log.marg.like[k]
-      max.param <- param
-    }
-    log.marg.like.pen[k] <- log.marg.like[k] + log.prior
-    if (log.marg.like.pen[k] > max.log.marg.like.pen) {
-      max.log.marg.like.pen <- log.marg.like.pen[k]
-      max.param.pen <- param
-    }
-    
-    ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
-  }
-  
-  ## restore data
-  ##-------------
-  object$recompile()
-  
-  # FIXME: Tentative of removing data without recompiling the model
-  #   for (v in seq(along=variable.names)) {
-  #     if (!(pn$names[[v]] %in% names(data))) {
-  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-  #       if (!ok)
-  #         stop("Failure restoring data")
-  #       next
-  #     }
-  #     
-  #     if (is.null(pn$lower[[v]])) {
-  #       data.sub <- data[[v]]
-  #     } else {
-  #       ## compute offsets
-  #       offsets <- NULL
-  #       dim <- dim(data[[v]])
-  #       if (is.null(dim))
-  #         dim <- length(data[[v]])
-  #       ind <- vector(len=length(dim))
-  #       
-  #       for (i in seq(along=data[[v]])) {
-  #         r <- i
-  #         for (d in seq(along=dim)) {
-  #           ind[d] <- ((r-1) %% dim[d]) +1
-  #           r <- ceiling(r/dim[d])
-  #         }
-  #         print(ind)
-  #         if (any(ind<pn$lower[[v]]) || any(ind>pn$upper[[v]]))
-  #           next
-  #         offsets <- c(offsets, i)
-  #       }
-  #       
-  #       data.sub <- array(data[[v]][offsets], dim=pn$upper[[v]]-pn$lower[[v]]+1)
-  #     }
-  #     
-  #     if (all(is.na(data.sub))) {
-  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-  #       if (!ok)
-  #         stop("Failure restoring data")
-  #       next
-  #     }
-  #     
-  #     if (any(is.na(data.sub)))
-  #       stop("Failure restoring data")
-  #     
-  #     ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
-  #                 data.sub, FALSE, PACKAGE="RBiips")
-  #     if (!ok)
-  #       stop("Failure restoring data")
-  #   }
-  
-  ## output
-  ##--------
-  ans <- list(log.marg.like=log.marg.like, max.param=max.param, max.log.marg.like=max.log.marg.like,
-              log.marg.like.pen=log.marg.like.pen, max.param.pen=max.param.pen, max.log.marg.like.pen=max.log.marg.like.pen)
-  
-  return(ans)
+  ok <- .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
 }
