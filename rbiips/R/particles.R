@@ -35,6 +35,53 @@
 #  Id:       $Id$
 #
 
+
+##' Objects for representing SMC output
+##' 
+##' A \code{particles} object is used by the \code{smc.samples} function to
+##' represent SMC output from a BiiPS model. It is an array with named
+##' dimensions, for which the dimension \dQuote{particles} has a special
+##' status.
+##' 
+##' A \code{particles.list} object is a list of \code{particles} objects with
+##' different types of monitoring for the same variable.
+##' 
+##' Functions applying to \code{particles} objects apply identically to
+##' \code{particles.list} objects by a call to each element of the list.
+##' 
+##' 
+##' 
+##' @aliases particles.object particles.list.object diagnostic
+##' diagnostic.particles diagnostic.particles.list summary.particles
+##' summary.particles.list density.particles density.particles.list
+##' plot.particles plot.particles.list
+##' @param object,x a \code{particles} or \code{particles.list} object
+##' @param fun a character vector indicating the functions to be used to
+##' generate summary statistics
+##' @param probs a numerical vector containing the desired quantile
+##' probabilities
+##' @param bw the smoothing bandwidth to be used. See \code{\link{density}} for
+##' more details
+##' @param adjust the bandwidth used is actually \code{adjust*bw}. This makes
+##' it easy to specify values like \sQuote{half the default} bandwidth.
+##' @param subset
+##' @param ess.thres
+##' @param ... additional arguments to be passed to the default methods
+##' @return The \code{summary} method for \code{particles} objects applies the
+##' given function to the array, marginalizing the \dQuote{particles}
+##' dimension.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \link{density}
+##' @keywords models
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--  or do  help(data=index)  for the standard data sets.
+##' 
+NULL
+
+
 which.type <- function(x, type=NULL)
 {
   if (!is.null(type) && !is.character(type))
@@ -253,6 +300,7 @@ plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.
 }
 
 
+##' @export
 diagnostic <- function(object, ...)
   UseMethod("diagnostic")
 

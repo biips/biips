@@ -138,10 +138,6 @@ macro(add_targets_depends src_files)
 endmacro(add_targets_depends)
 
 # add subdirectories
-add_subdirectory(data)
-add_subdirectory(demo)
-add_subdirectory(inst)
-add_subdirectory(man)
 add_subdirectory(R)
 add_subdirectory(src)
 add_subdirectory(tests)

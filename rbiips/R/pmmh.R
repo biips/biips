@@ -1,12 +1,13 @@
 
+##' @export
 init.pmmh <- function(object, ...)
   UseMethod("init.pmmh")
 
-#' initialize all variables to organize a pmmh algorithm
-#' which use a biips model (aka SMC) as likelyhood
-#' @param object the Biips model
-#' @param param.names vector of params
-#'
+##' initialize all variables to organize a pmmh algorithm
+##' which use a biips model (aka SMC) as likelyhood
+##' @param object the Biips model
+##' @param param.names vector of params
+##'
 init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
                             n.part, rs.thres=0.5, rs.type="stratified",
                             inits.rng.seed, ...)
@@ -218,8 +219,8 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
 }
 
 
-#' heart of the pmmh algorithm : realizes one step of the MH algorithm
-#' using the underlying SMC
+##' heart of the pmmh algorithm : realizes one step of the MH algorithm
+##' using the underlying SMC
 one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.param,
                                   sample, log.prior, log.marg.like,
                                   n.part, rw.learn, ...)
@@ -331,6 +332,7 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
 }
 
 
+##' @export
 update.pmmh <- function(object, ...)
   UseMethod("update.pmmh")
 
@@ -486,6 +488,36 @@ update.pmmh.biips <- function(object, param.names, n.iter,
 }
 
 
+
+
+##' Generate Particle Marginal Metropolis-Hastings samples
+##' 
+##' The \code{pmmh.samples} function creates monitors for the given variables,
+##' runs the model for \code{n.iter} iterations and returns the monitored
+##' samples.
+##' 
+##' @param model a biips model object
+##' @param variable.names a character vector giving the names of variables to
+##' be monitored
+##' @param n.iter number of iterations of the Markov chain to run
+##' @param thin thinning interval for monitors
+##' @param n.part number of particles
+##' @param max.fail maximum number of failures allowed
+##' @param ... additional arguments to be passed to the SMC algorithm
+##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips.model}}, \code{\link{pimh.samples}},
+##' \code{\link{smc.samples}}
+##' @keywords models
+##' @export
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--	or do  help(data=index)  for the standard data sets.
+##' 
 pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
                          n.part, max.fail=0, rw.learn=TRUE, ...)
 {  
