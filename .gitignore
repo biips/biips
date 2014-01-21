@@ -1,2 +1,3 @@
 *.pdf
 build_*/
+.Rproj.user
