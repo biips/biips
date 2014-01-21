@@ -1,4 +1,3 @@
-
 run.smc.forward <- function(object, n.part, rs.thres = 0.5, rs.type = "stratified",
                             smc.rng.seed)
 {
@@ -38,6 +37,53 @@ run.smc.forward <- function(object, n.part, rs.thres = 0.5, rs.type = "stratifie
 }
 
 
+
+
+##' Generate conditional samples
+##' 
+##' Function to extract random weighted samples, aka. particles, from the
+##' conditional distribution of the parameters of a \code{biips} model.
+##' 
+##' The \code{smc.samples} function creates monitors for the given types and
+##' variables, runs the SMC algorithm for \code{n.part} particles and returns
+##' the monitored samples.
+##' 
+##' Argument \code{type} specifies the type of particle values that will be
+##' stored for each monitored node. Possible values are: \code{"filtering"},
+##' \code{"smoothing"}, \code{"backward.smoothing"}
+##' 
+##' @param obj a biips model object
+##' @param variable.names a character vector giving the names of variables to
+##' be monitored
+##' @param type a character vector giving the types of monitoring desired.
+##' @param n.part number of particles
+##' @param backward logical flag. If \code{TRUE} then a backward smoothing
+##' algorithm will be run after the forward sampling step
+##' @param rs.thres threshold on the ESS criterion to control the resampling
+##' step
+##' @param rs.type a string indicating the resampling algorithm used
+##' @param ... additional arguments
+##' @return A list of \code{\link[=particles.list.object]{particles.list}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' 
+##' A \code{particles.list} object is a list of
+##' \code{\link[=particles.object]{particles}} object, with one element for
+##' each type of monitoring \code{type} argument.
+##' @note By default, the seed of the random number generation is chosen
+##' randomly. However for the sake of repatability, the optional
+##' \code{smc.rng.seed} integer argument can be used to fix it.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips.model}}, \code{\link{pmmh.samples}},
+##' \code{\link{pimh.samples}}
+##' @keywords models
+##' @export
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--	or do  help(data=index)  for the standard data sets.
+##' 
 smc.samples <- function(object, variable.names, n.part, type="fs",
                         rs.thres = 0.5, rs.type = "stratified", ...)
 {

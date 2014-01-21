@@ -1,4 +1,3 @@
-
 init.pimh.biips <- function(object, variable.names,
                             n.part, rs.thres=0.5, rs.type="stratified")
 {
@@ -77,6 +76,7 @@ update.pimh <- function(object, ...)
   UseMethod("update.pimh")
 
 
+##' @export
 update.pimh.biips <- function(object, variable.names, n.iter,
                               n.part, ...)
 {
@@ -135,6 +135,35 @@ update.pimh.biips <- function(object, variable.names, n.iter,
 }
 
 
+
+
+##' Generate Particle Independent Metropolis-Hastings samples
+##' 
+##' The \code{pimh.samples} function creates monitors for the given variables,
+##' runs the model for \code{n.iter} iterations and returns the monitored
+##' samples.
+##' 
+##' @param model a biips model object
+##' @param variable.names a character vector giving the names of variables to
+##' be monitored
+##' @param n.iter number of iterations of the Markov chain to run
+##' @param thin thinning interval for monitors
+##' @param n.part number of particles
+##' @param ... additional arguments to be passed to the SMC algorithm
+##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips.model}}, \code{\link{pmmh.samples}},
+##' \code{\link{smc.samples}}
+##' @keywords models
+##' @export
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--	or do  help(data=index)  for the standard data sets.
+##' 
 pimh.samples <- function(object, variable.names, n.iter, thin = 1,
                          n.part, ...)
 {

@@ -36,9 +36,50 @@
 #
 
 
-#' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
-#' variable name and n,p,q,r are integers
-#' @param varname string containing the name of the variable to sparse
+##' Manipulate biips model objects
+##' 
+##' A \code{biips} object represents a Bayesian graphical model described using
+##' the BUGS language.
+##' 
+##' The \code{variable.names} function returns a character vector of names of
+##' node arrays used in the model.
+##' 
+##' @aliases biips.object build.sampler build.sampler.biips init.pmmh
+##' init.pmmh.biips update.pmmh update.pmmh.biips update.pimh update.pimh.biips
+##' variable.names.biips is.biips
+##' @param object a biips model object
+##' @param proposal
+##' @param variable.names a character vector giving the names of variables to
+##' be monitored
+##' @param inits
+##' @param n.part number of particles
+##' @param rs.thres threshold on the ESS criterion to control the resampling
+##' step
+##' @param rs.type a string indicating the resampling algorithm used
+##' @param inits.rng.seed optional integer used as the seed for the random
+##' number generator of the initial values generation.
+##' @param n.iter number of iterations of the Markov chain to run
+##' @param max.fail maximum number of failures allowed
+##' @param ... additional arguments
+##' @return %% ~Describe the value returned
+##' %% If it is a LIST, use 
+##' %% \item{comp1 }{Description of 'comp1'} 
+##' %% \item{comp2 }{Description of 'comp2'} 
+##' %% ...
+##' @author Adrien Todeschini, Francois Caron
+##' @keywords models
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--  or do  help(data=index)  for the standard data sets.
+##' 
+NULL
+
+
+##' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
+##' variable name and n,p,q,r are integers
+##' @param varname string containing the name of the variable to sparse
 parse.varname <- function(varname) {
   
   
@@ -105,6 +146,7 @@ parse.varnames <- function(varnames)
 }
 
 
+##' @export
 is.biips <- function(object)
 {
   return(class(object) == "biips")
@@ -201,6 +243,7 @@ clear.monitors.biips <- function(object, type, release.only=FALSE)
 }
 
 
+##' @export
 build.sampler <- function(object, ...)
   UseMethod("build.sampler")
 
