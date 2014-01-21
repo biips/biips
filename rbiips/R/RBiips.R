@@ -37,10 +37,10 @@
 ## COPY: Adapted from rjags module file: jags.R
 
 
-#' load the corresponding module into the Biips environment
-#' @param the module name
-#' @param quiet verbose flag
-#' @return null
+##' load the corresponding module into the Biips environment
+##' @param name the module name
+##' @param quiet verbose flag
+##' @return null
 load.biips.module <- function(name, quiet=FALSE)
 {    
   if (!is.character(name) || length(name)>1)
@@ -129,6 +129,55 @@ mklist <- function(names, env = parent.frame()) {
 
 
 
+
+
+##' Create a biips model object
+##' 
+##' \code{biips.model} is used to create an object representing a Bayesian
+##' graphical model, specified with a BUGS language description of the prior
+##' distribution, and a set of data.
+##' 
+##' @param file a file containing a description of the model in the BiiPS/JAGS
+##' dialect of the BUGS language.
+##' 
+##' Alternatively, \code{file} can be a readable text-mode connection, or a
+##' complete URL.
+##' @param data a list or environment containing the data. Any numeric objects
+##' in \code{data} corresponding to node arrays used in \code{file} are taken
+##' to represent the values of observed nodes in the model
+##' @param sample.data logical flag. If \code{FALSE} then the \code{data} block
+##' of the model will be ignored.
+##' @param data.rng.seed optional integer used as the seed for the random
+##' number generator of the data generation.
+##' @param quiet if \code{TRUE} then messages generated during compilation will
+##' be suppressed.
+##' @return \code{biips.model} returns an object inheriting from class
+##' \code{biips} which can be used to generate dependent samples from the
+##' posterior distribution of the parameters
+##' 
+##' An object of class \code{biips} is a list of functions that share a common
+##' environment. The functions can be used to query information on the model.
+##' \item{ptr()}{Returns an external pointer to an object created by the BiiPS
+##' library.} \item{data()}{Returns a list containing the data that defines the
+##' observed nodes in the model.} \item{model()}{Returns a character vector
+##' containing the BUGS-language representation of the model.}
+##' \item{dot(file)}{Writes a description of the graph in dot language in
+##' \code{file}.} \item{nodes(type, observed)}{Returns a \code{data.frame}
+##' containing information on all the nodes of the graph: rank in the
+##' topological sort, node id, variable name or formula, type, observed. After
+##' calling \code{build.sampler} or any algorithm running smc sampler, the
+##' \code{data.frame} will also contain a column indicating the node sampler
+##' used for unobserved stochastic nodes.} \item{recompile()}{Recompiles the
+##' model using the original data set.}
+##' @author Adrien Todeschini, Francois Caron
+##' @keywords models graphs
+##' @export
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--	or do  help(data=index)  for the standard data sets.
+##' 
 biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
 {
   if (missing(file)) {
@@ -422,13 +471,14 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
 
 
 
-#' Add the corresponding R function to the bugs model
-#' @param name of the new  function
-#' @param number of arguments of the new function
-#' @param R function returning a vector containg arguments sizes
-#' @param R function computing the result of function
-#' @param R function checking the arguments 
-#' @param R function telling is new function is discrete wrt its arguments
+##' Add the corresponding R function to the bugs model
+##' @param name of the new  function
+##' @param number of arguments of the new function
+##' @param R function returning a vector containg arguments sizes
+##' @param R function computing the result of function
+##' @param R function checking the arguments 
+##' @param R function telling is new function is discrete wrt its arguments
+##' @export
 biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
 {    
   if (!is.character(name) || length(name)>1)
