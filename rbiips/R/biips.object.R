@@ -35,6 +35,105 @@
 #  Id:       $Id$
 #
 
+
+#' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
+#' variable name and n,p,q,r are integers
+#' @param varname string containing the name of the variable to sparse
+parse.varname <- function(varname) {
+  
+  
+  v <- try(parse(text=varname, n=1), silent=TRUE)
+  if (!is.expression(v) || length(v) != 1)
+    return(NULL)
+  
+  v <- v[[1]]
+  if (is.name(v)) {
+    ## Full node array requested
+    return(list(name=deparse(v)))
+  }
+  else if (is.call(v) && identical(deparse(v[[1]]), "[") && length(v) > 2) {
+    ## Subset requested
+    ndim <- length(v) - 2
+    lower <- upper <- numeric(ndim)
+    if (any(nchar(sapply(v, deparse)) == 0)) {
+      ## We have to catch empty indices here or they will cause trouble
+      ## below
+      return(NULL)
+    }
+    for (i in 1:ndim) {
+      index <- v[[i+2]]
+      if (is.numeric(index)) {
+        ## Single index
+        lower[i] <- upper[i] <- index
+      }
+      else if (is.call(index) && length(index) == 3 &&
+                 identical(deparse(index[[1]]), ":") &&
+                 is.numeric(index[[2]]) && is.numeric(index[[3]]))
+      {
+        ## Index range
+        lower[i] <- index[[2]]
+        upper[i] <- index[[3]]
+      }
+      else return(NULL)
+    }
+    if (any(upper < lower))
+      return (NULL)
+    return(list(name = deparse(v[[2]]), lower=lower, upper=upper))
+  }
+  return(NULL)
+}
+
+
+parse.varnames <- function(varnames)
+{
+  names <- character(length(varnames))
+  lower <- upper <- vector("list", length(varnames))
+  for (i in seq(along=varnames)) {
+    y <- parse.varname(varnames[i])
+    if (is.null(y)) {
+      stop("Invalid variable subset ", varnames[i])
+    }
+    names[i] <- y$name
+    if (!is.null(y$lower)) {
+      lower[[i]] <- y$lower
+    }
+    if (!is.null(y$upper)) {
+      upper[[i]] <- y$upper
+    }
+  }
+  return(list(names=names, lower=lower, upper=upper))
+}
+
+
+is.biips <- function(object)
+{
+  return(class(object) == "biips")
+}
+
+
+print.biips <- function(x,...)
+{
+  if (!is.biips(x))
+    stop("Invalid BiiPS model.")
+  
+  cat("BiiPS model:\n\n")
+  
+  model <- x$model()
+  for (i in 1:length(model)) {
+    cat(model[i],"\n",sep="")
+  }
+  
+  data <- x$data()
+  full <- !sapply(lapply(data, is.na), any)
+  if (any(full)) {
+    cat("\n\nFully observed variables:\n", names(data)[full], "\n")
+  }
+  part <- !full & !sapply(lapply(data, is.na), all)
+  if (any(part)) {
+    cat("\nPartially observed variables:\n", names(data)[part], "\n")
+  }
+}
+
 monitor.biips <- function(object, variable.names, type)
 {
   if (!is.biips(object))
@@ -123,179 +222,6 @@ build.sampler.biips <- function(object, proposal= "auto", ...)
   invisible(NULL)
 }
 
-
-run.smc.forward <- function(object, n.part, rs.thres = 0.5, rs.type = "stratified",
-                            smc.rng.seed)
-{
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-      
-  if (!is.numeric(n.part) || length(n.part)!=1 || n.part < 1) {
-    stop("Invalid n.part argument")
-  } 
-  if (!is.numeric(rs.thres) || length(rs.thres)!=1 || rs.thres < 0) {
-    stop("Invalid rs.thres argument")
-  }
-  if (!is.character(rs.type) || length(rs.type)!=1) {
-    stop("Invalid rs.type argument")
-  }
-  rs.type <- match.arg(rs.type, c("multinomial",
-                                  "residual",
-                                  "stratified",
-                                  "systematic"))
-  if (missing(smc.rng.seed)) {
-    smc.rng.seed <- runif(1, 0, as.integer(Sys.time()));
-  }
-  if (!is.numeric(smc.rng.seed) || length(smc.rng.seed)!=1 || smc.rng.seed < 0) {
-    stop("Invalid smc.rng.seed argument")
-  }
-  
-  ## build smc sampler
-  if (!.Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")) {
-    .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
-  }
-  
-  ## run smc sampler
-  ok <- .Call("run_smc_sampler", object$ptr(), as.integer(n.part),
-              as.integer(smc.rng.seed), rs.thres, rs.type, PACKAGE="RBiips")
-  
-  invisible(ok)
-}
-
-init.pimh.biips <- function(object, variable.names,
-                            n.part, rs.thres=0.5, rs.type="stratified")
-{
-  monitored <- is.monitored.biips(object, variable.names, "s", FALSE)
-  if (!monitored) {
-    ## monitor variables
-    monitor.biips(object, variable.names, type="s")
-  }
-  
-  if (!.Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")) {
-    ## build smc sampler
-    .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
-  }
-  
-  atend <- .Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
-  ## get log normalizing constant
-  if (!monitored || !atend) {
-    ## run smc sampler
-    .Call("message", "Initializing PIMH", PACKAGE="RBiips")
-    run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
-  }
-  log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
-  
-  ## get sampled value
-  sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
-  if (length(sampled.value)==0) {
-    ## sample one particle
-    rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
-    
-    sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
-  }
-  sample <- list()
-  for (var in variable.names) {
-    sample[[var]] <- sampled.value[[var]]
-  }
-  
-  ans <- list(sample=sample, log.marg.like=log.marg.like)
-  invisible(ans)
-}
-
-
-one.update.pimh.biips <- function(object, variable.names,
-                                  n.part, rs.thres=0.5, rs.type="stratified",
-                                  sample, log.marg.like)
-{
-  ## SMC
-  run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
-
-  ## Acceptance rate
-  log.marg.like.prop <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
-  log.ar <- log.marg.like.prop - log.marg.like
-
-  ## Accept/Reject step
-  accepted <- (runif(1) < exp(log.ar))
-  if (accepted) {
-    log.marg.like <- log.marg.like.prop
-    
-    ## sample one particle
-    rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
-    
-    ## get sampled value
-    sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
-    for (var in variable.names) {
-      sample[[var]] <- sampled.value[[var]]
-    }
-  }
-  
-  ans <- list(sample=sample, log.marg.like=log.marg.like, accepted=accepted)
-  invisible(ans)
-}
-
-
-update.pimh <- function(object, ...)
-  UseMethod("update.pimh")
-
-
-update.pimh.biips <- function(object, variable.names, n.iter,
-                       n.part, ...)
-{
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-  
-  ## check variable.names
-  if (!is.character(variable.names))
-    stop("Invalid variable.names argument")
-  parse.varnames(variable.names)
-  
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
-  n.iter <- as.integer(n.iter)
-  
-  ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
-  
-  ## initialize
-  out <- init.pimh.biips(object, variable.names=variable.names,
-                         n.part=n.part, ...)
-  sample <- out$sample
-  log.marg.like <- out$log.marg.like
-  
-  .Call("message", paste("Updating PIMH with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
-  
-  n.samples <- 0
-  
-  ## Independant Metropolis-Hastings iterations
-  ##-------------------------------------------
-  for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(object, variable.names=variable.names, 
-                                 sample=sample, log.marg.like=log.marg.like,
-                                 n.part=n.part, ...)
-    sample <- out$sample
-    log.marg.like <- out$log.marg.like
-    accepted <- out$accepted
-  
-    ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
-  }
-  
-  ## release monitors memory
-  clear.monitors.biips(object, type="s", TRUE)
-  
-  ## reset log norm const and sampled value
-  if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample, PACKAGE="RBiips")
-  }
-  
-  invisible(NULL)
-}
 
 
 variable.names.biips <- function(object, ...) {
