@@ -1,9 +1,0 @@
-file(GLOB Rfiles *.R)
-file(COPY "${CMAKE_SOURCE_DIR}/examples/funcmat.bug" DESTINATION
-${CMAKE_CURRENT_BINARY_DIR})
-set(test_files ${Rfiles} ${bfiles})
-file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set(rtests funcmat)
-foreach(_test ${rtests})
-    add_test(NAME ${_test}-R COMMAND ${R_EXECUTABLE} -e "require(\"RBiips\"); source(\"${rtests}.R\")")
-endforeach()

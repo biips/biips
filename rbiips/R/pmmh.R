@@ -4,7 +4,9 @@ init.pmmh <- function(object, ...)
   UseMethod("init.pmmh")
 
 ##' initialize all variables to organize a pmmh algorithm
-##' which use a biips model (aka SMC) as likelyhood
+##' which use a biips model (aka SMC) as likelihood
+##' 
+##' @S3method init.pmmh biips
 ##' @param object the Biips model
 ##' @param param.names vector of params
 ##'
@@ -337,6 +339,7 @@ update.pmmh <- function(object, ...)
   UseMethod("update.pmmh")
 
 
+##' @S3method update.pmmh biips
 update.pmmh.biips <- function(object, param.names, n.iter, 
                               n.part, max.fail=0, inits=list(),
                               rw.step, rw.adapt=TRUE, rw.learn=TRUE, ...)
