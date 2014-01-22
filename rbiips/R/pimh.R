@@ -72,11 +72,12 @@ one.update.pimh.biips <- function(object, variable.names,
 }
 
 
+##' @export
 update.pimh <- function(object, ...)
   UseMethod("update.pimh")
 
 
-##' @export
+##' @S3method update.pimh biips
 update.pimh.biips <- function(object, variable.names, n.iter,
                               n.part, ...)
 {

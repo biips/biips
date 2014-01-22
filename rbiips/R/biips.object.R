@@ -44,6 +44,7 @@
 ##' The \code{variable.names} function returns a character vector of names of
 ##' node arrays used in the model.
 ##' 
+##' @name biips.object 
 ##' @aliases biips.object build.sampler build.sampler.biips init.pmmh
 ##' init.pmmh.biips update.pmmh update.pmmh.biips update.pimh update.pimh.biips
 ##' variable.names.biips is.biips
@@ -62,10 +63,6 @@
 ##' @param max.fail maximum number of failures allowed
 ##' @param ... additional arguments
 ##' @return %% ~Describe the value returned
-##' %% If it is a LIST, use 
-##' %% \item{comp1 }{Description of 'comp1'} 
-##' %% \item{comp2 }{Description of 'comp2'} 
-##' %% ...
 ##' @author Adrien Todeschini, Francois Caron
 ##' @keywords models
 ##' @examples
@@ -152,7 +149,7 @@ is.biips <- function(object)
   return(class(object) == "biips")
 }
 
-
+##' @S3method print biips
 print.biips <- function(x,...)
 {
   if (!is.biips(x))
@@ -248,6 +245,7 @@ build.sampler <- function(object, ...)
   UseMethod("build.sampler")
 
 
+##' @S3method build.sampler biips
 build.sampler.biips <- function(object, proposal= "auto", ...)
 {
   if (!is.biips(object))
@@ -266,7 +264,8 @@ build.sampler.biips <- function(object, proposal= "auto", ...)
 }
 
 
-
+##' @importFrom stats variable.names
+##' @S3method variable.names biips
 variable.names.biips <- function(object, ...) {
     .Call("get_variable_names", object$ptr(), PACKAGE="RBiips")
 }

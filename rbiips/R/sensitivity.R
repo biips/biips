@@ -1,7 +1,6 @@
 ##' Sensitivity analysis
 ##' 
 ##' %% ~~ A concise (1-5 lines) description of what the function does. ~~
-##' 
 ##' %% ~~ If necessary, more details than the description above ~~
 ##' 
 ##' @param model a biips model object
@@ -9,10 +8,6 @@
 ##' @param n.part number of particles
 ##' @param ... additional arguments to be passed to the SMC algorithm
 ##' @return %% ~Describe the value returned
-##'  %% If it is a LIST, use
-##'  %% \item{comp1 }{Description of 'comp1'}
-##' %% \item{comp2 }{Description of 'comp2'}
-##' %% ...
 ##' @author Adrien Todeschini, Francois Caron
 ##' @keywords models
 ##' @export

@@ -99,6 +99,10 @@ if [[ $ans == "y" ]]; then set -x
         $MAKE VERBOSE=1 RBiips_INSTALL
         $MAKE RBiips_build
     fi
+    set +x; echo -n "Make RBiips PDF doc ? (y/[n])"; read ans
+    if [[ $ans == "y" ]]; then set -x
+        $MAKE RBiips_Rd2pdf
+    fi
 fi
 
 set +x; echo -n "Build MatBiips ? (y/[n])"; read ans
