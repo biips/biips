@@ -49,8 +49,7 @@
 ##' Functions applying to \code{particles} objects apply identically to
 ##' \code{particles.list} objects by a call to each element of the list.
 ##' 
-##' 
-##' 
+##' @name particles.object
 ##' @aliases particles.object particles.list.object diagnostic
 ##' diagnostic.particles diagnostic.particles.list summary.particles
 ##' summary.particles.list density.particles density.particles.list
@@ -99,12 +98,14 @@ which.type <- function(x, type=NULL)
 }
 
 
+##' @S3method print particles
 print.particles <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75),...)
 {
   print(summary(x, fun, probs), ...)
 }
 
 
+##' @S3method print particles.list
 print.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75), ...)
 {
   print(summary(x, fun, probs), ...)
@@ -157,6 +158,7 @@ stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
 }
 
 
+##' @S3method summary particles
 summary.particles <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
 {
   if (is.null(object$values) || is.null(object$weights) || is.null(object$discrete)) {
@@ -198,6 +200,7 @@ summary.particles <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
 }
 
 
+##' @S3method summary particles.list
 summary.particles.list <- function(object, ...)
 {
   ans <- list()
@@ -210,6 +213,7 @@ summary.particles.list <- function(object, ...)
 }
 
 
+##' @S3method print summary.particles
 print.summary.particles <- function(x, ...)
 {
   cat(x$name, x$type, "particles:\n")
@@ -223,6 +227,7 @@ print.summary.particles <- function(x, ...)
 }
 
 
+##' @S3method print summary.particles.list
 print.summary.particles.list <- function(x, ...)
 {
   for (n in names(x)) {
@@ -233,6 +238,7 @@ print.summary.particles.list <- function(x, ...)
 }
 
 
+##' @S3method plot summary.particles
 plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
                                    ylab="value", main, sub, leg.args=list(), ...)
 {
@@ -277,6 +283,7 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="o
 }
 
 
+##' @S3method plot summary.particles.list
 plot.summary.particles.list <- function(x, ...)
 {
   for (n in names(x))
@@ -285,6 +292,7 @@ plot.summary.particles.list <- function(x, ...)
 }
 
 
+##' @S3method plot particles
 plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
 {
   plot(summary(x, fun, probs), ...)
@@ -292,6 +300,7 @@ plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), 
 }
 
 
+##' @S3method plot particles.list
 plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
 {
   for (n in names(x))
@@ -305,6 +314,7 @@ diagnostic <- function(object, ...)
   UseMethod("diagnostic")
 
 
+##' @S3method diagnostic particles
 diagnostic.particles <- function(object, ess.thres=30, ...)
 {
   ess.min <- min(object$ess)
@@ -314,6 +324,7 @@ diagnostic.particles <- function(object, ess.thres=30, ...)
 }
 
 
+##' @S3method print diagnostic.particles
 print.diagnostic.particles <- function(x, ...)
 {
   if (x$valid)
@@ -327,6 +338,7 @@ print.diagnostic.particles <- function(x, ...)
 }
 
 
+##' @S3method diagnostic particles.list
 diagnostic.particles.list <- function(object, ...)
 {
   ans <- list()
@@ -381,6 +393,8 @@ deparse.varname <- function(name, lower=NULL, upper=lower)
 }
 
 
+##' @importFrom stats density
+##' @S3method density particles
 density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
 {
   ans <- list()
@@ -446,6 +460,7 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
 }
 
 
+##' @S3method density particles.list
 density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
 {
   ans <- list()
@@ -486,6 +501,7 @@ density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
 }
 
 
+##' @S3method plot density.particles.atomic
 plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
                                           xlab="value", ylab, main, sub,
                                           leg.args=list(), ...)
@@ -537,6 +553,7 @@ plot.density.particles.atomic <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
 }
 
 
+##' @S3method plot density.particles
 plot.density.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
                                    leg.args=list(), ...)
 {
@@ -547,6 +564,7 @@ plot.density.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
 }
 
 
+##' @S3method plot density.particles.atomic.list
 plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
                                                xlab="value", ylab, main, sub,
                                                leg.args=list(), density=NULL, angle=NULL, ...)
@@ -632,6 +650,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=2, col=
 }
 
 
+##' @S3method plot density.particles.list
 plot.density.particles.list <- function(x, type="l", lty=1:5, lwd=2, col=1:6,
                                         leg.args=list(), ...)
 {
