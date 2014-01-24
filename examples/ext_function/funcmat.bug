@@ -1,0 +1,40 @@
+var v_true[2,t_max-1], x_true[4,t_max], x_radar_true[2,t_max],
+v[2,t_max-1], x[4,t_max], x_radar[2,t_max], y[2,t_max]
+
+data
+{
+  x_true[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  x_radar_true[,1] <- x_true[1:2,1] - x_pos 
+  mu_y_true[1,1] <- sqrt(x_radar_true[1,1]^2+x_radar_true[2,1]^2)
+  mu_y_true[2,1] <- arctan(x_radar_true[2,1]/x_radar_true[1,1])
+  y[,1] ~ dmnorm(mu_y_true[,1], prec_y)
+
+  for (t in 2:t_max)
+  {
+    v_true[,t-1] ~ dmnorm(mean_v, prec_v)
+    x_true[,t] <- funcmat(x_true[,t-1], v_true[,t-1])
+    x_radar_true[,t] <- x_true[1:2,t] - x_pos
+    mu_y_true[1,t] <- sqrt(x_radar_true[1,t]^2+x_radar_true[2,t]^2)
+    mu_y_true[2,t] <- arctan(x_radar_true[2,t]/x_radar_true[1,t])
+    y[,t] ~ dmnorm(mu_y_true[,t], prec_y)
+  }
+}
+
+model
+{
+  x[,1] ~ dmnorm(mean_x_init, prec_x_init)
+  x_radar[,1] <- x[1:2,1] - x_pos
+  mu_y[1,1] <- sqrt(x_radar[1,1]^2+x_radar[2,1]^2)
+  mu_y[2,1] <- arctan(x_radar[2,1]/x_radar[1,1])
+  y[,1] ~ dmnorm(mu_y[,1], prec_y)
+
+  for (t in 2:t_max)
+  {
+    v[,t-1] ~ dmnorm(mean_v, prec_v)
+    x[,t] <- funcmat(x[,t-1],v[,t-1])
+    x_radar[,t] <- x[1:2,t] - x_pos
+    mu_y[1,t] <- sqrt(x_radar[1,t]^2+x_radar[2,t]^2)
+    mu_y[2,t] <- arctan(x_radar[2,t]/x_radar[1,t])
+    y[,t] ~ dmnorm(mu_y[,t], prec_y)
+  }
+}
