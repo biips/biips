@@ -1,6 +1,6 @@
 function biips_build_sampler(console, varargin)
 % BIIPS_BUILD_SAMPLER assign a sampler to every node of the graph
-% biips_smc_samples(console, [proposal])
+% biips_build_sampler(console, [proposal])
 % INPUT : 
 % - console : integer. Id of the console containing the model, returned by the 'biips_model' function
 % - proposal : string. Keyword defining the type of proposal desired.
