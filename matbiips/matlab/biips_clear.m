@@ -1,5 +1,5 @@
 function biips_clear(varargin)
-% BIIPS_CLEAR clears memory occupied by a console
+% BIIPS_CLEAR  destroys one or several consoles given by ids
 % biips_smc_samples([console, ...])
 % INPUT : 
 % - console : integers. Ids of the console containing the model, returned by the 'biips_model' function

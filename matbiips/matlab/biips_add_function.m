@@ -1,8 +1,8 @@
 function []= biips_add_function(name, nb_param, fun_dim, fun_eval, varargin)
-% BIIPS_ADD_FUNCTION add a matlab function to the Biips workspace
+% BIIPS_ADD_FUNCTION add a matlab function to the Biips workspace 
 % biips_add_function(name, nb_param, fun_dim, fun_eval , [fun_check_param, fun_is_discrete])
 %  INPUT :
-%  - name : string. name of the function taht will be used in the bug file.
+%  - name : string. name of the function that will be used in the bug file.
 %           must be a valid BUGS language function name
 %  - nb_param : integer. number of arguments of the function
 %  - fun_dim : string. name of the Matlab function returning the size 
