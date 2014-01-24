@@ -3,8 +3,7 @@
 init.pmmh <- function(object, ...)
   UseMethod("init.pmmh")
 
-##' initialize all variables to organize a pmmh algorithm
-##' which use a biips model (aka SMC) as likelihood
+##' initialize pmmh algorithm
 ##' 
 ##' @S3method init.pmmh biips
 ##' @param object the Biips model
@@ -139,7 +138,7 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## initialize rw
-  object$.rw.dim(sample)
+  object$.rw.init(sample)
   
   ## log prior density
   log.prior <- 0
@@ -225,7 +224,8 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
 ##' using the underlying SMC
 one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.param,
                                   sample, log.prior, log.marg.like,
-                                  n.part, rw.learn, ...)
+                                  n.part, rw.rescale, rw.learn,
+                                  rw.rescale.type, ...)
 {  
   n.fail <- 0
   
@@ -296,7 +296,7 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
   }
   
   ## Acceptance rate
-  accept.rate <- exp(log.marg.like.prop - log.marg.like + log.prior.prop - log.prior)
+  accept.rate <- min(1, exp(log.marg.like.prop - log.marg.like + log.prior.prop - log.prior))
   if (is.nan(accept.rate)) {
     stop("Failed to compute acceptanc rate: NaN.")
   }
@@ -322,11 +322,9 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
   }
   
   ## rescale random walk step
-  object$.rw.rescale(accept.rate)
-  
+  object$.rw.rescale(accept.rate, rw.rescale.type)
   ## update random walk covariance matrices
-  if (rw.learn)
-    object$.rw.learn.cov(sample[param.names], accepted)
+  object$.rw.learn.cov(sample[param.names], accepted)
   
   ans <- list(sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
               accept.rate=accept.rate, accepted=accepted, n.fail=n.fail)
@@ -339,27 +337,59 @@ update.pmmh <- function(object, ...)
   UseMethod("update.pmmh")
 
 
+##' Update Particle Marginal Metropolis-Hastings samples
+##' 
+##' The \code{update.pmmh} function creates monitors for the given variables,
+##' runs the model for \code{n.iter} iterations and returns the monitored
+##' samples.
+##' 
+##' @param model a biips model object
+##' @param param.names character vector. names of the variables uptaded with MCMC
+##' @param n.iter integer. number of iterations of the Markov chain
+##' @param n.part integer. number of particles of the SMC
+##' @param max.fail integer. maximum number of failures allowed
+##' @param inits named list of initial values for the variables in param.names.
+##' If empty, inits are sampled from the prior.
+##' @param rw.step positive steps of the random walk (std. dev. of the proposal
+##' kernel). If numeric,  the value is duplicated for all variables.
+##' If named list, the numeric components are assigned to the named variables.
+##' If unnamed list, the numeric components are assigned to the variables in 
+##' param.names with same ordering.
+##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
+##' @param rw.learn boolean. Toggle the online learning the empirical covariance
+##' matrix of the parameters
+##' @param ... additional arguments to be passed to the SMC algorithm
+##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips.model}}, \code{\link{pimh.samples}},
+##' \code{\link{smc.samples}}
+##' @keywords models
+##' @export
 ##' @S3method update.pmmh biips
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--  or do  help(data=index)  for the standard data sets.
+##' 
 update.pmmh.biips <- function(object, param.names, n.iter, 
                               n.part, max.fail=0, inits=list(),
-                              rw.step, rw.adapt=TRUE, rw.learn=TRUE, ...)
+                              rw.step, rw.rescale=TRUE, rw.learn=TRUE,
+                              rw.rescale.type='p', n.rescale=n.iter/4, ...)
 { 
   ### check arguments
   ### -------------------------------
-  
-  ## check object
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-  ## check n.iter
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
+  stopifnot(is.biips(object))
+  stopifnot(is.numeric(n.iter), length(n.iter)==1, n.iter>0)
   n.iter <- as.integer(n.iter)
-  ## check rw.adapt
-  if (!is.logical(rw.adapt) || length(rw.adapt)!=1)
-    stop("invalid rw.adapt argument")
-  ## check rw.learn
-  if (!is.logical(rw.learn) || length(rw.learn)!=1)
-    stop("invalid rw.learn argument")
+  stopifnot(is.logical(rw.rescale), length(rw.rescale)==1)
+  stopifnot(is.logical(rw.learn), length(rw.learn)==1)
+  rw.adapt <- rw.rescale|rw.learn
+  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n.iter)
+  n.rescale <- as.integer(n.rescale)
+  
   ## check rw.step
   if (!missing(rw.step))
   {
@@ -419,19 +449,26 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   
   ### assign rw step
   if (!missing(rw.step)) {
-    if (!object$.rw.adapt()) {
-      warning("Ignoring rw.step argument: adaptation has been stopped.")
-    } else {
+#     if (!object$.rw.adapt()) {
+#       ### FIXME
+#       warning("Ignoring rw.step argument: adaptation has been stopped.")
+#     } else {
       object$.rw.step(rw.step.values)
-    }
+#     }
   }
   
   ### stop adaptation if necessary
-  if (!rw.adapt) {
-    if (object$.rw.adapt() && !object$.rw.check.adapt())
-      cat("NOTE: Stopping adaptation of the PMMH random walk.\n")
-    object$.rw.adapt.off()
+  if (!rw.rescale) {
+    object$.rw.rescale.off()
   }
+  if (!rw.learn) {
+    object$.rw.learn.off()
+  }
+#   if (!rw.adapt) {
+#     if (object$.rw.adapt() && !object$.rw.check.adapt())
+#       message("NOTE: Stopping adaptation of the PMMH random walk.\n")
+#     object$.rw.adapt.off()
+#   }
   
   ### display message and progress bar
   title <- ifelse(object$.rw.adapt(), "Adapting", "Updating")
@@ -442,16 +479,18 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   ## initialize counters
   n.fail <- 0
   n.accept <- 0
+  accept.rate <- vector(length=n.iter)
+  step=list()
   
   ### Metropolis-Hastings iterations
-  ### -------------------------------
-  
+  ### ------------------------------- 
   for(i in 1:n.iter) {
     ## iterate
     out <- one.update.pmmh.biips(object, param.names=param.names,
                                  pn.param=pn.param,
                                  sample=out$sample, log.prior=out$log.prior, log.marg.like=out$log.marg.like,
-                                 n.part=n.part, rw.learn=rw.learn, ...)
+                                 n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
+                                 rw.rescale.type=rw.rescale.type, ...)
     
     ## advance progress bar
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
@@ -459,10 +498,20 @@ update.pmmh.biips <- function(object, param.names, n.iter,
     ## increment counters
     n.fail <- n.fail + out$n.fail
     n.accept <- n.accept + out$accepted
+    accept.rate[i] <- out$accept.rate
+    step[[i]] = object$.get.rw.step()
     
     ## check failures
     if (n.fail > max.fail) {
       stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
+    }
+    
+    # deactivate rescale and activate learning
+    if (rw.rescale && rw.learn) {
+      if (i==n.rescale) {
+        object$.rw.rescale.off()
+        object$.rw.learn.on()
+      }
     }
   }
   
@@ -483,10 +532,8 @@ update.pmmh.biips <- function(object, param.names, n.iter,
     .Call("set_log_norm_const", object$ptr(), out$log.marg.like, PACKAGE="RBiips")
   }
   
-  ### effective acceptance rate
-  ar.eff <- n.accept/n.iter
   
-  ans <- list(ar.eff=ar.eff, n.fail=n.fail)
+  ans <- list(ar.mean=mean(accept.rate), accept.rate=accept.rate, n.fail=n.fail, step=step)
   invisible(ans)
 }
 
@@ -500,12 +547,16 @@ update.pmmh.biips <- function(object, param.names, n.iter,
 ##' samples.
 ##' 
 ##' @param model a biips model object
-##' @param variable.names a character vector giving the names of variables to
-##' be monitored
-##' @param n.iter number of iterations of the Markov chain to run
+##' @param param.names a character vector giving the variables uptaded with MCMC
+##' @param latent.names a character vector giving the variables uptaded with SMC
+##' that you want to monitor
+##' @param n.iter number of iterations of the Markov chain
 ##' @param thin thinning interval for monitors
-##' @param n.part number of particles
+##' @param n.part number of particles of the SMC
 ##' @param max.fail maximum number of failures allowed
+##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
+##' @param rw.learn boolean. Toggle online learning the empirical covariance matrix of
+##' the parameters
 ##' @param ... additional arguments to be passed to the SMC algorithm
 ##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
 ##' objects, with one element for each element of the \code{variable.names}
@@ -522,17 +573,19 @@ update.pmmh.biips <- function(object, param.names, n.iter,
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
 pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
-                         n.part, max.fail=0, rw.learn=TRUE, ...)
+                         n.part, max.fail=0, rw.rescale=FALSE, rw.learn=FALSE,
+                         rw.rescale.type='p', n.rescale=n.iter/4, ...)
 {  
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
+  stopifnot(is.biips(object))
+  stopifnot(is.numeric(n.iter), length(n.iter)==1, n.iter>0)
   n.iter <- as.integer(n.iter)
-  if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
-    stop("Invalid thin argument")
+  stopifnot(is.logical(rw.rescale), length(rw.rescale)==1)
+  stopifnot(is.logical(rw.learn), length(rw.learn)==1)
+  rw.adapt <- rw.rescale|rw.learn
+  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n.iter)
+  n.rescale <- as.integer(n.rescale)
+  stopifnot(is.numeric(thin), length(thin)==1, thin>0)
   thin <- as.integer(thin)
-  
-  if (!is.logical(rw.learn) || length(rw.learn)!=1)
-    stop("invalid rw.learn parameter")
   
   ## stop biips verbosity
   verb <- .Call("verbosity", 0, PACKAGE="RBiips")
@@ -555,22 +608,36 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     }, add=TRUE)
   
   ans <- list()
+  
+  ## initialize counters
   n.samples <- 0
   n.fail <- 0
   accepted <- TRUE
   n.accept <- 0  
   
   accept.rate <- vector(length=n.iter)
+  step=list()
   
-  ## check adaptation
-  if (object$.rw.adapt() && !object$.rw.check.adapt())
-    cat("NOTE: Stopping adaptation of the PMMH random walk.\n")
-  ## turn off adaptation
-  object$.rw.adapt.off()
+  ### stop adaptation if necessary
+  if (!rw.rescale) {
+    object$.rw.rescale.off()
+  }
+  if (!rw.learn) {
+    object$.rw.learn.off()
+  }
+#   if (!rw.adapt) {
+#     ## check adaptation
+#     if (object$.rw.adapt() && !object$.rw.check.adapt())
+#       message("NOTE: Stopping adaptation of the PMMH random walk.\n")
+#     ## turn off adaptation
+#     object$.rw.adapt.off()
+#   }
   
-  .Call("message", paste("Generating PMMH samples with", n.part, "particles"), PACKAGE="RBiips")
-  ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  ### display message and progress bar
+  title <- ifelse(object$.rw.adapt(), " adaptive", "")
+  .Call("message", paste("Generating", title, " PMMH samples with ", n.part, " particles", sep=''), PACKAGE="RBiips")
+  symbol <- ifelse(object$.rw.adapt(), '+', '*')
+  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
@@ -578,7 +645,8 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     out <- one.update.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
                                  pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
-                                 n.part=n.part, rw.learn=rw.learn, ...)
+                                 n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
+                                 rw.rescale.type=rw.rescale.type, ...)
     sample <- out$sample
     log.prior <- out$log.prior
     log.marg.like <- out$log.marg.like
@@ -586,6 +654,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     n.fail <- n.fail + out$n.fail
     n.accept <- n.accept + out$accepted
     accept.rate[i] <- out$accept.rate
+    step[[i]] = object$.get.rw.step()
     
     ## advance progress bar
     .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
@@ -599,6 +668,13 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
       n.samples <- n.samples +1
       for (var in c(param.names, latent.names))
         ans[[var]] <- c(ans[[var]], sample[[var]])
+    }
+    
+    if (rw.rescale && rw.learn) {
+      if (i==n.rescale) {
+        object$.rw.rescale.off()
+        object$.rw.learn.on()
+      }
     }
   }
   
@@ -618,13 +694,14 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
       .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
   }
   
-  ## output
-  ## effective acceptance rate
-  ar.eff <- n.accept/n.iter
-  ans[["ar.eff"]] <- ar.eff
+  ## output mean acceptance rate
+  ans[["ar.mean"]] <- mean(accept.rate)
   
   ## number of failures
   ans[["n.fail"]] <- n.fail
+  
+  ans[["step"]] <- step
+  ans[["accept.rate"]] <- accept.rate
   
   ## set output dimensions
   for (var in c(param.names, latent.names)) {

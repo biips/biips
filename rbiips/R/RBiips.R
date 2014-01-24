@@ -241,27 +241,30 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   
   # local initial parameters of the algorithm of adaptation
   # of the step of random walk in the PMMH algorithm
-  rw <- list(adapt=TRUE,
-                niter=2,
-                pmean=0,
-                lstep=log(0.1),
-                targetprob=0.234, # Target acceptance probability. The default seems to
-                # be a fairly robust optimal value. Comes From (Rosenthal 2009, Examples 
-                #of Adaptives MCMC, p 16. Beware , in one-dimensional case, 
-                # it would be better to take ~0.44 
-                povertarget=FALSE,
-                ncrosstarget=10, #The value ncrosstarget controls the reduction in the step size when rescale is
-                #called. There is no reason to give it an initial value of zero. In
-                #fact this is a poor choice since the  step size would be immediately
-                #halved. We start with a value of 10 so the first change in step size
-                #is 10%.
-                count=0,
-                dim=list(),
-                buffer=c(),
-                buff.count=c(),
-                mean=c(),
-                cov=c(),
-                cov_chol=c()
+  rw <- list(rescale=TRUE,
+             learn=FALSE,
+             niter=1,
+             pmean=0,
+             lstep=c(),
+             beta=.05,
+             alpha=1,
+             targetprob=0.234, # Target acceptance probability. The default seems to
+             # be a fairly robust optimal value. Comes from Rosenthal 2009, Examples 
+             # of Adaptives MCMC, p 16. In one-dimensional case, we take 0.44 which
+             # is optimal in certain settings.
+             povertarget=FALSE,
+             ncrosstarget=10, #The value ncrosstarget controls the reduction in the step size when rescale is
+             #called. There is no reason to give it an initial value of zero. In
+             #fact this is a poor choice since the  step size would be immediately
+             #halved. We start with a value of 10 so the first change in step size
+             #is 10%.
+             dim=list(),
+             d=c(),
+             count=0,
+             buffer=c(),
+             buff.count=c(),
+             mean=c(),
+             cov=c()
   )
   
   model <- list("ptr" = function() {p},
@@ -313,13 +316,39 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   invisible(NULL)
                 },
                 ## store the dimensions of the variables
-                ".rw.dim" = function(sample) {
-                  rw$dim <<- lapply(sample, dim)
-                  d.null <- sapply(rw$dim, is.null)
-                  if (any(d.null)) {
+                ".rw.init" = function(sample) {
+                  ## FIXME
+                  
+                  ## store the dimensions of the variables
+                  sampledim <<- lapply(sample, dim)
+                  dim.null <- sapply(sampledim, is.null)
+                  if (any(dim.null)) {
                     len <- lapply(sample, length)
-                    rw$dim[d.null] <<- len[d.null]
+                    sampledim[d.null] <<- len[d.null]
                   }
+                  if (length(rw$dim)!=0) {
+                    stopifnot(all(mapply(identical,rw$dim,sampledim)))
+                  }
+                  else {
+                    rw$dim <<- sampledim
+                    
+                    rw$niter <<- 1
+                    rw$pmean <<- 0
+                    rw$povertarget <<- FALSE
+                    rw$ncrosstarget <<- 10
+                    
+                    rw$d <<- sum(sapply(rw$dim, FUN=sum))
+                    rw$targetprob <<- if (rw$d==1) 0.44 else 0.234
+                    rw$lstep <<- log(0.1/sqrt(rw$d))
+                    
+                    # clear learnt covariance matrix
+                    rw$count <<- 0
+                    rw$buffer <<- c()
+                    rw$buff.count <<- c()
+                    rw$mean <<- c()
+                    rw$cov <<- c()
+                  }
+                  
                   invisible(NULL)
                 },
                 ## assign rw step
@@ -343,39 +372,31 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                         stop("Incorrect rw.step dimension for variable:", n)
                     }
                   }
-                      
+                  
                   # concatenate all log values in a vector
                   # always in the order of rw$dim
                   rw$lstep <<- c()
                   for (n in names(rw$dim)) {
                     rw$lstep <<- c(rw$lstep, log(rw.step[[n]]))
                   }
+                  
+                  # clear rescale parameters
+                  rw$niter <<- 1
+                  rw$pmean <<- 0
+                  rw$povertarget <<- FALSE
+                  rw$ncrosstarget <<- 10
+                  
+                  # clear learnt covariance matrix
+                  rw$count <<- 0
+                  rw$buffer <<- c()
+                  rw$buff.count <<- c()
+                  rw$mean <<- c()
+                  rw$cov <<- c()
                     
                   invisible(NULL)
                 },
-                ".rw.rescale" = function(p) {
-                  # We keep a weighted mean estimate of the mean acceptance probability
-                  # with the weights in favour of more recent iterations
-                  p <- min(p, 1.0)
-                  rw$pmean <<- rw$pmean + 2*(p-rw$pmean)/rw$niter
-                  rw$niter <<- rw$niter+1
-                  
-                  if (!rw$adapt) {
-                    return(NULL)
-                  }
-                  
-                  # The step size is adapted to achieve the
-                  # target acceptance rate using a noisy gradient algorithm.
-                  rw$lstep <<- rw$lstep + (p-rw$targetprob)/rw$ncrosstarget
-                  if ((p>rw$targetprob) != rw$povertarget) {
-                    rw$povertarget <<- !rw$povertarget
-                    rw$ncrosstarget <<- rw$ncrosstarget+1
-                  }
-                  
-                  invisible(NULL)
-                },
                 ".rw.adapt" = function() {
-                  return(rw$adapt)
+                  return(rw$rescale|rw$learn)
                 },
                 ".rw.check.adapt" = function() {
                   if (rw$pmean==0 || rw$pmean==1) {
@@ -388,7 +409,22 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   return (dist < 0.5)
                 },
                 ".rw.adapt.off" = function() {
-                  rw$adapt <<- FALSE
+                  rw$rescale <<- FALSE
+                  rw$learn <<- FALSE
+                  invisible(NULL)
+                },
+                ".rw.rescale.off" = function() {
+                  rw$rescale <<- FALSE
+                  invisible(NULL)
+                },
+                ".rw.learn.off" = function() {
+                  rw$learn <<- FALSE
+                  invisible(NULL)
+                },
+                ".rw.learn.on" = function() {
+                  rw$rescale <<- FALSE
+                  rw$learn <<- TRUE
+                  rw$niter <<- 1
                   invisible(NULL)
                 },
                 ".rw.proposal" = function(sample) {
@@ -398,13 +434,20 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   for (n in names(rw$dim)) {
                     sample_vec <- c(sample_vec, sample[[n]])
                   }
-                  d <- length(sample_vec)
-                  if (rw$adapt || length(rw$cov_chol) == 0) {
-                    # modification with independent components
-                    prop_vec <- sample_vec + 2.38/sqrt(d) * exp(rw$lstep) * rnorm(d)
+                  stopifnot(length(sample_vec) == rw$d)
+                  
+                  if (length(rw$cov) == 0 || (rw$learn && (runif(1)<1-rw$beta))) {
+                    # modification with diagonal covariance
+                    prop_vec <- sample_vec + exp(rw$lstep) * rnorm(rw$d)
                   } else {
-                    prop_vec <- sample_vec + 2.38/sqrt(d) * rw$cov_chol %*% rnorm(d)
+                    eps <- 1/rw$niter
+                    cov_chol <- t(chol((1-eps) * rw$cov + eps * diag(0.1^2, nrow=rw$d)))
+                    prop_vec <- sample_vec + 2.38/sqrt(rw$d) * cov_chol %*% rnorm(rw$d)
                   }
+                  rw$niter <<- rw$niter+1
+                  
+                  # rearrange vectorized parameter to list of arrays with 
+                  # correct dimensions
                   prop <- list()
                   from <- 1
                   for (n in names(rw$dim)) {
@@ -414,7 +457,37 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   invisible(prop)
                 },
+                ".rw.rescale" = function(p, type='d') {
+                  # We keep a weighted mean estimate of the mean acceptance probability
+                  # with the weights in favour of more recent iterations
+                  p <- min(p, 1.0)
+                  rw$pmean <<- rw$pmean + 1*(p-rw$pmean)/rw$niter
+                  
+                  if (!rw$rescale) {
+                    return(NULL)
+                  }
+                  
+                  type = match.arg(type, c("dureau", "plummer"))
+                  if (type=="dureau") {
+                    rw$lstep <<- rw$lstep + rw$alpha^(rw$niter)*(rw$pmean-rw$targetprob)
+                  }
+                  else if (type=="plummer") {
+                    # The step size is adapted to achieve the
+                    # target acceptance rate using a noisy gradient algorithm.
+                    rw$lstep <<- rw$lstep + (p-rw$targetprob)/rw$ncrosstarget
+                  }
+                  
+                  if ((p>rw$targetprob) != rw$povertarget) {
+                    rw$povertarget <<- !rw$povertarget
+                    rw$ncrosstarget <<- rw$ncrosstarget+1
+                  }
+                  
+                  invisible(NULL)
+                },
                 ".rw.learn.cov" = function(sample, accepted) {
+                  if (!rw$learn) {
+                    return(NULL)
+                  }
                   if (accepted || is.null(rw$buffer)) {
                     # concatenate all variables in a vector
                     # always in the order of rw$dim
@@ -435,6 +508,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   d <- ncol(rw$buffer)
                   m <- sum(rw$buff.count)
                   
+                  # update mean and covariance
                   if (naccept == 2*d) {
                     # empirical mean and covariance of the buffer
                     mean_buff <- colSums(rw$buffer*rw$buff.count/m)
@@ -450,21 +524,26 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                       rw$mean <<- n/N*rw$mean + m/N*mean_buff
                       diff <- mean_buff - rw$mean
                       rw$cov <<- n/N*rw$cov + m/N*cov_buff + n*m/N^2 * diff %*% t(diff)
+                      
+                      rw$count <<- N
                     }
+                    rw$count <<- rw$count+m
+                    
                     # clear buffer
                     rw$buffer <<- c()
                     rw$buff.count <<- c()
-                    
-                    # compute choleski decomposition
-                    rw$cov_chol <<- t(chol(rw$cov))
-                    
-                    rw$count <<- rw$count+m
                   }
                   
                   invisible(NULL)
-                })
+                },
+                ".get.rw.step"=function(){exp(rw$lstep)}
+                )
   class(model) <- "biips"
   
+  # TRICK: We return functions in model list that use variables of the parent
+  # environment (ie the currrent function environment).
+  # This specific R trick allows to read and write persistent variables, 
+  # surrogating a class with private members and their modifiers.
   return(model)
 }
 

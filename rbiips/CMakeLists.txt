@@ -57,7 +57,7 @@ if (R_FOUND)
   endif()
 
   add_custom_command (OUTPUT ${pkg_dir}/NAMESPACE
-    COMMAND ${R_EXECUTABLE} -q -e "library(roxygen2);roxygenize('${PROJECT_NAME}')"
+    COMMAND ${R_EXECUTABLE} -q -e "library(roxygen2);roxygenise('${PROJECT_NAME}')"
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		COMMENT "Roxygenize ${PROJECT_NAME} in-source documentation"
 		VERBATIM
