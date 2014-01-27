@@ -41,10 +41,10 @@ sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 
 %% ---------------------------- BiiPS SMC  ----------------------------- %%
-
 %%% Run BiiPS SMC and report filtering and smoothing estimates
+
 % Parameters of the algorithm
-npart = 100; % Number of particles
+npart = 500; % Number of particles
 variables = {'x'}; % Variables to be monitored
 % Optional parameters
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5;
@@ -55,22 +55,34 @@ out_smc = biips_smc_samples(model_id, variables, npart,...
 % Diagnostic on the algorithm
 diag = biips_diagnostic(out_smc);
 
-%%% Some graphical outputs
-summary = biips_summary(out_smc);
+% Get some summary statistics on the posterior distributions (mean, variance, quantiles)
+summary = biips_summary(out_smc, 'probs', [.025, .975]);
 
+%%% Some graphical outputs
+% Filtering
 x_f_mean = summary.x.f.mean;
-x_s_mean = summary.x.s.mean;
-% x_f_var = summary.x.f.var;
+x_f_med = summary.x.f.med;
+x_f_quant = summary.x.f.quant;
 figure('name', 'Filtering')
 plot(x_f_mean)
 hold on
-plot(x_s_mean, 'g')
-% hold on
-plot(data.y, '.r')
+plot(x_f_quant', 'r--')
+xlabel('Time')
+ylabel('Estimates')
 
+% Smoothing
+x_s_mean = summary.x.s.mean;
+x_s_quant = summary.x.f.quant;
+figure('name', 'Smoothing')
+plot(x_s_mean)
+hold on
+plot(x_s_quant', 'r--')
+ylabel('Estimates')
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%
 %%% Run BiiPS Particle Independent Metropolis-Hastings
+
+
 
 %%% Some graphical outputs
 
