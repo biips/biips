@@ -11,7 +11,7 @@ function [summ] = biips_summary(parts, varargin)
 % -variables:   cell of strings. subset of the fields of particles struct
 %               argument. Default is all.
 % -fsb:         string containing the characters 'f', 's' and/or 'b'
-% -probas:      vector of reals in ]0,1[. probability levels for quantiles.
+% -probs:      vector of reals in ]0,1[. probability levels for quantiles.
 %               default is [] for no quantile
 % -order:       integer. Moment statistics of order below or equal to the
 %               value are returned. Default is 2.
@@ -23,7 +23,7 @@ function [summ] = biips_summary(parts, varargin)
 % model_id = biips_model('model.bug', data)
 % npart = 100; variables = {'x'}; 
 % out_smc = biips_smc_samples(model_id, variables, npart);
-% summ = biips_summary(out_smc);
+% summ = biips_summary(out_smc, 'probs', [.025, .975]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 %
@@ -38,19 +38,12 @@ function [summ] = biips_summary(parts, varargin)
 % Jan 2014; Last revision: 24-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-opt_argin = length(varargin);
+%% Default values
 vars = {};
-if opt_argin >=1
-   vars = varargin{1}; 
-end
 fsb = '';
-if opt_argin >=2
-   fsb = varargin{2};
-end
-more_argin = {};
-if opt_argin >=3
-   more_argin = varargin(3:end);
-end
+probs = [];
+order = 2;
+parsevar; % Process options
 
 if (isempty(vars))
    vars = fieldnames(parts); % vars = {}, take all fields
@@ -70,7 +63,7 @@ cell_sum = cell(size(vars));
 for i=1:length(vars)
   ctemp = cell(size(fsb));
   for j=1:length(fsb)
-   ctemp{j} =  summary(getfield(getfield(s, vars{i}), fsb(j)), more_argin{:});
+   ctemp{j} =  summary(getfield(getfield(s, vars{i}), fsb(j)), probs, order);
   end
   cell_sum{i} = biips_cell2struct(ctemp, cell_fsb);
 end
