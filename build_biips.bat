@@ -45,6 +45,7 @@ if "%errorlevel%"=="1" (
 	set "PATH=%RTOOLS_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
 	"%MAKE%" VERBOSE=1 RBiips_INSTALL_build
+	call:ask_make_pdf
 )
 
 choice /m "Build MatBiips"
@@ -85,6 +86,14 @@ choice /m "Run BiipsTestCompiler tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\testcompiler"
 	"%MAKE%" test
+)
+goto:eof
+
+:ask_make_pdf
+choice /m "Make RBiips PDF doc"
+if "%errorlevel%"=="1" (
+	cd "%BIIPS_BUILD%"
+	"%MAKE%" RBiips_Rd2pdf
 )
 goto:eof
 
