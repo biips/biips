@@ -63,11 +63,19 @@ if (R_FOUND)
 		VERBATIM
 	)
 
-  # add pkg_dir target
-  add_custom_target (${PROJECT_NAME}_pkg_dir
-    DEPENDS ${out_bindir}/configure ${pkg_dir}/NAMESPACE
-    COMMENT "Setting up ${PROJECT_NAME} package directory"
-	)
+  if (WIN32)
+    # add pkg_dir target
+    add_custom_target (${PROJECT_NAME}_pkg_dir
+      DEPENDS ${pkg_dir}/NAMESPACE
+      COMMENT "Setting up ${PROJECT_NAME} package directory"
+    )
+  else ()
+    # add pkg_dir target
+    add_custom_target (${PROJECT_NAME}_pkg_dir
+      DEPENDS ${out_bindir}/configure ${pkg_dir}/NAMESPACE
+      COMMENT "Setting up ${PROJECT_NAME} package directory"
+    )
+  endif ()
 
     
 	# add R CMD check target
