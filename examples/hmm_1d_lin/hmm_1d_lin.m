@@ -44,24 +44,22 @@ sample_data = true; % Boolean
 %%% Run BiiPS SMC and report filtering and smoothing estimates
 
 % Parameters of the algorithm
-npart = 1000; % Number of particles
+npart = 100000; % Number of particles
 variables = {'x'}; % Variables to be monitored
-% Optional parameters
-type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5;
+type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+
 % Run SMC
 out_smc = biips_smc_samples(model_id, variables, npart,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
-
 % Diagnostic on the algorithm
 diag = biips_diagnostic(out_smc);
-
 
 % Get some summary statistics on the posterior distributions (mean, variance, quantiles)
 summary = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%% Some graphical outputs
-% Filtering
+% Filtering estimates
 x_f_mean = summary.x.f.mean;
 x_f_med = summary.x.f.med;
 x_f_quant = summary.x.f.quant;
@@ -72,17 +70,18 @@ plot(x_f_quant', 'r--')
 xlabel('Time')
 ylabel('Estimates')
 
-% Smoothing
+% Smoothing estimates
 x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.f.quant;
 figure('name', 'Smoothing')
 plot(x_s_mean)
 hold on
 plot(x_s_quant', 'r--')
+xlabel('Time')
 ylabel('Estimates')
 
 
-% Plot the marginal filtering and smoothing densities
+% Marginal filtering and smoothing densities
 kde_estimates = biips_density(out_smc);
 
 time_index = [10, 50, 80, 100];
@@ -90,15 +89,15 @@ figure('name', 'Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f)
+    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);
     hold on
-    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r')
-    xlabel(['x_{' num2str(tk) '}'], 'fontsize', 16)
-    ylabel('posterior density', 'fontsize', 16)
-    title(['t=', num2str(tk)], 'fontsize', 16)
-    legend({'filtering density', 'smoothing density'}, 'fontsize', 12)
+    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
+    plot(data.x_true(tk), 0, '*g');
+    xlabel(['x_{' num2str(tk) '}'], 'fontsize', 16);
+    ylabel('posterior density', 'fontsize', 16);
+    title(['t=', num2str(tk)], 'fontsize', 16);
+    legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
 end
-
 
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%

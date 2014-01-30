@@ -59,10 +59,10 @@ if length(size_q) == 1
 end
 if (~isempty(probas))
 %     q = inter_biips('weighted_quantiles', part.values, part.weights, probas)    
-    quantiles = cellfun(@(x,w) inter_biips('weighted_quantiles', x, w, probas), cv, cs, 'UniformOutput',0);
+    quantiles = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
     summ.quant = reshape(cat(2, quantiles{:}), [length(probas), size_q]);
 end
-med = cellfun(@(x,w) inter_biips('weighted_quantiles', x, w, 0.5), cv, cs, 'UniformOutput',0);
+med = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
 
 summ.med = reshape(cat(2, med{:}), size_q);
 end
