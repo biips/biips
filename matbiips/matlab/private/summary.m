@@ -1,33 +1,40 @@
-function [ summ ] = summary(part, varargin)
+function summ = summary(part, probas, order)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SUMMARY computes some statistics on data
-% sum = summary(particles, [probas_quantiles])
-% INPUT :
-% - particles : structure containing two field
-%                * values : multidimensional array with last dimension corresponding to particules
-%                * weights : corresponding multimensional array for the weigths
-% - probas_quantiles : array containing the probabilities used to compute quantiles
-% -order : integer. The maximum wanted order for the moment statistics.
-%          default is 2
+% summ = summary(part, probas, order)
+% INPUT:
+% - part:   structure containing two fields
+%                * values: multidimensional array with last dimension 
+%                           corresponding to particules
+%                * weights: corresponding multimensional array for the weigths
+% - probs:  array containing the probabilities used to compute quantiles
+% -order:   integer. The maximum wanted order for the moment statistics.
 %
-% OUTPUT :
+% OUTPUT:
 % - summary : structure containing some statistics
 %             * mean
 %             * variance
 %             * momX (with X in {2,3,4}) : moment
 %             * kurt : kurtosis
 %             * skew : skewness
-%             * quants : quantiles
+%             * quant : quantiles
 %             * med : median
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+%
+% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
+% BiiPS: a software for Bayesian inference with interacting particle
+% systems. Technical Report, INRIA. February 2014.
+%
+% Authors: Adrien Todeschini, Marc Fuentes
+% INRIA Bordeaux, France
+% email: biips-project@lists.gforge.inria.fr
+% Website: https://alea.bordeaux.inria.fr/biips
+% Jan 2014; Last revision: 24-01-2014
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-opt_argin = length(varargin);
-probas = [];
-if opt_argin >=1
-    probas = varargin{1};
-end
-order = 2;
-if opt_argin >=2
-    order = varargin{2};
-end
+
 size_part = size(part.values);
 d = length(size_part);
 summ.mean = sum(part.values .* part.weights, d);

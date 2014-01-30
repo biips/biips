@@ -17,7 +17,7 @@ http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository
 
 Clone remote repository
 -----------------------
-Anonymous access:
+Anonymous access (read-only):
 
     git clone https://gforge.inria.fr/git/biips/biips.git
     
