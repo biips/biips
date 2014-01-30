@@ -44,7 +44,7 @@ sample_data = true; % Boolean
 %%% Run BiiPS SMC and report filtering and smoothing estimates
 
 % Parameters of the algorithm
-npart = 500; % Number of particles
+npart = 1000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 % Optional parameters
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5;
@@ -52,8 +52,10 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5;
 out_smc = biips_smc_samples(model_id, variables, npart,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
+
 % Diagnostic on the algorithm
 diag = biips_diagnostic(out_smc);
+
 
 % Get some summary statistics on the posterior distributions (mean, variance, quantiles)
 summary = biips_summary(out_smc, 'probs', [.025, .975]);
@@ -78,6 +80,26 @@ plot(x_s_mean)
 hold on
 plot(x_s_quant', 'r--')
 ylabel('Estimates')
+
+
+% Plot the marginal filtering and smoothing densities
+kde_estimates = biips_density(out_smc);
+
+time_index = [10, 50, 80, 100];
+figure('name', 'Marginal posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f)
+    hold on
+    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r')
+    xlabel(['x_{' num2str(tk) '}'], 'fontsize', 16)
+    ylabel('posterior density', 'fontsize', 16)
+    title(['t=', num2str(tk)], 'fontsize', 16)
+    legend({'filtering density', 'smoothing density'}, 'fontsize', 12)
+end
+
+
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%
 %%% Run BiiPS Particle Independent Metropolis-Hastings
