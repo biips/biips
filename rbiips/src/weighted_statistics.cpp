@@ -156,7 +156,7 @@ RcppExport SEXP weighted_median (SEXP values, SEXP weights)
     accu.Push(values_vec[i], weights_vec[i]);
 
   Rcpp::List stats;
-  stats["Median"] = Rcpp::wrap(accu.Quantile(0.5));
+  stats["Median"] = Rcpp::wrap(accu.Quantile(0U));
 
   return stats;
   END_RBIIPS
@@ -183,9 +183,9 @@ RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
   for (int i = 0; i<probs_vec.size(); ++i)
   {
     if (probs_vec[i] == 0.5)
-      stats["Median"] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
+      stats["Median"] = Rcpp::wrap(accu.Quantile(i));
     else
-      stats[String("Qu. ")+print(probs_vec[i])] = Rcpp::wrap(accu.Quantile(probs_vec[i]));
+      stats[String("Qu. ")+print(probs_vec[i])] = Rcpp::wrap(accu.Quantile(i));
   }
 
   return stats;

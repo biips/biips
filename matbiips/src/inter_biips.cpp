@@ -1028,7 +1028,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        double * probas_out = mxGetPr(plhs[0]);
        
        for (int i = 0; i<probas_size; ++i) {
-           probas_out[i] = accu.Quantile(probas_vec[i]);
+           probas_out[i] = accu.Quantile(i);
        }
        
        
