@@ -44,9 +44,9 @@ sample_data = true; % Boolean
 %%% Run BiiPS SMC and report filtering and smoothing estimates
 
 % Parameters of the algorithm
-npart = 100000; % Number of particles
+npart = 100; % Number of particles
 variables = {'x'}; % Variables to be monitored
-type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+type = 's'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 % Run SMC
 out_smc = biips_smc_samples(model_id, variables, npart,...
@@ -102,8 +102,9 @@ end
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%
 %%% Run BiiPS Particle Independent Metropolis-Hastings
-
-
+niter = 100;
+npart = 100;
+biips_pimh_update(model_id, variables, niter, npart)
 
 %%% Some graphical outputs
 
