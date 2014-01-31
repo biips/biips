@@ -14,7 +14,8 @@ set CMAKE_BUILD_TYPE=Release
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1"
 set CPACK_GENERATOR=NSIS
-set MAKE=C:\MinGW\bin\mingw32-make%1
+set MAKE=C:\MinGW\bin\mingw32-make
+set MAKE_OPT=%1
 ::-----------------------------------------
 
 pause
@@ -35,7 +36,7 @@ if "%errorlevel%"=="1" (
 	rmdir /S /Q "%BIIPS_ROOT%"
 	mkdir "%BIIPS_ROOT%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" install
+	"%MAKE%" %MAKE_OPT% install
 	call:ask_test
 	call:ask_testcompiler
 )
@@ -44,14 +45,14 @@ choice /m "Build/install RBiips"
 if "%errorlevel%"=="1" (
 	set "PATH=%RTOOLS_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" VERBOSE=1 RBiips_INSTALL_build
+	"%MAKE%" %MAKE_OPT% VERBOSE=1 RBiips_INSTALL_build
 	call:ask_make_pdf
 )
 
 choice /m "Build MatBiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" matbiips_package
+	"%MAKE%" %MAKE_OPT% matbiips_package
 	call:ask_test_matbiips
 )
 
@@ -77,7 +78,7 @@ goto:eof
 choice /m "Run BiipsTest tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\test"
-	"%MAKE%" test
+	"%MAKE%" %MAKE_OPT% test
 )
 goto:eof
 
@@ -85,7 +86,7 @@ goto:eof
 choice /m "Run BiipsTestCompiler tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\testcompiler"
-	"%MAKE%" test
+	"%MAKE%" %MAKE_OPT% test
 )
 goto:eof
 
@@ -93,7 +94,7 @@ goto:eof
 choice /m "Make RBiips PDF doc"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" RBiips_Rd2pdf
+	"%MAKE%" %MAKE_OPT% RBiips_Rd2pdf
 )
 goto:eof
 
@@ -101,6 +102,6 @@ goto:eof
 choice /m "Run MatBiips tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\matbiips"
-	"%MAKE%" test
+	"%MAKE%" %MAKE_OPT% test
 )
 goto:eof
