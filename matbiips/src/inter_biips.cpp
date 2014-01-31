@@ -903,7 +903,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "is_gen_tree_smooth_monitored") {
 
-       CheckRhs(nrhs, 4, name_func);
+       CheckRhs(nrhs, 5, name_func);
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console_ptr p_console = consoles[id];
         
@@ -915,28 +915,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsCell(2);
        CheckArgIsCell(3);
        CheckArgIsCell(4);
+       CheckArgIsLogical(5);
+
+       Bool check_released = static_cast<Bool>(*mxGetLogicals(prhs[5]));
 
        plhs[0] = mxCreateLogicalMatrix(1, 1);
        for(int i = 0; i <  nbVarNames; ++i )
-        {
-          const mxArray * m   = mxGetCell(prhs[2], i);
-          const mxArray * low = mxGetCell(prhs[3], i);
-          const mxArray * up  = mxGetCell(prhs[4], i);
-         
+       {
+         const mxArray * m   = mxGetCell(prhs[2], i);
+         const mxArray * low = mxGetCell(prhs[3], i);
+         const mxArray * up  = mxGetCell(prhs[4], i);
+
          CheckIsString(m);
          String name = mxArrayToString(m);
-          
-          IndexRange range = makeRange(low, up);
-        
-         if (!p_console->IsGenTreeSmoothMonitored(name, range)) {
-               *mxGetLogicals(plhs[0]) = 0; 
-               return;
-           }
+
+         IndexRange range = makeRange(low, up);
+
+         if (!p_console->IsGenTreeSmoothMonitored(name, range, check_released)) {
+           *mxGetLogicals(plhs[0]) = 0;
+           return;
+         }
        } 
        *mxGetLogicals(plhs[0]) = 1; 
-       
+
     }
-    
+
     /////////////////////////////////////////////
     // GET_SAMPLED_GEN_TREE_SMOOTH_PARTICLE FUNCTION
     /////////////////////////////////////////////
@@ -991,7 +994,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     
     /////////////////////////////////////////
-    // WEIGHTED_MEAN FUNCTION
+    // WEIGHTED_QUANTILES FUNCTION
     /////////////////////////////////////////
     else if (name_func == "weighted_quantiles") {
 

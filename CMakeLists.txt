@@ -190,7 +190,6 @@ if (BUILD_RBIIPS)
     add_subdirectory (rbiips)
 endif ()
 if (BUILD_MATBIIPS)
-    find_package(Mex)
     add_subdirectory (matbiips)
 endif ()
 
