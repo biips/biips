@@ -14,7 +14,7 @@ if (~isempty(indices{1})) % filtering
 end 
 if (~isempty(indices{2})) % smoothing
 %     p, names, lower, upper
-  ok = inter_biips('is_gen_tree_smooth_monitored', p, names, lower, upper)
+  ok = inter_biips('is_gen_tree_smooth_monitored', p, names, lower, upper, check_released)
 end  
 if (~isempty(indices{3})) %backward_smoothing
   error('Function is_backward_smooth_monitored not implemented in inter_biips.cpp')
