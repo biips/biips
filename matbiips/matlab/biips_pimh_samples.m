@@ -31,9 +31,9 @@ for i=1:n_iter
     % Store output
     if mod(i-1, thin)==0
         n_samples = n_samples + 1;
-        out.log_marg.like(n_samples) = log_marg_like;
+        out.log_marg_like(n_samples) = log_marg_like;
         for i=1:length(variable_names)
-%             out.(variable_names{i}) = 
+            out.(variable_names{i}) = 
         end
     end
     % Progress bar

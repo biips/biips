@@ -46,7 +46,7 @@ sample_data = true; % Boolean
 % Parameters of the algorithm
 npart = 100; % Number of particles
 variables = {'x'}; % Variables to be monitored
-type = 's'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 % Run SMC
 out_smc = biips_smc_samples(model_id, variables, npart,...
