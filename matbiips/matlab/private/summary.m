@@ -31,7 +31,7 @@ function summ = summary(part, probas, order)
 % INRIA Bordeaux, France
 % email: biips-project@lists.gforge.inria.fr
 % Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 24-01-2014
+% Jan 2014; Last revision: 30-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -58,10 +58,11 @@ if length(size_q) == 1
     size_q = [size_q, 1];
 end
 if (~isempty(probas))
-    quantiles = cellfun(@(w,x) inter_biips('weighted_quantiles', w, x, probas), cv, cs, 'UniformOutput',0);
+%     q = inter_biips('weighted_quantiles', part.values, part.weights, probas)    
+    quantiles = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
     summ.quant = reshape(cat(2, quantiles{:}), [length(probas), size_q]);
 end
-med = cellfun(@(w,x) inter_biips('weighted_quantiles', w, x, 0.5), cv, cs, 'UniformOutput',0);
+med = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
 
 summ.med = reshape(cat(2, med{:}), size_q);
 end
