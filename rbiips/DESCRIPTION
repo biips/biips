@@ -1,0 +1,25 @@
+Package: RBiips
+Version: 0.8.1
+Type: Package
+Date: 2014-01-31
+Title: Bayesian inference with interacting Particle Systems
+Author: Inria
+Maintainer: biips-project <biips-project@lists.gforge.inria.fr>
+Depends:
+    R (>= 2.13.0),
+    Rcpp (>= 0.9.4),
+    stats
+SystemRequirements: (Linux only) biips (== 0.8.1), boost (>= 1.49.0)
+Description: BiiPS is a general software for Bayesian inference with
+    interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+    It aims at popularizing the use of these methods to non-statistician
+    researchers and students, thanks to its automated "black box" inference
+    engine. It borrows from the BUGS/JAGS software, widely used in Bayesian
+    statistics, the statistical modeling with graphical models and the language
+    associated with their descriptions. Unlike MCMC methods used by BUGS/JAGS,
+    SMC methods are more adapted to dynamic problems (tracking, signal
+    filtering, etc).
+License: GPL-3
+Copyright: Copyright (C) Inria, 2012
+URL: http://alea.bordeaux.inria.fr/biips
+LinkingTo: Rcpp

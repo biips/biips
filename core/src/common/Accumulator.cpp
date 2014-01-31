@@ -222,11 +222,6 @@ namespace Biips
     return Scalar(acc::sum_of_weights(acc_));
   }
 
-  Scalar QuantileAccumulator::Quantile(Scalar prob) const
-  {
-    return Scalar(acc::quantile(acc_, acc::quantile_probability = prob));
-  }
-
   Scalar QuantileAccumulator::Quantile(Size i) const
   {
     if (i > quantileProbs_.size())
