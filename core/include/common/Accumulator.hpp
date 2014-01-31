@@ -195,7 +195,6 @@ namespace Biips
 
     Size Count() const;
     Scalar SumOfWeights() const;
-    Scalar Quantile(Scalar prob) const;
     Scalar Quantile(Size i) const;
   };
 
