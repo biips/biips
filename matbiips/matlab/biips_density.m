@@ -1,30 +1,47 @@
 function [dens] = biips_density(parts, varargin)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BIIPS_DENSITY computes 1D densities 
 % dens = biips_density(particles, [variables, fsb, adjust, bw])
 % INPUT
-% -particles : input structure containing the particles of different variables.
+% -particles: input structure containing the particles of different variables.
 %              usually returned by biips_smc_samples function
-% -variables : cell of strings. subset of the fields of particles struct
+% -variables: cell of strings. subset of the fields of particles struct
 %         argument. default is {} for all present fields in particles
-% -fsb : string containing the characters 'f', 's' and/or 'b'.
+% -fsb: string containing the characters 'f', 's' and/or 'b'.
 %        default is '' for all present fields in particles
-% -adjust : time factor for the bw. default is 1
-% -bw : bandwidth. default is estimated from the samples
+% -adjust: time factor for the bw. default is 1
+% -bw: bandwidth. default is estimated from the samples
 % OUTPUT
 % -dens : output structure
-opt_argin = length(varargin);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXAMPLE:
+% data = struct('var1', 0, 'var2', 1.2);
+% model_id = biips_model('model.bug', data)
+% npart = 100; variables = {'x'}; 
+% out_smc = biips_smc_samples(model_id, variables, npart);
+% diag = biips_density(out_smc, variables);% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+%
+% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
+% BiiPS: a software for Bayesian inference with interacting particle
+% systems. Technical Report, INRIA. February 2014.
+%
+% Authors: Adrien Todeschini, Marc Fuentes
+% INRIA Bordeaux, France
+% email: biips-project@lists.gforge.inria.fr
+% Website: https://alea.bordeaux.inria.fr/biips
+% Jan 2014; Last revision: 30-01-2014
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Default values
 vars = {};
-if opt_argin >=1
-   vars = varargin{1}; 
-end
 fsb = '';
-if opt_argin >=2
-   fsb = varargin{2}; 
-end
-more_argin = {};
-if opt_argin >= 3
-    more_argin = varargin(3:end);
-end
+adjust = 1;
+bw = [];
+parsevar; % Process options
 
 if (isempty(vars))
    vars = fieldnames(parts); % vars = {}, take all fields
@@ -47,7 +64,7 @@ for i=1:length(vars)
    particles = getfield(getfield(s, vars{i}), fsb(j));
    size_curr = size(particles.values);
    d = length(size_curr);
-   ctemp{j} = cellfun(@(x,w) kde(x, w, more_argin{:}), num2cell(particles.values, d), num2cell(particles.weights, d));  
+   ctemp{j} = cellfun(@(x,w) kde(x, w, adjust, bw), num2cell(particles.values, d), num2cell(particles.weights, d));  
   end
   cell_sum{i} = biips_cell2struct(ctemp, cell_fsb);
 end
