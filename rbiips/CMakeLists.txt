@@ -9,18 +9,24 @@ endmacro(set_output_bindir)
 
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}" out_bindir)
 
+if (NOT WIN32)
+# configure configure.ac file
+configure_file (configure.ac.IN
+  ${CMAKE_CURRENT_SOURCE_DIR}/configure.ac
+	@ONLY
+	NEWLINE_STYLE UNIX
+)
+endif()
+
+# copy files to binary directory
+set (src_files cleanup configure.ac COPYING README NOTICES)
+file(COPY ${src_files} DESTINATION ${out_bindir})
+
 # configure DESCRIPTION file
 configure_file (
   DESCRIPTION.IN
-  ${out_bindir}/DESCRIPTION
+  ${CMAKE_CURRENT_BINARY_DIR}/DESCRIPTION
   @ONLY
-)
-
-# configure configure.ac file
-configure_file (configure.ac.IN
-  ${out_bindir}/configure.ac
-	@ONLY
-	NEWLINE_STYLE UNIX
 )
 
 # Generate configuration scripts
@@ -29,22 +35,23 @@ if (NOT WIN32)
   if (${AUTOCONF} STREQUAL AUTOCONF-NOTFOUND)
 		message (SEND_ERROR "autoconf not found")
 	else ()
-	    add_custom_command(OUTPUT ${out_bindir}/configure
-		    DEPENDS ${out_bindir}/configure.ac
+	    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/configure
+		    DEPENDS configure.ac
 	        COMMAND ${AUTOCONF}
-		    WORKING_DIRECTORY ${out_bindir}
+	        COMMAND ${CMAKE_COMMAND} -E copy configure ${out_bindir}
+		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		    COMMENT "Autoconf generating configure file"
+	    )
+	    add_custom_command(OUTPUT ${out_bindir}/configure
+		    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
+	        COMMAND ${CMAKE_COMMAND} -E copy configure ${out_bindir}
+		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		    COMMENT "Copying configure file to binary directory"
 	    )
 	endif ()
 endif ()
 
 
-# copy files to binary directory
-set (src_files cleanup COPYING README NOTICES)
-file(COPY ${src_files} DESTINATION ${out_bindir})
-
-# add to source files
-set (src_files ${src_files} DESCRIPTION configure.ac)
 
 # find R
 find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp roxygen2)
@@ -56,26 +63,41 @@ if (R_FOUND)
       set (R_INSTALL_FLAGS -d)
   endif()
 
-  add_custom_command (OUTPUT ${pkg_dir}/NAMESPACE
-    COMMAND ${R_EXECUTABLE} -q -e "library(roxygen2);roxygenise('${PROJECT_NAME}')"
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		COMMENT "Roxygenize ${PROJECT_NAME} in-source documentation"
+  add_custom_command (OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION ${CMAKE_CURRENT_SOURCE_DIR}/NAMESPACE
+    COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_CURRENT_BINARY_DIR}/DESCRIPTION ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${R_EXECUTABLE} -q -e "library(roxygen2);roxygenize('.', roclets=c('collate', 'namespace'))"
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		COMMENT "Roxygenize ${PROJECT_NAME} DESCRIPTION and NAMESPACE"
+		VERBATIM
+    )
+  add_custom_command (OUTPUT ${pkg_dir}/DESCRIPTION ${pkg_dir}/NAMESPACE
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION ${CMAKE_CURRENT_SOURCE_DIR}/NAMESPACE
+    COMMAND ${CMAKE_COMMAND} -E copy DESCRIPTION ${pkg_dir}
+    COMMAND ${CMAKE_COMMAND} -E copy NAMESPACE ${pkg_dir}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		COMMENT "Copying ${PROJECT_NAME} DESCRIPTION and NAMESPACE to pkg_dir"
+		VERBATIM
+    )
+	
+  add_custom_command (OUTPUT ${pkg_dir}/man/${PROJECT_NAME}-package.Rd
+    COMMAND ${R_EXECUTABLE} -q -e "library(roxygen2);roxygenize('.', roclets='rd')"
+		WORKING_DIRECTORY ${pkg_dir}
+		COMMENT "Roxygenize ${PROJECT_NAME} man directory"
 		VERBATIM
 	)
 
+  # add pkg_dir target
   if (WIN32)
-    # add pkg_dir target
-    add_custom_target (${PROJECT_NAME}_pkg_dir
-      DEPENDS ${pkg_dir}/NAMESPACE
-      COMMENT "Setting up ${PROJECT_NAME} package directory"
-    )
-  else ()
-    # add pkg_dir target
-    add_custom_target (${PROJECT_NAME}_pkg_dir
-      DEPENDS ${out_bindir}/configure ${pkg_dir}/NAMESPACE
-      COMMENT "Setting up ${PROJECT_NAME} package directory"
-    )
-  endif ()
+      add_custom_target (${PROJECT_NAME}_pkg_dir
+        DEPENDS ${pkg_dir}/DESCRIPTION ${pkg_dir}/NAMESPACE ${pkg_dir}/man/${PROJECT_NAME}-package.Rd
+        COMMENT "Setting up ${PROJECT_NAME} package directory"
+	    )
+  else()
+      add_custom_target (${PROJECT_NAME}_pkg_dir
+        DEPENDS ${pkg_dir}/DESCRIPTION ${pkg_dir}/NAMESPACE ${pkg_dir}/man/${PROJECT_NAME}-package.Rd ${out_bindir}/configure
+        COMMENT "Setting up ${PROJECT_NAME} package directory"
+	    )
+  endif()
 
     
 	# add R CMD check target
@@ -89,7 +111,7 @@ if (R_FOUND)
 
   # add R CMD Rd2pdf target
 	add_custom_target (${PROJECT_NAME}_Rd2pdf
-		DEPENDS ${PROJECT_NAME}_pkg_dir
+		DEPENDS ${pkg_dir}/man/${PROJECT_NAME}-package.Rd
 		COMMAND ${R_EXECUTABLE} CMD Rd2pdf --no-preview --force ${pkg_dir}
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 		COMMENT "Generate ${PROJECT_NAME} documentation PDF output from the Rd sources"
