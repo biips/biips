@@ -73,11 +73,13 @@ log_marg_like = inter_biips('get_log_norm_const', console)
 
 % Get sampled value
 sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
-isempty(sampled_value)
-if (isempty(sampled_value))
+% inter_biips('sample_gen_tree_smooth_particle', console, seed); % !! FC: CHECK IF SAME SEED OK
+%     sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
+% isempty(sampled_value)
+if (isempty(sampled_value)) %% FC: AMODIFIER NE MARCHE PAS!! 
     % Sample one particle
     inter_biips('sample_gen_tree_smooth_particle', console, seed); % !! FC: CHECK IF SAME SEED OK
-    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
 end
 variable_names
 sampled_value
