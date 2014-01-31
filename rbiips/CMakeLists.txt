@@ -9,12 +9,14 @@ endmacro(set_output_bindir)
 
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/${PROJECT_NAME}" out_bindir)
 
+if (NOT WIN32)
 # configure configure.ac file
 configure_file (configure.ac.IN
   ${CMAKE_CURRENT_SOURCE_DIR}/configure.ac
 	@ONLY
 	NEWLINE_STYLE UNIX
 )
+endif()
 
 # copy files to binary directory
 set (src_files cleanup configure.ac COPYING README NOTICES)
