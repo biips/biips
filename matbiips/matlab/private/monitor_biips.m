@@ -10,6 +10,7 @@ if (~isempty(indices{1})) % filtering
   inter_biips('set_filter_monitors', p, names, lower, upper);
 end 
 if (~isempty(indices{2})) % smoothing
+%     p, names, lower, upper
   inter_biips('set_gen_tree_smooth_monitors', p, names, lower, upper);
 end  
 if (~isempty(indices{3})) %backward_smoothing
