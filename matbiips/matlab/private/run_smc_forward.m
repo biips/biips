@@ -11,6 +11,21 @@ function ok=run_smc_forward(p, nb_part, rs_thres, rs_type, seed)
 % - seed : seed for random number generator
 % OUTPUT
 % ok : boolean 
+
+if nargin<5 % if seed not specified
+    if (isoctave)
+       s=rand('state');
+       rand('state',sum(100*clock)); 
+       seed=double(randi(intmax));
+       rand('state',s);
+    else
+       s=rng('shuffle');
+       seed=randi(intmax);
+       rng(s);
+    end
+end
+
+
 if (~inter_biips('is_sampler_built', p))
    inter_biips('build_smc_sampler', p, false);
 end
