@@ -130,7 +130,7 @@ if(run.pimh)
   n.part.pimh <- 100
   n.burn.pimh <- 50
   n.iter.pimh <- 500
-  update.pimh(biips, variable.names="x", n.iter=n.burn.pimh,
+  pimh.update(biips, variable.names="x", n.iter=n.burn.pimh,
               n.part=n.part.pimh)
   out.pimh <- pimh.samples(biips, variable.names="x", n.iter=n.iter.pimh, 
                            n.part=n.part.pimh)
