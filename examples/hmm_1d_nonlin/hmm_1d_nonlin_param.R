@@ -113,7 +113,7 @@ if(run.sens)
   
   # initialize pmmh with max
   inits <- list(log_prec_y = out.sens$max.param$log_prec_y)
-  init.pmmh(biips, param.names="log_prec_y", 
+  pmmh.init(biips, param.names="log_prec_y", 
             inits=inits, n.part=n.part)
 }
 
