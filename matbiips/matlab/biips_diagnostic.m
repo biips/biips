@@ -8,9 +8,9 @@ function [diagn] = biips_diagnostic(parts, varargin)
 % -parts:      input structure containing the particles of different variables.
 %               usually returned by biips_smc_samples function
 % Optional Inputs:
-% -vars:       cell of strings. subset of the fields of particles struct
+% -variable_names:cell of strings. subset of the fields of particles struct
 %               argument
-% -fsb:        string containing the characters 'f', 's' and/or 'b'
+% -type:        string containing the characters 'f', 's' and/or 'b'
 % -ess_thres :  integer. Threshold on the Effective Sample Size (ESS) of the
 %               examined particles. If all the ESS components are over the
 %               threshold, the diagnostic is valid, otherwise it is not
@@ -43,35 +43,35 @@ function [diagn] = biips_diagnostic(parts, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Default values
-vars = {};
-fsb = '';
+variable_names = {};
+type = '';
 ess_thres = 30;
 quiet = 0;
 parsevar; % Process options
 
-if (isempty(vars))
-    vars = fieldnames(parts); % vars = {}, take all fields
+if (isempty(variable_names))
+    variable_names = fieldnames(parts); % vars = {}, take all fields
 end
-presents = fieldnames(getfield(parts, vars{1}));
-if (isempty(fsb)) % retrieve only the field presents in the first variable
+presents = fieldnames(getfield(parts, variable_names{1}));
+if (isempty(type)) % retrieve only the field presents in the first variable
     chaine='fsb';
     indices=arrayfun(@(x) strfind(strcat(presents{:}),x), chaine, 'UniformOutput', 0);
     indices=horzcat(indices{:});
-    fsb=chaine(sort(indices));
+    type=chaine(sort(indices));
 end
 % Select only the wanted variables
-s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
-cell_fsb = num2cell(fsb);
-cell_diagn = cell(size(vars));
+s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), variable_names,'UniformOutput',0), variable_names);
+cell_fsb = num2cell(type);
+cell_diagn = cell(size(variable_names));
 
-for i=1:length(vars)
+for i=1:length(variable_names)
     if ~quiet
-        disp(['* Diagnosing variable: ' , vars{i}]);
+        disp(['* Diagnosing variable: ' , variable_names{i}]);
     end
-    ctemp = cell(size(fsb));
-    for j=1:length(fsb)
-        ctemp{j} =  diagnostic_biips(getfield(getfield(s, vars{i}), fsb(j)), ess_thres, quiet, fsb(j));
+    ctemp = cell(size(type));
+    for j=1:length(type)
+        ctemp{j} =  diagnostic_biips(getfield(getfield(s, variable_names{i}), type(j)), ess_thres, quiet, type(j));
     end
     cell_diagn{i} = cell2struct_weaknames(ctemp, cell_fsb);
 end
-diagn = cell2struct_weaknames(cell_diagn, vars);
+diagn = cell2struct_weaknames(cell_diagn, variable_names);
