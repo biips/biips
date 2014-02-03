@@ -46,7 +46,8 @@ CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 
-AC_PREFIX_PROGRAM(biips_info)  # TODO: this command looks for program biips_info. If path to biips_info is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
+AC_PREFIX_PROGRAM(biips_info)
+# This command looks for program biips_info. If path to biips_info is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
 
 #Set optional include path with option --with-biips-include or
 #environment variable BIIPS_INCLUDE
@@ -86,6 +87,9 @@ AC_LANG_POP()
 # installed. The user can set the environment variable LIBnn to
 # override this.
 
+# On Debian, we use the dpkg-architecture program to get the  
+# architecture-dependent install library path
+
 if test -z "${LIBnn}"; then 
    LIBnn=`"${R_HOME}/bin/R" CMD config LIBnn`
 fi
@@ -104,10 +108,20 @@ else
       if test [ "${prefix}" = "NONE" ] ; then 
          AC_MSG_ERROR("Location of BiiPS libraries not defined. Use configure arg '--with-biips-lib' or environment variable 'BIIPS_LIB'")
       else
-         BIIPS_LIB=${prefix}/${LIBnn}
+         # check dpkg-architecture
+		 AC_CHECK_PROG(DPKG_FOUND, dpkg-architecture, "ok")
+         # if found then use DEB_HOST_MULTIARCH to define BIIPS_LIB
+         # else use LIBnn
+		 if test [ "$DPKG_FOUND" = "ok" ] ; then
+		 	DEB_HOST_MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH`
+			BIIPS_LIB=${prefix}/lib/${DEB_HOST_MULTIARCH}
+		 else
+		 	BIIPS_LIB=${prefix}/${LIBnn}
+		 fi
       fi
    fi
 fi
+
 
 
 OLDFLAGS=${LDFLAGS}
@@ -126,23 +140,6 @@ LDFLAGS=${OLDFLAGS}
 
 BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
 
-#Finally, set optional module directory using --with-biips-modules or
-#environment variable BIIPS_MODULES
-
-#AC_ARG_WITH([biips-modules],
-#            AC_HELP_STRING([--with-biips-modules=MOD_PATH],
-#                           [the location of the BiiPS modules]),
-#            [biips_mod_path=$withval])
-#if test [ -n "$biips_mod_path" ] ; then
-#   BIIPS_MODULES=$biips_mod_path
-#else
-#   if test [ -z "${BIIPS_MODULES}" ] ; then
-#      BIIPS_MODULES=${BIIPS_LIB}/biips/modules-${PACKAGE_VERSION}
-#      if test [! -d ${BIIPS_MODULES} ]; then
-#         AC_MSG_ERROR("BiiPS module directory ${BIIPS_MODULES} does not exist.")
-#      fi
-#   fi
-#fi
 
 EXTRA_COMPILE_FLAGS="--std=c++0x -fPIC -Wno-deprecated"
 EXTRA_LINK_FLAGS=""
@@ -151,9 +148,6 @@ AC_SUBST(EXTRA_COMPILE_FLAGS)
 AC_SUBST(EXTRA_LINK_FLAGS)
 AC_SUBST(BIIPS_INCLUDE)
 AC_SUBST(BIIPS_LD_FLAGS)
-#AC_SUBST(BIIPS_MODULES)
 
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
-#AC_CONFIG_FILES([R/unix/zzz.R])
-#AC_OUTPUT
