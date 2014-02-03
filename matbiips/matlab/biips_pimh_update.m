@@ -19,7 +19,10 @@ cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again
 %% Initialization
 [sample, log_marg_like] = init_pimh(console, variable_names, n_part, rs_thres, rs_type, seed);
 inter_biips('message', ['Updating PIMH with ' num2str(n_part) ' particles']);
-bar = inter_biips('progress_bar', n_iter, '*', 'iterations');
+
+% !!! NOTE FRANCOIS: LA FONCTION PROGRESS_BAR, utilise dans R, n'existe pas
+% dans inter_biips - remplace par fonction MAKE_PROGRESS_BAR
+bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
 
 % Independent Metropolis-Hastings iterations
 for i=1:n_iter
@@ -36,5 +39,9 @@ clear_monitors(console, 's', true);
 % Reset lognormalizing constant and sampled value
 if (n_iter>0 && ~accepted)
     inter_biips('set_log_norm_const', console, log_marg_like);
+    keyboard
+    %% FC: PROBLEM HERE WITH THE FUNCTION BELOW
+    % RUNTIME ERROR: Can't set sampled value: dimension mismatch.
+    fprintf('function set_sampled_gen_tree_smooth_particle\n')
     inter_biips('set_sampled_gen_tree_smooth_particle', console, sample);        
 end

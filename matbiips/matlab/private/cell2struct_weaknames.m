@@ -1,6 +1,6 @@
-function s= biips_cell2struct(fields, weak_names)
-% BIIPS_CELL2STRUCT build a structure with an "illegal" names
-% biips_cell2struct(fields, weak_names) 
+function s= cell2struct_weaknames(fields, weak_names)
+% CELL2STRUCT_WEAKNAMES build a structure with an "illegal" names
+% s= cell2struct_weaknames(fields, weak_names) 
 % INPUT 
 % - fields : cell containing of the field to put into the structure
 % - weak_names : cell of strings

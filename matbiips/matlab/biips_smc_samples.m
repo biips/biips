@@ -72,12 +72,12 @@ else
    rng(s);
 end
 parsevar; % Process options
- 
+
 indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0)
 filtering = ~isempty(indices{1}); 
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
- 
+
 %% Monitor
 if (backward)
     inter_biips('set_default_monitors', console);
@@ -85,46 +85,55 @@ end
 if (~isempty(variable_names))
     monitor_biips(console, variable_names, type); 
 end
- 
-%% Run forward SMC algorithm
+
+%% Run smc_sample
 ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
- 
-% Get log normalizing constant
+
 log_marg_like = inter_biips('get_log_norm_const', console);
- 
+
+cz=cell(0,1);
 if filtering % Get filtering output
     mon1 = inter_biips('get_filter_monitors', console);
-    for i=1:length(variable_names)
-        particles.(variable_names{i}).f = mon1.(variable_names{i});
-    end
+    noms = fieldnames(mon1);
+    cz = struct2cell(mon1);
     if (~backward)
        clear_monitors(console, 'f');
     end   
 end
- 
+
 if smoothing % Get smoothing output
     mon2 = inter_biips('get_gen_tree_smooth_monitors', console)
-    for i=1:length(variable_names)
-        particles.(variable_names{i}).s = mon2.(variable_names{i});
-    end
+    noms = fieldnames(mon2);
+    cz = horzcat(cz, struct2cell(mon2))
     clear_monitors(console, 's');
 end
- 
+
 if (backward) % Get backward smoothing output
    inter_biips('run_backward_smoother', console);
    clear_monitors(console, 'f'); 
    mon3 = inter_biips('get_backward_smooth_monitors', console);
-    for i=1:length(variable_names)
-        particles.(variable_names{i}).b = mon3.(variable_names{i});
-    end 
+   noms = fieldnames(mon3);    
    clear_monitors(console, 'b'); 
+   cz = horzcat(cz, struct2cell(mon3));
 end
 
-% 
-% 
-% %% OLD STUFF
-% 
-% 
+% fsb = {'f', 's', 'b' };
+% fsb = {fsb{1:size(cz, 2)} };
+for i=1:length(type)
+    fsb{i} = type(i);
+end
+
+nb_noms = length(noms);
+cell_noms = cell(nb_noms, 1);
+for i=1:nb_noms
+   cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
+end
+particles = cell2struct_weaknames(cell_noms, noms); % Allows to add fields with brackets in the structure
+
+
+
+%% OLD STUFF
+
 % %% Default values
 % type='fs';
 % rs_type = 'stratified';
@@ -140,12 +149,12 @@ end
 %    rng(s);
 % end
 % parsevar; % Process options
-% 
+%  
 % indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0)
 % filtering = ~isempty(indices{1}); 
 % smoothing = ~isempty(indices{2}); 
 % backward = ~isempty(indices{3});
-% 
+%  
 % %% Monitor
 % if (backward)
 %     inter_biips('set_default_monitors', console);
@@ -153,47 +162,38 @@ end
 % if (~isempty(variable_names))
 %     monitor_biips(console, variable_names, type); 
 % end
-% 
-% %% Run smc_sample
+%  
+% %% Run forward SMC algorithm
 % ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
-% 
+%  
+% % Get log normalizing constant
 % log_marg_like = inter_biips('get_log_norm_const', console);
-% 
-% cz=cell(0,1);
+%  
 % if filtering % Get filtering output
 %     mon1 = inter_biips('get_filter_monitors', console);
-%     noms = fieldnames(mon1);
-%     cz = struct2cell(mon1)
+%     for i=1:length(variable_names)
+%         particles.(variable_names{i}).f = mon1.(variable_names{i});
+%     end
 %     if (~backward)
 %        clear_monitors(console, 'f');
 %     end   
 % end
-% 
-% if smoothing % Get filtering output
+%  
+% if smoothing % Get smoothing output
 %     mon2 = inter_biips('get_gen_tree_smooth_monitors', console)
-%     noms = fieldnames(mon2);
-%     sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)    
-%     cz = horzcat(cz, struct2cell(mon2))
+%     for i=1:length(variable_names)
+%         particles.(variable_names{i}).s = mon2.(variable_names{i});
+%     end
 %     clear_monitors(console, 's');
 % end
-% 
+%  
 % if (backward) % Get backward smoothing output
 %    inter_biips('run_backward_smoother', console);
 %    clear_monitors(console, 'f'); 
 %    mon3 = inter_biips('get_backward_smooth_monitors', console);
-%    noms = fieldnames(mon3);    
+%     for i=1:length(variable_names)
+%         particles.(variable_names{i}).b = mon3.(variable_names{i});
+%     end 
 %    clear_monitors(console, 'b'); 
-%    cz = horzcat(cz, struct2cell(mon3));
 % end
-% 
-% fsb = {'f', 's', 'b' };
-% fsb = {fsb{1:size(cz, 2)} };
-% 
-% nb_noms = length(noms);
-% cell_noms = cell(nb_noms, 1);
-% for i=1:nb_noms
-%    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
-% end   
-% cell_noms
-% particles = biips_cell2struct(cell_noms, noms);
-% keyboard
+
