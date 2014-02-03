@@ -1,4 +1,4 @@
-function [sample, log_marg_like] = init_pimh(console, variable_names, nb_part, rs_thres, rs_type, seed)
+function [sample, log_marg_like] = init_pimh(console, variable_names, n_part, rs_thres, rs_type, seed)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % INIT_PIMH Initialisation of the Particle Independent Metropolis
@@ -13,7 +13,7 @@ function [sample, log_marg_like] = init_pimh(console, variable_names, nb_part, r
 %                                                       'var4[1, 5:10, 3]'}
 %                       Dimensions and indices must be a valid subset of 
 %                       the variables of the model.
-% - nb_part :           positive integer. Number of particles used in SMC algorithms
+% - n_part :            positive integer. Number of particles used in SMC algorithms
 %
 % - rs_thres :  positive real 
 %               Threshold for the resampling step (adaptive SMC).
@@ -62,29 +62,24 @@ if (~inter_biips('is_sampler_built', console))
    inter_biips('build_smc_sampler', console, false);
 end
 
-atend = inter_biips('is_smc_sampler_at_end', console)
+atend = inter_biips('is_smc_sampler_at_end', console);
 % Get the normalizing constant
 if (~monitored || ~atend)
     % Run SMC sampler
     inter_biips('message', 'Initializing PIMH');
-    run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
+    run_smc_forward(console, n_part, rs_thres, rs_type, seed);
 end
-log_marg_like = inter_biips('get_log_norm_const', console)
+log_marg_like = inter_biips('get_log_norm_const', console);
 
 % Get sampled value
-sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
+sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
 if (isempty(fieldnames(sampled_value)))
     % Sample one particle
     inter_biips('sample_gen_tree_smooth_particle', console, seed); % !! FC: CHECK IF SAME SEED OK
-    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
+    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
 end
 cell_struct = cell(length(variable_names), 1);
 for i=1:length(variable_names)
     cell_struct{i} = sampled_value.(variable_names{i});
 end
 sample = cell2struct_weaknames(cell_struct, variable_names);
-% keyboard
-% for i=1:length(variable_names)
-%     variable_names{i}
-%     sample.(variable_names{i}) = sampled_value.(variable_names{i});
-% end

@@ -1,4 +1,4 @@
-function [particles, log_marg_like] = biips_smc_samples(console, variable_names, nb_part, varargin)
+function [particles, log_marg_like] = biips_smc_samples(console, variable_names, n_part, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
@@ -13,7 +13,7 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 %                                                       'var4[1, 5:10, 3]'}
 %                       Dimensions and indices must be a valid subset of 
 %                       the variables of the model.
-% - nb_part :           positive integer. Number of particles used in SMC algorithms
+% - n_part :            positive integer. Number of particles used in SMC algorithms
 %
 % Optional Inputs:
 % - type :      string (default = 'fs').
@@ -61,19 +61,10 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 type='fs';
 rs_type = 'stratified';
 rs_thres = 0.5;
-if (isoctave)
-   s=rand('state');
-   rand('state',sum(100*clock)); 
-   seed=double(randi(intmax));
-   rand('state',s);
-else
-   s=rng('shuffle');
-   seed=randi(intmax);
-   rng(s);
-end
+seed = get_seed();
 parsevar; % Process options
 
-indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0)
+indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0);
 filtering = ~isempty(indices{1}); 
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
@@ -87,7 +78,7 @@ if (~isempty(variable_names))
 end
 
 %% Run smc_sample
-ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
+ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed);
 
 log_marg_like = inter_biips('get_log_norm_const', console);
 
@@ -102,9 +93,9 @@ if filtering % Get filtering output
 end
 
 if smoothing % Get smoothing output
-    mon2 = inter_biips('get_gen_tree_smooth_monitors', console)
+    mon2 = inter_biips('get_gen_tree_smooth_monitors', console);
     noms = fieldnames(mon2);
-    cz = horzcat(cz, struct2cell(mon2))
+    cz = horzcat(cz, struct2cell(mon2));
     clear_monitors(console, 's');
 end
 
@@ -129,71 +120,3 @@ for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);
 end
 particles = cell2struct_weaknames(cell_noms, noms); % Allows to add fields with brackets in the structure
-
-
-
-%% OLD STUFF
-
-% %% Default values
-% type='fs';
-% rs_type = 'stratified';
-% rs_thres = 0.5;
-% if (isoctave)
-%    s=rand('state');
-%    rand('state',sum(100*clock)); 
-%    seed=double(randi(intmax));
-%    rand('state',s);
-% else
-%    s=rng('shuffle');
-%    seed=randi(intmax);
-%    rng(s);
-% end
-% parsevar; % Process options
-%  
-% indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0)
-% filtering = ~isempty(indices{1}); 
-% smoothing = ~isempty(indices{2}); 
-% backward = ~isempty(indices{3});
-%  
-% %% Monitor
-% if (backward)
-%     inter_biips('set_default_monitors', console);
-% end
-% if (~isempty(variable_names))
-%     monitor_biips(console, variable_names, type); 
-% end
-%  
-% %% Run forward SMC algorithm
-% ok = run_smc_forward(console, nb_part, rs_thres, rs_type, seed);
-%  
-% % Get log normalizing constant
-% log_marg_like = inter_biips('get_log_norm_const', console);
-%  
-% if filtering % Get filtering output
-%     mon1 = inter_biips('get_filter_monitors', console);
-%     for i=1:length(variable_names)
-%         particles.(variable_names{i}).f = mon1.(variable_names{i});
-%     end
-%     if (~backward)
-%        clear_monitors(console, 'f');
-%     end   
-% end
-%  
-% if smoothing % Get smoothing output
-%     mon2 = inter_biips('get_gen_tree_smooth_monitors', console)
-%     for i=1:length(variable_names)
-%         particles.(variable_names{i}).s = mon2.(variable_names{i});
-%     end
-%     clear_monitors(console, 's');
-% end
-%  
-% if (backward) % Get backward smoothing output
-%    inter_biips('run_backward_smoother', console);
-%    clear_monitors(console, 'f'); 
-%    mon3 = inter_biips('get_backward_smooth_monitors', console);
-%     for i=1:length(variable_names)
-%         particles.(variable_names{i}).b = mon3.(variable_names{i});
-%     end 
-%    clear_monitors(console, 'b'); 
-% end
-
