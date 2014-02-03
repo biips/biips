@@ -44,12 +44,12 @@ sample_data = true; % Boolean
 %%% Run BiiPS SMC and report filtering and smoothing estimates
 
 % Parameters of the algorithm
-npart = 100; % Number of particles
+n_part = 500; % Number of particles
 variables = {'x', 'x[1:2]'}; % Variables to be monitored
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 % Run SMC
-out_smc = biips_smc_samples(model_id, variables, npart,...
+out_smc = biips_smc_samples(model_id, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 % Diagnostic on the algorithm
@@ -63,7 +63,7 @@ summary = biips_summary(out_smc, 'probs', [.025, .975]);
 x_f_mean = summary.x.f.mean;
 x_f_med = summary.x.f.med;
 x_f_quant = summary.x.f.quant;
-figure('name', 'Filtering')
+figure('name', 'SMC: Filtering estimates')
 plot(x_f_mean)
 hold on
 plot(x_f_quant', 'r--')
@@ -73,19 +73,17 @@ ylabel('Estimates')
 % Smoothing estimates
 x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.f.quant;
-figure('name', 'Smoothing')
+figure('name', 'SMC: Smoothing estimates')
 plot(x_s_mean)
 hold on
 plot(x_s_quant', 'r--')
 xlabel('Time')
 ylabel('Estimates')
 
-
 % Marginal filtering and smoothing densities
 kde_estimates = biips_density(out_smc);
-
 time_index = [10, 50, 80, 100];
-figure('name', 'Marginal posteriors')
+figure('name', 'SMC: Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -93,24 +91,85 @@ for k=1:length(time_index)
     hold on
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}'], 'fontsize', 16);
-    ylabel('posterior density', 'fontsize', 16);
-    title(['t=', num2str(tk)], 'fontsize', 16);
-    legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('posterior density');
+    title(['t=', num2str(tk)]);    
 end
+legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
 
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%
 %%% Run BiiPS Particle Independent Metropolis-Hastings
-nburn = 100;
-niter = 10;
-npart = 20;
-fprintf('update\n')
-biips_pimh_update(model_id, variables, nburn, npart)
-fprintf('samples\n')
-out_pimh = biips_pimh_samples(model_id, variables, niter, npart)
+
+% Parameters of the PIMH
+n_burn = 500;
+n_iter = 500;
+thin = 1;
+n_part = 25;
+
+% Run PIMH
+biips_pimh_update(model_id, variables, n_burn, n_part); % burn-in iterations
+[out_pimh, log_marg_like_pimh] = biips_pimh_samples(model_id, variables,...
+    n_iter, n_part, 'thin', thin);
+
+% Some summary statistics
+summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 
 %%% Some graphical outputs
+
+% Posterior mean and quantiles
+x_pimh_mean = summary_pimh.x.mean;
+x_pimh_quant = summary_pimh.x.quant;
+figure('name', 'PIMH: Posterior mean and quantiles')
+plot(x_pimh_mean)
+hold on
+plot(x_pimh_quant', 'r--')
+xlabel('Time')
+ylabel('Estimates')
+
+% Trace of MCMC samples
+time_index = [10, 50, 80, 100];
+figure('name', 'PIMH: Trace samples')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(out_pimh.x(tk, :))
+    hold on
+    plot(0, data.x_true(tk), '*g');  
+    xlabel('Iterations')
+    ylabel('PIMH samples')
+    title(['t=', num2str(tk)]);
+end
+legend({'PIMH samples', 'True value'});
+
+% Histograms of posteriors
+figure('name', 'PIMH: Histograms Marginal Posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    hist(out_pimh.x(tk, :), 20);
+    hold on    
+    plot(data.x_true(tk), 0, '*g');
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('posterior density');
+    title(['t=', num2str(tk)]);    
+end
+legend({'smoothing density', 'True value'});
+
+% Kernel density estimates of posteriors
+kde_estimates_pimh = biips_density(out_pimh);
+figure('name', 'PIMH: KDE estimates Marginal posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f); 
+    hold on
+    plot(data.x_true(tk), 0, '*g');
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('posterior density');
+    title(['t=', num2str(tk)]);    
+end
+legend({'posterior density', 'True value'}, 'fontsize', 12);
 
 %% --------------------------------------------------------------------- %%
 % Clear model 
