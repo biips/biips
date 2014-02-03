@@ -133,6 +133,7 @@ plot(drop(prec_y_biips),
      main=paste("Trace of", n.iter, "BiiPS PMMH burnin samples"))
 legend("topright", leg="prec_y", pch=1, bty='n')
 plot(sapply(out.pmmh_burn$step, FUN=identity), ylab='rw.step')
+plot(out.pmmh_burn$accept.rate, ylab='accept.rate')
 
 
 # sample
