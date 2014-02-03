@@ -45,7 +45,7 @@ sample_data = true; % Boolean
 
 % Parameters of the algorithm
 npart = 100; % Number of particles
-variables = {'x'}; % Variables to be monitored
+variables = {'x', 'x[1:2]'}; % Variables to be monitored
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 % Run SMC
@@ -102,9 +102,13 @@ end
 
 %% ---------------------------- BiiPS PIMH  ---------------------------  %%
 %%% Run BiiPS Particle Independent Metropolis-Hastings
-niter = 100;
-npart = 100;
-biips_pimh_update(model_id, variables, niter, npart)
+nburn = 100;
+niter = 10;
+npart = 20;
+fprintf('update\n')
+biips_pimh_update(model_id, variables, nburn, npart)
+fprintf('samples\n')
+out_pimh = biips_pimh_samples(model_id, variables, niter, npart)
 
 %%% Some graphical outputs
 
