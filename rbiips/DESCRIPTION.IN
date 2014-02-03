@@ -1,4 +1,4 @@
-Package: @PROJECT_NAME@
+Package: @PKG_NAME@
 Version: @Biips_VERSION@
 Type: Package
 Date: @Biips_DATE@
