@@ -1,4 +1,4 @@
-init.pimh.biips <- function(object, variable.names,
+pimh.init.biips <- function(object, variable.names,
                             n.part, rs.thres=0.5, rs.type="stratified")
 {
   monitored <- is.monitored.biips(object, variable.names, "s", FALSE)
@@ -40,7 +40,7 @@ init.pimh.biips <- function(object, variable.names,
 }
 
 
-one.update.pimh.biips <- function(object, variable.names,
+one.pimh.update.biips <- function(object, variable.names,
                                   n.part, rs.thres=0.5, rs.type="stratified",
                                   sample, log.marg.like)
 {
@@ -73,12 +73,12 @@ one.update.pimh.biips <- function(object, variable.names,
 
 
 ##' @export
-update.pimh <- function(object, ...)
-  UseMethod("update.pimh")
+pimh.update <- function(object, ...)
+  UseMethod("pimh.update")
 
 
-##' @S3method update.pimh biips
-update.pimh.biips <- function(object, variable.names, n.iter,
+##' @S3method pimh.update biips
+pimh.update.biips <- function(object, variable.names, n.iter,
                               n.part, ...)
 {
   if (!is.biips(object))
@@ -98,7 +98,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
   on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
   
   ## initialize
-  out <- init.pimh.biips(object, variable.names=variable.names,
+  out <- pimh.init.biips(object, variable.names=variable.names,
                          n.part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
@@ -112,7 +112,7 @@ update.pimh.biips <- function(object, variable.names, n.iter,
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(object, variable.names=variable.names, 
+    out <- one.pimh.update.biips(object, variable.names=variable.names, 
                                  sample=sample, log.marg.like=log.marg.like,
                                  n.part=n.part, ...)
     sample <- out$sample
@@ -189,7 +189,7 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
   
   ## Initialization
   ##---------------  
-  out <- init.pimh.biips(object, variable.names=variable.names,
+  out <- pimh.init.biips(object, variable.names=variable.names,
                          n.part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
@@ -204,7 +204,7 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pimh.biips(object, variable.names=variable.names,
+    out <- one.pimh.update.biips(object, variable.names=variable.names,
                                  n.part=n.part,
                                  sample=sample, log.marg.like=log.marg.like, ...)
     sample <- out$sample

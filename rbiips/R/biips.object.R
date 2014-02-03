@@ -45,8 +45,8 @@
 ##' node arrays used in the model.
 ##' 
 ##' @name biips.object 
-##' @aliases biips.object build.sampler build.sampler.biips init.pmmh
-##' init.pmmh.biips update.pmmh update.pmmh.biips update.pimh update.pimh.biips
+##' @aliases biips.object build.sampler build.sampler.biips pmmh.init
+##' pmmh.init.biips pmmh.update pmmh.update.biips pimh.update pimh.update.biips
 ##' variable.names.biips is.biips
 ##' @param object a biips model object
 ##' @param proposal
