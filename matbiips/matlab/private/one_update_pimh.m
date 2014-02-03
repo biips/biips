@@ -18,8 +18,10 @@ if accepted
     
     % Get sampled value
     sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
-    for i=1:length(variable_names)    
-        sample.(variable_names{i}) = sampled_value.(variable_names{i});
+    cell_struct = cell(length(variable_names), 1);
+    for i=1:length(variable_names)
+        cell_struct{i} = sampled_value.(variable_names{i});
     end
+    sample = cell2struct_weaknames(cell_struct, variable_names);
 end
     

@@ -60,7 +60,7 @@ if (isempty(fsb)) % retrieve only the field presents in the first variable
     fsb=chaine(sort(indices));
 end
 % Select only the wanted variables
-s = biips_cell2struct(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
+s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
 cell_fsb = num2cell(fsb);
 cell_diagn = cell(size(vars));
 
@@ -72,6 +72,6 @@ for i=1:length(vars)
     for j=1:length(fsb)
         ctemp{j} =  diagnostic_biips(getfield(getfield(s, vars{i}), fsb(j)), ess_thres, quiet, fsb(j));
     end
-    cell_diagn{i} = biips_cell2struct(ctemp, cell_fsb);
+    cell_diagn{i} = cell2struct_weaknames(ctemp, cell_fsb);
 end
-diagn = biips_cell2struct(cell_diagn, vars);
+diagn = cell2struct_weaknames(cell_diagn, vars);

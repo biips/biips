@@ -54,7 +54,7 @@ if (isempty(fsb)) % retrieve only the field presents in the first variable
    fsb=chaine(sort(indices));
 end
 % select only the wanted variables
-s = biips_cell2struct(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
+s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), vars,'UniformOutput',0), vars);
 cell_fsb = num2cell(fsb);
 cell_sum = cell(size(vars));
 
@@ -66,6 +66,6 @@ for i=1:length(vars)
    d = length(size_curr);
    ctemp{j} = cellfun(@(x,w) kde(x, w, adjust, bw), num2cell(particles.values, d), num2cell(particles.weights, d));  
   end
-  cell_sum{i} = biips_cell2struct(ctemp, cell_fsb);
+  cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
 end
-dens = biips_cell2struct(cell_sum, vars);
+dens = cell2struct_weaknames(cell_sum, vars);
