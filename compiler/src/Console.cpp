@@ -1550,9 +1550,13 @@ namespace Biips
         if (!sampledValueMap_.count(it->first))
           throw RuntimeError("Can't set sampled value: variable not found.");
 
-        if (it->second.Dim() != sampledValueMap_.at(it->first).Dim())
+        // check dropped dimensions
+        if (it->second.Dim().Drop() != sampledValueMap_.at(it->first).Dim().Drop()) {
           throw RuntimeError("Can't set sampled value: dimension mismatch.");
-        sampledValueMap_[it->first] = it->second;
+        }
+        // change only the values
+        sampledValueMap_[it->first].SetPtr(sampledValueMap_[it->first].DimPtr(),
+                                           it->second.ValuesPtr());
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
