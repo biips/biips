@@ -1,15 +1,15 @@
 
 ##' @export
-init.pmmh <- function(object, ...)
-  UseMethod("init.pmmh")
+pmmh.init <- function(object, ...)
+  UseMethod("pmmh.init")
 
 ##' initialize pmmh algorithm
 ##' 
-##' @S3method init.pmmh biips
+##' @S3method pmmh.init biips
 ##' @param object the Biips model
 ##' @param param.names vector of params
 ##'
-init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
+pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
                             n.part, rs.thres=0.5, rs.type="stratified",
                             inits.rng.seed, ...)
 { 
@@ -222,7 +222,7 @@ init.pmmh.biips <- function(object, param.names, latent.names=c(), inits=list(),
 
 ##' heart of the pmmh algorithm : realizes one step of the MH algorithm
 ##' using the underlying SMC
-one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.param,
+one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.param,
                                   sample, log.prior, log.marg.like,
                                   n.part, rw.rescale, rw.learn,
                                   rw.rescale.type, ...)
@@ -333,13 +333,13 @@ one.update.pmmh.biips <- function(object, param.names, latent.names=c(), pn.para
 
 
 ##' @export
-update.pmmh <- function(object, ...)
-  UseMethod("update.pmmh")
+pmmh.update <- function(object, ...)
+  UseMethod("pmmh.update")
 
 
 ##' Update Particle Marginal Metropolis-Hastings samples
 ##' 
-##' The \code{update.pmmh} function creates monitors for the given variables,
+##' The \code{pmmh.update} function creates monitors for the given variables,
 ##' runs the model for \code{n.iter} iterations and returns the monitored
 ##' samples.
 ##' 
@@ -367,14 +367,14 @@ update.pmmh <- function(object, ...)
 ##' \code{\link{smc.samples}}
 ##' @keywords models
 ##' @export
-##' @S3method update.pmmh biips
+##' @S3method pmmh.update biips
 ##' @examples
 ##' 
 ##' ## Should be DIRECTLY executable !! 
 ##' ##-- ==>  Define data, use random,
 ##' ##--  or do  help(data=index)  for the standard data sets.
 ##' 
-update.pmmh.biips <- function(object, param.names, n.iter, 
+pmmh.update.biips <- function(object, param.names, n.iter, 
                               n.part, max.fail=0, inits=list(),
                               rw.step, rw.rescale=TRUE, rw.learn=TRUE,
                               rw.rescale.type='p', n.rescale=n.iter/4, ...)
@@ -442,7 +442,7 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   
   ### Initialize
   ### -------------------------------
-  out <- init.pmmh.biips(object, param.names=param.names, n.part=n.part,
+  out <- pmmh.init.biips(object, param.names=param.names, n.part=n.part,
                          inits=inits, ...)
   
   pn.param <- parse.varnames(param.names)
@@ -486,7 +486,7 @@ update.pmmh.biips <- function(object, param.names, n.iter,
   ### ------------------------------- 
   for(i in 1:n.iter) {
     ## iterate
-    out <- one.update.pmmh.biips(object, param.names=param.names,
+    out <- one.pmmh.update.biips(object, param.names=param.names,
                                  pn.param=pn.param,
                                  sample=out$sample, log.prior=out$log.prior, log.marg.like=out$log.marg.like,
                                  n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
@@ -593,7 +593,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   
   ## Initialization
   #----------------
-  out <- init.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
+  out <- pmmh.init.biips(object, param.names=param.names, latent.names=latent.names,
                          n.part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
@@ -642,7 +642,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   ## Metropolis-Hastings iterations
   ##-------------------------------
   for(i in 1:n.iter) {
-    out <- one.update.pmmh.biips(object, param.names=param.names, latent.names=latent.names,
+    out <- one.pmmh.update.biips(object, param.names=param.names, latent.names=latent.names,
                                  pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
                                  n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 

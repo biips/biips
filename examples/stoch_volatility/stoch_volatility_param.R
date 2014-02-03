@@ -108,7 +108,7 @@ if(run.sens)
   
   # initialize pmmh with max
   inits <- list(alpha = out.sens$max.param$alpha)
-  init.pmmh(biips, param.names=c("alpha"), 
+  pmmh.init(biips, param.names=c("alpha"), 
             inits=inits, n.part=n.part)
 }
 
@@ -116,7 +116,7 @@ if(run.sens)
 #---------------------
 
 # burn in
-update.pmmh(biips, param.names=c("alpha"),
+pmmh.update(biips, param.names=c("alpha"),
             n.iter=n.burn,
             n.part=n.part)
 # sample
