@@ -1,8 +1,4 @@
-set_output_bindir(out_bindir)
+file(GLOB r_files RELATIVE ${PKG_SRC_DIR} *.R)
 
-# copy files to binary directory
-file(GLOB rfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.R)
-file(COPY ${rfiles} DESTINATION ${out_bindir})
-
-# add files in out_bindir to parent scope SRC_FILES list
-add_sources(${out_bindir} rfiles)
+# add files to parent scope PKG_FILES list
+set(PKG_FILES ${PKG_FILES} ${r_files} PARENT_SCOPE)
