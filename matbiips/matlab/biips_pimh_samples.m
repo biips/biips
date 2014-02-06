@@ -27,8 +27,8 @@ bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
 n_samples = ceil((n_iter)/thin);
 n_dim = zeros(length(variable_names), 1);
 for k=1:length(variable_names)
-    n_dim(k) = ndims(sample.(variable_names{k}));
-    samples_st{k} = zeros([size(sample.(variable_names{k})), n_samples]);    
+    n_dim(k) = ndims(getfield(sample, variable_names{k}));
+    samples_st{k} = zeros([size(getfield(sample, variable_names{k})), n_samples]);    
 end
 log_marg_like_st = zeros(n_samples, 1);
 
@@ -45,11 +45,11 @@ for i=1:n_iter
         for k=1:length(variable_names)
             switch(n_dim(k)) % !!!FC: NOT VERY ELEGANT PIECE OF CODE!!!
                 case 1
-                    samples_st{k}(:, ind_sample) = sample.(variable_names{k});
+                    samples_st{k}(:, ind_sample) = getfield(sample, variable_names{k});
                 case 2
-                    samples_st{k}(:, :, ind_sample) = sample.(variable_names{k});
+                    samples_st{k}(:, :, ind_sample) = getfield(sample, (variable_names{k});
                 case 3
-                    samples_st{k}(:, :, :, ind_sample) = sample.(variable_names{k});                    
+                    samples_st{k}(:, :, :, ind_sample) = getfield(sample, variable_names{k});                    
                 otherwise
                     error(['Variable ' variable_names{k} 'of dimension >3'])                    
             end

@@ -80,6 +80,6 @@ if (isempty(fieldnames(sampled_value)))
 end
 cell_struct = cell(length(variable_names), 1);
 for i=1:length(variable_names)
-    cell_struct{i} = sampled_value.(variable_names{i});
+    cell_struct{i} = getfield(sampled_value, variable_names{i});
 end
 sample = cell2struct_weaknames(cell_struct, variable_names);
