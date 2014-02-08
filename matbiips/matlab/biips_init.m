@@ -9,4 +9,9 @@ if (~isempty(varargin))
     verb = varargin{1};
 end
 inter_biips('verbosity', verb);
-biips_load_module('basemod');
+
+% load module
+ok = inter_biips('load_module', 'basemod');
+if (~ok)
+    error('problem loading module'); 
+end

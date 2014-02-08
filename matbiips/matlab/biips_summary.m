@@ -43,17 +43,21 @@ function [summ] = biips_summary(samples, varargin)
 % Jan 2014; Last revision: 24-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Default values
-variable_names = {};
-type = '';
-probs = [];
-order = 2;
-parsevar; % Process options
+%% PROCESS AND CHECK INPUTS
+%%% Process and check optional arguments
+optarg_names = {'variable_names', 'type', 'probs', 'order'};
+optarg_default = {{}, '', [], 2};
+optarg_valid = {{}, {'', 'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 1],...
+    [1,4]};
+optarg_type = {'char', 'char', 'numeric', 'numeric'};
+[variable_names, type, probs, order] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
 if (isempty(variable_names))
    variable_names = fieldnames(samples); % vars = {}, take all fields
 end
 
+%% Summary statistics
 if isstruct(samples.(variable_names{1})) % samples corresponds to the output of a SMC algorithm
     presents = fieldnames(samples.(variable_names{1}));
     if (isempty(type)) % retrieve only the field presents in the first variable
