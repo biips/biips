@@ -56,16 +56,20 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 % Jan 2014; Last revision: 31-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-%% Default values
-type='fs';
-rs_type = 'stratified';
-rs_thres = 0.5;
-seed = get_seed();
-parsevar; % Process options
+%% PROCESS AND CHECK INPUTS
+% CAN WE ADD A CHECK ON THE VARIABLES??
+%%% Process and check optional arguments
+optarg_names = {'type', 'rs_thres', 'rs_type', 'seed'};
+optarg_default = {'fs', .5, 'stratified', get_seed()};
+optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, n_part],...
+    {'multinomial', 'stratified', 'residual', 'systematic'},...
+    [0, intmax]};
+optarg_type = {'char', 'numeric', 'char', 'numeric'};
+[type, rs_thres, rs_type, seed] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
 indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0);
-filtering = ~isempty(indices{1}); 
+filtering = ~isempty(indices{1});
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
 
@@ -78,7 +82,7 @@ if (~isempty(variable_names))
 end
 
 %% Run smc_sample
-ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed);
+run_smc_forward(console, n_part, rs_thres, rs_type, seed);
 
 log_marg_like = inter_biips('get_log_norm_const', console);
 
@@ -108,8 +112,6 @@ if (backward) % Get backward smoothing output
    cz = horzcat(cz, struct2cell(mon3));
 end
 
-% fsb = {'f', 's', 'b' };
-% fsb = {fsb{1:size(cz, 2)} };
 for i=1:length(type)
     fsb{i} = type(i);
 end
