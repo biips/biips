@@ -5,14 +5,23 @@ function biips_pimh_update(console, variable_names, n_iter, n_part, varargin)
 
 
 
-%%
-% FC: NEED TO ADD SOME CHECKS ON THE INPUTS
+%% PROCESS AND CHECK INPUTS
+% CAN WE ADD A CHECK ON THE VARIABLES??
+%%% Process and check optional arguments
+optarg_names = {'rs_thres', 'rs_type', 'seed'};
+optarg_default = {.5, 'stratified', get_seed()};
+optarg_valid = {[0, n_part],...
+    {'multinomial', 'stratified', 'residual', 'systematic'},...
+    [0, intmax]};
+optarg_type = {'numeric', 'char', 'numeric'};
+[rs_thres, rs_type, seed] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
-%% Process options
-rs_type = 'stratified';
-rs_thres = 0.5;
-seed = get_seed();
-parsevar; % Process options
+% %% Process options
+% rs_type = 'stratified';
+% rs_thres = 0.5;
+% seed = get_seed();
+% parsevar; % Process options
 
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
