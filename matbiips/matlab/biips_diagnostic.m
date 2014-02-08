@@ -41,13 +41,16 @@ function [diagn] = biips_diagnostic(parts, varargin)
 % Website: https://alea.bordeaux.inria.fr/biips
 % Jan 2014; Last revision: 24-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Default values
-variable_names = {};
-type = '';
-ess_thres = 30;
-quiet = 0;
-parsevar; % Process options
+% 
+%% PROCESS AND CHECK INPUTS
+%%% Process and check optional arguments
+optarg_names = {'variable_names', 'type', 'ess_thres', 'quiet'};
+optarg_default = {{}, 'fs', 30, false};
+optarg_valid = {{}, {'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, intmax],...
+    {true, false}};
+optarg_type = {'char', 'char', 'numeric', 'logical'};
+[variable_names, type, ess_thres, quiet] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
 if (isempty(variable_names))
     variable_names = fieldnames(parts); % vars = {}, take all fields
