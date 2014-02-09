@@ -9,6 +9,6 @@ data=struct('t_max', t_max, 'prec_x_init', prec_x_init, 'prec_x', prec_x,  'prec
 % console initialisation 
 biips_init;
 console = biips_model('hmm_1d_lin.bug', data);
-out_smc = biips_smc_samples(p, {'x[1:2]'}, 100);
+out_smc = biips_smc_samples(console, {'x[1:2]'}, 100);
 % console cleaning 
-inter_biips('clear_console', p); 
+inter_biips('clear_console', console); 
