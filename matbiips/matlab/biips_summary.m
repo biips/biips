@@ -58,8 +58,8 @@ if (isempty(variable_names))
 end
 
 %% Summary statistics
-if isstruct(samples.(variable_names{1})) % samples corresponds to the output of a SMC algorithm
-    presents = fieldnames(samples.(variable_names{1}));
+if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the output of a SMC algorithm
+    presents = fieldnames(getfield(samples, variable_names{1}));
     if (isempty(type)) % retrieve only the field presents in the first variable
        chaine='fsb';
        indices=arrayfun(@(x) strfind(strcat(presents{:}),x), chaine, 'UniformOutput', 0);
@@ -67,15 +67,15 @@ if isstruct(samples.(variable_names{1})) % samples corresponds to the output of 
        type=chaine(sort(indices));
     end
     % select only the wanted variables
-    s = cell2struct_weaknames(cellfun(@(x) samples.(x), variable_names,'UniformOutput',0), variable_names);
+    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names,'UniformOutput',0), variable_names);
     cell_fsb = num2cell(type);
     cell_sum = cell(size(variable_names));
 
     for i=1:length(variable_names)
       ctemp = cell(size(type));
       for j=1:length(type)
-          ctemp{j} =  summary(s.(variable_names{i}).(type(j)).values, ...
-              s.(variable_names{i}).(type(j)).weights, probs, order);
+          ctemp{j} = summary(getfield(getfield(getfield(s, variable_names{i}), type(j)), 'values'), ...
+             getfield(getfield(getfield(s,variable_names{i}), type(j)), 'weights'), probs, order);
       end
       cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
     end
@@ -83,12 +83,12 @@ if isstruct(samples.(variable_names{1})) % samples corresponds to the output of 
     
 else % samples corresponds to the output of a MCMC algorithm
     % select only the wanted variables
-    s = cell2struct_weaknames(cellfun(@(x) samples.(x), variable_names,'UniformOutput',0), variable_names);    
-    nsamples = size(s.(variable_names{1}), ndims(s.(variable_names{1})));
+    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names, 'UniformOutput',0), variable_names);    
+    nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
     cell_sum = cell(size(variable_names));
     for i=1:length(variable_names)  
-        weights = 1/nsamples * ones(size(s.(variable_names{i})));
-        cell_sum{i} = summary(s.(variable_names{i}), weights, probs, order);
+        weights = 1/nsamples * ones(size(getfield(s, variable_names{i})));
+        cell_sum{i} = summary(getfield(s, variable_names{i}), weights, probs, order);
     end
     summ = cell2struct_weaknames(cell_sum, variable_names);
 end
