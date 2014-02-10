@@ -42,6 +42,7 @@ else(UNIX)
 endif(UNIX)
 mark_as_advanced(
     MATLAB_LIBRARIES
+    OCTAVE
     MATLAB_COMMAND
     MATLAB_FLAGS
     MATLAB_ARCH
