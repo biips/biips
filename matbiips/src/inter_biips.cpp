@@ -697,10 +697,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console_ptr p_console = consoles[id];
 
-       CheckArgIsCell(2);
+       CheckArgIsString(2);
        mxArray * str = mxGetCell(prhs[2], 0);
-       CheckIsString(str);
-       String name = mxArrayToString(str);
+       String name = mxArrayToString(prhs[2]);
 
        CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
