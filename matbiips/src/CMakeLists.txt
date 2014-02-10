@@ -27,17 +27,9 @@ if (MATLAB)
     set(INTER_TARGET inter_biips)
     get_target_property(INTER_TARGET_L inter_biips LOCATION)
 
-else()
-    message (FATAL_ERROR "MATLAB not found on your computer.\n"
-			 "Try setting MATLAB_ROOT to the root path of 
-your MATLAB installation. eg: c:\\Program Files\\MATLAB\\R2012a\n"
-			 "Octave mkoct is not yet supported on 
-Windows.\n" 
-                         "You should deactivate MATBIIPS compilation by 
-setting BUILD_MATBIIPS=OFF")
                 
 #octave
-else()
+elseif(OCTAVE)
     set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 	foreach(l ${BIIPS_LIBS})
 			get_property(MYLIB TARGET ${l} PROPERTY LOCATION)
@@ -66,6 +58,15 @@ else()
     	COMMENT "Building mexfile"
     	VERBATIM
 	)
+
+else()
+    message (FATAL_ERROR "MATLAB not found on your computer.\n"
+			 "Try setting MATLAB_ROOT to the root path of 
+your MATLAB installation. eg: c:\\Program Files\\MATLAB\\R2012a\n"
+			 "Octave mkoct is not yet supported on 
+Windows.\n" 
+                         "You should deactivate MATBIIPS compilation by 
+setting BUILD_MATBIIPS=OFF")
 endif()
 
 # install mexfile in the build directory
