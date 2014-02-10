@@ -168,7 +168,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        
        for (int i = 0; i < ndim ; ++i) {
             String var_name = names[i]; 
-           mwSize  nd[] = { var_name.size() }; 
+           mwSize  nd[] = { static_cast<mwSize>(var_name.size()) }; 
            mxArray * value = mxCreateCharArray(1, nd);
            std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
            mxSetCell(plhs[0], i, value);
@@ -571,7 +571,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
            throw RuntimeError("Failed to dump node names.");
        
          mwSize name_ndim = 1;
-         mwSize name_dims[] = { node_names_vec.size() };
+         mwSize name_dims[] = { static_cast<mwSize>(node_names_vec.size()) };
          mxArray * names = mxCreateCellArray(name_ndim, name_dims);
          for (int i = 0;  i <  node_names_vec.size() ; ++i) {
                mxArray * str = mxCreateString(node_names_vec[i].c_str());
@@ -584,7 +584,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
          if (!p_console->DumpNodeTypes(node_types_vec))
             throw RuntimeError("Failed to dump node types.");
          mwSize type_ndim = 1;
-         mwSize type_dims[] = { node_types_vec.size() };
+         mwSize type_dims[] = { static_cast<mwSize>(node_types_vec.size()) };
          mxArray * types = mxCreateCellArray(type_ndim, type_dims);
          for (Size i=0; i<graph_size; ++i)
          {
@@ -653,7 +653,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
            throw RuntimeError("Failed to dump node samplers.");
        
          mwSize name_ndim = 1;
-         mwSize name_dims[] = { node_samplers_vec.size() };
+         mwSize name_dims[] = { static_cast<mwSize>(node_samplers_vec.size()) };
          mxArray * samplers = mxCreateCellArray(name_ndim, name_dims);
          for (int i = 0;  i <  node_samplers_vec.size() ; ++i) {
                mxArray * str = mxCreateString(node_samplers_vec[i].c_str());
