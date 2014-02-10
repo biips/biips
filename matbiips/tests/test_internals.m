@@ -11,6 +11,8 @@ biips_init;
 console = biips_model('hmm_1d_lin.bug', data);
 out_smc = biips_smc_samples(console, {'x[1:2]'}, 100);
 % test change data
-inter_biips('change_data', console, 'x', [3] , [3] , 0.5, true)
+change_ok = inter_biips('change_data', console, 'x', [3] , [3] , 0.5, true);
+%
+sample_ok = inter_biips('sample_data', console, 'x', [1] , [1] , 1.2)
 % console cleaning 
 inter_biips('clear_console', console); 
