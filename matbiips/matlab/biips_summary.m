@@ -74,8 +74,8 @@ if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the o
     for i=1:length(variable_names)
       ctemp = cell(size(type));
       for j=1:length(type)
-          ctemp{j} = summary(getfield(getfield(getfield(s, variable_names{i}), type(j)), values), ...
-             getfield(getfield(getfield(s,variable_names{i}), type(j)), weights), probs, order);
+          ctemp{j} = summary(getfield(getfield(getfield(s, variable_names{i}), type(j)), 'values'), ...
+             getfield(getfield(getfield(s,variable_names{i}), type(j)), 'weights'), probs, order);
       end
       cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
     end
@@ -83,7 +83,7 @@ if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the o
     
 else % samples corresponds to the output of a MCMC algorithm
     % select only the wanted variables
-    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names,'UniformOutput',0), variable_names);    
+    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names, 'UniformOutput',0), variable_names);    
     nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
     cell_sum = cell(size(variable_names));
     for i=1:length(variable_names)  
