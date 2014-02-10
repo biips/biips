@@ -41,23 +41,23 @@ function [p, data] = biips_model(filename, data, varargin)
 % Jan 2014; Last revision: 24-01-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Defauts values for optional arguments
-sample_data = true; 
-if (isoctave()) % If GNU Octave
-   s = rand('state');
-   rand('state',sum(100*clock)); 
-   seed = double(randi(intmax));
-   rand('state',s);
-else % If Using Matlab
-   s = rng('shuffle');
-   seed = randi(intmax);
-   rng(s);
+
+%% PROCESS AND CHECK INPUTS
+%%% Check filename
+if ~ischar(filename)
+    error('Invalid filename ''%s''', filename);
+elseif ~exist(filename, 'file')
+    error('Undefined BUGS file ''%s''', filename);
 end
-quiet = false;
+%%% Process and check optional arguments
+optarg_names = {'sample_data', 'seed', 'quiet'};
+optarg_default = {true, get_seed(), false};
+optarg_valid = {{true, false}, [0, intmax], {'true', 'false'}};
+optarg_type = {'logical', 'integer', 'logical'};
+[sample_data, seed, quiet] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
-parsevar;
-
-%% Processing data argument
+%%% Processing data argument
 if (isa(data, 'cell'))
     data = reshape(data, length(data), 1);
     
@@ -80,14 +80,16 @@ if (isa(data, 'cell'))
     data = cell2struct(cellfun(@(x) evalin('base',x), data, 'UniformOutput', false), data, 1);
 end
 
+%% Create console
 p = inter_biips('make_console');
 if (quiet)
   old_verb = inter_biips('verbosity', 0);
 end
 
 %% Load model and do some checks
-inter_biips('check_model', p, filename);
+inter_biips('check_model', p, filename)
 inter_biips('compile_model', p, data, sample_data, seed);
+
 data = inter_biips('get_data', p);
 
 if (quiet)

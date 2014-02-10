@@ -1,7 +1,7 @@
 function test_parse_varname()
 nom = 'test_parse_var_name';
 
-out1 = parse_varname('x[1:2]');
+out1 = parse_varname('x[1:2]')
 if ((out1.name ~= 'x') || (out1.lower ~= 1) || (out1.upper ~=2))
    error ([nom, ' test 1 failed']);
 end
