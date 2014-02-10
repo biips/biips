@@ -40,19 +40,21 @@ function [dens] = biips_density(samples, varargin)
 % Jan 2014; Last revision: 03-02-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-%% Default values
-variable_names = {};
-type = '';
-adjust = 1;
-bw = [];
-parsevar; % Process options
+%% PROCESS AND CHECK INPUTS
+%%% Process and check optional arguments
+optarg_names = {'variable_names', 'type', 'adjust', 'bw'};
+optarg_default = {{}, '', 1, []};
+optarg_valid = {{}, {'', 'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 10],...
+    [0,intmax]};
+optarg_type = {'char', 'char', 'numeric', 'numeric'};
+[variable_names, type, adjust, bw] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
 
 if (isempty(variable_names))
    variable_names = fieldnames(samples); % take all fields
 end
 
-
+%% Density estimates
 if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the output of a SMC algorithm
     presents = fieldnames(getfield(samples, variable_names{1}));
     if (isempty(type)) % retrieve only the field presents in the first variable
@@ -85,13 +87,6 @@ else % samples corresponds to the output of a MCMC algorithm
     nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
     cell_sum = cell(size(variable_names));
     for i=1:length(variable_names)
-      ctemp = cell(size(type));
-      for j=1:length(type)
-       particles = getfield(getfield(s, variable_names{i}), type(j));
-       size_curr = size(particles.values);
-       d = length(size_curr);
-       ctemp{j} = cellfun(@(x,w) kde(x, w, adjust, bw), num2cell(particles.values, d), num2cell(particles.weights, d));  
-      end
       samp = getfield(s, variable_names{i});
       weights = 1/nsamples * ones(size(samp));
       size_curr = size(samp);

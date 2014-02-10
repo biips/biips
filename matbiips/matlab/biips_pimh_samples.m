@@ -2,16 +2,24 @@ function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n
 
 %% FC: NEED HEADER
 
-
-%%
-% FC: NEED TO ADD SOME CHECKS ON THE INPUTS
-
-%% Process options
-rs_type = 'stratified';
-rs_thres = 0.5;
-thin = 1;
-seed = get_seed();
-parsevar; % Process options
+%% PROCESS AND CHECK INPUTS
+% CAN WE ADD A CHECK ON THE VARIABLES??
+%%% Process and check optional arguments
+optarg_names = {'rs_thres', 'rs_type', 'seed', 'thin'};
+optarg_default = {.5, 'stratified', get_seed(), 1};
+optarg_valid = {[0, n_part],...
+    {'multinomial', 'stratified', 'residual', 'systematic'},...
+    [0, intmax], [1, n_iter]};
+optarg_type = {'numeric', 'char', 'numeric', 'numeric'};
+[rs_thres, rs_type, seed, thin] = parsevar(varargin, optarg_names, optarg_type,...
+    optarg_valid, optarg_default);
+% 
+% %% Process options
+% rs_type = 'stratified';
+% rs_thres = 0.5;
+% thin = 1;
+% seed = get_seed();
+% parsevar; % Process options
 
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
