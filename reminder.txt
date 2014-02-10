@@ -1,9 +1,8 @@
 pour compiler 
 # octave
-cmake -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mkoctfile ..
+cmake -DMATBIIPS=Octave -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release ..
 # matlab
-cmake  -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release -DMEX=mex ..
-
+cmake -DMATBIIPS=Matlab -DCMAKE_INSTALL_PREFIX:STRING=/home/fux/biips -DCMAKE_BUILD_TYPE:STRING=Release ..
 # under windows
 ---------------
 -install Rtools
