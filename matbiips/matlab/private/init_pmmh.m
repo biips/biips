@@ -50,6 +50,10 @@ verb = inter_biips('verbosity', 0);
 cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
 
 inits
+pn_param(1).name
+iscell(pn_param(1).name)
+iscell(pn_param(1).lower)
+pause
 % pause
 % Set init values
 if ~sample_init_values
@@ -69,7 +73,9 @@ else
     for i=1:length(param_names)
         data
         var = param_names{i}
-        pn_param(i)
+        pn_param(i).name
+        iscell(pn_param(i).name)
+        iscell(pn_param(i).lower)
         if isfield(data, var)
             sample = setfield(sample, var, getfield(data, var));
         else
