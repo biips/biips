@@ -55,7 +55,7 @@ for i=1:n_iter
                 case 1
                     samples_st{k}(:, ind_sample) = getfield(sample, variable_names{k});
                 case 2
-                    samples_st{k}(:, :, ind_sample) = getfield(sample, (variable_names{k});
+                    samples_st{k}(:, :, ind_sample) = getfield(sample, variable_names{k});
                 case 3
                     samples_st{k}(:, :, :, ind_sample) = getfield(sample, variable_names{k});                    
                 otherwise

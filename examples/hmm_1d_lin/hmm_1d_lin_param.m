@@ -39,7 +39,8 @@ biips_init;
 model = 'hmm_1d_lin_param.bug'; % BUGS model filename
 sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
-
+nodes = biips_get_nodes(model_id)
+pause
 %% ---------------------------- BiiPS PMMH  ---------------------------  %%
 %%% Run BiiPS Particle Marginal Metropolis-Hastings
 
@@ -48,7 +49,7 @@ n_burn = 500;
 n_iter = 500;
 thin = 1;
 n_part = 25;
-param_names = {'log_prec_y[1:1]'}; % name of the variables updated with mcmc (others are updated with SMC)
+param_names = {'log_prec_y'}; % name of the variables updated with mcmc (others are updated with SMC)
 latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 
 % Run PMMH
