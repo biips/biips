@@ -62,6 +62,14 @@ Size  GetConsoleId(const std::deque<Console_ptr> consoles,
    return id;
 }
 
+
+inline
+String GetString(const mxArray * pm) {
+  char * c  = mxArrayToString(pm);
+  String str(c);
+  return str;
+}
+
 inline 
 Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress, 
                    const mxArray * pm,
@@ -77,8 +85,7 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
 
 // macros for arguments checking
 
-#if 1
-
+// FIXME : does not throw exception
 #define CheckArgIsCell(nb) \
  if (!mxIsCell(prhs[(nb)]))\
     mbiips_cerr << name_func  << " " << nb << " -th argument must be a cell" << endl
@@ -99,6 +106,7 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
  if (!mxIsLogical(prhs[(nb)]))\
     mbiips_cerr << name_func  << " " << nb << " -th argument must be logical" << endl
 
+// FIXME : not informative message
 #define CheckIsString(m)\
  if (!mxIsChar((m)))\
     mbiips_cerr << name_func  << " " << " some argument must be a string" << endl
@@ -107,5 +115,4 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
  if (!mxIsDouble((m)))\
     mbiips_cerr << name_func  << " " <<  " some argument must be double precision" << endl
 
-#endif
-#endif
+#endif /* INTER_UTILS_H_ */
