@@ -34,9 +34,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mexErrMsgIdAndTxt( "inter_biips:inputNotVector",
               "Input must be a row vector.");
     
-    char * input_buf = mxArrayToString(prhs[0]);
-   
-    String name_func = String(input_buf);
+    String name_func = GetString(prhs[0]);
 
     /////////////////////////////////////////
     // MAKE_CONSOLE FUNCTION
@@ -72,14 +70,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 2, name_func);
        
-       char * filename = mxArrayToString(prhs[2]);
-       
        Size id = GetConsoleId(consoles, prhs[1], name_func);
        Console_ptr p_console = consoles[id]; 
 
-       if (! p_console->CheckModel(String(filename), VERBOSITY))
+       String filename = GetString(prhs[2]);
+
+       if (! p_console->CheckModel(filename, VERBOSITY))
                  mexErrMsgTxt("Model syntax is incorrect.");
-       mxFree(filename);
     }       
     /////////////////////////////////////////
     // COMPILE_MODEL FUNCTION
@@ -128,10 +125,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     else if (name_func == "load_module") {
 
        CheckRhs(nrhs, 1, name_func);
-       
-       char * mod_name = mxArrayToString(prhs[1]);
+
+       String mod_name = GetString(prhs[1]);
+
        plhs[0] = mxCreateLogicalMatrix(1, 1);
-       if (!std::strcmp(mod_name,"basemod")) {
+       if (mod_name == "basemod") {
          load_base_module();
          *mxGetLogicals(plhs[0]) = 1;
        }
@@ -218,7 +216,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * up  = mxGetCell(prhs[4], i);
          
          CheckIsString(m);
-         String name = mxArrayToString(m);
+         String name = GetString(m);
          
          if (!mxIsEmpty(low)) {
            CheckIsDouble(low);
@@ -269,8 +267,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * up  = mxGetCell(prhs[4], i);
          
          CheckIsString(m);
-         String name = mxArrayToString(m);
-          
+         String name = GetString(m);
           
          if (!mxIsEmpty(low)) {
            CheckIsDouble(low);
@@ -320,7 +317,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           const mxArray * up  = mxGetCell(prhs[4], i);
          
          CheckIsString(m);
-         String name = mxArrayToString(m);
+         String name = GetString(m);
           
          if (!mxIsEmpty(low)) {
            CheckIsDouble(low);
@@ -393,7 +390,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[4]));
        
        CheckArgIsString(5);
-       String resample_type = mxArrayToString(prhs[5]);
+       String resample_type = GetString(prhs[5]);
 
        Bool ok = p_console->RunForwardSampler(n_part, smc_rng_seed, resample_type, ess_threshold, VERBOSITY, VERBOSITY);
 
@@ -673,7 +670,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Console_ptr p_console = consoles[id];
   
        CheckArgIsString(2);
-       String dot_file_name = mxArrayToString(prhs[2]);
+       String dot_file_name = GetString(prhs[2]);
 
        if (VERBOSITY)
          mbiips_cout << PROMPT_STRING << "Writing dot file in: "
@@ -698,8 +695,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Console_ptr p_console = consoles[id];
 
        CheckArgIsString(2);
-       mxArray * str = mxGetCell(prhs[2], 0);
-       String name = mxArrayToString(prhs[2]);
+       String name = GetString(prhs[2]);
 
        CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
@@ -742,7 +738,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Console_ptr p_console = consoles[id];
 
        CheckArgIsString(2);
-       String name = mxArrayToString(prhs[2]);
+       String name = GetString(prhs[2]);
 
        CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
@@ -782,7 +778,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        Console_ptr p_console = consoles[id];
   
        CheckArgIsString(2);
-       String name = mxArrayToString(prhs[2]);
+       String name = GetString(prhs[2]);
 
        CheckArgIsDouble(3);
        const mxArray * lower = prhs[3];
@@ -824,7 +820,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
        CheckRhs(nrhs, 1, name_func);
        CheckArgIsString(1);
-       String mess = mxArrayToString(prhs[1]);
+       String mess = GetString(prhs[1]);
        mbiips_cout << PROMPT_STRING << mess << endl;
     }
     
@@ -855,16 +851,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        unsigned long expected_count = static_cast<unsigned long>(*mxGetPr(prhs[1]));
 
        CheckArgIsString(2);
-       String symbol = mxArrayToString(prhs[2]);
+       String symbol = GetString(prhs[2]);
+
        if (symbol.size() != 1)
            throw RuntimeError("Error in progress_bar: symbol argument must be one character sized.");
 
        CheckArgIsString(3);
-       String iter_name = mxArrayToString(prhs[3]);
-         
+       String iter_name = GetString(prhs[3]);
 
        progress.push_back(ProgressBar_ptr(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING, 
-                                          symbol[0], iter_name)));
+                                                          symbol[0], iter_name)));
        plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
        *mxGetPr(plhs[0]) = progress.size()-1;
     }
@@ -926,7 +922,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
          const mxArray * up  = mxGetCell(prhs[4], i);
 
          CheckIsString(m);
-         String name = mxArrayToString(m);
+         String name = GetString(m);
 
          IndexRange range = makeRange(low, up);
 
@@ -1051,18 +1047,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsCell(1);
        CheckArgIsCell(2);
 
+       char ** field_names= new char *[nb_cell];
        for(int i = 0; i <  nb_cell; ++i ) {
           const mxArray * m = mxGetCell(prhs[2], i);
           CheckIsString(m);
-          String name = mxArrayToString(m);
-       }
-       
-       typedef char * chaine_carac ;
-       chaine_carac* field_names= new chaine_carac[nb_cell];
-       for(int i = 0; i <  nb_cell; ++i ) {
-          const mxArray * m = mxGetCell(prhs[2], i);
-          CheckIsString(m);
-          String name = mxArrayToString(m);
+          String name = GetString(m);
+
           field_names[i] = new char[name.size()];
           std::strcpy(field_names[i], name.c_str());
        }
@@ -1089,12 +1079,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        CheckArgIsString(5);
        CheckArgIsString(6);
    
-       String arg1 = mxArrayToString(prhs[1]);
+
+       String arg1 = GetString(prhs[1]);
        Size arg2 = static_cast<Size>(*mxGetPr(prhs[2]));
-       String arg3 = mxArrayToString(prhs[3]);
-       String arg4 = mxArrayToString(prhs[4]);
-       String arg5 = mxArrayToString(prhs[5]);
-       String arg6 = mxArrayToString(prhs[6]);
+       String arg3 = GetString(prhs[3]);
+       String arg4 = GetString(prhs[4]);
+       String arg5 = GetString(prhs[5]);
+       String arg6 = GetString(prhs[6]);
 
        
        if (!Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(arg1,
@@ -1112,8 +1103,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
        mexErrMsgTxt("bad name of function\n");
 
     }
-    /* set C-style string output_buf to MATLAB mexFunction output*/
-    mxFree(input_buf);
     return;
 
 }
