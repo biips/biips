@@ -1,5 +1,5 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "hmm_1d_lin.bug")
+model <- file.path("hmm_1d_lin.bug")
 model.title <- "Linear gaussian univariate HMM"
 
 # data
