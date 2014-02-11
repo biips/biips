@@ -96,15 +96,15 @@ end
 
 % log-prior density
 for i=1:length(param_names)
-    log_prior = inter_biips('get_log_prior_density', console, pn_param{i}.names, ...
-        pn_param{i}.lower, pn_param{i}.upper);
+    log_prior = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
+        pn_param(i).lower, pn_param(i).upper);
     if isnan(log_prior) || isinf(log_prior)
         error('Failed to evaluate log-prior density');
     end
 end
 
 latent_monitored = true;
-if ~isempty(latentvariables)
+if ~isempty(latent_names)
     if ~is_monitored(console, latent_names, 's', false)
         % monitor variables
         monitor_biips(console, latent_names, 's');
@@ -113,22 +113,23 @@ if ~isempty(latentvariables)
 end
 
 % build SMC sampler
-if ~interbiips('is_sampler_built', console)
-    interbiips('build_smc_sampler', console, false)
+if ~inter_biips('is_sampler_built', console)
+    inter_biips('build_smc_sampler', console, false)
 end
 
-sampler_atend = interbiips('is_smc_at_end', console);
+sampler_atend = inter_biips('is_smc_sampler_at_end', console)
+pause
 
 %% Get log-normalizing constant
 if (~sampler_atend || ~latent_monitored)
     % Run SMC
     if (~sampler_atend)
-        interbiips('message', 'Initializing PMMH');
+        inter_biips('message', 'Initializing PMMH');
     else
         if (~latent_monitored)
             inter_biips('message', 'Initializing PMMH latent variables')        
         end
-        ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed);
+        ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed)
         if (~ok)
             error('Run SMC sampler: invalid initial values');
         end
