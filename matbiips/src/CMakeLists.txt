@@ -32,7 +32,7 @@ else()
     setting BUILD_MATBIIPS=OFF")
 endif()
 
-# install mexfile in the build directory
+# install mexfile in the build matlab directory
 set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
 add_custom_command(OUTPUT ${INTER_BIN}
 	DEPENDS ${INTER_TARGET}
@@ -41,5 +41,12 @@ add_custom_command(OUTPUT ${INTER_BIN}
     VERBATIM
 )
 
-add_custom_target(matbiips DEPENDS ${INTER_BIN} BiipsCore BiipsCompiler
-    BiipsBase)
+# copy mexfile in the src matlab directory
+add_custom_command(TARGET ${INTER_TARGET}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_L} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
+    COMMENT "Copying mexfile in source matlab directory"
+    VERBATIM
+)
+
+add_custom_target(matbiips DEPENDS ${INTER_BIN})
