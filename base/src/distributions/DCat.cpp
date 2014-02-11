@@ -53,15 +53,19 @@ namespace Biips
 
   Bool DCat::CheckParamValues(const NumArray::Array & paramValues) const
   {
+    Bool nz = false;
     const NumArray & weights = paramValues[0];
 
     for (Size i = 0; i < weights.Values().size(); ++i)
     {
       if (weights.Values()[i] < 0.0)
         return false;
+      if (weights.Values()[i] > 0.0) {
+          nz = true; //at least one non-zero probability
+      }
     }
 
-    return true;
+    return nz;
   }
 
   DimArray DCat::dim(const Types<DimArray::Ptr>::Array & paramDims) const
