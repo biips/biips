@@ -154,7 +154,8 @@ endif ()
 
 # configure interfaces build
 option (BUILD_RBIIPS "Activate RBiips (BiiPS interface for GNU R) build" ON)
-option (MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" MATLAB)
+option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
+set (MATBLAB_OR_OCTAVE "Matlab" CACHE STRING "Select target software for matbiips (Matlab|Octave)")
 
 
 
@@ -189,7 +190,7 @@ add_subdirectory (doc)
 if (BUILD_RBIIPS)
     add_subdirectory (rbiips)
 endif ()
-if (MATBIIPS)
+if (BUILD_MATBIIPS)
     add_subdirectory (matbiips)
 endif ()
 
