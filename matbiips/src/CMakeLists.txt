@@ -1,6 +1,9 @@
 #define sources
-file(GLOB MBIIPS_SRC inter_biips.cpp inter_utils.cpp Mostream.cpp MatlabFunction.cpp)
-file(GLOB MBIIPS_H *.h *.hpp)
+file(GLOB MBIIPS_SRC 
+${CMAKE_CURRENT_SOURCE_DIR}/*.cpp 
+${CMAKE_CURRENT_SOURCE_DIR}/*.h 
+${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+)
 
 set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 if (MATLAB OR OCTAVE) 
@@ -20,8 +23,7 @@ if (MATLAB OR OCTAVE)
 		SUFFIX .${MEX_EXT}
 	)
 	
-    set(INTER_TARGET inter_biips)
-    get_target_property(INTER_TARGET_L inter_biips LOCATION)
+    get_target_property(INTER_TARGET_LOC inter_biips LOCATION)
 else()
     message (FATAL_ERROR "MATLAB not found on your computer.\n"
     			 "Try setting MATLAB_ROOT to the root path of 
@@ -35,16 +37,16 @@ endif()
 # install mexfile in the build matlab directory
 set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
 add_custom_command(OUTPUT ${INTER_BIN}
-	DEPENDS ${INTER_TARGET}
-    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_L} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
+	DEPENDS inter_biips
+    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )
 
 # copy mexfile in the src matlab directory
-add_custom_command(TARGET ${INTER_TARGET}
+add_custom_command(TARGET inter_biips
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_L} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
+    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in source matlab directory"
     VERBATIM
 )
