@@ -9,6 +9,7 @@ set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
 set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
+set MATLAB_ROOT=C:\Program Files\MATLAB\R2013b
 set RTOOLS_BINDIR=C:\Rtools\bin
 set CMAKE_BUILD_TYPE=Release
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
