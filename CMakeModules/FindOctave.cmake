@@ -2,7 +2,7 @@ set(MEX_EXT mex)
 if (UNIX)
     find_program(OCTAVE_CONFIG octave-config) 
     if (OCTAVE_CONFIG) 
-        message (STATUS "(octave-config) found : ${OCTAVE_CONFIG}")
+        message (STATUS "(octave-config) found: ${OCTAVE_CONFIG}")
     	set(MATLAB_COMPILE_FLAGS -DOCTAVE)
         # retrieve INCLUDE
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTINCLUDEDIR
@@ -33,12 +33,12 @@ if (UNIX)
    endif(OCTAVE_CONFIG)
    find_program(OCTAVE "octave")
    if (OCTAVE)
-       message(STATUS "octave found : ${OCTAVE}")
+       message(STATUS "octave found: ${OCTAVE}")
        set(MATLAB_COMMAND "${OCTAVE}")
        set(MATLAB_FLAGS --traditional)
    endif(OCTAVE)	    
 else(UNIX)
-    message(FATAL_ERROR "Octave is support only on Unix systems")
+    message(FATAL_ERROR "Octave is supported only on Unix systems")
 endif(UNIX)
 mark_as_advanced(
     MATLAB_LIBRARIES
