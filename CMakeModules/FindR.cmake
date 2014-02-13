@@ -100,21 +100,4 @@ find_package_handle_standard_args (R
     VERSION_VAR R_VERSION
 )
 
-# find Rscript to extract PKG_CXXFLAGS
-get_filename_component(PATH_TO_R ${R_EXECUTABLE} PATH)
-find_program (R_SCRIPT NAMES Rscript PATHS ${PATH_TO_R})
-if (R_SCRIPT)
-  message(STATUS "found R_SCRIPT")
-  execute_process(COMMAND ${R_SCRIPT} -e "Rcpp:::CxxFlags()" OUTPUT_VARIABLE RCPP_CXXFLAGS)
-  execute_process(COMMAND ${R_SCRIPT} -e "Rcpp:::LdFlags()" OUTPUT_VARIABLE RCPP_LIBS)
-  if (WIN32)
-    execute_process(COMMAND ${R_SCRIPT} -e "cat(R.home(\\\"include\\\"))" OUTPUT_VARIABLE R_INCLUDE)
-  else ()
-    execute_process(COMMAND ${R_SCRIPT} -e "cat(R.home(\"include\"))" OUTPUT_VARIABLE R_INCLUDE)
-  endif ()
-  message(STATUS "Rcpp_FLAGS = " ${RCPP_CXXFLAGS})
-  message(STATUS "R_INCLUDE = " ${R_INCLUDE})
-  message(STATUS "Rcpp_LIBS = " ${RCPP_LIBS})
-endif(R_SCRIPT)
-
 mark_as_advanced (R_EXECUTABLE ${R_PACKAGES})

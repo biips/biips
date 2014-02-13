@@ -1,17 +1,14 @@
 # Variables defined:
 # MATLAB				path to MATLAB exectuable or "MATLAB-NOTFOUND"
-# MEX_FOUND 			equals to "MATLAB", "OCTAVE" or "0"
-
-# Variables defined if MEX_FOUND is not "0":
-# MEX_COMMAND			
-# MEX_EXT				
 
 # Variables defined if MATLAB is not "MATLAB-NOTFOUND":
-# MATLAB_COMMAND		
-# MATLAB_FLAGS			
-# MATLAB_BINDIR			
+# MATLAB_COMMAND
+# MATLAB_FLAGS
+# MATLAB_BINDIR
+# MEX_COMMAND
+# MEX_EXT
 # MEX_OPT
-# MEXEXT_COMMAND		
+# MEXEXT_COMMAND
 # MATLAB_ARCH			equals to "i386" or "x64"
 # MATLAB_LIBRARY_DIR 	
 # MATLAB_INCLUDE_DIR 	
@@ -20,13 +17,6 @@
 # MATLAB_MEX_LIBRARY	
 # MATLAB_MX_LIBRARY		
 # MATLAB_MAT_LIBRARY	
-
-# Variables defined if MEX_FOUND is "OCTAVE":
-# MKOCT					path to mkoctfile exectuable or "MKOCT-NOTFOUND"
-# OCTAVE				path to octave exectuable or "OCTAVE-NOTFOUND"
-# if OCTAVE is not "OCTAVE-NOTFOUND":
-# MATLAB_COMMAND		
-# MATLAB_FLAGS			
 
 # Variables that can be set by the user:
 # MATLAB_ROOT		path to the root of MATLAB install. Helps finding MATLAB.
@@ -51,6 +41,7 @@ find_program(MATLAB matlab ${MATLAB_BINDIR})
 
 # Yes! found it
 if (MATLAB)
+    message(STATUS "matlab found: ${MATLAB}")
     set(MATLAB_COMMAND "${MATLAB}")
     set(MATLAB_FLAGS -nojvm -nosplash)
     if (NOT MATLAB_BINDIR)
@@ -78,10 +69,6 @@ if (MATLAB)
         PATHS ${MATLAB_BINDIR} 
         NO_DEFAULT_PATH
     )
-    if (MEX_COMMAND)
-        message (STATUS "mex (Matlab) found : ${MEX_COMMAND}")
-        set(MEX_FOUND MATLAB)
-    endif(MEX_COMMAND)
 
     # find mexext program
     find_program(MEXEXT_COMMAND
@@ -181,8 +168,6 @@ if (MATLAB)
         )
     endif(MATLAB_INCLUDEDIR)
 
-else(MATLAB) # We did not find matlab
-    # try with octave	
 endif(MATLAB)
 
 mark_as_advanced(
