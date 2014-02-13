@@ -124,13 +124,14 @@ add_custom_target (${PKG_NAME}_Rd2pdf
 	COMMENT "Generate ${PKG_NAME} documentation PDF output from the Rd sources"
 	VERBATIM
 )    
-    
+
+
 if (WIN32)
 # TODO: customize arch #######################################
     # add R CMD INSTALL --build target
     add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.zip
         DEPENDS ${PKG_NAME}_pkg_dir
-        COMMAND ${R_EXECUTABLE} --arch 64 CMD INSTALL --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
+        COMMAND ${R_EXECUTABLE} --arch 64 CMD INSTALL --preclean --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Building ${PKG_NAME} binary package"
         VERBATIM
