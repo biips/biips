@@ -1,0 +1,38 @@
+var c[t_max, clust_max],mu[t_max, clust_max],mu_y[t_max], m[t_max, clust_max],m_up[t_max, clust_max], p[t_max,clust_max],y[t_max,1]
+
+
+model
+{
+  m[1,1] <- 1
+  c[1,1] <- 1
+  for (i in 2:clust_max)
+  {
+    m[1,i] <- 0
+    c[1,i] <- 0
+  }
+  for (i in 1:clust_max)
+  {
+      mu[1,i] ~ dnorm(mu_0, prec_0)  
+  }
+  y[1,1] ~ dnorm(mu[1,1], prec_y)
+  for (t in 2:t_max)
+  {
+    for (i in 1:clust_max)
+    {
+        m_up[t-1,i] ~ dbinom(m[t-1,i], rho)
+    }
+    p[t,] <- (m_up[t-1,] + alpha/clust_max)/(sum(m_up[t-1,])+alpha)    
+    c[t,] ~ dmulti(p[t,], 1)
+    m[t,] <- m_up[t-1,] + c[t,]
+    
+    # Cluster evolution
+    for (i in 1:clust_max)
+    {
+        mu[t,i] ~ dnorm(gamma * mu[t-1,i] + (1-gamma)*mu_0, 1/(1-rho^2)*prec_0)
+    }
+    
+    mu_y[t] <- sum(c[t,]*mu[t,])
+    
+    y[t,1] ~ dnorm(mu_y[t], prec_y)
+  }
+}
