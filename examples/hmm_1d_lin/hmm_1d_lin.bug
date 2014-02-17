@@ -1,4 +1,5 @@
-var y[t_max,1]
+var y[t_max,1],x[t_max, 1], x_true[t_max,1]
+
 data
 {
   x_true[1,1] ~ dnorm(mean_x_init, prec_x_init)

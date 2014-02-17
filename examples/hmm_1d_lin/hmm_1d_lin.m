@@ -29,9 +29,7 @@ mean_x_init = 0;
 prec_x_init = 1;
 prec_x = 1;
 prec_y = 10;
-y = randn(t_max, 1);
-x_true = randn(t_max, 1);
-data = struct('y', y, 't_max', t_max, 'prec_x_init', prec_x_init,...
+data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
     'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
 
 %%% Start BiiPS console
@@ -39,15 +37,16 @@ biips_init;
 
 %%% Compile BUGS model and sample data
 model = 'hmm_1d_lin.bug'; % BUGS model filename
-sample_data = false; % Boolean
+sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
-pause
+
+
 %% ---------------------------- BiiPS SMC  ----------------------------- %%
 %%% Run BiiPS SMC and report filtering and smoothing estimates
 
 % Parameters of the algorithm
 n_part = 500; % Number of particles
-variables = {'x', 'x[1:2]'}; % Variables to be monitored
+variables = {'x', 'x[1:2,1]'}; % Variables to be monitored
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 % Run SMC
