@@ -55,7 +55,7 @@ if opt_argin >= 1
         error('the function ''%s'' does not exist',fun_check_param);
     end
 end
-if opt_argin >=2
+if opt_argin >=2 % FC: MODIFY THIS TO USE SPARSEVAR
     fun_is_discrete = varargin{2};
     if (~isa(fun_is_discrete,'char'))
         error('biips_add_function : 6-th argument must be a string')
@@ -64,4 +64,9 @@ if opt_argin >=2
         error('the function ''%s'' does not exist',fun_is_discrete);
     end
 end
-inter_biips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
+try
+    inter_biips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
+    fprintf('Added function ''%s''\n', name)
+catch
+    warning('Cannot add function ''%s'' - the function may already exist', name);
+end
