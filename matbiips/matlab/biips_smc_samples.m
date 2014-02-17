@@ -86,6 +86,7 @@ run_smc_forward(console, n_part, rs_thres, rs_type, seed);
 
 log_marg_like = inter_biips('get_log_norm_const', console);
 
+
 cz=cell(0,1);
 if filtering % Get filtering output
     mon1 = inter_biips('get_filter_monitors', console);
