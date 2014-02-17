@@ -1,5 +1,5 @@
 function [sample_param, sample_latent, log_prior, log_marg_like, ...
-    accept_rate, accepted, n_fail] = one_update_pmmh(console, param_names, ...
+    accept_rate, accepted, n_fail, rw] = one_update_pmmh(console, param_names, ...
     pn_param, sample_param, sample_latent, latent_names, log_prior, log_marg_like,...
     n_part, rs_thres, rs_type, seed, rw)
 
@@ -71,3 +71,8 @@ if accepted
 end
 sample_param
 sample_latent
+
+% rescale random walk stepsize
+rw = pmmh_rw_rescale(rw, accept_rate);
+% Update empirical mean and covariance matrix
+rw = pmmh_rw_learn_cov(rw, sample_param, accepted);
