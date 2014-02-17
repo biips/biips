@@ -21,7 +21,7 @@ optarg_names = {'latent_names', 'inits', 'inits_rng_seed', 'rs_thres', 'rs_type'
 optarg_default = {{}, {}, get_seed(), .5, 'stratified'};
 optarg_valid = {{}, {}, get_seed(), [0, n_part],...
     {'multinomial', 'stratified', 'residual', 'systematic'}};
-optarg_type = {'char', 'cell', 'numeric', 'numeric', 'char'};
+optarg_type = {'char', 'numeric', 'numeric', 'numeric', 'char'};
 [latent_names, inits, inits_rng_seed, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 % Check latent_names
@@ -33,6 +33,12 @@ for i=1:length(latent_names)
 end
 % Remove duplicate entries
 latent_names = unique(latent_names);
+
+monitored = is_monitored(console, latent_names, 's', false);
+if ~monitored
+    % monitor variables
+    monitor_biips(console, latent_names, 's'); 
+end
 
 
 % Check inits
@@ -72,7 +78,6 @@ if ~sample_init_values
 else
     data = biips_get_data(console);
     for i=1:length(param_names)
-        data
         var = param_names{i};
         if isfield(data, var)
 %             sample = setfield(sample, var, getfield(data, var));
@@ -132,10 +137,6 @@ if (~sampler_atend || ~latent_monitored)
             inter_biips('message', 'Initializing PMMH latent variables')        
         end
     end
-%     n_part
-%     rs_thres
-%     rs_type
-%     inits_rng_seed
     ok = run_smc_forward(console, n_part, rs_thres, rs_type, inits_rng_seed);
     if (~ok)
         error('Run SMC sampler: invalid initial values');
@@ -150,18 +151,17 @@ end
 sample_latent = cell(length(latent_names), 1);
 if (~isempty(latent_names))
     sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
-    if isempty(sampled_value)
+    if isempty(fieldnames(sampled_value))
         % Sample one particle
         rng_seed = get_seed();
         inter_biips('sample_gen_tree_smooth_particle', console, uint32(rng_seed));
-        sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+        sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
     end
     for i=1:length(latent_names)
+        var = latent_names{i};
         sample_latent{i} = getfield(sampled_value, var);
 %         sample.(var) = sampled_value.(var); % NOTE: CHANGE THAT FOR OCTAVE
     end    
 end
-% sample = cell2struc_weaknames([sample_variable_cell; sample_latent],...
-%     [variable_names; latent_names]);
 
 

@@ -53,7 +53,9 @@ param_names = {'log_prec_y[1:1]'}; % name of the variables updated with mcmc (ot
 latent_names = {'x','x[1:2]'}; % name of the variables updated with SMC and that need to be monitored
 
 % Run PMMH
-biips_pmmh_update(model_id, param_names, n_burn, n_part, 'inits', {1}); % burn-in iterations
+biips_pmmh_update(model_id, param_names, n_burn, n_part, 'inits', {1},...
+    'latent_names', latent_names); % burn-in iterations
+
 % [out_pmmh, log_marg_like_pimh] = biips_pimh_samples(model_id, variables,...
 %     n_iter, n_part, 'thin', thin);
 % 
