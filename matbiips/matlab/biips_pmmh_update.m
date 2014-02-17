@@ -12,10 +12,10 @@ function biips_pmmh_update(console, param_names, n_iter, n_part, varargin)
 %%% Process and check optional arguments
 optarg_names = {'latent_names', 'max_fail', 'inits', 'rw_step', 'rw_rescale',...
     'rw_learn', 'rw_rescale_type', 'n_rescale', 'rs_thres', 'rs_type', 'seed'};
-optarg_default = {{}, 0, {}, [], true, true, 'p', n_iter/4,...
+optarg_default = {{}, 0, {}, [], true, true, 'dureau', n_iter/4,...
     .5, 'stratified', get_seed()};
 optarg_valid = {{}, [0, intmax], {}, {}, {true, false}, {true, false}, ...
-    {}, [0,n_iter], [0, n_part],...
+    {'dureau','plummer'}, [0,n_iter], [0, n_part],...
     {'multinomial', 'stratified', 'residual', 'systematic'},[0, intmax]};
 optarg_type = {'char', 'numeric', 'numeric', 'numeric', 'logical', 'logical',...
     'char', 'numeric', 'numeric', 'char', 'numeric'};
@@ -51,18 +51,13 @@ latent_names
 param_names
 pn_param =  cellfun(@parse_varname, param_names);
 
-% Assign rw step
+% Update rw structure
 if ~isempty(rw_step_values)
     rw = pmmh_rw_step(rw, rw_step_values);
 end
-
-% Stop adaptation if necessary
-if ~rw_rescale
-    rw.rescale = false;
-end
-if ~rw_learn
-    rw.learn = false;
-end
+rw.rescale = rw_rescale;
+rw.learn = rw_learn;
+rw.rescale_type = rw_rescale_type;
 
 
 % display message and progress bar
@@ -83,7 +78,8 @@ accept_rate = zeros(n_iter, 1);
 
 % PMMH iterations
 for i=1:n_iter
-    out = one_update_pmmh(console, param_names, pn_param, sample_param,...
+    [sample_param, sample_latent, log_prior, log_marg_like, ...
+    accept_rate, accepted, n_fail, rw] = one_update_pmmh(console, param_names, pn_param, sample_param,...
         sample_latent, latent_names, log_prior, log_marg_like,  n_part, rs_thres,...
         rs_type,seed, rw);
     

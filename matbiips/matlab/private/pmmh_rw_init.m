@@ -9,6 +9,7 @@ rw.niter = 1;
 rw.pmean = 0;
 rw.povertarget = false;
 rw.ncrosstarget = 10;
+rw.alpha = 1;
 
 rw.d = sum(cellfun(@prod,sampledim, 'UniformOutput', true));
 if rw.d==1
