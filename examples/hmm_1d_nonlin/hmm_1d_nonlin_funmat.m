@@ -1,6 +1,5 @@
-%% Matbiips: Bayesian inference in nonlinear non-Gaussian hidden Markov model
-% In this tutorial, we consider applying sequential Monte Carlo methods for
-% Bayesian inference in a nonlinear non-Gaussian hidden Markov model.
+%% Matbiips: Addition of a user-defined function in BUGS language
+% In this tutorial, we will see how to introduce user-defined functions in the BUGS model.
 
 %% Statistical model
 % The statistical model is defined as follows.
@@ -20,7 +19,7 @@
 
 %% Statistical model in BUGS language
 % One needs to describe the model in BUGS language. We create the file
-%  'hmm_1d_nonlin.bug':
+%  'hmm_1d_nonlin_funmat.bug':
 
 %%
 %
@@ -33,10 +32,11 @@
 %       y[1] ~ dnorm(x_true[1]^2/20, prec_y)
 %       for (t in 2:t_max)
 %       {
-%         x_true[t] ~ dnorm(0.5*x_true[t-1]+25*x_true[t-1]/(1+x_true[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+%         x_true[t] ~ dnorm(funmat(x_true[t-1],t-1), prec_x)
 %         y[t] ~ dnorm(x_true[t]^2/20, prec_y)
 %       }
 %     }
+% 
 % 
 %     model
 %     {
@@ -44,10 +44,35 @@
 %       y[1] ~ dnorm(x[1]^2/20, prec_y)
 %       for (t in 2:t_max)
 %       {
-%         x[t] ~ dnorm(0.5*x[t-1]+25*x[t-1]/(1+x[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+%         x[t] ~ dnorm(funmat(x[t-1],t-1), prec_x)
 %         y[t] ~ dnorm(x[t]^2/20, prec_y)
 %       }
 %     }
+%
+% Although the nonlinear function f can be defined in BUGS language, we
+% choose here to use an external user-defined function 'funmat', which will
+% call a Matlab function. 
+
+%% User-defined functions in Matlab
+% The BUGS model calls a function funcmat. In order to be able to use this
+% function, one needs to create two functions in Matlab. The first
+% function, called here 'f_eval.m' provides the evaluation of the function.
+%
+% *f_eval.m*
+%
+%     function out = f_eval(x, k)
+% 
+%     out = .5 * x + 25*x/(1+x^2) + 8*cos(1.2*k);
+%
+% The second function, f_dim.m, provides the dimensions of the output of f_eval, 
+% possibly depending on the dimensions of the inputs.
+%
+% *f_dim.m* 
+%
+%     function out_dim = f_dim(x_dim, k_dim)
+% 
+%     out_dim = [1,1];
+
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -75,8 +100,14 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
 biips_init;
 
 %%
+% *Add the user-defined function 'funmat'*
+fun_bugs = 'funmat'; fun_dim = 'f_dim';funeval = 'f_eval';fun_nb_inputs = 2;
+biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, funeval)
+
+
+%%
 % *Compile BUGS model and sample data*
-model = 'hmm_1d_nonlin.bug'; % BUGS model filename
+model = 'hmm_1d_nonlin_funmat.bug'; % BUGS model filename
 sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 
@@ -153,86 +184,6 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);    
 end
 legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
-
-%% BiiPS Particle Independent Metropolis-Hastings
-% We now use BiiPS to run a Particle Independent Metropolis-Hastings
-
-%%
-% *Parameters of the PIMH*
-n_burn = 500;
-n_iter = 500;
-thin = 1;
-n_part = 100;
-
-%%
-% *Run PIMH*
-biips_pimh_update(model_id, variables, n_burn, n_part); % burn-in iterations
-[out_pimh, log_marg_like_pimh] = biips_pimh_samples(model_id, variables,...
-    n_iter, n_part, 'thin', thin);
-
-%%
-% *Some summary statistics*
-summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
-
-%%
-% *Posterior mean and quantiles*
-x_pimh_mean = summary_pimh.x.mean;
-x_pimh_quant = summary_pimh.x.quant;
-figure('name', 'PIMH: Posterior mean and quantiles')
-fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
-hold on
-plot(x_pimh_mean, 'linewidth', 3)
-xlabel('Time')
-ylabel('Estimates')
-legend({'95 % credible interval', 'PIMH Mean Estimate'})
-
-%%
-% *Trace of MCMC samples*
-time_index = [5, 10, 15, 20];
-figure('name', 'PIMH: Trace samples')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    plot(out_pimh.x(tk, :))
-    hold on
-    plot(0, data.x_true(tk), '*g');  
-    xlabel('Iterations')
-    ylabel('PIMH samples')
-    title(['t=', num2str(tk)]);
-end
-legend({'PIMH samples', 'True value'});
-
-%%
-% *Histograms of posteriors*
-figure('name', 'PIMH: Histograms Marginal Posteriors')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    hist(out_pimh.x(tk, :), 20);
-    hold on    
-    plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
-end
-legend({'posterior density', 'True value'});
-
-%%
-% *Kernel density estimates of posteriors*
-kde_estimates_pimh = biips_density(out_pimh);
-figure('name', 'PIMH: KDE estimates Marginal posteriors')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f); 
-    hold on
-    plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
-end
-legend({'posterior density', 'True value'}, 'fontsize', 12);
 
 %% Clear model
 % 
