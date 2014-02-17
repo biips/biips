@@ -34,12 +34,6 @@ end
 % Remove duplicate entries
 latent_names = unique(latent_names);
 
-monitored = is_monitored(console, latent_names, 's', false);
-if ~monitored
-    % monitor variables
-    monitor_biips(console, latent_names, 's'); 
-end
-
 
 % Check inits
 if ~isempty(inits)
@@ -112,10 +106,11 @@ end
 
 latent_monitored = true;
 if ~isempty(latent_names)
-    if ~is_monitored(console, latent_names, 's', false)
+    monitored = is_monitored(console, latent_names, 's', false);
+    if ~monitored
         % monitor variables
-        monitor_biips(console, latent_names, 's');
-        latent_monitored = false;
+        monitor_biips(console, latent_names, 's'); 
+        latent_monitored = false
     end
 end
 
