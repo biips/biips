@@ -48,8 +48,10 @@ for i=1:2:length(opt_param)
     [tag, ind] = ismember(opt_param{i}, param_names);
   if ~ischar(opt_param{i}) || ~tag % Check if known optional parameter name
       warning(['Unknown optional parameter ' opt_param{i}]);      
-  elseif ~isa(opt_param{i+1}, param_type{ind}) % Check of valid parameter type
+  elseif ~iscell(opt_param{i+1}) && ~isa(opt_param{i+1}, param_type{ind}) % Check of valid parameter type
       warning('Input parameter ''%s'' should be of type ''%s''; set to default value.', opt_param{i}, param_type{ind});
+  elseif iscell(opt_param{i+1}) && sum(cellfun(@(x) ~isa(x, param_type{ind}),opt_param{i+1}) ) % If cell, check if all elements are of valid type
+      warning('Every Input parameter ''%s'' in cell should be of type ''%s''; set to default value.', opt_param{i}, param_type{ind});
   elseif found(ind)==true
       warning(['Value of the optional parameter ' opt_param{i} ' already specified'])
   else
