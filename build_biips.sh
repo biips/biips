@@ -19,9 +19,9 @@ export ECLIPSE=/home/adrien-alea/eclipse_4.3
 export MATLAB_ROOT=/usr/local/MATLAB/R2012b
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1"
+export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
 # OpenSuse: add -DBoost_USE_STATIC_LIBS=OFF
-# Generate Eclipse source project: add -DECLIPSE_CDT4_GENERATE_SOURCE_PROJECT=TRUE
+# Generate Eclipse source project: add -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE
 export CPACK_GENERATOR=DEB
 # OpenSuse: use RPM
 export MAKE="make $1"
@@ -113,7 +113,7 @@ if [[ $ans == "y" ]]; then set -x
     set +x; echo -n "Run MatBiips tests ? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
-        $MAKE test
+        ctest -VV
     fi
 fi
 

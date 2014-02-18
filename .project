@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>biips-git</name>
+	<name>Biips-Source@biips-git</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -13,11 +13,6 @@
 			<name>[Subprojects]</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>[Subprojects]/RBiips</name>
-			<type>2</type>
-			<location>/home/adrien-alea/workspace/biips-git/rbiips</location>
 		</link>
 	</linkedResources>
 </projectDescription>
