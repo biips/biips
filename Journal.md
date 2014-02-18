@@ -6,6 +6,19 @@ rw$d <<- sum(sapply(rw$dim, FUN=sum))
 Il me semble que FUN devrait prendre le produit des dimensions plutot que la somme.
 - [ ] biips renvoie une erreur lorsque l'on essaie d'ajouter une fonction qui existe déjà. Ce serait bien de renvoyer juste un warning, et si possible de redéfinir la fonction (la fonction matlab peut avoir changer) - pas urgent ajouter message indiquant qu'il faut fermer matlab dans biips_add_function pour pouvoir redéfinir la fonction
 
+
+François le 13/02/2014 :
+========================
+Pour dbinom, j'obtiens l'erreur suivante:
+   |*Error in node m_up[1,1]
+Invalid parameters values in Sample method for distribution dbin
+Can't get log normalizing constant. SMC sampler did not finish!
+
+J'ai l'impression que l'erreur vient du fait que dans dbinom(n, p), j'ai 
+quelquefois n=0.
+
+- [ ] Est-ce que cela peut se gérer?
+
 Adrien le 11/02/2014 :
 ======================
 - [ ] exemples avec publish matlab (avec ou sans le package de Peyré ? plutôt sans...)
