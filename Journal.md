@@ -10,6 +10,9 @@ Adrien le 11/02/2014 :
 ======================
 - [ ] exemples avec publish matlab (avec ou sans le package de Peyré ? plutôt sans...)
 - [ ] trouver une solution similaire pour R (voir package knitr)
+    * --> OK en utilisant la fonction spin() du package knitr
+    * voir : http://yihui.name/knitr/demo/stitch/
+    * demo : https://github.com/yihui/knitr/blob/master/inst/examples/knitr-spin.R
 - [ ] améliorer message d'erreur "Subset y[1] out of range [1:100] in Compiler::setConstantMask.
 - [ ] éviter crash matlab
 - [ ] vérifier : si sample_data=false -> ne pas compiler bloc data
