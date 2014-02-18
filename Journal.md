@@ -222,7 +222,7 @@ A faire :
 
 - [ ] Note : pimh et pmmh ont besoin du package rjags (sorties de type mcarray). Il faut trouver une alternative à cette dépendance : réimplementer les opérations sur mcarray dans RBiips ?
 
-- [ ] Corriger le formatage du warning:
+- [x] Corriger le formatage du warning:
     Unused variables in data:t.maxmean.x.initprec.x.initprec.xprec.y
 
 - [ ] Améliorer les résultats des exemples pmmh
