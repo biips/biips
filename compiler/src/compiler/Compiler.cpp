@@ -880,7 +880,7 @@ namespace Biips
         if (array.GetNode(range) != NULL_NODEID)
         {
           throw CompileError(var,
-                             String("Attempt to redefine node") + var->name()
+                             String("Attempt to redefine node ") + var->name()
                              + print(range));
         }
         symtab.InsertNode(node_id, var->name(), range); // TODO check this code
