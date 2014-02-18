@@ -141,7 +141,7 @@ namespace Biips
 
   Console::Console(std::ostream & out, std::ostream & err)
       : out_(out), err_(err), pModel_(NULL), pData_(NULL), pRelations_(NULL),
-          pVariables_(NULL), lockBackward_(false)
+          pVariables_(NULL), lockBackward_(false), logNormConst_(BIIPS_NEGINF)
   {
   }
 
