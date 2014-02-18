@@ -337,7 +337,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                     rw$povertarget <<- FALSE
                     rw$ncrosstarget <<- 10
                     
-                    rw$d <<- sum(sapply(rw$dim, FUN=sum))
+                    rw$d <<- sum(sapply(rw$dim, FUN=prod))
                     rw$targetprob <<- if (rw$d==1) 0.44 else 0.234
                     rw$lstep <<- log(0.1/sqrt(rw$d))
                     
