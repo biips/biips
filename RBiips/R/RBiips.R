@@ -436,7 +436,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   stopifnot(length(sample_vec) == rw$d)
                   
-                  if (length(rw$cov) == 0 || (rw$learn && (runif(1)<1-rw$beta))) {
+                  if (length(rw$cov) == 0 || (rw$learn && (runif(1)<rw$beta))) {
                     # modification with diagonal covariance
                     prop_vec <- sample_vec + exp(rw$lstep) * rnorm(rw$d)
                   } else {
