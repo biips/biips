@@ -1,4 +1,4 @@
-function [sample_param, sample_latent, log_prior, log_marg_like, pmmh_rw]...
+function [sample_param, sample_latent, log_prior, log_marg_like]...
     = init_pmmh(console, param_names, n_part, varargin)
 
 %% ADD DOC
@@ -44,61 +44,75 @@ if ~isempty(inits)
 else
     sample_init_values = true;
 end
+
 % MORE TODO: R code not clear
-
-% Stop Biips verbosity
-verb = inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
-
-% inits
-% pn_param(1).name
-% iscell(pn_param(1).name)
-% iscell(pn_param(1).lower)
+% % Stop Biips verbosity
+% verb = inter_biips('verbosity', 0);
+% cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
 
 sample_param = cell(length(param_names), 1);
 % Set init values
 if ~sample_init_values
     for i=1:length(param_names)
-        var = param_names{i};
+        var_name = param_names{i};
         % Take init value in inits parameters
         tag = inter_biips('change_data', console, pn_param(i).name, ...
             pn_param(i).lower, pn_param(i).upper, inits{i}, true);
         if ~tag
-            error('Data change failed: invalid initial value for variable %s', var);
+            error('Data change failed: invalid initial value for variable %s', var_name);
         end
         sample_param{i} = inits{i};
 %         sample = setfield(sample, var, inits{i}); % PB: will not work with [] TBD
     end
 else
-    data = biips_get_data(console);
+    data = biips_get_data(console);    
     for i=1:length(param_names)
-        var = param_names{i};
-        if isfield(data, var)
-%             sample = setfield(sample, var, getfield(data, var));
-            sample_param{i} = getfield(data, var);
+        if isempty(pn_param(i).lower)
+            var_name = param_names{i};
+        else % Get the name of the variable without bracketts
+            k=1;
+            while ~strcmp(param_names{i}(k),'[')
+                var_name(k) = param_names{i}(k);
+                k=k+1;
+            end  
+                
+        end
+        if isfield(data, var_name) 
+            if isempty(pn_param(i).lower)
+                sample_param{i} = getfield(data, var_name);
+            else
+                samp_full = getfield(data, var_name);
+                switch(length(pn_param(i).lower))
+                    case 1
+                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1));
+                    case 2
+                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
+                            pn_param(i).lower(2):pn_param(i).upper(2));
+                    case 3
+                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
+                            pn_param(i).lower(2):pn_param(i).upper(2),...
+                            pn_param(i).lower(3):pn_param(i).upper(3));
+                end
+            end
         else
             samp = inter_biips('sample_data', console, pn_param(i).name,...
                 pn_param(i).lower, pn_param(i).upper, inits_rng_seed);
             sample_param{i} = samp;
-%             sample = setfield(sample, var, samp);
         end    
     end
 end
 
-sample_param
-
 % Check NA
 % TODO??
 
-% Initialize rw
-pmmh_rw = pmmh_rw_init(sample_param);
+
 
 % log-prior density
 log_prior = 0;
 for i=1:length(param_names)
     log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
-    if isnan(log_p) || isinf(log_p)
+    if isnan(log_p) || log_p==Inf
         error('Failed to evaluate log-prior density');
     end
     log_prior = log_prior + log_p;
@@ -110,7 +124,7 @@ if ~isempty(latent_names)
     if ~monitored
         % monitor variables
         monitor_biips(console, latent_names, 's'); 
-        latent_monitored = false
+        latent_monitored = false;
     end
 end
 
@@ -123,9 +137,9 @@ sampler_atend = inter_biips('is_smc_sampler_at_end', console);
 % pause
 
 %% Get log-normalizing constant
-if (~sampler_atend || ~latent_monitored)
+if (~sampler_atend || ~latent_monitored || ~sample_init_values)
     % Run SMC
-    if (~sampler_atend)
+    if (~sampler_atend || ~sample_init_values)
         inter_biips('message', 'Initializing PMMH');
     else
         if (~latent_monitored)
@@ -145,18 +159,15 @@ end
 %% Get latent variables sampled value
 sample_latent = cell(length(latent_names), 1);
 if (~isempty(latent_names))
-    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
+    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
     if isempty(fieldnames(sampled_value))
         % Sample one particle
         rng_seed = get_seed();
-        inter_biips('sample_gen_tree_smooth_particle', console, uint32(rng_seed));
-        sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console)
+        inter_biips('sample_gen_tree_smooth_particle', console, rng_seed);
+        sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
     end
     for i=1:length(latent_names)
-        var = latent_names{i};
-        sample_latent{i} = getfield(sampled_value, var);
-%         sample.(var) = sampled_value.(var); % NOTE: CHANGE THAT FOR OCTAVE
+        var_name = latent_names{i};
+        sample_latent{i} = getfield(sampled_value, var_name);
     end    
 end
-
-
