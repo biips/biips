@@ -231,7 +231,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   data <- data[relevant.variables]
   unused.variables <- setdiff(v, varnames)
   if (length(unused.variables)>0)
-    warning("Unused variables in data:", paste(unused.variables ,sep=","))
+    warning("Unused variables in data: ", paste(unused.variables ,collapse=", "))
   
   # compile model
   .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
@@ -337,7 +337,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                     rw$povertarget <<- FALSE
                     rw$ncrosstarget <<- 10
                     
-                    rw$d <<- sum(sapply(rw$dim, FUN=sum))
+                    rw$d <<- sum(sapply(rw$dim, FUN=prod))
                     rw$targetprob <<- if (rw$d==1) 0.44 else 0.234
                     rw$lstep <<- log(0.1/sqrt(rw$d))
                     
@@ -436,7 +436,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   stopifnot(length(sample_vec) == rw$d)
                   
-                  if (length(rw$cov) == 0 || (rw$learn && (runif(1)<1-rw$beta))) {
+                  if (length(rw$cov) == 0 || (rw$learn && (runif(1)<rw$beta))) {
                     # modification with diagonal covariance
                     prop_vec <- sample_vec + exp(rw$lstep) * rnorm(rw$d)
                   } else {
