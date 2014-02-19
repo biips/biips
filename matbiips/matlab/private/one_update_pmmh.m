@@ -5,6 +5,8 @@ function [sample_param, sample_latent, log_prior, log_marg_like, ...
 
 n_fail = 0;
 
+
+
 % % Remove duplicate entries
 % pn_param = cellfun(@parse_varname, param_names);
 
@@ -32,7 +34,7 @@ end
 % Compute the marginal likelihood: Run SMC sampler
 log_marg_like_prop = 0;
 if (log_prior_prop ~= -Inf)
-    ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed)
+    ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed);
     if ~ok
         log_marg_like_prop = -Inf;
         n_fail = n_fail + 1;
@@ -69,10 +71,10 @@ if accepted
         end   
     end
 end
-sample_param
-sample_latent
 
 % rescale random walk stepsize
 rw = pmmh_rw_rescale(rw, accept_rate);
 % Update empirical mean and covariance matrix
-rw = pmmh_rw_learn_cov(rw, sample_param, accepted);
+rw = pmmh_rw_learn_cov(rw, sample_param);
+
+

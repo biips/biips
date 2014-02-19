@@ -79,6 +79,9 @@ end
 %% Set output structure
 for k=1:length(variable_names) % Remove singleton dimensions for vectors
     samples_st{k} = squeeze(samples_st{k});
+    if size(samples_st{k}, ndims(samples_st{k}))==1 % needed because weird behavior of squeeze with [1,1,n]
+            samples_st{k} = samples_st{k}';
+    end
 end
 out = cell2struct_weaknames(samples_st, variable_names);
 % out.log_marg_like = log_marg_like_st;
