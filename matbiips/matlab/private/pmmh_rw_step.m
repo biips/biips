@@ -1,4 +1,4 @@
-function [rw] = pmmh_rw_step(rw, rw_step)
+function [rw] = pmmh_rw_step(rw, rw_step, rw_cov)
 
 n_param = length(rw_step);
 
@@ -31,4 +31,4 @@ rw.count = 0;
 rw.buffer = [];
 rw.buff_count = [];
 rw.mean = [];
-rw.cov = [];
+rw.cov = rw_cov;
