@@ -80,8 +80,8 @@ namespace Biips
 
   public:
     Monitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
-      iter_(iter), sampledNodes_(sampledNodes), weightsSet_(false),
-          weightsSwapped_(false)/*, logWeightsSwapped_(false)*/
+      iter_(iter), ess_(0), sumOfWeights_(0), sampledNodes_(sampledNodes),
+      weightsSet_(false), weightsSwapped_(false)/*, logWeightsSwapped_(false)*/
     {
     }
     virtual ~Monitor()
@@ -191,7 +191,7 @@ namespace Biips
 
   public:
     FilterMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
-      BaseType(iter, sampledNodes)
+      BaseType(iter, sampledNodes), resampled_(false), logNormConst_(BIIPS_NEGINF)
     {
     }
     virtual ~FilterMonitor()
