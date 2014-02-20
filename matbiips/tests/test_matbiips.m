@@ -21,7 +21,7 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
 %%% Start BiiPS console
 biips_init;
 %%% Compile BUGS model and sample data
-model = 'hmm_1d_linv2.bug'; % BUGS model filename
+model = 'hmm_1d_lin_mat.bug'; % BUGS model filename
 sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
 
