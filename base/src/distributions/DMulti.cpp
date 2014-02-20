@@ -86,7 +86,7 @@ namespace Biips
     Scalar n = 0.0;
 
     for (Size i=0; i<weights.Length(); ++i) {
-      if (x.Values()[i] < 0 || !checkSize(x.Values()[i])) {
+      if (!checkSize(x.Values()[i])) {
         return false;
       }
 
