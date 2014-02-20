@@ -13,12 +13,12 @@ for i=1:n_param
     if sum((rw_step{i}(:))<=0)
         error('Non-positive values')        
     end
-    % Convert to a vector
+    % Convert to a (row) vector
     rw_step{i} = rw_step{i}(:)';
 end
 
-% Concatenate all log value in a vector
-rw.lstep = cell2mat(cellfun(@log, rw_step));
+% Concatenate all log value in a (row) vector
+rw.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false));
 
 % Clear rescaled parameters
 rw.niter = 1;
