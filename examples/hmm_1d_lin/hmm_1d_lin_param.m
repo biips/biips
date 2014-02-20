@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Matlab Demo script hmm_1d_lin.m
+% Matlab Demo script hmm_1d_lin_param.m
 %
 % Linear and Gaussian Hidden Markov Model with unknown hyperparameters
 % Associated BUGS file: hmm_1d_lin_param.bug
@@ -14,7 +14,7 @@
 % INRIA Bordeaux, France
 % email: biips-project@lists.gforge.inria.fr
 % Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 24-01-2014
+% Feb 2015; Last revision: 20-02-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Add the matlab matbiips path if necessary
@@ -42,6 +42,22 @@ sample_data = true; % Boolean
 % nodes = biips_get_nodes(model_id)
 % pause
 
+% %% ---------------------------- BiiPS SMC: sensitivity analysis  ---------------------------  %%
+% n_part = 50;
+% param_names = {'log_prec_y[1:1]'};
+% param_values = {-10:.5:10};
+% out = biips_smc_sensitivity(model_id, param_names, param_values, n_part);
+% 
+% log_marg_like = out.log_marg_like;
+% log_marg_like_pen = out.log_marg_like_pen;
+% 
+% 
+% figure;
+% plot(param_values{1}, log_marg_like)
+% 
+% figure;
+% plot(param_values{1}, log_marg_like_pen)
+% 
 
 
 
@@ -58,10 +74,10 @@ latent_names = {'x','x[1:2]'}; % name of the variables updated with SMC and that
 
 % Run PMMH
 obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {1});
-pause
-rw = biips_pmmh_update(model_id, param_names, n_burn, n_part, 'inits', {1}); % adaptation and burn-in iterations
-[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(model_id, param_names, n_iter, n_part,...
-    'rw', rw, 'thin', 1, 'latent_names', latent_names);
+% pause
+obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', 1, 'latent_names', latent_names);
 
 var_name = param_names{1};
 figure
@@ -164,21 +180,7 @@ end
 legend({'posterior density', 'True value'}, 'fontsize', 12);
 
 
-%% ---------------------------- BiiPS SMC: sensitivity analysis  ---------------------------  %%
-n_part = 100;
-param_names = {'log_prec_y[1:1]'};
-param_values = {-10:.1:10};
-out = biips_smc_sensitivity(model_id, param_names, param_values, n_part);
 
-log_marg_like = out.log_marg_like;
-log_marg_like_pen = out.log_marg_like_pen;
-
-
-figure;
-plot(param_values{1}, log_marg_like)
-
-figure;
-plot(param_values{1}, log_marg_like_pen)
 
 %% --------------------------------------------------------------------- %%
 % Clear model 

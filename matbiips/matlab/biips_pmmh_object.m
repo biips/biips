@@ -70,7 +70,7 @@ end
 % Concatenate all log value in a vector
 iscell(rw_step)
 cellfun(@log, rw_step)
-rw.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false));
+obj.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false));
 
 % Covariance matrix
 obj.mean = [];

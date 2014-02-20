@@ -3,9 +3,9 @@ function rw = pmmh_rw_rescale(rw, p)
 p = min(1.0, p);
 rw.pmean = rw.pmean + 1*(p-rw.pmean)/rw.niter;
 
-if ~rw.rescale
-    return;
-end
+% if ~rw.rescale
+%     return;
+% end
 rw.lstep = rw.lstep + rw.alpha^(rw.niter)*(rw.pmean-rw.targetprob);
 
 
