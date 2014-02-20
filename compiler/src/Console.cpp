@@ -68,69 +68,69 @@ using std::endl;
 #define BIIPS_CONSOLE_CATCH_ERRORS                                    \
     catch (NodeError & except)                                        \
     {                                                                 \
-      err_ << "Error in node " <<                                     \
-      pModel_->GetSymbolTable().GetName(except.GetNodeId()) << endl;  \
-      err_ << except.what() << endl;                                  \
+      err_ << String("Error in node ") +                              \
+        pModel_->GetSymbolTable().GetName(except.GetNodeId()) + ": " +\
+        except.what() + "\n";                                         \
       return false;                                                   \
     }                                                                 \
     catch (RuntimeError & except)                                     \
     {                                                                 \
-      err_ << "RUNTIME ERROR: " << except.what() << endl;             \
+      err_ << String("RUNTIME ERROR: ") + except.what() + "\n";       \
       return false;                                                   \
     }                                                                 \
     catch (LogicError & except)                                       \
     {                                                                 \
-      err_ << "LOGIC ERROR: " << except.what() << endl;               \
+      err_ << String("LOGIC ERROR: ") + except.what() + "\n";         \
       /*err_ << "Please send a bug report to "                          \
          << PACKAGE_BUGREPORT << endl;*/                              \
-    return false;                                                     \
+      return false;                                                   \
     }                                                                 \
     catch(const std::exception & e)                                   \
     {                                                                 \
-      err_ << "STD ERROR: " << e.what() << endl;                      \
+      err_ << String("STD ERROR: ") + e.what() + "\n";                \
       return false;                                                   \
     }                                                                 \
     catch(...)                                                        \
     {                                                                 \
-      err_ << "UNKNOWN ERROR: " << endl;                              \
+      err_ << "UNKNOWN ERROR\n";                                      \
       return false;                                                   \
     }
 
 #define BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL                       \
-    catch (NodeError & except)                                        \
-    {                                                                 \
-      err_ << "Error in node " <<                                     \
-      pModel_->GetSymbolTable().GetName(except.GetNodeId()) << endl;  \
-      err_ << except.what() << endl;                                  \
+	catch (NodeError & except)                                        \
+	{                                                                 \
+	  err_ << String("Error in node ") +                              \
+		pModel_->GetSymbolTable().GetName(except.GetNodeId()) + ": " +\
+		except.what() + "\n";                                         \
+	  ClearModel();                                                 \
+	  return false;                                                 \
+	}                                                                 \
+	catch (RuntimeError & except)                                     \
+	{                                                                 \
+	  err_ << String("RUNTIME ERROR: ") + except.what() + "\n";       \
       ClearModel();                                                   \
-      return false;                                                   \
-    }                                                                 \
-    catch (RuntimeError & except)                                     \
-    {                                                                 \
-      err_ << "RUNTIME ERROR: " << except.what() << endl;             \
+	  return false;                                                   \
+	}                                                                 \
+	catch (LogicError & except)                                       \
+	{                                                                 \
+	  err_ << String("LOGIC ERROR: ") + except.what() + "\n";         \
+	  /*err_ << "Please send a bug report to "                          \
+		 << PACKAGE_BUGREPORT << endl;*/                              \
+	  ClearModel();                                                   \
+	  return false;                                                   \
+	}                                                                 \
+	catch(const std::exception & e)                                   \
+	{                                                                 \
+	  err_ << String("STD ERROR: ") + e.what() + "\n";                \
       ClearModel();                                                   \
-      return false;                                                   \
-    }                                                                 \
-    catch (LogicError & except)                                       \
-    {                                                                 \
-      err_ << "LOGIC ERROR: " << except.what() << endl;               \
-      /*err_ << "Please send a bug report to "                          \
-         << PACKAGE_BUGREPORT << endl;*/                              \
-    ClearModel();                                                     \
-    return false;                                                     \
-    }                                                                 \
-    catch(const std::exception & e)                                   \
-    {                                                                 \
-      err_ << "STD ERROR: " << e.what() << endl;                      \
+	  return false;                                                   \
+	}                                                                 \
+	catch(...)                                                        \
+	{                                                                 \
+	  err_ << "UNKNOWN ERROR\n";                                      \
       ClearModel();                                                   \
-      return false;                                                   \
-    }                                                                 \
-    catch(...)                                                        \
-    {                                                                 \
-      err_ << "UNKNOWN ERROR: " << endl;                              \
-      ClearModel();                                                   \
-      return false;                                                   \
-    }
+	  return false;                                                   \
+	}
 
 namespace Biips
 {
@@ -273,7 +273,7 @@ namespace Biips
 
     if (status != 0)
     {
-      err_ << endl << "Error parsing model file:" << endl << message << endl;
+      err_ << String("\nError parsing model file: ") + message + "\n";
       //Tidy up
       clearParseTrees();
       return false;
@@ -363,10 +363,11 @@ namespace Biips
             {
               if (!data_graph.GetObserved()[*it_parents])
               {
-                err_ << "Invalid data graph: observed node "
-                << pModel_->GetSymbolTable().GetName(*it_node_id)
-                << " has unobserved parent "
-                << pModel_->GetSymbolTable().GetName(*it_parents) << std::endl;
+                err_ << String("Invalid data graph: observed node ")
+                		+ pModel_->GetSymbolTable().GetName(*it_node_id)
+                		+ " has unobserved parent "
+                		+ pModel_->GetSymbolTable().GetName(*it_parents)
+                		+ "\n";
                 ClearModel();
                 return false;
               }
@@ -460,7 +461,7 @@ namespace Biips
       }
       else
       {
-        err_ << "Nothing to compile" << endl;
+        err_ << "Nothing to compile\n";
         return true;
       }
       // FIXME
@@ -508,7 +509,7 @@ namespace Biips
       }
       else
       {
-        err_ << "No model" << endl;
+        err_ << "No model\n";
         return true;
       }
     }
@@ -521,14 +522,13 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't build SMC sampler. No model!" << endl;
+      err_ << "Can't build SMC sampler. No model!\n";
       return false;
     }
     if (pModel_->graph().Empty())
     {
       err_
-          << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)"
-          << endl;
+          << "Can't build SMC sampler. No nodes in graph (Have you compiled the model?)\n";
       return false;
     }
     try
@@ -570,12 +570,12 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't run SMC sampler. No model!" << endl;
+      err_ << "Can't run SMC sampler. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't run SMC sampler. Not built!" << endl;
+      err_ << "Can't run SMC sampler. Not built!\n";
       return false;
     }
 
@@ -642,19 +642,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't get log normalizing constant. No model!" << endl;
+      err_ << "Can't get log normalizing constant. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't get log normalizing constant. SMC sampler did not run!"
-           << endl;
+      err_ << "Can't get log normalizing constant. SMC sampler did not run!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't get log normalizing constant. SMC sampler did not finish!"
-           << endl;
+      err_ << "Can't get log normalizing constant. SMC sampler did not finish!\n";
       return false;
     }
     try
@@ -670,19 +668,16 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set log normalizing constant. No model!" << endl;
-      return false;
+      err_ << "Can't set log normalizing constant. No model!\n";
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't set log normalizing constant. SMC sampler did not run!"
-           << endl;
+      err_ << "Can't set log normalizing constant. SMC sampler did not run!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't set log normalizing constant. SMC sampler did not finish!"
-           << endl;
+      err_ << "Can't set log normalizing constant. SMC sampler did not finish!\n";
       return false;
     }
     try
@@ -699,25 +694,23 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't run backward smoother. No model!" << endl;
+      err_ << "Can't run backward smoother. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't run backward smoother. SMC sampler did not run!" << endl;
+      err_ << "Can't run backward smoother. SMC sampler did not run!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't run backward smoother. SMC sampler did not finish!"
-           << endl;
+      err_ << "Can't run backward smoother. SMC sampler did not finish!\n";
       return false;
     }
     if (lockBackward_)
     {
       err_
-          << "Can't run backward smoother. Data has been changed. You must run forward SMC sampler again."
-          << endl;
+          << "Can't run backward smoother. Data has been changed. You must run forward SMC sampler again.\n";
       return false;
     }
 
@@ -777,7 +770,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set default filter monitors. No model!" << endl;
+      err_ << "Can't set default filter monitors. No model!\n";
       return false;
     }
 
@@ -794,7 +787,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set filter monitor. No model!" << endl;
+      err_ << "Can't set filter monitor. No model!\n";
       return false;
     }
     // TODO: check that sampler did not start
@@ -804,11 +797,13 @@ namespace Biips
       Bool ok = pModel_->SetFilterMonitor(name, range);
       if (!ok)
       {
-        err_ << "Failed to set filter monitor for variable " << name;
-        if (!range.IsNull())
-          err_ << range;
-        err_ << endl;
-        return false;
+    	String msg("Failed to set filter monitor for variable ");
+    	msg += name;
+    	if (!range.IsNull())
+    	  msg += print(range);
+    	msg += "\n";
+    	err_ << msg;
+    	return false;
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
@@ -821,7 +816,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set smooth monitor. No model!" << endl;
+      err_ << "Can't set smooth monitor. No model!\n";
       return false;
     }
     // TODO: check that sampler did not start
@@ -831,11 +826,13 @@ namespace Biips
       Bool ok = pModel_->SetGenTreeSmoothMonitor(name, range);
       if (!ok)
       {
-        err_ << "Failed to set smooth monitor for variable " << name;
-        if (!range.IsNull())
-          err_ << range;
-        err_ << endl;
-        return false;
+    	String msg("Failed to set smooth monitor for variable ");
+    	msg += name;
+    	if (!range.IsNull())
+    	  msg += print(range);
+    	msg += "\n";
+    	err_ << msg;
+    	return false;
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
@@ -847,7 +844,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set backward smooth monitor. No model!" << endl;
+      err_ << "Can't set backward smooth monitor. No model!\n";
       return false;
     }
     // TODO: check that sampler did not start
@@ -857,11 +854,13 @@ namespace Biips
       Bool ok = pModel_->SetBackwardSmoothMonitor(name, range);
       if (!ok)
       {
-        err_ << "Failed to set backward smooth monitor for variable " << name;
-        if (!range.IsNull())
-          err_ << range;
-        err_ << endl;
-        return false;
+      	String msg("Failed to set backward smooth monitor for variable ");
+      	msg += name;
+      	if (!range.IsNull())
+      	  msg += print(range);
+      	msg += "\n";
+      	err_ << msg;
+      	return false;
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
@@ -874,7 +873,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't check filter monitor. No model!" << endl;
+      err_ << "Can't check filter monitor. No model!\n";
       return false;
     }
     return pModel_->IsFilterMonitored(name, range, check_released);
@@ -886,7 +885,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't check smooth monitor. No model!" << endl;
+      err_ << "Can't check smooth monitor. No model!\n";
       return false;
     }
     return pModel_->IsGenTreeSmoothMonitored(name, range, check_released);
@@ -897,7 +896,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't check backward smooth monitor. No model!" << endl;
+      err_ << "Can't check backward smooth monitor. No model!\n";
       return false;
     }
     return pModel_->IsBackwardSmoothMonitored(name, range, check_released);
@@ -907,7 +906,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't clear filter monitors. No model!" << endl;
+      err_ << "Can't clear filter monitors. No model!\n";
       return false;
     }
 
@@ -924,7 +923,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't clear smooth monitors. No model!" << endl;
+      err_ << "Can't clear smooth monitors. No model!\n";
       return false;
     }
 
@@ -941,7 +940,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't clear smooth monitors. No model!" << endl;
+      err_ << "Can't clear smooth monitors. No model!\n";
       return false;
     }
 
@@ -959,18 +958,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract filter statistic. No model!" << endl;
+      err_ << "Can't extract filter statistic. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract filter statistic. SMC sampler not built!" << endl;
+      err_ << "Can't extract filter statistic. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract filter statistic. SMC sampler still running!"
-           << endl;
+      err_ << "Can't extract filter statistic. SMC sampler still running!\n";
       return false;
     }
 
@@ -979,8 +977,7 @@ namespace Biips
       Bool ok = pModel_->ExtractFilterStat(name, statFeature, statMap);
       if (!ok)
       {
-        err_ << "Failed to extract filter statistic for variable " << name
-             << endl;
+        err_ << String("Failed to extract filter statistic for variable ") + name + "\n";
         return false;
       }
     }
@@ -995,19 +992,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract smooth statistic. No model!" << endl;
+      err_ << "Can't extract smooth statistic. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth statistic. SMC sampler not built!"
-           << endl;
+      err_ << "Can't extract smooth statistic. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract smooth statistic. SMC sampler still running!"
-           << endl;
+      err_ << "Can't extract smooth statistic. SMC sampler still running!\n";
       return false;
     }
 
@@ -1016,8 +1011,7 @@ namespace Biips
       Bool ok = pModel_->ExtractGenTreeSmoothStat(name, statFeature, statMap);
       if (!ok)
       {
-        err_ << "Failed to extract smooth statistic for variable " << name
-             << endl;
+        err_ << String("Failed to extract smooth statistic for variable ") + name + "\n";
         return false;
       }
     }
@@ -1031,21 +1025,19 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract backward smoother statistic. No model!" << endl;
+      err_ << "Can't extract backward smoother statistic. No model!\n";
       return false;
     }
     if (!pModel_->SmootherInitialized())
     {
       err_
-          << "Can't extract backward smoother statistic. Backward smoother not initialized!"
-          << endl;
+          << "Can't extract backward smoother statistic. Backward smoother not initialized!\n";
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
       err_
-          << "Can't extract backward smoother statistic. Backward smoother still running!"
-          << endl;
+          << "Can't extract backward smoother statistic. Backward smoother still running!\n";
       return false;
     }
 
@@ -1054,8 +1046,7 @@ namespace Biips
       Bool ok = pModel_->ExtractBackwardSmoothStat(name, statFeature, statMap);
       if (!ok)
       {
-        err_ << "Failed to extract backward smoother statistic for variable "
-             << name << endl;
+        err_ << String("Failed to extract backward smoother statistic for variable ") + name + "\n";
         return false;
       }
     }
@@ -1070,17 +1061,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract filter pdf. No model!" << endl;
+      err_ << "Can't extract filter pdf. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract filter pdf. SMC sampler not built!" << endl;
+      err_ << "Can't extract filter pdf. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract filter pdf. SMC sampler still running!" << endl;
+      err_ << "Can't extract filter pdf. SMC sampler still running!\n";
       return false;
     }
 
@@ -1089,7 +1080,7 @@ namespace Biips
       Bool ok = pModel_->ExtractFilterPdf(name, pdfMap, numBins, cacheFraction);
       if (!ok)
       {
-        err_ << "Failed to extract filter pdf for variable " << name << endl;
+        err_ << String("Failed to extract filter pdf for variable ") + name + "\n";
         return false;
       }
     }
@@ -1104,18 +1095,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract smooth pdf. No model!" << endl;
+      err_ << "Can't extract smooth pdf. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't extract smooth pdf. SMC sampler not built!" << endl;
+      err_ << "Can't extract smooth pdf. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't extract smooth pdf. SMC sampler still running!"
-           << endl;
+      err_ << "Can't extract smooth pdf. SMC sampler still running!\n";
       return false;
     }
 
@@ -1125,8 +1115,7 @@ namespace Biips
                                               cacheFraction);
       if (!ok)
       {
-        err_ << "Failed to extract smooth pdf for variable " << name
-             << endl;
+        err_ << String("Failed to extract smooth pdf for variable ") + name + "\n";
         return false;
       }
     }
@@ -1141,20 +1130,18 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't extract backward smoother pdf. No model!" << endl;
+      err_ << "Can't extract backward smoother pdf. No model!\n";
       return false;
     }
     if (!pModel_->SmootherInitialized())
     {
       err_
-          << "Can't extract backward smoother pdf. SMC sampler not initialized!"
-          << endl;
+          << "Can't extract backward smoother pdf. SMC sampler not initialized!\n";
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't extract backward smoother pdf. SMC sampler still running!"
-           << endl;
+      err_ << "Can't extract backward smoother pdf. SMC sampler still running!\n";
       return false;
     }
 
@@ -1163,8 +1150,7 @@ namespace Biips
       Bool ok = pModel_->ExtractBackwardSmoothPdf(name, pdfMap, numBins, cacheFraction);
       if (!ok)
       {
-        err_ << "Failed to extract backward smoother pdf for variable " << name
-             << endl;
+        err_ << String("Failed to extract backward smoother pdf for variable ") + name + "\n";
         return false;
       }
     }
@@ -1177,7 +1163,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump data. No model!" << endl;
+      err_ << "Can't dump data. No model!\n";
       return false;
     }
 
@@ -1185,7 +1171,7 @@ namespace Biips
     {
       if (!pModel_->DumpData(dataMap))
       {
-        err_ << "Failed to dump data" << endl;
+        err_ << "Failed to dump data.\n";
         return false;
       }
     }
@@ -1199,25 +1185,24 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't change data. No model!" << endl;
+      err_ << "Can't change data. No model!\n";
       return false;
     }
     if (pModel_->graph().Empty())
     {
       err_
-          << "Can't change data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+          << "Can't change data. No nodes in graph. (Have you compiled the model?)\n";
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
         && !pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't change data. SMC sampler is running." << endl;
+      err_ << "Can't change data. SMC sampler is running.\n";
       return false;
     }
     if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't change data. Backward smoother is running." << endl;
+      err_ << "Can't change data. Backward smoother is running.\n";
       return false;
     }
     try
@@ -1229,7 +1214,7 @@ namespace Biips
       Bool rebuild_sampler;
       if (!pModel_->ChangeData(variable, range, data, mcmc, rebuild_sampler))
       {
-        err_ << "Failed to change data" << endl;
+        err_ << "Failed to change data.\n";
         return false;
       }
       if (pModel_->SamplerBuilt() && rebuild_sampler)
@@ -1251,25 +1236,24 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't sample data. No model!" << endl;
+      err_ << "Can't sample data. No model!\n";
       return false;
     }
     if (pModel_->graph().Empty())
     {
       err_
-          << "Can't sample data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+          << "Can't sample data. No nodes in graph. (Have you compiled the model?)\n";
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
         && !pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't sample data. SMC sampler is running." << endl;
+      err_ << "Can't sample data. SMC sampler is running.\n";
       return false;
     }
     if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't sample data. Backward smoother is running." << endl;
+      err_ << "Can't sample data. Backward smoother is running.\n";
       return false;
     }
     try
@@ -1284,7 +1268,7 @@ namespace Biips
 
       if (!pModel_->SampleData(variable, range, data, p_rng.get()))
       {
-        err_ << "Failed to sample data" << endl;
+        err_ << "Failed to sample data.\n";
         return false;
       }
       if (pModel_->SamplerBuilt())
@@ -1306,25 +1290,24 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't remove data. No model!" << endl;
+      err_ << "Can't remove data. No model!\n";
       return false;
     }
     if (pModel_->graph().Empty())
     {
       err_
-          << "Can't remove data. No nodes in graph (Have you compiled the model?)"
-          << endl;
+          << "Can't remove data. No nodes in graph. (Have you compiled the model?)\n";
       return false;
     }
     if (pModel_->SamplerBuilt() && pModel_->Sampler().Initialized()
         && !pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't remove data. SMC sampler is running." << endl;
+      err_ << "Can't remove data. SMC sampler is running.\n";
       return false;
     }
     if (pModel_->SmootherInitialized() && !pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't remove data. Backward smoother is running." << endl;
+      err_ << "Can't remove data. Backward smoother is running.\n";
       return false;
     }
     try
@@ -1335,7 +1318,7 @@ namespace Biips
       }
       if (!pModel_->RemoveData(variable, range))
       {
-        err_ << "Failed to remove data" << endl;
+        err_ << "Failed to remove data.\n";
         return false;
       }
       if (pModel_->SamplerBuilt())
@@ -1358,17 +1341,17 @@ namespace Biips
 
     if (!pModel_)
     {
-      err_ << "Can't dump filter monitors. No model!" << endl;
+      err_ << "Can't dump filter monitors. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't dump filter monitors. SMC sampler not built!" << endl;
+      err_ << "Can't dump filter monitors. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't dump filter monitors. SMC sampler still running!" << endl;
+      err_ << "Can't dump filter monitors. SMC sampler still running!\n";
       return false;
     }
 
@@ -1377,7 +1360,7 @@ namespace Biips
       Bool ok = pModel_->DumpFilterMonitors(particlesMap);
       if (!ok)
       {
-        err_ << "Failed to dump filter monitors" << endl;
+        err_ << "Failed to dump filter monitors.\n";
         return false;
       }
     }
@@ -1391,18 +1374,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump smooth monitors. No model!" << endl;
+      err_ << "Can't dump smooth monitors. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't dump smooth monitors. SMC sampler not built!" << endl;
+      err_ << "Can't dump smooth monitors. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't dump smooth monitors. SMC sampler still running!"
-           << endl;
+      err_ << "Can't dump smooth monitors. SMC sampler still running!\n";
       return false;
     }
 
@@ -1411,7 +1393,7 @@ namespace Biips
       Bool ok = pModel_->DumpGenTreeSmoothMonitors(particlesMap);
       if (!ok)
       {
-        err_ << "Failed to dump smooth monitors" << endl;
+        err_ << "Failed to dump smooth monitors.\n";
         return false;
       }
     }
@@ -1425,17 +1407,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump backward smooth monitors. No model!" << endl;
+      err_ << "Can't dump backward smooth monitors. No model!\n";
       return false;
     }
     if (!pModel_->SmootherInitialized())
     {
-      err_ << "Can't dump backward smooth monitors. Smoother not initialized!" << endl;
+      err_ << "Can't dump backward smooth monitors. Smoother not initialized!\n";
       return false;
     }
     if (!pModel_->Smoother().AtEnd())
     {
-      err_ << "Can't dump backward smooth monitors. Smoother still running!" << endl;
+      err_ << "Can't dump backward smooth monitors. Smoother still running!\n";
       return false;
     }
 
@@ -1444,7 +1426,7 @@ namespace Biips
       Bool ok = pModel_->DumpBackwardSmoothMonitors(particlesMap);
       if (!ok)
       {
-        err_ << "Failed to dump backward smooth monitors" << endl;
+        err_ << "Failed to dump backward smooth monitors.\n";
         return false;
       }
     }
@@ -1457,19 +1439,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't sample smooth particle. No model!" << endl;
+      err_ << "Can't sample smooth particle. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth particle. SMC sampler not built!"
-           << endl;
+      err_ << "Can't sample smooth particle. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't sample smooth particle. SMC sampler still running!"
-           << endl;
+      err_ << "Can't sample smooth particle. SMC sampler still running!\n";
       return false;
     }
 
@@ -1481,7 +1461,7 @@ namespace Biips
       Bool ok = pModel_->SampleGenTreeSmoothParticle(p_rng.get(), sampledValueMap_);
       if (!ok)
       {
-        err_ << "Failed to sample smooth particle" << endl;
+        err_ << "Failed to sample smooth particle.\n";
         return false;
       }
     }
@@ -1495,19 +1475,17 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't sample smooth particle. No model!" << endl;
+      err_ << "Can't sample smooth particle. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't sample smooth particle. SMC sampler not built!"
-           << endl;
+      err_ << "Can't sample smooth particle. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
-      err_ << "Can't sample smooth particle. SMC sampler still running!"
-           << endl;
+      err_ << "Can't sample smooth particle. SMC sampler still running!\n";
       return false;
     }
 
@@ -1525,20 +1503,18 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't set sampled smooth particle. No model!" << endl;
+      err_ << "Can't set sampled smooth particle. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't set sampled smooth particle. SMC sampler not built!"
-           << endl;
+      err_ << "Can't set sampled smooth particle. SMC sampler not built!\n";
       return false;
     }
     if (!pModel_->Sampler().AtEnd())
     {
       err_
-          << "Can't set sampled smooth particle. SMC sampler still running!"
-          << endl;
+          << "Can't set sampled smooth particle. SMC sampler still running!\n";
       return false;
     }
 
@@ -1568,7 +1544,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't print graphviz. No model!" << endl;
+      err_ << "Can't print graphviz. No model!\n";
       return false;
     }
     try
@@ -1584,7 +1560,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node ids. No model!" << endl;
+      err_ << "Can't dump node ids. No model!\n";
       return false;
     }
     try
@@ -1604,7 +1580,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node names. No model!" << endl;
+      err_ << "Can't dump node names. No model!\n";
       return false;
     }
     try
@@ -1627,7 +1603,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node types. No model!" << endl;
+      err_ << "Can't dump node types. No model!\n";
       return false;
     }
     try
@@ -1650,7 +1626,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node observed boolean. No model!" << endl;
+      err_ << "Can't dump node observed boolean. No model!\n";
       return false;
     }
     try
@@ -1673,13 +1649,12 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node sampling iterations. No model!" << endl;
+      err_ << "Can't dump node sampling iterations. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't dump node sampling iterations. SMC sampler not built!"
-           << endl;
+      err_ << "Can't dump node sampling iterations. SMC sampler not built!\n";
       return false;
     }
     try
@@ -1708,12 +1683,12 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't dump node samplers. No model!" << endl;
+      err_ << "Can't dump node samplers. No model!\n";
       return false;
     }
     if (!pModel_->SamplerBuilt())
     {
-      err_ << "Can't dump node samplers. SMC sampler not built!" << endl;
+      err_ << "Can't dump node samplers. SMC sampler not built!\n";
       return false;
     }
     try
@@ -1740,7 +1715,7 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't get graph size. No model!" << endl;
+      err_ << "Can't get graph size. No model!\n";
       return false;
     }
     try
@@ -1757,14 +1732,14 @@ namespace Biips
   {
     if (!pModel_)
     {
-      err_ << "Can't get prior density. No model!" << endl;
+      err_ << "Can't get prior density. No model!\n";
       return false;
     }
     try
     {
       if (!pModel_->GetLogPriorDensity(prior, variable, range))
       {
-        err_ << "Failed to get log prior density." << endl;
+        err_ << "Failed to get log prior density.\n";
         return false;
       }
     }

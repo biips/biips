@@ -1,18 +1,29 @@
 Adrien le 20/02/2014 :
 ======================
-Concernant test_crash1.m, le problème se siyue au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
+Concernant test_crash1.m, le problème se situe au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
 En tout cas, sample_data est retourné true au lieu de false par parsevar.
+D'après moi, parsevar doit renvoyer une erreur en cas de mauvais paramètre au lieu d'un warning et de prendre la valeur par défaut.
 
 A faire:
 - [ ] corriger parsevar
+- [ ] pb ctest matbiips sous windows: les test passent automatiquement. Regarder s'il est possible d'attendre la bonne sortie de matlab
+
+François le 20/02/2014 :
+========================
+- [ ] Adrien, peux-tu aussi regarder dans inter_biips sample_data, pour autoriser de 
+rééchantilloner une variable meme lorsqu'elle existe déjà?
+A l'heure actuelle, si la valeur de log_prec_y est deja initialisée (par 
+exemple parce que l'on a fait appel à biips_sensitivity avant) on ne 
+peut pas lancer le pmmh avec initialisation aléatoire de la variable.
+sinon, Existe-t-il une fonction pour supprimer la valeur, afin de 
+pouvoir la rééchantilloner selon le prior?
 
 Adrien le 18/02/2014 :
 ======================
-- [ ] résoudre les problèmes des scripts test_crash dans matbiips/tests
 - [ ] pb quand on donne une valeur de paramètres dans data: il la ré-échantillonne
-- [ ] pb avec pimh qd on veut monitorer x[1:2,1], cf script test_crash3
+- [ ] pb avec pimh qd on veut monitorer x[1:2,1], cf script test_crash3.m
 - [ ] warning qd on ne donne pas de bornes dans `change_data` et `get_log_prior_density`
-- [ ] remplacer mbiip_cerr par message erreur mex
+- [x] remplacer mbiip_cerr par message erreur mex
 - [ ] rajouter les test de distribution ds rbiips et matbiips
 
 François le 16/02/2014
@@ -44,15 +55,15 @@ Adrien le 11/02/2014 :
     * demo : https://github.com/yihui/knitr/blob/master/inst/examples/knitr-spin.R
     * pas sûr qu'on puisse insérer du latex
 - [ ] améliorer message d'erreur "Subset y[1] out of range [1:100] in Compiler::setConstantMask.
-- [ ] éviter crash matlab
-- [ ] vérifier : si sample_data=false -> ne pas compiler bloc data
+- [ ] éviter crash matlab : test_crash3.m non résolu (le lancer plusieurs fois)
+- [x] vérifier : si sample_data=false -> ne pas compiler bloc data
 - [ ] tester octave sous linux, windows et mac
 - [ ] Pb de headers avec octave et gcc 4.8
-- [ ] regarder warning dans test_internals.m
+- [x] regarder warning dans test_internals.m
 
 François le 11/02/2014 :
 ========================
-J'ai une erreur lorsque j'essaye de rentrer les données y dans la structure data dans hmm_1d_lin: (jusqu'à présent je les échantillonais)
+- [ ] J'ai une erreur lorsque j'essaye de rentrer les données y dans la structure data dans hmm_1d_lin: (jusqu'à présent je les échantillonais). voir test_crash2.m
 
 L'erreur se produit dans inter_biips compile_model avec l'erreur suivante:
 * Compiling data graph
@@ -122,28 +133,28 @@ Modification de parsevar pour inclure vérification des types, et arguments admis
 Début du codage des fonctions init_pmmh et biips_pmmh_update
 
 ERREURS avec inter_biips: (lancer hmm_1d_lin_param.m)
-1. 'change_data': quels sont les types des entrées de cette fonction?. J'ai essayé 
+- [x] 'change_data': quels sont les types des entrées de cette fonction?. J'ai essayé 
 inter_biips('change_data', console, pn_param(i).name, ...
             pn_param(i).lower, pn_param(i).upper, inits{i}, true)
 où pn_param est la sortie de parse_varname, mais j'ai un message m'indiquant que le deuxième argument doit etre 'cell'
-2. 'sample_data': même question
+- [ ] 'sample_data': même question
 samp = inter_biips('sample_data', console, pn_param(i).name,...
                 pn_param(i).lower, pn_param(i).upper, inits_rng_seed)
-me renvoit un message comme quoi le 3e et 4e arguments doivent etre double. Mais si les dimensions de la variable ne sont pas indiquée, parse_varname renvoit une cell vide.
-* Même en indiquant les indices de la variable, la fonction crashe, cette fois-ci sans message d'erreur.
+me renvoit un message comme quoi le 3e et 4e arguments doivent etre double. Mais si les dimensions de la variable ne sont pas indiqués, parse_varname renvoit une cell vide.
+- [ ] Même en indiquant les indices de la variable, la fonction crashe, cette fois-ci sans message d'erreur.
 
 Questions concernant inter_biips et biips:
-* Lorsque l'on rentre dans la structure data les valeurs de x_true et y (pour hmm_1d_lin), on a une erreur à la compilation - ne peut-on pas éviter cela? 
-* Message de inter_biips indiquant que seed doit etre double: ce n'est pas supposé etre un entier? La classe uint32 ne serait pas plus appropriée?
-* Dans la fonction init_pmmh de Rbiips, pourquoi mettre la valeur latent_variables à false quand on les monitor?
-* dans init.pmmh de rbiips, je ne comprends pas ce que fait object$.rw.init(sample)
-* idem pour object$.rw.step(rw.step.values) et autres dans d'autres fonction pmmh
+- [ ] Lorsque l'on rentre dans la structure data les valeurs de x_true et y (pour hmm_1d_lin), on a une erreur à la compilation - ne peut-on pas éviter cela? 
+- [x] Message de inter_biips indiquant que seed doit etre double: ce n'est pas supposé etre un entier? La classe uint32 ne serait pas plus appropriée? ---> Réponse: utilisation de double plus commode pour l'utilisateur
+- [ ] Dans la fonction init_pmmh de Rbiips, pourquoi mettre la valeur latent_variables à false quand on les monitor?
+- [x] dans init.pmmh de rbiips, je ne comprends pas ce que fait object$.rw.init(sample)
+- [x] idem pour object$.rw.step(rw.step.values) et autres dans d'autres fonction pmmh
 
 
 Adrien le 4/2/2014 :
 ====================
 A faire dans Matbiips :
-- [ ] modifier lecture des champs de structure : utiliser getfield
+- [x] modifier lecture des champs de structure : utiliser getfield
 - [x] harmonisation des noms de variables
 - [x] traitement des sorties MCMC dans biips_summary et biips_density
     Rq: si out.varname a les champs f, s ou b -> traitement SMC sur les sous-champs values et weights
