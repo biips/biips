@@ -60,7 +60,7 @@ namespace Biips
 
   Bool checkSize(Scalar s, Scalar * pIntPart)
   {
-    return (s > 0.0) && checkInteger(s, pIntPart);
+    return (s >= 0.0) && checkInteger(s, pIntPart);
   }
 
   typedef boost::numeric::converter<Size, Scalar,

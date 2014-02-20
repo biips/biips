@@ -49,6 +49,15 @@ namespace Biips
         <= 1.0);
   }
 
+  Bool DBin::checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const
+  {
+    Scalar success_fraction = paramValues[0].ScalarView();
+    Scalar trials = paramValues[1].ScalarView();
+
+    return checkSize(x) && checkSize(trials) && (success_fraction >= 0.0) && (success_fraction
+        <= 1.0);
+  }
+
   DBin::MathDistType DBin::mathDist(const NumArray::Array & paramValues) const
   {
     Scalar success_fraction = paramValues[0].ScalarView();

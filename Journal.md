@@ -1,6 +1,22 @@
+Adrien le 20/02/2014 :
+======================
+Concernant test_crash1.m, le problème se siyue au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
+En tout cas, sample_data est retourné true au lieu de false par parsevar.
+
+A faire:
+- [ ] corriger parsevar
+
+Adrien le 18/02/2014 :
+======================
+- [ ] résoudre les problèmes des scripts test_crash dans matbiips/tests
+- [ ] pb quand on donne une valeur de paramètres dans data: il la ré-échantillonne
+- [ ] pb avec pimh qd on veut monitorer x[1:2,1], cf script test_crash3
+- [ ] warning qd on ne donne pas de bornes dans `change_data` et `get_log_prior_density`
+- [ ] remplacer mbiip_cerr par message erreur mex
+- [ ] rajouter les test de distribution ds rbiips et matbiips
+
 François le 16/02/2014
 ======================
-
 - [x] Vérifier s'il n'y a pas un pb dans RBiips.R, ligne 340:
 rw$d <<- sum(sapply(rw$dim, FUN=sum))
 Il me semble que FUN devrait prendre le produit des dimensions plutot que la somme.
@@ -26,6 +42,7 @@ Adrien le 11/02/2014 :
     * --> OK en utilisant la fonction spin() du package knitr
     * voir : http://yihui.name/knitr/demo/stitch/
     * demo : https://github.com/yihui/knitr/blob/master/inst/examples/knitr-spin.R
+    * pas sûr qu'on puisse insérer du latex
 - [ ] améliorer message d'erreur "Subset y[1] out of range [1:100] in Compiler::setConstantMask.
 - [ ] éviter crash matlab
 - [ ] vérifier : si sample_data=false -> ne pas compiler bloc data

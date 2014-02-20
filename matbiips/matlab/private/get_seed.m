@@ -6,7 +6,7 @@ if (isoctave)
        seed = double(randi(intmax));
        rand('state',s);
 else
-       s=rng('shuffle');
+%        s=rng('shuffle');
        seed = randi(intmax);
-       rng(s);
+%        rng(s);
 end
