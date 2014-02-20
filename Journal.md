@@ -2,9 +2,20 @@ Adrien le 20/02/2014 :
 ======================
 Concernant test_crash1.m, le problème se siyue au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
 En tout cas, sample_data est retourné true au lieu de false par parsevar.
+D'après moi, parsevar doit renvoyer une erreur en cas de mauvais paramètre au lieu d'un warning et de prendre la valeur par défaut.
 
 A faire:
 - [ ] corriger parsevar
+
+François le 20/02/2014 :
+========================
+- [ ] Adrien, peux-tu aussi regarder dans inter_biips sample_data, pour autoriser de 
+rééchantilloner une variable meme lorsqu'elle existe déjà?
+A l'heure actuelle, si la valeur de log_prec_y est deja initialisée (par 
+exemple parce que l'on a fait appel à biips_sensitivity avant) on ne 
+peut pas lancer le pmmh avec initialisation aléatoire de la variable.
+sinon, Existe-t-il une fonction pour supprimer la valeur, afin de 
+pouvoir la rééchantilloner selon le prior?
 
 Adrien le 18/02/2014 :
 ======================
