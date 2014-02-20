@@ -6,8 +6,13 @@ if (OCTAVE_ROOT)
     	set(MATLAB_COMPILE_FLAGS -DOCTAVE)
         # retrieve INCLUDE
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTINCLUDEDIR
-                OUTPUT_VARIABLE MATLAB_INCLUDE_DIR)
-    	# retrieve LIBDIR
+                OUTPUT_VARIABLE OCT_INCLUDE_DIR)
+    	file(GLOB_RECURSE MEX_OU_ES_TU "mex.h" ${OCT_INCLUDE_DIR})
+        get_filename_component(MATLAB_INCLUDE_DIR ${MEX_OU_ES_TU} PATH)
+        if (MATLAB_INCLUDE_DIR)
+           message(STATUS "mex include : ${MATLAB_INCLUDE_DIR}")
+        endif(MATLAB_INCLUDE_DIR)
+        # retrieve LIBDIR
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTLIBDIR
                 OUTPUT_VARIABLE MATLAB_LIB_DIR)
         if (MATLAB_LIBRARY_DIR)
