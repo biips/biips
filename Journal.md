@@ -1,7 +1,16 @@
+Adrien le 20/02/2014 :
+======================
+Concernant test_crash1.m, le problème se siyue au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
+En tout cas, sample_data est retourné true au lieu de false par parsevar.
+
+A faire:
+- [ ] corriger parsevar
+
 Adrien le 18/02/2014 :
 ======================
+- [ ] résoudre les problèmes des scripts test_crash dans matbiips/tests
 - [ ] pb quand on donne une valeur de paramètres dans data: il la ré-échantillonne
-- [ ] pb avec pimh qd on veut monitorer x[1:2,1], cf scripts test_crash
+- [ ] pb avec pimh qd on veut monitorer x[1:2,1], cf script test_crash3
 - [ ] warning qd on ne donne pas de bornes dans `change_data` et `get_log_prior_density`
 - [ ] remplacer mbiip_cerr par message erreur mex
 - [ ] rajouter les test de distribution ds rbiips et matbiips
