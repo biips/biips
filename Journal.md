@@ -1,11 +1,12 @@
 Adrien le 20/02/2014 :
 ======================
-Concernant test_crash1.m, le problème se siyue au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
+Concernant test_crash1.m, le problème se situe au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
 En tout cas, sample_data est retourné true au lieu de false par parsevar.
 D'après moi, parsevar doit renvoyer une erreur en cas de mauvais paramètre au lieu d'un warning et de prendre la valeur par défaut.
 
 A faire:
 - [ ] corriger parsevar
+- [ ] pb ctest matbiips sous windows: les test passent automatiquement. Regarder s'il est possible d'attendre la bonne sortie de matlab
 
 François le 20/02/2014 :
 ========================
