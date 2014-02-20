@@ -1,4 +1,4 @@
-function varargout = biips_pmmh(console, param_names, n_iter, n_part, return_samples, varargin)
+function varargout = biips_pmmh(obj, n_iter, n_part, return_samples, varargin)
 
 %% TODO: DOC
 
@@ -10,36 +10,42 @@ function varargout = biips_pmmh(console, param_names, n_iter, n_part, return_sam
 % TODO: add some checks on nonoptional inputs
 
 %%% Process and check optional arguments
-optarg_names = {'rw', 'thin', 'rw_cov', 'latent_names', 'max_fail', 'inits', 'rw_step', 'rw_rescale',...
-    'rw_learn', 'rw_rescale_type', 'n_rescale', 'rs_thres', 'rs_type', 'seed'};
-optarg_default = {struct(), 1, [], {}, 0, {}, [], true, true, 'dureau', n_iter/4,...
-    .5, 'stratified', get_seed()};
-optarg_valid = {{}, [0, n_part], {}, {}, [0, intmax], {}, {}, {true, false}, {true, false}, ...
-    {'dureau','plummer'}, [0,n_iter], [0, n_part],...
-    {'multinomial', 'stratified', 'residual', 'systematic'},[0, intmax]};
-optarg_type = {'struct', 'numeric', 'numeric', 'char', 'numeric', 'numeric', 'numeric', 'logical', 'logical',...
-    'char', 'numeric', 'numeric', 'char', 'numeric'};
-[rw, thin, rw_cov, latent_names, max_fail, inits, rw_step, rw_rescale, rw_learn, rw_rescale_type,...
-    n_rescale, rs_thres, rs_type, seed] = parsevar(varargin, optarg_names,...
+optarg_names = {'thin', 'latent_names', 'max_fail', 'rw_learn',...
+    'rs_thres', 'rs_type'};
+optarg_default = {1, {}, 0, false, .5, 'stratified'};
+optarg_valid = {[0, n_part], {}, [0, intmax], {true, false},...
+    [0, n_part], {'multinomial', 'stratified', 'residual', 'systematic'}};
+optarg_type = {'numeric', 'char', 'numeric', 'logical', 'numeric', 'char'};
+[thin, latent_names, max_fail, rw_learn, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
+console = obj.console;
+param_names = obj.param_names;
 n_param = length(param_names);
 
-% Check rw_step
-rw_step_values = {};
-if ~isempty(rw_step)    
-    if isnumeric(rw_step)
-        for i=1:n_param
-            rw_step_values{i} = rw_step; 
-        end
-    elseif iscell(rw_step)
-        if length(rw_step) ~= length(param_names)
-            warning('Dimension of rw_step does not match the dimension of param_names - skipped argument');
-        else
-            rw_step_values = rw_step;
-        end
-    end
+if obj.niter<obj.n_rescale
+    rw_rescale = true;
+else
+    rw_rescale = false;    
 end
+
+% % Check rw_step
+% rw_step_values = {};
+% if ~isempty(rw_step)    
+%     if isnumeric(rw_step)
+%         for i=1:n_param
+%             rw_step_values{i} = rw_step; 
+%         end
+%     elseif iscell(rw_step)
+%         if length(rw_step) ~= length(param_names)
+%             warning('Dimension of rw_step does not match the dimension of param_names - skipped argument');
+%         else
+%             rw_step_values = rw_step;
+%         end
+%     end
+% end
+
+
 
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
@@ -47,35 +53,35 @@ cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again
 
 % Initialize
 [sample_param, sample_latent, log_prior, log_marg_like] =...
-    init_pmmh(console, param_names, n_part, 'latent_names', latent_names,...
-    'inits', inits, 'rs_thres', rs_thres, 'rs_type', rs_type);
+    init_pmmh(console, param_names, n_part, (obj.niter==0),  'latent_names', latent_names,...
+    'rs_thres', rs_thres, 'rs_type', rs_type);
 pn_param =  cellfun(@parse_varname, param_names);
 
-if ~return_samples || isempty(fieldnames(rw)) % if update of if the details of the rw proposal have not been provided
-    % Initialize rw
-    rw = pmmh_rw_init(sample_param);
-    % Update rw structure
-    if ~isempty(rw_step_values)
-        rw = pmmh_rw_step(rw, rw_step_values);
-    end    
-    rw.rescale = rw_rescale;
-    rw.learn = rw_learn;
-    rw.rescale_type = rw_rescale_type;  
-else
+% if ~return_samples || isempty(fieldnames(rw)) % if update of if the details of the rw proposal have not been provided
+%     % Initialize rw
+%     rw = pmmh_rw_init(sample_param);
 %     % Update rw structure
 %     if ~isempty(rw_step_values)
 %         rw = pmmh_rw_step(rw, rw_step_values);
-%     end
-%     rw.cov = rw_cov;
-    rw.rescale = false;
-    rw.learn = false;
-end
+%     end    
+%     rw.rescale = rw_rescale;
+%     rw.learn = rw_learn;
+%     rw.rescale_type = rw_rescale_type;  
+% else
+% %     % Update rw structure
+% %     if ~isempty(rw_step_values)
+% %         rw = pmmh_rw_step(rw, rw_step_values);
+% %     end
+% %     rw.cov = rw_cov;
+%     rw.rescale = false;
+%     rw.learn = false;
+% end
     
 
 % display message and progress bar
 % is_adapt = 1;
 if ~return_samples
-    if rw.learn % CHECK IF THIS IS CORRECT
+    if rw_learn % CHECK IF THIS IS CORRECT
         inter_biips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
         bar = inter_biips('make_progress_bar', n_iter, '+', 'iterations');
     else
@@ -94,7 +100,7 @@ n_accept = 0;
 % Set output
 n_samples = ceil((n_iter)/thin);
 accept_rate = zeros(n_samples, 1);
-step_rw = zeros(n_samples, length(rw.lstep));
+step_rw = zeros(n_samples, length(obj.lstep));
 log_marg_like_st = zeros(n_samples, 1);
 log_post_st = zeros(n_samples, 1);
 if return_samples
@@ -115,9 +121,9 @@ end
 for i=1:n_iter
     % MH step
     [sample_param, sample_latent, log_prior, log_marg_like, ...
-    accept_rate_step, accepted, n_fail_step, rw] = one_update_pmmh(console, param_names, pn_param, sample_param,...
+    accept_rate_step, accepted, n_fail_step, obj] = one_update_pmmh(console, param_names, pn_param, sample_param,...
         sample_latent, latent_names, log_prior, log_marg_like,  n_part, rs_thres,...
-        rs_type,seed, rw);
+        rs_type, obj, rw_rescale, rw_learn);
 
     % Print progress bar
     inter_biips('advance_progress_bar', bar, 1);
@@ -125,7 +131,7 @@ for i=1:n_iter
     n_fail = n_fail + n_fail_step;
     n_accept = n_accept + accepted;
     accept_rate(i) = accept_rate_step;
-    step_rw(i,:) = exp(rw.lstep);
+    step_rw(i,:) = exp(obj.lstep);
     log_marg_like_st(i) = log_marg_like;
     log_post_st(i) = log_marg_like + log_prior;
     
@@ -134,12 +140,9 @@ for i=1:n_iter
         error('Number of failure exceeds max_fails: %d failures', n_fail)
     end
     
-    % Stop rescale and learning of covariance matrix
-    if (rw.rescale && rw.learn)
-        if i==n_rescale
-            rw.rescale = false;
-%             rw.learn = false;            
-        end
+    % Stop rescale
+    if (rw_rescale && (i==obj.n_rescale))
+        rw_rescale = false;  
     end  
     
 %     rw.cov
@@ -184,11 +187,6 @@ if ~isempty(latent_names)
     clear_monitors(console, 's')
 end
 
-% Turn off adaptation if checked
-if pmmh_rw_check_adapt(rw)
-    rw.rescale = false;
-    rw.learn = false;
-end
 
 % Reset log-norm constant and sampled values if not accepted to store the
 % last of the loglikelihood in the biips model
@@ -234,6 +232,6 @@ else
     out.step_rw = step_rw;
     out.log_marg_like = log_marg_like_st;
     out.log_post = log_post_st;
-    varargout{1} = rw;
+    varargout{1} = obj;
     varargout{2} = out;
 end

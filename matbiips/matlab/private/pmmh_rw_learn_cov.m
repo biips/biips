@@ -1,8 +1,8 @@
 function rw = pmmh_rw_learn_cov(rw, sample_param)
-
-if ~rw.learn
-    return;
-end
+% 
+% if ~rw.learn
+%     return;
+% end
 
 niter = rw.niter;
 
