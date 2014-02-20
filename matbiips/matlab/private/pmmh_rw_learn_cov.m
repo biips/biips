@@ -12,7 +12,7 @@ sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
 if niter==1
     rw.mean = sample_vec;
     rw.cov = sample_vec*sample_vec';
-else
+else % Recursive update of the empirical mean and covariance matrix
     rw.cov = (niter-1)/niter * rw.cov ...
         + (niter-1)/niter^2*(sample_vec - rw.mean)*(sample_vec - rw.mean)';
     rw.mean = (niter-1)/niter*rw.mean + 1/niter * sample_vec;
