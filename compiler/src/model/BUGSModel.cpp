@@ -295,8 +295,8 @@ namespace Biips
 
       Size iter = pSampler_->NIterations() - 1
                   - pSampler_->GetNodeSamplingIteration(it->left);
-      if (backwardSmoothMonitors_.size() < iter + 1 || !backwardSmoothMonitors_[iter]
-          && !backwardSmoothMonitors_[iter]->Contains(it->left))
+      if (backwardSmoothMonitors_.size() < iter + 1 || (!backwardSmoothMonitors_[iter]
+          && !backwardSmoothMonitors_[iter]->Contains(it->left)))
         return false;
     }
 
