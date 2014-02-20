@@ -66,6 +66,9 @@ namespace Biips
     virtual MathDistType mathDist(const NumArray::Array & paramValues) const;
     virtual RandomDistType randomDist(const NumArray::Array & paramValues) const;
 
+    virtual Bool
+    checkDensityParamValues(Scalar x, const NumArray::Array & paramValues) const;
+
   public:
     virtual String Alias() const
     {
