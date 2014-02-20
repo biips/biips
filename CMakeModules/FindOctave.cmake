@@ -1,6 +1,6 @@
 set(MEX_EXT mex)
 if (OCTAVE_ROOT)
-    find_program(OCTAVE_CONFIG octave-config PATHS ${OCTAVE_ROOT})
+    find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT})
     if (OCTAVE_CONFIG) 
         message (STATUS "(octave-config) found: ${OCTAVE_CONFIG}")
     	set(MATLAB_COMPILE_FLAGS -DOCTAVE)
@@ -47,7 +47,7 @@ if (OCTAVE_ROOT)
    endif(OCTAVE_CONFIG)
    
    
-   find_program(OCTAVE "octave" PATHS ${OCTAVE_ROOT})
+   find_program(OCTAVE "octave" ${OCTAVE_ROOT})
    if (OCTAVE)
        message(STATUS "octave found: ${OCTAVE}")
        set(MATLAB_COMMAND "${OCTAVE}")
