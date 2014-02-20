@@ -1,8 +1,8 @@
-function rw = pmmh_rw_learn_cov(rw, sample_param, accepted)
-
-if ~rw.learn
-    return;
-end
+function rw = pmmh_rw_learn_cov(rw, sample_param)
+% 
+% if ~rw.learn
+%     return;
+% end
 
 niter = rw.niter;
 
@@ -12,18 +12,8 @@ sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
 if niter==1
     rw.mean = sample_vec;
     rw.cov = sample_vec*sample_vec';
-else
+else % Recursive update of the empirical mean and covariance matrix
     rw.cov = (niter-1)/niter * rw.cov ...
         + (niter-1)/niter^2*(sample_vec - rw.mean)*(sample_vec - rw.mean)';
     rw.mean = (niter-1)/niter*rw.mean + 1/niter * sample_vec;
 end
-
-
-% if (accepted ||  isempty(rw.buffer))
-%     % Concatenate all variables in a vector
-%     % Concatenate all variables in a row vector
-%     sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
-%         'UniformOutput', false));
-%     % Push sample back in buffer
-%     rw.buffer = 
-
