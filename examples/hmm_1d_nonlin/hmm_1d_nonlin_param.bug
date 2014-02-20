@@ -2,7 +2,7 @@ var x_true[t_max], x[t_max], y[t_max]
 
 data
 {
-  log_prec_y_true ~ dunif(-3, 3)
+  #log_prec_y_true ~ dunif(-3, 3)
   prec_y_true <- exp(log_prec_y_true)
   x_true[1] ~ dnorm(mean_x_init, prec_x_init)
   y[1] ~ dnorm(x_true[1]^2/20, prec_y_true)

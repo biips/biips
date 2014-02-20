@@ -1,7 +1,7 @@
 function [sample_param, sample_latent, log_prior, log_marg_like, ...
     accept_rate, accepted, n_fail, rw] = one_update_pmmh(console, param_names, ...
     pn_param, sample_param, sample_latent, latent_names, log_prior, log_marg_like,...
-    n_part, rs_thres, rs_type, seed, rw)
+    n_part, rs_thres, rs_type, rw, rw_rescale, rw_learn)
 
 n_fail = 0;
 
@@ -32,7 +32,7 @@ end
 % Compute the marginal likelihood: Run SMC sampler
 log_marg_like_prop = 0;
 if (log_prior_prop ~= -Inf)
-    ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed)
+    ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
     if ~ok
         log_marg_like_prop = -Inf;
         n_fail = n_fail + 1;
@@ -69,10 +69,14 @@ if accepted
         end   
     end
 end
-sample_param
-sample_latent
 
 % rescale random walk stepsize
-rw = pmmh_rw_rescale(rw, accept_rate);
+if rw_rescale
+    rw = pmmh_rw_rescale(rw, accept_rate);
+end
 % Update empirical mean and covariance matrix
-rw = pmmh_rw_learn_cov(rw, sample_param, accepted);
+if rw_learn
+    rw = pmmh_rw_learn_cov(rw, sample_param);
+end
+
+

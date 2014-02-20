@@ -75,7 +75,12 @@ for i=1:2:length(opt_param)
                   else
                       varargout{ind} = opt_param{i+1};
                       found(ind) = true;
-                  end              
+                  end 
+              case {'logical'}
+                  varargout{ind} = opt_param{i+1};
+              otherwise 
+                  warning('Unknow parameter type %s for parameter %s',...
+                      param_type{ind}, param_names{ind});
           end
       end      
   end 
