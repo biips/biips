@@ -42,7 +42,11 @@ if (OCTAVE_ROOT)
                 "${CRUFT_LIBRARY}"
             )
         endif(MATLAB_LIBRARY_DIR)
+   else(OCTAVE_CONFIG)
+     message(WARNING "cannot find octave-config")
    endif(OCTAVE_CONFIG)
+   
+   
    find_program(OCTAVE "octave" PATHS ${OCTAVE_ROOT})
    if (OCTAVE)
        message(STATUS "octave found: ${OCTAVE}")
