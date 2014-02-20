@@ -27,7 +27,7 @@ y_name = ['y[1,1:' int2str(t_max) ']'];
 out_smc = biips_smc_samples(p, {x_name, y_name}, n_part, 'type', 'fsb');
 
 %% filtering stats
-x_summ = biips_summary(out_smc, 'fsb', 'fs');
+x_summ = biips_summary(out_smc, 'type', 'fs');
 
 % compute densities
 % x_dens = biips_density(out_smc, 'fsb', 'fs'); 
