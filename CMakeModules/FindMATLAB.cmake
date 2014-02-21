@@ -37,11 +37,16 @@ elseif(APPLE)
 endif(MATLAB_ROOT)
 
 # try to find matlab
-find_program(MATLAB matlab ${MATLAB_BINDIR})
+find_program(MATLAB matlab HINTS ${MATLAB_BINDIR} NO_DEFAULT_PATH)
+    
+if (NOT MATLAB)
+    # try to find matlab in default paths
+    find_program(MATLAB matlab)
+endif()
 
 # Yes! found it
 if (MATLAB)
-    message(STATUS "matlab found: ${MATLAB}")
+    message(STATUS "Found MATLAB: ${MATLAB}")
     set(MATLAB_COMMAND "${MATLAB}")
     set(MATLAB_FLAGS -nojvm -nosplash)
     if (NOT MATLAB_BINDIR)
@@ -82,7 +87,7 @@ if (MATLAB)
             OUTPUT_VARIABLE MEX_EXT
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        message(STATUS "mex extension on this machine : ${MEX_EXT}")
+        message(STATUS "mex extension on this machine: ${MEX_EXT}")
 
         # define matlab architecture
         # use MATLAB_ARCH on Windows to link with the correct BiiPS libs
@@ -98,7 +103,7 @@ if (MATLAB)
     # to compile mex-files but use cmake commands instead
     # hence, define compile flags and find MATLAB libraries to link with
     # define compile flags
-    set(MATLAB_COMPILE_FLAGS -DMATLAB_MEX_FILE)
+    set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE -fpermissive")
 
     if (NOT $ENV{MATLAB_LIBRARYDIR} STREQUAL "")
         file (TO_CMAKE_PATH $ENV{MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
