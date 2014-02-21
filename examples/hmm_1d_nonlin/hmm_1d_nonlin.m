@@ -154,6 +154,7 @@ for k=1:length(time_index)
 end
 legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
 
+
 %% BiiPS Particle Independent Metropolis-Hastings
 % We now use BiiPS to run a Particle Independent Metropolis-Hastings
 

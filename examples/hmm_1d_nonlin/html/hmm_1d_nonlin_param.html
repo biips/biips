@@ -1,0 +1,483 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Matbiips: Sensitivity analysis and parameter estimation in nonlinear non-Gaussian hidden Markov model</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-02-21"><meta name="DC.source" content="hmm_1d_nonlin_param.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Matbiips: Sensitivity analysis and parameter estimation in nonlinear non-Gaussian hidden Markov model</h1><!--introduction--><p>In this tutorial, we consider applying sequential Monte Carlo methods for sensitivity analysis and parameter estimation in a nonlinear non-Gaussian hidden Markov model.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Statistical model</a></li><li><a href="#2">Statistical model in BUGS language</a></li><li><a href="#4">Installation of Matbiips</a></li><li><a href="#5">Load model and data</a></li><li><a href="#9">BiiPS : Sensitivity analysis with Sequential Monte Carlo</a></li><li><a href="#13">BiiPS Particle Marginal Metropolis-Hastings</a></li><li><a href="#25">Clear model</a></li></ul></div><h2>Statistical model<a name="1"></a></h2><p>The statistical model is defined as follows.</p><p><img src="hmm_1d_nonlin_param_eq51166.png" alt="$$ x_1\sim \mathcal N\left (\mu_0, \frac{1}{\lambda_0}\right )$$"></p><p><img src="hmm_1d_nonlin_param_eq01687.png" alt="$$ y_1\sim \mathcal N\left (h(x_1), \frac{1}{\lambda_y}\right )$$"></p><p>For <img src="hmm_1d_nonlin_param_eq45863.png" alt="$t=2:t_{max}$"></p><p><img src="hmm_1d_nonlin_param_eq10710.png" alt="$$ x_t|x_{t-1} \sim \mathcal N\left ( f(x_{t-1},t-1), \frac{1}{\lambda_x}\right )$$"></p><p><img src="hmm_1d_nonlin_param_eq30045.png" alt="$$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$"></p><p>with <img src="hmm_1d_nonlin_param_eq73825.png" alt="$\mathcal N\left (m, S\right )$"> stands for the Gaussian distribution of mean <img src="hmm_1d_nonlin_param_eq81831.png" alt="$m$"> and covariance matrix <img src="hmm_1d_nonlin_param_eq68961.png" alt="$S$">, <img src="hmm_1d_nonlin_param_eq87702.png" alt="$h(x)=x^2/20$">, <img src="hmm_1d_nonlin_param_eq91341.png" alt="$f(x,t-1)=0.5\cdot x+25 x/(1+x^2)+8 \cos(1.2*(t-1))$">, <img src="hmm_1d_nonlin_param_eq16411.png" alt="$\mu_0=0$">, <img src="hmm_1d_nonlin_param_eq90550.png" alt="$\lambda_0 = 5$">, <img src="hmm_1d_nonlin_param_eq80701.png" alt="$\lambda_x = 0.1$">. The precision of the observation noise <img src="hmm_1d_nonlin_param_eq66508.png" alt="$\lambda_y$"> is also assumed to be unknown. We will assume a uniform prior for <img src="hmm_1d_nonlin_param_eq68326.png" alt="$\log(\lambda_y)$">:</p><p><img src="hmm_1d_nonlin_param_eq20575.png" alt="$$ \log(\lambda_y) \sim Unif([-3,3]) $$"></p><h2>Statistical model in BUGS language<a name="2"></a></h2><p>One needs to describe the model in BUGS language. We create the file  'hmm_1d_nonlin_param.bug':</p><pre>       var x_true[t_max], x[t_max], y[t_max]</pre><pre>       data
+       {
+         prec_y_true &lt;- exp(log_prec_y_true)
+         x_true[1] ~ dnorm(mean_x_init, prec_x_init)
+         y[1] ~ dnorm(x_true[1]^2/20, prec_y_true)
+         for (t in 2:t_max)
+         {
+           x_true[t] ~ dnorm(0.5*x_true[t-1]+25*x_true[t-1]/(1+x_true[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+           y[t] ~ dnorm(x_true[t]^2/20, prec_y_true)
+         }
+       }</pre><pre>       model
+       {
+         log_prec_y ~ dunif(-3, 3)
+         prec_y &lt;- exp(log_prec_y)
+         x[1] ~ dnorm(mean_x_init, prec_x_init)
+         y[1] ~ dnorm(x[1]^2/20, prec_y)
+         for (t in 2:t_max)
+         {
+           x[t] ~ dnorm(0.5*x[t-1]+25*x[t-1]/(1+x[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+           y[t] ~ dnorm(x[t]^2/20, prec_y)
+         }
+       }</pre><h2>Installation of Matbiips<a name="4"></a></h2><p>Unzip the Matbiips archive in some folder and add the Matbiips folder to the Matlab path</p><pre class="codeinput">matbiips_path = <span class="string">'..\..\matbiips\matlab'</span>;
+addpath(matbiips_path)
+</pre><h2>Load model and data<a name="5"></a></h2><p><b>Model parameters</b></p><pre class="codeinput">t_max = 20;
+mean_x_init = 0;
+prec_x_init = 1;
+prec_x = 10;
+log_prec_y_true = log(1); <span class="comment">% True value used to sample the data</span>
+data = struct(<span class="string">'t_max'</span>, t_max, <span class="string">'prec_x_init'</span>, prec_x_init,<span class="keyword">...</span>
+    <span class="string">'prec_x'</span>, prec_x,  <span class="string">'log_prec_y_true'</span>, log_prec_y_true, <span class="string">'mean_x_init'</span>, mean_x_init);
+</pre><p><b>Start BiiPS console</b></p><pre class="codeinput">biips_init;
+</pre><p><b>Compile BUGS model and sample data</b></p><pre class="codeinput">model = <span class="string">'hmm_1d_nonlin_param.bug'</span>; <span class="comment">% BUGS model filename</span>
+sample_data = true; <span class="comment">% Boolean</span>
+[model_id, data] = biips_model(model, data, <span class="string">'sample_data'</span>, sample_data); <span class="comment">% Create biips model and sample data</span>
+</pre><pre class="codeoutput">* Parsing model in: hmm_1d_nonlin_param.bug
+* Compiling data graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 280
+  Sampling data
+  Reading data back into data table
+* Compiling model graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 284
+</pre><h2>BiiPS : Sensitivity analysis with Sequential Monte Carlo<a name="9"></a></h2><p>Let now use BiiPS to provide estimates of the marginal log-likelihood and log-posterior (up to a normalizing constant) given various values of the log-precision parameters <img src="hmm_1d_nonlin_param_eq68326.png" alt="$\log(\lambda_y)$"> .</p><p><b>Parameters of the algorithm</b>.</p><pre class="codeinput">n_part = 100; <span class="comment">% Number of particles</span>
+param_names = {<span class="string">'log_prec_y[1:1]'</span>}; <span class="comment">% Parameter for which we want to study sensitivity</span>
+param_values = {-5:.2:3}; <span class="comment">% Range of values</span>
+</pre><p><b>Run sensitivity analysis with SMC</b></p><pre class="codeinput">out = biips_smc_sensitivity(model_id, param_names, param_values, n_part);
+</pre><pre class="codeoutput">* Analyzing sensitivity with 100 particles
+  |--------------------------------------------------| 100%
+  |**************************************************| 41 iterations in 1.84 s
+</pre><p><b>Plot log-marginal likelihood and penalized log-marginal likelihood</b></p><pre class="codeinput">figure(<span class="string">'name'</span>, <span class="string">'log-marginal likelihood'</span>);
+plot(param_values{1}, out.log_marg_like, <span class="string">'.'</span>)
+xlabel(<span class="string">'Parameter log\_prec\_y'</span>)
+ylabel(<span class="string">'Log-marginal likelihood'</span>)
+
+figure(<span class="string">'name'</span>, <span class="string">'penalized log-marginal likelihood'</span>);
+plot(param_values{1}, out.log_marg_like_pen, <span class="string">'.'</span>)
+xlabel(<span class="string">'Parameter log\_prec\_y'</span>)
+ylabel(<span class="string">'Penalized log-marginal likelihood'</span>)
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_01.png" alt=""> <img vspace="5" hspace="5" src="hmm_1d_nonlin_param_02.png" alt=""> <h2>BiiPS Particle Marginal Metropolis-Hastings<a name="13"></a></h2><p>We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order to obtain posterior MCMC samples of the parameter and variables x.</p><p><b>Parameters of the PMMH</b> param_names indicates the parameters to be sampled using a random walk Metroplis-Hastings step. For all the other variables, biips will use a sequential Monte Carlo as proposal.</p><pre class="codeinput">n_burn = 2000; <span class="comment">% nb of burn-in/adaptation iterations</span>
+n_iter = 2000; <span class="comment">% nb of iterations after burn-in</span>
+thin = 1; <span class="comment">% thinning of MCMC outputs</span>
+n_part = 50; <span class="comment">% nb of particles for the SMC</span>
+var_name = <span class="string">'log_prec_y[1:1]'</span>;
+param_names = {var_name}; <span class="comment">% name of the variables updated with MCMC (others are updated with SMC)</span>
+latent_names = {<span class="string">'x'</span>}; <span class="comment">% name of the variables updated with SMC and that need to be monitored</span>
+</pre><p><b>Init PMMH</b></p><pre class="codeinput">obj_pmmh = biips_pmmh_object(model_id, param_names, <span class="string">'inits'</span>, {-2}); <span class="comment">% creates a pmmh object</span>
+</pre><p><b>Run PMMH</b></p><pre class="codeinput">obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); <span class="comment">% adaptation and burn-in iterations</span>
+[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,<span class="keyword">...</span>
+    <span class="string">'thin'</span>, 1, <span class="string">'latent_names'</span>, latent_names); <span class="comment">% Samples</span>
+</pre><pre class="codeoutput">* Initializing PMMH
+* Adapting PMMH with 50 particles
+  |--------------------------------------------------| 100%
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 2000 iterations in 20.31 s
+* Initializing PMMH - latent variables
+* Generating 2000 PMMH samples with 50 particles
+  |--------------------------------------------------| 100%
+  |**************************************************| 2000 iterations in 20.52 s
+</pre><p><b>Some summary statistics</b></p><pre class="codeinput">summary_pmmh = biips_summary(out_pmmh, <span class="string">'probs'</span>, [.025, .975]);
+</pre><p><b>Compute kernel density estimates</b></p><pre class="codeinput">kde_estimates_pmmh = biips_density(out_pmmh);
+</pre><p><b>Posterior mean and credibilist interval for the parameter</b></p><pre class="codeinput">fprintf(<span class="string">'Posterior mean of log_prec_y: %.1f\n'</span>,summary_pmmh.(var_name).mean);
+fprintf(<span class="string">'95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n'</span>,<span class="keyword">...</span>
+    summary_pmmh.(var_name).quant(1),  summary_pmmh.(var_name).quant(2));
+</pre><pre class="codeoutput">Posterior mean of log_prec_y: -0.5
+95% credibilist interval for log_prec_y: [-1.3,0.2]
+</pre><p><b>Trace of MCMC samples for the parameter</b></p><pre class="codeinput">figure(<span class="string">'name'</span>, <span class="string">'PMMH: Trace samples parameter'</span>)
+plot(out_pmmh.(var_name))
+hold <span class="string">on</span>
+plot(0, data.log_prec_y_true, <span class="string">'*g'</span>);
+xlabel(<span class="string">'Iterations'</span>)
+ylabel(<span class="string">'PMMH samples'</span>)
+title(<span class="string">'log\_prec\_y'</span>)
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_03.png" alt=""> <p><b>Histogram and kde estimate of the posterior for the parameter</b></p><pre class="codeinput">figure(<span class="string">'name'</span>, <span class="string">'PMMH: Histogram posterior parameter'</span>)
+hist(out_pmmh.(var_name), 15)
+hold <span class="string">on</span>
+plot(data.log_prec_y_true, 0, <span class="string">'*g'</span>);
+xlabel(<span class="string">'log\_prec\_y'</span>)
+ylabel(<span class="string">'number of samples'</span>)
+title(<span class="string">'log\_prec\_y'</span>)
+
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: KDE estimate posterior parameter'</span>)
+plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f);
+hold <span class="string">on</span>
+plot(data.log_prec_y_true, 0, <span class="string">'*g'</span>);
+xlabel(<span class="string">'log\_prec\_y'</span>);
+ylabel(<span class="string">'posterior density'</span>);
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_04.png" alt=""> <img vspace="5" hspace="5" src="hmm_1d_nonlin_param_05.png" alt=""> <p><b>Posterior mean and quantiles for x</b></p><pre class="codeinput">x_pmmh_mean = summary_pmmh.x.mean;
+x_pmmh_quant = summary_pmmh.x.quant;
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: Posterior mean and quantiles'</span>)
+fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],<span class="keyword">...</span>
+    [.7 .7 1], <span class="string">'edgecolor'</span>, <span class="string">'none'</span>)
+hold <span class="string">on</span>
+plot(x_pmmh_mean, <span class="string">'linewidth'</span>, 3)
+xlabel(<span class="string">'Time'</span>)
+ylabel(<span class="string">'Estimates'</span>)
+legend({<span class="string">'95 % credible interval'</span>, <span class="string">'PMMH Mean Estimate'</span>})
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_06.png" alt=""> <p><b>Trace of MCMC samples for x</b></p><pre class="codeinput">time_index = [5, 10, 15, 20];
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: Trace samples x'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(out_pmmh.x(tk, :))
+    hold <span class="string">on</span>
+    plot(0, data.x_true(tk), <span class="string">'*g'</span>);
+    xlabel(<span class="string">'Iterations'</span>)
+    ylabel(<span class="string">'PMMH samples'</span>)
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+legend({<span class="string">'PMMH samples'</span>, <span class="string">'True value'</span>});
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_07.png" alt=""> <p><b>Histogram and kernel density estimate of posteriors of x</b></p><pre class="codeinput">figure(<span class="string">'name'</span>, <span class="string">'PMMH: Histograms Marginal Posteriors'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    hist(out_pmmh.x(tk, :), 15);
+    hold <span class="string">on</span>
+    plot(data.x_true(tk), 0, <span class="string">'*g'</span>);
+    xlabel([<span class="string">'x_{'</span> num2str(tk) <span class="string">'}'</span>]);
+    ylabel(<span class="string">'number of samples'</span>);
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+legend({<span class="string">'smoothing density'</span>, <span class="string">'True value'</span>});
+
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: KDE estimates Marginal posteriors'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
+    hold <span class="string">on</span>
+    plot(data.x_true(tk), 0, <span class="string">'*g'</span>);
+    xlabel([<span class="string">'x_{'</span> num2str(tk) <span class="string">'}'</span>]);
+    ylabel(<span class="string">'posterior density'</span>);
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+legend({<span class="string">'posterior density'</span>, <span class="string">'True value'</span>}, <span class="string">'fontsize'</span>, 12);
+</pre><img vspace="5" hspace="5" src="hmm_1d_nonlin_param_08.png" alt=""> <img vspace="5" hspace="5" src="hmm_1d_nonlin_param_09.png" alt=""> <h2>Clear model<a name="25"></a></h2><pre class="codeinput">biips_clear(model_id)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Matbiips: Sensitivity analysis and parameter estimation in nonlinear non-Gaussian hidden Markov model
+% In this tutorial, we consider applying sequential Monte Carlo methods for
+% sensitivity analysis and parameter estimation in a nonlinear non-Gaussian hidden Markov model.
+
+%% Statistical model
+% The statistical model is defined as follows.
+%
+% $$ x_1\sim \mathcal N\left (\mu_0, \frac{1}{\lambda_0}\right )$$
+%
+% $$ y_1\sim \mathcal N\left (h(x_1), \frac{1}{\lambda_y}\right )$$
+%
+% For $t=2:t_{max}$
+%
+% $$ x_t|x_{t-1} \sim \mathcal N\left ( f(x_{t-1},t-1), \frac{1}{\lambda_x}\right )$$
+%
+% $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
+%
+% with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
+% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5\cdot
+% x+25 x/(1+x^2)+8 \cos(1.2*(t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x
+% = 0.1$. The precision of the observation noise
+% $\lambda_y$ is also assumed to be unknown. We will assume a uniform prior
+% for $\log(\lambda_y)$:
+%
+% $$ \log(\lambda_y) \sim Unif([-3,3]) $$
+
+%% Statistical model in BUGS language
+% One needs to describe the model in BUGS language. We create the file
+%  'hmm_1d_nonlin_param.bug':
+
+%%
+%
+% 
+%         var x_true[t_max], x[t_max], y[t_max]
+% 
+%         data
+%         {
+%           prec_y_true <- exp(log_prec_y_true)
+%           x_true[1] ~ dnorm(mean_x_init, prec_x_init)
+%           y[1] ~ dnorm(x_true[1]^2/20, prec_y_true)
+%           for (t in 2:t_max)
+%           {
+%             x_true[t] ~ dnorm(0.5*x_true[t-1]+25*x_true[t-1]/(1+x_true[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+%             y[t] ~ dnorm(x_true[t]^2/20, prec_y_true)
+%           }
+%         }
+% 
+%         model
+%         {
+%           log_prec_y ~ dunif(-3, 3)
+%           prec_y <- exp(log_prec_y)
+%           x[1] ~ dnorm(mean_x_init, prec_x_init)
+%           y[1] ~ dnorm(x[1]^2/20, prec_y)
+%           for (t in 2:t_max)
+%           {
+%             x[t] ~ dnorm(0.5*x[t-1]+25*x[t-1]/(1+x[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+%             y[t] ~ dnorm(x[t]^2/20, prec_y)
+%           }
+%         }
+
+%% Installation of Matbiips
+% Unzip the Matbiips archive in some folder
+% and add the Matbiips folder to the Matlab path
+% 
+
+matbiips_path = '..\..\matbiips\matlab';
+addpath(matbiips_path)
+
+%% Load model and data
+%
+
+%%
+% *Model parameters*
+t_max = 20;
+mean_x_init = 0;
+prec_x_init = 1;
+prec_x = 10; 
+log_prec_y_true = log(1); % True value used to sample the data
+data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
+    'prec_x', prec_x,  'log_prec_y_true', log_prec_y_true, 'mean_x_init', mean_x_init);
+
+%%
+% *Start BiiPS console*
+biips_init;
+
+%%
+% *Compile BUGS model and sample data*
+model = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
+sample_data = true; % Boolean
+[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+
+
+%% BiiPS : Sensitivity analysis with Sequential Monte Carlo
+% Let now use BiiPS to provide estimates of the marginal log-likelihood and 
+% log-posterior (up to a normalizing constant) given various values of the
+% log-precision parameters $\log(\lambda_y)$ .
+
+%%
+% *Parameters of the algorithm*. 
+n_part = 100; % Number of particles
+param_names = {'log_prec_y[1:1]'}; % Parameter for which we want to study sensitivity
+param_values = {-5:.2:3}; % Range of values
+
+%%
+% *Run sensitivity analysis with SMC*
+out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+
+%%
+% *Plot log-marginal likelihood and penalized log-marginal likelihood*
+figure('name', 'log-marginal likelihood');
+plot(param_values{1}, out.log_marg_like, '.')
+xlabel('Parameter log\_prec\_y')
+ylabel('Log-marginal likelihood')
+
+figure('name', 'penalized log-marginal likelihood');
+plot(param_values{1}, out.log_marg_like_pen, '.')
+xlabel('Parameter log\_prec\_y')
+ylabel('Penalized log-marginal likelihood')
+
+
+%% BiiPS Particle Marginal Metropolis-Hastings
+% We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
+% to obtain posterior MCMC samples of the parameter and variables x.
+
+%%
+% *Parameters of the PMMH*
+% param_names indicates the parameters to be sampled using a random walk
+% Metroplis-Hastings step. For all the other variables, biips will use a
+% sequential Monte Carlo as proposal.
+n_burn = 2000; % nb of burn-in/adaptation iterations
+n_iter = 2000; % nb of iterations after burn-in
+thin = 1; % thinning of MCMC outputs
+n_part = 50; % nb of particles for the SMC
+var_name = 'log_prec_y[1:1]';
+param_names = {var_name}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
+
+%%
+% *Init PMMH*
+obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-2}); % creates a pmmh object
+
+%%
+% *Run PMMH*
+obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', 1, 'latent_names', latent_names); % Samples
+ 
+%%
+% *Some summary statistics*
+summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+
+%%
+% *Compute kernel density estimates*
+kde_estimates_pmmh = biips_density(out_pmmh);
+
+%%
+% *Posterior mean and credibilist interval for the parameter*
+fprintf('Posterior mean of log_prec_y: %.1f\n',summary_pmmh.(var_name).mean);
+fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
+    summary_pmmh.(var_name).quant(1),  summary_pmmh.(var_name).quant(2));
+
+
+%%
+% *Trace of MCMC samples for the parameter*
+figure('name', 'PMMH: Trace samples parameter')
+plot(out_pmmh.(var_name))
+hold on
+plot(0, data.log_prec_y_true, '*g');  
+xlabel('Iterations')
+ylabel('PMMH samples')
+title('log\_prec\_y')
+
+%%
+% *Histogram and kde estimate of the posterior for the parameter*
+figure('name', 'PMMH: Histogram posterior parameter')
+hist(out_pmmh.(var_name), 15)
+hold on
+plot(data.log_prec_y_true, 0, '*g');  
+xlabel('log\_prec\_y')
+ylabel('number of samples')
+title('log\_prec\_y')
+
+figure('name', 'PMMH: KDE estimate posterior parameter')
+plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f); 
+hold on
+plot(data.log_prec_y_true, 0, '*g');
+xlabel('log\_prec\_y');
+ylabel('posterior density');
+   
+
+%%
+% *Posterior mean and quantiles for x*
+x_pmmh_mean = summary_pmmh.x.mean;
+x_pmmh_quant = summary_pmmh.x.quant;
+figure('name', 'PMMH: Posterior mean and quantiles')
+fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+    [.7 .7 1], 'edgecolor', 'none')
+hold on
+plot(x_pmmh_mean, 'linewidth', 3)
+xlabel('Time')
+ylabel('Estimates')
+legend({'95 % credible interval', 'PMMH Mean Estimate'})
+
+%%
+% *Trace of MCMC samples for x*
+time_index = [5, 10, 15, 20];
+figure('name', 'PMMH: Trace samples x')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(out_pmmh.x(tk, :))
+    hold on
+    plot(0, data.x_true(tk), '*g');  
+    xlabel('Iterations')
+    ylabel('PMMH samples')
+    title(['t=', num2str(tk)]);
+end
+legend({'PMMH samples', 'True value'});
+
+%%
+% *Histogram and kernel density estimate of posteriors of x*
+figure('name', 'PMMH: Histograms Marginal Posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    hist(out_pmmh.x(tk, :), 15);
+    hold on    
+    plot(data.x_true(tk), 0, '*g');
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('number of samples');
+    title(['t=', num2str(tk)]);    
+end
+legend({'smoothing density', 'True value'});
+
+figure('name', 'PMMH: KDE estimates Marginal posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
+    hold on
+    plot(data.x_true(tk), 0, '*g');
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('posterior density');
+    title(['t=', num2str(tk)]);    
+end
+legend({'posterior density', 'True value'}, 'fontsize', 12);
+
+
+%% Clear model
+% 
+
+biips_clear(model_id)
+
+##### SOURCE END #####
+--></body></html>

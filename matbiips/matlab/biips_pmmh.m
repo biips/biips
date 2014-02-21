@@ -205,7 +205,6 @@ end
 if return_samples
     %% Set output structure
     for k=1:length(param_names) % Remove singleton dimensions for vectors
-        size(samples_param_st{k})
         samples_all{k} = squeeze(samples_param_st{k});
         if size(samples_all{k}, ndims(samples_all{k}))==1 % needed because weird behavior of squeeze with [1,1,n]
             samples_all{k} = samples_all{k}';
