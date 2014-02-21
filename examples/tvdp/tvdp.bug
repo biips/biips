@@ -19,7 +19,7 @@ model
   {
     for (i in 1:clust_max)
     {
-        m_up[t-1,i] ~ dbinom(m[t-1,i], rho)
+        m_up[t-1,i] ~ dbinom(rho, m[t-1,i])
     }
     p[t,] <- (m_up[t-1,] + alpha/clust_max)/(sum(m_up[t-1,])+alpha)    
     c[t,] ~ dmulti(p[t,], 1)

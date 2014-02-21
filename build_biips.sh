@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "Usage:   ./build_biips.sh [-jN]"
+    echo "Usage:   ./build_biips.sh [-jN] [-g]"
     echo "By default, N=1"
 fi
 
@@ -9,47 +9,68 @@ set -x;
 # Change these variables to fit your needs
 #-----------------------------------------
 # prefer absolute over relative paths
-export BIIPS_SRC=`pwd`
-export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
-export BIIPS_ROOT=/home/adrien-alea/biips
-export LIBnn=lib/x86_64-linux-gnu
-# Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
-# OpenSuse: use lib or lib64
-export ECLIPSE=/home/adrien-alea/eclipse_4.3
-export MATLAB_ROOT=/usr/local/MATLAB/R2012b
-export CMAKE_BUILD_TYPE=Release
-export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
-# OpenSuse: add -DBoost_USE_STATIC_LIBS=OFF
-# Generate Eclipse source project: add -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE
-export CPACK_GENERATOR=DEB
-# OpenSuse: use RPM
-export MAKE="make $1"
 
-# environment variables for Mac
-if [ "$(uname)" == "Darwin" ]; then
-    export BIIPS_BUILD=/Users/adrien/workspace/biips-build
+if [[ "$(uname)" == "Darwin" ]]; then
+    # environment variables for Mac
+    export BIIPS_SRC=`pwd`
     export BIIPS_ROOT=/Users/adrien/biips
     export BOOST_ROOT=/Users/adrien/boost_1_49_0
 	export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
 	export CMAKE_GENERATOR="Unix Makefiles"
-    export CMAKE_BUILD_TYPE=Release
 	export CMAKE_OPTIONS=""
     export CPACK_GENERATOR="PackageMaker"
     export LIBnn=lib
+    
+    if [[ "$2"=="-g" ]]; then
+        export BIIPS_BUILD=/Users/adrien/workspace/biips-debug
+        export CMAKE_BUILD_TYPE=Debug
+    else
+        export BIIPS_BUILD=/Users/adrien/workspace/biips-build
+        export CMAKE_BUILD_TYPE=Release
+    fi
+else
+    # environment variables for Linux
+    export BIIPS_SRC=`pwd`
+    export BIIPS_ROOT=/home/adrien-alea/biips
+    export LIBnn=lib/x86_64-linux-gnu
+    # Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
+    # OpenSuse: use lib or lib64
+    export ECLIPSE=/home/adrien-alea/eclipse_4.3/eclipse
+    export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
+    export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_EXECUTABLE=$ECLIPSE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
+    # OpenSuse: add -DBoost_USE_STATIC_LIBS=OFF
+    export CPACK_GENERATOR=DEB
+    # OpenSuse: use RPM
+    export MAKE="make $1"
+
+    if [[ "$2" == "-g" ]]; then
+        export BIIPS_BUILD=/home/adrien-alea/workspace/biips-debug
+        export MATLAB_ROOT=/usr/local/MATLAB/R2010b
+        export CMAKE_BUILD_TYPE=Debug
+    else
+        export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
+        export MATLAB_ROOT=/usr/local/MATLAB/R2012b
+        export CMAKE_BUILD_TYPE=Release
+    fi
 fi
+
 
 #-----------------------------------------
 
-set +x; read -p 'Press [Enter] key to continue...'; set -x
-cd $BIIPS_SRC
-git pull origin master
+set +x; echo -n "*** Git pull? (y/[n])"; read ans
+if [[ $ans == "y" ]]; then set -x
+    cd $BIIPS_SRC
+    git pull origin master
+fi
 
-set +x; echo -n "Run CMake ? (y/[n])"; read ans
+set +x; echo -n "*** Run CMake? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then
-	echo -n "Clear build directory ? (y/[n])"; read ans
+	echo -n "*** Clear build directory? (y/[n])"; read ans
 	if [[ $ans == "y" ]]; then set -x
-	    rm -rf $BIIPS_BUILD; mkdir $BIIPS_BUILD
+	    rm -rf $BIIPS_BUILD
+	fi
+	set +x; if [ ! -d "$BIIPS_BUILD" ]; then set -x
+	    mkdir $BIIPS_BUILD
 	fi
     set -x
     cd $BIIPS_BUILD
@@ -61,24 +82,24 @@ fi
 
 cd $BIIPS_BUILD
 
-set +x; echo -n "Build/install Biips ? (y/[n])"; read ans
+set +x; echo -n "*** Build/install Biips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     rm -rf $BIIPS_ROOT; mkdir $BIIPS_ROOT
     $MAKE install
 
-    set +x; echo -n "Run BiipsTest tests ? (y/[n])"; read ans
+    set +x; echo -n "*** Run BiipsTest tests? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test
         $MAKE test
     fi
 
-    set +x; echo -n "Run BiipsTestCompiler tests ? (y/[n])"; read ans
+    set +x; echo -n "*** Run BiipsTestCompiler tests? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/testcompiler
         $MAKE test
     fi
 
-    set +x; echo -n "Package Biips ? (y/[n])"; read ans
+    set +x; echo -n "*** Package Biips? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD
         cpack -G $CPACK_GENERATOR
@@ -88,7 +109,7 @@ if [[ $ans == "y" ]]; then set -x
 fi
 
 
-set +x; echo -n "Install/build RBiips ? (y/[n])"; read ans
+set +x; echo -n "*** Install/build RBiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
@@ -99,18 +120,18 @@ if [[ $ans == "y" ]]; then set -x
         $MAKE VERBOSE=1 RBiips_INSTALL
         $MAKE RBiips_build
     fi
-    set +x; echo -n "Make RBiips PDF doc ? (y/[n])"; read ans
+    set +x; echo -n "*** Make RBiips PDF doc? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         $MAKE RBiips_Rd2pdf
     fi
 fi
 
-set +x; echo -n "Build MatBiips ? (y/[n])"; read ans
+set +x; echo -n "*** Build MatBiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
     $MAKE matbiips_package
 
-    set +x; echo -n "Run MatBiips tests ? (y/[n])"; read ans
+    set +x; echo -n "*** Run MatBiips tests? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
         ctest -VV
@@ -118,5 +139,5 @@ if [[ $ans == "y" ]]; then set -x
 fi
 
 
-set +x; read -p 'Press [Enter] key to finish...'
+set +x; read -p "*** Press [Enter] key to finish..."
 
