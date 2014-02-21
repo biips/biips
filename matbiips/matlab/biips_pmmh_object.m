@@ -21,6 +21,11 @@ param_names = unique(param_names);
 n_param = length(param_names);
 
 
+%% Stops biips verbosity
+inter_biips('verbosity', 0);
+cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+
+
 % Console and parameter names
 obj.console = console;
 obj.param_names = param_names;
@@ -68,8 +73,6 @@ else
     end
 end
 % Concatenate all log value in a vector
-iscell(rw_step)
-cellfun(@log, rw_step)
 obj.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false));
 
 % Covariance matrix
