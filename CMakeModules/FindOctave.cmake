@@ -3,7 +3,7 @@ if (OCTAVE_ROOT)
     find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT})
     if (OCTAVE_CONFIG) 
         message (STATUS "(octave-config) found: ${OCTAVE_CONFIG}")
-    	set(MATLAB_COMPILE_FLAGS -DOCTAVE -m64 -fPIC)
+    	set(MATLAB_COMPILE_FLAGS -DOCTAVE)
         # retrieve INCLUDE
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTINCLUDEDIR
                 OUTPUT_VARIABLE OCT_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
