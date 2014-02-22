@@ -21,7 +21,6 @@ std::deque<ProgressBar_ptr> progress;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	try {
 		if (nrhs < 1) {
 			myMexErrMsg("noArgs", "must have at least one argument");
 		}
@@ -34,6 +33,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		String name_func = GetString(prhs[0]);
 
+	    try {
 		/////////////////////////////////////////
 		// MAKE_CONSOLE FUNCTION
 		/////////////////////////////////////////
@@ -74,7 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			String filename = GetString(prhs[2]);
 
 			if (! p_console->CheckModel(filename, VERBOSITY))
-				myMexErrMsg(name_func, "Model syntax is incorrect.");
+				myMexErrMsg(name_func, name_func + "Model syntax is incorrect.");
 		}
 		/////////////////////////////////////////
 		// COMPILE_MODEL FUNCTION
@@ -201,7 +201,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			Size nbVarNames = static_cast<Size>(mxGetNumberOfElements(prhs[2]));
 
 			if ((nbVarNames != mxGetNumberOfElements(prhs[3])) || (nbVarNames != mxGetNumberOfElements(prhs[4])))
-				myMexErrMsg(name_func, name_func+": arguments 2, 3 and 4 must have the same number of elements");
+				myMexErrMsg(name_func, name_func + ": arguments 2, 3 and 4 must have the same number of elements");
 
 			CheckArgIsCell(2);
 			CheckArgIsCell(3);
@@ -1077,30 +1077,38 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			CheckArgIsString(6);
 
 
-			String arg1 = GetString(prhs[1]);
-			Size arg2 = static_cast<Size>(*mxGetPr(prhs[2]));
-			String arg3 = GetString(prhs[3]);
-			String arg4 = GetString(prhs[4]);
-			String arg5 = GetString(prhs[5]);
-			String arg6 = GetString(prhs[6]);
+			String name = GetString(prhs[1]);
+			Size npar = static_cast<Size>(*mxGetPr(prhs[2]));
+			String fundim = GetString(prhs[3]);
+			String funeval = GetString(prhs[4]);
+			String funcheckpar = GetString(prhs[5]);
+			String funisdiscrete = GetString(prhs[6]);
 
-
-			if (!Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(arg1,
-					arg2,
-					arg3,
-					arg4,
-					arg5,
-					arg6)))) {
-				myMexErrMsg(name_func, name_func+": can not insert the function (may already exist?)");
+			if (Compiler::FuncTab().Contains(name))
+			{
+			  if (Compiler::FuncTab().IsLocked(name))
+                myMexErrMsg(name_func, name_func + ": can't add function: "
+                            + name + " is an existing locked function.");
+			  else
+			    mbiips_cerr << name_func + ": replacing existing function "
+                + name;
+			}
+			if (!Compiler::FuncTab().Insert(Function::Ptr(new MatlabFunction(name,
+			                                                                 npar,
+			                                                                 fundim,
+			                                                                 funeval,
+			                                                                 funcheckpar,
+			                                                                 funisdiscrete)))) {
+				myMexErrMsg(name_func, name_func + ": could not add function" + name);
 			}
 		}
 		else {
-			myMexErrMsg("invalidNameFunc", name_func+": invalid name of function");
+			myMexErrMsg("invalidNameFunc", name_func + ": invalid function name");
 		}
 	}
 	catch (std::exception& e)
 	{
-		myMexErrMsg("cppException", String("BiiPS c++ exception: ") + e.what());
+		myMexErrMsg(name_func+":cppException", name_func + ": BiiPS c++ exception: " + e.what());
 	}
 	return;
 }

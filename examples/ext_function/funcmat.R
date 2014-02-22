@@ -1,3 +1,4 @@
+require(RBiips)
 ## define data
 t_max <- 10
 data <- list(
@@ -27,7 +28,7 @@ myfunisdiscrete = function (x,v) { FALSE }
 
 
 ## build evaluation functions
-zut <- biips.add.function("funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
+biips.add.function("funcmat", 2, myfuncdim , myfunceval, myfuncheckparam, myfunisdiscrete)
 biips <- biips.model('funcmat.bug', data=data, sample.data=FALSE);
 x_true = biips$data()$x_true;
 
