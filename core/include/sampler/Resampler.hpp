@@ -60,7 +60,7 @@ namespace Biips
 
   public:
     Resampler(const String & name) :
-      name_(name)
+      name_(name), nParticles_(0)
     {
     }
 
