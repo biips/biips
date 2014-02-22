@@ -1,3 +1,7 @@
+Adrien le 21/02/2014:
+=====================
+- [ ] améliorer FindMatlab.cmake : vérifier les options de compilation utilisées par mex (voir MATLAB_ROOT/bin/mbuildopts.sh)
+
 François le 21/02/2014:
 ======================
 PMMH quasiment fini en matbiips. Creation d'une fonction `biips_pmmh_object` qui cree une structure contenant les variables utilisees pour la loi de proposition et pour l'adaptation. Maintenant, on ne peut adapter que dans `biips_pmmh_update`. 
@@ -5,7 +9,7 @@ J'ai supprimer la possibilite de choisir le type de rescaling et la variable `rw
 Exemple `hmm_1d_nonlin` termine. 
 
 A faire dans le PMMH:
-- [ ]  Tester le PMMH et sensitivity sur un exemple ou le parametre est multiD et/ou il y a plusieurs parametres
+- [ ] Tester le PMMH et sensitivity sur un exemple ou le parametre est multiD et/ou il y a plusieurs parametres
 - [ ] Creer une fonction test permettant de tester avec les differentes options et differentes conditions
 - [ ] ajouter entetes fonctions PMMH
 - [ ] verifier la procedure de rescaling - semble donner des resultats aberrants de temps en temps(valeurs tres faibles ou tres larges)

@@ -3,6 +3,7 @@
 
 # Variables defined if MATLAB is not "MATLAB-NOTFOUND":
 # MATLAB_COMMAND
+# MATLAB_VERSION
 # MATLAB_FLAGS
 # MATLAB_BINDIR
 # MEX_COMMAND
@@ -34,39 +35,31 @@ elseif(APPLE)
     file(GLOB _MATLAB_PATHS "/Applications/MATLAB_*")
     find_path(MATLAB_ROOT "license.txt" ${_MATLAB_PATHS})
     file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
-endif(MATLAB_ROOT)
+endif()
 
-# try to find matlab
-find_program(MATLAB matlab HINTS ${MATLAB_BINDIR} NO_DEFAULT_PATH)
-    
-if (NOT MATLAB)
+if (MATLAB_BINDIR)
+    # try to find matlab
+    find_program(MATLAB matlab HINTS ${MATLAB_BINDIR} NO_DEFAULT_PATH)
+else()
     # try to find matlab in default paths
     find_program(MATLAB matlab)
 endif()
 
 # Yes! found it
 if (MATLAB)
-    message(STATUS "Found MATLAB: ${MATLAB}")
+    message(STATUS "Found Matlab: ${MATLAB}")
     set(MATLAB_COMMAND "${MATLAB}")
-    set(MATLAB_FLAGS -nojvm -nosplash)
+    set(MATLAB_FLAGS -nojvm)
     if (NOT MATLAB_BINDIR)
         # if matlab is found in /usr/local/bin
         # mex and mexext programs will certainly not be there
         # hence we define MATLAB_BINDIR using the 'matlabroot' MATLAB command
-        file (TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/matlab_root" _matlab_root_file)
 		execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
-			-r "fprintf(fopen('matlab_root','w'), '%s', matlabroot); exit"
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            OUTPUT_QUIET)
-		while (NOT MATLAB_ROOT)
-			while (NOT EXISTS ${_matlab_root_file})
-				# wait for previous execute_process
-			endwhile()
-			file (READ "${_matlab_root_file}" MATLAB_ROOT)
-		endwhile()
-        file (REMOVE "${_matlab_root_file}")
+			-r "disp(matlabroot);exit"
+			OUTPUT_VARIABLE _out)
+        string(REGEX MATCH "/.*$" MATLAB_ROOT ${_out})
         file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
-    endif(NOT MATLAB_BINDIR)
+    endif()
 
     # find mex program
     find_program(MEX_COMMAND
@@ -103,7 +96,7 @@ if (MATLAB)
     # to compile mex-files but use cmake commands instead
     # hence, define compile flags and find MATLAB libraries to link with
     # define compile flags
-    set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE -fpermissive")
+    set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE")
 
     if (NOT $ENV{MATLAB_LIBRARYDIR} STREQUAL "")
         file (TO_CMAKE_PATH $ENV{MATLAB_LIBRARYDIR} MATLAB_LIBRARYDIR)
@@ -176,6 +169,7 @@ if (MATLAB)
 endif(MATLAB)
 
 mark_as_advanced(
+    MATLAB_VERSION
     MATLAB_LIBRARIES
     MATLAB_MEX_LIBRARY
     MATLAB_MX_LIBRARY
