@@ -1,6 +1,9 @@
 Adrien le 21/02/2014:
 =====================
 - [ ] améliorer FindMatlab.cmake : vérifier les options de compilation utilisées par mex (voir MATLAB_ROOT/bin/mbuildopts.sh)
+- [ ] vérifier la validité des noms de fonction dans add_function
+- [x] permettre de remplacer les fonctions avec add_function mais protéger les fonctions du module base
+- [ ] permettre compilation 32bit sous windows
 
 François le 21/02/2014:
 ======================
@@ -67,7 +70,7 @@ Can't get log normalizing constant. SMC sampler did not finish!
 J'ai l'impression que l'erreur vient du fait que dans dbinom(n, p), j'ai 
 quelquefois n=0.
 
-- [ ] Est-ce que cela peut se gérer?
+- [x] Est-ce que cela peut se gérer?
 
 Adrien le 11/02/2014 :
 ======================
