@@ -97,81 +97,81 @@ namespace Biips
   void loadBaseModule(FunctionTable & funcTab, DistributionTable & distTab)
   {
     // TODO check returned boolean
-    funcTab.Insert(And::Instance());
-    funcTab.Insert(Or::Instance());
-    funcTab.Insert(Not::Instance());
+    funcTab.Insert(And::Instance(), true);
+    funcTab.Insert(Or::Instance(), true);
+    funcTab.Insert(Not::Instance(), true);
 
-    funcTab.Insert(GreaterThan::Instance());
-    funcTab.Insert(GreaterOrEqual::Instance());
-    funcTab.Insert(LessThan::Instance());
-    funcTab.Insert(LessOrEqual::Instance());
-    funcTab.Insert(Equal::Instance());
-    funcTab.Insert(NotEqual::Instance());
+    funcTab.Insert(GreaterThan::Instance(), true);
+    funcTab.Insert(GreaterOrEqual::Instance(), true);
+    funcTab.Insert(LessThan::Instance(), true);
+    funcTab.Insert(LessOrEqual::Instance(), true);
+    funcTab.Insert(Equal::Instance(), true);
+    funcTab.Insert(NotEqual::Instance(), true);
 
-    funcTab.Insert(Add::Instance());
-    funcTab.Insert(Subtract::Instance());
-    funcTab.Insert(Multiply::Instance());
-    funcTab.Insert(Divide::Instance());
-    funcTab.Insert(MatMult::Instance());
-    funcTab.Insert(Neg::Instance());
+    funcTab.Insert(Add::Instance(), true);
+    funcTab.Insert(Subtract::Instance(), true);
+    funcTab.Insert(Multiply::Instance(), true);
+    funcTab.Insert(Divide::Instance(), true);
+    funcTab.Insert(MatMult::Instance(), true);
+    funcTab.Insert(Neg::Instance(), true);
 
-    funcTab.Insert(PowInfix::Instance());
-    funcTab.Insert(Pow::Instance());
+    funcTab.Insert(PowInfix::Instance(), true);
+    funcTab.Insert(Pow::Instance(), true);
 
-    funcTab.Insert(Equals::Instance());
-    funcTab.Insert(IfElse::Instance());
+    funcTab.Insert(Equals::Instance(), true);
+    funcTab.Insert(IfElse::Instance(), true);
 
-    funcTab.Insert(Cos::Instance());
-    funcTab.Insert(Sin::Instance());
-    funcTab.Insert(Tan::Instance());
-    funcTab.Insert(ArcCos::Instance());
-    funcTab.Insert(ArcSin::Instance());
-    funcTab.Insert(ArcTan::Instance());
-    funcTab.Insert(Cosh::Instance());
-    funcTab.Insert(Sinh::Instance());
-    funcTab.Insert(Tanh::Instance());
-    funcTab.Insert(ArcCosh::Instance());
-    funcTab.Insert(ArcSinh::Instance());
-    funcTab.Insert(ArcTanh::Instance());
+    funcTab.Insert(Cos::Instance(), true);
+    funcTab.Insert(Sin::Instance(), true);
+    funcTab.Insert(Tan::Instance(), true);
+    funcTab.Insert(ArcCos::Instance(), true);
+    funcTab.Insert(ArcSin::Instance(), true);
+    funcTab.Insert(ArcTan::Instance(), true);
+    funcTab.Insert(Cosh::Instance(), true);
+    funcTab.Insert(Sinh::Instance(), true);
+    funcTab.Insert(Tanh::Instance(), true);
+    funcTab.Insert(ArcCosh::Instance(), true);
+    funcTab.Insert(ArcSinh::Instance(), true);
+    funcTab.Insert(ArcTanh::Instance(), true);
 
-    funcTab.Insert(Abs::Instance());
-    funcTab.Insert(Sqrt::Instance());
-    funcTab.Insert(Exp::Instance());
-    funcTab.Insert(Log::Instance());
-    funcTab.Insert(Round::Instance());
-    funcTab.Insert(Trunc::Instance());
+    funcTab.Insert(Abs::Instance(), true);
+    funcTab.Insert(Sqrt::Instance(), true);
+    funcTab.Insert(Exp::Instance(), true);
+    funcTab.Insert(Log::Instance(), true);
+    funcTab.Insert(Round::Instance(), true);
+    funcTab.Insert(Trunc::Instance(), true);
 
-    funcTab.Insert(Step::Instance());
+    funcTab.Insert(Step::Instance(), true);
 
-    funcTab.Insert(Transpose::Instance());
-    funcTab.Insert(Sum::Instance());
-    funcTab.Insert(Inverse::Instance());
-    funcTab.Insert(Max::Instance());
-    funcTab.Insert(Min::Instance());
-    funcTab.Insert(Prod::Instance());
+    funcTab.Insert(Transpose::Instance(), true);
+    funcTab.Insert(Sum::Instance(), true);
+    funcTab.Insert(Inverse::Instance(), true);
+    funcTab.Insert(Max::Instance(), true);
+    funcTab.Insert(Min::Instance(), true);
+    funcTab.Insert(Prod::Instance(), true);
 
     // TODO check returned boolean
-    distTab.Insert(DNorm::Instance());
-    distTab.Insert(DNormVar::Instance());
-    distTab.Insert(DMNorm::Instance());
-    distTab.Insert(DMNormVar::Instance());
-    distTab.Insert(DBeta::Instance());
-    distTab.Insert(DBin::Instance());
-    distTab.Insert(DCat::Instance());
-    distTab.Insert(DUnif::Instance());
-    distTab.Insert(DBern::Instance());
-    distTab.Insert(DExp::Instance());
-    distTab.Insert(DLnorm::Instance());
-    distTab.Insert(DChisqr::Instance());
-    distTab.Insert(DGamma::Instance());
-    distTab.Insert(DT::Instance());
-    distTab.Insert(DWeib::Instance());
-//    distTab.Insert(DPar::Instance());
-    distTab.Insert(DPois::Instance());
-    distTab.Insert(DF::Instance());
-//    distTab.Insert(DDexp::Instance());
-//    distTab.Insert(DGenGamma::Instance());
-    distTab.Insert(DMulti::Instance());
+    distTab.Insert(DNorm::Instance(), true);
+    distTab.Insert(DNormVar::Instance(), true);
+    distTab.Insert(DMNorm::Instance(), true);
+    distTab.Insert(DMNormVar::Instance(), true);
+    distTab.Insert(DBeta::Instance(), true);
+    distTab.Insert(DBin::Instance(), true);
+    distTab.Insert(DCat::Instance(), true);
+    distTab.Insert(DUnif::Instance(), true);
+    distTab.Insert(DBern::Instance(), true);
+    distTab.Insert(DExp::Instance(), true);
+    distTab.Insert(DLnorm::Instance(), true);
+    distTab.Insert(DChisqr::Instance(), true);
+    distTab.Insert(DGamma::Instance(), true);
+    distTab.Insert(DT::Instance(), true);
+    distTab.Insert(DWeib::Instance(), true);
+//    distTab.Insert(DPar::Instance(), true);
+    distTab.Insert(DPois::Instance(), true);
+    distTab.Insert(DF::Instance(), true);
+//    distTab.Insert(DDexp::Instance(), true);
+//    distTab.Insert(DGenGamma::Instance(), true);
+    distTab.Insert(DMulti::Instance(), true);
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
                                                                      true));

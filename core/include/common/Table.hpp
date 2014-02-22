@@ -52,16 +52,18 @@ namespace Biips
 
   protected:
     std::map<String, StoredPtr> map_;
-    std::map<String, StoredPtr> aliasMap_;
+    std::map<String, Bool> lock_;
 
     static const StoredPtr nullPtr_;
 
   public:
     Table() {}
 
-    Bool Insert(const StoredPtr & ptr);
+    Bool Insert(const StoredPtr & ptr, Bool lock=false);
+    Size Remove(const String & name);
 
     Bool Contains(const String & name) const;
+    Bool IsLocked(const String & name) const;
 
     const StoredPtr & GetPtr(const String & name) const;
     const StoredPtr & operator [] (const String & name) const { return GetPtr(name); }
@@ -75,27 +77,60 @@ namespace Biips
 
 
   template<typename T>
-  Bool Table<T>::Insert(const StoredPtr & ptr)
+  Bool Table<T>::Insert(const StoredPtr & ptr, Bool lock)
   {
     if (!ptr)
       throw LogicError("Can not Insert in Table: ptr is NULL.");
 
-    if (Contains(ptr->Name()))
+    String name = ptr->Name();
+    String alias = ptr->Alias();
+
+    if (IsLocked(name))
+      return false;
+    else if (!alias.empty() && IsLocked(alias))
       return false;
 
-    map_.insert(std::make_pair(ptr->Name(), ptr));
 
-    if (!ptr->Alias().empty())
-      aliasMap_.insert(std::make_pair(ptr->Alias(), ptr));
+    map_.insert(std::make_pair(name, ptr));
+    lock_.insert(std::make_pair(name, lock));
+
+    if (!alias.empty()) {
+      map_.insert(std::make_pair(alias, ptr));
+      lock_.insert(std::make_pair(alias, lock));
+    }
 
     return true;
   }
 
 
   template<typename T>
+  Size Table<T>::Remove(const String & name)
+  {
+    if (IsLocked(name))
+      return 0;
+
+    Size nb_removed = map_.erase(name);
+    lock_.erase(name);
+    String alias = map_.at(name)->Alias();
+    if (!alias.empty()) {
+      nb_removed += map_.erase(alias);
+      lock_.erase(alias);
+    }
+
+    return nb_removed;
+  }
+
+
+  template<typename T>
   Bool Table<T>::Contains(const String & name) const
   {
-    return map_.find(name) != map_.end() || aliasMap_.find(name) != aliasMap_.end();
+    return map_.find(name) != map_.end();
+  }
+
+  template<typename T>
+  Bool Table<T>::IsLocked(const String & name) const
+  {
+    return map_.find(name) != map_.end() && lock_.at(name);
   }
 
 
@@ -104,8 +139,6 @@ namespace Biips
   {
     if (map_.find(name) != map_.end())
       return map_.at(name);
-    else if (aliasMap_.find(name) != aliasMap_.end())
-      return aliasMap_.at(name);
     else
       return nullPtr_;
   }

@@ -564,5 +564,6 @@ biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, fu
   {
     stop("invalid name")
   }
-  ok <- .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
+  .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
+  invisible(NULL)
 }
