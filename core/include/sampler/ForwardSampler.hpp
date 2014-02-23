@@ -79,8 +79,16 @@ namespace Biips
     Flags sampledFlagsBefore_;
     Flags sampledFlagsAfter_;
 
+    // Each iteration i will update the nodes in nodeIdSequence_[i]
+    // which first element is an unobserved stochastic node
+    // followed by logical children.
     Types<Types<NodeId>::Array>::Array nodeIdSequence_;
+    // obsNodeIdSequence_[i] gives the sequence
+    // of observed stochastic children that will be used to
+    // compute the weights.
     Types<Types<NodeId>::Array>::Array obsNodeIdSequence_;
+    // nodeSamplerSequence_[i] is the node sampler
+    // assigned to the front element of nodeIdSequence_[i]
     Types<NodeSampler::Ptr>::Array nodeSamplerSequence_;
 
     Types<Particle>::Array particles_;
