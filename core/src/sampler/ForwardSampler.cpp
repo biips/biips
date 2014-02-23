@@ -59,12 +59,15 @@ namespace Biips
   {
     nodeSamplerSequence_.resize(nodeIdSequence_.size());
 
+    // list of node sampler factories
     std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::const_iterator
         it_sampler_factory = NodeSamplerFactories().begin();
 
     Types<Types<NodeId>::Array>::Iterator it_node_id;
     Types<NodeSampler::Ptr>::Iterator it_node_sampler;
 
+    // loop over node sampler factories
+    // in priority order
     for (; it_sampler_factory != NodeSamplerFactories().end(); ++it_sampler_factory)
     {
       if (!it_sampler_factory->second)
@@ -72,12 +75,18 @@ namespace Biips
 
       it_node_id = nodeIdSequence_.begin();
       it_node_sampler = nodeSamplerSequence_.begin();
+
+      // loop over nodes
       for (; it_node_id != nodeIdSequence_.end(); ++it_node_id, ++it_node_sampler)
       {
+        // if null: not already assigned a sampler
         if (!(*it_node_sampler))
           it_sampler_factory->first->Create(graph_,
                                             it_node_id->front(),
                                             *it_node_sampler);
+        // if the current node sampler factory conditions are met
+        // Create method assigns the node sampler to *it_node_sampler
+        // otherwise does not change it (null)
       }
     }
 
@@ -86,6 +95,7 @@ namespace Biips
     it_node_sampler = nodeSamplerSequence_.begin();
     for (; it_node_id != nodeIdSequence_.end(); ++it_node_id, ++it_node_sampler)
     {
+      // if null: not already assigned a sampler
       if (!(*it_node_sampler))
         NodeSamplerFactory::Instance()->Create(graph_,
                                                it_node_id->front(),
@@ -218,6 +228,7 @@ namespace Biips
       // push a new array whose first element is the stochastic node
       nodeIdSequence_.push_back(Types<NodeId>::Array(1, nodeId_));
       nodeIterationsMap_[nodeId_] = nodeIdSequence_.size() - 1;
+      // create an empty sequence of observed nodes
       obsNodeIdSequence_.push_back(Types<NodeId>::Array());
     }
 
