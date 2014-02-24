@@ -57,14 +57,11 @@ namespace Biips
 
   void ForwardSampler::buildNodeSamplers()
   {
-    nodeSamplerSequence_.resize(nodeIdSequence_.size());
-
     // list of node sampler factories
     std::list<std::pair<NodeSamplerFactory::Ptr, Bool> >::const_iterator
-        it_sampler_factory = NodeSamplerFactories().begin();
+    it_sampler_factory = NodeSamplerFactories().begin();
 
-    Types<Types<NodeId>::Array>::Iterator it_node_id;
-    Types<NodeSampler::Ptr>::Iterator it_node_sampler;
+    Types<SMCIteration>::Iterator it_smc_iter;
 
     // loop over node sampler factories
     // in priority order
@@ -73,33 +70,38 @@ namespace Biips
       if (!it_sampler_factory->second)
         continue;
 
-      it_node_id = nodeIdSequence_.begin();
-      it_node_sampler = nodeSamplerSequence_.begin();
-
-      // loop over nodes
-      for (; it_node_id != nodeIdSequence_.end(); ++it_node_id, ++it_node_sampler)
+      // loop over iterations
+      for (Size i=0; i<smcIterations_.size(); ++i)
       {
-        // if null: not already assigned a sampler
-        if (!(*it_node_sampler))
-          it_sampler_factory->first->Create(graph_,
-                                            it_node_id->front(),
-                                            *it_node_sampler);
-        // if the current node sampler factory conditions are met
-        // Create method assigns the node sampler to *it_node_sampler
-        // otherwise does not change it (null)
+        // loop over nodes in iteration i
+        it_smc_iter = smcIterations_.at(i).begin();
+        for (; it_smc_iter != smcIterations_.at(i).end(); ++it_smc_iter)
+        {
+          // if null, i.e not already assigned a sampler
+          if (!it_smc_iter->NodeSamplerPtr())
+            it_sampler_factory->first->Create(graph_,
+                                              it_smc_iter->StoUnobs(),
+                                              it_smc_iter->NodeSamplerPtr());
+          // if the current node sampler factory conditions are met
+          // Create method assigns the node sampler to it_smc_iter->NodeSamplerPtr()
+          // otherwise does not change it (null)
+        }
       }
     }
 
     // assign default prior NodeSampler to all non assigned nodes
-    it_node_id = nodeIdSequence_.begin();
-    it_node_sampler = nodeSamplerSequence_.begin();
-    for (; it_node_id != nodeIdSequence_.end(); ++it_node_id, ++it_node_sampler)
+    // loop over iterations
+    for (Size i=0; i<smcIterations_.size(); ++i)
     {
-      // if null: not already assigned a sampler
-      if (!(*it_node_sampler))
-        NodeSamplerFactory::Instance()->Create(graph_,
-                                               it_node_id->front(),
-                                               *it_node_sampler);
+      it_smc_iter = smcIterations_.at(i).begin();
+      for (; it_smc_iter != smcIterations_.at(i).end(); ++it_smc_iter)
+      {
+        // if null, i.e not already assigned a sampler
+        if (!it_smc_iter->NodeSamplerPtr())
+          NodeSamplerFactory::Instance()->Create(graph_,
+                                                 it_smc_iter->StoUnobs(),
+                                                 it_smc_iter->NodeSamplerPtr());
+      }
     }
   }
 
@@ -131,29 +133,25 @@ namespace Biips
 
   void ForwardSampler::unlockSampledParents()
   {
-    Types<NodeId>::ConstIterator it_sampled_nodes = iterNodeId_->begin();
-    for (; it_sampled_nodes != iterNodeId_->end(); ++it_sampled_nodes)
+    for (Size i=0; i<smcIterations_.at(iter_).size(); ++i)
     {
-      GraphTypes::ParentIterator it_parents, it_parents_end;
-      boost::tie(it_parents, it_parents_end)
-          = graph_.GetParents(*it_sampled_nodes);
-      for (; it_parents != it_parents_end; ++it_parents)
-        UnlockNode(*it_parents);
-    }
-    Types<NodeId>::ConstIterator it_obs_nodes = iterObsNodes_->begin();
-    for (; it_obs_nodes != iterObsNodes_->end(); ++it_obs_nodes)
-    {
-      GraphTypes::ParentIterator it_parents, it_parents_end;
-      boost::tie(it_parents, it_parents_end) = graph_.GetParents(*it_obs_nodes);
-      for (; it_parents != it_parents_end; ++it_parents)
-        UnlockNode(*it_parents);
+      const Types<NodeId>::Array & sampled_nodes = smcIterations_.at(iter_).at(i).SampledNodes();
+      Types<NodeId>::ConstIterator it_sampled_nodes = sampled_nodes.begin();
+      for (; it_sampled_nodes != sampled_nodes.end(); ++it_sampled_nodes)
+      {
+        GraphTypes::ParentIterator it_parents, it_parents_end;
+        boost::tie(it_parents, it_parents_end)
+        = graph_.GetParents(*it_sampled_nodes);
+        for (; it_parents != it_parents_end; ++it_parents)
+          UnlockNode(*it_parents);
+      }
     }
   }
 
   ForwardSampler::ForwardSampler(const Graph & graph) :
-    graph_(graph), nParticles_(1), resampleThreshold_(BIIPS_POSINF),
-        sampledFlagsBefore_(graph.GetSize()), nodeIterations_(graph.GetSize(),
-                                                              BIIPS_SIZENA),
+        graph_(graph), nParticles_(1), resampleThreshold_(BIIPS_POSINF),
+        sampledFlagsBefore_(graph.GetSize()), sampledFlagsAfter_(graph.GetSize()),
+        nodeIterations_(graph.GetSize(), BIIPS_SIZENA),
         nodeLocks_(graph.GetSize(), 0), built_(false), initialized_(false)
   {
     if (!resamplerTable().Contains("stratified"))
@@ -168,15 +166,25 @@ namespace Biips
     if (!Initialized())
       throw LogicError("Can not GetNodeESS: sampler not initialized.");
 
+    if (graph_.GetObserved()[nodeId])
+      throw LogicError("Can not get node ess: node is observed.");
+
     Size iter = GetNodeSamplingIteration(nodeId);
 
     if (iter > iter_)
       throw LogicError("Can not get node ess: node has not been sampled.");
 
-    if (std::find(iterNodeId_->begin(), iterNodeId_->end(), nodeId)
-        != iterNodeId_->end())
+    // TODO check this
+    if (iter==iter_)
       return ess_;
+//    for (Size i=0; i<smcIterations_.at(iter_).size(); ++i)
+//    {
+//      if (smcIterations_.at(iter_).at(i).SamplesNode(nodeId))
+//        return ess_;
+//    }
 
+    // We store the particle indices of unique values
+    // in a map indexed by the value pointers
     std::map<ValArray*, Types<Size>::Array> indices_table;
     for (Size i = 0; i < nParticles_; ++i)
       indices_table[particles_[i].GetValue()[nodeId].get()].push_back(i);
@@ -197,18 +205,28 @@ namespace Biips
       throw NumericalError("Failure to calculate node ESS: sum of squared weights is null.");
 
     return std::exp(-std::log(sum_sq) + 2.0
-        * std::log(LongScalar(sumOfWeights_)));
+                    * std::log(LongScalar(sumOfWeights_)));
   }
 
-  class BuildNodeIdSequenceVisitor: public ConstNodeVisitor
+  Types<NodeId>::Array ForwardSampler::SampledNodes()
+  {
+    Types<NodeId>::Array ans;
+    for (Size i=0; i<smcIterations_.at(iter_).size(); ++i)
+    {
+      const Types<NodeId>::Array & sampled = smcIterations_.at(iter_).at(i).SampledNodes();
+      ans.insert(ans.end(), sampled.begin(), sampled.end());
+    }
+    return ans;
+  }
+
+  class BuildIterationsVisitor: public ConstNodeVisitor
   {
   protected:
-    typedef BuildNodeIdSequenceVisitor SelfType;
+    typedef BuildIterationsVisitor SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
     const Graph & graph_;
-    Types<Types<NodeId>::Array>::Array & nodeIdSequence_;
-    Types<Types<NodeId>::Array>::Array & obsNodeIdSequence_;
+    Types<Types<SMCIteration>::Array >::Array & smcIterations_;
     Types<Size>::Array & nodeIterationsMap_;
 
     virtual void visit(const ConstantNode & node)
@@ -219,17 +237,22 @@ namespace Biips
     {
       if (graph_.GetObserved()[nodeId_])
       {
-        // if obsNodeIdSequence_ is empty the observed node is not informative
-        if (!obsNodeIdSequence_.empty())
-          obsNodeIdSequence_.back().push_back(nodeId_);
+        // if smcIterations_ is empty the observed node is not informative
+        if (!smcIterations_.empty())
+          smcIterations_.back().back().PushLikeChild(nodeId_);
         return;
       }
 
-      // push a new array whose first element is the stochastic node
-      nodeIdSequence_.push_back(Types<NodeId>::Array(1, nodeId_));
-      nodeIterationsMap_[nodeId_] = nodeIdSequence_.size() - 1;
-      // create an empty sequence of observed nodes
-      obsNodeIdSequence_.push_back(Types<NodeId>::Array());
+      // keep the same iteration if the last node has no likelihood children.
+      if (!smcIterations_.empty() && smcIterations_.back().back().LikeChildren().empty()) {
+        smcIterations_.back().push_back(SMCIteration(nodeId_));
+      }
+      // otherwise add new iteration
+      else {
+        smcIterations_.push_back(Types<SMCIteration>::Array(1, SMCIteration(nodeId_)));
+      }
+
+      nodeIterationsMap_[nodeId_] = smcIterations_.size() - 1;
     }
 
     virtual void visit(const LogicalNode & node)
@@ -237,47 +260,41 @@ namespace Biips
       if (graph_.GetObserved()[nodeId_])
         return;
 
-      if (nodeIdSequence_.empty())
-        throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in empty node id sequence.");
+      if (smcIterations_.empty())
+        throw LogicError("BuildNodeIdSequenceVisitor can not push LogicalNode in empty sequence.");
 
-      // push all the logical children back in the last array
-      nodeIdSequence_.back().push_back(nodeId_);
-      nodeIterationsMap_[nodeId_] = nodeIdSequence_.size() - 1;
-
+      // push all the logical children in the last iteration
+      smcIterations_.back().back().PushLogicalChild(nodeId_);
+      nodeIterationsMap_[nodeId_] = smcIterations_.size() - 1;
     }
 
   public:
 
-    BuildNodeIdSequenceVisitor(const Graph & graph,
-                               Types<Types<NodeId>::Array>::Array & nodeIdSequence,
-                               Types<Types<NodeId>::Array>::Array & obsNodeIdSequence,
-                               Types<Size>::Array & nodeIterations) :
-      graph_(graph), nodeIdSequence_(nodeIdSequence),
-          obsNodeIdSequence_(obsNodeIdSequence),
-          nodeIterationsMap_(nodeIterations)
-    {
-    }
+    BuildIterationsVisitor(const Graph & graph,
+                           Types<Types<SMCIteration>::Array >::Array & smcIterations,
+                           Types<Size>::Array & nodeIterationsMap) :
+                             graph_(graph), smcIterations_(smcIterations),
+                             nodeIterationsMap_(nodeIterationsMap)
+  {
+  }
   };
 
   void ForwardSampler::buildNodeIdSequence()
   {
-    // this will build an array of NodeId arrays whose first
-    // element are the unobserved stochastic nodes
-    // followed by their logical children
-    // in topological order
-    BuildNodeIdSequenceVisitor build_node_id_sequence_vis(graph_,
-                                                          nodeIdSequence_,
-                                                          obsNodeIdSequence_,
-                                                          nodeIterations_);
-    graph_.VisitGraph(build_node_id_sequence_vis);
+    BuildIterationsVisitor build_iterations_vis(graph_,
+                                                smcIterations_,
+                                                nodeIterations_);
+    graph_.VisitGraph(build_iterations_vis);
   }
 
   Types<std::pair<NodeId, String> >::Array ForwardSampler::GetSamplersSequence() const
   {
     Types<std::pair<NodeId, String> >::Array ans;
-    for (Size k = 0; k < nodeIdSequence_.size(); ++k)
-      ans.push_back(std::make_pair(nodeIdSequence_[k].front(),
-                                   nodeSamplerSequence_[k]->Name()));
+    for (Size k = 0; k < smcIterations_.size(); ++k) {
+      for (Size i=0; i<smcIterations_.at(k).size(); ++i)
+        ans.push_back(std::make_pair(smcIterations_.at(k).at(i).StoUnobs(),
+                                     smcIterations_.at(k).at(i).NodeSamplerPtr()->Name()));
+    }
 
     return ans;
   }
@@ -311,38 +328,45 @@ namespace Biips
     built_ = true;
   }
 
-//  void ForwardSampler::Reset()
-//  {
-//    nodeLocks_.assign(graph_.GetSize(), 0);
-//    nodeIdSequence_.clear();
-//    obsNodeIdSequence_.clear();
-//    nodeIterations_.assign(graph_.GetSize(), BIIPS_SIZENA);
-//    nodeSamplerSequence_.clear();
-//    built_ = false;
-//    initialized_ = false;
-//  }
+  //  void ForwardSampler::Reset()
+  //  {
+  //    nodeLocks_.assign(graph_.GetSize(), 0);
+  //    nodeIdSequence_.clear();
+  //    obsNodeIdSequence_.clear();
+  //    nodeIterations_.assign(graph_.GetSize(), BIIPS_SIZENA);
+  //    nodeSamplerSequence_.clear();
+  //    built_ = false;
+  //    initialized_ = false;
+  //  }
 
   void ForwardSampler::mutateParticle(Particle & lastParticle)
   {
     // sample current stochastic node
-    sampledFlagsAfter_ = sampledFlagsBefore_;
-    (*iterNodeSampler_)->SetMembers(lastParticle.Value(),
-                                    sampledFlagsAfter_,
-                                    pRng_);
-    (*iterNodeSampler_)->Sample(iterNodeId_->front());
+    std::copy(sampledFlagsBefore_.begin(), sampledFlagsBefore_.end(),
+              sampledFlagsAfter_.begin());
 
-    // update particle log weight
-    Scalar log_incr_weight = (*iterNodeSampler_)->LogIncrementalWeight();
-    lastParticle.AddToLogWeight(log_incr_weight);
+    Types<SMCIteration>::Array & smc_iter = smcIterations_.at(iter_);
 
-    // compute all logical children
-    // TODO only update nodes which have a monitored child
-    Types<NodeId>::Iterator it_logical_children = iterNodeId_->begin() + 1;
-    while (it_logical_children != iterNodeId_->end())
+    for (Size i=0; i<smc_iter.size(); ++i)
     {
-      (*iterNodeSampler_)->Sample(*it_logical_children);
-      ++it_logical_children;
+      smc_iter.at(i).NodeSamplerPtr()->SetMembers(lastParticle.Value(),
+                                      sampledFlagsAfter_,
+                                      pRng_);
+      smc_iter.at(i).NodeSamplerPtr()->Sample(smc_iter.at(i).StoUnobs());
+
+      // compute all logical children
+      // TODO only update nodes which have a monitored child
+      Types<NodeId>::ConstIterator it_logical_children = smc_iter.at(i).SampledNodes().begin()+1;
+      while (it_logical_children != smc_iter.at(i).SampledNodes().end())
+      {
+        smc_iter.at(i).NodeSamplerPtr()->Sample(*it_logical_children);
+        ++it_logical_children;
+      }
     }
+    // update particle log weight
+    // only at the last smc_iter which has observed likelihood children
+    Scalar log_incr_weight = smc_iter.back().NodeSamplerPtr()->LogIncrementalWeight();
+    lastParticle.AddToLogWeight(log_incr_weight);
   }
 
   Scalar ForwardSampler::rescaleWeights()
@@ -417,12 +441,8 @@ namespace Biips
 
     iter_ = 0;
 
-    iterNodeId_ = nodeIdSequence_.begin();
-    iterObsNodes_ = obsNodeIdSequence_.begin();
-    iterNodeSampler_ = nodeSamplerSequence_.begin();
-
-    for (NodeId id = 0; id < graph_.GetSize(); ++id)
-      sampledFlagsBefore_[id] = graph_.GetObserved()[id];
+    for (Size i=0; i<sampledFlagsBefore_.size(); ++i)
+      sampledFlagsBefore_.at(i) = graph_.GetObserved()[i];
 
     //Initialize the particle set.
     NodeValues init_node_values(graph_.GetSize());
@@ -445,7 +465,7 @@ namespace Biips
 
     // increment the normalizing constant
     logNormConst_ = std::log(sumOfWeights_) - std::log(nParticles_)
-        + max_weight;
+    + max_weight;
     if (isNan(logNormConst_))
       throw NumericalError(String("Failure to calculate log normalizing constant."));
 
@@ -463,9 +483,6 @@ namespace Biips
       throw LogicError("Can not iterate ForwardSampler: the sequence have reached the end.");
 
     ++iter_;
-    ++iterNodeId_;
-    ++iterObsNodes_;
-    ++iterNodeSampler_;
 
     sampledFlagsBefore_.swap(sampledFlagsAfter_);
 
@@ -610,7 +627,7 @@ namespace Biips
   void ForwardSampler::UnlockAllNodes()
   {
     for (Types<Int>::Iterator it_locks = nodeLocks_.begin(); it_locks
-        != nodeLocks_.end(); ++it_locks)
+    != nodeLocks_.end(); ++it_locks)
     {
       if (*it_locks > 0)
         *it_locks = 0;

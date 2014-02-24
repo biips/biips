@@ -100,7 +100,8 @@ namespace Biips
     void Sample(NodeId nodeId);
 
     explicit NodeSampler(const Graph & graph) :
-      graph_(graph), logIncrementalWeight_(0.0), membersSet_(false)
+      graph_(graph), pNodeValuesMap_(NULL), pSampledFlagsMap_(NULL),
+      pRng_(NULL), logIncrementalWeight_(0.0), membersSet_(false)
     {
     }
 
