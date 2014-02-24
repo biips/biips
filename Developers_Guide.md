@@ -95,3 +95,58 @@ In the Biips box, click *Manage Project* and then click *Slaves* on the left pan
 
 Click the *Connect* button on the desired slave to get connection commands that include your username.
 
+
+---------------------------------------------------------------------
+
+Coding rules
+============
+
+Naming conventions
+-------------------
+* source file: MyClass.cpp
+* header file: MyClass.hpp // one class by file
+* class: MyClass
+* private/protected member: myMember_
+* public member: MyMember_
+* private/protected method: myMethod
+* public method: MyMethod
+* argument: myArgument
+* local variable: my_variable
+* pointer: pObject, p_object, _pObject
+* namespace: MyNamespace
+* iterator: iter_container
+* constant: MY_CONSTANT
+* enum item: MY_ITEM
+
+Other rules
+------------
+* Everything is in the namespace Biips
+		#ifndef BIIPS_MYCLASS_HPP_
+		#define BIIPS_MYCLASS_HPP_
+		
+		#endif /* BIIPS_MYCLASS_HPP_ */
+
+* All primitive types are redefined in BiipsTypes.hpp
+* destructor must be virtual
+* virtuel inherited methods must be declared virtual
+
+TODO
+---------
+* const-correctness
+* redesign the management of object/pointer/reference
+* sub-namespaces
+* separate API headers
+* comments
+ 
+Notes / Common errors
+--------------------------
+* Do not use #ifndef #define in .cpp
+* Do not access the content of a null pointer or shared_ptr null
+* Do not create a shared_ptr with an object not dynamically allocated
+* Do not define a template function in a source file (only in headers)
+* Library linking order : The traditional behavior of linkers is to search 
+  for external functions from left to right in the libraries specified on the 
+  command line. This means that a library containing the definition of a function 
+  should appear after any source files or object files which use it.
+* Do not pass-by-copy a polymorphic object
+

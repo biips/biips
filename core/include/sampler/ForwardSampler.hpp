@@ -55,6 +55,42 @@ namespace Biips
 
   class FilterMonitor;
 
+  class SMCIteration
+  {
+  public:
+    typedef SMCIteration SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+
+  protected:
+    Types<NodeId>::Array sampledNodes_;
+    Types<NodeId>::Array likeChildren_;
+    NodeSampler::Ptr pNodeSampler_;
+
+  public:
+    explicit SMCIteration(NodeId stoUnobs) :
+    sampledNodes_(1, stoUnobs)
+    {
+    }
+    virtual ~SMCIteration()
+    {
+    }
+
+    // modifiers
+    void PushLogicalChild(NodeId child) { sampledNodes_.push_back(child); }
+    void PushLikeChild(NodeId like) { likeChildren_.push_back(like); }
+
+    // accessors
+    NodeId StoUnobs() const { return sampledNodes_.front(); }
+    const Types<NodeId>::Array & SampledNodes() const { return sampledNodes_; }
+    const Types<NodeId>::Array & LikeChildren() const { return likeChildren_; }
+    const NodeSampler::Ptr & NodeSamplerPtr() const { return pNodeSampler_; }
+
+    // accessor/modifier
+    NodeSampler::Ptr & NodeSamplerPtr() { return pNodeSampler_; }
+
+  };
+
+
   class ForwardSampler
   {
   public:
@@ -73,23 +109,10 @@ namespace Biips
     ///The ESS threshold under which resampling will be done.
     Scalar resampleThreshold_;
 
-    Types<Types<NodeId>::Array>::Iterator iterNodeId_;
-    Types<Types<NodeId>::Array>::Iterator iterObsNodes_;
-    Types<NodeSampler::Ptr>::Iterator iterNodeSampler_;
+    Types<Types<SMCIteration>::Array >::Array smcIterations_;
+
     Flags sampledFlagsBefore_;
     Flags sampledFlagsAfter_;
-
-    // Each iteration i will update the nodes in nodeIdSequence_[i]
-    // which first element is an unobserved stochastic node
-    // followed by logical children.
-    Types<Types<NodeId>::Array>::Array nodeIdSequence_;
-    // obsNodeIdSequence_[i] gives the sequence
-    // of observed stochastic children that will be used to
-    // compute the weights.
-    Types<Types<NodeId>::Array>::Array obsNodeIdSequence_;
-    // nodeSamplerSequence_[i] is the node sampler
-    // assigned to the front element of nodeIdSequence_[i]
-    Types<NodeSampler::Ptr>::Array nodeSamplerSequence_;
 
     Types<Particle>::Array particles_;
 
@@ -144,7 +167,7 @@ namespace Biips
     }
     Size NIterations() const
     {
-      return nodeIdSequence_.size();
+      return smcIterations_.size();
     }
     Scalar ESS() const
     {
@@ -154,10 +177,7 @@ namespace Biips
     {
       return logNormConst_;
     }
-    const Types<NodeId>::Array & SampledNodes()
-    {
-      return *iterNodeId_;
-    }
+    Types<NodeId>::Array SampledNodes();
 
     Scalar GetNodeESS(NodeId nodeId) const;
 

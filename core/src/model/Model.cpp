@@ -193,7 +193,7 @@ namespace Biips
       pSampler_->LockNode(*it_nodes);
 
     Size t = pSampler_->Iteration();
-    const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
+    Types<NodeId>::Array sampled_nodes = pSampler_->SampledNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
@@ -244,7 +244,7 @@ namespace Biips
     pSampler_->Iterate();
 
     Size t = pSampler_->Iteration();
-    const Types<NodeId>::Array & sampled_nodes = pSampler_->SampledNodes();
+    Types<NodeId>::Array sampled_nodes = pSampler_->SampledNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;

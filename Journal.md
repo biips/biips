@@ -154,7 +154,7 @@ A faire :
   ---> Actuellement: 1 itération = 1 noeud stochastique non observé
        * x[2] est donc seulement conditionné à y[1]
        * x[3] est lui conditionné à y[1], y[2], y[3], y[4]
-       Il faut donc changer ce comportement
+       Il faut changer ce comportement
 - [ ] retourner les conditionnelles sous la forme présentée plus haut
 
 
