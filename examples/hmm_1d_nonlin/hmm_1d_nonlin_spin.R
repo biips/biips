@@ -1,6 +1,6 @@
 #+ setup, include=FALSE
 library(knitr)
-opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold')
+opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold', tidy=FALSE)
 
 #' # RBiips: Bayesian inference in nonlinear non-Gaussian hidden Markov model
 #' In this tutorial, we consider applying sequential Monte Carlo methods for
@@ -20,7 +20,7 @@ opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold')
 #' $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 #'
 #' with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
-#' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5\cdot x+25 x/(1+x^2)+8 \cos(1.2\cdot(t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
+#' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
 
 #' ## Statistical model in BUGS language
 #' One needs to describe the model in BUGS language. We create the file
@@ -115,8 +115,7 @@ x_f_sup = summ$f$'Qu. 0.975'
 
 plot(x_f_mean, type='l', col=4, 'lwd'=3,
      xlab='Time', ylab='Estimates', 
-     ylim=c(min(x_f_inf), max(x_f_sup)),
-     bty='n')
+     ylim=c(min(x_f_inf), max(x_f_sup)), bty='l')
 legend('topright', leg='Filtering Mean Estimate', 
        col=4, lwd=3, bty='n')
 
@@ -136,9 +135,8 @@ x_s_inf = summ$s$'Qu. 0.025'
 x_s_sup = summ$s$'Qu. 0.975'
 
 plot(x_s_mean, type='l', col=4, lwd=3, 
-     xlab='Time', ylab='Estimates',, 
-     ylim=c(min(x_s_inf), max(x_s_sup)),
-     bty='n')
+     xlab='Time', ylab='Estimates',
+     ylim=c(min(x_s_inf), max(x_s_sup)), bty='l')
 legend('topright', leg='Smoothing Mean Estimate', 
        col=4, lwd=3, bty='n')
 
@@ -195,8 +193,7 @@ x_pimh_inf = summary_pimh$quantiles[,1]
 x_pimh_sup = summary_pimh$quantiles[,2]
 plot(x_pimh_mean, lwd=3, type='l', col=4,
      xlab='Time', ylab='Estimates', 
-     ylim=c(min(x_pimh_inf), max(x_pimh_sup)),
-     bty='n')
+     ylim=c(min(x_pimh_inf), max(x_pimh_sup)), bty='l')
 legend('topright', leg='PIMH Mean Estimate', 
        col=4, lwd=3, bty='n')
 
