@@ -17,7 +17,7 @@
 %
 % with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
 % of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5\cdot
-% x+25 x/(1+x^2)+8 \cos(1.2*(t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x
+% x+25 x/(1+x^2)+8 \cos(1.2\cdot(t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x
 % = 0.1$. The precision of the observation noise
 % $\lambda_y$ is also assumed to be unknown. We will assume a uniform prior
 % for $\log(\lambda_y)$:
