@@ -15,7 +15,7 @@
 % $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 %
 % with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
-% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5\cdot x+25 x/(1+x^2)+8 \cos(1.2\cdot(t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
+% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
 
 %% Statistical model in BUGS language
 % One needs to describe the model in BUGS language. We create the file
