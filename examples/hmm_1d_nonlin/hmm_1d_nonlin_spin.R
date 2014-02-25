@@ -106,7 +106,7 @@ diagnostic(out_smc$x)
 summ = summary(out_smc$x, fun=c('mean', 'median', 'quantiles'), 
                probs=c(.025, .975))
 
-#+ , fig.cap='SMC: Filtering estimates'
+#+ fig.cap='SMC: Filtering estimates'
 #' **Plot Filtering estimates**
 x_f_mean = summ$f$Mean
 x_f_med = summ$f$Med
@@ -128,7 +128,7 @@ legend('topleft', leg='95 % credible interval',
        col=4, pch=15, pt.cex=2, bty='n')
 palette('default')
 
-#+ , fig.cap='SMC: Smoothing estimates'
+#+ fig.cap='SMC: Smoothing estimates'
 #' **Plot Smoothing estimates**
 x_s_mean = summ$s$Mean
 x_s_med = summ$s$Med
@@ -149,7 +149,7 @@ legend('topleft', leg='95 % credible interval',
        col=4, pt.cex=2, pch=15, bty='n')
 palette('default')
 
-#+ , fig.cap='SMC: Marginal posteriors'
+#+ fig.cap='SMC: Marginal posteriors'
 #' **Marginal filtering and smoothing densities**
 kde_estimates = density(out_smc$x)
 time_index = c(5, 10, 15, 20)
@@ -188,7 +188,7 @@ out_pimh = pimh.samples(model, variables, n_iter, n_part, thin=thin)
 require(rjags)
 summary_pimh = summary(as.mcmc.list(out_pimh$x), quantiles=c(.025, .975))
 
-#+ , fig.cap='PIMH: Posterior mean and quantiles'
+#+ fig.cap='PIMH: Posterior mean and quantiles'
 #' **Posterior mean and quantiles**
 x_pimh_mean = summary_pimh$statistics[,'Mean']
 x_pimh_inf = summary_pimh$quantiles[,1]
@@ -207,7 +207,7 @@ legend('topleft', leg='95 % credible interval',
        col=4, pch=15, pt.cex=2, bty='n')
 palette('default')
 
-#+ , fig.cap='PIMH: Trace samples'
+#+ fig.cap='PIMH: Trace samples'
 #' **Trace of MCMC samples**
 time_index = c(5, 10, 15, 20)
 par(mfrow=c(2,2))
@@ -222,7 +222,7 @@ legend('topright', leg=c('PIMH samples', 'True value'),
        col=c(4, 3), pch=c(NA,8), lty=c(1,NA), bg='white')
 
 
-#+ , fig.cap='PIMH: Histograms Marginal Posteriors'
+#+ fig.cap='PIMH: Histograms Marginal Posteriors'
 #' **Histograms of posteriors**
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
@@ -236,7 +236,7 @@ legend('topright', leg=c('posterior density', 'True value'),
        col=c(1, 3), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA), 
        bg='white')
 
-#+ , fig.cap='PIMH: KDE estimates Marginal posteriors'
+#+ fig.cap='PIMH: KDE estimates Marginal posteriors'
 #' **Kernel density estimates of posteriors**
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
