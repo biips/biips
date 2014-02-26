@@ -154,14 +154,12 @@ time_index = c(5, 10, 15, 20)
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  plot(kde_estimates[[tk]]$f$density, col=4,
+  plot(kde_estimates[[tk]], col=c(4,2), lty=1,
        xlab=bquote(x[.(tk)]), ylab='posterior density',
-       main=paste('t=', tk, sep=''),
-       ylim=c(0, max(c(kde_estimates[[tk]]$f$density$y, kde_estimates[[tk]]$s$density$y))))
-  lines(kde_estimates[[tk]]$s$density, col=2)
+       main=paste('t=', tk, sep=''), sub='', leg.args=list(leg='', lty=NA))
   points(data$x_true[tk], 0, col=3, pch=8)
 }
-legend('topright', leg=c('filtering density', 'smoothing density', 'True value'), 
+legend('topright', leg=c('Filtering density', 'Smoothing density', 'True value'), 
        col=c(4, 2, 3), pch=c(NA,NA,8), lty=c(1,1,NA), bg='white')
 par(mfrow=c(1,1))
 
