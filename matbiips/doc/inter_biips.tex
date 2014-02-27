@@ -1,0 +1,124 @@
+\documentclass[11pt]{article}
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[dvips]{graphicx}
+\usepackage{pstricks}
+\usepackage{epsfig}
+\usepackage{a4wide}
+
+\usepackage{listings}
+\usepackage{relsize}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\newcommand{\biips}{{\bf Biips\ }{}}
+\newcommand{\matlab}{{\bf MATLAB\ }{}}
+\lstset{ %
+  framerule=0pt,
+  basicstyle=\relsize{-2}\ttfamily,  % the size of the fonts that are used for the code
+  backgroundcolor=\color{gray},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  %frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{dkgreen},   % comment style
+  stringstyle=\color{mauve}
+}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\section{make\_console}
+ \begin{lstlisting}[language=matlab]
+   p = inter_biips('make_console')
+ \end{lstlisting}
+   
+   \texttt{MAKE\_CONSOLE}  creates a new console and returns the id of the console in the global table of console. It
+   is strongly recommended to store the number of the console in a variable, to be able later to communicate with Biips trough that
+   console
+
+\section{clear\_console}
+
+ \begin{lstlisting}
+   inter_biips('clear_console', id)
+ \end{lstlisting}
+
+  \texttt{CLEAR\_CONSOLE} suppress the console with the given \texttt{id} and free the memory associated
+
+\section{clear\_all\_console}
+ 
+ \begin{lstlisting}
+   inter_biips('clear_all_console')
+ \end{lstlisting}
+
+  \texttt{CLEAR\_ALL\_CONSOLE} suppress all the consoles and free memory
+
+\section{check\_model}
+
+ \begin{lstlisting}
+   inter_biips('check_model', id, filename)
+ \end{lstlisting}
+  
+ \texttt{CHECK\_MODEL} verifies that the model given in the \texttt{filename} (with extension .bug) is consistent and associate it to the console \texttt{id}
+
+\section{compile\_model}
+
+ \begin{lstlisting}
+   inter_biips('compile_model', id, vars, sample_data, seed) 
+ \end{lstlisting}
+   \begin{description}
+   \setlength{\baselineskip}{0.1\baselineskip}
+     \item[\texttt{id}] : the number of the console
+     \item[\texttt{vars}] : a struct containing variables as fields, and the values in the model as values.
+     \item[\texttt{sample\_data}] : a boolean flag indicating if data is given or sampled following the \texttt{data} section in the bug file
+     \item[\texttt{seed}] : value of the seed used for random number generation
+   
+   \end{description}
+
+   \texttt{COMPILE\_MODEL} compile the model previously furnished by the \texttt{CHECK\_MODEL} function. You can set up values of variables of 
+   the model.
+
+
+\section{get\_data}
+   
+ \begin{lstlisting}
+   data = inter_biips('get_data', id) 
+ \end{lstlisting}
+ 
+  \texttt{GET\_DATA} retrieves all the data linked to a consoled with \texttt{id} and put it in the return value.
+
+
+\section{load\_module}
+ 
+ \begin{lstlisting}
+   ok = inter_biips('load_module', name)
+ \end{lstlisting}
+
+  \texttt{LOAD\_MODULE} load the module \texttt{name} in Biips. Currently, it only works with \texttt{'basemod'} module. A 
+  boolean flag is return if the operation is successful.
+
+\section{verbosity}
+ 
+ \begin{lstlisting}
+  inter_biips('verbosity', level) 
+ \end{lstlisting}
+
+  \texttt{VERBOSITY} set the verbosity level of biips. \texttt{level} must belong to the set $\{0,1,2\}$
+
+\section{get\_variables\_names}
+
+ \begin{lstlisting}
+  names = inter_biips('get_variables_names', id)
+ \end{lstlisting}
+
+ \texttt{GET\_VARIABLES\_NAMES} retrieves the names of variables of current model of the console \texttt{id} . the return value \texttt{names}
+ is a cell of string
+
+
+\end{document}
