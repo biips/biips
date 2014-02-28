@@ -14,6 +14,7 @@
 \newcommand{\biips}{{\bf Biips\ }{}}
 \newcommand{\matlab}{{\bf MATLAB\ }{}}
 \lstset{ %
+  language=matlab,
   framerule=0pt,
   basicstyle=\relsize{-2}\ttfamily,  % the size of the fonts that are used for the code
   backgroundcolor=\color{gray},  % choose the background color. You must add \usepackage{color}
@@ -35,7 +36,7 @@
 \begin{document}
 
 \section{make\_console}
- \begin{lstlisting}[language=matlab]
+ \begin{lstlisting}
    p = inter_biips('make_console')
  \end{lstlisting}
    
@@ -114,11 +115,107 @@
 \section{get\_variables\_names}
 
  \begin{lstlisting}
-  names = inter_biips('get_variables_names', id)
+  names = inter_biips('get_variable_names', id)
  \end{lstlisting}
 
- \texttt{GET\_VARIABLES\_NAMES} retrieves the names of variables of current model of the console \texttt{id} . the return value \texttt{names}
- is a cell of string
+ \texttt{GET\_VARIABLE\_NAMES} retrieves the names of variables of current model of the console \texttt{id} . the return value \texttt{names}
+ is a cell of strings containing the names of variables
+
+\section{set\_default\_monitors}
+
+ \begin{lstlisting}
+  names = inter_biips('set_default_monitors', id)
+ \end{lstlisting}
+
+ \texttt{SET\_DEFAULT\_MONITORS} set up the default filters for backward smoothing step for console model \texttt{id}
+
+\section{set\_filter\_monitors}
+ \begin{lstlisting}
+  inter_biips('set_filter_monitors', id, monitored_vars, lower, upper )
+ \end{lstlisting}
+   
+   \begin{description}
+   \setlength{\baselineskip}{0.1\baselineskip}
+     \item[\texttt{id}] : the number of the console
+     \item[\texttt{monitored\_vars}] : cell containing strings for variables to be monitored
+     \item[\texttt{lower}] : cell containing lower bound for range monitoring
+     \item[\texttt{upper}] : cell containing upper bound for range monitoring 
+   
+   \end{description}
+
+   \texttt{SET\_FILTER\_MONITORS} sets which variables must be monitored in the model. For instance to monitor x[1:10,1], one can use
+ \begin{lstlisting}
+  inter_biips('set_filter_monitors', id, {'x'} ,  {1,1} , {10,1} )
+ \end{lstlisting}
+
+\section{set\_gen\_tree\_smooth\_monitors}
+
+ \begin{lstlisting}
+  inter_biips('set_gen_tree_smooth_monitors', id, smooth_monitored_vars, lower, upper )
+ \end{lstlisting}
+
+   \begin{description}
+   \setlength{\baselineskip}{0.1\baselineskip}
+     \item[\texttt{id}] : the number of the console
+     \item[\texttt{smooth\_monitored\_vars}] : cell containing strings for variables to be smooth monitored
+     \item[\texttt{lower}] : cell containing lower bound for range smooth monitoring
+     \item[\texttt{upper}] : cell containing upper bound for range smooth monitoring 
+   
+   \end{description}
+
+   \texttt{SET\_GEN\_TREE\_SMOOTH\_MONITORS} sets which variables must be smoothly monitored in the model. For instance to smoothly monitor x[1:10,1], one can use
+ \begin{lstlisting}
+  inter_biips('set_gen_tree_smooth_monitors', id, {'x'} ,  {1,1} , {10,1} )
+ \end{lstlisting}
 
 
+\section{set\_backward\_smooth\_monitors}
+
+ \begin{lstlisting}
+  inter_biips('set_backward_smooth_monitors', id, bw_smooth_monitored_vars, lower, upper )
+ \end{lstlisting}
+
+   \begin{description}
+     \item[\texttt{id}] : the number of the console
+     \item[\texttt{bw\_smooth\_monitored\_vars}] : cell containing strings for variables to be backward smoothly monitored
+     \item[\texttt{lower}] : cell containing lower bound for range smooth monitoring
+     \item[\texttt{upper}] : cell containing upper bound for range smooth monitoring 
+   
+   \end{description}
+
+   \texttt{SET\_BACKWARD\_SMOOTH\_MONITORS} sets which variables must be backward smoothly monitored in the model. For instance to backward smoothly monitor x[1:10,1], one can use
+ \begin{lstlisting}
+  inter_biips('set_backward_smooth_monitors', id, {'x'} ,  {1,1} , {10,1} )
+ \end{lstlisting}
+
+\section{build\_smc\_sampler}
+
+ \begin{lstlisting}
+  inter_biips('build_smc_sampler', id, prior_flag)
+ \end{lstlisting}
+  \texttt{BUILD\_SMC\_SAMPLER} builds the smc sampler associated to \texttt{id} console setting up possibly the prior method for sampling (\texttt{prior\_flag})
+
+\section{is\_sampler\_built}
+
+ \begin{lstlisting}
+  ok = inter_biips('is_sampler_built', id)
+ \end{lstlisting}
+  \texttt{IS\_SAMPLER\_BUILT} returns the \texttt{ok} flag to check if sampler is built
+\section{run\_smc\_sampler}
+
+ \begin{lstlisting}
+   ok = inter_biips('run_smc_sampler', id, nb_part, seed, ess_threshold, resample_type)
+ \end{lstlisting}
+ 
+   \begin{description}
+     \item[\texttt{id}] : the number of the console
+     \item[\texttt{nb\_part}] : number of particles 
+     \item[\texttt{seed}] : seed for random number generator
+     \item[\texttt{ess\_threshold}] : threshold value for the Effective Sample Size
+     \item[\texttt{resample\_type}] : string belonging to \texttt{ 'stratified', 'systematic', 'residual', 'multinomial' } 
+   
+   \end{description}
+
+  \texttt{RUN\_SMC\_SAMPLER} run the SMC with \texttt{nb\_part} particules. One can select the resampling method using \texttt{resample\_type}
+  
 \end{document}
