@@ -217,5 +217,27 @@
    \end{description}
 
   \texttt{RUN\_SMC\_SAMPLER} run the SMC with \texttt{nb\_part} particules. One can select the resampling method using \texttt{resample\_type}
-  
+  \section{get\_log\_norm\_const}
+
+ \begin{lstlisting}
+  log_norm = inter_biips('get_log_norm_const', id )
+ \end{lstlisting}
+ \texttt{GET\_LOG\_NORM\_CONST} returns the log normalizing constant relative to the console \texttt{id}
+
+ \section{get\_filter\_monitors}
+
+ \begin{lstlisting}
+  filter_monitors = inter_biips('get_filter_monitor', id )
+ \end{lstlisting}
+
+ \texttt{GET\_FILTER\_MONITORS} dumps the filters monitors into the \texttt{filter\_monitors} double nested struct
+ 
+ \section{get\_gen\_tree\_smooth\_monitors}
+ 
+ \begin{lstlisting}
+  smooth_monitors = inter_biips('get_gen_tree_smooth_monitors', id )
+ \end{lstlisting}
+ 
+ \texttt{GET\_GEN\_TREE\_SMOOTH\_MONITORS} dumps the filters monitors into the \texttt{smooth\_monitors} double nested struct
+
 \end{document}
