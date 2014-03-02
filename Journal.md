@@ -1,12 +1,17 @@
-Adrien le 21/02/2014:
-=====================
+Adrien le 2/3/2014 :
+====================
+- [ ] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
+- [ ] Modifier arguments par défaut de plot.summary.particles.
+
+Adrien le 21/02/2014 :
+======================
 - [ ] améliorer FindMatlab.cmake : vérifier les options de compilation utilisées par mex (voir MATLAB_ROOT/bin/mbuildopts.sh)
 - [ ] vérifier la validité des noms de fonction dans add_function
 - [x] permettre de remplacer les fonctions avec add_function mais protéger les fonctions du module base
 - [ ] permettre compilation 32bit sous windows
 
-François le 21/02/2014:
-======================
+François le 21/02/2014 :
+========================
 PMMH quasiment fini en matbiips. Creation d'une fonction `biips_pmmh_object` qui cree une structure contenant les variables utilisees pour la loi de proposition et pour l'adaptation. Maintenant, on ne peut adapter que dans `biips_pmmh_update`. 
 J'ai supprimer la possibilite de choisir le type de rescaling et la variable `rw_rescale`, qui est fixee par `n_rescale`.
 Exemple `hmm_1d_nonlin` termine. 

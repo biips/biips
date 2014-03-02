@@ -240,7 +240,7 @@ print.summary.particles.list <- function(x, ...)
 
 ##' @S3method plot summary.particles
 plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
-                                   ylab="value", main, sub, leg.args=list(), ...)
+                                   ylab="value", main, sub, args.legend=list(), ...)
 {
   ltyy <- lty
   lwdd <- lwd
@@ -277,8 +277,8 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="o
         collapse=","))
   matplot(mat, type=type, xlab=xlab, ylab=ylab, main=main, sub=sub, lty=lty, lwd=lwd, col=col, ...)
   
-  leg.args[["legend"]] <- stat.names
-  do.call("legend.summary.particles", leg.args)
+  args.legend[["legend"]] <- stat.names
+  do.call("legend.summary.particles", args.legend)
   invisible()
 }
 
@@ -446,7 +446,7 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
     
     if (discrete) {
       table <- .Call("weighted_table", values, weights, PACKAGE="RBiips")
-      dens <- list(x=table[["Table"]]$x, y=table[["Table"]]$y, bw=1)
+      dens <- list(x=table[["Table"]]$x, y=table[["Table"]]$y)
     } else {
       dens <- density(values, weights=weights, bw=bww, adjust=adjust, ...)
     }
@@ -502,32 +502,33 @@ density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
 
 
 ##' @S3method plot density.particles.atomic
-plot.density.particles.atomic <- function(x, type="l", lwd=1, lty=1:5, col=1:6,
-                                          xlab="value", ylab, main, sub,
-                                          leg.args=list(), ...)
+plot.density.particles.atomic <- function(x, type="l", lwd=1, col=1:6,
+                                          xlab="value", ylab, main, sub, 
+                                          legend.text=NULL, args.legend=NULL, 
+                                          ...)
 {
   lwdd <- lwd
-  ltyy <- lty
   coll <- col
   
   legend.density.particles <- function(x="topright", y=NULL, lwd=lwdd,
-                                       lty=ltyy, col=coll, bty="n", inset=c(0.01,0.01), ...)
+                                       col=coll, ...)
   {
-    return(legend(x=x, y=y, lwd=lwd, lty=lty, col=col, bty=bty, inset=inset, ...))
+    return(legend(x=x, y=y, lwd=lwd, col=col, ...))
   }
   
-  legmatch <- pmatch(names(leg.args),'legend')
-  legkey <- names(leg.args)[legmatch]
-  legkey <- legkey[!is.na(legkey)]
-  if (length(legkey)==0)
-  {
-    legkey <- 'legend'
-    leg <- c()
-    for (t in names(x)) {
-      leg <- c(paste(x[[t]]$type, ", ess=", round(x$ess), sep=""))
-    }
-    leg.args[[legkey]] <- leg
+  leg.flag <- TRUE
+  if (is.logical(legend.text)) {
+    stopifnot(is.atomic(legend.text))
+    leg.flag <- legend.text
   }
+  
+  if (leg.flag && (is.logical(legend.text) || is.null(legend.text))) {
+    legend.text <- c()
+    for (t in names(x)) {
+      legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess), sep=""))
+    }
+  }
+  
 
   if (x$discrete) {
     if (missing(ylab))
@@ -539,7 +540,7 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, lty=1:5, col=1:6,
     
     barplot(x$density$y, names.arg=x$density$x,
             col=col, lwd=lwd, xlab=xlab, ylab=ylab, main=main.title, sub=sub,
-            legend=leg.args[[legkey]], ...)
+            legend.text=legend.text, args.legend=args.legend, ...)
   } else {
     if (missing(ylab))
       ylab <- "density"
@@ -551,10 +552,11 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, lty=1:5, col=1:6,
     }
     
     plot(x$density$x, x$density$y,
-         type=type, lwd=lwd, lty=lty, col=col,
+         type=type, lwd=lwd, col=col,
          xlab=xlab, ylab=ylab, main=main, sub=sub, ...)
   
-    do.call(legend.density.particles, leg.args)
+    if (leg.flag)
+      do.call(legend.density.particles, c(legend=legend.text, args.legend))
   }
       
   invisible()
@@ -562,42 +564,40 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, lty=1:5, col=1:6,
 
 
 ##' @S3method plot density.particles
-plot.density.particles <- function(x, type="l", lwd=lwd, lty=1:5, col=1:6,
-                                   leg.args=list(), ...)
+plot.density.particles <- function(x, type="l", lwd=lwd, col=1:6, ...)
 {
   for (n in names(x)) {
-    plot(x[[n]], type=type, lwd=lwd, lty=lty, col=col, leg.args=leg.args, ...)
+    plot(x[[n]], type=type, lwd=lwd, col=col, ...)
   }
   invisible()
 }
 
 
 ##' @S3method plot density.particles.atomic.list
-plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=1, col=1:6,
-                                               xlab="value", ylab, main, sub,
-                                               leg.args=list(), density=NULL, angle=NULL, ...)
+plot.density.particles.atomic.list <- function(x, type="l", lwd=1, col=1:6,
+                                               xlab="value", ylab, main, sub, 
+                                               legend.text=NULL, args.legend=NULL, 
+                                               ...)
 {
-  ltyy <- lty
   lwdd <- lwd
   coll <- col
   
-  legend.density.particles <- function(x="topright", y=NULL,
-                                       lty=ltyy, lwd=lwdd, col=coll, bty="n", inset=c(0.01,0.01), ...)
+  legend.density.particles <- function(x="topright", y=NULL, lwd=lwdd, col=coll, ...)
   {
-    return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
+    return(legend(x=x, y=y, lwd=lwd, col=col, ...))
   }
-
-  legmatch <- pmatch(names(leg.args),'legend')
-  legkey <- names(leg.args)[legmatch]
-  legkey <- legkey[!is.na(legkey)]
-  if (length(legkey)==0)
-  {
-    legkey <- 'legend'
-    leg <- c()
+  
+  leg.flag <- TRUE
+  if (is.logical(legend.text)) {
+    stopifnot(is.atomic(legend.text))
+    leg.flag <- legend.text
+  }
+  
+  if (leg.flag && (is.logical(legend.text) || is.null(legend.text))) {
+    legend.text <- c()
     for (t in names(x)) {
-      leg <- c(leg, paste(x[[t]]$type, ", ess=", round(x[[t]]$ess), sep=""))
+      legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess), sep=""))
     }
-    leg.args[[legkey]] <- leg
   }
   
   if (x[[1]]$discrete) {
@@ -617,7 +617,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=1, col=
     yy <- matrix(yy, nrow=length(x), byrow=TRUE)
     
     if (missing(ylab))
-      ylab <- "probabilty"
+      ylab <- "probability"
     if (missing(main))
       main <- paste(x[[1]]$name, "discrete law histograms")
     if (missing(sub))
@@ -631,7 +631,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=1, col=
       angle <- angle[1:length(x)]
     barplot(yy, names.arg=xx,
             col=col, xlab=xlab, ylab=ylab, main=main, sub=sub,
-            legend=leg.args[[legkey]], beside=TRUE, density=density, angle=angle, ...)
+            legend.text=legend.text, args.legend=args.legend, beside=TRUE, ...)
   } else {
     xx <- c()
     yy <- c()
@@ -653,10 +653,11 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=1, col=
     }
   
     matplot(xx, yy,
-         type=type, lty=lty, lwd=lwd, col=col,
+         type=type, lwd=lwd, col=col,
          xlab=xlab, ylab=ylab, main=main, sub=sub, ...)
     
-    do.call(legend.density.particles, leg.args)
+    if (leg.flag)
+      do.call(legend.density.particles, c(legend=legend.text, args.legend))
   }
       
   invisible()
@@ -664,11 +665,10 @@ plot.density.particles.atomic.list <- function(x, type="l", lty=1:5, lwd=1, col=
 
 
 ##' @S3method plot density.particles.list
-plot.density.particles.list <- function(x, type="l", lty=1:5, lwd=1, col=1:6,
-                                        leg.args=list(), ...)
+plot.density.particles.list <- function(x, type="l", lwd=1, col=1:6, ...)
 {
   for (n in names(x)) {
-    plot(x[[n]], type=type, lty=lty, lwd=lwd, col=col, leg.args=leg.args, ...)
+    plot(x[[n]], type=type, lwd=lwd, col=col, ...)
   }
   invisible()
 }
