@@ -1,13 +1,14 @@
 %%% Model parameters
 clust_max = 30;
 t_max = 100;
-y = .1*randn(t_max, 1);
+
 mu_0 = 0;
 prec_0 = 1;
-prec_y = 5;
+prec_y = 10;
 alpha = 3;
-rho = .9;
-gamma = .9;
+rho = 1;
+gamma = .999;
+y = sqrt(1/prec_y)*randn(t_max, 1) + 2*(rand(t_max, 1)>0.5) -1;
 data = {'rho', 'gamma', 't_max', 'clust_max', 'y', 'mu_0', 'prec_0', 'prec_y', 'alpha'};
 % data = {'t_max', 'y', 'mu_0', 'prec_y'};
 
@@ -46,7 +47,7 @@ for t=1:t_max
 end
 figure
 for t=1:5:t_max
-    line(t*ones(length(x0)), x0, out(t, :))
+    line(t*ones(length(x0),1), x0, out(t, :))
     hold on
 end
 view(3)
