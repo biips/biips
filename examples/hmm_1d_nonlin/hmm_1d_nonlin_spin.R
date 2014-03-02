@@ -1,6 +1,9 @@
 #+ setup, include=FALSE
 library(knitr)
-opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold', tidy=FALSE)
+opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold', tidy=FALSE, pars=TRUE)
+knit_hooks$set(pars = function(before, options, envir) {
+  if (before) graphics::par(bty='l')
+})
 
 #' # RBiips: Bayesian inference in nonlinear non-Gaussian hidden Markov model
 #' In this tutorial, we consider applying sequential Monte Carlo methods for
@@ -19,7 +22,7 @@ opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold', tidy
 #'
 #' $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 #'
-#' with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
+#' where $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
 #' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
 
 #' ## Statistical model in BUGS language
@@ -54,7 +57,19 @@ opts_chunk$set(cache=TRUE, comment=NA, background='white', fig.show='hold', tidy
 #'     }
 
 #' ## Installation of RBiips package
-#' 
+#' Install *RBiips* package archive depending on your system:
+#' - `RBiips_x.x.x.zip` for Windows
+#' - `RBiips_x.x.x.tgz` for Mac OS X
+#' - `RBiips_x.x.x.tar.gz` for Linux
+
+#+ eval=FALSE
+install.packages('path/to/RBiips_x.x.x.ext')
+
+#' where `x.x.x` is the version of the package and `ext` is the 
+#' archive extension for your system.
+#'
+#' **Note:** Linux installation needs a previous installation of
+#' *BiiPS* libraries and headers as well as *Boost*.
 
 
 #' ## Load model and data
@@ -82,7 +97,7 @@ model = biips.model(model_file, data, sample.data=sample_data) # Create biips mo
 data = model$data()
 
 #' ## BiiPS Sequential Monte Carlo
-#' Let now use BiiPS to run a particle filter. 
+#' Let now use *BiiPS* to run a particle filter. 
 
 #+
 #' **Parameters of the algorithm**. We want to monitor the variable x, and to
@@ -113,14 +128,14 @@ x_f_med = summ$f$Med
 x_f_inf = summ$f$'Qu. 0.025'
 x_f_sup = summ$f$'Qu. 0.975'
 
-plot(x_f_mean, type='l', col=4, 'lwd'=3,
+plot(x_f_mean, type='l', col=4, lwd=3,
      xlab='Time', ylab='Estimates', 
-     ylim=c(min(x_f_inf), max(x_f_sup)), bty='l')
+     ylim=c(min(x_f_inf), max(x_f_sup)))
 legend('topright', leg='Filtering Mean Estimate', 
        col=4, lwd=3, bty='n')
 
-mycols = adjustcolor(palette('default'), alpha.f=.3)
-palette(mycols)
+lightcols = adjustcolor(palette('default'), alpha.f=.3)
+palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_f_inf, rev(x_f_sup)),
         col=4, border=NA)
 legend('topleft', leg='95 % credible interval', 
@@ -134,17 +149,17 @@ x_s_med = summ$s$Med
 x_s_inf = summ$s$'Qu. 0.025'
 x_s_sup = summ$s$'Qu. 0.975'
 
-plot(x_s_mean, type='l', col=4, lwd=3, 
+plot(x_s_mean, type='l', col=2, lwd=3, 
      xlab='Time', ylab='Estimates',
-     ylim=c(min(x_s_inf), max(x_s_sup)), bty='l')
+     ylim=c(min(x_s_inf), max(x_s_sup)))
 legend('topright', leg='Smoothing Mean Estimate', 
-       col=4, lwd=3, bty='n')
+       col=2, lwd=3, bty='n')
 
-palette(mycols)
+palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_s_inf, rev(x_s_sup)),
-        col=4, border=NA)
+        col=2, border=NA)
 legend('topleft', leg='95 % credible interval', 
-       col=4, pt.cex=2, pch=15, bty='n')
+       col=2, pt.cex=2, pch=15, bty='n')
 palette('default')
 
 #+ fig.cap='SMC: Marginal posteriors'
@@ -155,8 +170,9 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(kde_estimates[[tk]], col=c(4,2), lty=1,
-       xlab=bquote(x[.(tk)]), ylab='posterior density',
-       main=paste('t=', tk, sep=''), sub='', leg.args=list(leg='', lty=NA))
+       xlab=bquote(x[.(tk)]), ylab='Posterior density',
+       main=paste('t=', tk, sep=''), sub='', 
+       legend.text=FALSE)
   points(data$x_true[tk], 0, col=3, pch=8)
 }
 legend('topright', leg=c('Filtering density', 'Smoothing density', 'True value'), 
@@ -165,7 +181,7 @@ par(mfrow=c(1,1))
 
 
 #' ## BiiPS Particle Independent Metropolis-Hastings
-#' We now use BiiPS to run a Particle Independent Metropolis-Hastings
+#' We now use *BiiPS* to run a Particle Independent Metropolis-Hastings.
 
 #+
 #' **Parameters of the PIMH**
@@ -189,17 +205,17 @@ summary_pimh = summary(as.mcmc.list(out_pimh$x), quantiles=c(.025, .975))
 x_pimh_mean = summary_pimh$statistics[,'Mean']
 x_pimh_inf = summary_pimh$quantiles[,1]
 x_pimh_sup = summary_pimh$quantiles[,2]
-plot(x_pimh_mean, lwd=3, type='l', col=4,
+plot(x_pimh_mean, lwd=3, type='l', col=2,
      xlab='Time', ylab='Estimates', 
-     ylim=c(min(x_pimh_inf), max(x_pimh_sup)), bty='l')
+     ylim=c(min(x_pimh_inf), max(x_pimh_sup)))
 legend('topright', leg='PIMH Mean Estimate', 
-       col=4, lwd=3, bty='n')
+       col=2, lwd=3, bty='n')
 
-palette(mycols)
+palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_pimh_inf, rev(x_pimh_sup)), 
-        col=4, border=NA)
+        col=2, border=NA)
 legend('topleft', leg='95 % credible interval', 
-       col=4, pch=15, pt.cex=2, bty='n')
+       col=2, pch=15, pt.cex=2, bty='n')
 palette('default')
 
 #+ fig.cap='PIMH: Trace samples'
@@ -222,13 +238,13 @@ legend('topright', leg=c('PIMH samples', 'True value'),
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  hist(out_pimh$x[tk,], breaks=20, col=4,
-       xlab='Iterations', ylab='number of samples',
+  hist(out_pimh$x[tk,], breaks=20, col=2,
+       xlab='Iterations', ylab='Number of samples',
        main=paste('t=', tk, sep=''))
   points(data$x_true[tk], 0, col=3, pch=8)
 }
-legend('topright', leg=c('posterior density', 'True value'), 
-       col=c(1, 3), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA), 
+legend('topright', leg=c('Smoothing density', 'True value'), 
+       col=c(1, 3), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(2,NA), 
        bg='white')
 
 #+ fig.cap='PIMH: KDE estimates Marginal posteriors'
@@ -237,11 +253,11 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   kde_estimate_pimh = density(out_pimh$x[tk,])
-  plot(kde_estimate_pimh, col=4,
-       xlab=bquote(x[.(tk)]), ylab='posterior density',
+  plot(kde_estimate_pimh, col=2,
+       xlab=bquote(x[.(tk)]), ylab='Posterior density',
        main=paste('t=', tk, sep=''))
   points(data$x_true[tk], 0, col=3, pch=8)
 }
-legend('topright', leg=c('posterior density', 'True value'), 
-       col=c(4, 3), pch=c(NA,8), lty=c(1,NA), bg='white')
+legend('topright', leg=c('Smoothing density', 'True value'), 
+       col=c(2, 3), pch=c(NA,8), lty=c(1,NA), bg='white')
 par(mfrow=c(1,1))
