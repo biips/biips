@@ -230,8 +230,36 @@
   filter_monitors = inter_biips('get_filter_monitor', id )
  \end{lstlisting}
 
- \texttt{GET\_FILTER\_MONITORS} dumps the filters monitors into the \texttt{filter\_monitors} double nested struct
+ \texttt{GET\_FILTER\_MONITORS} dumps the filters monitors into the \texttt{filter\_monitors} double nested struct : for each monitored variable , we have
+  a nested structure containing the following fields :
+  \begin{itemize}
+   \item \texttt{values} : matrix of vector of monitored values ( size : $N_{\mbox{space}} \times N_{\mbox{particules}}$)
+   \item \texttt{weigths} : vector of weights (same dimensions as values)
+   \item \texttt{ess} : vector of effective  sample size ( size : $N_{\mbox{space}}}$)
+   \item \texttt{discrete} : XXXXXX
+   \item \texttt{name} : name of the variable
+   \item \texttt{lower} : vector of lower bounds
+   \item \texttt{upper} : vector of upper bounds
+   \item \texttt{type} : string for type of method : 'filtering', 'smoothing' of 'backward'
+   \end{itemize}
+
+  For instance, if one wants to get all monitored values for variable \texttt{'x[1:4]'}, he could use
+ \begin{lstlisting}
+>> filter_monitors.('x[1:4]') 
+
+ans = 
+
+      values: [4x100 double]
+     weights: [4x100 double]
+         ess: [4x1 double]
+    discrete: [4x1 double]
+        name: 'x'
+       lower: 1
+       upper: 4
+        type: 'filtering'
  
+ \end{lstlisting}
+
  \section{get\_gen\_tree\_smooth\_monitors}
  
  \begin{lstlisting}
@@ -239,5 +267,6 @@
  \end{lstlisting}
  
  \texttt{GET\_GEN\_TREE\_SMOOTH\_MONITORS} dumps the filters monitors into the \texttt{smooth\_monitors} double nested struct
+
 
 \end{document}
