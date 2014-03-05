@@ -75,10 +75,10 @@
  \end{lstlisting}
    \begin{description}
    \setlength{\baselineskip}{0.1\baselineskip}
-     \item[\texttt{id}] : the number of the console
-     \item[\texttt{vars}] : a struct containing variables as fields, and the values in the model as values.
-     \item[\texttt{sample\_data}] : a boolean flag indicating if data is given or sampled following the \texttt{data} section in the bug file
-     \item[\texttt{seed}] : value of the seed used for random number generation
+     \item[\texttt{id}]: the number of the console
+     \item[\texttt{vars}]: a struct containing variables as fields, and the values in the model as values.
+     \item[\texttt{sample\_data}]: a boolean flag indicating if data is given or sampled following the \texttt{data} section in the bug file
+     \item[\texttt{seed}]: value of the seed used for random number generation
    
    \end{description}
 
@@ -136,10 +136,10 @@
    
    \begin{description}
    \setlength{\baselineskip}{0.1\baselineskip}
-     \item[\texttt{id}] : the number of the console
-     \item[\texttt{monitored\_vars}] : cell containing strings for variables to be monitored
-     \item[\texttt{lower}] : cell containing lower bound for range monitoring
-     \item[\texttt{upper}] : cell containing upper bound for range monitoring 
+     \item[\texttt{id}]: the number of the console
+     \item[\texttt{monitored\_vars}]: cell containing strings for variables to be monitored
+     \item[\texttt{lower}]: cell containing lower bound for range monitoring
+     \item[\texttt{upper}]: cell containing upper bound for range monitoring 
    
    \end{description}
 
@@ -156,10 +156,10 @@
 
    \begin{description}
    \setlength{\baselineskip}{0.1\baselineskip}
-     \item[\texttt{id}] : the number of the console
-     \item[\texttt{smooth\_monitored\_vars}] : cell containing strings for variables to be smooth monitored
-     \item[\texttt{lower}] : cell containing lower bound for range smooth monitoring
-     \item[\texttt{upper}] : cell containing upper bound for range smooth monitoring 
+     \item[\texttt{id}]: the number of the console
+     \item[\texttt{smooth\_monitored\_vars}]: cell containing strings for variables to be smooth monitored
+     \item[\texttt{lower}]: cell containing lower bound for range smooth monitoring
+     \item[\texttt{upper}]: cell containing upper bound for range smooth monitoring 
    
    \end{description}
 
@@ -176,10 +176,10 @@
  \end{lstlisting}
 
    \begin{description}
-     \item[\texttt{id}] : the number of the console
-     \item[\texttt{bw\_smooth\_monitored\_vars}] : cell containing strings for variables to be backward smoothly monitored
-     \item[\texttt{lower}] : cell containing lower bound for range smooth monitoring
-     \item[\texttt{upper}] : cell containing upper bound for range smooth monitoring 
+     \item[\texttt{id}]: the number of the console
+     \item[\texttt{bw\_smooth\_monitored\_vars}]: cell containing strings for variables to be backward smoothly monitored
+     \item[\texttt{lower}]: cell containing lower bound for range smooth monitoring
+     \item[\texttt{upper}]: cell containing upper bound for range smooth monitoring 
    
    \end{description}
 
@@ -208,11 +208,11 @@
  \end{lstlisting}
  
    \begin{description}
-     \item[\texttt{id}] : the number of the console
-     \item[\texttt{nb\_part}] : number of particles 
-     \item[\texttt{seed}] : seed for random number generator
-     \item[\texttt{ess\_threshold}] : threshold value for the Effective Sample Size
-     \item[\texttt{resample\_type}] : string belonging to \texttt{ 'stratified', 'systematic', 'residual', 'multinomial' } 
+     \item[\texttt{id}]: the number of the console
+     \item[\texttt{nb\_part}]: number of particles 
+     \item[\texttt{seed}]: seed for random number generator
+     \item[\texttt{ess\_threshold}]: threshold value for the Effective Sample Size
+     \item[\texttt{resample\_type}]: string belonging to \texttt{ 'stratified', 'systematic', 'residual', 'multinomial' } 
    
    \end{description}
 
@@ -230,17 +230,17 @@
   filter_monitors = inter_biips('get_filter_monitor', id )
  \end{lstlisting}
 
- \texttt{GET\_FILTER\_MONITORS} dumps the filters monitors into the \texttt{filter\_monitors} double nested struct : for each monitored variable , we have
-  a nested structure containing the following fields :
+ \texttt{GET\_FILTER\_MONITORS} dumps the filters monitors into the \texttt{filter\_monitors} double nested struct: for each monitored variable , we have
+  a nested structure containing the following fields:
   \begin{itemize}
-   \item \texttt{values} : matrix of vector of monitored values ( size : $N_{\mbox{space}} \times N_{\mbox{particules}}$)
-   \item \texttt{weigths} : vector of weights (same dimensions as values)
-   \item \texttt{ess} : vector of effective  sample size ( size : $N_{\mbox{space}}$)
-   \item \texttt{discrete} : XXXXXX
-   \item \texttt{name} : name of the variable
-   \item \texttt{lower} : vector of lower bounds
-   \item \texttt{upper} : vector of upper bounds
-   \item \texttt{type} : string  'filtering'
+   \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
+   \item \texttt{weigths}: vector of weights (same dimensions as values)
+   \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
+   \item \texttt{discrete}: XXXXXX
+   \item \texttt{name}: name of the variable
+   \item \texttt{lower}: vector of lower bounds
+   \item \texttt{upper}: vector of upper bounds
+   \item \texttt{type}: string  'filtering'
    \end{itemize}
 
   For instance, if one wants to get all monitored values for variable \texttt{'x[1:4]'}, he could use
@@ -266,18 +266,18 @@ ans =
   smooth_monitors = inter_biips('get_gen_tree_smooth_monitors', id )
  \end{lstlisting}
  
- \texttt{GET\_GEN\_TREE\_SMOOTH\_MONITORS} dumps the smooth monitors into the \texttt{smooth\_monitors} double nested struct : for each monitored variable , we have
-  a nested structure containing the following fields :
+ \texttt{GET\_GEN\_TREE\_SMOOTH\_MONITORS} dumps the smooth monitors into the \texttt{smooth\_monitors} double nested struct: for each monitored variable , we have
+  a nested structure containing the following fields:
 
   \begin{itemize}
-   \item \texttt{values} : matrix of vector of monitored values ( size : $N_{\mbox{space}} \times N_{\mbox{particules}}$)
-   \item \texttt{weigths} : vector of weights (same dimensions as values)
-   \item \texttt{ess} : vector of effective  sample size ( size : $N_{\mbox{space}}$)
-   \item \texttt{discrete} : XXXXXX
-   \item \texttt{name} : name of the variable
-   \item \texttt{lower} : vector of lower bounds
-   \item \texttt{upper} : vector of upper bounds
-   \item \texttt{type} : string 'smoothing' 
+   \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
+   \item \texttt{weigths}: vector of weights (same dimensions as values)
+   \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
+   \item \texttt{discrete}: XXXXXX
+   \item \texttt{name}: name of the variable
+   \item \texttt{lower}: vector of lower bounds
+   \item \texttt{upper}: vector of upper bounds
+   \item \texttt{type}: string 'smoothing' 
    \end{itemize}
 
   For instance, if one wants to get all monitored values for variable \texttt{'x[1:4]'}, he could use
@@ -302,18 +302,18 @@ ans =
   backward_smooth_monitors = inter_biips('get_backward_smooth_monitors', id )
  \end{lstlisting}
  
- \texttt{GET\_BACKWARD\_SMOOTH\_MONITORS} dumps the backward smooth monitors into the \texttt{backward\_smooth\_monitors} double nested struct : for each monitored variable , we have
-  a nested structure containing the following fields :
+ \texttt{GET\_BACKWARD\_SMOOTH\_MONITORS} dumps the backward smooth monitors into the \texttt{backward\_smooth\_monitors} double nested struct: for each monitored variable , we have
+  a nested structure containing the following fields:
 
   \begin{itemize}
-   \item \texttt{values} : matrix of vector of monitored values ( size : $N_{\mbox{space}} \times N_{\mbox{particules}}$)
-   \item \texttt{weigths} : vector of weights (same dimensions as values)
-   \item \texttt{ess} : vector of effective  sample size ( size : $N_{\mbox{space}}$)
-   \item \texttt{discrete} : XXXXXX
-   \item \texttt{name} : name of the variable
-   \item \texttt{lower} : vector of lower bounds
-   \item \texttt{upper} : vector of upper bounds
-   \item \texttt{type} : string 'backward\_smoothing'
+   \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
+   \item \texttt{weigths}: vector of weights (same dimensions as values)
+   \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
+   \item \texttt{discrete}: XXXXXX
+   \item \texttt{name}: name of the variable
+   \item \texttt{lower}: vector of lower bounds
+   \item \texttt{upper}: vector of upper bounds
+   \item \texttt{type}: string 'backward\_smoothing'
    \end{itemize}
 
   For instance, if one wants to get all monitored values for variable \texttt{'x[1:4]'}, he could use
@@ -339,7 +339,7 @@ ans =
   inter_biips('clear_filter_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_FILTER\_MONITORS} removes all filter monitor relative to the console \texttt{id} : you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_FILTER\_MONITORS} removes all filter monitor relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
 
 \section{clear\_gen\_tree\_smooth\_monitors}
  
@@ -347,7 +347,7 @@ ans =
   inter_biips('clear_gen_tree_smooth_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_GEN\_TREE\_MONITORS} removes all smooth monitors relative to the console \texttt{id} : you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_GEN\_TREE\_MONITORS} removes all smooth monitors relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
 
 \section{clear\_backward\_smooth\_monitors}
  
@@ -355,7 +355,7 @@ ans =
   inter_biips('clear_backward_smooth_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_BACKWARD\_SMOOTH\_MONITORS} removes all bac backward smooth monitors relative to the console \texttt{id} : you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_BACKWARD\_SMOOTH\_MONITORS} removes all bac backward smooth monitors relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
 
 \section{run\_backward\_smoother} 
  
@@ -375,10 +375,10 @@ ans =
  \end{lstlisting}
   \texttt{GET\_SORTED\_NODES} retrieves a struct \texttt{sort_nodes} containing the following fields  
   \begin{itemize}
-   \item \texttt{id} : vector of number for nodes
-   \item \texttt{names} : cell of strings containing the names of nodes
-   \item \texttt{type} : cell of strings containing the type of nodes \texttt{'Stochastic', 'Constant', 'Logical'}
-   \item \texttt{observed} : vector of boolean flags to indicate if the node is observed or not  
+   \item \texttt{id}: vector of number for nodes
+   \item \texttt{names}: cell of strings containing the names of nodes
+   \item \texttt{type}: cell of strings containing the type of nodes \texttt{'Stochastic', 'Constant', 'Logical'}
+   \item \texttt{observed}: vector of boolean flags to indicate if the node is observed or not  
    \end{itemize}
 \end{lstlistings}
 
@@ -388,11 +388,11 @@ ans =
   nodes_samplers = inter_biips('get_nodes_samplers, id)
  \end{lstlisting}
   
-  \texttt{GET\_NODES\_SAMPLERS} retrieves a struct \texttt{nodes\_samplers} containing the following fields  :
+  \texttt{GET\_NODES\_SAMPLERS} retrieves a struct \texttt{nodes\_samplers} containing the following fields:
 
   \begin{itemize}
-   \item \texttt{iteration} : vector of integers contaning the numbers of iterations for each node
-   \item \texttt{sampler} : cell of strings containing the name of samplers (e.g \texttt{'Conjugate Normal (with known precision)'}) 
+   \item \texttt{iteration}: vector of integers contaning the numbers of iterations for each node
+   \item \texttt{sampler}: cell of strings containing the name of samplers (e.g \texttt{'Conjugate Normal (with known precision)'}) 
    \end{itemize}
 
 
@@ -406,9 +406,52 @@ ans =
 
 \section{change\_data}
 
- \begin{lstlisting}
-   change_ok = inter_biips('change_data', id, var, lower, upper, values, flag)
+ \begin{lstlisting} 
+ change_ok = inter_biips('change_data', id, var, lower, upper, values, flag)
  \end{lstlisting}
 
+ \texttt{CHANGE\_DATA} changes the values of some variables in the model: one could use the following 
+  arguments
+
+  \begin{itemize}
+   \item \texttt{id}: console id
+   \item \texttt{var}: string name of the variable to change
+   \item \texttt{lower}: vector of lower bounds for the variable to change 
+   \item \texttt{upper}: vector of upper bounds for the variable to change 
+   \item \texttt{values}: vector or matrix of new values 
+   \item \texttt{flag}: XXXXX
+   \end{itemize}
+
+\section{sample\_data}
+
+ \begin{lstlisting} 
+ sampled_values = inter_biips('sample_data', id, var, lower, upper, seed)
+ \end{lstlisting}
+
+  \texttt{SAMPLE\_VALUES} samples values for some variables in the model \texttt{id}
+
+  \begin{itemize}
+   \item \texttt{id}: console id
+   \item \texttt{var}: string name of the variable to sample 
+   \item \texttt{lower}: vector of lower bounds for the variable to sample
+   \item \texttt{upper}: vector of upper bounds for the variable to sample 
+   \item \texttt{seed}: seed for random number generation 
+   \item \texttt{samples_values} : vector or matrices of sampled values
+   \end{itemize}
+
+   \section{get\_log\_prior\_density}
+
+ \begin{lstlisting} 
+  log_prior_density = inter_biips('get_log_prior_density', id, var, lower, upper)
+ \end{lstlisting}
+    \texttt{GET\_LOG\_PRIOR\_DENSITY} retrieves the log prior density of the model \texttt{id}
+
+ \begin{itemize}
+   \item \texttt{id}: console id
+   \item \texttt{var}: string name of the variable to sample 
+   \item \texttt{lower}: vector of lower bounds for the variable to sample
+   \item \texttt{upper}: vector of upper bounds for the variable to sample 
+   \item \texttt{log_prior_density} :  
+   \end{itemize}
 
 \end{document}
