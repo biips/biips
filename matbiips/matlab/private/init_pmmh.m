@@ -67,6 +67,7 @@ sample_param = cell(length(param_names), 1);
 % else
     data = biips_get_data(console);    
     for i=1:length(param_names)
+        clear var_name;
         if isempty(pn_param(i).lower)
             var_name = param_names{i};
         else % Get the name of the variable without bracketts
@@ -161,11 +162,11 @@ elseif ~latent_monitored
     end    
 end
     
-% end
 log_marg_like = inter_biips('get_log_norm_const', console);
 if isnan(log_marg_like) || isinf(log_marg_like)
     error('Failed to evaluate the log marginal likelihood (Inf or NaN)');
 end
+
 
 %% Get latent variables sampled value
 sample_latent = cell(length(latent_names), 1);

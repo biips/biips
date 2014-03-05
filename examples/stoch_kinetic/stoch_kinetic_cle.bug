@@ -1,0 +1,63 @@
+# Stochastic kinetic prey - predator model
+# cf Boys, Wilkinson and Kirkwood
+# Bayesian inference for a discretely observed stochastic kinetic model
+# and
+# Bayesian parameter inference for stochastic biochemical network
+# models using particle MCMC, by Golightly and Wilkinson
+#
+# generate data and use model from the chemical Langevin equation as an approximation to the true model
+
+var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt], y[t_max/dt], matvar[2,2,t_max/dt], matvar_true[2,2,t_max/dt]
+
+# Data generated from chemical Langevin model
+data
+{	
+  x_true[,1] <- x_init
+  for (t in 2:t_max/dt)
+  { 
+    mu_true[1,t] <- alpha_true*x_true[1,t-1] - beta_true*x_true[1,t-1]*x_true[2,t-1]
+    mu_true[2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] - gamma_true*x_true[2,t-1]
+    matvar_true[1,1,t] <- alpha_true*x_true[1,t-1] + beta_true*x_true[1,t-1]*x_true[2,t-1]
+    matvar_true[1,2,t] <- -beta_true*x_true[1,t-1]*x_true[2,t-1]
+    matvar_true[2,1,t] <- matvar_true[1,2,t]
+    matvar_true[2,2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] + gamma_true*x_true[2,t-1]
+    x_true_temp[,t] ~ dmnorm(x_true[,t-1]+mu_true[,t]*dt, inverse(matvar_true[,,t])/dt) 
+    # Needs to threshold to avoid extinction
+    x_true[1,t] <- max(x_true_temp[1,t],1) 
+    x_true[2,t] <- max(x_true_temp[2,t],1) 
+  }
+  for (t in 1:t_max)	
+  {
+    y[t/dt] ~ dnorm(x_true[1,t/dt], prec_y) 
+  }
+}
+
+# Model is chemical Langevin Equation
+model
+{
+  logalpha ~ dunif(-7,2)
+  logbeta ~ dunif(-7,2)
+  loggamma ~ dunif(-7,2)
+  alpha <- exp(logalpha)
+  beta <- exp(logbeta)
+  gamma <- exp(loggamma)
+  x[,1] <- x_init
+  for (t in 2:t_max/dt)
+  { 
+    mu[1,t] <- alpha*x[1,t-1] - beta*x[1,t-1]*x[2,t-1]
+    mu[2,t] <- beta*x[1,t-1]*x[2,t-1] - gamma*x[2,t-1]
+    matvar[1,1,t] <- alpha*x[1,t-1] + beta*x[1,t-1]*x[2,t-1]
+    matvar[1,2,t] <- -beta*x[1,t-1]*x[2,t-1]
+    matvar[2,1,t] <- matvar[1,2,t]
+    matvar[2,2,t] <- beta*x[1,t-1]*x[2,t-1] + gamma*x[2,t-1]
+    x_temp[,t] ~ dmnorm(x[,t-1]+mu[,t]*dt, inverse(matvar[,,t])/dt)  
+    # Needs to threshold to avoid extinction 
+    # !!! faut-il enlever les 2 lignes suivantes ? !!!
+    x[1,t] <- max(x_temp[1,t],1)
+    x[2,t] <- max(x_temp[2,t],1)
+  }
+  for (t in 1:t_max)	
+  {
+    y[t/dt] ~ dnorm(x[1,t/dt], prec_y) 
+  }
+}

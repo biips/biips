@@ -1,0 +1,44 @@
+# Stochastic kinetic prey - predator model
+# cf Boys, Wilkinson and Kirkwood
+# Bayesian inference for a discretely observed stochastic kinetic model
+
+
+var x.true[2,t.max], c.true[t.max], vect.true[4,t.max],
+    x[2,t.max], c[t.max], vect[4,t.max], y[t.max]
+
+data
+{
+  x.true[,1] <- x.init+0.0
+  for (t in 2:t.max)
+  { 
+    vect.true[1, t] <- alpha*x.true[1, t-1]*dt
+    vect.true[2, t] <- beta*x.true[1,t-1]*dt
+    vect.true[3, t] <- gamma*x.true[2, t-1]*dt
+    vect.true[4, t] <- 1-  alpha*x.true[1, t-1]*dt- beta*x.true[1,t-1]*dt-gamma*x.true[2, t-1]*dt
+    c.true[t] ~ dcat(vect.true[,t])
+    x.true[1, t] <- x.true[1, t-1] + (c.true[t]==1) - (c.true[t]==2)
+    x.true[2, t] <- x.true[2, t-1] + (c.true[t]==2) - (c.true[t]==3)    
+  }
+  for (t in 1:t.max)	
+  {
+    y[t] ~ dnorm(x.true[1,t], prec.y) 
+  }
+}
+model
+{
+  x[,1] <- x.init+0.0
+  for (t in 2:t.max)
+  { 
+    vect[1, t] <- alpha*x[1, t-1]*dt
+    vect[2, t] <- beta*x[1,t-1]*dt
+    vect[3, t] <- gamma*x[2, t-1]*dt
+    vect[4, t] <- 1-  alpha*x[1, t-1]*dt- beta*x[1,t-1]*dt-gamma*x[2, t-1]*dt
+    c[t] ~ dcat(vect[,t])
+    x[1, t] <- x[1, t-1] + (c[t]==1) - (c[t]==2)
+    x[2, t] <- x[2, t-1] + (c[t]==2) - (c[t]==3)    
+  }
+  for (t in 1:t.max)	
+  {
+    y[t] ~ dnorm(x[1,t], prec.y) 
+  }
+}

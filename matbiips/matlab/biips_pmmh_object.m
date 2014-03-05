@@ -13,12 +13,19 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric'};
 % Check param_names
 for i=1:length(param_names)
     if ~ischar(param_names{i})
-        error('Invalid param name')        
+        error('Invalid parameter name %s',param_names{i})        
     end
 end
 % Remove duplicate entries
 param_names = unique(param_names);
 n_param = length(param_names);
+
+% Check the init values
+if ~isempty(inits)
+    if length(inits)~=length(param_names)
+        error('Inits must be a cell with the same length as param_names')
+    end
+end
 
 
 %% Stops biips verbosity
@@ -73,7 +80,7 @@ else
     end
 end
 % Concatenate all log value in a vector
-obj.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false));
+obj.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false))';
 
 % Covariance matrix
 obj.mean = [];
