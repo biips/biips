@@ -522,7 +522,30 @@ ans =
   \item \texttt{upper} : cell of integers indicating upper bounds in variable monitoring
   \item \texttt{check\_released} : boolean flag  indicating XXXX
  \end{itemize}
+RBiips/src/RBiips.cpp
 
 
+\section{sample\_gen\_tree\_smooth\_particle}
+
+ \begin{lstlisting} 
+  inter_biips('sample_gen_tree_smooth_particle', id, seed)
+ \end{lstlisting}
+
+ \texttt{SAMPLE\_GEN\_TREE\_SMOOTH\_PARTICLE} samples the values of the smooth monitors using \texttt{seed} for random number generation
+
+\section{get\_sampled\_gen\_tree\_smooth\_particle}
+ \begin{lstlisting} 
+  sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', id)
+ \end{lstlisting}
+
+ \texttt{GET\_SAMPLED\_GEN\_TREE\_SMOOTH\_PARTICLE} retrieves the sample values of smooth monitor in a structure which has for fields the names
+ of monitored variables.
+
+\section{set\_sampled\_gen\_tree\_smooth\_particle}
+
+ \begin{lstlisting} 
+  sampled_value = inter_biips('set_sampled_gen_tree_smooth_particle', id, sampled_values)
+ \end{lstlisting}
+ 
 
 \end{document}
