@@ -1,32 +1,35 @@
 # Stochastic volatility model
-var y[t_max,1], x[t_max,1], prec_[t_max,1]
+var y[t_max,1], x[t_max,1], prec_y[t_max,1]
 
 data
 {
   
-  x_true[1,1] ~ dnorm(0, 1/sigma^2)
-  prec_y_true[1,1] <- 1 / (exp(x_true[1,1]/2)) 
+  x_true[1,1] ~ dnorm(0, 1/sigma_true^2)
+  prec_y_true[1,1] <- 2* exp(-x_true[1,1]) 
   y[1,1] ~ dnorm(0, prec_y_true[1,1])
   for (t in 2:t_max)
   { 
-    x_true[t,1] ~ dnorm(alpha + beta_true*x_true[t-1,1], 1/sigma^2)
-    prec_y_true[t,1] <- 1 / (exp(x_true[t,1])/2)  
+    x_true[t,1] ~ dnorm(alpha_true + beta_true*x_true[t-1,1], 1/sigma_true^2)
+    prec_y_true[t,1] <- 2* exp(-x_true[t,1])  
     y[t,1] ~ dnorm(0, prec_y_true[t,1])
   }
 }
 
 model
 {
-  logit_beta ~ dnorm(0,.0001)
+  alpha ~ dnorm(0,10000)
+  logit_beta ~ dnorm(0,.1)
   beta <- 1/(1+exp(-logit_beta))
+  log_sigma ~ dnorm(0, 1)
+  sigma <- exp(log_sigma)
   
   x[1,1] ~ dnorm(0, 1/sigma^2)
-  prec_y[1,1] <- 1 / (exp(x[1,1]/2)) 
+  prec_y[1,1] <- 2* exp(-x[1,1]) 
   y[1,1] ~ dnorm(0, prec_y[1,1])
   for (t in 2:t_max)
   { 
     x[t,1] ~ dnorm(alpha + beta*x[t-1,1], 1/sigma^2)
-    prec_y[t,1] <- 1 / (exp(x[t,1])/2)  
+    prec_y[t,1] <- 2* exp(-x[t,1]) 
     y[t,1] ~ dnorm(0, prec_y[t,1])
   }
 }

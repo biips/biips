@@ -1,33 +1,35 @@
-%%
-% *Load and plot data*
 
-T = readtable('SP500.csv', 'delimiter', ';');
-y = diff(log(T.Close(end:-1:1)));
-SP500_date_str = T.Date(end:-1:2);
-% SP500_date_num = datenum(SP500_date_str);
+sample_data = true;
+t_max = 100;
 
-ind = 1:200;
-y = y(ind);
-SP500_date_str = SP500_date_str(ind);
+if ~sample_data
+    %%
+    % *Load and plot data*
+    T = readtable('SP500.csv', 'delimiter', ';');
+    y = diff(log(T.Close(end:-1:1)));
+    SP500_date_str = T.Date(end:-1:2);
+    % SP500_date_num = datenum(SP500_date_str);
+
+    ind = 1:t_max;
+    y = y(ind);
+    SP500_date_str = SP500_date_str(ind);
 
 
-SP500_date_num = datenum(SP500_date_str);
-figure
-plot(SP500_date_num, y)
-% xlim([min(SP500_date_num), max(SP500_date_num)])
-datetick('x', 'mmmyyyy', 'keepticks')
-
+    SP500_date_num = datenum(SP500_date_str);
+    figure
+    plot(SP500_date_num, y)
+    % xlim([min(SP500_date_num), max(SP500_date_num)])
+    datetick('x', 'mmmyyyy', 'keepticks')
+end
 
 
 %%
 % *Model parameters*
-t_max = length(y);
-sigma = .4;
-% alpha = 0.6;
-alpha = 0;
+sigma_true = .4;
+alpha_true = 0;
 beta_true = .99;
-data = struct('t_max', t_max, 'sigma', sigma,...
-    'alpha', alpha, 'beta_true', beta_true);
+data = struct('t_max', t_max, 'sigma_true', sigma_true,...
+    'alpha_true', alpha_true, 'beta_true', beta_true);
 
 %%
 % *Start BiiPS console*
@@ -36,7 +38,6 @@ biips_init;
 %%
 % *Compile BUGS model and sample data*
 model = 'stoch_volatility.bug'; % BUGS model filename
-sample_data = true;
 [model_id, data] = biips_model(model, data, 'sample_data', true); % Create biips model and sample data
 
 
@@ -49,19 +50,22 @@ sample_data = true;
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 100; % nb of burn-in/adaptation iterations
-n_iter = 100; % nb of iterations after burn-in
+n_burn = 1000; % nb of burn-in/adaptation iterations
+n_iter = 1000; % nb of iterations after burn-in
 thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'logit_beta[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
+param_names = {'alpha[1:1]', 'logit_beta[1:1]', 'log_sigma[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
 latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 % latent_names = {};
-var_name = param_names{1};
+var_name1 = param_names{1};
+var_name2 = param_names{2};
+
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {5}); % creates a pmmh object
-
+inits = {0,5,-2};
+obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', inits); % creates a pmmh object
+pause
 %%
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
@@ -78,36 +82,57 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credibilist interval for the parameter*
-fprintf('Posterior mean of log_prec_y: %.1f\n',summary_pmmh.(param_names{1}).mean);
-fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
-    summary_pmmh.(param_names{1}).quant(1),  summary_pmmh.(param_names{1}).quant(2));
-
+for i=1:length(param_names)
+    fprintf('Posterior mean of %s: %.3f\n',param_names{i},summary_pmmh.(param_names{i}).mean);
+    fprintf('95%% credibilist interval for %s: [%.3f,%.3f]\n',...
+        param_names{i},...
+        summary_pmmh.(param_names{i}).quant(1),  summary_pmmh.(param_names{i}).quant(2));
+end
 
 %%
 % *Trace of MCMC samples for the parameter*
 figure('name', 'PMMH: Trace samples parameter')
-plot(1./(1+exp(-out_pmmh.(var_name))))
-% hold on
-% plot(0, log(data.alpha_true), '*g');  
+plot(out_pmmh.(param_names{2}))
+if sample_data
+    hold on
+    plot(0, log(data.beta_true/(1-data.beta_true)), '*g');  
+end
 xlabel('Iterations')
 ylabel('PMMH samples')
-title('\beta')
+title('logit(\beta)')
+
+%%
+% *Trace of MCMC samples for the parameter*
+figure('name', 'PMMH: Trace samples parameter')
+plot(out_pmmh.(param_names{1}))
+if sample_data
+    hold on
+    plot(0, alpha_true, '*g');  
+end
+xlabel('Iterations')
+ylabel('PMMH samples')
+title('alpha')
 
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
 figure('name', 'PMMH: Histogram posterior parameter')
-hist(out_pmmh.(var_name), 15)
-% hold on
-% plot(data.log_prec_y_true, 0, '*g');  
-xlabel('log\_prec\_y')
+hist(out_pmmh.(param_names{2}), 15)
+if sample_data
+    hold on
+    plot(log(data.beta_true/(1-data.beta_true)),0, '*g');  
+end
+xlabel('logit(\beta)')
 ylabel('number of samples')
-title('log\_prec\_y')
+title('logit(\beta)')
 
 figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f); 
-hold on
-plot(data.log_prec_y_true, 0, '*g');
-xlabel('log\_prec\_y');
+plot(kde_estimates_pmmh.(param_names{2}).x,...
+    kde_estimates_pmmh.(param_names{2}).f); 
+if sample_data
+    hold on
+    plot(log(data.beta_true/(1-data.beta_true)),0, '*g');  
+end
+xlabel('logit(\beta)')
 ylabel('posterior density');
    
 
