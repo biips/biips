@@ -522,7 +522,6 @@ ans =
   \item \texttt{upper} : cell of integers indicating upper bounds in variable monitoring
   \item \texttt{check\_released} : boolean flag  indicating XXXX
  \end{itemize}
-RBiips/src/RBiips.cpp
 
 
 \section{sample\_gen\_tree\_smooth\_particle}
@@ -546,6 +545,36 @@ RBiips/src/RBiips.cpp
  \begin{lstlisting} 
   sampled_value = inter_biips('set_sampled_gen_tree_smooth_particle', id, sampled_values)
  \end{lstlisting}
+
+\section{weighted\_quantiles}
+
+ \begin{lstlisting} 
+  quantiles = inter_biips('weighted_quantiles', values, weights, probs)
+ \end{lstlisting}
+
+ \texttt{WEIGHTED\_QUANTILES} computes the weigthed quantiles using Boost accumulator
+
+
+\section{cell2struct\_weak\_names}
+
+ \begin{lstlisting} 
+  weak_cell = inter_biips('weighted_quantiles', values, names)
+ \end{lstlisting}
+
+  \texttt{CELL2STRUCT\_WEAK\_NAMES} does the same jobs as \texttt{cell2struct} - build a struct from 2 cell arrays - but names of fields could be
+  illegals, i.e.  names containing \texttt{[,:,]}
+
+\section{add\_function}
+
+ \begin{lstlisting} 
+  inter_biips('add_function', name_func, nb_args, name_fun_dim, name_fun_eval, name_fun_check, name_fun_discrete) 
+ \end{lstlisting}
  
+ \texttt{ADD\_FUNCTION} adds a matlab function in the functions table. After that, the user could use the function in BUGS model. The arguments are the following
+
+ \begin{itemize}
+  \item \texttt{name} : name of the function in bug models
+  \item \texttt{nb\_args} : number of arguments of the function 
+ \end{itemize}
 
 \end{document}
