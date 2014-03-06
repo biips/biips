@@ -373,14 +373,13 @@ ans =
  \begin{lstlisting}
   sort_nodes= inter_biips('get_sorted_nodes, id)
  \end{lstlisting}
-  \texttt{GET\_SORTED\_NODES} retrieves a struct \texttt{sort_nodes} containing the following fields  
+  \texttt{GET\_SORTED\_NODES} retrieves a struct \texttt{sort\_nodes} containing the following fields  
   \begin{itemize}
    \item \texttt{id}: vector of number for nodes
    \item \texttt{names}: cell of strings containing the names of nodes
    \item \texttt{type}: cell of strings containing the type of nodes \texttt{'Stochastic', 'Constant', 'Logical'}
    \item \texttt{observed}: vector of boolean flags to indicate if the node is observed or not  
    \end{itemize}
-\end{lstlistings}
 
 \section{get\_nodes\_samplers}
 
@@ -436,7 +435,7 @@ ans =
    \item \texttt{lower}: vector of lower bounds for the variable to sample
    \item \texttt{upper}: vector of upper bounds for the variable to sample 
    \item \texttt{seed}: seed for random number generation 
-   \item \texttt{samples_values} : vector or matrices of sampled values
+   \item \texttt{samples\_values} : vector or matrices of sampled values
    \end{itemize}
 
    \section{get\_log\_prior\_density}
@@ -451,7 +450,79 @@ ans =
    \item \texttt{var}: string name of the variable to sample 
    \item \texttt{lower}: vector of lower bounds for the variable to sample
    \item \texttt{upper}: vector of upper bounds for the variable to sample 
-   \item \texttt{log_prior_density} :  
+   \item \texttt{log\_prior\_density} : scalar value of the log prior density 
    \end{itemize}
+
+\section{is\_smc\_sampler\_at\_end}
+
+ \begin{lstlisting} 
+  ok = inter_biips('is_smc_sampler_at_end', id)
+ \end{lstlisting}
+ \texttt{IS\_SMC\_SAMPLER\_AT\_END} checks that the smc sampler algorithm associated to the console \texttt{id} is finish.
+
+
+\section{message}
+ 
+ \begin{lstlisting} 
+  inter_biips('message', id, msg)
+ \end{lstlisting}
+
+  \texttt{MESSAGE} writes the string \texttt{msg} in the console \texttt{id}
+
+\section{set\_log\_norm\_const}
+
+ \begin{lstlisting} 
+  inter_biips('set_log_norm_const', id, log_norm)
+ \end{lstlisting}
+  
+  \texttt{SET\_LOG\_NORM\_CONST} sets the value of the log normalisation constant
+
+\section{make\_progress\_bar}
+
+ \begin{lstlisting} 
+  bar_id = inter_biips('make_progress_bar', num, progress_string, name)
+ \end{lstlisting}
+
+ \texttt{MAKE\_PROGRESS\_BAR} builds a progress bar in the current output stream. arguments are the following
+ \begin{itemize}
+  \item \texttt{num} : the number max of iterations (ie 100\% value)
+  \item \texttt{progress\_string} : one character string used for progression (e.g '*', '+' or 'x')
+  \item \texttt{name} : string for the name of bar
+  \item \texttt{bar\_id} : number of the bar, in the table of bars
+  \end{itemize}
+
+\section{clear\_progress\_bar}
+ 
+ \begin{lstlisting} 
+  inter_biips('clear_progress_bar', bar_id)
+ \end{lstlisting}
+  \texttt{CLEAR\_PROGRESS\_BAR} clears the bar \texttt{bar\_id}
+
+\section{advance\_progress\_bar} 
+ 
+ \begin{lstlisting} 
+  inter_biips('advance_progress_bar', bar_id, count)
+ \end{lstlisting}
+ 
+ \texttt{ADVANCE\_PROGRESS\_BAR} make a progress of \texttt{count} units for the bar \texttt{bar\_id} 
+
+
+\section{is\_gen\_tree\_smooth\_monitored}
+
+ \begin{lstlisting} 
+  ok = inter_biips('is_gen_tree_smooth_monitored', id, names, lower, upper, check_released)
+ \end{lstlisting}
+
+\texttt{IS\_GEN\_TREE\_SMOOTH\_MONITORED} checks that smooth monitoring of some variable is finished: arguments are the following
+ 
+ \begin{itemize}
+  \item \texttt{id} : id of the console
+  \item \texttt{names} : cell of strings indicating variables to check
+  \item \texttt{lower} : cell of integers indicating lower bounds in variable monitoring
+  \item \texttt{upper} : cell of integers indicating upper bounds in variable monitoring
+  \item \texttt{check\_released} : boolean flag  indicating XXXX
+ \end{itemize}
+
+
 
 \end{document}
