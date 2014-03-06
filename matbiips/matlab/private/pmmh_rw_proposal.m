@@ -2,7 +2,10 @@ function [rw, prop] = pmmh_rw_proposal(rw, sample_param)
 
 % Concatenate all variables in a row vector
 sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
-    'UniformOutput', false));
+    'UniformOutput', false))';
+sample_vec = sample_vec(:);
+
+
 % Check dimension
 if length(sample_vec)~=rw.d
     error('Problem with dimensions')
@@ -16,12 +19,12 @@ else
     % proposal with learnt covariance
     epsilon = .01;
     cov_chol = cholcov(rw.cov + epsilon*eye(rw.d));
-    prop_vec = sample_vec + 2.38/sqrt(rw.d) * randn(1,rw.d)* cov_chol ;
+    prop_vec = sample_vec + 2.38/sqrt(rw.d) * cov_chol * randn(rw.d, 1);
 end
 
 % Rearrange vectorized parameter to cell of arrays with appropriate
 % dimensions
-prop = cell(length(sample_param), 1);
+prop = cell(1, length(sample_param));
 k=1;
 for i=1:length(sample_param)
     length_i = prod(rw.dim{i});

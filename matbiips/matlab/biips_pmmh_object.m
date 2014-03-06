@@ -16,8 +16,8 @@ for i=1:length(param_names)
         error('Invalid parameter name %s',param_names{i})        
     end
 end
-% Remove duplicate entries
-param_names = unique(param_names);
+% % Remove duplicate entries
+% param_names = unique(param_names);
 n_param = length(param_names);
 
 % Check the init values

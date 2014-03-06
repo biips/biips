@@ -13,8 +13,8 @@ for i=1:length(param_names)
         param_names(i) = [];
     end
 end
-% Remove duplicate entries
-param_names = unique(param_names);
+% % Remove duplicate entries
+% param_names = unique(param_names);
 pn_param = cellfun(@parse_varname, param_names);
 %%% Process and check optional arguments
 optarg_names = {'latent_names', 'rs_thres', 'rs_type'};
