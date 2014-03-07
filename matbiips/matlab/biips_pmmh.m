@@ -78,20 +78,7 @@ pn_param =  cellfun(@parse_varname, param_names);
 % end
     
 
-% display message and progress bar
-% is_adapt = 1;
-if ~return_samples
-    if rw_learn % CHECK IF THIS IS CORRECT
-        inter_biips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
-        bar = inter_biips('make_progress_bar', n_iter, '+', 'iterations');
-    else
-        inter_biips('message', ['Updating PMMH with ', num2str(n_part) ' particles']);
-        bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
-    end
-else
-    inter_biips('message', ['Generating ' num2str(n_iter) ' PMMH samples with ', num2str(n_part) ' particles']);
-    bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
-end
+
     
 % Initialize counters
 n_fail = 0;
@@ -114,6 +101,21 @@ if return_samples
         n_dim_latent(k) = ndims(sample_latent{k});
         samples_latent_st{k} = zeros([size(sample_latent{k}), n_samples]);    
     end
+end
+
+% display message and progress bar
+% is_adapt = 1;
+if ~return_samples
+    if rw_learn % CHECK IF THIS IS CORRECT
+        inter_biips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
+        bar = inter_biips('make_progress_bar', n_iter, '+', 'iterations');
+    else
+        inter_biips('message', ['Updating PMMH with ', num2str(n_part) ' particles']);
+        bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
+    end
+else
+    inter_biips('message', ['Generating ' num2str(n_samples) ' PMMH samples with ', num2str(n_part) ' particles']);
+    bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
 end
 
 

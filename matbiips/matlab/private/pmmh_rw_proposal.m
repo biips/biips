@@ -17,7 +17,7 @@ if (isempty(rw.cov) || (rw.niter < rw.n_rescale) || (rand<(rw.beta)))
     prop_vec = sample_vec + exp(rw.lstep) .* randn(size(sample_vec));
 else
     % proposal with learnt covariance
-    epsilon = .01;
+    epsilon = 1e-5; % For numerical stability
     cov_chol = cholcov(rw.cov + epsilon*eye(rw.d));
     prop_vec = sample_vec + 2.38/sqrt(rw.d) * cov_chol * randn(rw.d, 1);
 end

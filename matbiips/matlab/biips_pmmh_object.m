@@ -4,7 +4,7 @@ function obj = biips_pmmh_object(console, param_names, varargin)
 
 %%% Process and check optional arguments
 optarg_names = {'inits', 'rw_step', 'n_rescale', 'beta','alpha'};
-optarg_default = {{}, [], 100, .05, .99};
+optarg_default = {{}, [], 400, .05, .99};
 optarg_valid = {{}, [], [0,intmax], [0,1], [0,1]};
 optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric'};
 [inits, rw_step, n_rescale, beta, alpha] = parsevar(varargin, optarg_names,...
@@ -49,6 +49,7 @@ obj.pmean = 0;
 obj.alpha = alpha;
 obj.beta = beta;
 obj.n_rescale = n_rescale;
+obj.ncov = n_rescale/2; % we start learning the covariance matrix after ncov iterations
 
 obj.d = sum(cellfun(@prod,sampledim, 'UniformOutput', true));
 if obj.d==1

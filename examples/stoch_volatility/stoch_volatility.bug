@@ -1,16 +1,18 @@
-# Stochastic volatility model
+# Stochastic volatility model SV_0
+# Reference: S. Chib, F. Nardari, N. Shepard. Markov chain Monte Carlo methods
+# for stochastic volatility models. Journal of econometrics, vol. 108, pp. 281-316, 2002.
+
 var y[t_max,1], x[t_max,1], prec_y[t_max,1]
 
 data
-{
-  
+{  
   x_true[1,1] ~ dnorm(0, 1/sigma_true^2)
-  prec_y_true[1,1] <- 2* exp(-x_true[1,1]) 
+  prec_y_true[1,1] <- exp(-x_true[1,1]) 
   y[1,1] ~ dnorm(0, prec_y_true[1,1])
   for (t in 2:t_max)
   { 
-    x_true[t,1] ~ dnorm(alpha_true + beta_true*x_true[t-1,1], 1/sigma_true^2)
-    prec_y_true[t,1] <- 2* exp(-x_true[t,1])  
+    x_true[t,1] ~ dnorm(alpha_true + beta_true*(x_true[t-1,1]-alpha_true), 1/sigma_true^2)
+    prec_y_true[t,1] <- exp(-x_true[t,1])  
     y[t,1] ~ dnorm(0, prec_y_true[t,1])
   }
 }
@@ -24,12 +26,12 @@ model
   sigma <- exp(log_sigma)
   
   x[1,1] ~ dnorm(0, 1/sigma^2)
-  prec_y[1,1] <- 2* exp(-x[1,1]) 
+  prec_y[1,1] <- exp(-x[1,1]) 
   y[1,1] ~ dnorm(0, prec_y[1,1])
   for (t in 2:t_max)
   { 
-    x[t,1] ~ dnorm(alpha + beta*x[t-1,1], 1/sigma^2)
-    prec_y[t,1] <- 2* exp(-x[t,1]) 
+    x[t,1] ~ dnorm(alpha + beta*(x[t-1,1]-alpha), 1/sigma^2)
+    prec_y[t,1] <- exp(-x[t,1]) 
     y[t,1] ~ dnorm(0, prec_y[t,1])
   }
 }
