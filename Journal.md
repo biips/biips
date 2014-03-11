@@ -3,7 +3,7 @@ Adrien le 11/3/2014 :
 - [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
 - [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans biips_density de matbiips.
 - [ ] Retourner le mode dans biips_summary pour les lois discrètes
-- [ ] Calculer un histogramme dans biips_density pour les lois discrètes
+- [ ] Calculer un histogramme dans biips_density pour les lois discrètesgit
 
 François le 5/3/2014 :
 ======================
