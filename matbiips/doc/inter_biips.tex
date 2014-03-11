@@ -12,6 +12,7 @@
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \newcommand{\biips}{{\bf Biips\ }{}}
 \newcommand{\matlab}{{\bf MATLAB\ }{}}
+\usepackage{hyperref}
 \lstset{ %
   language=matlab,
   framerule=0pt,
@@ -20,7 +21,7 @@
   showspaces=false,               % show spaces adding particular underscores
   showstringspaces=false,         % underline spaces within strings
   showtabs=false,                 % show tabs within strings adding particular underscores
-  %frame=single,                   % adds a frame around the code
+  frame=single,                   % adds a frame around the code
   rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
   breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
   keywordstyle=\color{blue},      % keyword style
@@ -30,19 +31,19 @@
 
 
 
-
 \begin{document}
 
 \begin{center}
-{\Huge Documentation of internal functions of the MatBiips interface}
+{\Large \bf Internal documentation for functions of the matlab interface}
 \end{center}
 
 \tableofcontents
 
-
 \section{introduction}
 
-  to call the Biips function in MATLAB,  
+  Here, we have enumerated all the "internal" functions that one could call using the \texttt{inter\_biips} function. These functions are not intented
+  to be used in a basic usage of biips trough the matlab interface, but an user could rather use them in an aim of efficiency when he needs to
+  do elementary works on the biips model : e.g. change some values of variables, monitors variables, etc ...
 
 \section{make\_console}
  \begin{lstlisting}
@@ -245,7 +246,7 @@
    \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
    \item \texttt{weigths}: vector of weights (same dimensions as values)
    \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
-   \item \texttt{discrete}: XXXXXX
+   \item \texttt{discrete}: vectors of booleans if the variables is discrete, 0 otherwise
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds
@@ -282,7 +283,7 @@ ans =
    \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
    \item \texttt{weigths}: vector of weights (same dimensions as values)
    \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
-   \item \texttt{discrete}: XXXXXX
+   \item \texttt{discrete}: vectors of booleans if the variable if discrete (vectors of zeros otherwise)
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds
@@ -318,7 +319,7 @@ ans =
    \item \texttt{values}: matrix of vector of monitored values ( size: $N_{\mbox{space}} \times N_{\mbox{particules}}$)
    \item \texttt{weigths}: vector of weights (same dimensions as values)
    \item \texttt{ess}: vector of effective  sample size ( size: $N_{\mbox{space}}$)
-   \item \texttt{discrete}: XXXXXX
+   \item \texttt{discrete}: vectors of booleans if the variable if discrete (vectors of zeros otherwise)
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds
@@ -348,7 +349,9 @@ ans =
   inter_biips('clear_filter_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_FILTER\_MONITORS} removes all filter monitor relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_FILTER\_MONITORS} removes all filter monitor relative to the console \texttt{id}; 
+  \texttt{release} is a  boolean value indicating to keep the information of which nodes are monitored (if false, in addition to deallocate memory,
+  we forgive which nodes are monitored)
 
 \section{clear\_gen\_tree\_smooth\_monitors}
  
@@ -356,7 +359,9 @@ ans =
   inter_biips('clear_gen_tree_smooth_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_GEN\_TREE\_MONITORS} removes all smooth monitors relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_GEN\_TREE\_MONITORS} removes all smooth monitors relative to the console \texttt{id}; 
+  \texttt{release} is a  boolean value indicating to keep the information of which nodes are monitored (if false, in addition to deallocate memory,
+  we forgive which nodes are monitored)
 
 \section{clear\_backward\_smooth\_monitors}
  
@@ -364,7 +369,9 @@ ans =
   inter_biips('clear_backward_smooth_monitors', id , release) 
  \end{lstlisting}
   
-  \texttt{CLEAR\_BACKWARD\_SMOOTH\_MONITORS} removes all bac backward smooth monitors relative to the console \texttt{id}: you can set the flag \texttt{release} to XXXXX
+  \texttt{CLEAR\_BACKWARD\_SMOOTH\_MONITORS} removes all bac backward smooth monitors relative to the console \texttt{id};
+  \texttt{release} is a boolean value indicating to keep the information of which nodes are monitored (if false, in addition to deallocate memory,
+  we forgive which nodes are monitored)
 
 \section{run\_backward\_smoother} 
  
@@ -415,7 +422,7 @@ ans =
 \section{change\_data}
 
  \begin{lstlisting} 
- change_ok = inter_biips('change_data', id, var, lower, upper, values, flag)
+ change_ok = inter_biips('change_data', id, var, lower, upper, values, mcmc)
  \end{lstlisting}
 
  \texttt{CHANGE\_DATA} changes the values of some variables in the model: one could use the following 
@@ -427,7 +434,7 @@ ans =
    \item \texttt{lower}: vector of lower bounds for the variable to change 
    \item \texttt{upper}: vector of upper bounds for the variable to change 
    \item \texttt{values}: vector or matrix of new values 
-   \item \texttt{flag}: XXXXX
+   \item \texttt{mcmc}: boolean to enforce some checks about discretness of variables if using Biips embedded in a mcmc algorithm 
    \end{itemize}
 
 \section{sample\_data}
@@ -519,7 +526,7 @@ ans =
 \section{is\_gen\_tree\_smooth\_monitored}
 
  \begin{lstlisting} 
-  ok = inter_biips('is_gen_tree_smooth_monitored', id, names, lower, upper, check_released)
+  ok = inter_biips('is_gen_tree_smooth_monitored', id, names, lower, upper, released)
  \end{lstlisting}
 
 \texttt{IS\_GEN\_TREE\_SMOOTH\_MONITORED} checks that smooth monitoring of some variable is finished: arguments are the following
@@ -529,7 +536,8 @@ ans =
   \item \texttt{names} : cell of strings indicating variables to check
   \item \texttt{lower} : cell of integers indicating lower bounds in variable monitoring
   \item \texttt{upper} : cell of integers indicating upper bounds in variable monitoring
-  \item \texttt{check\_released} : boolean flag  indicating XXXX
+  \item \texttt{released} : boolean value indicating to keep the information of which nodes are monitored (if false, in addition to deallocate memory,
+  we forgive which nodes are monitored)
  \end{itemize}
 
 
@@ -552,9 +560,9 @@ ans =
 \section{set\_sampled\_gen\_tree\_smooth\_particle}
 
  \begin{lstlisting} 
-  sampled_value = inter_biips('set_sampled_gen_tree_smooth_particle', id, sampled_values)
+  sampled_value = inter_biips('set_sampled_gen_tree_smooth_particle', id, values)
  \end{lstlisting}
-
+  \texttt{SET\_SAMPLED\_GEN\_TREE\_SMOOTH\_PARTICLE} 
 \section{weighted\_quantiles}
 
  \begin{lstlisting} 
@@ -576,7 +584,7 @@ ans =
 \section{add\_function}
 
  \begin{lstlisting} 
-  inter_biips('add_function', name_func, nb_args, name_fun_dim, name_fun_eval, name_fun_check, name_fun_discrete) 
+  inter_biips('add_function', func, nb_args, fun_dim, fun_eval, fun_check, fun_discrete) 
  \end{lstlisting}
  
  \texttt{ADD\_FUNCTION} adds a matlab function in the functions table. After that, the user could use the function in BUGS model. The arguments are the following
@@ -584,10 +592,10 @@ ans =
  \begin{itemize}
   \item \texttt{name\_func} : name of the function in bug models
   \item \texttt{nb\_args} : number of arguments of the function 
-  \item \texttt{name\_fun\_dim} : name of the M-file function checking the size of arguments and returning a vector of dimensions of the output
-  \item \texttt{name\_fun\_eval} : name of the M-file function which computes the value of the function
-  \item \texttt{name\_fun\_check} : name of the M-file function checking the arguments
-  \item \texttt{name\_fun\_discrete} : name of the M-file function which returns a boolean indicating the discretness of the output parameter of \texttt{add\_function}
+  \item \texttt{fun\_dim} : name of the M-file function checking the size of arguments and returning a vector of dimensions of the output
+  \item \texttt{fun\_eval} : name of the M-file function which computes the value of the function
+  \item \texttt{fun\_check} : name of the M-file function checking the arguments
+  \item \texttt{fun\_discrete} : name of the M-file function which returns a boolean indicating the discretness of the output parameter of \texttt{add\_function}
 \end{itemize}
 
 \end{document}
