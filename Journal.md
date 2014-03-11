@@ -1,3 +1,22 @@
+Adrien le 11/3/2014 :
+=====================
+- [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
+- [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans biips_density de matbiips.
+- [ ] Retourner le mode dans biips_summary pour les lois discrètes
+- [ ] Calculer un histogramme dans biips_density pour les lois discrètesgit
+
+François le 5/3/2014 :
+======================
+Je me bats avec le modele de stochastic kinetic. Le mexfile bugge a des 
+endroits differents sans infos particulieres (des fois a la compilation, 
+d'autre fois dans le pmmh_samples, etc...). J'ai eu une fois l'erreur 
+suivante:
+Warning: RUNTIME ERROR: Node x_true[2,24] overlaps previously defined nodes
+
+- [x] Test sous Linux ok
+- [ ] Le pb doit venir de windows. Chez moi, cela plante plus d'une fois 
+sur deux. En general je n'ai pas de message d'erreur, j'ai juste une segmentation fault.
+
 Adrien le 2/3/2014 :
 ====================
 - [ ] Rationaliser l'usage des arguments seed dans matbiips et RBiips.

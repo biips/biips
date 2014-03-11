@@ -91,7 +91,7 @@ n_iter = 10; % nb of iterations after burn-in
 thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'.(var_name)[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
+param_names = {'logalpha[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
 %latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 latent_names = {};
 var_name = param_names{1};
