@@ -1,10 +1,9 @@
 function [rw, prop] = pmmh_rw_proposal(rw, sample_param)
 
-% Concatenate all variables in a row vector
-sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
-    'UniformOutput', false))';
-sample_vec = sample_vec(:);
 
+% Concatenate all variables in a row vector
+sample_vec = cell2mat(cellfun(@(x) x(:) , sample_param(:),...
+    'UniformOutput', false));
 
 % Check dimension
 if length(sample_vec)~=rw.d

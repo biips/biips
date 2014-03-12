@@ -62,7 +62,7 @@ end
 % Init rw_stepsize for the part with diagonal covariance matrix
 if isempty(rw_step)
     for i=1:n_param
-        rw_step{i} = .1/sqrt(obj.d);
+        rw_step{i} = .1/sqrt(obj.d)*ones(sampledim{i});
     end
 else
     % Check values and dimensions
@@ -76,12 +76,16 @@ else
         if sum((rw_step{i}(:))<=0)
             error('Non-positive values')        
         end
+        if size(rw_step{i})~sample_dim{i}
+            error('rw_step must be of the same dimension as the variable %s', param_names)
+        end
         % Convert to a vector
         rw_step{i} = rw_step{i}(:)';
     end
 end
+
 % Concatenate all log value in a vector
-obj.lstep = cell2mat(cellfun(@log, rw_step, 'UniformOutput', false))';
+obj.lstep = cell2mat(cellfun(@(x) log(x(:)), rw_step(:), 'UniformOutput', false));
 
 % Covariance matrix
 obj.mean = [];
