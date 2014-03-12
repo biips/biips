@@ -76,7 +76,31 @@ hold on
 plot(data.x_true(2,:), 'r', 'linewidth', 2)
 
 
-pause
+%% BiiPS : Sensitivity analysis with Sequential Monte Carlo
+
+
+%%
+% *Parameters of the algorithm*. 
+n_part = 100; % Number of particles
+param_names = {'logalpha[1:1]'}; % Parameter for which we want to study sensitivity
+param_values = {-7:.2:3}; % Range of values
+
+%%
+% *Run sensitivity analysis with SMC*
+out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+
+%%
+% *Plot log-marginal likelihood and penalized log-marginal likelihood*
+figure('name', 'log-marginal likelihood');
+plot(param_values{1}, out.log_marg_like, '.')
+xlabel('log(\alpha)')
+ylabel('Log-marginal likelihood')
+
+figure('name', 'penalized log-marginal likelihood');
+plot(param_values{1}, out.log_marg_like_pen, '.')
+xlabel('log(\alpha)')
+ylabel('Penalized log-marginal likelihood')
+
 
 %% BiiPS Particle Marginal Metropolis-Hastings
 % We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
