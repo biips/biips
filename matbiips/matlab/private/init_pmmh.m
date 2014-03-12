@@ -149,8 +149,11 @@ end
 %     end
 
 if first_init
-    inter_biips('message', 'Initializing PMMH');
+    inter_biips('message', 'Initializing PMMH');   
+%     biips_get_data(console)
     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
+%     fprintf('finsmcforward')
+    
     if (~ok)
         error('Run SMC sampler: invalid values');        
     end    

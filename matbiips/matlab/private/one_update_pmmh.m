@@ -27,6 +27,7 @@ for i=1:length(param_names)
     log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
     log_prior_prop = log_prior_prop + log_p;
+    
 end
 
 % Compute the marginal likelihood: Run SMC sampler
@@ -44,7 +45,6 @@ if (log_prior_prop ~= -Inf)
         end
     end    
 end
-
 % Acceptance rate
 accept_rate = min(1, exp(log_marg_like_prop - log_marg_like + ...
     log_prior_prop - log_prior));
