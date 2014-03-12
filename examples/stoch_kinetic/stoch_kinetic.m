@@ -48,16 +48,16 @@ addpath(matbiips_path)
 
 %%
 % *Model parameters*
-t_max = 5;
-dt = .2;
+t_max = 10;
+dt = 0.20;
 x_init = [100 ;100];
 alpha_true = .5;
 beta_true = .0025;
 gamma_true = .3;
 prec_y = .1;
 data = struct('t_max', t_max, 'dt', dt, 'alpha_true',alpha_true, ...
-    'beta_true', beta_true, 'gamma_true', gamma_true, 'x_init', x_init, ...
-    'prec_y', prec_y, 'logbeta', log(beta_true), 'loggamma', log(gamma_true));
+    'beta', beta_true, 'gamma', gamma_true, 'x_init', x_init, ...
+    'prec_y', prec_y);
 
 
 %%
@@ -76,6 +76,7 @@ hold on
 plot(data.x_true(2,:), 'r', 'linewidth', 2)
 
 
+pause
 
 %% BiiPS Particle Marginal Metropolis-Hastings
 % We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
@@ -86,8 +87,8 @@ plot(data.x_true(2,:), 'r', 'linewidth', 2)
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 10; % nb of burn-in/adaptation iterations
-n_iter = 10; % nb of iterations after burn-in
+n_burn = 400; % nb of burn-in/adaptation iterations
+n_iter = 400; % nb of iterations after burn-in
 thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
@@ -134,76 +135,76 @@ title('log(\alpha)')
 % *Histogram and kde estimate of the posterior for the parameter*
 figure('name', 'PMMH: Histogram posterior parameter')
 hist(out_pmmh.(var_name), 15)
-hold on
-plot(data.log_prec_y_true, 0, '*g');  
+% hold on
+% plot(data.log_prec_y_true, 0, '*g');  
 xlabel('log\_prec\_y')
 ylabel('number of samples')
 title('log\_prec\_y')
 
 figure('name', 'PMMH: KDE estimate posterior parameter')
 plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f); 
-hold on
-plot(data.log_prec_y_true, 0, '*g');
+% hold on
+% plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
 ylabel('posterior density');
    
 
-%%
-% *Posterior mean and quantiles for x*
-x_pmmh_mean = summary_pmmh.x.mean;
-x_pmmh_quant = summary_pmmh.x.quant;
-figure('name', 'PMMH: Posterior mean and quantiles')
-fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
-hold on
-plot(x_pmmh_mean, 'linewidth', 3)
-xlabel('Time')
-ylabel('Estimates')
-legend({'95 % credible interval', 'PMMH Mean Estimate'})
-
-%%
-% *Trace of MCMC samples for x*
-time_index = [5, 10, 15, 20];
-figure('name', 'PMMH: Trace samples x')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :))
-    hold on
-    plot(0, data.x_true(tk), '*g');  
-    xlabel('Iterations')
-    ylabel('PMMH samples')
-    title(['t=', num2str(tk)]);
-end
-legend({'PMMH samples', 'True value'});
-
-%%
-% *Histogram and kernel density estimate of posteriors of x*
-figure('name', 'PMMH: Histograms Marginal Posteriors')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    hist(out_pmmh.x(tk, :), 15);
-    hold on    
-    plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('number of samples');
-    title(['t=', num2str(tk)]);    
-end
-legend({'smoothing density', 'True value'});
-
-figure('name', 'PMMH: KDE estimates Marginal posteriors')
-for k=1:length(time_index)
-    tk = time_index(k);
-    subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
-    hold on
-    plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
-end
-legend({'posterior density', 'True value'}, 'fontsize', 12);
+% %%
+% % *Posterior mean and quantiles for x*
+% x_pmmh_mean = summary_pmmh.x.mean;
+% x_pmmh_quant = summary_pmmh.x.quant;
+% figure('name', 'PMMH: Posterior mean and quantiles')
+% fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+%     [.7 .7 1], 'edgecolor', 'none')
+% hold on
+% plot(x_pmmh_mean, 'linewidth', 3)
+% xlabel('Time')
+% ylabel('Estimates')
+% legend({'95 % credible interval', 'PMMH Mean Estimate'})
+% 
+% %%
+% % *Trace of MCMC samples for x*
+% time_index = [5, 10, 15, 20];
+% figure('name', 'PMMH: Trace samples x')
+% for k=1:length(time_index)
+%     tk = time_index(k);
+%     subplot(2, 2, k)
+%     plot(out_pmmh.x(tk, :))
+%     hold on
+%     plot(0, data.x_true(tk), '*g');  
+%     xlabel('Iterations')
+%     ylabel('PMMH samples')
+%     title(['t=', num2str(tk)]);
+% end
+% legend({'PMMH samples', 'True value'});
+% 
+% %%
+% % *Histogram and kernel density estimate of posteriors of x*
+% figure('name', 'PMMH: Histograms Marginal Posteriors')
+% for k=1:length(time_index)
+%     tk = time_index(k);
+%     subplot(2, 2, k)
+%     hist(out_pmmh.x(tk, :), 15);
+%     hold on    
+%     plot(data.x_true(tk), 0, '*g');
+%     xlabel(['x_{' num2str(tk) '}']);
+%     ylabel('number of samples');
+%     title(['t=', num2str(tk)]);    
+% end
+% legend({'smoothing density', 'True value'});
+% 
+% figure('name', 'PMMH: KDE estimates Marginal posteriors')
+% for k=1:length(time_index)
+%     tk = time_index(k);
+%     subplot(2, 2, k)
+%     plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
+%     hold on
+%     plot(data.x_true(tk), 0, '*g');
+%     xlabel(['x_{' num2str(tk) '}']);
+%     ylabel('posterior density');
+%     title(['t=', num2str(tk)]);    
+% end
+% legend({'posterior density', 'True value'}, 'fontsize', 12);
 
 
 %% Clear model
