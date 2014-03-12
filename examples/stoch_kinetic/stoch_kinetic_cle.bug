@@ -15,13 +15,13 @@ data
   x_true[,1] <- x_init
   for (t in 2:t_max/dt)
   { 
-    mu_true[1,t] <- alpha_true*x_true[1,t-1] - beta_true*x_true[1,t-1]*x_true[2,t-1]
-    mu_true[2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] - gamma_true*x_true[2,t-1]
-    matvar_true[1,1,t] <- alpha_true*x_true[1,t-1] + beta_true*x_true[1,t-1]*x_true[2,t-1]
-    matvar_true[1,2,t] <- -beta_true*x_true[1,t-1]*x_true[2,t-1]
+    mu_true[1,t] <- alpha_true*x_true[1,t-1] - beta*x_true[1,t-1]*x_true[2,t-1]
+    mu_true[2,t] <- beta*x_true[1,t-1]*x_true[2,t-1] - gamma*x_true[2,t-1]
+    matvar_true[1,1,t] <- alpha_true*x_true[1,t-1] + beta*x_true[1,t-1]*x_true[2,t-1]
+    matvar_true[1,2,t] <- -beta*x_true[1,t-1]*x_true[2,t-1]
     matvar_true[2,1,t] <- matvar_true[1,2,t]
-    matvar_true[2,2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] + gamma_true*x_true[2,t-1]
-    x_true_temp[,t] ~ dmnorm(x_true[,t-1]+mu_true[,t]*dt, inverse(matvar_true[,,t])/dt) 
+    matvar_true[2,2,t] <- beta*x_true[1,t-1]*x_true[2,t-1] + gamma*x_true[2,t-1]
+    x_true_temp[,t] ~ dmnormvar(x_true[,t-1]+mu_true[,t]*dt, (matvar_true[,,t])*dt) 
     # Needs to threshold to avoid extinction
     x_true[1,t] <- max(x_true_temp[1,t],1) 
     x_true[2,t] <- max(x_true_temp[2,t],1) 
@@ -36,11 +36,11 @@ data
 model
 {
   logalpha ~ dunif(-7,2)
-  logbeta ~ dunif(-7,2)
-  loggamma ~ dunif(-7,2)
+  #logbeta ~ dunif(-7,2)
+  #loggamma ~ dunif(-7,2)
   alpha <- exp(logalpha)
-  beta <- exp(logbeta)
-  gamma <- exp(loggamma)
+  #beta <- exp(logbeta)
+  #gamma <- exp(loggamma)
   x[,1] <- x_init
   for (t in 2:t_max/dt)
   { 
@@ -50,7 +50,7 @@ model
     matvar[1,2,t] <- -beta*x[1,t-1]*x[2,t-1]
     matvar[2,1,t] <- matvar[1,2,t]
     matvar[2,2,t] <- beta*x[1,t-1]*x[2,t-1] + gamma*x[2,t-1]
-    x_temp[,t] ~ dmnorm(x[,t-1]+mu[,t]*dt, inverse(matvar[,,t])/dt)  
+    x_temp[,t] ~ dmnormvar(x[,t-1]+mu[,t]*dt, (matvar[,,t])*dt)  
     # Needs to threshold to avoid extinction 
     # !!! faut-il enlever les 2 lignes suivantes ? !!!
     x[1,t] <- max(x_temp[1,t],1)
