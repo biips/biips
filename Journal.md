@@ -1,3 +1,16 @@
+François le 12/3/2014 :
+======================
+Probleme dans change_data lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
+x[1] ~dnorm(0,1)
+x[2] ~dnorm(0,1)
+Dans ce cas, on ne peut pas faire change_data avec x[1:2]
+voir exemple dans test_crash4
+message d'erreur:
+Warning: RUNTIME ERROR: Can not change data: variable x[1:2]
+does not match one node exactly.
+
+- [ ] resoudre le probleme si pas trop compliqué, sinon mettre un message d'erreur un peu plus explicite 
+
 Adrien le 11/3/2014 :
 =====================
 - [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
@@ -36,10 +49,10 @@ J'ai supprimer la possibilite de choisir le type de rescaling et la variable `rw
 Exemple `hmm_1d_nonlin` termine. 
 
 A faire dans le PMMH:
-- [ ] Tester le PMMH et sensitivity sur un exemple ou le parametre est multiD et/ou il y a plusieurs parametres
+- [x] Tester le PMMH et sensitivity sur un exemple ou le parametre est multiD et/ou il y a plusieurs parametres
 - [ ] Creer une fonction test permettant de tester avec les differentes options et differentes conditions
 - [ ] ajouter entetes fonctions PMMH
-- [ ] verifier la procedure de rescaling - semble donner des resultats aberrants de temps en temps(valeurs tres faibles ou tres larges)
+- [x] verifier la procedure de rescaling - semble donner des resultats aberrants de temps en temps(valeurs tres faibles ou tres larges)
 - [ ] Ajouter une fonction verifiant que l'objet pmmh est valide (verifier les champs de la structure, dimensions, etc)
 
 A faire pour le PIMH:
