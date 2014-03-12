@@ -1,16 +1,11 @@
 function rw = pmmh_rw_learn_cov(rw, sample_param)
-% 
-% if ~rw.learn
-%     return;
-% end
 
 niter = rw.niter;
 ncov = rw.ncov; 
 
 % Concatenate all variables in a column vector
-sample_vec = cell2mat(cellfun(@(x) x(:)' , sample_param,...
+sample_vec = cell2mat(cellfun(@(x) x(:) , sample_param(:),...
     'UniformOutput', false));
-sample_vec = sample_vec(:);
 
 if (niter == ncov + 1)
     rw.mean = sample_vec;

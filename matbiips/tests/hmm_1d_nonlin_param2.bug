@@ -1,0 +1,31 @@
+var x_true[t_max], x[t_max], y[t_max]
+
+data
+{
+  log_prec_y_true ~ dunif(-3, 3)
+  prec_y_true <- exp(log_prec_y_true)
+  x_true[1] ~ dnorm(mean_x_init, prec_x_init)
+  y[1] ~ dnorm(x_true[1]^2/20, prec_y_true)
+  for (t in 2:t_max)
+  {
+    x_true[t] ~ dnorm(0.5*x_true[t-1]+25*x_true[t-1]/(1+x_true[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+    y[t] ~ dnorm(x_true[t]^2/20, prec_y_true)
+  }
+}
+
+model
+{
+  log_prec_y[1] ~ dunif(-3, 3)
+  log_prec_y[2] ~ dnorm(0, .1)
+  log_prec_y2[1:2] ~ dmnorm(mean0, prec0)  
+  alpha ~ dnorm(0,1)
+
+  prec_y <- exp(log_prec_y[1])
+  x[1] ~ dnorm(mean_x_init, prec_x_init)
+  y[1] ~ dnorm(x[1]^2/20, prec_y)
+  for (t in 2:t_max)
+  {
+    x[t] ~ dnorm(0.5*x[t-1]+25*x[t-1]/(1+x[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
+    y[t] ~ dnorm(x[t]^2/20, prec_y)
+  }
+}
