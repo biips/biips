@@ -1,14 +1,14 @@
 François le 12/3/2014 :
 =======================
 Probleme dans change_data lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
-    x[1] ~dnorm(0,1)
-    x[2] ~dnorm(0,1)
-Dans ce cas, on ne peut pas faire change_data avec x[1:2]
-voir exemple dans test_crash4
+        x[1] ~dnorm(0,1)
+        x[2] ~dnorm(0,1)
+Dans ce cas, on ne peut pas faire `change_data` avec `x[1:2]`
+voir exemple dans `test_crash4`
 message d'erreur:
-    Warning: RUNTIME ERROR: Can not change data: variable x[1:2]
-    does not match one node exactly.
-
+        Warning: RUNTIME ERROR: Can not change data: variable x[1:2]
+        does not match one node exactly.
+    
 - [ ] resoudre le probleme si pas trop compliqué, sinon mettre un message d'erreur un peu plus explicite 
 
 François le 11/3/2014 :
@@ -20,12 +20,12 @@ Francois:
 - [ ] refaire une passe sur la doc inter_biips
 
 Marc: 
-- [x] doc inter_biips (matbiips) finie
+- [x] doc `inter_biips` (matbiips) finie
 - [ ] Mettre les mexfile linux Matlab et Otave sur git
 - [ ] pb pour mexfile octave windows car octave est en 32 bits. Avec Adrien, faire octave 32bits windows
 
 Adrien: 
-- [ ] Pb dans change_data lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
+- [ ] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
 - [ ] Regarder bug exemple stochastic kinetic
 - [ ] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
@@ -37,17 +37,17 @@ Adrien:
 Adrien le 11/3/2014 :
 =====================
 - [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
-- [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans biips_density de matbiips.
-- [ ] Retourner le mode dans biips_summary pour les lois discrètes
-- [ ] Calculer un histogramme dans biips_density pour les lois discrètes
+- [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans `biips_density` de matbiips.
+- [ ] Retourner le mode dans `biips_summary` pour les lois discrètes
+- [ ] Calculer un histogramme dans `biips_density` pour les lois discrètes
 
 François le 5/3/2014 :
 ======================
 Je me bats avec le modele de stochastic kinetic. Le mexfile bugge a des 
 endroits differents sans infos particulieres (des fois a la compilation, 
-d'autre fois dans le pmmh_samples, etc...). J'ai eu une fois l'erreur 
+d'autre fois dans le `pmmh_samples`, etc...). J'ai eu une fois l'erreur 
 suivante:
-Warning: RUNTIME ERROR: Node x_true[2,24] overlaps previously defined nodes
+		Warning: RUNTIME ERROR: Node x_true[2,24] overlaps previously defined nodes
 
 - [x] Test sous Linux ok
 - [ ] Le pb doit venir de windows. Chez moi, cela plante plus d'une fois 
@@ -57,7 +57,7 @@ MATLAB crash file:C:\Users\adrien\AppData\Local\Temp\matlab_crash_dump.3656-1:
 
 
 ------------------------------------------------------------------------
-          Access violation detected at Wed Mar 12 22:35:43 2014
+	  Access violation detected at Wed Mar 12 22:35:43 2014
 ------------------------------------------------------------------------
 
 Configuration:
@@ -105,14 +105,14 @@ Stack Trace (from fault):
 Adrien le 2/3/2014 :
 ====================
 - [ ] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
-- [ ] Modifier arguments par défaut de plot.summary.particles.
+- [ ] Modifier arguments par défaut de `plot.summary.particles`.
 
 Adrien le 21/02/2014 :
 ======================
-- [ ] améliorer FindMatlab.cmake : vérifier les options de compilation utilisées par mex (voir MATLAB_ROOT/bin/mbuildopts.sh)
+- [ ] améliorer `FindMatlab.cmake` : vérifier les options de compilation utilisées par mex (voir `MATLAB_ROOT/bin/mbuildopts.sh`)
 - [ ] vérifier la validité des noms de fonction dans add_function
 - [x] permettre de remplacer les fonctions avec add_function mais protéger les fonctions du module base
-- [ ] permettre compilation 32bit sous windows
+- [x] permettre compilation 32bit sous windows
 
 François le 21/02/2014 :
 ========================
