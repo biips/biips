@@ -1,22 +1,45 @@
 François le 12/3/2014 :
-======================
+=======================
 Probleme dans change_data lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
-x[1] ~dnorm(0,1)
-x[2] ~dnorm(0,1)
+    x[1] ~dnorm(0,1)
+    x[2] ~dnorm(0,1)
 Dans ce cas, on ne peut pas faire change_data avec x[1:2]
 voir exemple dans test_crash4
 message d'erreur:
-Warning: RUNTIME ERROR: Can not change data: variable x[1:2]
-does not match one node exactly.
+    Warning: RUNTIME ERROR: Can not change data: variable x[1:2]
+    does not match one node exactly.
 
 - [ ] resoudre le probleme si pas trop compliqué, sinon mettre un message d'erreur un peu plus explicite 
+
+François le 11/3/2014 :
+=======================
+Francois: 
+- [x] 3 tutos et 3 exemples en suivi d'objet, volatilite et estimation de densite finis en matbiips. 
+- [ ] Ajouter doc PMMH matbiips
+- [ ] finir le dernier exemple
+- [ ] refaire une passe sur la doc inter_biips
+
+Marc: 
+- [x] doc inter_biips (matbiips) finie
+- [ ] Mettre les mexfile linux Matlab et Otave sur git
+- [ ] pb pour mexfile octave windows car octave est en 32 bits. Avec Adrien, faire octave 32bits windows
+
+Adrien: 
+- [ ] Pb dans change_data lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
+- [ ] Regarder bug exemple stochastic kinetic
+- [ ] ajouter les lois conditionnelles
+- [ ] quand exemples matbiips finis, transcrire en Rbiips
+- [ ] mexfile windows 32 bits
+- [ ] quand doc PMMH matbiips finie, verifier et transcrire dans RBiips
+
+- [ ] On vise d'avoir la version et les tutos/exemples en ligne avec l'article sur arxiv pour la fin du mois.
 
 Adrien le 11/3/2014 :
 =====================
 - [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
 - [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans biips_density de matbiips.
 - [ ] Retourner le mode dans biips_summary pour les lois discrètes
-- [ ] Calculer un histogramme dans biips_density pour les lois discrètesgit
+- [ ] Calculer un histogramme dans biips_density pour les lois discrètes
 
 François le 5/3/2014 :
 ======================
@@ -29,6 +52,55 @@ Warning: RUNTIME ERROR: Node x_true[2,24] overlaps previously defined nodes
 - [x] Test sous Linux ok
 - [ ] Le pb doit venir de windows. Chez moi, cela plante plus d'une fois 
 sur deux. En general je n'ai pas de message d'erreur, j'ai juste une segmentation fault.
+
+MATLAB crash file:C:\Users\adrien\AppData\Local\Temp\matlab_crash_dump.3656-1:
+
+
+------------------------------------------------------------------------
+          Access violation detected at Wed Mar 12 22:35:43 2014
+------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding     : Disabled
+  Default Encoding   : windows-1252
+  MATLAB Architecture: win64
+  MATLAB Root        : C:\Program Files\MATLAB\R2013b
+  MATLAB Version     : 8.2.0.701 (R2013b)
+  Operating System   : Microsoft Windows 7
+  Processor ID       : x86 Family 6 Model 58 Stepping 9, GenuineIntel
+  Virtual Machine    : Java 1.7.0_11-b21 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  Window System      : Version 6.1 (Build 7601: Service Pack 1)
+
+Fault Count: 1
+
+
+Abnormal termination:
+Access violation
+
+Register State (from fault):
+  RAX = 3ca8ac4d00b9fa98  RBX = 000000001b0a4020
+  RCX = 000000ffffffffff  RDX = 000000001af89780
+  RSP = 0000000004015810  RBP = 0000000000000001
+  RSI = 0000000008190000  RDI = 000000001af89790
+ 
+   R8 = 000000001b055f70   R9 = ed27d9036d025f71
+  R10 = 000000001826a900  R11 = 0000000000000000
+  R12 = 3db12d828ac1c754  R13 = 0000000100000001
+  R14 = ffffffff00007fff  R15 = 00000000ffff0000
+ 
+  RIP = 00000000779532f2  EFL = 00010286
+ 
+   CS = 0033   FS = 0053   GS = 002b
+
+Stack Trace (from fault):
+[  0] 0x00000000779532f2                      C:\Windows\SYSTEM32\ntdll.dll+00340722 RtlFreeHeap+00000306
+[  1] 0x000007feffb610c8                     C:\Windows\system32\msvcrt.dll+00004296 free+00000028
+[  2] 0x0000000017a3dbab C:\Users\adrien\workspace\biips-git\matbiips\matlab\inter_biips.mexw64+01825707 ZN5boost6detail17sp_counted_impl_pIN5Biips8ValArrayEE7disposeEv+00000027
+[  3] 0x00000000179902de C:\Users\adrien\workspace\biips-git\matbiips\matlab\inter_biips.mexw64+01114846 ZN5Biips14ForwardSampler12ReleaseNodesEv+00000190
+[  4] 0x00000000179a26df C:\Users\adrien\workspace\biips-git\matbiips\matlab\inter_biips.mexw64+01189599 ZN5Biips5Model11InitSamplerEjPNS_3RngERKSsd+00001663
+[  5] 0x000000001791c95f C:\Users\adrien\workspace\biips-git\matbiips\matlab\inter_biips.mexw64+00641375 ZN5Biips7Console17RunForwardSamplerEjjRKSsdjb+00000927
+[  6] 0x00000000178873e1 C:\Users\adrien\workspace\biips-git\matbiips\matlab\inter_biips.mexw64+00029665 mexFunction+00017985
+
 
 Adrien le 2/3/2014 :
 ====================
@@ -94,7 +166,7 @@ François le 16/02/2014
 - [x] Vérifier s'il n'y a pas un pb dans RBiips.R, ligne 340:
         rw$d <<- sum(sapply(rw$dim, FUN=sum))
 Il me semble que FUN devrait prendre le produit des dimensions plutot que la somme.
-- [ ] biips renvoie une erreur lorsque l'on essaie d'ajouter une fonction qui existe déjà. Ce serait bien de renvoyer juste un warning, et si possible de redéfinir la fonction (la fonction matlab peut avoir changer) - pas urgent ajouter message indiquant qu'il faut fermer matlab dans `biips_add_function` pour pouvoir redéfinir la fonction
+- [x] biips renvoie une erreur lorsque l'on essaie d'ajouter une fonction qui existe déjà. Ce serait bien de renvoyer juste un warning, et si possible de redéfinir la fonction (la fonction matlab peut avoir changer) - pas urgent ajouter message indiquant qu'il faut fermer matlab dans `biips_add_function` pour pouvoir redéfinir la fonction
 
 
 François le 13/02/2014 :
@@ -112,11 +184,11 @@ quelquefois n=0.
 Adrien le 11/02/2014 :
 ======================
 - [ ] exemples avec publish matlab (avec ou sans le package de Peyré ? plutôt sans...)
-- [ ] trouver une solution similaire pour R (voir package knitr)
+- [x] trouver une solution similaire pour R (voir package knitr)
     * --> OK en utilisant la fonction spin() du package knitr
     * voir : http://yihui.name/knitr/demo/stitch/
     * demo : https://github.com/yihui/knitr/blob/master/inst/examples/knitr-spin.R
-    * pas sûr qu'on puisse insérer du latex
+    * pas sûr qu'on puisse insérer du latex --> Si on peut
 - [ ] améliorer message d'erreur `Subset y[1] out of range [1:100] in Compiler::setConstantMask`.
 - [ ] éviter crash matlab : test_crash3.m non résolu (le lancer plusieurs fois)
 - [x] vérifier : si `sample_data=false` -> ne pas compiler bloc data
@@ -191,7 +263,7 @@ A faire :
   ---> Actuellement: 1 itération = 1 noeud stochastique non observé
        * x[2] est donc seulement conditionné à y[1]
        * x[3] est lui conditionné à y[1], y[2], y[3], y[4]
-       [x] Il faut changer ce comportement
+       - [x] Il faut changer ce comportement
 - [ ] retourner les conditionnelles sous la forme présentée plus haut
 
 

@@ -131,7 +131,7 @@ if (WIN32)
     # add R CMD INSTALL --build target
     add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.zip
         DEPENDS ${PKG_NAME}_pkg_dir
-        COMMAND ${R_EXECUTABLE} --arch 64 CMD INSTALL --preclean --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
+        COMMAND ${R_EXECUTABLE} --arch ${BITS} CMD INSTALL --preclean --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Building ${PKG_NAME} binary package"
         VERBATIM
