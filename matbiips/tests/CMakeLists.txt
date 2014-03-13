@@ -11,10 +11,11 @@ foreach(_test ${mtests})
         add_test(NAME ${_test}-matlab
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} -r "${MAT_COMS}"
         )
-        else(MATLAB) # Octave
-        add_test(NAME ${_test}-matlab
+        set_tests_properties(${_test}-matlab PROPERTIES TIMEOUT 30)
+    elseif(OCTAVE)
+        add_test(NAME ${_test}-octave
             COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS} --eval "${MAT_COMS}"
         )
+        set_tests_properties(${_test}-octave PROPERTIES TIMEOUT 30)
     endif()
-    set_tests_properties(${_test}-matlab PROPERTIES TIMEOUT 30)
 endforeach()

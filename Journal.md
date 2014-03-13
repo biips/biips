@@ -7,7 +7,7 @@ Biips compile en 32bits sous windows 64bits.
 		b2 toolset=gcc address-model=32 --stagedir=stage32 --build-type=complete --with-program_options --with-regex stage
 
 2. Compiler Biips avec les options suivantes
-		-DBUILD_32BIT=ON 
+		-DBUILD_64BIT=OFF 
 		-DBOOST_LIBRARYDIR="%BOOST_ROOT%/stage32/lib"
 
 Par contre je n'ai que Matlab 64bits sur cette VM et n'ai pas pu compiler matbiips pour matlab en 32bits.
