@@ -48,16 +48,15 @@ addpath(matbiips_path)
 
 %%
 % *Model parameters*
-t_max = 10;
+t_max = 20;
 dt = 0.20;
 x_init = [100 ;100];
 alpha_true = .5;
 beta_true = .0025;
 gamma_true = .3;
-prec_y = .1;
-data = struct('t_max', t_max, 'dt', dt, 'alpha_true',alpha_true, ...
-    'beta', beta_true, 'gamma', gamma_true, 'x_init', x_init, ...
-    'prec_y', prec_y);
+prec_y = 1/10;
+data = struct('t_max', t_max, 'dt', dt, 'alpha_true',alpha_true, 'beta_true', beta_true, ...
+    'gamma_true', gamma_true, 'x_init', x_init, 'prec_y', prec_y);
 
 
 %%
@@ -70,11 +69,14 @@ model = 'stoch_kinetic_cle.bug'; % BUGS model filename
 sample_data = true; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 
-figure
-plot(data.x_true(1,:), 'linewidth', 2)
+figure('name', 'data')
+plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
 hold on
-plot(data.x_true(2,:), 'r', 'linewidth', 2)
+plot(dt:dt:t_max, data.x_true(2,:), 'r', 'linewidth', 2)
+hold on
+plot(dt:dt:t_max, data.y, 'g*')
 
+legend('Prey', 'Predator', 'Measurements')
 
 %% BiiPS : Sensitivity analysis with Sequential Monte Carlo
 
@@ -82,8 +84,8 @@ plot(data.x_true(2,:), 'r', 'linewidth', 2)
 %%
 % *Parameters of the algorithm*. 
 n_part = 100; % Number of particles
-param_names = {'logalpha[1:1]'}; % Parameter for which we want to study sensitivity
-param_values = {-7:.2:3}; % Range of values
+param_names = {'logalpha[1:1]','logbeta[1:1]','loggamma[1:1]'}; % Parameter for which we want to study sensitivity
+param_values = {linspace(-7,3,20),log(beta_true)*ones(20,1),log(gamma_true)*ones(20,1)}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
@@ -104,35 +106,34 @@ ylabel('Penalized log-marginal likelihood')
 
 %% BiiPS Particle Marginal Metropolis-Hastings
 % We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
-% to obtain posterior MCMC samples of the parameter and variables x.
+% to obtain posterior MCMC samples of the parameters and variables x.
 
 %%
 % *Parameters of the PMMH*
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 400; % nb of burn-in/adaptation iterations
-n_iter = 400; % nb of iterations after burn-in
-thin = 1; % thinning of MCMC outputs
-n_part = 50; % nb of particles for the SMC
+n_burn = 10; % nb of burn-in/adaptation iterations
+n_iter = 10; % nb of iterations after burn-in
+thin = 2; % thinning of MCMC outputs
+n_part = 100; % nb of particles for the SMC
 
-param_names = {'logalpha[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
-%latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'logalpha[1:1]','logbeta[1:1]', 'loggamma[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
+% latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 latent_names = {};
-var_name = param_names{1};
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {log(.5)}); % creates a pmmh object
+obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-1, -6, -1}); % creates a pmmh object
 
 %%
 % *Run PMMH*
-obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[obj_pmmh, stats] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 [out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1, 'latent_names', latent_names); % Samples
  
 %%
 % *Some summary statistics*
-summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975,.5]);
 
 %%
 % *Compute kernel density estimates*
@@ -145,47 +146,56 @@ fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
     summary_pmmh.(param_names{1}).quant(1),  summary_pmmh.(param_names{1}).quant(2));
 
 
+param_true = [log(alpha_true), log(beta_true), log(gamma_true)];
+leg = {'log(\alpha)', 'log(\beta)', 'log(\gamma)'}
 %%
 % *Trace of MCMC samples for the parameter*
-figure('name', 'PMMH: Trace samples parameter')
-plot(out_pmmh.(var_name))
-hold on
-plot(0, log(data.alpha_true), '*g');  
-xlabel('Iterations')
-ylabel('PMMH samples')
-title('log(\alpha)')
+for i=1:length(param_names)
+    figure('name', 'PMMH: Trace samples parameter')
+    plot(out_pmmh.(param_names{i}))
+    hold on
+    plot(0, param_true(i), '*g');  
+    xlabel('Iterations')
+    ylabel('PMMH samples')
+    title(leg{i})
+end
 
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
-figure('name', 'PMMH: Histogram posterior parameter')
-hist(out_pmmh.(var_name), 15)
-% hold on
-% plot(data.log_prec_y_true, 0, '*g');  
-xlabel('log\_prec\_y')
-ylabel('number of samples')
-title('log\_prec\_y')
+for i=1:length(param_names)
+    figure('name', 'PMMH: Histogram posterior parameter')
+    hist(out_pmmh.(param_names{i}), 15)
+    hold on
+    plot(param_true(i), 0, '*g');  
+    xlabel(leg{i})
+    ylabel('number of samples')
+    title(leg{i})
+end
 
-figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f); 
-% hold on
-% plot(data.log_prec_y_true, 0, '*g');
-xlabel('log\_prec\_y');
-ylabel('posterior density');
+for i=1:length(param_names)
+    figure('name', 'PMMH: KDE estimate posterior parameter')
+    plot(kde_estimates_pmmh.(param_names{i}).x,...
+        kde_estimates_pmmh.(param_names{i}).f); 
+    hold on
+    plot(param_true(i), 0, '*g');  
+    xlabel(leg{i});
+    ylabel('posterior density');
+end
    
 
-% %%
-% % *Posterior mean and quantiles for x*
-% x_pmmh_mean = summary_pmmh.x.mean;
-% x_pmmh_quant = summary_pmmh.x.quant;
-% figure('name', 'PMMH: Posterior mean and quantiles')
-% fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
-%     [.7 .7 1], 'edgecolor', 'none')
-% hold on
-% plot(x_pmmh_mean, 'linewidth', 3)
-% xlabel('Time')
-% ylabel('Estimates')
-% legend({'95 % credible interval', 'PMMH Mean Estimate'})
-% 
+%%
+% *Posterior mean and quantiles for x*
+x_pmmh_mean = summary_pmmh.x.mean;
+x_pmmh_quant = summary_pmmh.x.quant;
+figure('name', 'PMMH: Posterior mean and quantiles')
+fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,1, :))', fliplr(squeeze(x_pmmh_quant(2,1,:))')],...
+    [.7 .7 1], 'edgecolor', 'none')
+hold on
+plot(x_pmmh_mean(1, :), 'linewidth', 3)
+xlabel('Time')
+ylabel('Estimates')
+legend({'95 % credible interval', 'PMMH Mean Estimate'})
+ 
 % %%
 % % *Trace of MCMC samples for x*
 % time_index = [5, 10, 15, 20];
