@@ -1,11 +1,25 @@
+Adrien le 13/3/2014 :
+=====================
+Biips compile en 32bits sous windows 64bits.
+
+1. Compiler boost en 32 bits et installer dans le sous-répertoire stage32/lib :
+
+		b2 toolset=gcc address-model=32 --stagedir=stage32 --build-type=complete --with-program_options --with-regex stage
+
+2. Compiler Biips avec les options suivantes
+		-DBUILD_32BIT=ON 
+		-DBOOST_LIBRARYDIR="%BOOST_ROOT%/stage32/lib"
+
+Par contre je n'ai que Matlab 64bits sur cette VM et n'ai pas pu compiler matbiips pour matlab en 32bits.
+
 François le 13/3/2014 :
 =======================
 Fait:
 * Retirer l'argument seed des fonctions
 * Renommer les fonctions matlab pimh dans private pour avoir pimh_***
 * Ajouter en-tetes PIMH
-J'ai ajouté une fonction test_crash5.m qui identifie un probleme avec l'utilisation de matrice dans le pimh/pmmh
-- [ ] Resoudre le probleme dans test_crash5.m
+J'ai ajouté une fonction `test_crash5.m` qui identifie un probleme avec l'utilisation de matrice dans le pimh/pmmh
+- [ ] Resoudre le probleme dans `test_crash5.m`
 
 François le 12/3/2014 :
 =======================
