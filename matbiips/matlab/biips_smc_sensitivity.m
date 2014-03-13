@@ -22,7 +22,7 @@ end
 for i=2:n_params
     dimension = size(param_values{i});
     if (length(dimension)==2 && dimension(2)==1) % scalar parameter#
-        if n_values ~= 1
+        if n_values ~= dimension(1)
             error('Invalid param_values argument: number of values to evaluate do not match')
         end
     else

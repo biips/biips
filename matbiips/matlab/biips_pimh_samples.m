@@ -1,9 +1,9 @@
 function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n_iter, n_part, varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BIIPS_PIMH_UPDATE Performs burn-in iterations for the particle
+% BIIPS_PIMH_SAMPLES Performs iterations for the particle
 % independent Metropolis-Hastings algorithm
-% biips_pimh_update(console, variable_names, n_iter, n_part, varargin)
+% biips_pimh_samples(console, variable_names, n_iter, n_part, varargin)
 %
 % INPUT: 
 % - console:     integer. Id of the console containing the model, 
