@@ -3,6 +3,7 @@ clear all
 
 test = 'all';% smc, pmmh or all
 
+%% Tests SMC
 switch(test)
     case {'smc', 'all'}
     % RUNS A SET OF TESTS
@@ -28,6 +29,7 @@ switch(test)
     model = 'hmm_1d_lin_mat.bug'; % BUGS model filename
     sample_data = true; % Boolean
     [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    biips_clear(model_id)
 
     % Test model with cell data structure
     t_max = 40; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;
@@ -39,6 +41,7 @@ switch(test)
     % model = 'hmm_1d_lin.bug'; % BUGS model filename
     sample_data = true; % Boolean
     [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    
 
 
     % test model with wrong type for argument
@@ -86,7 +89,53 @@ switch(test)
     out_smc = biips_smc_samples(model_id, variables, n_part,...
         'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
     nodes = biips_get_nodes(model_id)
+    biips_clear(model_id)
 end
+
+%% Test PIMH
+switch(test)
+    case {'pimh', 'all'}
+        
+    % Test pimh with vectors
+    t_max = 10; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;
+    data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
+        'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
+    %%% Start BiiPS console
+    biips_init;
+    %%% Compile BUGS model and sample data
+    model = 'hmm_1d_lin.bug'; % BUGS model filename
+    sample_data = true; % Boolean
+    [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    
+    variables = {'x', 'x[1:2]'};
+    n_part = 100;
+    n_iter = 20;
+    biips_pimh_update(model_id, variables, n_iter, n_part);
+    out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part);
+    biips_clear(model_id)
+    
+    % Test pimh with matrices
+    t_max = 10; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;
+    data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
+        'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
+    %%% Start BiiPS console
+    biips_init;
+    %%% Compile BUGS model and sample data
+    model = 'hmm_1d_lin_mat.bug'; % BUGS model filename
+    sample_data = true; % Boolean
+    [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    
+    variables = {'x', 'x[1:2,1]'};
+    n_part = 100;
+    n_iter = 20;
+    biips_pimh_update(model_id, variables, n_iter, n_part);
+    out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part);
+    biips_clear(model_id)
+
+end
+
+
+%% Test PMMH
 switch(test)
     case {'pmmh', 'all'}
     
@@ -117,4 +166,5 @@ switch(test)
     obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
     [out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
         'thin', 1, 'latent_names', latent_names); % Samples
+    biips_clear(model_id)
 end
