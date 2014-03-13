@@ -21,7 +21,7 @@ Francois:
 
 Marc: 
 - [x] doc `inter_biips` (matbiips) finie
-- [ ] Mettre les mexfile linux Matlab et Otave sur git
+- [x] Mettre les mexfile linux Matlab et Otave sur git
 - [ ] pb pour mexfile octave windows car octave est en 32 bits. Avec Adrien, faire octave 32bits windows
 
 Adrien: 
