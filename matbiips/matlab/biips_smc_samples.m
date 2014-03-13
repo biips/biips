@@ -29,8 +29,6 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 % - rs_type :   string (default = 'stratified')
 %               Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
 %               Indicates the type of algorithm used for the resampling step.           
-% - seed :      integer (default is set randomly). 
-%               Seed for random number generator.
 % OUTPUT:
 % particles:    output structure containing all the SMC information
 % log_marg_like: log marginal likelihood
@@ -44,28 +42,21 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 %               'rs_type', rs_type, 'rs_thres', rs_thres);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-%
-% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
-% BiiPS: a software for Bayesian inference with interacting particle
-% systems. Technical Report, INRIA. February 2014.
-%
-% Authors: Adrien Todeschini, Marc Fuentes
-% INRIA Bordeaux, France
-% email: biips-project@lists.gforge.inria.fr
-% Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 31-01-2014
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright: INRIA
+% Jan 2014; Last revision: 13-03-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% PROCESS AND CHECK INPUTS
 % CAN WE ADD A CHECK ON THE VARIABLES??
 %%% Process and check optional arguments
-optarg_names = {'type', 'rs_thres', 'rs_type', 'seed'};
-optarg_default = {'fs', .5, 'stratified', get_seed()};
+optarg_names = {'type', 'rs_thres', 'rs_type'};
+optarg_default = {'fs', .5, 'stratified'};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, n_part],...
-    {'multinomial', 'stratified', 'residual', 'systematic'},...
-    [0, intmax]};
-optarg_type = {'char', 'numeric', 'char', 'numeric'};
-[type, rs_thres, rs_type, seed] = parsevar(varargin, optarg_names, optarg_type,...
+    {'multinomial', 'stratified', 'residual', 'systematic'}};
+optarg_type = {'char', 'numeric', 'char'};
+[type, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
 indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0);
@@ -82,7 +73,7 @@ if (~isempty(variable_names))
 end
 
 %% Run smc_sample
-run_smc_forward(console, n_part, rs_thres, rs_type, seed);
+run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
 
 log_marg_like = inter_biips('get_log_norm_const', console);
 
