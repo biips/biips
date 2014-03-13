@@ -1,38 +1,40 @@
 function [particles, log_marg_like] = biips_smc_samples(console, variable_names, n_part, varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BIIPS_SMC_SAMPLES main routine implementing SMC algorithms
-% [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
+%--------------------------------------------------------------------------
+% BIIPS_SMC_SAMPLES Runs a sequential Monte Carlo algorithm
+%   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
 %        nb_part, 'Propertyname', propertyvalue, ...)
-% INPUT: 
-% - console :           integer. Id of the console containing the model, 
-%                       returned by the 'biips_model' function
-% - variable_names :    cell of strings. Contains the names of the 
-%                       unobserved variables to monitor.
-%                       Possible value: {'var1', 'var2[1]', 'var3[1:10]',
+%   INPUT: 
+%    - console:        integer. Id of the console containing the model, 
+%                      returned by the 'biips_model' function
+%    - variable_names: cell of strings. Contains the names of the 
+%                      unobserved variables to monitor.
+%                      Possible value: {'var1', 'var2[1]', 'var3[1:10]',
 %                                                       'var4[1, 5:10, 3]'}
-%                       Dimensions and indices must be a valid subset of 
-%                       the variables of the model.
-% - n_part :            positive integer. Number of particles used in SMC algorithms
+%                      Dimensions and indices must be a valid subset of 
+%                      the variables of the model.
+%    - n_part:         positive integer. Number of particles used in SMC algorithms
 %
-% Optional Inputs:
-% - type :      string (default = 'fs').
+%   Optional Inputs:
+%   - type:     string (default = 'fs').
 %               Its characters must be in the set {'f', 's', 'b'} for 
 %               respectively 'filtering', 'smoothing' and 'backward smoothing'.
 %               can use multiple letters, eg: 'fsb' for the three algorithms.
-% - rs_thres :  positive real (default = 0.5).
+%   - rs_thres: positive real (default = 0.5).
 %               Threshold for the resampling step (adaptive SMC).
 %               if rs_thres is in [0,1] --> resampling occurs when 
 %                                           (ESS > rs_thres * nb_part)
 %               if rs_thres is in [2,nb_part] --> resampling occurs when 
 %                                               (ESS > rs_thres)
-% - rs_type :   string (default = 'stratified')
+%   - rs_type : string (default = 'stratified')
 %               Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
 %               Indicates the type of algorithm used for the resampling step.           
-% OUTPUT:
-% particles:    output structure containing all the SMC information
-% log_marg_like: log marginal likelihood
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   OUTPUT:
+%   - particles:    output structure containing all the SMC information
+%   - log_marg_like:log marginal likelihood
+%
+%   See also BIIPS_MODEL
+%--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
 % model_id = biips_model('model.bug', data)
@@ -40,17 +42,17 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 % type = 'fs'; rs_type = 'multinomial'; rs_thres = 0.5;
 % out_smc = biips_smc_samples(model_id, variables, npart, 'type', type,...
 %               'rs_type', rs_type, 'rs_thres', rs_thres);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
+
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, François Caron
-% Copyright: INRIA
+% Copyright (C) Inria
+% License: GPL-3
 % Jan 2014; Last revision: 13-03-2014
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-% CAN WE ADD A CHECK ON THE VARIABLES??
-%%% Process and check optional arguments
 optarg_names = {'type', 'rs_thres', 'rs_type'};
 optarg_default = {'fs', .5, 'stratified'};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, n_part],...
