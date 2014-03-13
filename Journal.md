@@ -1,3 +1,12 @@
+François le 13/3/2014 :
+=======================
+Fait:
+* Retirer l'argument seed des fonctions
+* Renommer les fonctions matlab pimh dans private pour avoir pimh_***
+* Ajouter en-tetes PIMH
+J'ai ajouté une fonction test_crash5.m qui identifie un probleme avec l'utilisation de matrice dans le pimh/pmmh
+- [ ] Resoudre le probleme dans test_crash5.m
+
 François le 12/3/2014 :
 =======================
 Probleme dans change_data lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
