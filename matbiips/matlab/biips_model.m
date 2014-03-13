@@ -45,9 +45,9 @@ function [p, data] = biips_model(filename, data, varargin)
 %% PROCESS AND CHECK INPUTS
 %%% Check filename
 if ~ischar(filename)
-    error('Invalid filename: must be a character array.\n');
+    error('Invalid filename: must be a character array.');
 elseif ~exist(filename, 'file')
-    error('Undefined BUGS file ''%s''\n', filename);
+    error('Cannot find BUGS file ''%s''', filename);
 end
 %%% Process and check optional arguments
 optarg_names = {'sample_data', 'seed', 'quiet'};
