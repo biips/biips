@@ -1,3 +1,10 @@
+if "%1" == "" (
+    echo "Usage:   build_biips.bat [-jN [-g [-32 [-oct]]]]"
+    echo "    Where N=nb of parallel jobs."
+    echo "    The options order matters."
+    echo "    Use any string that does not match the option, e.g. '-', to skip an option"
+)
+
 :: Change these variables to fit your needs
 ::-----------------------------------------
 set BIIPS_SRC=%~dp0
@@ -17,31 +24,21 @@ set MAKE=C:\MinGW\bin\mingw32-make
 set MAKE_OPT=%1
 
 set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
-set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage\lib
 set CMAKE_BUILD_TYPE=Release
-set BUILD_64BIT=ON
-set BUILD_MATBIIPS=ON
 
 if "%2"=="-g" (
-	set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
-	set CMAKE_BUILD_TYPE=Debug
+    set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
+    set CMAKE_BUILD_TYPE=Debug
 ) 
-if "%3"=="-g" (
-	set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
-	set CMAKE_BUILD_TYPE=Debug
+
+if "%3"=="-32" (
+    set BIIPS_BUILD=%BIIPS_BUILD%-32bit
+    set CMAKE_OPTIONS="%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBUILD_MATBIIPS=OFF -DBOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib"
 )
 
-if "%2"=="-32" (
-	set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib
-	set BUILD_64BIT=OFF
-    set BUILD_MATBIIPS=OFF
-)
-if "%3"=="-32" (
-	set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib
-	set BUILD_64BIT=OFF
-	set BUILD_MATBIIPS=OFF
+if "%4" == "-oct" (
+    set BIIPS_BUILD=%BIIPS_BUILD%-oct
+    set CMAKE_OPTIONS="%CMAKE_OPTIONS% -DFIND_OCTAVE=ON"
 )
 
 ::-----------------------------------------
@@ -58,7 +55,7 @@ if "%errorlevel%"=="1" (
 	call:ask_clear
 	TIMEOUT /T 1
 	cd "%BIIPS_BUILD%"
-	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -DBUILD_64BIT=%BUILD_64BIT% -DBUILD_MATBIIPS=%BUILD_MATBIIPS% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
+	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% %CMAKE_OPTIONS% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
 )
 
 cd "%BIIPS_BUILD%"
