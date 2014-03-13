@@ -48,6 +48,11 @@ Installer machine virtuelle Windows
 
 		bootstrap
 
-	* Compiler les bibliothèques désirées et installer dans le sous-répertoire stage\lib
+	* Compiler les bibliothèques désirées en 64bit et installer dans le sous-répertoire stage\lib
 
-		.\b2 toolset=gcc address-model=64 --build-type=complete --with-program_options --with-regex stage
+		b2 toolset=gcc address-model=64 --build-type=complete --with-program_options --with-regex stage
+
+	* Compiler les bibliothèques désirées en 32bit et installer dans le sous-répertoire stage32\lib
+
+		b2 toolset=gcc address-model=32 --stagedir=stage32 --build-type=complete --with-program_options --with-regex stage
+

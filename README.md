@@ -3,7 +3,7 @@ BiiPS
 BiiPS is a general software for Bayesian inference with interacting Particle Systems.
 
 - Version:       0.8.1
-- Last modified: 2014-03-11
+- Last modified: 2014-03-13
 - Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
 - License:       GPL-3
 - Website:       http://alea.bordeaux.inria.fr/biips
