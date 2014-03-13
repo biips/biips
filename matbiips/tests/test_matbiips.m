@@ -45,7 +45,12 @@ switch(test)
     data = {'t_max', 'prec_x_init',...
         'prec_x', 'prec_y', 'mean_x_init'};
     sample_data = 'tartealacreme';
-    [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    try 
+        [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    catch err
+        fprintf('[\bError: %s]\b\n', err.message)
+    end
+    
 
     % MAKES THE PROGRAMM CRASH
     % % Test model with cell data structure
@@ -63,14 +68,14 @@ switch(test)
     badmodel = 'an_unknown_bug_file.bug'; % BUGS model filename
     try(biips_model(badmodel, data, 'sample_data', sample_data))
     catch err
-        fprintf(err.message)    
+        fprintf('[\bError: %s]\b\n', err.message)
     end
 
     % Test model with bad filename
     badmodel2 = 2; % BUGS model filename
     try(biips_model(badmodel2, data, 'sample_data', sample_data))
     catch err
-        fprintf(err.message)
+        fprintf('[\bError: %s]\b\n', err.message)
     end
 
     %% TESTS BIIPS_SMC_SAMPLES
