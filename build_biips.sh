@@ -15,11 +15,12 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export BIIPS_SRC=`pwd`
     export BIIPS_ROOT=/Users/adrien/biips
     export BOOST_ROOT=/Users/adrien/boost_1_49_0
+    export LIBnn=lib
 	export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
 	export CMAKE_GENERATOR="Unix Makefiles"
 	export CMAKE_OPTIONS=""
     export CPACK_GENERATOR="PackageMaker"
-    export LIBnn=lib
+    export MAKE="make $1"
     
     if [[ "$2"=="-g" ]]; then
         export BIIPS_BUILD=/Users/adrien/workspace/biips-debug

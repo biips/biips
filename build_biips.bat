@@ -3,31 +3,62 @@
 set BIIPS_SRC=%~dp0
 set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
 set BIIPS_ROOT=C:\Users\adrien\biips
-set BOOST_ROOT=C:\Program Files\boost\boost_1_49_0
-::set BOOST_LIBRARYDIR64=%BOOST_ROOT%\stage\lib64
+set BOOST_ROOT=C:\Program Files\boost\boost_1_55_0
 set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
 set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
 set MATLAB_ROOT=C:\Program Files\MATLAB\R2013b
 set RTOOLS_BINDIR=C:\Rtools\bin
-set CMAKE_BUILD_TYPE=Release
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1"
 set CPACK_GENERATOR=NSIS
 set MAKE=C:\MinGW\bin\mingw32-make
 set MAKE_OPT=%1
+
+set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
+set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage\lib
+set CMAKE_BUILD_TYPE=Release
+set BUILD_64BIT=ON
+set BUILD_MATBIIPS=ON
+
+if "%2"=="-g" (
+	set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
+	set CMAKE_BUILD_TYPE=Debug
+) 
+if "%3"=="-g" (
+	set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
+	set CMAKE_BUILD_TYPE=Debug
+)
+
+if "%2"=="-32" (
+	set BIIPS_BUILD=%BIIPS_BUILD%-32bit
+    set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib
+	set BUILD_64BIT=OFF
+    set BUILD_MATBIIPS=OFF
+)
+if "%3"=="-32" (
+	set BIIPS_BUILD=%BIIPS_BUILD%-32bit
+    set BOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib
+	set BUILD_64BIT=OFF
+	set BUILD_MATBIIPS=OFF
+)
+
 ::-----------------------------------------
 
-pause
-"%PAGEANT%" "%GFORGE_PRIVATE_KEY%"
-"%TORTOISEGITPROC%" /command:pull origin master /path:"%BIIPS_SRC%" /closeonend:2
+
+choice /m "Git pull"
+if "%errorlevel%"=="1" (
+    "%PAGEANT%" "%GFORGE_PRIVATE_KEY%"
+    "%TORTOISEGITPROC%" /command:pull origin master /path:"%BIIPS_SRC%" /closeonend:2
+)
 
 choice /m "Run CMake"
 if "%errorlevel%"=="1" (
 	call:ask_clear
+	TIMEOUT /T 1
 	cd "%BIIPS_BUILD%"
-	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
+	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -DBUILD_64BIT=%BUILD_64BIT% -DBUILD_MATBIIPS=%BUILD_MATBIIPS% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
 )
 
 cd "%BIIPS_BUILD%"
@@ -46,7 +77,7 @@ choice /m "Build/install RBiips"
 if "%errorlevel%"=="1" (
 	set "PATH=%RTOOLS_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% VERBOSE=1 RBiips_INSTALL_build
+	"%MAKE%" VERBOSE=1 RBiips_INSTALL_build
 	call:ask_make_pdf
 )
 
