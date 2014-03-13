@@ -1,8 +1,10 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "Usage:   ./build_biips.sh [-jN] [-g]"
-    echo "By default, N=1"
+    echo "Usage:   ./build_biips.sh [-jN [-g [-oct]]]"
+    echo "    Where N=nb of parallel jobs."
+    echo "    The options order matters."
+    echo "    Use any string that does not match the option, e.g. '-', to skip an option"
 fi
 
 set -x;
@@ -13,30 +15,33 @@ set -x;
 if [[ "$(uname)" == "Darwin" ]]; then
     # environment variables for Mac
     export BIIPS_SRC=`pwd`
+    export BIIPS_BUILD=/Users/adrien/workspace/biips-build
     export BIIPS_ROOT=/Users/adrien/biips
     export BOOST_ROOT=/Users/adrien/boost_1_49_0
     export LIBnn=lib
-	export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
-	export CMAKE_GENERATOR="Unix Makefiles"
-	export CMAKE_OPTIONS=""
+    export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
+    export CMAKE_BUILD_TYPE=Release
+    export CMAKE_GENERATOR="Unix Makefiles"
+    export CMAKE_OPTIONS=""
     export CPACK_GENERATOR="PackageMaker"
     export MAKE="make $1"
     
     if [[ "$2"=="-g" ]]; then
         export BIIPS_BUILD=/Users/adrien/workspace/biips-debug
         export CMAKE_BUILD_TYPE=Debug
-    else
-        export BIIPS_BUILD=/Users/adrien/workspace/biips-build
-        export CMAKE_BUILD_TYPE=Release
     fi
+
 else
     # environment variables for Linux
     export BIIPS_SRC=`pwd`
+    export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
     export BIIPS_ROOT=/home/adrien-alea/biips
     export LIBnn=lib/x86_64-linux-gnu
     # Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
     # OpenSuse: use lib or lib64
+    export MATLAB_ROOT=/usr/local/MATLAB/R2012b
     export ECLIPSE=/home/adrien-alea/eclipse_4.3/eclipse
+    export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
     export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_EXECUTABLE=$ECLIPSE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
     # OpenSuse: add -DBoost_USE_STATIC_LIBS=OFF
@@ -48,11 +53,12 @@ else
         export BIIPS_BUILD=/home/adrien-alea/workspace/biips-debug
         export MATLAB_ROOT=/usr/local/MATLAB/R2010b
         export CMAKE_BUILD_TYPE=Debug
-    else
-        export BIIPS_BUILD=/home/adrien-alea/workspace/biips-build
-        export MATLAB_ROOT=/usr/local/MATLAB/R2012b
-        export CMAKE_BUILD_TYPE=Release
     fi
+fi
+
+if [[ "$3" == "-oct" ]]; then
+    export CMAKE_OPTIONS="$CMAKE_OPTIONS -DFIND_OCTAVE=ON"
+    export BIIPS_BUILD=${BIIPS_BUILD}-oct
 fi
 
 
