@@ -21,13 +21,16 @@ if (OCTAVE_ROOT)
         endif(MATLAB_INCLUDE_DIR)
         # retrieve LIBDIR
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTLIBDIR
-                OUTPUT_VARIABLE MATLAB_LIB_DIR)
+                OUTPUT_VARIABLE MATLAB_LIB_DIR 
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        file(TO_CMAKE_PATH ${MATLAB_LIB_DIR} MATLAB_LIBRARY_DIR)
         if (MATLAB_LIBRARY_DIR)
             # find MATLAB libaries
             find_library(OCTINTERP_LIBRARY octinterp  
                 PATHS ${MATLAB_LIBRARY_DIR}
                 NO_DEFAULT_PATH
             )
+            message(STATUS "octinterp library =  ${OCTINTERP_LIBRARY}") 
             find_library(OCTAVE_LIBRARY octave 
                 PATHS ${MATLAB_LIBRARY_DIR}
                 NO_DEFAULT_PATH
