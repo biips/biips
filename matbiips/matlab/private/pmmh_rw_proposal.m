@@ -17,7 +17,10 @@ if (isempty(rw.cov) || (rw.niter < rw.n_rescale) || (rand<(rw.beta)))
 else
     % proposal with learnt covariance
     epsilon = 1e-5; % For numerical stability
-    cov_chol = cholcov(rw.cov + epsilon*eye(rw.d));
+    [cov_chol, tag] = chol(rw.cov + epsilon*eye(rw.d));
+    if tag>1
+        error('Matrix is not positive semi-definite');
+    end
     prop_vec = sample_vec + 2.38/sqrt(rw.d) * cov_chol * randn(rw.d, 1);
 end
 

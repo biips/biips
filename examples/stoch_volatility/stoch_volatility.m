@@ -132,8 +132,8 @@ model = 'stoch_volatility.bug'; % BUGS model filename
 
 %%
 % *Parameters of the PMMH*
-n_burn = 20000; % nb of burn-in/adaptation iterations
-n_iter = 20000; % nb of iterations after burn-in
+n_burn = 200; % nb of burn-in/adaptation iterations
+n_iter = 200; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
@@ -162,10 +162,10 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 %%
 % *Posterior mean and credibilist interval for the parameters*
 for i=1:length(param_names)
-    fprintf('Posterior mean of %s: %.3f\n',param_names{i},summary_pmmh.(param_names{i}).mean);
+    sum_param = getfield(summary_pmmh, param_names{i});
+    fprintf('Posterior mean of %s: %.3f\n',param_names{i},sum_param.mean);
     fprintf('95%% credibilist interval for %s: [%.3f,%.3f]\n',...
-        param_names{i},...
-        summary_pmmh.(param_names{i}).quant(1),  summary_pmmh.(param_names{i}).quant(2));
+        param_names{i}, sum_param.quant(1),  sum_param.quant(2));
 end
 
 %%
@@ -176,8 +176,9 @@ end
 title_names = {'\alpha', 'logit(\beta)', 'log(\sigma)'};
 % figure('name', 'PMMH: Trace samples parameter')
 for k=1:3
+    out_pmmh_param = getfield(out_pmmh, param_names{k});
     figure
-    plot(out_pmmh.(param_names{k}))
+    plot(out_pmmh_param)
     if sample_data
         hold on
         plot(0, param_true(k), '*g');  
@@ -191,8 +192,9 @@ end
 %%
 % *Histogram and kde estimate of the posterior for the parameters*
 for k=1:3
+    out_pmmh_param = getfield(out_pmmh, param_names{k});
     figure('name', 'PMMH: Histogram posterior parameter')
-    hist(out_pmmh.(param_names{k}), 15)
+    hist(out_pmmh_param, 15)
     if sample_data
         hold on
         plot(param_true(k),0, '*g');  
@@ -209,7 +211,7 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
+    [.7 .7 1])
 hold on
 plot(x_pmmh_mean, 'linewidth', 3)
 if sample_data
@@ -275,7 +277,7 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);    
 end
 if sample_data
-    legend({'posterior density', 'True value'}, 'fontsize', 12);
+    legend({'posterior density', 'True value'});
 end
 
 
