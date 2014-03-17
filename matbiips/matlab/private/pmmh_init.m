@@ -1,5 +1,5 @@
 function [sample_param, sample_latent, log_prior, log_marg_like]...
-    = init_pmmh(console, param_names, n_part, first_init, varargin)
+    = pmmh_init(console, param_names, n_part, first_init, varargin)
 
 %% ADD DOC
 % param_names: parameters updated by MCMC
