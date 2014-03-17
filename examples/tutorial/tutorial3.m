@@ -142,7 +142,7 @@ x_f_med = summary.x.f.med;
 x_f_quant = summary.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
+    [.7 .7 1]);
 hold on
 plot(x_f_mean, 'linewidth', 3)
 xlabel('Time')
@@ -157,7 +157,7 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
+    [.7 .7 1]);
 hold on
 plot(x_s_mean, 'linewidth', 3)
 xlabel('Time')
@@ -183,7 +183,7 @@ for k=1:length(time_index)
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
-legend({'filtering density', 'smoothing density', 'True value'}, 'fontsize', 12);
+legend({'filtering density', 'smoothing density', 'True value'});
 
 %% Clear model
 % 

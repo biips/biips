@@ -155,15 +155,17 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credibilist interval for the parameter*
-fprintf('Posterior mean of log_prec_y: %.1f\n',summary_pmmh.(var_name).mean);
+sum_var = getfield(summary_pmmh, var_name);
+fprintf('Posterior mean of log_prec_y: %.1f\n', sum_var.mean);
 fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
-    summary_pmmh.(var_name).quant(1),  summary_pmmh.(var_name).quant(2));
+    sum_var.quant(1),  sum_var.quant(2));
 
 
 %%
 % *Trace of MCMC samples for the parameter*
+mcmc_samples = getfield(out_pmmh,var_name);
 figure('name', 'PMMH: Trace samples parameter')
-plot(out_pmmh.(var_name))
+plot(mcmc_samples)
 hold on
 plot(0, data.log_prec_y_true, '*g');  
 xlabel('Iterations')
@@ -173,15 +175,16 @@ title('log\_prec\_y')
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
 figure('name', 'PMMH: Histogram posterior parameter')
-hist(out_pmmh.(var_name), 15)
+hist(mcmc_samples, 15)
 hold on
 plot(data.log_prec_y_true, 0, '*g');  
 xlabel('log\_prec\_y')
 ylabel('number of samples')
 title('log\_prec\_y')
 
+kde_var = getfield(kde_estimates_pmmh, var_name);
 figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_estimates_pmmh.(var_name).x, kde_estimates_pmmh.(var_name).f); 
+plot(kde_var.x, kde_var.f); 
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
@@ -194,7 +197,7 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
-    [.7 .7 1], 'edgecolor', 'none')
+    [.7 .7 1]);%, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean, 'linewidth', 3)
 xlabel('Time')
@@ -243,7 +246,7 @@ for k=1:length(time_index)
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
-legend({'posterior density', 'True value'}, 'fontsize', 12);
+legend({'posterior density', 'True value'});
 
 
 %% Clear model
