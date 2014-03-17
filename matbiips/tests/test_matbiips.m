@@ -30,6 +30,14 @@ switch(test)
     sample_data = true; % Boolean
     [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
     biips_clear(model_id)
+    
+    % Test biips_build_sampler
+    [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+    biips_build_sampler(model_id)
+    biips_build_sampler(model_id,'proposal', 'prior')
+    biips_build_sampler(model_id,'proposal', 'auto')
+    biips_clear(model_id)
+    
 
     % Test model with cell data structure
     t_max = 40; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;

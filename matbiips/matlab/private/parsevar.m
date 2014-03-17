@@ -63,7 +63,7 @@ for i=1:2:length(opt_param)
               case 'char'
                   if ~ismember(opt_param{i+1}, param_valid{ind})
                       error('Invalid parameter value ''%s'' for input ''%s''',...
-                          opt_param{i+1}, opt_param{i}, varargout{ind});
+                          opt_param{i+1}, opt_param{i});
                   else
                       varargout{ind} = opt_param{i+1};
                       found(ind) = true;
@@ -71,7 +71,7 @@ for i=1:2:length(opt_param)
               case {'numeric', 'integer'}
                   if min(opt_param{i+1})<param_valid{ind}(1) || max(opt_param{i+1})>param_valid{ind}(2)
                       error('Invalid parameter value ''%.1f'' for input ''%s''',...
-                          opt_param{i+1}, opt_param{i}, varargout{ind});
+                          opt_param{i+1}, opt_param{i});
                   else
                       varargout{ind} = opt_param{i+1};
                       found(ind) = true;
