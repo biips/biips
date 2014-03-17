@@ -1,21 +1,21 @@
 function [dens] = biips_density(samples, varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BIIPS_DENSITY computes 1D densities 
-% dens = biips_density(particles, [variables, fsb, adjust, bw])
-% INPUT
-% -samples:     input structure containing either the output of a SMC algorithm
+%--------------------------------------------------------------------------
+% BIIPS_DENSITY computes 1D kernel density estimates
+% dens = biips_density(samples, 'PropertyName', PropertyValue, ...)
+%   INPUT
+%   - samples:  input structure containing either the output of a SMC algorithm
 %               or of a PIMH/PMMH algorithm.
-% Optional inputs
-% -variable_names:cell of strings. subset of the fields of particles struct
-%               argument. default is {} for all present fields in parts
-% -type:         string containing the characters 'f', 's' and/or 'b'.
-%               default is '' for all present fields in particles
-% -adjust:      time factor for the bw. default is 1
-% -bw:          bandwidth. default is estimated from the samples
-% OUTPUT
-% -dens :       output structure
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Optional inputs
+%   - variable_names:   cell of strings. subset of the fields of particles struct
+%                       argument. default is {} for all present fields in parts
+%   - type:             string containing the characters 'f', 's' and/or 'b'.
+%                       default is '' for all present fields in particles
+%   - adjust:           time factor for the bw. default is 1
+%   - bw:               bandwidth. default is estimated from the samples
+%   OUTPUT
+%   -dens :             output structure
+%--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
 % model_id = biips_model('model.bug', data)
@@ -26,22 +26,17 @@ function [dens] = biips_density(samples, varargin)
 % n_iter = 100;
 % out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part);
 % kde_estimates_pimh = biips_density(out_pimh);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
+
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-%
-% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
-% BiiPS: a software for Bayesian inference with interacting particle
-% systems. Technical Report, INRIA. February 2014.
-%
-% Authors: Adrien Todeschini, Marc Fuentes
-% INRIA Bordeaux, France
-% email: biips-project@lists.gforge.inria.fr
-% Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 03-02-2014
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 17-03-2014
+%--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-%%% Process and check optional arguments
 optarg_names = {'variable_names', 'type', 'adjust', 'bw'};
 optarg_default = {{}, '', 1, []};
 optarg_valid = {{}, {'', 'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 10],...
