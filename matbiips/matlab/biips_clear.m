@@ -1,21 +1,34 @@
-function biips_clear(varargin)
-% BIIPS_CLEAR  destroys one or several consoles given by ids
-% biips_smc_samples([console, ...])
-% INPUT : 
-% - console : integers. Ids of the console containing the model, returned by the 'biips_model' function
+function biips_clear(console)
+
+%--------------------------------------------------------------------------
+% BIIPS_CLEAR  clears one or several biips consoles
+%
+%   biips_smc_samples(console) clears the biips consoles given in the vector console
 % 
-% biips_clear called with no argument will clear all the consoles and reset
-% the Id counter to 0.
+%   biips_clear()  will clear all the consoles and reset the Id counter to 0.
+%
+%   See also BIIPS_MODEL
+%--------------------------------------------------------------------------
+% EXAMPLE
+% biips_clear(1)
+%--------------------------------------------------------------------------
 
-opt_argin = length(varargin);
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 17-03-2014
+%--------------------------------------------------------------------------
 
-if opt_argin
-    for i =1:opt_argin
-        if ~isa(varargin{i},'numeric') || length(varargin{i})~=1
-            error([num2str(i), '-th argument of ''biips_clear'' must be a scalar numeric'])
+if nargin
+    if ~isnumeric(console)
+        error('The 1-st argument must be a numeric vector')
+    else
+        for i =1:length(console)
+            inter_biips('clear_console', console(i));            
         end
-        inter_biips('clear_console', varargin{i});
-    end
+    end    
 else
     inter_biips('clear_all_console');
 end

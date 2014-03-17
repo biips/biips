@@ -3,7 +3,7 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 %--------------------------------------------------------------------------
 % BIIPS_SMC_SAMPLES Runs a sequential Monte Carlo algorithm
 %   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
-%        nb_part, 'Propertyname', propertyvalue, ...)
+%        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
 %    - console:        integer. Id of the console containing the model, 
 %                      returned by the 'biips_model' function
@@ -28,7 +28,8 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 %                                               (ESS > rs_thres)
 %   - rs_type : string (default = 'stratified')
 %               Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
-%               Indicates the type of algorithm used for the resampling step.           
+%               Indicates the type of algorithm used for the resampling step.
+%
 %   OUTPUT:
 %   - particles:    output structure containing all the SMC information
 %   - log_marg_like:log marginal likelihood
