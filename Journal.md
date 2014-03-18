@@ -1,3 +1,21 @@
+Marc le 17/3/2014 :
+===================
+Compilation Matbiips Octave sur CI:
+
+sur ubuntu
+        -DBUILD_MATBIIPS=ON  -DCMAKE_BUILD_TYPE:STRING=Release -DFIND_OCTAVE=ON
+        -DOCTAVE_ROOT=/usr/bin 
+
+sur windows : 
+        -DCMAKE_CXX_COMPILER="C:/Rtools/gcc-4.6.3/bin/g++.exe"
+        -DCMAKE_MAKE_PROGRAM="C:/MinGW/bin/mingw32-make.exe" -DBUILD_MATBIIPS=ON
+        -DFIND_OCTAVE=ON  -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_RBIIPS=OFF
+        -DOCTAVE_ROOT="C:/Program Files/octave/bin/" -DBUILD_64BIT=OFF 
+avec un script pré-chargé (-C)  `env_ouin_octave.cmake`
+        set(ENV{BOOST_ROOT} "c:/boost_1_50_0/")
+        set(ENV{BOOST_ROOT} "c:/boost_1_50_0/stage32/lib")
+        add_definitions(-m32)
+
 Adrien le 13/3/2014 :
 =====================
 Biips compile en 32bits sous windows 64bits.
@@ -133,7 +151,7 @@ Adrien le 2/3/2014 :
 Adrien le 21/02/2014 :
 ======================
 - [ ] améliorer `FindMatlab.cmake` : vérifier les options de compilation utilisées par mex (voir `MATLAB_ROOT/bin/mbuildopts.sh`)
-- [ ] vérifier la validité des noms de fonction dans add_function
+- [ ] vérifier la validité des noms de fonction dans `add_function`
 - [x] permettre de remplacer les fonctions avec add_function mais protéger les fonctions du module base
 - [x] permettre compilation 32bit sous windows
 
