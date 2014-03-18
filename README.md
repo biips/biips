@@ -71,8 +71,8 @@ Authors
 BiiPS code is Copyright (C) Inria, 2012 
 
 Authors:
-- [Adrien TODESCHINI](http://fr.linkedin.com/in/adrientodeschini/en), software designer and developer
-- [Francois CARON](http://www.math.u-bordeaux1.fr/~fcaron/), probability expertise and specifications
+- [Adrien TODESCHINI](https://sites.google.com/site/adrientodeschini/), software designer and developer
+- [Francois CARON](http://www.stats.ox.ac.uk/~caron/), probability expertise and specifications
 - Marc FUENTES, software designer and developer
 
 BiiPS code is adapted from:
