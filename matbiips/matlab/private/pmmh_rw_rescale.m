@@ -1,30 +1,22 @@
 function rw = pmmh_rw_rescale(rw, p)
 
+%--------------------------------------------------------------------------
+% PMMH_RW_RESCALE rescale the randow walk variance
+% rw = pmmh_rw_rescale(rw, p)
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
 p = min(1.0, p);
 rw.pmean = rw.pmean + 1*(p-rw.pmean)/rw.niter;
 
-% if ~rw.rescale
-%     return;
-% end
+
 rw.lstep = rw.lstep + rw.alpha^(rw.niter)*(rw.pmean-rw.targetprob);
 
 
-% 
-% % OLD CODE: REMOVED THE PLUMMER UPDATE
-% switch(rw.rescale_type)
-%     case 'dureau'
-%         rw.lstep = rw.lstep + rw.alpha^(rw.niter)*(rw.pmean-rw.targetprob)        
-%         
-%     case 'plummer'
-%         % The step size is adapted to achieve the target acceptance rate
-%         % using a noisy gradient algorithm
-%         rw.lstep = rw.lstep + (p - rw.targetprob)/rw.ncrosstarget;
-%     otherwise
-%         error('Unkown rescaling technique')
-%         
-% end
-% 
-% if ((p>rw.targetprob) ~= rw.povertarget)
-%     rw.povertarget = ~rw.povertarget;
-%     rw.ncrosstarget = rw.ncrosstarget + 1;
-% end

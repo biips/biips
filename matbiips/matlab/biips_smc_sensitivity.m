@@ -1,10 +1,57 @@
 function out = biips_smc_sensitivity(console, param_names, param_values, ...
     n_part, varargin)
 
-% TODO: DOC
+%--------------------------------------------------------------------------
+% BIIPS_SMC_SENSITIVITY performs sensitivity analysis of parameters with
+% SMC
+%  out = biips_smc_sensitivity(console, param_names, param_values, ...
+%    n_part, 'PropertyName', propertyvalue, ...)
+%
+%   INPUT 
+%   - console:      integer. Id of the console containing the model, 
+%                   returned by the 'biips_model' function
+%   - param_names:  cell of strings. Contains the names of the 
+%                   unobserved variables for sensitivity analysis
+%   - param_values: cell of numeric values, of the same length as
+%                   param_names.
+%   Optional Inputs:
+%   - rs_thres :    positive real (default = 0.5).
+%                   Threshold for the resampling step (adaptive SMC).
+%                   if rs_thres is in [0,1] --> resampling occurs when 
+%                                           (ESS > rs_thres * nb_part)
+%                   if rs_thres is in [2,nb_part] --> resampling occurs when 
+%                                               (ESS > rs_thres)
+%   - rs_type :     string (default = 'stratified')
+%                   Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
+%                   Indicates the type of algorithm used for the resampling step.
+%
+%   OUTPUT
+%   - out:          Structure with the following fields:
+%                   * log_marg_like
+%                   * log_marg_like_pen
+%                   * max_param
+%                   * max_log_marg_like
+%                   * max_param_pen
+%                   * max_log_marg_like_pen
+%
+%   See also BIIPS_MODEL
+%--------------------------------------------------------------------------
+% EXAMPLE:
+% model_id = 1; n_part = 100; 
+% param_names = {'log_prec_y[1:1]'};
+% param_values = {-5:.2:3}; 
+% out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 
-% TODO: some checks on inputs
 n_params = length(param_names);
 if n_params~=length(param_values)
     error('param_names and param_values must be cells of the same size')
@@ -34,14 +81,12 @@ end
 
 
 %% PROCESS AND CHECK INPUTS
-%%% Process and check optional arguments
-optarg_names = {'rs_thres', 'rs_type', 'seed'};
-optarg_default = {.5, 'stratified', get_seed()};
+optarg_names = {'rs_thres', 'rs_type'};
+optarg_default = {.5, 'stratified'};
 optarg_valid = {[0, n_part],...
-    {'multinomial', 'stratified', 'residual', 'systematic'},...
-    [0, intmax]};
-optarg_type = {'numeric', 'char', 'numeric'};
-[rs_thres, rs_type, seed] = parsevar(varargin, optarg_names, optarg_type,...
+    {'multinomial', 'stratified', 'residual', 'systematic'}};
+optarg_type = {'numeric', 'char'};
+[rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
 
@@ -87,10 +132,9 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
      for i=1:n_params
          log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper);
-        %% TODO: ADD SOME CHECK ON THE log_prior - WHAT DOES HAPPEN WHEN THE PRIOR NOT SPECIFIED IN BUGS? 
          log_prior = log_prior + log_p;
      end
-     ok = run_smc_forward(console, n_part, rs_thres, rs_type, seed);
+     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
      if ~ok
          error('Failure running SMC forward sampler')        
      end
@@ -115,8 +159,4 @@ out.log_marg_like_pen = log_marg_like_pen;
 out.max_param = max_param;
 out.max_log_marg_like = max_log_marg_like;
 out.max_param_pen = max_param_pen;
-out.max_log_marg_like_pen = max_log_marg_like_pen;
-
- % restore data
- % TODO: recompile the model
- 
+out.max_log_marg_like_pen = max_log_marg_like_pen; 
