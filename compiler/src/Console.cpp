@@ -548,11 +548,12 @@ namespace Biips
 
       pModel_->BuildSampler();
 
-      if (verbosity > 1)
-      {
-        out_ << INDENT_STRING << "Samplers sequence :" << endl;
-        pModel_->PrintSamplersSequence(out_);
-      }
+      // TODO
+//      if (verbosity > 1)
+//      {
+//        out_ << INDENT_STRING << "Samplers sequence :" << endl;
+//        pModel_->PrintSamplersSequence(out_);
+//      }
     }
     BIIPS_CONSOLE_CATCH_ERRORS_DELETE_MODEL
 
@@ -610,8 +611,10 @@ namespace Biips
 
       if (p_show_progress)
         ++(*p_show_progress);
-      else if (verbosity > 1)
-        printSamplerState(pModel_->Sampler(), out_);
+
+      // TODO
+//      else if (verbosity > 1)
+//        printSamplerState(pModel_->Sampler(), out_);
 
       for (Size n = 1; n < n_iter; ++n)
       {
@@ -619,8 +622,10 @@ namespace Biips
 
         if (p_show_progress)
           ++(*p_show_progress);
-        else if (verbosity > 1)
-          printSamplerState(pModel_->Sampler(), out_);
+
+        // TODO
+//        else if (verbosity > 1)
+//          printSamplerState(pModel_->Sampler(), out_);
       }
 
       // normalizing constant

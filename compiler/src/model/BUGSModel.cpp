@@ -673,18 +673,18 @@ namespace Biips
     return true;
   }
 
-  void BUGSModel::PrintSamplersSequence(std::ostream & out) const
-  {
-    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
-        pSampler_->GetSamplersSequence();
-    for (Size i = 0; i < node_id_samplers_seq.size(); ++i)
-    {
-      NodeId node_id = node_id_samplers_seq[i].first;
-      const String & name = node_id_samplers_seq[i].second;
-      out << i + 1 << ": " << symbolTable_.GetName(node_id) << " (id="
-          << node_id << "), " << name << std::endl;
-    }
-  }
+//  void BUGSModel::PrintSamplersSequence(std::ostream & out) const
+//  {
+//    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
+//        pSampler_->GetSamplersSequence();
+//    for (Size i = 0; i < node_id_samplers_seq.size(); ++i)
+//    {
+//      NodeId node_id = node_id_samplers_seq[i].first;
+//      const String & name = node_id_samplers_seq[i].second;
+//      out << i + 1 << ": " << symbolTable_.GetName(node_id) << " (id="
+//          << node_id << "), " << name << std::endl;
+//    }
+//  }
 
   class VarNamePropertyWriter: public VertexPropertyWriter
   {
