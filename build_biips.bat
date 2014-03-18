@@ -10,15 +10,16 @@ if "%1" == "" (
 set BIIPS_SRC=%~dp0
 set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
 set BIIPS_ROOT=C:\Users\adrien\biips
-set BOOST_ROOT=C:\Program Files\boost\boost_1_55_0
+set BOOST_ROOT=C:\Program Files\boost\boost_1_49_0
 set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
 set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
 set MATLAB_ROOT=C:\Program Files\MATLAB\R2013b
+set OCTAVE_ROOT=C:\Octave\Octave3.6.4_gcc4.6.2\bin
 set RTOOLS_BINDIR=C:\Rtools\bin
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
-set CMAKE_OPTIONS="-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1"
+set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1
 set CPACK_GENERATOR=NSIS
 set MAKE=C:\MinGW\bin\mingw32-make
 set MAKE_OPT=%1
@@ -33,12 +34,16 @@ if "%2"=="-g" (
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set CMAKE_OPTIONS="%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBUILD_MATBIIPS=OFF -DBOOST_LIBRARYDIR=%BOOST_ROOT%\stage32\lib"
+    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib"
+	
+	if NOT "%4" == "-oct" (
+		set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_MATBIIPS=OFF
+	)
 )
 
 if "%4" == "-oct" (
     set BIIPS_BUILD=%BIIPS_BUILD%-oct
-    set CMAKE_OPTIONS="%CMAKE_OPTIONS% -DFIND_OCTAVE=ON"
+    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DFIND_OCTAVE=ON
 )
 
 ::-----------------------------------------
