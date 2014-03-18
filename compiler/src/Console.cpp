@@ -1701,14 +1701,12 @@ namespace Biips
       nodeSamplers.clear();
       nodeSamplers.resize(pModel_->graph().GetSize());
 
-      Types<std::pair<NodeId, String> >::Array samplers_sequence = pModel_
-          ->Sampler().GetSamplersSequence();
-      for (Size i = 0; i < samplers_sequence.size(); ++i)
+      std::map<NodeId, String> samplers_map = pModel_->Sampler().GetNodeSamplersMap();
+      std::map<NodeId, String>::const_iterator it=samplers_map.begin();
+      for (; it!=samplers_map.end(); ++it)
       {
-        NodeId id = samplers_sequence[i].first;
-        Size rank = pModel_->graph().GetRanks()[id];
-        const String & sampler_name = samplers_sequence[i].second;
-        nodeSamplers[rank] = sampler_name;
+        Size rank = pModel_->graph().GetRanks()[it->first];
+        nodeSamplers[rank] = it->second;
       }
     }
     BIIPS_CONSOLE_CATCH_ERRORS
