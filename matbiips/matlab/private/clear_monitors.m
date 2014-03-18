@@ -1,16 +1,24 @@
 function clear_monitors(p, type, release_only)
-% CLEAR_MONITORS clear some monitors  
-% clear_monitors(console, type, [release_only])
-% INPUT : 
-% - console : id of the current console
-% - type : string containing 'f' - forward
-%                            's' - smoothing
-%                            'b' - backward smoothing
-% - release_only : boolean flag to indicate what kind of 
-% clearing has to be done
 
-% opt_argin = length(varargin);
-%default values
+%--------------------------------------------------------------------------
+% CLEAR_MONITORS clears some monitors  
+% clear_monitors(console, type, [release_only])
+%   INPUT
+%   - console:      id of the current console
+%   - type :        string containing   'f' - forward
+%                                       's' - smoothing
+%                                       'b' - backward smoothing
+%   - release_only: boolean flag to indicate what kind of clearing has 
+%                   to be done
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 if nargin<3
     release_only = false;

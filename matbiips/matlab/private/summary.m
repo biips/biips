@@ -1,6 +1,6 @@
 function summ = summary(values, weights, probas, order)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
 % SUMMARY computes some statistics on data
 % summ = summary(part, probas, order)
 % INPUT:
@@ -19,19 +19,15 @@ function summ = summary(values, weights, probas, order)
 %             * skew : skewness
 %             * quant : quantiles
 %             * med : median
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
+
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-%
-% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
-% BiiPS: a software for Bayesian inference with interacting particle
-% systems. Technical Report, INRIA. February 2014.
-%
-% Authors: Adrien Todeschini, Marc Fuentes
-% INRIA Bordeaux, France
-% email: biips-project@lists.gforge.inria.fr
-% Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 30-01-2014
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 
 size_part = size(values);
