@@ -1,3 +1,82 @@
+Adrien le 18/3/2014 :
+=====================
+- [ ] enlever les bornes inutiles dans les arguments de `biips_sensitivity` et `biips_pmmh_samples`  des tutoriels et exemples 
+- [ ] `biips_build_sampler` doit renvoyer une structure décrivant les itérations du SMC. Pour chaque itération :
+    * liste des noeuds stochastiques mis à jour
+    * liste des samplers
+    * liste des noeuds logiques mis à jour
+    * liste des observations de conditionnement
+- [ ] Concernant les crashs MATLAB: est-ce que ça crashe dès la première exécution ou seulement à partir de la deuxième ?
+- [ ] enlever C++0X/11 ?
+- [ ] enlever boost regex (utiliser std::string ou autre?)
+- [ ] crash MATLAB sur exemple `stoch_kinetic`
+
+>> stoch_kinetic
+* Parsing model in: stoch_kinetic_cle.bug
+* Compiling data graph
+   Declaring variables
+   Resolving undeclared variables
+   Allocating nodes
+
+------------------------------------------------------------------------
+           Access violation detected at Tue Mar 18 15:39:11 2014
+------------------------------------------------------------------------
+
+Configuration:
+   Crash Decoding     : Disabled
+   Default Encoding   : windows-1252
+   MATLAB Architecture: win64
+   MATLAB Root        : C:\Program Files\MATLAB\R2013b
+   MATLAB Version     : 8.2.0.701 (R2013b)
+   Operating System   : Microsoft Windows 7
+   Processor ID       : x86 Family 6 Model 58 Stepping 9, GenuineIntel
+   Virtual Machine    : Java 1.7.0_11-b21 with Oracle Corporation Java 
+HotSpot(TM) 64-Bit Server VM mixed mode
+   Window System      : Version 6.1 (Build 7601: Service Pack 1)
+
+Fault Count: 1
+
+
+Abnormal termination:
+Access violation
+
+Register State (from fault):
+   RAX = 33847c90ae6f02ce  RBX = 00000000c0fb9d30
+   RCX = 000000ffffffffff  RDX = 00000000c150ab70
+   RSP = 000000000401da30  RBP = 0000000000000001
+   RSI = 0000000006e30000  RDI = 00000000c150ab80
+
+    R8 = 3832d9c90fbc0a64   R9 = fe72ffff206a0a65
+   R10 = 0000000000000000  R11 = 0000000000000000
+   R12 = 3fe01ada45dea4c6  R13 = 0000000100000001
+   R14 = ffffffff00007fff  R15 = 00000000ffff0000
+
+   RIP = 00000000770f32f2  EFL = 00010286
+
+    CS = 0033   FS = 0053   GS = 002b
+
+Stack Trace (from fault):
+[  0] 0x00000000770f32f2 C:\Windows\SYSTEM32\ntdll.dll+00340722 RtlFreeHeap+00000306
+[  1] 0x000007fefe3810c8 C:\Windows\system32\msvcrt.dll+00004296 free+00000028
+[  2] 0x000000001f9281bb D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+01868219 ZN5boost6detail17sp_counted_impl_pIN5Biips8ValArrayEE7disposeEv+00000027
+[  3] 0x000000001f925bb9 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+01858489 ZN5boost6detail12shared_countD1Ev+00000057
+[  4] 0x000000001f929170 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+01872240 ZN5boost6detail22remove_vertex_dispatchINS_14adjacency_listINS_4vecSES3_NS_14bidirectionalSENS_8propertyINS_17vertex_node_ptr_tENS_10shared_ptrIN5Biips4NodeEEENS5_INS_17vertex_observed_tEbNS5_INS_17vertex_discrete_tEbNS5_INS_14vertex_value_tENS7_INS8_8ValArrayEEENS_11no_propertyEEEEEEEEESG_SG_NS_5listSEEEyEEvRT_T0_NS_17bidirectional_tagE+00000656
+[  5] 0x000000001f8669c7 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+01075655 ZN5Biips5Graph7PopNodeEv+00000487
+[  6] 0x000000001f80b4ba D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00701626 ZN5Biips8Compiler15IndexExpressionEPK9ParseTreeRi+00000842
+[  7] 0x000000001f80d9e5 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00711141 ZN5Biips8Compiler8getRangeEPK9ParseTreeRKNS_10IndexRangeE+00002245
+[  8] 0x000000001f80f010 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00716816 ZN5Biips8Compiler14getArraySubsetEPK9ParseTree+00000800
+[  9] 0x000000001f80a692 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00698002 ZN5Biips8Compiler12GetParameterEPK9ParseTree+00000386
+[ 10] 0x000000001f811cba D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00728250 ZN5Biips8Compiler15setConstantMaskEPK9ParseTree+00002842
+[ 11] 0x000000001f80a8f8 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00698616 ZN5Biips8Compiler12GetParameterEPK9ParseTree+00001000
+[ 12] 0x000000001f811cba D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00728250 ZN5Biips8Compiler15setConstantMaskEPK9ParseTree+00002842
+[ 13] 0x000000001f80a8f8 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00698616 ZN5Biips8Compiler12GetParameterEPK9ParseTree+00001000
+[ 14] 0x000000001f811ff3 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00729075 ZN5Biips8Compiler15allocateLogicalEPK9ParseTree+00000387
+[ 15] 0x000000001f8136f0 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00734960 ZN5Biips8Compiler8allocateEPK9ParseTree+00000400
+[ 16] 0x000000001f813e5f D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00736863 ZN5Biips8Compiler12traverseTreeEPK9ParseTreeMS0_FvS3_Eb+00000671
+[ 17] 0x000000001f8140f4 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00737524 ZN5Biips8Compiler12traverseTreeEPK9ParseTreeMS0_FvS3_Eb+00001332
+[ 18] 0x000000001f817393  D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00750483 ZN5Biips8Compiler14WriteRelationsEPK9ParseTree+00001091
+[ 19] 0x000000001f802203 D:\Projects\biips\matbiips\matlab\inter_biips.mexw64+00664067 ZN5Biips7Console7CompileERSt3mapISsNS_10MultiArrayESt4lessISsESaISt4pairIKSsS2_EEEbjj+00003107
+
 Marc le 17/3/2014 :
 ===================
 Compilation Matbiips Octave sur CI:
@@ -41,7 +120,7 @@ J'ai ajouté une fonction `test_crash5.m` qui identifie un probleme avec l'utilis
 
 François le 12/3/2014 :
 =======================
-Probleme dans change_data lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
+Probleme dans `change_data` lorsque l'on a une variable multiD, mais associée avec différents noeuds stochastiques dans biips, e.g.
         x[1] ~dnorm(0,1)
         x[2] ~dnorm(0,1)
 Dans ce cas, on ne peut pas faire `change_data` avec `x[1:2]`
@@ -58,15 +137,15 @@ Francois:
 - [x] 3 tutos et 3 exemples en suivi d'objet, volatilite et estimation de densite finis en matbiips. 
 - [ ] Ajouter doc PMMH matbiips
 - [ ] finir le dernier exemple
-- [ ] refaire une passe sur la doc inter_biips
+- [x] refaire une passe sur la doc `inter_biips`
 
 Marc: 
 - [x] doc `inter_biips` (matbiips) finie
 - [x] Mettre les mexfile linux Matlab et Otave sur git
-- [ ] pb pour mexfile octave windows car octave est en 32 bits. Avec Adrien, faire octave 32bits windows
+- [x] pb pour mexfile octave windows car octave est en 32 bits. Avec Adrien, faire octave 32bits windows
 
 Adrien: 
-- [ ] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
+- [x] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
 - [ ] Regarder bug exemple stochastic kinetic
 - [ ] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
@@ -176,12 +255,12 @@ A faire un peu partout:
 
 Adrien le 20/02/2014 :
 ======================
-Concernant test_crash1.m, le problème se situe au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
+Concernant `test_crash1.m`, le problème se situe au niveau de la fonction parsevar qui ne traite pas les arguments 'logical' je pense.
 En tout cas, sample_data est retourné true au lieu de false par parsevar.
 D'après moi, parsevar doit renvoyer une erreur en cas de mauvais paramètre au lieu d'un warning et de prendre la valeur par défaut.
 
 A faire:
-- [ ] corriger parsevar
+- [x] corriger parsevar
 - [ ] pb ctest matbiips sous windows: les test passent automatiquement. Regarder s'il est possible d'attendre la bonne sortie de matlab
 
 François le 20/02/2014 :
@@ -198,7 +277,7 @@ Adrien le 18/02/2014 :
 ======================
 - [ ] pb quand on donne une valeur de paramètres dans data: il la ré-échantillonne
 - [ ] pb avec pimh qd on veut monitorer `x[1:2,1]`, cf script `test_crash3.m`
-- [ ] warning qd on ne donne pas de bornes dans `change_data` et `get_log_prior_density`
+- [x] warning qd on ne donne pas de bornes dans `change_data` et `get_log_prior_density`
 - [x] remplacer mbiip_cerr par message erreur mex
 - [ ] rajouter les test de distribution ds rbiips et matbiips
 
@@ -233,7 +312,10 @@ Adrien le 11/02/2014 :
 - [ ] améliorer message d'erreur `Subset y[1] out of range [1:100] in Compiler::setConstantMask`.
 - [ ] éviter crash matlab : test_crash3.m non résolu (le lancer plusieurs fois)
 - [x] vérifier : si `sample_data=false` -> ne pas compiler bloc data
-- [ ] tester octave sous linux, windows et mac
+- [ ] tester octave sous 
+    * [x] linux
+    * [x] windows
+    * [ ] mac
 - [ ] Pb de headers avec octave et gcc 4.8
 - [x] regarder warning dans `test_internals.m`
 
@@ -248,7 +330,7 @@ L'erreur se produit dans `inter_biips compile_model` avec l'erreur suivante:
           Allocating nodes
         LOGIC ERROR: Subset y[1] out of range [1:100] in Compiler::setConstantMask.
 
-Par ailleurs, cela crashe toujours matlab. Est-il possible d'éviter de fermer Matlab s'il y a un pb avec le fichier bugs?
+- [ ] Par ailleurs, cela crashe toujours matlab. Est-il possible d'éviter de fermer Matlab s'il y a un pb avec le fichier bugs?
 
         EXEMPLE:
         %%% Model parameters
@@ -324,11 +406,11 @@ où `pn_param` est la sortie de `parse_varname`, mais j'ai un message m'indiquant
 me renvoit un message comme quoi le 3e et 4e arguments doivent etre double. Mais si les dimensions de la variable ne sont pas indiqués, parse_varname renvoit une cell vide.
 - [ ] Même en indiquant les indices de la variable, la fonction crashe, cette fois-ci sans message d'erreur.
 
-Questions concernant inter_biips et biips:
+Questions concernant `inter_biips` et biips:
 - [ ] Lorsque l'on rentre dans la structure data les valeurs de `x_true` et `y` (pour `hmm_1d_lin`), on a une erreur à la compilation - ne peut-on pas éviter cela? 
 - [x] Message de inter_biips indiquant que seed doit etre double: ce n'est pas supposé etre un entier? La classe uint32 ne serait pas plus appropriée? ---> Réponse: utilisation de double plus commode pour l'utilisateur
-- [ ] Dans la fonction `init_pmmh` de Rbiips, pourquoi mettre la valeur latent_variables à false quand on les monitor?
-- [x] dans init.pmmh de rbiips, je ne comprends pas ce que fait `object$.rw.init(sample)`
+- [ ] Dans la fonction `init_pmmh` de Rbiips, pourquoi mettre la valeur `latent_variables` à false quand on les monitor?
+- [x] dans `init.pmmh` de rbiips, je ne comprends pas ce que fait `object$.rw.init(sample)`
 - [x] idem pour `object$.rw.step(rw.step.values)` et autres dans d'autres fonction pmmh
 
 
@@ -342,14 +424,14 @@ A faire dans Matbiips :
     sinon -> traitement MCMC : pas de sous-champs values, les poids sont tous égaux
 - [ ] `biips_pimh_samples` : améliorer stockage des échantillons. cf. switch/case dans le code
     Rq: L'appel de squeeze modifie les dimensions
-- [ ] créer exemple court et l'inclure dans matbiips
-- [x] supprimer `biips_load_module` : l'intégrer dans biips_init
+- [x] créer exemple court et l'inclure dans matbiips
+- [x] supprimer `biips_load_module` : l'intégrer dans `biips_init`
 - [ ] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
-- [ ] renommer `make_progress_bar` en `progress_bar`
+- [x] renommer `make_progress_bar` en `progress_bar`
 - [x] mettre isoctave dans private
 - [ ] revoir et ajouter tests matbiips et ne pas les intégrer dans l'archive
 - [ ] ajouter un README.md
-- [ ] commenter inter_biips en doxygen et générer pdf
+- [x] commenter `inter_biips` en doxygen et générer pdf --> finalement c'est un doc latex séparé
 
 Autres tâches :
 - [ ] tester l'install de RBiips sous linux
@@ -373,7 +455,7 @@ Je ne pense pas pouvoir retravailler dessus cette semaine, j'attaquerai
 le PMMH la semaine prochaine.
 
 A Faire:
-- [ ] Commenter un peu `inter_biips`, au moins une description succincte des entrees/sorties et ce que fait chaque fonction (si le nom n'est pas assez explicite).
+- [x] Commenter un peu `inter_biips`, au moins une description succincte des entrees/sorties et ce que fait chaque fonction (si le nom n'est pas assez explicite).
 
 Marc le 3/2/2014 :
 ====================
@@ -396,9 +478,9 @@ Adrien le 30/1/2014 :
 > `inter_biips('weighted_quantiles', values, weights, probas)` ne renvoit 
 > pas les bonnes valeurs.
 
-En fait, il faut juste multiplier les poids par N, c.f. stat.particles dans RBiips.
+En fait, il faut juste multiplier les poids par N, c.f. `stat.particles` dans RBiips.
 Je ne comprends plus pourquoi mais ça marche... sûrement un problème numérique !?
-Je suppose que l'algo renormalise tout seul. J'ai corrigé summary.m.
+Je suppose que l'algo renormalise tout seul. J'ai corrigé `summary.m`.
 
 - [ ] Je vais voir s'il ne vaut pas mieux modifier dans Biips (c++)
 
@@ -406,8 +488,8 @@ Adrien le 27/01/2014 :
 ======================
 A faire:
 - [x] Changer les noms de fonctions dans Rbiips : 
-	- update.pimh -> pimh.update
-	- update.pmmh -> pmmh.update
+	- `update.pimh` -> `pimh.update`
+	- `update.pmmh` -> `pmmh.update`
 - [x] Améliorer l'install de RBiips:
 
         env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL RBiips_0.8.1.tar.gz

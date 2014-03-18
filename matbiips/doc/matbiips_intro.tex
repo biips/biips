@@ -1,10 +1,11 @@
-\documentclass[12pt,twoside,french]{article}
-\usepackage[a4paper]{geometry}
+\documentclass[11pt,twoside]{article}
+%\usepackage[a4paper]{geometry}
+\usepackage{a4wide}
 \usepackage[latin1]{inputenc} % ou \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc} % ou \usepackage[OT1]{fontenc}
+%\usepackage[T1]{fontenc} % ou \usepackage[OT1]{fontenc}
 
 \usepackage{hyperref}
-\usepackage[frenchb]{babel} % optionnel
+%\usepackage[french]{babel} % optionnel
 %\usepackage[round]{natbib} % optionnel
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -16,6 +17,7 @@
 \usepackage{epstopdf}
 \usepackage{fancybox}
 \usepackage{verbatim}
+\usepackage{lmodern}
 %\usepackage{float}
 %\usepackage{here}
 \usepackage{color}
@@ -46,9 +48,11 @@
 \pagestyle{empty}
 \begin{document}
 
-\begin{center}
-{\Large matBiips tutorial}
-\end{center}
+\title{Introduction to MatBiips}
+\date{}
+
+\maketitle
+\tableofcontents
 
 
 \section{Matlab Interface for \biips{}}
@@ -162,101 +166,6 @@ ans =
    \subsection{Internal functions}
 
     The mexfile used to call \biips is \texttt{inter\_biips.cpp} : in that mexfile, we have one entry point function \texttt{inter\_biips} which takes as a first 
-    argument the name of the \biips routine we want to call and after the arguments to pass to the routine. Here there is a list of theses internal routines
-
-  \begin{figure}[H]
-   \tiny
-  \begin{tabular}{|l|l|l|}
-    name & args & return value \\
-   \hline
-    make\_console & & console\_id 
-   \hline
-    clear\_console & console\_id  &  \\
-   \hline
-    clear\_all\_console & &  \\ 
-   \hline
-    check\_model & console\_id, file\_name & \\
-   \hline
-    compile\_model & console\_id, var\_values\_struct, sample\_flag, seed & \\
-   \hline
-    get\_data & & \\
-   \hline
-    load\_module & \\
-   \hline
-   verbosity & \\
-   \hline
-    get\_variable\_names & \\
-   \hline
-    set\_default\_monitors & \\
-   \hline
-    set\_filter\_monitors & \\
-   \hline
-    set\_gen\_tree\_smooth\_monitors & \\
-   \hline
-    set\_backward\_smooth\_monitors & \\
-   \hline
-    build\_smc\_sampler & \\
-   \hline
-    is\_sampler\_built & \\
-   \hline
-    run\_smc\_sampler & \\
-   \hline
-    get\_log\_norm\_const & \\
-   \hline
-    get\_filter\_monitors & \\
-   \hline
-    get\_gen\_tree\_smooth\_monitors & \\
-   \hline
-    get\_backward\_smooth\_monitors & \\
-   \hline
-    clear\_filter\_monitors & \\
-   \hline
-    clear\_gen\_tree\_smooth\_monitors & \\
-   \hline
-    clear\_backward\_smooth\_monitors & \\
-   \hline
-    run\_backward\_smoother & \\
-   \hline
-    get\_sorted\_nodes & \\
-   \hline
-    get\_nodes\_samplers & \\
-   \hline
-    print\_graphviz & \\
-   \hline
-    change\_data & \\
-   \hline
-    sample\_data & \\
-   \hline
-    get\_log\_prior\_density & \\
-   \hline
-    is\_smc\_sampler\_at\_end & \\
-   \hline
-   message & \\
-   \hline
-    set\_log\_norm\_const & \\
-   \hline
-    make\_progress\_bar & \\
-   \hline
-    clear\_progress\_bar & \\
-   \hline
-    advance\_progress\_bar & \\
-   \hline
-    is\_gen\_tree\_smooth\_monitored & \\
-   \hline
-    get\_sampled\_gen\_tree\_smooth\_particle & \\
-   \hline
-    sample\_gen\_tree\_smooth\_particle & \\
-   \hline
-    set\_sampled\_gen\_tree\_smooth\_particle & \\
-   \hline
-    weighted\_quantiles & \\
-   \hline
-    cell2struct\_weak\_names & \\
-   \hline
-    add\_function & \\
-   \hline
-  \end{tabular}
-  \end{figure}
-
+    argument the name of the \biips routine we want to call and after the arguments to pass to the routine.
 
 \end{document}
