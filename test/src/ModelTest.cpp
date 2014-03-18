@@ -329,20 +329,22 @@ namespace Biips
     initFilterAccumulators(nParticles, numBins);
     filterAccumulate(0);
 
-    if (verbose_ == 1 && showProgress)
+    if (verbose_ >= 1 && showProgress)
       ++(*p_show_progress);
-    else if (verbose_ >= 2)
-      printSamplerState(*pSampler_, os_);
+    // TODO
+//    else if (verbose_ >= 2)
+//      printSamplerState(*pSampler_, os_);
 
     Size t_max = pSampler_->NIterations();
 
     for (Size t = 1; t < t_max; ++t)
     {
       pSampler_->Iterate();
-      if (verbose_ == 1 && showProgress)
+      if (verbose_ >= 1 && showProgress)
         ++(*p_show_progress);
-      else if (verbose_ >= 2)
-        printSamplerState(*pSampler_, os_);
+      // TODO
+//      else if (verbose_ >= 2)
+//        printSamplerState(*pSampler_, os_);
 
       filterAccumulate(t);
     }
