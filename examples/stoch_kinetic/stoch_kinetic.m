@@ -8,32 +8,7 @@
 %%
 %
 % 
-%         var x_true[t_max], x[t_max], y[t_max]
-% 
-%         data
-%         {
-%           prec_y_true <- exp(log_prec_y_true)
-%           x_true[1] ~ dnorm(mean_x_init, prec_x_init)
-%           y[1] ~ dnorm(x_true[1]^2/20, prec_y_true)
-%           for (t in 2:t_max)
-%           {
-%             x_true[t] ~ dnorm(0.5*x_true[t-1]+25*x_true[t-1]/(1+x_true[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
-%             y[t] ~ dnorm(x_true[t]^2/20, prec_y_true)
-%           }
-%         }
-% 
-%         model
-%         {
-%           log_prec_y ~ dunif(-3, 3)
-%           prec_y <- exp(log_prec_y)
-%           x[1] ~ dnorm(mean_x_init, prec_x_init)
-%           y[1] ~ dnorm(x[1]^2/20, prec_y)
-%           for (t in 2:t_max)
-%           {
-%             x[t] ~ dnorm(0.5*x[t-1]+25*x[t-1]/(1+x[t-1]^2)+8*cos(1.2*(t-1)), prec_x)
-%             y[t] ~ dnorm(x[t]^2/20, prec_y)
-%           }
-%         }
+%         EDIT MODEL
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -84,7 +59,7 @@ legend('Prey', 'Predator', 'Measurements')
 %%
 % *Parameters of the algorithm*. 
 n_part = 100; % Number of particles
-param_names = {'logalpha[1:1]','logbeta[1:1]','loggamma[1:1]'}; % Parameter for which we want to study sensitivity
+param_names = {'logalpha','logbeta','loggamma'}; % Parameter for which we want to study sensitivity
 param_values = {linspace(-7,3,20),log(beta_true)*ones(20,1),log(gamma_true)*ones(20,1)}; % Range of values
 
 %%
@@ -113,12 +88,12 @@ ylabel('Penalized log-marginal likelihood')
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 10; % nb of burn-in/adaptation iterations
-n_iter = 10; % nb of iterations after burn-in
-thin = 2; % thinning of MCMC outputs
+n_burn = 1000; % nb of burn-in/adaptation iterations
+n_iter = 1000; % nb of iterations after burn-in
+thin = 1; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
-param_names = {'logalpha[1:1]','logbeta[1:1]', 'loggamma[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
+param_names = {'logalpha','logbeta', 'loggamma'}; % name of the variables updated with MCMC (others are updated with SMC)
 % latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 latent_names = {};
 %%
@@ -147,7 +122,7 @@ fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
 
 
 param_true = [log(alpha_true), log(beta_true), log(gamma_true)];
-leg = {'log(\alpha)', 'log(\beta)', 'log(\gamma)'}
+leg = {'log(\alpha)', 'log(\beta)', 'log(\gamma)'};
 %%
 % *Trace of MCMC samples for the parameter*
 for i=1:length(param_names)
