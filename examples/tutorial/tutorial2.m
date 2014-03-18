@@ -98,7 +98,7 @@ sample_data = true; % Boolean
 %%
 % *Parameters of the algorithm*. 
 n_part = 100; % Number of particles
-param_names = {'log_prec_y[1:1]'}; % Parameter for which we want to study sensitivity
+param_names = {'log_prec_y'}; % Parameter for which we want to study sensitivity
 param_values = {-5:.2:3}; % Range of values
 
 %%
@@ -131,7 +131,7 @@ n_burn = 2000; % nb of burn-in/adaptation iterations
 n_iter = 2000; % nb of iterations after burn-in
 thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
-var_name = 'log_prec_y[1:1]';
+var_name = 'log_prec_y';
 param_names = {var_name}; % name of the variables updated with MCMC (others are updated with SMC)
 latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 
