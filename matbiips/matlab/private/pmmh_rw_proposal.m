@@ -1,5 +1,17 @@
 function [rw, prop] = pmmh_rw_proposal(rw, sample_param)
 
+%--------------------------------------------------------------------------
+% PMMH_RW_PROPOSAL samples from the proposal distribution
+% [rw, prop] = pmmh_rw_proposal(rw, sample_param)
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 % Concatenate all variables in a row vector
 sample_vec = cell2mat(cellfun(@(x) x(:) , sample_param(:),...
