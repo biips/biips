@@ -193,7 +193,7 @@ namespace Biips
 
     Size GetNodeSamplingIteration(NodeId nodeId) const;
     const Types<Size>::Array & GetNodeSamplingIterations() const;
-    Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
+    std::map<NodeId, String> GetNodeSamplersMap() const;
 
     Types<NodeId>::Array GetStoUnobs(Size iter);
     Types<NodeId>::Array GetLogical(Size iter);
