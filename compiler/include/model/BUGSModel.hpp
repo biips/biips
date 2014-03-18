@@ -94,7 +94,7 @@ namespace Biips
     IsBackwardSmoothMonitored(const String & name, IndexRange range = NULL_RANGE,
                       Bool check_released = true) const;
 
-    void PrintSamplersSequence(std::ostream & out) const;
+//    void PrintSamplersSequence(std::ostream & out) const;
 
     void PrintGraphviz(std::ostream & out) const;
 

@@ -1,5 +1,17 @@
 function s=parse_varname(str)
-% PARSE_VARNAME parse a string of the form
+
+%--------------------------------------------------------------------------
+% PARSE_VARNAME parses a string of the form x[1:5]
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
 z1=textscan(str, '%s', 'delimiter', '[');
 z1=z1{1};
 s=struct('name', z1{1}); 

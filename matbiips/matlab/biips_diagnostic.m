@@ -1,46 +1,43 @@
-function [diagn] = biips_diagnostic(parts, varargin)
+function diagn = biips_diagnostic(parts, varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BIIPS_DIAGNOSTIC returns a diagnostic structure
+%--------------------------------------------------------------------------
+% BIIPS_DIAGNOSTIC returns a diagnostic structure on the SMC algorithm
 % diagn = biips_diagnostic(parts, 'Propertyname', propertyvalue, ...)
 %
-% INPUT
-% -parts:      input structure containing the particles of different variables.
+%   INPUT
+%   - parts:    input structure containing the particles of different variables.
 %               usually returned by biips_smc_samples function
-% Optional Inputs:
-% -variable_names:cell of strings. subset of the fields of particles struct
-%               argument
-% -type:        string containing the characters 'f', 's' and/or 'b'
-% -ess_thres :  integer. Threshold on the Effective Sample Size (ESS) of the
-%               examined particles. If all the ESS components are over the
-%               threshold, the diagnostic is valid, otherwise it is not
-%               valid.
-%               default is 30
-% -quiet:      flag. deactivate message display. default is 0
+%   Optional Inputs:
+%   - variable_names:   cell of strings. subset of the fields of particles struct
+%                       argument
+%   - type:             string containing the characters 'f', 's' and/or 'b'
+%   - ess_thres :       integer. Threshold on the Effective Sample Size (ESS) of the
+%                       examined particles. If all the ESS components are over the
+%                       threshold, the diagnostic is valid, otherwise it is not
+%                       valid. default is 30
+%   - quiet:            flag. deactivate message display. default is 0
 %
-% OUTPUT
-% -diagn:      output structure providing the minimum value of the
-%              effective sample size
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   OUTPUT
+%   - diagn:   output structure providing the minimum value of the
+%              effective sample size for each variable
+%
+%   See also BIIPS_SMC_SAMPLES
+%--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
 % model_id = biips_model('model.bug', data)
 % npart = 100; variables = {'x'}; 
 % out_smc = biips_smc_samples(model_id, variables, npart);
-% diag = biips_diagnostic(out_smc);% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% diag = biips_diagnostic(out_smc);
+%--------------------------------------------------------------------------
+
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-%
-% Reference: A. Todeschini, M. Fuentes, F. Caron, P. Legrand, P. Del Moral.
-% BiiPS: a software for Bayesian inference with interacting particle
-% systems. Technical Report, INRIA. February 2014.
-%
-% Authors: Adrien Todeschini, Marc Fuentes
-% INRIA Bordeaux, France
-% email: biips-project@lists.gforge.inria.fr
-% Website: https://alea.bordeaux.inria.fr/biips
-% Jan 2014; Last revision: 24-01-2014
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 % 
 %% PROCESS AND CHECK INPUTS
 %%% Process and check optional arguments

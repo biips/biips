@@ -3,6 +3,23 @@ function [sample_param, sample_latent, log_prior, log_marg_like, ...
     pn_param, sample_param, sample_latent, latent_names, log_prior, log_marg_like,...
     n_part, rs_thres, rs_type, rw, rw_rescale, rw_learn)
 
+
+%--------------------------------------------------------------------------
+% PMMH_ONE_UPDATE performs one step of the PMMH algorithm
+% [sample_param, sample_latent, log_prior, log_marg_like, ...
+%     accept_rate, accepted, n_fail, rw] = pmmh_one_update(console, param_names, ...
+%     pn_param, sample_param, sample_latent, latent_names, log_prior, log_marg_like,...
+%     n_part, rs_thres, rs_type, rw, rw_rescale, rw_learn)
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
 n_fail = 0;
 
 % % Remove duplicate entries
