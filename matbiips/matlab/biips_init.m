@@ -1,9 +1,21 @@
 function biips_init(varargin)
-% BIIPS_INIT do some initialization
-% biips_init(verb)
-% INPUT 
-% verb : integer which set the verbosity level
-% this function loads the basemod module and set the verbosity
+
+%--------------------------------------------------------------------------
+% BIIPS_INIT loads the biips module
+% biips_init(verb) loads the biips basemod module and set the verbosity
+%
+% Optional input
+%   verb: integer which sets the verbosity level
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
 verb = 1;
 if (~isempty(varargin))
     verb = varargin{1};

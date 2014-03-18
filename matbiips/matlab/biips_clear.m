@@ -5,7 +5,7 @@ function biips_clear(console)
 %
 %   biips_smc_samples(console) clears the biips consoles given in the vector console
 % 
-%   biips_clear()  will clear all the consoles and reset the Id counter to 0.
+%   biips_clear()  clears all the consoles and reset the Id counter to 0.
 %
 %   See also BIIPS_MODEL
 %--------------------------------------------------------------------------

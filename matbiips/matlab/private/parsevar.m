@@ -1,34 +1,39 @@
 function varargout = parsevar(opt_param, param_names, param_type, param_valid, param_default)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
 % PARSEVAR parses the set of optional parameters and returns their values
 % parsevar(opt_param, param_names, param_list)
 %
-% INPUTS
+%   INPUTS
+%   - opt_param:    cell of length 2*n {name_var1, value_var1, namevar2, value_var2, ...}
+%   - param_names:  cell of length m containing the names of allowed optional parameters
+%                   First value is the default value
+%   - param_type:   cell of length m containing the classes class of optional parameters
+%                   'char', 'numeric', 'logical', 
+%   - param_valid:  cell of length m containing the set/range of valid values
+%                   for input of type 'char' or logical, set of values allowed
+%                   for input of type 'numeric', range of values allowed
+%   - param_default:cell of length m of default values for optional parameters
 %
-% opt_param:    cell of length 2*n {name_var1, value_var1, namevar2, value_var2, ...}
-% param_names:  cell of length m containing the names of allowed optional parameters
-%               First value is the default value
-% param_type:   cell of length m containing the classes class of optional parameters
-%               'char', 'numeric', 'logical', 
-% param_valid:  cell of length m containing the set/range of valid values
-%               for input of type 'char' or logical, set of values allowed
-%               for input of type 'numeric', range of values allowed
-% param_default:cell of length m of default values for optional parameters
-%
-% OUTPUTS
-%
-% varargout:       Values of the optional parameters
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Example
-% 
+%   OUTPUTS
+%   - varargout:    Values of the optional parameters
+%--------------------------------------------------------------------------
+% EXAMPLE
 % param_names = {'var1', 'var2', 'var3'};
 % param_type = {'numeric', 'logical', 'char'};
 % param_valid = {[0,10],{true, false}, {'a', 'b', 'c'}};
 % param_default = {1, true, 'b'};
 % params = parsevar({'var1', 5, 'var3', 'c'}, param_names, param_type,...
 %                param_valid, param_default);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 
 n_params = length(param_names);
