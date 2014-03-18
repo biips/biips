@@ -1,6 +1,20 @@
 function varargout = biips_pmmh(obj, n_iter, n_part, return_samples, varargin)
 
-%% TODO: DOC
+%--------------------------------------------------------------------------
+% BIIPS_PMMH performs iterations for the particle marginal Metropolis-Hastings algorithm
+%
+%   It is recommended to use the two wrapper functions below instead:
+%
+%   See also  BIIPS_PMMH_UPDATE, BIIPS_PMMH_SAMPLES
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
 
 
 %% PROCESS AND CHECK INPUTS

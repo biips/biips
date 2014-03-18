@@ -181,9 +181,6 @@ namespace Biips
 
     Scalar GetNodeESS(NodeId nodeId) const;
 
-    Size GetNodeSamplingIteration(NodeId nodeId) const;
-    const Types<Size>::Array & GetNodeSamplingIterations() const;
-    Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
 
     void Build();
 
@@ -193,6 +190,14 @@ namespace Biips
     {
       return built_;
     }
+
+    Size GetNodeSamplingIteration(NodeId nodeId) const;
+    const Types<Size>::Array & GetNodeSamplingIterations() const;
+    Types<std::pair<NodeId, String> >::Array GetSamplersSequence() const;
+
+    Types<NodeId>::Array GetStoUnobs(Size iter);
+    Types<NodeId>::Array GetLogical(Size iter);
+    Types<NodeId>::Array GetLikeChildren(Size iter);
 
     void LockNode(NodeId id)
     {
@@ -234,7 +239,7 @@ namespace Biips
     void ReleaseNodes();
   };
 
-  void printSamplerState(const ForwardSampler & sampler, std::ostream & os);
+//  void printSamplerState(const ForwardSampler & sampler, std::ostream & os);
 
 } /* namespace Biips */
 

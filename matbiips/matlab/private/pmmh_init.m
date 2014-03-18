@@ -1,12 +1,22 @@
 function [sample_param, sample_latent, log_prior, log_marg_like]...
     = pmmh_init(console, param_names, n_part, first_init, varargin)
 
-%% ADD DOC
-% param_names: parameters updated by MCMC
-% latent_names: parameters updated by SMC that you want to monitor
-% varargin
+%--------------------------------------------------------------------------
+% PMMH_INIT initializes the PMMH algorithm
+% [sample_param, sample_latent, log_prior, log_marg_like]...
+%     = pmmh_init(console, param_names, n_part, first_init, varargin)
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
+
 %% PROCESS AND CHECK INPUTS
-% Check param_names
 for i=1:length(param_names)
     if ~ischar(param_names{i})
         warning('Invalid parameter name')
@@ -34,79 +44,38 @@ end
 % Remove duplicate entries
 latent_names = unique(latent_names);
 
-
-% % Check inits
-% if ~isempty(inits)
-%     if length(inits)~=length(param_names)
-%         error('variables_names and inits should be of same length')
-%     end
-%     sample_init_values = false;
-% else
-%     sample_init_values = true;
-% end
-
-% MORE TODO: R code not clear
-% % Stop Biips verbosity
-% verb = inter_biips('verbosity', 0);
-% cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
-
 sample_param = cell(length(param_names), 1);
-% % Set init values
-% if ~sample_init_values
-%     for i=1:length(param_names)
-%         var_name = param_names{i};
-%         % Take init value in inits parameters
-%         tag = inter_biips('change_data', console, pn_param(i).name, ...
-%             pn_param(i).lower, pn_param(i).upper, inits{i}, true);
-%         if ~tag
-%             error('Data change failed: invalid initial value for variable %s', var_name);
-%         end
-%         sample_param{i} = inits{i};
-% %         sample = setfield(sample, var, inits{i}); % PB: will not work with [] TBD
-%     end
-% else
-    data = biips_get_data(console);    
-    for i=1:length(param_names)
-        clear var_name;
-        if isempty(pn_param(i).lower)
-            var_name = param_names{i};
-        else % Get the name of the variable without bracketts
-            k=1;
-            while ~strcmp(param_names{i}(k),'[')
-                var_name(k) = param_names{i}(k);
-                k=k+1;
-            end  
-                
+%% Set init values
+data = biips_get_data(console);    
+for i=1:length(param_names)
+    clear var_name;
+    if isempty(pn_param(i).lower)
+        var_name = param_names{i};
+    else % Get the name of the variable without bracketts
+        k=1;
+        while ~strcmp(param_names{i}(k),'[')
+            var_name(k) = param_names{i}(k);
+            k=k+1;
+        end  
+
+    end    
+    if isempty(pn_param(i).lower)
+        sample_param{i} = getfield(data, var_name);
+    else
+        samp_full = getfield(data, var_name);
+        switch(length(pn_param(i).lower))
+            case 1
+                sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1));
+            case 2
+                sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
+                    pn_param(i).lower(2):pn_param(i).upper(2));
+            case 3
+                sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
+                    pn_param(i).lower(2):pn_param(i).upper(2),...
+                    pn_param(i).lower(3):pn_param(i).upper(3));
         end
-%         if isfield(data, var_name) 
-            if isempty(pn_param(i).lower)
-                sample_param{i} = getfield(data, var_name);
-            else
-                samp_full = getfield(data, var_name);
-                switch(length(pn_param(i).lower))
-                    case 1
-                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1));
-                    case 2
-                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
-                            pn_param(i).lower(2):pn_param(i).upper(2));
-                    case 3
-                        sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1),...
-                            pn_param(i).lower(2):pn_param(i).upper(2),...
-                            pn_param(i).lower(3):pn_param(i).upper(3));
-                end
-            end
-%         else
-%             samp = inter_biips('sample_data', console, pn_param(i).name,...
-%                 pn_param(i).lower, pn_param(i).upper, inits_rng_seed);
-%             sample_param{i} = samp;
-%         end    
     end
-% end
-
-% Check NA
-% TODO??
-
-
+end
 
 % log-prior density
 log_prior = 0;
@@ -134,26 +103,10 @@ if ~inter_biips('is_sampler_built', console)
     inter_biips('build_smc_sampler', console, false)
 end
 
-% sampler_atend = inter_biips('is_smc_sampler_at_end', console);
-% pause
-
-%% Get log-normalizing constant
-% if (~sampler_atend || ~latent_monitored || ~sample_init_values)
-    % Run SMC
-%     if (~sampler_atend || ~sample_init_values)
-%         inter_biips('message', 'Initializing PMMH');
-%     else
-%         if (~latent_monitored)
-%             inter_biips('message', 'Initializing PMMH latent variables')        
-%         end
-%     end
 
 if first_init
     inter_biips('message', 'Initializing PMMH');   
-%     biips_get_data(console)
     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
-%     fprintf('finsmcforward')
-    
     if (~ok)
         error('Run SMC sampler: invalid values');        
     end    
