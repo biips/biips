@@ -1,5 +1,18 @@
 function rw = pmmh_rw_learn_cov(rw, sample_param)
 
+%--------------------------------------------------------------------------
+% PMMH_RW_LEARN_COV updates the empirical covariance of the samples
+% rw = pmmh_rw_learn_cov(rw, sample_param)
+%--------------------------------------------------------------------------
+
+% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% MatBiips interface
+% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Copyright (C) Inria
+% License: GPL-3
+% Jan 2014; Last revision: 18-03-2014
+%--------------------------------------------------------------------------
+
 niter = rw.niter;
 ncov = rw.ncov; 
 

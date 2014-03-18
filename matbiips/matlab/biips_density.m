@@ -14,7 +14,7 @@ function [dens] = biips_density(samples, varargin)
 %   - adjust:           time factor for the bw. default is 1
 %   - bw:               bandwidth. default is estimated from the samples
 %   OUTPUT
-%   -dens :             output structure
+%   - dens:             output structure
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
