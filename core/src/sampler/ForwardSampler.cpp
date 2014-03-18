@@ -600,22 +600,23 @@ namespace Biips
       monitor.SetIterationESS(iter, GetNodeESS(nodeId));
   }
 
-  void printSamplerState(const ForwardSampler & sampler, std::ostream & os)
-  {
-    if (!sampler.Initialized())
-      os << "Not initialized" << std::endl;
-    else
-    {
-      Size old_prec = os.precision();
-      os.precision(4);
-      os << sampler.Iteration() << ": ESS = " << sampler.ESS() << " ("
-          << std::fixed << sampler.ESS() / sampler.NParticles() << "N)";
-      if (!sampler.AtEnd() && sampler.Resampled())
-        os << ", Resampled";
-      os << std::endl;
-      os.precision(old_prec);
-    }
-  }
+  // TODO
+//  void printSamplerState(const ForwardSampler & sampler, std::ostream & os)
+//  {
+//    if (!sampler.Initialized())
+//      os << "Not initialized" << std::endl;
+//    else
+//    {
+//      Size old_prec = os.precision();
+//      os.precision(4);
+//      os << sampler.Iteration() << ": ESS = " << sampler.ESS() << " ("
+//          << std::fixed << sampler.ESS() / sampler.NParticles() << "N)";
+//      if (!sampler.AtEnd() && sampler.Resampled())
+//        os << ", Resampled";
+//      os << std::endl;
+//      os.precision(old_prec);
+//    }
+//  }
 
   Size ForwardSampler::NParticles() const
   {
