@@ -58,7 +58,7 @@
 % and add the Matbiips folder to the Matlab path
 % 
 
-matbiips_path = '..\..\matbiips\matlab';
+matbiips_path = '../../matbiips/matlab';
 addpath(matbiips_path)
 
 
