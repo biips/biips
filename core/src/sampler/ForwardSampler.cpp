@@ -287,13 +287,12 @@ namespace Biips
     graph_.VisitGraph(build_iterations_vis);
   }
 
-  Types<std::pair<NodeId, String> >::Array ForwardSampler::GetSamplersSequence() const
+  std::map<NodeId, String> ForwardSampler::GetNodeSamplersMap() const
   {
-    Types<std::pair<NodeId, String> >::Array ans;
+    std::map<NodeId, String> ans;
     for (Size k = 0; k < smcIterations_.size(); ++k) {
       for (Size i=0; i<smcIterations_.at(k).size(); ++i)
-        ans.push_back(std::make_pair(smcIterations_.at(k).at(i).StoUnobs(),
-                                     smcIterations_.at(k).at(i).NodeSamplerPtr()->Name()));
+        ans[smcIterations_.at(k).at(i).StoUnobs()] = smcIterations_.at(k).at(i).NodeSamplerPtr()->Name();
     }
 
     return ans;

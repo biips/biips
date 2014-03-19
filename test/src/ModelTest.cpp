@@ -300,19 +300,20 @@ namespace Biips
   {
     boost::scoped_ptr<Rng> p_rng(new Rng(rngSeed));
 
-    if (verbose_ >= 2)
-    {
-      os_ << "Node sampler's sequence: " << std::endl;
-      Types<std::pair<NodeId, String> >::Array samplers_seq =
-          pSampler_->GetSamplersSequence();
-      for (Size i = 0; i < samplers_seq.size(); ++i)
-      {
-        NodeId node_id = samplers_seq[i].first;
-        const String & name = samplers_seq[i].second;
-        os_ << i << ": node " << node_id << ", " << name << std::endl;
-      }
-      os_ << std::endl;
-    }
+    // TODO
+//    if (verbose_ >= 2)
+//    {
+//      os_ << "Node sampler's sequence: " << std::endl;
+//      Types<std::pair<NodeId, String> >::Array samplers_seq =
+//          pSampler_->GetSamplersSequence();
+//      for (Size i = 0; i < samplers_seq.size(); ++i)
+//      {
+//        NodeId node_id = samplers_seq[i].first;
+//        const String & name = samplers_seq[i].second;
+//        os_ << i << ": node " << node_id << ", " << name << std::endl;
+//      }
+//      os_ << std::endl;
+//    }
 
     Types<boost::progress_display>::Ptr p_show_progress;
     if (verbose_ == 1 && showProgress)

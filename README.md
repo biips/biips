@@ -3,7 +3,7 @@ BiiPS
 BiiPS is a general software for Bayesian inference with interacting Particle Systems.
 
 - Version:       0.8.1
-- Last modified: 2014-03-13
+- Last modified: 2014-03-18
 - Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
 - License:       GPL-3
 - Website:       http://alea.bordeaux.inria.fr/biips
@@ -71,8 +71,8 @@ Authors
 BiiPS code is Copyright (C) Inria, 2012 
 
 Authors:
-- [Adrien TODESCHINI](http://fr.linkedin.com/in/adrientodeschini/en), software designer and developer
-- [Francois CARON](http://www.math.u-bordeaux1.fr/~fcaron/), probability expertise and specifications
+- [Adrien TODESCHINI](https://sites.google.com/site/adrientodeschini/), software designer and developer
+- [Francois CARON](http://www.stats.ox.ac.uk/~caron/), probability expertise and specifications
 - Marc FUENTES, software designer and developer
 
 BiiPS code is adapted from:
