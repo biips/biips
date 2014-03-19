@@ -210,8 +210,9 @@ end
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
-    [.7 .7 1])
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+    [.7 .7 1]);
+set(h, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean, 'linewidth', 3)
 if sample_data
