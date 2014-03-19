@@ -1,9 +1,8 @@
 function out = biips_smc_sensitivity(console, param_names, param_values, ...
     n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_SMC_SENSITIVITY performs sensitivity analysis of parameters with
-% SMC
+%
+% BIIPS_SMC_SENSITIVITY performs sensitivity analysis of parameters with SMC
 %  out = biips_smc_sensitivity(console, param_names, param_values, ...
 %    n_part, 'PropertyName', propertyvalue, ...)
 %

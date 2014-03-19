@@ -1,8 +1,7 @@
 function biips_pimh_update(console, variable_names, n_iter, n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_PIMH_UPDATE performs burn-in iterations for the particle
-% independent Metropolis-Hastings algorithm
+%
+% BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm
 % biips_pimh_update(console, variable_names, n_iter, n_part, varargin)
 %
 %   INPUT: 

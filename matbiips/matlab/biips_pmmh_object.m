@@ -1,6 +1,6 @@
 function obj = biips_pmmh_object(console, param_names, varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_PMMH_OBJECT creates a PMMH object
 % obj = biips_pmmh_object(console, param_names, 'PropertyName', propertyvalue, ...)
 %

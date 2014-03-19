@@ -1,7 +1,7 @@
 function [particles, log_marg_like] = biips_smc_samples(console, variable_names, n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_SMC_SAMPLES Runs a sequential Monte Carlo algorithm
+%
+% BIIPS_SMC_SAMPLES runs a sequential Monte Carlo algorithm
 %   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 

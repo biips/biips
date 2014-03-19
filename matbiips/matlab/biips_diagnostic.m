@@ -1,6 +1,6 @@
 function diagn = biips_diagnostic(parts, varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_DIAGNOSTIC returns a diagnostic structure on the SMC algorithm
 % diagn = biips_diagnostic(parts, 'Propertyname', propertyvalue, ...)
 %
