@@ -163,8 +163,9 @@ end
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,1, :))', fliplr(squeeze(x_pmmh_quant(2,1,:))')],...
-    [.7 .7 1], 'edgecolor', 'none')
+h = fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,1, :))', fliplr(squeeze(x_pmmh_quant(2,1,:))')],...
+    [.7 .7 1], 'edgecolor', 'none');
+set(h, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
 xlabel('Time')
