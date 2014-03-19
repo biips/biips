@@ -182,8 +182,9 @@ summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 x_pimh_mean = summary_pimh.x.mean;
 x_pimh_quant = summary_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
-fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
-    [.7 .7 1]);%, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
+    [.7 .7 1]);
+set(h, 'edgecolor', 'none')
 hold on
 plot(x_pimh_mean, 'linewidth', 3)
 xlabel('Time')
