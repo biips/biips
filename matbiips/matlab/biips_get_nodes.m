@@ -1,6 +1,6 @@
 function nodes = biips_get_nodes(p)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_GET_NODES returns the nodes of the current model
 % nodes = biips_get_nodes(p)
 %

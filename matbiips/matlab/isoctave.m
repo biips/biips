@@ -1,6 +1,6 @@
 function res = isoctave()
 
-%--------------------------------------------------------------------------
+%
 % ISOCTAVE checks if octave is running
 %  res = isoctave() returns a boolean equal to 1 if octave is running, 0 otherwise
 %--------------------------------------------------------------------------

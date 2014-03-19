@@ -1,6 +1,6 @@
 function [dens] = biips_density(samples, varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_DENSITY computes 1D kernel density estimates
 % dens = biips_density(samples, 'PropertyName', PropertyValue, ...)
 %   INPUT

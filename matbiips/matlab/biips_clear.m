@@ -1,6 +1,6 @@
 function biips_clear(console)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_CLEAR  clears one or several biips consoles
 %
 %   biips_smc_samples(console) clears the biips consoles given in the vector console

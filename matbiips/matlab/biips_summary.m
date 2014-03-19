@@ -1,6 +1,6 @@
 function [summ] = biips_summary(samples, varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_SUMMARY computes some statistics on selected variables
 %  summ = biips_summary(parts, 'Propertyname', propertyvalue, ...)
 %

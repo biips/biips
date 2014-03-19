@@ -1,6 +1,6 @@
 function data = biips_get_data(p)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_GET_DATA returns the data of the current model
 % data = biips_get_data(p)
 %
