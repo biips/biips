@@ -1,9 +1,8 @@
 function [out, log_post, log_marg_like, stats_pmmh] = ... 
     biips_pmmh_samples(obj, n_iter, n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_PMMH_SAMPLES Performs iterations for the particle
-% marginal Metropolis-Hastings algorithm and returns samples
+%
+% BIIPS_PMMH_SAMPLES performs iterations for the PMMH algorithm and returns samples
 % [out, log_post, log_marg_like, stats_pmmh] = ... 
 %     biips_pmmh_samples(obj, n_iter, n_part, 'PropertyName', PropertyValue)
 %

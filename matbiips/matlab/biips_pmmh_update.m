@@ -1,8 +1,7 @@
 function [obj, out] = biips_pmmh_update(obj, n_iter, n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_PMMH_UPDATE performs adaptation and burn-in iterations for the particle
-% marginal Metropolis-Hastings algorithm
+%
+% BIIPS_PMMH_UPDATE performs adaptation and burn-in iterations for the PMMH algorithm
 % [obj, out] = biips_pmmh_update(obj, n_iter, n_part,...
 %                               'PropertyName', propertyvalue, ...)
 %

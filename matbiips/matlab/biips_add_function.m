@@ -1,7 +1,7 @@
 function biips_add_function(name, nb_param, fun_dim, fun_eval, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_ADD_FUNCTION adds a matlab function to the Biips workspace 
+%
+% BIIPS_ADD_FUNCTION adds a Matlab function to the Biips workspace 
 %   biips_add_function(name, nb_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:

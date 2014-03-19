@@ -1,7 +1,7 @@
 function [p, data] = biips_model(filename, data, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_MODEL instantiate a stochastic model under a DAG form 
+%
+% BIIPS_MODEL instantiates a stochastic model under a DAG form 
 % [p, data] = biips_model(filename, data, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT: 

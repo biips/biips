@@ -1,8 +1,7 @@
 function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n_iter, n_part, varargin)
 
-%--------------------------------------------------------------------------
-% BIIPS_PIMH_SAMPLES Performs iterations for the particle
-% independent Metropolis-Hastings algorithm and returns samples
+%
+% BIIPS_PIMH_SAMPLES performs iterations for the PIMH algorithm and returns samples
 % [out, log_marg_like_st] = biips_pimh_samples(console,...
 %                           variable_names, n_iter, n_part, varargin)
 %

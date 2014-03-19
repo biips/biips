@@ -1,6 +1,6 @@
 function biips_init(varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_INIT loads the biips module
 % biips_init(verb) loads the biips basemod module and set the verbosity
 %

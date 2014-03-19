@@ -1,6 +1,6 @@
 function biips_build_sampler(console, varargin)
 
-%--------------------------------------------------------------------------
+%
 % BIIPS_BUILD_SAMPLER assigns a sampler to every node of the graph
 %   biips_build_sampler(console, 'PropertyName', PropertyValue)
 %   INPUT: 
