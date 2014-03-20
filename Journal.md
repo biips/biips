@@ -1,3 +1,38 @@
+Adrien le 20/3/2014 :
+=====================
+- [ ] faire une liste des fonctions, distributions de biips avec les paramètrisations (cf tables du manuel de jags)
+- [ ] faire en sorte que `change_data` vérifie qu'une valeur de noeud stochastique est dans le support de sa distribution avant de mettre à jour les enfants.
+    Et dans ce cas, ne pas afficher de message d'erreur mais trouver un moyen silencieux d'avertir l'utilisateur (booleen = false?)
+- [ ] corriger la densité de dbeta, pour qu'elle retourne `-Inf` si pb de bornes. actuellemnt retourne `NaN` parfois
+- [ ] vérifier les calculs de log density dans toutes les distributions de Biips
+- [ ] tester les crashs sous octave
+- [ ] faire version R des `tutorialsX.m`, en rajoutant explications si besoin et repasser sur les labels, boxoff etc.
+- [ ] faire publish de l'exemple `switch_stoch_volatility.m` sous linux
+
+Note: on peut générer un fichier `contents.m` avec matlab depuis le répertoire en question: Reports -> Contents report 
+
+Questions en suspens:
+- [ ] est-ce qu'on applique une transformation des paramètres pour la marche aléatoire en fonction de leur support ?
+
+A rajouter dans la doc de `inter_biips` :
+`get_log_prior_density` lance une erreur si :
+* pas de modèle
+* variable non existente
+* bornes invalides
+* noeud non observé
+* noeud stochastique avec parents non observés
+* valeurs invalides pour le calcul de la densité
+* autres lancement d'exceptions...
+
+La valeur de retour est :
+* NA si le noeud est constant ou logical (dans matlab ce NA est transformé en NaN)
+* -Inf si hors des bornes
+
+Note: un `NaN` peut aussi être renvoyé pour des erreurs numériques. Par exemple dans les cas suivants :
+* `Inf-Inf`
+* `Inf/Inf`
+- [ ] ne doit-on pas lancer une erreur dans ce cas ?
+
 Adrien le 18/3/2014 :
 =====================
 - [ ] enlever les bornes inutiles dans les arguments de `biips_sensitivity` et `biips_pmmh_samples`  des tutoriels et exemples 
@@ -130,6 +165,7 @@ message d'erreur:
         does not match one node exactly.
     
 - [ ] resoudre le probleme si pas trop compliqué, sinon mettre un message d'erreur un peu plus explicite 
+    --> Actuellement, utiliser {'x[1]', 'x[2]'} au lieu de {'x[1,2]'}
 
 François le 11/3/2014 :
 =======================

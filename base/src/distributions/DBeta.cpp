@@ -35,7 +35,7 @@
  */
 
 #include "distributions/DBeta.hpp"
-#include <boost/math/special_functions/gamma.hpp>
+#include "jrmath/JRmath.h"
 
 #define ALPHA(paramValues) (paramValues[0].ScalarView())
 #define BETA(paramValues) (paramValues[1].ScalarView())
@@ -78,14 +78,7 @@ namespace Biips
   {
     if (give_log)
     {
-      Scalar alpha = ALPHA(paramValues);
-      Scalar beta = BETA(paramValues);
-
-      using std::log;
-      using boost::math::lgamma;
-
-      return lgamma(alpha + beta) - lgamma(alpha) - lgamma(beta)
-             + (alpha - 1.0) * log(x) + (beta - 1.0) * log(1.0 - x);
+      return dbeta(x, ALPHA(paramValues), BETA(paramValues));
     }
 
     MathDistType dist = mathDist(paramValues);
