@@ -1,0 +1,5 @@
+This is a partial copy of the Rmath library that is part of R.
+
+Minor changes have been done:
+* c files have been changed in cpp files.
+* Everything unnecessary for our purpose has been removed.
