@@ -137,7 +137,7 @@ for i=1:n_iter
                 end
             end
             for k=1:n_latent
-                switch(n_dim_latent(k))
+               switch(n_dim_latent(k))
                     case 1
                         samples_latent_st{k}(:, ind_sample) = sample_latent{k};
                     case 2
