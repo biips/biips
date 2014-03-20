@@ -130,7 +130,7 @@ namespace Biips
     MathDistType dist = mathDist(paramValues);
 
     if (log_p)
-      return p = std::exp(p);
+      p = std::exp(p);
 
     if (lower)
       return boost::math::quantile(dist, p);
