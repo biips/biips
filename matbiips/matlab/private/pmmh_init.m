@@ -24,7 +24,6 @@ for i=1:length(param_names)
     end
 end
 % % Remove duplicate entries
-% param_names = unique(param_names);
 pn_param = cellfun(@parse_varname, param_names);
 %%% Process and check optional arguments
 optarg_names = {'latent_names', 'rs_thres', 'rs_type'};
@@ -41,9 +40,6 @@ for i=1:length(latent_names)
         latent_names(i) = [];
     end
 end
-% Remove duplicate entries
-latent_names = unique(latent_names);
-
 sample_param = cell(length(param_names), 1);
 %% Set init values
 data = biips_get_data(console);    

@@ -1,0 +1,2391 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Matbiips example: Switching Stochastic volatility</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-03-20"><meta name="DC.source" content="switch_stoch_volatility.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Matbiips example: Switching Stochastic volatility</h1><!--introduction--><p>In this example, we consider the Markov switching stochastic volatility model for application e.g. in finance.</p><p>Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Statistical model</a></li><li><a href="#2">Statistical model in BUGS language</a></li><li><a href="#4">Installation of Matbiips</a></li><li><a href="#5">Load model and load or simulate data</a></li><li><a href="#9">BiiPS Particle Marginal Metropolis-Hastings</a></li><li><a href="#21">Clear model</a></li></ul></div><h2>Statistical model<a name="1"></a></h2><p>Let <img src="switch_stoch_volatility_eq13352.png" alt="$y_t$"> be the response variable and <img src="switch_stoch_volatility_eq61044.png" alt="$x_t$"> the unobserved log-volatility of <img src="switch_stoch_volatility_eq13352.png" alt="$y_t$">. The stochastic volatility model is defined as follows for <img src="switch_stoch_volatility_eq44689.png" alt="$t\leq t_{max}$"></p><p><img src="switch_stoch_volatility_eq01539.png" alt="$$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$"></p><p><img src="switch_stoch_volatility_eq91127.png" alt="$$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$"></p><p>The regime variables <img src="switch_stoch_volatility_eq21725.png" alt="$c_t$"> follow a two-state Markov process with transition probabilities</p><p><img src="switch_stoch_volatility_eq95115.png" alt="$$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$"></p><p>We assume the following priors over the parameters <img src="switch_stoch_volatility_eq56275.png" alt="$\alpha $, $\phi $, $\sigma $ and $p$">:</p><p><img src="switch_stoch_volatility_eq94399.png" alt="$$ \alpha_1=\gamma_1$$"></p><p><img src="switch_stoch_volatility_eq47700.png" alt="$$\alpha_2 = \gamma_1+\gamma_2$$"></p><p><img src="switch_stoch_volatility_eq92713.png" alt="$$\gamma_1 \sim \mathcal N(0,100)$$"></p><p><img src="switch_stoch_volatility_eq34524.png" alt="$$\gamma_2 \sim \mathcal {TN}_{(0,\infty)}(0,100)$$"></p><p><img src="switch_stoch_volatility_eq69778.png" alt="$$\phi \sim \mathcal {TN}_{(-1,1)}(0,100) $$"></p><p><img src="switch_stoch_volatility_eq51098.png" alt="$$\sigma^2 \sim invGamma(2.001,1) $$"></p><p><img src="switch_stoch_volatility_eq92612.png" alt="$$\pi_{11} \sim Beta(0.5,0.5)$$"></p><p><img src="switch_stoch_volatility_eq07503.png" alt="$$\pi_{22} \sim Beta(0.5,0.5)$$"></p><p><img src="switch_stoch_volatility_eq23889.png" alt="$\mathcal N(m,\sigma^2)$"> denotes the normal distribution of mean <img src="switch_stoch_volatility_eq81831.png" alt="$m$"> and variance <img src="switch_stoch_volatility_eq03760.png" alt="$\sigma^2$">. <img src="switch_stoch_volatility_eq80507.png" alt="$\mathcal {TN}_{(a,b)}(m,\sigma^2)$"> denotes the truncated normal distribution of mean <img src="switch_stoch_volatility_eq81831.png" alt="$m$"> and variance <img src="switch_stoch_volatility_eq03760.png" alt="$\sigma^2$">.</p><h2>Statistical model in BUGS language<a name="2"></a></h2><p>Content of the file `switch_stoch_volatility.bug':</p><pre>       var y[t_max,1], x[t_max,1], prec_y[t_max,1],mu[t_max,1],mu_true[t_max,1],alpha[2,1],gamma[2,1],c[t_max],c_true[t_max],pi[2,2]</pre><pre>       data
+       {
+         c_true[1] ~ dcat(pi_true[1,])
+         mu_true[1,1] &lt;- alpha_true[1,1] * (c_true[1]==1) + alpha_true[2,1]*(c_true[1]==2)
+         x_true[1,1] ~ dnorm(mu_true[1,1], 1/sigma_true^2)
+         prec_y_true[1,1] &lt;- exp(-x_true[1,1])
+         y[1,1] ~ dnorm(0, prec_y_true[1,1])
+         for (t in 2:t_max)
+         {
+           c_true[t] ~ dcat(ifelse(c_true[t-1]==1,pi_true[1,],pi_true[2,]))
+           mu_true[t,1] &lt;- alpha_true[1,1]*(c_true[t]==1) + alpha_true[2,1]*(c_true[t]==2) + phi_true*x_true[t-1,1];
+           x_true[t,1] ~ dnorm(mu_true[t,1], 1/sigma_true^2)
+           prec_y_true[t,1] &lt;- exp(-x_true[t,1])
+           y[t,1] ~ dnorm(0, prec_y_true[t,1])
+         }
+       }</pre><pre>       model
+       {
+         gamma[1,1] ~ dnorm(0, 1/100)
+         gamma[2,1] ~ dnorm(0, 1/100)T(0,)
+         alpha[1,1] &lt;- gamma[1,1]
+         alpha[2,1] &lt;- gamma[1,1] + gamma[2,1]
+         phi ~ dnorm(0, 1/100)T(-1,1)
+         tau ~ dgamma(2.001, 1)
+         sigma &lt;- 1/sqrt(tau)
+         pi[1,1] ~ dbeta(.5, .5)
+         pi[1,2] &lt;- 1.00 - pi[1,1]
+         pi[2,2] ~ dbeta(.5, .5)
+         pi[2,1] &lt;- 1.00 - pi[2,2]</pre><pre>         c[1] ~ dcat(pi[1,])
+         mu[1,1] &lt;- alpha[1,1] * (c[1]==1) + alpha[2,1]*(c[1]==2)
+         x[1,1] ~ dnorm(mu[1,1], 1/sigma^2)
+         prec_y[1,1] &lt;- exp(-x[1,1])
+         y[1,1] ~ dnorm(0, prec_y[1,1])
+         for (t in 2:t_max)
+         {
+           c[t] ~ dcat(ifelse(c[t-1]==1, pi[1,], pi[2,]))
+           mu[t,1] &lt;- alpha[1,1] * (c[t]==1) + alpha[2,1]*(c[t]==2) + phi*x[t-1,1]
+           x[t,1] ~ dnorm(mu[t,1], 1/sigma^2)
+           prec_y[t,1] &lt;- exp(-x[t,1])
+           y[t,1] ~ dnorm(0, prec_y[t,1])
+         }
+       }</pre><h2>Installation of Matbiips<a name="4"></a></h2><p>Unzip the Matbiips archive in some folder and add the Matbiips folder to the Matlab path</p><pre class="codeinput">matbiips_path = <span class="string">'../../matbiips/matlab'</span>;
+addpath(matbiips_path)
+</pre><h2>Load model and load or simulate data<a name="5"></a></h2><pre class="codeinput">sample_data = true; <span class="comment">% Simulated data or SP500 data</span>
+t_max = 200;
+
+<span class="keyword">if</span> ~sample_data
+    <span class="comment">% Load the data</span>
+    T = readtable(<span class="string">'SP500.csv'</span>, <span class="string">'delimiter'</span>, <span class="string">';'</span>);
+    y = diff(log(T.Close(end:-1:1)));
+    SP500_date_str = T.Date(end:-1:2);
+
+    ind = 1:t_max;
+    y = y(ind);
+    SP500_date_str = SP500_date_str(ind);
+
+    SP500_date_num = datenum(SP500_date_str);
+
+    <span class="comment">% Plot the SP500 data</span>
+    figure(<span class="string">'name'</span>, <span class="string">'log-returns'</span>)
+    plot(SP500_date_num, y)
+    datetick(<span class="string">'x'</span>, <span class="string">'mmmyyyy'</span>, <span class="string">'keepticks'</span>)
+    ylabel(<span class="string">'log-returns'</span>)
+<span class="keyword">end</span>
+</pre><p><b>Model parameters</b></p><pre class="codeinput"><span class="keyword">if</span> ~sample_data
+    data = struct(<span class="string">'t_max'</span>, t_max, <span class="string">'y'</span>, y);
+<span class="keyword">else</span>
+    sigma_true = .4;
+    alpha_true = [-2.5; -1];
+    phi_true = .5;
+    pi11 = .9;
+    pi22 = .9;
+    pi_true = [
+        pi11, 1-pi11;
+        1-pi22, pi22];
+
+    data = struct(<span class="string">'t_max'</span>, t_max, <span class="string">'sigma_true'</span>, sigma_true,<span class="keyword">...</span>
+        <span class="string">'alpha_true'</span>, alpha_true, <span class="string">'phi_true'</span>, phi_true, <span class="string">'pi_true'</span>, pi_true);
+<span class="keyword">end</span>
+</pre><p><b>Start BiiPS console</b></p><pre class="codeinput">biips_init;
+</pre><p><b>Compile BUGS model and sample data if simulated data</b></p><pre class="codeinput">model = <span class="string">'switch_stoch_volatility.bug'</span>; <span class="comment">% BUGS model filename</span>
+[model_id, data] = biips_model(model, data, <span class="string">'sample_data'</span>, sample_data); <span class="comment">% Create biips model and sample data</span>
+</pre><pre class="codeoutput">* Parsing model in: switch_stoch_volatility.bug
+* Compiling data graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 2412
+  Sampling data
+  Reading data back into data table
+* Compiling model graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 2430
+</pre><h2>BiiPS Particle Marginal Metropolis-Hastings<a name="9"></a></h2><p>We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order to obtain posterior MCMC samples of the parameters \alpha, \beta and \sigma, and of the variables x.</p><p><b>Parameters of the PMMH</b></p><pre class="codeinput">n_burn = 20000; <span class="comment">% nb of burn-in/adaptation iterations</span>
+n_iter = 20000; <span class="comment">% nb of iterations after burn-in</span>
+thin = 20; <span class="comment">% thinning of MCMC outputs</span>
+n_part = 50; <span class="comment">% nb of particles for the SMC</span>
+
+param_names = {<span class="string">'gamma[1,1]'</span>,<span class="string">'gamma[2,1]'</span>, <span class="string">'phi'</span>, <span class="string">'tau'</span>, <span class="string">'pi[1,1]'</span>, <span class="string">'pi[2,2]'</span>}; <span class="comment">% name of the variables updated with MCMC (others are updated with SMC)</span>
+latent_names = {<span class="string">'x'</span>,<span class="string">'alpha[1,1]'</span>,<span class="string">'alpha[2,1]'</span>, <span class="string">'sigma'</span>}; <span class="comment">% name of the variables updated with SMC and that need to be monitored</span>
+</pre><p><b>Init PMMH</b></p><pre class="codeinput">inits = {-1, 1,.5,5,.8,.8};
+obj_pmmh = biips_pmmh_object(model_id, param_names, <span class="string">'inits'</span>, inits); <span class="comment">% creates a pmmh object</span>
+<span class="comment">% pause</span>
+</pre><p><b>Run PMMH</b></p><pre class="codeinput">[obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); <span class="comment">% adaptation and burn-in iterations</span>
+[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,<span class="keyword">...</span>
+    <span class="string">'thin'</span>, thin, <span class="string">'latent_names'</span>, latent_names); <span class="comment">% Samples</span>
+</pre><pre class="codeoutput">* Initializing PMMH
+* Adapting PMMH with 50 particles
+  |--------------------------------------------------| 100%
+  |+++++++++++++++++++++++++++++++++++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
++| 20000 iterations in 3407.84 s
+* Initializing PMMH - latent variables
+* Generating 1000 PMMH samples with 50 particles
+  |--------------------------------------------------| 100%
+  |*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+*Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+Warning: LOGIC ERROR: Invalid parameters values for function sqrt
+ 
+**| 20000 iterations in 2922.77 s
+</pre><p><b>Some summary statistics</b></p><pre class="codeinput">summary_pmmh = biips_summary(out_pmmh, <span class="string">'probs'</span>, [.025, .975]);
+</pre><p><b>Compute kernel density estimates</b></p><pre class="codeinput">kde_estimates_pmmh = biips_density(out_pmmh);
+
+param_plot = {<span class="string">'alpha[1,1]'</span>,<span class="string">'alpha[2,1]'</span>, <span class="string">'phi'</span>, <span class="string">'sigma'</span>,<span class="string">'pi[1,1]'</span>,<span class="string">'pi[2,2]'</span>};
+</pre><p><b>Posterior mean and credibilist interval for the parameters</b></p><pre class="codeinput"><span class="keyword">for</span> i=1:length(param_plot)
+    sum_param = getfield(summary_pmmh, param_plot{i});
+    fprintf(<span class="string">'Posterior mean of %s: %.3f\n'</span>,param_plot{i},sum_param.mean);
+    fprintf(<span class="string">'95%% credibilist interval for %s: [%.3f,%.3f]\n'</span>,<span class="keyword">...</span>
+        param_plot{i}, sum_param.quant(1),  sum_param.quant(2));
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Posterior mean of alpha[1,1]: -2.450
+95% credibilist interval for alpha[1,1]: [-3.929,-1.316]
+Posterior mean of alpha[2,1]: -1.147
+95% credibilist interval for alpha[2,1]: [-2.100,-0.522]
+Posterior mean of phi: 0.494
+95% credibilist interval for phi: [0.128,0.728]
+Posterior mean of sigma: 0.685
+95% credibilist interval for sigma: [0.493,0.838]
+Posterior mean of pi[1,1]: 0.890
+95% credibilist interval for pi[1,1]: [0.759,0.976]
+Posterior mean of pi[2,2]: 0.922
+95% credibilist interval for pi[2,2]: [0.805,0.998]
+</pre><p><b>Trace of MCMC samples for the parameters</b></p><pre class="codeinput"><span class="keyword">if</span> sample_data
+    param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
+<span class="keyword">end</span>
+title_names = {<span class="string">'\alpha[1]'</span>,<span class="string">'\alpha[2]'</span>, <span class="string">'\phi'</span>, <span class="string">'\sigma'</span>,<span class="string">'\pi[1,1]'</span>,<span class="string">'\pi[2,2]'</span>};
+<span class="comment">% figure('name', 'PMMH: Trace samples parameter')</span>
+<span class="keyword">for</span> k=1:length(param_plot)
+    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    figure
+    plot(out_pmmh_param)
+    <span class="keyword">if</span> sample_data
+        hold <span class="string">on</span>
+        plot(0, param_true(k), <span class="string">'*g'</span>);
+    <span class="keyword">end</span>
+    xlabel(<span class="string">'Iterations'</span>)
+    ylabel(<span class="string">'PMMH samples'</span>)
+    title(title_names{k})
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="switch_stoch_volatility_01.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_02.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_03.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_04.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_05.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_06.png" alt=""> <p><b>Histogram and kde estimate of the posterior for the parameters</b></p><pre class="codeinput"><span class="keyword">for</span> k=1:length(param_plot)
+    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    figure(<span class="string">'name'</span>, <span class="string">'PMMH: Histogram posterior parameter'</span>)
+    hist(out_pmmh_param, 15)
+    <span class="keyword">if</span> sample_data
+        hold <span class="string">on</span>
+        plot(param_true(k),0, <span class="string">'*g'</span>);
+    <span class="keyword">end</span>
+    xlabel(title_names{k})
+    ylabel(<span class="string">'number of samples'</span>)
+    title(title_names{k})
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="switch_stoch_volatility_07.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_08.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_09.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_10.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_11.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_12.png" alt=""> <p><b>Posterior mean and quantiles for x</b></p><pre class="codeinput">x_pmmh_mean = summary_pmmh.x.mean;
+x_pmmh_quant = summary_pmmh.x.quant;
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: Posterior mean and quantiles'</span>)
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],<span class="keyword">...</span>
+    [.7 .7 1]);
+set(h, <span class="string">'edgecolor'</span>, <span class="string">'none'</span>)
+hold <span class="string">on</span>
+plot(x_pmmh_mean, <span class="string">'linewidth'</span>, 3)
+<span class="keyword">if</span> sample_data
+    plot(data.x_true, <span class="string">'g'</span>, <span class="string">'linewidth'</span>, 2)
+    legend({<span class="string">'95 % credible interval'</span>, <span class="string">'PMMH Mean Estimate'</span>, <span class="string">'True value'</span>})
+<span class="keyword">else</span>
+    legend({<span class="string">'95 % credible interval'</span>, <span class="string">'PMMH Mean Estimate'</span>})
+<span class="keyword">end</span>
+xlabel(<span class="string">'Time'</span>)
+ylabel(<span class="string">'Estimates'</span>)
+</pre><img vspace="5" hspace="5" src="switch_stoch_volatility_13.png" alt=""> <p><b>Trace of MCMC samples for x</b></p><pre class="codeinput">time_index = [5, 10, 15, 20];
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: Trace samples x'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(out_pmmh.x(tk, :))
+    <span class="keyword">if</span> sample_data
+        hold <span class="string">on</span>
+        plot(0, data.x_true(tk), <span class="string">'*g'</span>);
+    <span class="keyword">end</span>
+    xlabel(<span class="string">'Iterations'</span>)
+    ylabel(<span class="string">'PMMH samples'</span>)
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+<span class="keyword">if</span> sample_data
+    legend({<span class="string">'PMMH samples'</span>, <span class="string">'True value'</span>});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="switch_stoch_volatility_14.png" alt=""> <p><b>Histogram and kernel density estimate of posteriors of x</b></p><pre class="codeinput">figure(<span class="string">'name'</span>, <span class="string">'PMMH: Histograms Marginal Posteriors'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    hist(out_pmmh.x(tk, :), 15);
+    <span class="keyword">if</span> sample_data
+        hold <span class="string">on</span>
+        plot(data.x_true(tk), 0, <span class="string">'*g'</span>);
+    <span class="keyword">end</span>
+    xlabel([<span class="string">'x_{'</span> num2str(tk) <span class="string">'}'</span>]);
+    ylabel(<span class="string">'number of samples'</span>);
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+<span class="keyword">if</span> sample_data
+    legend({<span class="string">'smoothing density'</span>, <span class="string">'True value'</span>});
+<span class="keyword">end</span>
+
+figure(<span class="string">'name'</span>, <span class="string">'PMMH: KDE estimates Marginal posteriors'</span>)
+<span class="keyword">for</span> k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
+    <span class="keyword">if</span> sample_data
+        hold <span class="string">on</span>
+        plot(data.x_true(tk), 0, <span class="string">'*g'</span>);
+    <span class="keyword">end</span>
+    xlabel([<span class="string">'x_{'</span> num2str(tk) <span class="string">'}'</span>]);
+    ylabel(<span class="string">'posterior density'</span>);
+    title([<span class="string">'t='</span>, num2str(tk)]);
+<span class="keyword">end</span>
+<span class="keyword">if</span> sample_data
+    legend({<span class="string">'posterior density'</span>, <span class="string">'True value'</span>});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="switch_stoch_volatility_15.png" alt=""> <img vspace="5" hspace="5" src="switch_stoch_volatility_16.png" alt=""> <h2>Clear model<a name="21"></a></h2><pre class="codeinput">biips_clear(model_id)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Matbiips example: Switching Stochastic volatility
+% In this example, we consider the Markov switching stochastic volatility model for
+% application e.g. in finance.
+%
+% Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
+% stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.
+
+%% Statistical model
+%
+% Let $y_t$ be the response variable and $x_t$ the unobserved
+% log-volatility of $y_t$. The stochastic volatility model is defined as follows
+% for $t\leq t_{max}$
+% 
+% $$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$
+%
+% $$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$
+%
+% The regime variables $c_t$ follow a two-state Markov process with
+% transition probabilities
+%
+% $$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$
+%
+% We assume the following
+% priors over the parameters $\alpha $, $\phi $, $\sigma $ and $p$:
+%
+% $$ \alpha_1=\gamma_1$$
+%
+% $$\alpha_2 = \gamma_1+\gamma_2$$
+%
+% $$\gamma_1 \sim \mathcal N(0,100)$$
+%
+% $$\gamma_2 \sim \mathcal {TN}_{(0,\infty)}(0,100)$$
+%
+% $$\phi \sim \mathcal {TN}_{(-1,1)}(0,100) $$
+%
+% $$\sigma^2 \sim invGamma(2.001,1) $$
+%
+% $$\pi_{11} \sim Beta(0.5,0.5)$$
+%
+% $$\pi_{22} \sim Beta(0.5,0.5)$$
+%
+% $\mathcal N(m,\sigma^2)$ denotes the normal
+% distribution of mean $m$ and variance $\sigma^2$. 
+% $\mathcal {TN}_{(a,b)}(m,\sigma^2)$ denotes the truncated normal
+% distribution of mean $m$ and variance $\sigma^2$. 
+
+
+%% Statistical model in BUGS language
+% Content of the file `switch_stoch_volatility.bug':
+
+%%
+%
+%
+%         var y[t_max,1], x[t_max,1], prec_y[t_max,1],mu[t_max,1],mu_true[t_max,1],alpha[2,1],gamma[2,1],c[t_max],c_true[t_max],pi[2,2]
+% 
+%         data
+%         {  
+%           c_true[1] ~ dcat(pi_true[1,])
+%           mu_true[1,1] <- alpha_true[1,1] * (c_true[1]==1) + alpha_true[2,1]*(c_true[1]==2)
+%           x_true[1,1] ~ dnorm(mu_true[1,1], 1/sigma_true^2)
+%           prec_y_true[1,1] <- exp(-x_true[1,1]) 
+%           y[1,1] ~ dnorm(0, prec_y_true[1,1])
+%           for (t in 2:t_max)
+%           { 
+%             c_true[t] ~ dcat(ifelse(c_true[t-1]==1,pi_true[1,],pi_true[2,]))
+%             mu_true[t,1] <- alpha_true[1,1]*(c_true[t]==1) + alpha_true[2,1]*(c_true[t]==2) + phi_true*x_true[t-1,1];
+%             x_true[t,1] ~ dnorm(mu_true[t,1], 1/sigma_true^2)
+%             prec_y_true[t,1] <- exp(-x_true[t,1])  
+%             y[t,1] ~ dnorm(0, prec_y_true[t,1])
+%           }
+%         }
+% 
+%         model
+%         {
+%           gamma[1,1] ~ dnorm(0, 1/100)
+%           gamma[2,1] ~ dnorm(0, 1/100)T(0,)
+%           alpha[1,1] <- gamma[1,1]
+%           alpha[2,1] <- gamma[1,1] + gamma[2,1]
+%           phi ~ dnorm(0, 1/100)T(-1,1)
+%           tau ~ dgamma(2.001, 1)
+%           sigma <- 1/sqrt(tau)
+%           pi[1,1] ~ dbeta(.5, .5)
+%           pi[1,2] <- 1.00 - pi[1,1]
+%           pi[2,2] ~ dbeta(.5, .5)
+%           pi[2,1] <- 1.00 - pi[2,2]
+% 
+% 
+%           c[1] ~ dcat(pi[1,])
+%           mu[1,1] <- alpha[1,1] * (c[1]==1) + alpha[2,1]*(c[1]==2)
+%           x[1,1] ~ dnorm(mu[1,1], 1/sigma^2)
+%           prec_y[1,1] <- exp(-x[1,1]) 
+%           y[1,1] ~ dnorm(0, prec_y[1,1])
+%           for (t in 2:t_max)
+%           { 
+%             c[t] ~ dcat(ifelse(c[t-1]==1, pi[1,], pi[2,]))
+%             mu[t,1] <- alpha[1,1] * (c[t]==1) + alpha[2,1]*(c[t]==2) + phi*x[t-1,1]
+%             x[t,1] ~ dnorm(mu[t,1], 1/sigma^2)
+%             prec_y[t,1] <- exp(-x[t,1])  
+%             y[t,1] ~ dnorm(0, prec_y[t,1])
+%           }
+%         }
+
+
+%% Installation of Matbiips
+% Unzip the Matbiips archive in some folder
+% and add the Matbiips folder to the Matlab path
+% 
+
+matbiips_path = '../../matbiips/matlab';
+addpath(matbiips_path)
+
+%% Load model and load or simulate data
+%
+
+sample_data = true; % Simulated data or SP500 data
+t_max = 200;
+
+if ~sample_data    
+    % Load the data
+    T = readtable('SP500.csv', 'delimiter', ';');
+    y = diff(log(T.Close(end:-1:1)));
+    SP500_date_str = T.Date(end:-1:2);
+
+    ind = 1:t_max;
+    y = y(ind);
+    SP500_date_str = SP500_date_str(ind);
+
+    SP500_date_num = datenum(SP500_date_str);
+    
+    % Plot the SP500 data
+    figure('name', 'log-returns')
+    plot(SP500_date_num, y)
+    datetick('x', 'mmmyyyy', 'keepticks')
+    ylabel('log-returns')
+end
+
+%%
+% *Model parameters*
+if ~sample_data
+    data = struct('t_max', t_max, 'y', y);
+else
+    sigma_true = .4;
+    alpha_true = [-2.5; -1];
+    phi_true = .5;    
+    pi11 = .9;
+    pi22 = .9;
+    pi_true = [
+        pi11, 1-pi11;
+        1-pi22, pi22];
+    
+    data = struct('t_max', t_max, 'sigma_true', sigma_true,...
+        'alpha_true', alpha_true, 'phi_true', phi_true, 'pi_true', pi_true);
+end
+
+
+%%
+% *Start BiiPS console*
+biips_init;
+
+%%
+% *Compile BUGS model and sample data if simulated data*
+model = 'switch_stoch_volatility.bug'; % BUGS model filename
+[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+
+
+%% BiiPS Particle Marginal Metropolis-Hastings
+% We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
+% to obtain posterior MCMC samples of the parameters \alpha, \beta and \sigma,
+% and of the variables x.
+
+%%
+% *Parameters of the PMMH*
+n_burn = 20000; % nb of burn-in/adaptation iterations
+n_iter = 20000; % nb of iterations after burn-in
+thin = 20; % thinning of MCMC outputs
+n_part = 50; % nb of particles for the SMC
+
+param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+
+%%
+% *Init PMMH*
+inits = {-1, 1,.5,5,.8,.8};
+obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', inits); % creates a pmmh object
+% pause
+%%
+% *Run PMMH*
+[obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', thin, 'latent_names', latent_names); % Samples
+ 
+%%
+% *Some summary statistics*
+summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+
+%%
+% *Compute kernel density estimates*
+kde_estimates_pmmh = biips_density(out_pmmh);
+
+param_plot = {'alpha[1,1]','alpha[2,1]', 'phi', 'sigma','pi[1,1]','pi[2,2]'};
+%%
+% *Posterior mean and credibilist interval for the parameters*
+for i=1:length(param_plot)
+    sum_param = getfield(summary_pmmh, param_plot{i});
+    fprintf('Posterior mean of %s: %.3f\n',param_plot{i},sum_param.mean);
+    fprintf('95%% credibilist interval for %s: [%.3f,%.3f]\n',...
+        param_plot{i}, sum_param.quant(1),  sum_param.quant(2));
+end
+
+%%
+% *Trace of MCMC samples for the parameters*
+if sample_data
+    param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
+end
+title_names = {'\alpha[1]','\alpha[2]', '\phi', '\sigma','\pi[1,1]','\pi[2,2]'};
+% figure('name', 'PMMH: Trace samples parameter')
+for k=1:length(param_plot)
+    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    figure
+    plot(out_pmmh_param)
+    if sample_data
+        hold on
+        plot(0, param_true(k), '*g');  
+    end
+    xlabel('Iterations')
+    ylabel('PMMH samples')
+    title(title_names{k})
+end
+
+
+%%
+% *Histogram and kde estimate of the posterior for the parameters*
+for k=1:length(param_plot)
+    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    figure('name', 'PMMH: Histogram posterior parameter')
+    hist(out_pmmh_param, 15)
+    if sample_data
+        hold on
+        plot(param_true(k),0, '*g');  
+    end
+    xlabel(title_names{k})
+    ylabel('number of samples')
+    title(title_names{k})
+end
+  
+
+%%
+% *Posterior mean and quantiles for x*
+x_pmmh_mean = summary_pmmh.x.mean;
+x_pmmh_quant = summary_pmmh.x.quant;
+figure('name', 'PMMH: Posterior mean and quantiles')
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+    [.7 .7 1]);
+set(h, 'edgecolor', 'none')
+hold on
+plot(x_pmmh_mean, 'linewidth', 3)
+if sample_data
+    plot(data.x_true, 'g', 'linewidth', 2)
+    legend({'95 % credible interval', 'PMMH Mean Estimate', 'True value'})
+else
+    legend({'95 % credible interval', 'PMMH Mean Estimate'})
+end
+xlabel('Time')
+ylabel('Estimates')
+
+
+%%
+% *Trace of MCMC samples for x*
+time_index = [5, 10, 15, 20];
+figure('name', 'PMMH: Trace samples x')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(out_pmmh.x(tk, :))
+    if sample_data
+        hold on
+        plot(0, data.x_true(tk), '*g');  
+    end
+    xlabel('Iterations')
+    ylabel('PMMH samples')
+    title(['t=', num2str(tk)]);
+end
+if sample_data
+    legend({'PMMH samples', 'True value'});
+end
+
+%%
+% *Histogram and kernel density estimate of posteriors of x*
+figure('name', 'PMMH: Histograms Marginal Posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    hist(out_pmmh.x(tk, :), 15);
+    if sample_data
+        hold on    
+        plot(data.x_true(tk), 0, '*g');
+    end
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('number of samples');
+    title(['t=', num2str(tk)]);    
+end
+if sample_data
+    legend({'smoothing density', 'True value'});
+end
+
+figure('name', 'PMMH: KDE estimates Marginal posteriors')
+for k=1:length(time_index)
+    tk = time_index(k);
+    subplot(2, 2, k)
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
+    if sample_data
+        hold on
+        plot(data.x_true(tk), 0, '*g');
+    end
+    xlabel(['x_{' num2str(tk) '}']);
+    ylabel('posterior density');
+    title(['t=', num2str(tk)]);    
+end
+if sample_data
+    legend({'posterior density', 'True value'});
+end
+
+
+%% Clear model
+% 
+
+biips_clear(model_id)
+##### SOURCE END #####
+--></body></html>
