@@ -175,6 +175,7 @@ namespace Biips
 
   protected:
     std::list<Scalar> quantileProbs_;
+    Types<Size>::Array quantileRanks_;
     AccType acc_;
 
   public:
@@ -184,9 +185,20 @@ namespace Biips
     }
     template<typename InputIterator>
     QuantileAccumulator(InputIterator first, InputIterator last) :
-      quantileProbs_(first, last), acc_(AccTags::Quantiles::probabilities
+      quantileProbs_(first, last), quantileRanks_(quantileProbs_.size()), acc_(AccTags::Quantiles::probabilities
           = quantileProbs_)
     {
+      // sort probs
+      Types<Scalar>::Array prob_sorted(first, last);
+      std::sort(prob_sorted.begin(), prob_sorted.end());
+
+      // search ranks of probs in sorted vector
+      Types<Size>::Iterator it_order = quantileRanks_.begin();
+      for (std::list<Scalar>::const_iterator it=quantileProbs_.begin();
+          it!=quantileProbs_.end(); ++it)
+      {
+        *it_order = std::find(prob_sorted.begin(), prob_sorted.end(), *it) - prob_sorted.begin();
+      }
     }
 
     void Init();

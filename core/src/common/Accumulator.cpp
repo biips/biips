@@ -226,7 +226,8 @@ namespace Biips
   {
     if (i > quantileProbs_.size())
       throw LogicError("Invalid quantile index.");
-    return Scalar(acc::weighted_extended_p_square(acc_)[i]);
+
+    return Scalar(acc::weighted_extended_p_square(acc_)[quantileRanks_[i]]);
   }
 
   void DiscreteAccumulator::Init()

@@ -1026,7 +1026,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				probas_out[i] = accu.Quantile(i);
 			}
 
-
 		}
 
 		/////////////////////////////////////////
