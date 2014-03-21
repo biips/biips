@@ -125,7 +125,7 @@
   commentstyle=\color{darkgreen},       % comment style
   stringstyle=\color{mymauve},         % string literal style
   escapeinside={\%*}{*)},            % if you want to add a comment within your code
-  morekeywords={}               % if you want to add more keywords to the set 
+  morekeywords={}               % if you want to add more keywords to the set
   }
   % DEFINE BUGS STYLE
 \lstdefinestyle{bugs}{
@@ -520,6 +520,37 @@ Shoud we describe this here?
 \label{sec:switchingstochasticvolatility}
 
 \lstinputlisting[style=matbiips, firstline=171, lastline=193]{../../examples/stoch_volatility/switch_stoch_volatility.m}
+
+\section{Stochastic kinetic}
+Let $\delta_t=1/m$ where $m$ is an integer, and $T$ a multiple of $m$.
+For $t=1,\ldots,T$
+$$ x_t|x_{t-1}\sim \mathcal N(x_{t-1}+\alpha(x_{t-1},c)\delta_t,\beta(x_{t-1},c)\delta_t)$$
+
+where $$\alpha(x,c) = \left(
+                  \begin{array}{c}
+                    c_1x_1-c_2x_1x_2  \\
+                    c_2x_1x_2-c_3x_2 \\
+                  \end{array}
+                \right)$$
+
+     $$\beta(x,c) = \left(
+                  \begin{array}{cc}
+                    c_1x_1+c_2x_1x_2 & -c_2x_1x_2\\
+                    -c_2x_1x_2 & c_2x_1x_2 + c_3x_2 \\
+                  \end{array}
+                \right)$$ 
+
+
+For $t=m,2m,3m,\ldots,T$, 
+$$y_t|x_t\sim \mathcal N(x_{1t},\sigma^2)$$
+
+          
+and for $i=1,\ldots,3$
+
+$$ \log(c_i)\sim Unif(-7,2) $$
+
+
+$x_{t1}$ and $x_{t2}$ respectively correspond to the number of preys and predators and $y_t$ is the approximated number of preys. The model is the approximation of the Lotka-Volterra model.
 
 \section{Discussion of related softwares and merits/limits of Biips}
 \label{sec:discussion}
