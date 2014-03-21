@@ -1,3 +1,9 @@
+François le 21/3/2014 :
+=======================
+- [ ] Il y a un petit bug dans inter_biips weighted quantiles. Quand tu lui 
+    des donne des probas non ordonnees, il te les retourne dans le mauvais 
+    ordre (c'est-a dire ordoneees).
+
 Adrien le 20/3/2014 :
 =====================
 - [ ] faire une liste des fonctions, distributions de biips avec les paramètrisations (cf tables du manuel de jags)
@@ -6,6 +12,8 @@ Adrien le 20/3/2014 :
 - [ ] corriger la densité de dbeta, pour qu'elle retourne `-Inf` si pb de bornes. actuellemnt retourne `NaN` parfois
 - [ ] vérifier les calculs de log density dans toutes les distributions de Biips
 - [ ] tester les crashs sous octave
+  --> Il y a bien le meme bug dans octave sous windows. Par exemple `stoch_kinetic` fait crasher octave avec le message:
+        panic: segmentation violation
 - [ ] faire version R des `tutorialsX.m`, en rajoutant explications si besoin et repasser sur les labels, boxoff etc.
 - [ ] faire publish de l'exemple `switch_stoch_volatility.m` sous linux
 
