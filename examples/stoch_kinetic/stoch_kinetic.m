@@ -1,4 +1,5 @@
-%% Matbiips example: Stochastic kinetic
+%% Matbiips example: Stochastic kinetic prey-predator model
+
 
 
 
@@ -94,8 +95,8 @@ thin = 1; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
 param_names = {'logalpha','logbeta', 'loggamma'}; % name of the variables updated with MCMC (others are updated with SMC)
-% latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
-latent_names = {};
+latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
+
 %%
 % *Init PMMH*
 obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-1, -6, -1}); % creates a pmmh object
@@ -164,58 +165,20 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,1, :))', fliplr(squeeze(x_pmmh_quant(2,1,:))')],...
-    [.7 .7 1], 'edgecolor', 'none');
+    [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
+h2 = fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,2, :))', fliplr(squeeze(x_pmmh_quant(2,2,:))')],...
+    [1 .7 .7]);
+set(h2, 'edgecolor', 'none')
+plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
+set(h, 'edgecolor', 'none')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PMMH Mean Estimate'})
+legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey',...
+    '95 % credible interval - predator', 'PMMH Mean Estimate - predator'})
  
-% %%
-% % *Trace of MCMC samples for x*
-% time_index = [5, 10, 15, 20];
-% figure('name', 'PMMH: Trace samples x')
-% for k=1:length(time_index)
-%     tk = time_index(k);
-%     subplot(2, 2, k)
-%     plot(out_pmmh.x(tk, :))
-%     hold on
-%     plot(0, data.x_true(tk), '*g');  
-%     xlabel('Iterations')
-%     ylabel('PMMH samples')
-%     title(['t=', num2str(tk)]);
-% end
-% legend({'PMMH samples', 'True value'});
-% 
-% %%
-% % *Histogram and kernel density estimate of posteriors of x*
-% figure('name', 'PMMH: Histograms Marginal Posteriors')
-% for k=1:length(time_index)
-%     tk = time_index(k);
-%     subplot(2, 2, k)
-%     hist(out_pmmh.x(tk, :), 15);
-%     hold on    
-%     plot(data.x_true(tk), 0, '*g');
-%     xlabel(['x_{' num2str(tk) '}']);
-%     ylabel('number of samples');
-%     title(['t=', num2str(tk)]);    
-% end
-% legend({'smoothing density', 'True value'});
-% 
-% figure('name', 'PMMH: KDE estimates Marginal posteriors')
-% for k=1:length(time_index)
-%     tk = time_index(k);
-%     subplot(2, 2, k)
-%     plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
-%     hold on
-%     plot(data.x_true(tk), 0, '*g');
-%     xlabel(['x_{' num2str(tk) '}']);
-%     ylabel('posterior density');
-%     title(['t=', num2str(tk)]);    
-% end
-% legend({'posterior density', 'True value'}, 'fontsize', 12);
-
 
 %% Clear model
 % 

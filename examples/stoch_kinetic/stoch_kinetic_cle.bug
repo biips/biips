@@ -1,15 +1,12 @@
 # Stochastic kinetic prey - predator model
-# cf Boys, Wilkinson and Kirkwood
-# Bayesian inference for a discretely observed stochastic kinetic model
-# and
-# Bayesian parameter inference for stochastic biochemical network
-# models using particle MCMC, by Golightly and Wilkinson
+# with chemical Langevin equations
 #
-# generate data and use model from the chemical Langevin equation as an approximation to the true model
+# Reference: A. Golightly and D. J. Wilkinson. Bayesian parameter inference 
+# for stochastic biochemical network models using particle Markov chain
+# Monte Carlo. Interface Focus, vol.1, pp. 807-820, 2011.
 
 var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt], y[t_max/dt], matvar[2,2,t_max/dt], matvar_true[2,2,t_max/dt], logalpha[1],logbeta[1],loggamma[1]
 
-# Data generated from chemical Langevin model
 data
 {	
   x_true[,1] <- x_init
@@ -22,7 +19,7 @@ data
     matvar_true[2,1,t] <- matvar_true[1,2,t]
     matvar_true[2,2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] + gamma_true*x_true[2,t-1]
     x_true_temp[,t] ~ dmnormvar(x_true[,t-1]+mu_true[,t]*dt, (matvar_true[,,t])*dt) 
-    # Needs to threshold to avoid extinction
+    # To avoid extinction
     x_true[1,t] <- max(x_true_temp[1,t],1) 
     x_true[2,t] <- max(x_true_temp[2,t],1) 
   }
@@ -32,7 +29,6 @@ data
   }
 }
 
-# Model is chemical Langevin Equation
 model
 {
   logalpha[1] ~ dunif(-7,2)
@@ -51,8 +47,7 @@ model
     matvar[2,1,t] <- matvar[1,2,t]
     matvar[2,2,t] <- beta*x[1,t-1]*x[2,t-1] + gamma*x[2,t-1]
     x_temp[,t] ~ dmnormvar(x[,t-1]+mu[,t]*dt, (matvar[,,t])*dt)  
-    # Needs to threshold to avoid extinction 
-    # !!! faut-il enlever les 2 lignes suivantes ? !!!
+    # To avoid extinction 
     x[1,t] <- max(x_temp[1,t],1)
     x[2,t] <- max(x_temp[2,t],1)
   }
