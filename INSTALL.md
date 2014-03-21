@@ -9,13 +9,13 @@ install RBiips
 
         install.packages('path/to/RBiips_X.X.X.zip')
 
-install matbiips
+install MatBiips
 ----------------
 * Requirements: Matlab (>=R2012b)
 
-* Extract matbiips archive
+* Extract MatBiips archive
 
-* Before using matbiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
+* Before using MatBiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
 
         addpath('path/to/matbiips/matlab')
 
@@ -30,13 +30,13 @@ install RBiips
 
         install.packages('path/to/RBiips_X.X.X.tgz')
 
-install matbiips
+install MatBiips
 ----------------
 * Requirements: Matlab (>=R2012b)
 
-* Extract matbiips archive
+* Extract MatBiips archive
 
-* Before using matbiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
+* Before using MatBiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
 
         addpath('path/to/matbiips/matlab')
 
@@ -45,7 +45,7 @@ Linux
 =============
 
 install biips from binary
---------------------------
+-------------------------
 * Requirements: libboost-dev (>=1.49)
 
 * Root installation (Debian/Ubuntu) from terminal:
@@ -79,26 +79,29 @@ install RBiips
 
         env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL RBiips_0.8.1.tar.gz
 
-install matbiips
+install MatBiips
 ----------------
-* Requirements: Matlab (>=R2012b). Previous biips installation is not needed for matbiips
+* Requirements: Matlab (>=R2012b). Previous biips installation is not needed for MatBiips
 
-* Extract matbiips archive
+* Extract MatBiips archive
 
         tar xvzf matbiips_X.X.X.tar.gz
 
-* Test matbiips
+* Test MatBiips
 
         cd path/to/matbiips/tests
-        LD_PRELOAD=/usr/lib/ARCH/libstdc++.so.6  matlab -nojvm
+        LD_PRELOAD=/usr/libARCH/libstdc++.so.6  matlab
         >> test_smc
 
-Change ARCH to the right directory (e.g. on x64 Debian/Ubuntu, ARCH=x86_64-linux-gnu)
+where `libARCH` is a directory depending on your Linux distribution and architecture, e.g.:
+- on 64bit Debian/Ubuntu: `libARCH=lib/x86_64-linux-gnu`
+- on 64bit Fedora/openSUSE/Mandriva/CentOS: `libARCH=lib64`
 
-Note: alternatively to using the LD_PRELOAD=... command, you can rename the path/to/MATLAB/R20XXx/sys/os/glnxa64/libstdc++.so.6 to e.g. libstdc++.so.6.bak
+Note: alternatively to using the `LD_PRELOAD=...` command, you can rename the `path/to/MATLAB/R20XXx/sys/os/glnxa64/libstdc++.so.6` to e.g. `libstdc++.so.6.bak`.
+This usually requires administrator permissions.
 
 install biips from sources
------------------------
+--------------------------
 * Requirements:
     - git
     - cmake
@@ -111,10 +114,9 @@ install biips from sources
 
 * Configure
 
-        cd biips_sources
-        mkdir build
-        cd build
-        cmake  -DBUILD_MATBIIPS=ON -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release -DMEX=mex ..
+        mkdir biips_build
+        cd biips_build
+        cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release path/to/sources
 
 * Compile
 
