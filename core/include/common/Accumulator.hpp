@@ -193,11 +193,11 @@ namespace Biips
       std::sort(prob_sorted.begin(), prob_sorted.end());
 
       // search ranks of probs in sorted vector
-      Types<Size>::Iterator it_order = quantileRanks_.begin();
+      Types<Size>::Iterator it_rank = quantileRanks_.begin();
       for (std::list<Scalar>::const_iterator it=quantileProbs_.begin();
-          it!=quantileProbs_.end(); ++it)
+          it!=quantileProbs_.end(); ++it, ++it_rank)
       {
-        *it_order = std::find(prob_sorted.begin(), prob_sorted.end(), *it) - prob_sorted.begin();
+        *it_rank = std::find(prob_sorted.begin(), prob_sorted.end(), *it) - prob_sorted.begin();
       }
     }
 
