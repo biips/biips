@@ -132,12 +132,12 @@ model = 'stoch_volatility.bug'; % BUGS model filename
 
 %%
 % *Parameters of the PMMH*
-n_burn = 200; % nb of burn-in/adaptation iterations
-n_iter = 200; % nb of iterations after burn-in
-thin = 20; % thinning of MCMC outputs
+n_burn = 1000; % nb of burn-in/adaptation iterations
+n_iter = 1000; % nb of iterations after burn-in
+thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'alpha[1:1]', 'logit_beta[1:1]', 'log_sigma[1:1]'}; % name of the variables updated with MCMC (others are updated with SMC)
+param_names = {'alpha', 'logit_beta', 'log_sigma'}; % name of the variables updated with MCMC (others are updated with SMC)
 latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
