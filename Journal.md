@@ -1,3 +1,24 @@
+François le 25/3/2014 :
+=======================
+- [ ] Il faudrait une fonction biips add_function_rnd, qui rajouterait une 
+    fonction pour simuler, que l'on ne pourrait appeler dand bugs que pour 
+    des noeuds stochastiques non observés. (sinon renvoit une erreur). On ne 
+    prendrait pas en compte le cas plus compliqué des noeuds observés, car 
+    dans ce cas il faudrait fournir la densité.
+
+    Je sais que c'est encore un ajout au C++, mais j'ai l'impression que 
+    c'est un ajout relativement simple et qui ajoute beaucoup, car on peut 
+    traiter des cas pour lesquels on n'a pas accès à l'évaluation de 
+    p(x_t|x_t-1), on sait juste simuler selon cette loi, et donc les MCMC 
+    standards ne sont pas applicables.
+
+Adrien le 24/3/2014 :
+=====================
+- [ ] Pour les crashs windows, essyer de désactiver ReleaseNodes dans sensitivity et pmmh
+- [ ] Faire tourner les exemples sous Jags, notamment `switching_stoch_volatility`
+- [ ] pmmh: modifier traitement sortie `get_log_prior_density`, NaN = erreur numérique
+- [ ] Tester validité des distributions et samplers
+
 François le 21/3/2014 :
 =======================
 - [ ] Il y a un petit bug dans inter_biips weighted quantiles. Quand tu lui 
