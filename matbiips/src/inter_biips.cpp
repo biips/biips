@@ -16,6 +16,7 @@
 #include "common/Utility.hpp"
 #include "compiler/Compiler.hpp"
 #include "MatlabFunction.hpp"
+#include "MatlabRandomDist.hpp"
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
 
@@ -1101,6 +1102,48 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				myMexErrMsg(name_func, name_func + ": could not add function" + name);
 			}
 		}
+        ////////////////////////////////////////////
+        // ADD_RANDOM FUNCTION
+        ////////////////////////////////////////////
+        else if (name_func == "add_random_dist") {
+
+            CheckRhs(nrhs, 6, name_func);
+            CheckArgIsString(1);
+            CheckArgIsDouble(2);
+            CheckArgIsString(3);
+            CheckArgIsString(4);
+            CheckArgIsString(5);
+            CheckArgIsString(6);
+
+
+            String name = GetString(prhs[1]);
+            Size npar = static_cast<Size>(*mxGetPr(prhs[2]));
+            String fundim = GetString(prhs[3]);
+            String funsample = GetString(prhs[4]);
+            String funcheckpar = GetString(prhs[5]);
+            String funisdiscrete = GetString(prhs[6]);
+
+            if (Compiler::DistTab().Contains(name))
+            {
+              if (Compiler::DistTab().IsLocked(name))
+                myMexErrMsg(name_func, name_func + ": can't add random distribution: "
+                            + name + " is an existing locked distribution.");
+              else
+                mbiips_cerr << name_func + ": replacing existing distribution "
+                + name;
+            }
+            if (!Compiler::DistTab().Insert(Distribution::Ptr(new MatlabRandomDist(name,
+                                                                             npar,
+                                                                             fundim,
+                                                                             funsample,
+                                                                             funcheckpar,
+                                                                             funisdiscrete)))) {
+                myMexErrMsg(name_func, name_func + ": could not add random distribution" + name);
+            }
+        }
+        ////////////////////////////////////////////
+        // INVALID FUNCTION
+        ////////////////////////////////////////////
 		else {
 			myMexErrMsg("invalidNameFunc", name_func + ": invalid function name");
 		}

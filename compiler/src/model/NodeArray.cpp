@@ -39,6 +39,8 @@
 #include "common/IndexRangeIterator.hpp"
 #include "model/NodeArray.hpp"
 #include "graph/Graph.hpp"
+#include "graph/StochasticNode.hpp"
+#include "distribution/DistError.hpp"
 #include "iostream/outStream.hpp"
 
 namespace Biips
@@ -397,6 +399,13 @@ namespace Biips
       // check node is observed
       if (!graph_.GetObserved()[id])
       {
+        // check Distribution is observable
+        const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
+        Distribution::Ptr p_dist = snode.PriorPtr();
+        if (!p_dist->Observable())
+        {
+          throw DistError(p_dist, "Can not change data: distribution not observable.");
+        }
         // otherwise set observed
         graph_.SetObserved(id);
         set_observed_nodes = true;
@@ -422,6 +431,13 @@ namespace Biips
         // check node is observed
         if (type == STOCHASTIC && !graph_.GetObserved()[id])
         {
+          // check Distribution is observable
+          const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
+          Distribution::Ptr p_dist = snode.PriorPtr();
+          if (!p_dist->Observable())
+          {
+            throw DistError(p_dist, "Can not change data: distribution not observable.");
+          }
           // otherwise set observed
           graph_.SetObserved(id);
           set_observed_nodes = true;
@@ -489,6 +505,14 @@ namespace Biips
     // check node is unobserved
     if (graph_.GetObserved()[id])
       throw LogicError(String("Can not sample data: node is already observed."));
+
+    // check Distribution is observable
+    const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
+    Distribution::Ptr p_dist = snode.PriorPtr();
+    if (!p_dist->Observable())
+    {
+      throw DistError(p_dist, "Can not change data: distribution not observable.");
+    }
 
     graph_.SetObserved(id);
 

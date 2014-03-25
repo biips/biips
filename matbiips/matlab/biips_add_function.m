@@ -1,7 +1,7 @@
 function biips_add_function(name, nb_param, fun_dim, fun_eval, varargin)
 
 %
-% BIIPS_ADD_FUNCTION adds a Matlab function to the Biips workspace 
+% BIIPS_ADD_FUNCTION adds a Matlab function to the BUGS language
 %   biips_add_function(name, nb_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
@@ -35,7 +35,7 @@ function biips_add_function(name, nb_param, fun_dim, fun_eval, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 17-03-2014
@@ -51,13 +51,13 @@ optarg_type = {'char', 'char'};
     optarg_valid, optarg_default);
 % Check inputs
 if (~isa(name,'char'))
-    error('biips_add_function : 1-st argument must be a string')
+    error('biips_add_function : 1-st argumentï¿½must be a string')
 end
 if (~isa(fun_dim,'char'))
-    error('biips_add_function : 3-d argument must be a string')
+    error('biips_add_function : 3-d argumentï¿½must be a string')
 end
 if (~isa(fun_eval,'char'))
-    error('biips_add_function : 4-th argument must be a string')
+    error('biips_add_function : 4-th argumentï¿½must be a string')
 end
 if (~any(exist(fun_dim)==[2,3,5]))
     error('the function ''%s'' does not exist',fun_dim);
