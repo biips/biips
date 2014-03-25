@@ -582,7 +582,7 @@ namespace Biips
     }
 
     explicit LogPriorDensityVisitor(const Graph & graph) :
-        graph_(graph)
+        graph_(graph), prior_(BIIPS_REALNA)
     {
     }
   };

@@ -771,6 +771,11 @@ namespace Biips
 
     Bool obs(p_this_data);
 
+    // If Node is observed, check distribution is observable
+    if (obs && !p_dist->Observable())
+      throw CompileError(p_distribution,
+                         String("Distribution ") + distname + " can not be observed");
+
     NodeId snode_id = model_.graph().AddStochasticNode(p_dist,
                                                        parameters,
                                                        obs,

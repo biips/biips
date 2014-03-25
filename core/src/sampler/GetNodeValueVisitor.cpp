@@ -566,7 +566,7 @@ namespace Biips
     }
 
     explicit IsSupportFixedVisitor(const Graph & graph) :
-      graph_(graph)
+      graph_(graph), fixed_(false)
     {
     }
   };

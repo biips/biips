@@ -26,7 +26,7 @@ switch(test)
     %%% Start BiiPS console
     biips_init;
     %%% Compile BUGS model and sample data
-    model = 'hmm_1d_lin_mat.bug'; % BUGS model filename
+    model = 'hmm_1d_lin2.bug'; % BUGS model filename
     sample_data = true; % Boolean
     [model_id, data] = biips_model(model, data, 'sample_data', sample_data);
     biips_clear(model_id)

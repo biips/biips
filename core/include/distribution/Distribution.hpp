@@ -144,6 +144,10 @@ namespace Biips
     {
       return Dim(paramDims).Length();
     }
+    virtual Bool Observable() const
+    {
+      return true;
+    }
 
     virtual ~Distribution()
     {
