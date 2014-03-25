@@ -17,7 +17,7 @@ biips_init;
 
 %% build evalutations functions
 biips_add_function('funcmat',2, 'myfuncdim', 'myfunceval')
-[p, data] = biips_model('funcmat.bug', who);
+[p, data] = biips_model('hmm_4d_nonlin_funcmat.bug', who);
 x_true = data.x_true(1:2,:);
 
 %% run SMC

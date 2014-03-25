@@ -1,6 +1,6 @@
 % test_crash1
 % PB: Erreur car x_true n'est pas fourni dans la structure data
-% Or sample_data=false, donc cela ne devrait pas poser de problème
+% Or sample_data=false, donc cela ne devrait pas poser de problï¿½me
 
 %%% Model parameters
 t_max = 100;
@@ -17,11 +17,11 @@ data = struct('y', y, 't_max', t_max, 'prec_x_init', prec_x_init,...
 biips_init;
 
 %%% Compile BUGS model and sample data
-model = 'hmm_1d_lin_mat.bug'; % BUGS model filename
+model = 'hmm_1d_lin2.bug'; % BUGS model filename
 sample_data = false; % Boolean
 [model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 
-% * Parsing model in: hmm_1d_lin_mat.bug
+% * Parsing model in: hmm_1d_lin2.bug
 % * Compiling data graph
 %   Declaring variables
 %   Resolving undeclared variables
