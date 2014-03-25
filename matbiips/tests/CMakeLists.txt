@@ -4,7 +4,7 @@ file(GLOB bugs_files *.bug)
 set(test_files ${mfiles} ${bugs_files})
 file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-set(mtests test_output test_console test_macros test_smc test_funcmat test_internals)
+set(mtests test_output test_console test_macros test_smc test_funcmat test_distmat test_internals)
 foreach(_test ${mtests})
     set (MAT_COMS "${_test};exit")
     if (MATLAB)
