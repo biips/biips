@@ -5,20 +5,20 @@
 # for stochastic biochemical network models using particle Markov chain
 # Monte Carlo. Interface Focus, vol.1, pp. 807-820, 2011.
 
-var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt], y[t_max/dt], matvar[2,2,t_max/dt], matvar_true[2,2,t_max/dt], logalpha[1],logbeta[1],loggamma[1]
+var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt], y[t_max/dt], beta[2,2,t_max/dt], beta_true[2,2,t_max/dt], logc[3],c[3],c_true[3]
 
 data
 {	
   x_true[,1] <- x_init
   for (t in 2:t_max/dt)
   { 
-    mu_true[1,t] <- alpha_true*x_true[1,t-1] - beta_true*x_true[1,t-1]*x_true[2,t-1]
-    mu_true[2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] - gamma_true*x_true[2,t-1]
-    matvar_true[1,1,t] <- alpha_true*x_true[1,t-1] + beta_true*x_true[1,t-1]*x_true[2,t-1]
-    matvar_true[1,2,t] <- -beta_true*x_true[1,t-1]*x_true[2,t-1]
-    matvar_true[2,1,t] <- matvar_true[1,2,t]
-    matvar_true[2,2,t] <- beta_true*x_true[1,t-1]*x_true[2,t-1] + gamma_true*x_true[2,t-1]
-    x_true_temp[,t] ~ dmnormvar(x_true[,t-1]+mu_true[,t]*dt, (matvar_true[,,t])*dt) 
+    alpha_true[1,t] <- c_true[1] * x_true[1,t-1] - c_true[2]*x_true[1,t-1]*x_true[2,t-1]
+    alpha_true[2,t] <- c_true[2]*x_true[1,t-1]*x_true[2,t-1] - c_true[3]*x_true[2,t-1]
+    beta_true[1,1,t] <- c_true[1]*x_true[1,t-1] + c_true[2]*x_true[1,t-1]*x_true[2,t-1]
+    beta_true[1,2,t] <- -c_true[2]*x_true[1,t-1]*x_true[2,t-1]
+    beta_true[2,1,t] <- beta_true[1,2,t]
+    beta_true[2,2,t] <- c_true[2]*x_true[1,t-1]*x_true[2,t-1] + c_true[3]*x_true[2,t-1]
+    x_true_temp[,t] ~ dmnormvar(x_true[,t-1]+alpha_true[,t]*dt, (beta_true[,,t])*dt) 
     # To avoid extinction
     x_true[1,t] <- max(x_true_temp[1,t],1) 
     x_true[2,t] <- max(x_true_temp[2,t],1) 
@@ -31,22 +31,22 @@ data
 
 model
 {
-  logalpha[1] ~ dunif(-7,2)
-  logbeta[1] ~ dunif(-7,2)
-  loggamma[1] ~ dunif(-7,2)
-  alpha <- exp(logalpha[1])
-  beta <- exp(logbeta[1])
-  gamma <- exp(loggamma[1])
+  logc[1] ~ dunif(-7,2)
+  logc[2] ~ dunif(-7,2)
+  logc[3] ~ dunif(-7,2)
+  c[1] <- exp(logc[1])
+  c[2] <- exp(logc[2])
+  c[3] <- exp(logc[3])
   x[,1] <- x_init
   for (t in 2:t_max/dt)
   { 
-    mu[1,t] <- alpha*x[1,t-1] - beta*x[1,t-1]*x[2,t-1]
-    mu[2,t] <- beta*x[1,t-1]*x[2,t-1] - gamma*x[2,t-1]
-    matvar[1,1,t] <- alpha*x[1,t-1] + beta*x[1,t-1]*x[2,t-1]
-    matvar[1,2,t] <- -beta*x[1,t-1]*x[2,t-1]
-    matvar[2,1,t] <- matvar[1,2,t]
-    matvar[2,2,t] <- beta*x[1,t-1]*x[2,t-1] + gamma*x[2,t-1]
-    x_temp[,t] ~ dmnormvar(x[,t-1]+mu[,t]*dt, (matvar[,,t])*dt)  
+    alpha[1,t] <- c[1]*x[1,t-1] - c[2]*x[1,t-1]*x[2,t-1]
+    alpha[2,t] <- c[2]*x[1,t-1]*x[2,t-1] - c[3]*x[2,t-1]
+    beta[1,1,t] <- c[1]*x[1,t-1] + c[2]*x[1,t-1]*x[2,t-1]
+    beta[1,2,t] <- -c[2]*x[1,t-1]*x[2,t-1]
+    beta[2,1,t] <- beta[1,2,t]
+    beta[2,2,t] <- c[2]*x[1,t-1]*x[2,t-1] + c[3]*x[2,t-1]
+    x_temp[,t] ~ dmnormvar(x[,t-1]+alpha[,t]*dt, beta[,,t]*dt)  
     # To avoid extinction 
     x[1,t] <- max(x_temp[1,t],1)
     x[2,t] <- max(x_temp[2,t],1)
