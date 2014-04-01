@@ -1,6 +1,6 @@
 François le 25/3/2014 :
 =======================
-- [ ] Il faudrait une fonction biips add_function_rnd, qui rajouterait une 
+- [x] Il faudrait une fonction biips add_function_rnd, qui rajouterait une 
     fonction pour simuler, que l'on ne pourrait appeler dand bugs que pour 
     des noeuds stochastiques non observés. (sinon renvoit une erreur). On ne 
     prendrait pas en compte le cas plus compliqué des noeuds observés, car 
@@ -21,7 +21,7 @@ Adrien le 24/3/2014 :
 
 François le 21/3/2014 :
 =======================
-- [ ] Il y a un petit bug dans inter_biips weighted quantiles. Quand tu lui 
+- [x] Il y a un petit bug dans inter_biips weighted quantiles. Quand tu lui 
     des donne des probas non ordonnees, il te les retourne dans le mauvais 
     ordre (c'est-a dire ordoneees).
 
