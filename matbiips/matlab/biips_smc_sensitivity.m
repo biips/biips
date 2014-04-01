@@ -57,6 +57,11 @@ if n_params~=length(param_values)
 end
 pn_param =  cellfun(@parse_varname, param_names);
 
+if ~prod(cellfun(@isnumeric, param_values))
+    error('param_values must be a cell of numerics');
+end
+
+
 % Get the number of parameter values to evaluate
 dimension = size(param_values{1});
 if (length(dimension)==2 && dimension(2)==1) % scalar parameter
@@ -120,6 +125,10 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
              case 4
                  value{i} = param_values{i}(:, :, :, k);
          end
+          pn_param(i)
+          pn_param(i).lower
+          pn_param(i).upper
+          value{i}
          tag = inter_biips('change_data', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper, value{i}, false);
          if ~tag
