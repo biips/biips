@@ -103,6 +103,8 @@ log_marg_like = zeros(n_values, 1);
 log_marg_like_pen = zeros(n_values, 1);
 max_log_marg_like = -Inf;
 max_log_marg_like_pen = -Inf;
+max_param = [];
+max_param_pen = [];
 
 inter_biips('message', ['Analyzing sensitivity with ' num2str(n_part) ' particles']);
 % Progress bar
@@ -125,10 +127,6 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
              case 4
                  value{i} = param_values{i}(:, :, :, k);
          end
-          pn_param(i)
-          pn_param(i).lower
-          pn_param(i).upper
-          value{i}
          tag = inter_biips('change_data', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper, value{i}, false);
          if ~tag

@@ -20,7 +20,6 @@
 %
 % $$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$
 %
-%
 % $\mathcal N(m,\sigma^2)$ denotes the normal
 % distribution of mean $m$ and variance $\sigma^2$. 
 
@@ -63,7 +62,9 @@
 %       }
 %     }
 
+set(0, 'DefaultAxesFontsize', 14)
 rng('default')
+
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
 % and add the Matbiips folder to the Matlab path
@@ -91,7 +92,8 @@ out_smc = biips_smc_samples(model_id, variables, n_part);
 % *Diagnostic on the algorithm*. 
 diag = biips_diagnostic(out_smc);
 
-%% plot particles
+%% 
+% Plot weighted particles
 figure('name', 'Particles')
 hold on
 for t=1:t_max
@@ -107,18 +109,6 @@ end
 xlabel('Time')
 ylabel('Particles (smoothing)')
 saveas(gca, 'volatility_particles_s', 'png')
-
-% %% plot particles
-% figure
-% for i=1:n_part
-%     hold on
-%     plot(out_smc.x.s.values(:,:,i), 'ro', 'markersize', 2, 'markerfacecolor', 'r')  
-% end
-% figure
-% for i=1:n_part
-%     hold on
-%     plot(out_smc.x.f.values(:,:,i), 'ro', 'markersize', 2, 'markerfacecolor', 'r')
-% end
 
 
 %%
@@ -190,9 +180,9 @@ saveas(gca, 'volatility_kde', 'epsc2')
 
 %%
 % *Parameters of the algorithm*. 
-n_part = 100; % Number of particles
+n_part = 50; % Number of particles
 param_names = {'alpha[1:2,1]'}; % Parameter for which we want to study sensitivity
-[A, B] = meshgrid(-3:.5:0, -3:.5:0);
+[A, B] = meshgrid(-5:.2:2, -5:.2:2);
 param_values = {[A(:), B(:)]'}; % Range of values
 
 %%
@@ -201,13 +191,18 @@ out = biips_smc_sensitivity(model_id, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
-surf(A(:), B(:), out.log_marg_like)
-pause
-% 
-% figure('name', 'log-marginal likelihood');
-% plot(param_values{1}, out.log_marg_like, '.')
-% xlabel('Parameter log\_prec\_y')
-% ylabel('Log-marginal likelihood')
+figure
+surf(A, B, reshape(out.log_marg_like, size(A)))
+shading interp
+caxis([0,max(out.log_marg_like(:))])
+colormap(hot)
+view(2)
+xlim([min(A(:)), max(A(:))])
+colorbar
+xlabel('$\alpha[1,1]$', 'interpreter', 'latex')
+ylabel('$\alpha[2,1]$', 'interpreter', 'latex')
+saveas(gca, 'volatility_sensibility', 'epsc2')
+
 
 
 %% BiiPS Particle Independent Metropolis-Hastings
