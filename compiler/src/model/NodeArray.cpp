@@ -374,17 +374,15 @@ namespace Biips
 
     std::set<NodeId> changed_nodes;
 
+    NodeId id = GetNode(range);
+    if (id == NULL_NODEID)
+      throw RuntimeError(String("Can not change data: variable ") + Name()
+                         + print(range)
+                         + " does not match one node exactly.");
+
     // check that nodes are valid
     if (mcmc)
     {
-      NodeId id = GetNode(range);
-      if (id == NULL_NODEID)
-        throw RuntimeError(String("Can not change data: variable ") + Name()
-                           + print(range)
-                           + " does not match one node exactly.");
-
-      changed_nodes.insert(id);
-
       if (graph_.GetNode(id).GetType() != STOCHASTIC)
         throw RuntimeError("Can not change data: node is not stochastic.");
 
@@ -413,20 +411,9 @@ namespace Biips
     }
     else
     {
-      for (boost::bimap<NodeId, IndexRange>::const_iterator it =
-          nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
-      {
-        NodeId id = it->left;
-        const IndexRange & sub_range = it->right;
-
-        if (!sub_range.Overlaps(range))
-          continue;
-
         NodeType type = graph_.GetNode(id).GetType();
         if (type == LOGICAL)
           throw RuntimeError("Can not change data: node is logical.");
-
-        changed_nodes.insert(id);
 
         // check node is observed
         if (type == STOCHASTIC && !graph_.GetObserved()[id])
@@ -442,8 +429,9 @@ namespace Biips
           graph_.SetObserved(id);
           set_observed_nodes = true;
         }
-      }
     }
+
+    changed_nodes.insert(id);
 
     // change values
     for (IndexRangeIterator it_subrange(range); !it_subrange.AtEnd();
