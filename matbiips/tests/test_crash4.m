@@ -26,6 +26,7 @@ obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in
 [out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1, 'latent_names', latent_names); % Samples
     
+biips_clear
 %    Warning: RUNTIME ERROR: Can not change data: variable log_prec_y[1:2]
 % does not match one node exactly.
 %  

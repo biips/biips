@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MatlabRandomDist.cpp
+/*! \file MatlabDistribSampler.cpp
  * \brief
  *
  * \author  $LastChangedBy$
@@ -34,13 +34,13 @@
  * Id:      $Id$
  */
 
-#include "MatlabRandomDist.hpp"
+#include "MatlabDistribSampler.hpp"
 #include <algorithm>
 #include "mex.h"
 
 namespace Biips
 {
-  void MatlabRandomDist::sample(ValArray & values,
+  void MatlabDistribSampler::sample(ValArray & values,
                             const NumArray::Array & paramValues,
                             const NumArray::Pair & boundValues,
                             Rng & rng) const
@@ -103,7 +103,7 @@ namespace Biips
     mxFree(prhs);
   }
 
-  DimArray MatlabRandomDist::dim(
+  DimArray MatlabDistribSampler::dim(
       const std::vector<DimArray::Ptr> & paramDims) const
   {
     // declare input
@@ -149,7 +149,7 @@ namespace Biips
     return DimArray(lhs, lhs + size_lhs);
   }
 
-  Bool MatlabRandomDist::IsDiscreteValued(const Flags & mask) const
+  Bool MatlabDistribSampler::IsDiscreteValued(const Flags & mask) const
   {
     // default implementation
     if (fun_is_discrete_.empty())
@@ -201,7 +201,7 @@ namespace Biips
     return ans;
   }
 
-  Scalar MatlabRandomDist::logDensity(const NumArray& x,
+  Scalar MatlabDistribSampler::logDensity(const NumArray& x,
                                   const NumArray::Array& paramValues,
                                   const NumArray::Pair& boundValues) const
   {
@@ -209,19 +209,19 @@ namespace Biips
     return BIIPS_REALNAN;
   }
 
-  void MatlabRandomDist::fixedUnboundedSupport(ValArray& lower,
+  void MatlabDistribSampler::fixedUnboundedSupport(ValArray& lower,
                                            ValArray& upper,
                                            const NumArray::Array& fixedParamValues) const
   {
     throw LogicError("fixedUnboundedSupport call is not available for distribution "+name_);
   }
 
-  Bool MatlabRandomDist::IsSupportFixed(const Flags& fixmask) const
+  Bool MatlabDistribSampler::IsSupportFixed(const Flags& fixmask) const
   {
     return false;
   }
 
-  Bool MatlabRandomDist::CheckParamValues(
+  Bool MatlabDistribSampler::CheckParamValues(
       const NumArray::Array & paramValues) const
   {
     // default implementation

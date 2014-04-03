@@ -488,7 +488,7 @@ namespace Biips
     if (graph_.GetDiscrete()[id])
       throw RuntimeError(String("Can not sample data: node is discrete."));
 
-    // TODO check that it has (indirect) unobserved stochastic children ?
+    // TODO check that it has (indirect) unobserved stochastic children?
 
     // check node is unobserved
     if (graph_.GetObserved()[id])
@@ -518,26 +518,34 @@ namespace Biips
     if (range.IsNull())
       range = range_;
     else if (!range_.Contains(range))
-      throw RuntimeError(String("Can not sample data: variable ") + Name()
+      throw RuntimeError(String("Can not remove data: variable ") + Name()
                          + "does not contain subrange " + print(range));
 
-    std::set<NodeId> removed_nodes;
+//    std::set<NodeId> removed_nodes;
 
-    // check that nodes are valid
-    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
-        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
-    {
-      const IndexRange & sub_range = it->right;
-      if (!range.Contains(sub_range))
-      {
-        if (range.Overlaps(sub_range))
-          throw LogicError(String("Can not remove data: variable ") + Name()
-                           + print(range)
-                           + " does not contain full nodes only.");
-        continue;
-      }
+    NodeId id = GetNode(range);
+    if (id == NULL_NODEID)
+      throw RuntimeError(String("Can not remove data: variable ") + Name()
+                         + print(range)
+                         + " does not match one node exactly.");
 
-      NodeId id = it->left;
+//    // check that nodes are valid
+//    for (boost::bimap<NodeId, IndexRange>::const_iterator it =
+//        nodeIdRangeBimap_.begin(); it != nodeIdRangeBimap_.end(); ++it)
+//    {
+//      const IndexRange & sub_range = it->right;
+//      if (!range.Contains(sub_range))
+//      {
+//        if (range.Overlaps(sub_range))
+//          throw LogicError(String("Can not remove data: variable ") + Name()
+//                           + print(range)
+//                           + " does not contain full nodes only.");
+//        continue;
+//      }
+//
+//      NodeId id = it->left;
+
+    // check node is stochastic
       if (graph_.GetNode(id).GetType() != STOCHASTIC)
         throw LogicError(String("Can not remove data: node is not stochastic."));
 
@@ -545,13 +553,14 @@ namespace Biips
       if (!graph_.GetObserved()[id])
         throw LogicError(String("Can not remove data: node is not observed."));
 
-      removed_nodes.insert(id);
-    }
-    for (std::set<NodeId>::const_iterator it(removed_nodes.begin());
-        it != removed_nodes.end(); ++it)
-    {
-      graph_.SetUnobserved(*it);
-    }
+      graph_.SetUnobserved(id);
+//      removed_nodes.insert(id);
+//    }
+//    for (std::set<NodeId>::const_iterator it(removed_nodes.begin());
+//        it != removed_nodes.end(); ++it)
+//    {
+//      graph_.SetUnobserved(*it);
+//    }
   }
 
   MultiArray NodeArray::GetData() const

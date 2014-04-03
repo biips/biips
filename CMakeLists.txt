@@ -5,8 +5,8 @@ cmake_minimum_required (VERSION 2.8)
 project (Biips CXX C)
 
 set (Biips_VERSION_MAJOR 0)
-set (Biips_VERSION_MINOR 8)
-set (Biips_VERSION_PATCH 1)
+set (Biips_VERSION_MINOR 9)
+set (Biips_VERSION_PATCH 0)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
 file (WRITE VERSION.txt ${Biips_VERSION})
