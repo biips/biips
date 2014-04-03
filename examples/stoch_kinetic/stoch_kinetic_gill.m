@@ -40,7 +40,7 @@ biips_init;
 %%
 % *Add the user-defined function 'LV'*
 fun_bugs = 'LV'; fun_dim = 'lotka_volterra_dim';funeval = 'lotka_volterra_gillespie';fun_nb_inputs = 5;
-biips_add_random_dist(fun_bugs, fun_nb_inputs, fun_dim, funeval)
+biips_add_distrib_sampler(fun_bugs, fun_nb_inputs, fun_dim, funeval)
 
 
 %%

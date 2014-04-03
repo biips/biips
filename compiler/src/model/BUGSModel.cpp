@@ -608,6 +608,8 @@ namespace Biips
       return false;
     if (!pSampler_->AtEnd())
       return false;
+    if (!pGenTreeSmoothMonitor_)
+      return false;
 
     // sample one particle according to the weights
     typedef boost::random::discrete_distribution<Int, Scalar> CategoricalDist;

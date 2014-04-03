@@ -16,7 +16,7 @@
 #include "common/Utility.hpp"
 #include "compiler/Compiler.hpp"
 #include "MatlabFunction.hpp"
-#include "MatlabRandomDist.hpp"
+#include "MatlabDistribSampler.hpp"
 std::deque<Console_ptr> consoles;
 std::deque<ProgressBar_ptr> progress;
 
@@ -1105,7 +1105,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         ////////////////////////////////////////////
         // ADD_RANDOM FUNCTION
         ////////////////////////////////////////////
-        else if (name_func == "add_random_dist") {
+        else if (name_func == "add_distrib_sampler") {
 
             CheckRhs(nrhs, 6, name_func);
             CheckArgIsString(1);
@@ -1126,19 +1126,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (Compiler::DistTab().Contains(name))
             {
               if (Compiler::DistTab().IsLocked(name))
-                myMexErrMsg(name_func, name_func + ": can't add random distribution: "
+                myMexErrMsg(name_func, name_func + ": can't add distribution sampler: "
                             + name + " is an existing locked distribution.");
               else
                 mbiips_cerr << name_func + ": replacing existing distribution "
                 + name;
             }
-            if (!Compiler::DistTab().Insert(Distribution::Ptr(new MatlabRandomDist(name,
+            if (!Compiler::DistTab().Insert(Distribution::Ptr(new MatlabDistribSampler(name,
                                                                              npar,
                                                                              fundim,
                                                                              funsample,
                                                                              funcheckpar,
                                                                              funisdiscrete)))) {
-                myMexErrMsg(name_func, name_func + ": could not add random distribution" + name);
+                myMexErrMsg(name_func, name_func + ": could not add distribution sampler" + name);
             }
         }
         ////////////////////////////////////////////

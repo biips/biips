@@ -49,7 +49,7 @@ endif()
 if (MATLAB)
     message(STATUS "Found Matlab: ${MATLAB}")
     set(MATLAB_COMMAND "${MATLAB}")
-    set(MATLAB_FLAGS -nojvm)
+    set(MATLAB_FLAGS -nojvm -nosplash)
     if (NOT MATLAB_BINDIR)
         # if matlab is found in /usr/local/bin
         # mex and mexext programs will certainly not be there

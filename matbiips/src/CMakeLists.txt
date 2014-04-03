@@ -43,12 +43,14 @@ add_custom_command(OUTPUT ${INTER_BIN}
     VERBATIM
 )
 
-# copy mexfile in the src matlab directory
-add_custom_command(TARGET inter_biips
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
-    COMMENT "Copying mexfile in source matlab directory"
-    VERBATIM
-)
+if (NOT BIIPS_DEBUG)
+	# copy mexfile in the src matlab directory
+	add_custom_command(TARGET inter_biips
+	    POST_BUILD
+	    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
+	    COMMENT "Copying mexfile in source matlab directory"
+	    VERBATIM
+	)
+endif()
 
 add_custom_target(matbiips DEPENDS ${INTER_BIN})
