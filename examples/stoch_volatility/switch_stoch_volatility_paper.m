@@ -73,19 +73,32 @@ rng('default')
 matbiips_path = '../../matbiips/matlab';
 addpath(matbiips_path)
 
-% Start Biips console
-biips_init;
+%% Load model and data
+%
+
+%%
+% *Model parameters*
 sigma = .4;alpha = [-2.5; -1]; phi = .5; c0 = 1; x0 = 0; t_max = 100;
 pi = [.9, .1; .1, .9];
 data = struct('t_max', t_max, 'sigma', sigma,...
         'alpha', alpha, 'phi', phi, 'pi', pi, 'c0', c0, 'x0', x0);
-model = 'switch_stoch_volatility.bug'; % BUGS model filename
+
+
+% Start Biips console
+biips_init;
+
 % Parse and compile BUGS model, and sample data
+model = 'switch_stoch_volatility.bug'; % BUGS model filename
 [model_id, data] = biips_model(model, data, 'sample_data', true);
 
+
+%% BiiPS Sequential Monte Carlo
+% 
+
+%%
+% *Run SMC*
 n_part = 2000; % Number of particles
 variables = {'x'}; % Variables to be monitored
-% Run SMC
 out_smc = biips_smc_samples(model_id, variables, n_part);
 
 %%
@@ -175,38 +188,9 @@ legend('boxoff')
 saveas(gca, 'volatility_kde', 'epsc2')
 
 
-%% BiiPS Sensitivity analysis
-%
-
-%%
-% *Parameters of the algorithm*. 
-n_part = 50; % Number of particles
-param_names = {'alpha[1:2,1]'}; % Parameter for which we want to study sensitivity
-[A, B] = meshgrid(-5:.2:2, -5:.2:2);
-param_values = {[A(:), B(:)]'}; % Range of values
-
-%%
-% *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
-
-%%
-% *Plot log-marginal likelihood and penalized log-marginal likelihood*
-figure
-surf(A, B, reshape(out.log_marg_like, size(A)))
-shading interp
-caxis([0,max(out.log_marg_like(:))])
-colormap(hot)
-view(2)
-xlim([min(A(:)), max(A(:))])
-colorbar
-xlabel('$\alpha[1,1]$', 'interpreter', 'latex')
-ylabel('$\alpha[2,1]$', 'interpreter', 'latex')
-saveas(gca, 'volatility_sensibility', 'epsc2')
-
-
 
 %% BiiPS Particle Independent Metropolis-Hastings
-% We now use BiiPS to run a Particle Independent Metropolis-Hastings
+% 
 
 %%
 % *Parameters of the PIMH*
@@ -295,6 +279,35 @@ h = legend({'posterior density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
 legend('boxoff')
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
+
+
+%% BiiPS Sensitivity analysis
+%
+
+%%
+% *Parameters of the algorithm*. 
+n_part = 50; % Number of particles
+param_names = {'alpha[1:2,1]'}; % Parameter for which we want to study sensitivity
+[A, B] = meshgrid(-5:.2:2, -5:.2:2);
+param_values = {[A(:), B(:)]'}; % Range of values
+
+%%
+% *Run sensitivity analysis with SMC*
+out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+
+%%
+% *Plot log-marginal likelihood and penalized log-marginal likelihood*
+figure
+surf(A, B, reshape(out.log_marg_like, size(A)))
+shading interp
+caxis([0,max(out.log_marg_like(:))])
+colormap(hot)
+view(2)
+xlim([min(A(:)), max(A(:))])
+colorbar
+xlabel('$\alpha[1,1]$', 'interpreter', 'latex')
+ylabel('$\alpha[2,1]$', 'interpreter', 'latex')
+saveas(gca, 'volatility_sensibility', 'epsc2')
 
 
 
