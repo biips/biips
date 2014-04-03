@@ -1,4 +1,4 @@
-function [out, log_post, log_marg_like, stats_pmmh] = ... 
+function [obj, out, log_post, log_marg_like, stats_pmmh] = ... 
     biips_pmmh_samples(obj, n_iter, n_part, varargin)
 
 %
@@ -26,6 +26,7 @@ function [out, log_post, log_marg_like, stats_pmmh] = ...
 %                   Indicates the type of algorithm used for the resampling step.
 %
 %   OUTPUT
+%   - obj:          PMMH structure
 %   - out:          Structure with the PIMH samples for each variable
 %   - log_marg_like_st: vector with log marginal likelihood over iterations
 %
@@ -35,10 +36,10 @@ function [out, log_post, log_marg_like, stats_pmmh] = ...
 % n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
 % param_names = {'log_prec_y[1:1]';}
 % latent_names = {'x'};
-% obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-2});
+% obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-%     'thin', 1, 'latent_names', latent_names); 
+% [obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+%     'thin', 1); 
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -50,15 +51,15 @@ function [out, log_post, log_marg_like, stats_pmmh] = ...
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'thin', 'latent_names', 'max_fail', 'rs_thres', 'rs_type'};
-optarg_default = {1, {}, 0, .5, 'stratified'};
-optarg_valid = {[0, n_iter], {}, [0, n_part],...
+optarg_names = {'thin', 'max_fail', 'rs_thres', 'rs_type'};
+optarg_default = {1, 0, .5, 'stratified'};
+optarg_valid = {[0, n_iter], [0, n_part],...
     {'multinomial', 'stratified', 'residual', 'systematic'}};
-optarg_type = {'numeric', 'char', 'numeric', 'numeric', 'char'};
-[thin, latent_names, max_fail, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
+optarg_type = {'numeric', 'numeric', 'numeric', 'char'};
+[thin, max_fail, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
 return_samples = true;
-[out, log_post, log_marg_like, stats_pmmh] = biips_pmmh(obj, n_iter, n_part,...
-    return_samples, 'thin', thin, 'latent_names', latent_names, 'max_fail',...
+[obj, out, log_post, log_marg_like, stats_pmmh] = biips_pmmh(obj, n_iter, n_part,...
+    return_samples, 'thin', thin, 'max_fail',...
     max_fail, 'rs_thres', rs_thres, 'rs_type', rs_type);

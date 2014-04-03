@@ -74,7 +74,7 @@ else
         sample_param = prop;
         log_prior = log_prior_prop;
         log_marg_like = log_marg_like_prop;
-        if ~isempty(sample_latent)
+        if ~isempty(latent_names)
             % Sample one realization of the monitored latent variables
             rng_seed = get_seed();
             inter_biips('sample_gen_tree_smooth_particle', console, rng_seed);

@@ -88,8 +88,8 @@ data = struct('t_max', t_max, 'sigma', sigma,...
 biips_init;
 
 % Parse and compile BUGS model, and sample data
-model = 'switch_stoch_volatility.bug'; % BUGS model filename
-[model_id, data] = biips_model(model, data, 'sample_data', true);
+model_filename = 'switch_stoch_volatility.bug'; % BUGS model filename
+[model, data] = biips_model(model_filename, data, 'sample_data', true);
 
 
 %% BiiPS Sequential Monte Carlo
@@ -97,13 +97,24 @@ model = 'switch_stoch_volatility.bug'; % BUGS model filename
 
 %%
 % *Run SMC*
-n_part = 2000; % Number of particles
+n_part = 5000; % Number of particles
 variables = {'x'}; % Variables to be monitored
-out_smc = biips_smc_samples(model_id, variables, n_part);
+out_smc = biips_smc_samples(model, variables, n_part);
 
 %%
 % *Diagnostic on the algorithm*. 
 diag = biips_diagnostic(out_smc);
+%%
+% Plot ESS
+figure('name', 'ESS')
+semilogy(out_smc.x.s.ess)
+hold on
+plot([1:t_max], 30*ones(t_max,1), '--k')
+xlabel('Time')
+ylabel('ESS')
+legend('Effective sample size (smoothing)')
+
+pause
 
 %% 
 % Plot weighted particles
@@ -122,6 +133,7 @@ end
 xlabel('Time')
 ylabel('Particles (smoothing)')
 saveas(gca, 'volatility_particles_s', 'png')
+
 
 
 %%
@@ -194,15 +206,16 @@ saveas(gca, 'volatility_kde', 'epsc2')
 
 %%
 % *Parameters of the PIMH*
-n_burn = 2000;
-n_iter = 2000;
+n_burn = 20;
+n_iter = 20;
 thin = 1;
 n_part = 50;
 
 %%
 % *Run PIMH*
-biips_pimh_update(model_id, variables, n_burn, n_part); % burn-in iterations
-[out_pimh, log_marg_like_pimh] = biips_pimh_samples(model_id, variables,...
+obj_pimh = biips_pimh_init(model, variables);
+obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % burn-in iterations
+[obj_pimh, out_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh,...
     n_iter, n_part, 'thin', thin);
 
 %%
@@ -293,14 +306,14 @@ param_values = {[A(:), B(:)]'}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part); 
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
 figure('name', 'Sensitivity: log-likelihood')
-surf(A, B, reshape(out.log_marg_like, size(A)))
+surf(A, B, reshape(out_sensitivity.log_marg_like, size(A)))
 shading interp
-caxis([0,max(out.log_marg_like(:))])
+caxis([0,max(out_sensitivity.log_marg_like(:))])
 colormap(hot)
 view(2)
 xlim([min(A(:)), max(A(:))])
@@ -314,4 +327,4 @@ saveas(gca, 'volatility_sensibility', 'epsc2')
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

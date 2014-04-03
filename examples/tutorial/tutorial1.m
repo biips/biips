@@ -89,9 +89,9 @@ sample_data = true; % Boolean
 % *Parameters of the algorithm*. We want to monitor the variable x, and to
 % get the filtering and smoothing particle approximations. The algorithm
 % will use 10000 particles, stratified resampling, with a threshold of 0.5.
-n_part = 100; % Number of particles
-variables = {'x[1:3,1]'}; % Variables to be monitored
-type = 's'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+n_part = 1000; % Number of particles
+variables = {'x'}; % Variables to be monitored
+type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 %%
 % *Run SMC*
@@ -123,9 +123,11 @@ h = fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
+hold on
+plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering Mean Estimate'})
+legend({'95 % credible interval', 'Filtering Mean Estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -139,28 +141,30 @@ h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_s_mean, 'linewidth', 3)
+hold on
+plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing Mean Estimate'})
+legend({'95 % credible interval', 'Smoothing Mean Estimate', 'True value'})
 legend('boxoff')
 box off
 
-%%
-% *Plot Backward smoothing estimates*
-x_b_mean = summary.x.b.mean;
-x_b_med = summary.x.b.med;
-x_b_quant = summary.x.b.quant;
-figure('name', 'SMC: Backward smoothing estimates')
-h = fill([1:t_max, t_max:-1:1], [x_b_quant(1,:), fliplr(x_b_quant(2,:))],...
-    [.7 .7 1]);
-set(h, 'edgecolor', 'none')
-hold on
-plot(x_b_mean, 'linewidth', 3)
-xlabel('Time')
-ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering Mean Estimate'})
-legend('boxoff')
-box off
+% %%
+% % *Plot Backward smoothing estimates*
+% x_b_mean = summary.x.b.mean;
+% x_b_med = summary.x.b.med;
+% x_b_quant = summary.x.b.quant;
+% figure('name', 'SMC: Backward smoothing estimates')
+% h = fill([1:t_max, t_max:-1:1], [x_b_quant(1,:), fliplr(x_b_quant(2,:))],...
+%     [.7 .7 1]);
+% set(h, 'edgecolor', 'none')
+% hold on
+% plot(x_b_mean, 'linewidth', 3)
+% xlabel('Time')
+% ylabel('Estimates')
+% legend({'95 % credible interval', 'Filtering Mean Estimate'})
+% legend('boxoff')
+% box off
 
 %%
 % *Marginal filtering and smoothing densities*
@@ -215,9 +219,10 @@ h = fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],.
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_pimh_mean, 'linewidth', 3)
+plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PIMH Mean Estimate'})
+legend({'95 % credible interval', 'PIMH Mean Estimate', 'True value'})
 legend('boxoff')
 box off
 
