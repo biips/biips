@@ -1,4 +1,4 @@
-function [p, data] = biips_model(filename, data, varargin)
+function [struct_model, data] = biips_model(filename, data, varargin)
 
 %
 % BIIPS_MODEL instantiates a stochastic model under a DAG form 
@@ -15,19 +15,23 @@ function [p, data] = biips_model(filename, data, varargin)
 %   - quiet:        boolean to deactivate verbosity. default is 'false'
 %
 %   OUTPUT:
-%   - p:            integer which is an index of the compiled model object
-%                   in the internal table of models.
+%   - struct_model: A biips model structure with the following fields:
+%                   * id: integer which is an index of the compiled model object
+%                     in the internal table of models.
+%                   * filename: filename of bug model
+%                   * definition: char contening the bugs model
+%                   * data: structure containing the data.
 %   - data:         structure containing the data. useful if 'sample_data' is true
 %
-%   See also BIIPS_MODEL
+%   See also BIIPS_INIT
 %--------------------------------------------------------------------------
 % EXAMPLES:
 % data = struct('var1', 0, 'var2', 1.2);
-% [model_id, data] = biips_model('model.bug', data, 'sample_data', true);
+% [obj_model, data] = biips_model('model.bug', data, 'sample_data', true);
 %
 % var1 = 0; var2 = 1.2;
 % data_names = {'var1', 'var2'};
-% [model_id, data] = biips_model('model.bug', data_names, 'sample_data', true);
+% [obj_model, data] = biips_model('model.bug', data_names, 'sample_data', true);
 % 
 %--------------------------------------------------------------------------
 
@@ -93,3 +97,9 @@ data = inter_biips('get_data', p);
 if (quiet)
   inter_biips('verbosity', old_verb);
 end
+
+% Biips model structure
+struct_model.id = p;
+struct_model.filename = filename;
+struct_model.definition = fileread(filename);
+struct_model.data = data;
