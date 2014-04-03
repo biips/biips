@@ -1,4 +1,4 @@
-function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n_iter, n_part, varargin)
+function [obj_pimh, out_samples, log_marg_like_st] = biips_pimh_samples(obj_pimh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PIMH_SAMPLES performs iterations for the PIMH algorithm and returns samples
@@ -6,8 +6,7 @@ function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n
 %                           variable_names, n_iter, n_part, varargin)
 %
 %   INPUT 
-%   - console:      integer. Id of the console containing the model, 
-%                   returned by the 'biips_model' function
+%   - obj_pimh:     structure. PIMH object
 %   - variable_names: cell of strings. Contains the names of the 
 %                   unobserved variables to monitor.
 %                   Examples: {'var1', 'var2[1]', 'var3[1:10]',
@@ -30,7 +29,7 @@ function [out, log_marg_like_st] = biips_pimh_samples(console, variable_names, n
 %                   Indicates the type of algorithm used for the resampling step.
 %
 %   OUTPUT
-%   - out:          Structure with the PIMH samples for each variable
+%   - out_samples:       Structure with the PIMH samples for each variable
 %   - log_marg_like_st: vector with log marginal likelihood over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_UPDATE
@@ -60,12 +59,31 @@ optarg_type = {'numeric', 'char', 'numeric'};
 [rs_thres, rs_type, thin] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
+% console = model.id;
+check_struct_model(obj_pimh.model);
+
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
 cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
 
+
+%% Create a clone model for the PIMH
+variable_names = obj_pimh.variable_names;
+model = obj_pimh.model;
+filename = model.filename; data = model.data;
+model2 = biips_model(filename, data);
+console = model2.id;
+monitor_biips(console, variable_names, 's'); 
+if (~inter_biips('is_sampler_built', console))
+   inter_biips('build_smc_sampler', console, false);
+end
+
+%% Get sample and log likelihood from PIMH object
+sample = obj_pimh.sample;
+variable_names = obj_pimh.variable_names;
+log_marg_like = obj_pimh.log_marg_like;
+
 %% Initialization
-[sample, log_marg_like] = pimh_init(console, variable_names, n_part, rs_thres, rs_type);
 inter_biips('message', ['Generating PIMH samples with ' num2str(n_part)...
     ' particles and ' num2str(n_iter) ' iterations']);
 bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
@@ -106,14 +124,21 @@ for i=1:n_iter
     inter_biips('advance_progress_bar', bar, 1);    
 end
 
-% Release monitor memory
-clear_monitors(console, 's', true);
+% % Release monitor memory
+% clear_monitors(console, 's', true);
+% 
+% % Reset lognormalizing constant and sampled value
+% if (n_iter>0 && ~accepted)
+%     inter_biips('set_log_norm_const', console, log_marg_like);
+%     inter_biips('set_sampled_gen_tree_smooth_particle', console, sample);        
+% end
 
-% Reset lognormalizing constant and sampled value
-if (n_iter>0 && ~accepted)
-    inter_biips('set_log_norm_const', console, log_marg_like);
-    inter_biips('set_sampled_gen_tree_smooth_particle', console, sample);        
-end
+%% Delete clone console
+inter_biips('clear_console', console);
+
+%% Output PIMH object with current sample and log marginal likelihood
+obj_pimh.sample = sample;
+obj_pimh.log_marg_like = log_marg_like;
 
 %% Set output structure
 for k=1:length(variable_names) % Remove singleton dimensions for vectors
@@ -122,4 +147,4 @@ for k=1:length(variable_names) % Remove singleton dimensions for vectors
             samples_st{k} = samples_st{k}';
     end
 end
-out = cell2struct_weaknames(samples_st, variable_names);
+out_samples = cell2struct_weaknames(samples_st, variable_names);

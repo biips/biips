@@ -64,6 +64,8 @@ if accepted
     
     % Get sampled value
     sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+    sampled_value.x
+    pause
     cell_struct = cell(length(variable_names), 1);
     for i=1:length(variable_names)
         cell_struct{i} = getfield(sampled_value, variable_names{i});

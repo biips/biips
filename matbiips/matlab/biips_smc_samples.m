@@ -1,11 +1,11 @@
-function [particles, log_marg_like] = biips_smc_samples(console, variable_names, n_part, varargin)
+function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n_part, varargin)
 
 %
 % BIIPS_SMC_SAMPLES runs a sequential Monte Carlo algorithm
 %   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
-%    - console:        integer. Id of the console containing the model, 
+%    - struct_model:   structure contening the model, 
 %                      returned by the 'biips_model' function
 %    - variable_names: cell of strings. Contains the names of the 
 %                      unobserved variables to monitor.
@@ -32,6 +32,21 @@ function [particles, log_marg_like] = biips_smc_samples(console, variable_names,
 %
 %   OUTPUT:
 %   - particles:    output structure containing all the SMC information
+%                   with following fields: 
+%                   * names of the variables monitored with subfields
+%                       * f, s and/or b for filtering, smoothing or backward
+%                       smoothing with subfields
+%                           * value: matrix of size ndim * N with values of the particles
+%                           * weights: matrix of size ndim * N with weights of the particles
+%                           * ess: matrix of size ndim with effective sample size 
+%                           * name: string with the name of the variable
+%                           * lower: cell with the lower dimension of the
+%                           variable
+%                           * upper: cell with the upper dimension of the
+%                           variable
+%                           * type: string ('filtering', 'smoothing' or 'backward smoothing')
+%                   Example to access values of the particles for smoothing for variable x: 
+%                   particles.var1.s.values
 %   - log_marg_like:log marginal likelihood
 %
 %   See also BIIPS_MODEL
@@ -66,6 +81,9 @@ indices = arrayfun(@(x) strfind(type,x), 'fsb', 'UniformOutput', 0);
 filtering = ~isempty(indices{1});
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
+
+check_struct_model(model); % Checks if the structure model is valid
+console = model.id; % Get the id of the biips console
 
 %% Monitor
 if (backward)
