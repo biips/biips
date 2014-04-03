@@ -1,6 +1,8 @@
-% test_crash1
+% [SOLVED] test_crash1
 % PB: Erreur car x_true n'est pas fourni dans la structure data
 % Or sample_data=false, donc cela ne devrait pas poser de probl�me
+
+addpath('../matlab');
 
 %%% Model parameters
 t_max = 100;

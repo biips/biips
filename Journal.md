@@ -1,3 +1,7 @@
+Adrien le 1/4/2014:
+===================
+- [ ]  revoir dimensions et affichage de la sortie de biips_get_nodes.
+
 François le 25/3/2014 :
 =======================
 - [x] Il faudrait une fonction biips add_function_rnd, qui rajouterait une 

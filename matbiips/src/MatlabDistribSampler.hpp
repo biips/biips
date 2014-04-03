@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MatlabRandomDist.hpp
+/*! \file MatlabDistribSampler.hpp
  * \brief
  *
  * \author  $LastChangedBy$
@@ -34,14 +34,14 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_MATLABRANDOMDIST_HPP_
-#define BIIPS_MATLABRANDOMDIST_HPP_
+#ifndef BIIPS_MATLABDISTRIBSAMPLER_HPP_
+#define BIIPS_MATLABDISTRIBSAMPLER_HPP_
 
 #include "distribution/Distribution.hpp"
 namespace Biips
 {
 
-  class MatlabRandomDist: public Distribution
+  class MatlabDistribSampler: public Distribution
   {
   protected:
     String fun_dim_;
@@ -69,17 +69,17 @@ namespace Biips
                                   const NumArray::Array & fixedParamValues) const;
 
   public:
-    typedef MatlabRandomDist SelfType;
+    typedef MatlabDistribSampler SelfType;
     typedef Distribution BaseType;
 
-    MatlabRandomDist(const String & name, Size nParam, const String & fun_dim,
+    MatlabDistribSampler(const String & name, Size nParam, const String & fun_dim,
                  const String & fun_sample, const String & fun_check_param = "",
                  const String & fun_is_discrete = "")
     : BaseType(name, nParam), fun_dim_(fun_dim), fun_sample_(fun_sample),
       fun_check_param_(fun_check_param), fun_is_discrete_(fun_is_discrete)
     {
       // TODO: check name is valid
-      // TODO: check functions exist in matlab
+      // TODO: check functions exist in matlab (currently done in iter_biips)
     }
 
     virtual Bool IsSupportFixed(const Flags & fixmask) const;
@@ -93,7 +93,7 @@ namespace Biips
       return false;
     }
 
-    virtual ~MatlabRandomDist()
+    virtual ~MatlabDistribSampler()
     {
     }
 
@@ -101,5 +101,5 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_MATLABRANDOMDIST_HPP_ */
+#endif /* BIIPS_MATLABDISTRIBSAMPLER_HPP_ */
 

@@ -1,9 +1,10 @@
-function biips_add_random_dist(name, nb_param, fun_dim, fun_sample, varargin)
+function biips_add_distrib_sampler(name, nb_param, fun_dim, fun_sample, varargin)
 
 %
-% BIIPS_ADD_RANDOM_DIST adds a Matlab random distribution to the BUGS
-% language
-%   biips_add_random_dist(name, nb_param, fun_dim, fun_sample , ...
+% BIIPS_ADD_DISTRIB_SAMPLER adds a Matlab distribution sampler to the BUGS
+% language. This distribution can only be used to define unobserved
+% nodes.
+%   biips_add_distrib_sampler(name, nb_param, fun_dim, fun_sample , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
 %   - name:     string. name of the function that will be used in the bug file.
@@ -53,13 +54,13 @@ optarg_type = {'char', 'char'};
     optarg_valid, optarg_default);
 % Check inputs
 if (~isa(name,'char'))
-    error('biips_add_random_dist : 1-st argument�must be a string')
+    error('biips_add_distrib_sampler : 1-st argument�must be a string')
 end
 if (~isa(fun_dim,'char'))
-    error('biips_add_random_dist : 3-d argument�must be a string')
+    error('biips_add_distrib_sampler : 3-d argument�must be a string')
 end
 if (~isa(fun_sample,'char'))
-    error('biips_add_random_dist : 4-th argument�must be a string')
+    error('biips_add_distrib_sampler : 4-th argument�must be a string')
 end
 if (~any(exist(fun_dim)==[2,3,5]))
     error('the function ''%s'' does not exist',fun_dim);
@@ -78,10 +79,10 @@ if ~isempty(fun_is_discrete)
     end
 end
 
-%% Add random distribution
+%% Add distribution sampler
 try
-    inter_biips('add_random_dist', name, nb_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
-    fprintf('Added random distribution ''%s''\n', name)
+    inter_biips('add_distrib_sampler', name, nb_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
+    fprintf('Added distribution sampler ''%s''\n', name)
 catch
-    warning('Cannot add random distribution ''%s'' - the distribution may already exist', name);
+    warning('Cannot add distribution sampler ''%s'' - the distribution may already exist', name);
 end

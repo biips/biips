@@ -13,7 +13,7 @@ prec_y = 1;
 biips_init;
 
 %% build evalutations functions
-biips_add_random_dist('rdistmat', 3, 'mydistdim', 'mydistsample')
+biips_add_distrib_sampler('distmat', 3, 'mydistdim', 'mydistsample')
 
 %% create model
 [p, data] = biips_model('hmm_1d_nonlin_distmat.bug', who);
