@@ -87,7 +87,7 @@ biips_init;
 % *Compile BUGS model and sample data*
 model = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+[model, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 
 
 %% BiiPS : Sensitivity analysis with Sequential Monte Carlo
@@ -103,7 +103,7 @@ param_values = {-5:.2:3}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
@@ -137,13 +137,14 @@ latent_names = {'x'}; % name of the variables updated with SMC and that need to 
 
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-2}); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2},...
+    'latent_names', latent_names); % creates a pmmh object
 
 %%
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', 1, 'latent_names', latent_names); % Samples
+[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', 1); % Samples
  
 %%
 % *Some summary statistics*
@@ -253,4 +254,4 @@ legend({'posterior density', 'True value'});
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

@@ -1,9 +1,8 @@
 function [obj_pimh] = biips_pimh_init(model, variable_names)
 
 %--------------------------------------------------------------------------
-% PIMH_INIT initializes the Particle Independent Metropolis
-% Hastings algorithm
-% [sample, log_marg_like] = pimh_init(console, variable_names, n_part, rs_thres, rs_type)
+% BIIPS_PIMH_INIT initializes the Particle Independent Metropolis-Hastings algorithm
+% [sample, log_marg_like] = biips_pimh_init(model, variable_names, n_part, rs_thres, rs_type)
 %
 %   INPUT
 %   - model:    structure. Biips model, returned by the 'biips_model' function
@@ -22,7 +21,16 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 %                 monitored
 %               * model: structure, biips model
 %
-%   See also BIIPS_MODEL, BIIPS_PIMH_UPDATE, BIPS_PIMH_SAMPLES
+%   See also BIIPS_MODEL, BIIPS_PIMH_UPDATE, BIIPS_PIMH_SAMPLES
+%--------------------------------------------------------------------------
+% EXAMPLE:
+% data = struct('var1', 0, 'var2', 1.2);
+% model = biips_model('model.bug', data)
+% variables = {'x'}; 
+% nburn = 1000; niter = 1000; npart = 100; 
+% obj_pimh = biips_pimh_init(model, variables); 
+% obj_pimh = biips_pimh_update(obj_pimh, nburn, npart); 
+% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, niter, npart); 
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -32,8 +40,6 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 % License: GPL-3
 % Jan 2014; Last revision: 03-04-2014
 %--------------------------------------------------------------------------
-
-%%
 
 inter_biips('message', 'Initializing PIMH');
 obj_pimh.log_marg_like = - Inf;
