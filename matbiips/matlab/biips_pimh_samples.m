@@ -36,10 +36,12 @@ function [obj_pimh, out_samples, log_marg_like_st] = biips_pimh_samples(obj_pimh
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-% npart = 100; variables = {'x'}; 
-% thin = 2;
-% out_smc = biips_pimh_samples(model_id, variables, npart, 'thin', thin);
+% model = biips_model('model.bug', data)
+% variables = {'x'}; 
+% nburn = 1000; niter = 1000; npart = 100; 
+% obj_pimh = biips_pimh_init(model, variables); %Initialize
+% obj_pimh = biips_pimh_update(obj_pimh, nburn, npart); % Burn-in
+% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, niter, npart); % Samples
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -69,10 +71,8 @@ cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again
 
 %% Create a clone model for the PIMH
 variable_names = obj_pimh.variable_names;
-model = obj_pimh.model;
-filename = model.filename; data = model.data;
-model2 = biips_model(filename, data);
-console = model2.id;
+% model2 = clone_model(obj_pimh.model);
+console = obj_pimh.model.id;
 monitor_biips(console, variable_names, 's'); 
 if (~inter_biips('is_sampler_built', console))
    inter_biips('build_smc_sampler', console, false);
@@ -124,8 +124,8 @@ for i=1:n_iter
     inter_biips('advance_progress_bar', bar, 1);    
 end
 
-% % Release monitor memory
-% clear_monitors(console, 's', true);
+% Release monitor memory
+clear_monitors(console, 's', true);
 % 
 % % Reset lognormalizing constant and sampled value
 % if (n_iter>0 && ~accepted)
@@ -133,8 +133,8 @@ end
 %     inter_biips('set_sampled_gen_tree_smooth_particle', console, sample);        
 % end
 
-%% Delete clone console
-inter_biips('clear_console', console);
+% %% Delete clone console
+% inter_biips('clear_console', console);
 
 %% Output PIMH object with current sample and log marginal likelihood
 obj_pimh.sample = sample;

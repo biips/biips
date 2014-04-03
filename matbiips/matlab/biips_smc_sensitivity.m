@@ -1,4 +1,4 @@
-function out = biips_smc_sensitivity(console, param_names, param_values, ...
+function out = biips_smc_sensitivity(model, param_names, param_values, ...
     n_part, varargin)
 
 %
@@ -7,7 +7,7 @@ function out = biips_smc_sensitivity(console, param_names, param_values, ...
 %    n_part, 'PropertyName', propertyvalue, ...)
 %
 %   INPUT 
-%   - console:      integer. Id of the console containing the model, 
+%   - model:        structure contening the model, 
 %                   returned by the 'biips_model' function
 %   - param_names:  cell of strings. Contains the names of the 
 %                   unobserved variables for sensitivity analysis
@@ -33,13 +33,14 @@ function out = biips_smc_sensitivity(console, param_names, param_values, ...
 %                   * max_param_pen
 %                   * max_log_marg_like_pen
 %
-%   See also BIIPS_MODEL
+%   See also BIIPS_MODEL, BIIPS_SMC_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% model_id = 1; n_part = 100; 
+% model = biips_model('file.bug', data); 
+% n_part = 100; 
 % param_names = {'log_prec_y[1:1]'};
 % param_values = {-5:.2:3}; 
-% out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+% out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -97,6 +98,15 @@ optarg_type = {'numeric', 'char'};
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
 cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+
+%% Create a clone model
+model2 = clone_model(model);
+console = model2.id;
+%monitor_biips(console, variable_names, 's'); 
+if (~inter_biips('is_sampler_built', console))
+   inter_biips('build_smc_sampler', console, false);
+end
+
 
 % initialize
 log_marg_like = zeros(n_values, 1);
@@ -160,6 +170,9 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
      % Advance progress bar
      inter_biips('advance_progress_bar', bar, 1);
  end
+%% Delete clone console
+inter_biips('clear_console', console); 
+ 
 out.log_marg_like = log_marg_like;
 out.log_marg_like_pen = log_marg_like_pen;
 out.max_param = max_param;

@@ -1,11 +1,11 @@
-function obj = biips_pmmh_object(console, param_names, varargin)
+function obj = biips_pmmh_init(model, param_names, varargin)
 
 %
-% BIIPS_PMMH_OBJECT creates a PMMH object
-% obj = biips_pmmh_object(console, param_names, 'PropertyName', propertyvalue, ...)
+% BIIPS_PMMH_INIT creates a PMMH object
+% obj = biips_pmmh_init(console, param_names, 'PropertyName', propertyvalue, ...)
 %
 %   INPUT 
-%   - console:      integer. Id of the console containing the model, 
+%   - model:        structure contening the model, 
 %                   returned by the 'biips_model' function
 %   - param_names:  cell of strings containing the list of variables to be
 %                   updated with MH proposal. Other are updated with SMC
@@ -42,12 +42,14 @@ function obj = biips_pmmh_object(console, param_names, varargin)
 %--------------------------------------------------------------------------
 
 %%% Process and check optional arguments
-optarg_names = {'inits', 'rw_step', 'n_rescale', 'beta','alpha'};
-optarg_default = {{}, [], 400, .05, .99};
-optarg_valid = {{}, [], [0,intmax], [0,1], [0,1]};
-optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric'};
-[inits, rw_step, n_rescale, beta, alpha] = parsevar(varargin, optarg_names,...
+optarg_names = {'inits', 'rw_step', 'n_rescale', 'beta','alpha', 'latent_names'};
+optarg_default = {{}, [], 400, .05, .99, {}};
+optarg_valid = {{}, [], [0,intmax], [0,1], [0,1],{}};
+optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric','char'};
+[inits, rw_step, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
+
+inter_biips('message', 'Initializing PMMH');   
 
 % Check param_names
 for i=1:length(param_names)
@@ -55,8 +57,7 @@ for i=1:length(param_names)
         error('Invalid parameter name %s',param_names{i})        
     end
 end
-% % Remove duplicate entries
-% param_names = unique(param_names);
+
 n_param = length(param_names);
 
 % Check the init values
@@ -66,19 +67,32 @@ if ~isempty(inits)
     end
 end
 
-
 %% Stops biips verbosity
 inter_biips('verbosity', 0);
 cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
 
+% model
+obj.model = model;
 
-% Console and parameter names
-obj.console = console;
-obj.param_names = param_names;
+%% Clone console
+model2 = clone_model(model);
+console = model2.id;
 
 % Init the parameters of the random walk
 pn_param = cellfun(@parse_varname, param_names);
 sample_param = set_param(console, pn_param, inits);
+
+%% Delete clone console
+inter_biips('clear_console', console)
+
+
+% Parameters and latent
+obj.param_names = param_names;
+obj.latent_names = latent_names;
+obj.param_val = sample_param;
+obj.latent_val = [];
+obj.log_marg_like = -Inf;
+obj.log_prior = -Inf;
 
 sampledim = cellfun(@size,sample_param, 'UniformOutput', false);
 
@@ -137,12 +151,12 @@ sample_param = cell(length(pn_param), 1);
 % Set init values in Biips
 if ~isempty(inits)
     for i=1:length(pn_param)
-        % Take init value in inits parameters
-        tag = inter_biips('change_data', console, pn_param(i).name, ...
-            pn_param(i).lower, pn_param(i).upper, inits{i}, true);        
-        if ~tag
-            error('Data change failed: invalid initial value for variable %s', pn_param(i).name);
-        end
+%         % Take init value in inits parameters
+%         tag = inter_biips('change_data', console, pn_param(i).name, ...
+%             pn_param(i).lower, pn_param(i).upper, inits{i}, true);        
+%         if ~tag
+%             error('Data change failed: invalid initial value for variable %s', pn_param(i).name);
+%         end
         sample_param{i} = inits{i};
     end
 else

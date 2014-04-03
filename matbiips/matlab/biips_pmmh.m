@@ -18,19 +18,37 @@ function varargout = biips_pmmh(obj, n_iter, n_part, return_samples, varargin)
 
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'thin', 'latent_names', 'max_fail', 'rw_learn',...
+optarg_names = {'thin', 'max_fail', 'rw_learn',...
     'rs_thres', 'rs_type'};
-optarg_default = {1, {}, 0, false, .5, 'stratified'};
-optarg_valid = {[0, n_part], {}, [0, intmax], {true, false},...
+optarg_default = {1, 0, false, .5, 'stratified'};
+optarg_valid = {[0, n_part], [0, intmax], {true, false},...
     [0, n_part], {'multinomial', 'stratified', 'residual', 'systematic'}};
-optarg_type = {'numeric', 'char', 'numeric', 'logical', 'numeric', 'char'};
-[thin, latent_names, max_fail, rw_learn, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
+optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
+[thin, max_fail, rw_learn, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-console = obj.console;
+%% Stops biips verbosity
+inter_biips('verbosity', 0);
+cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+
+
+%% Create a clone console
+model2 = clone_model(obj.model);
+console = model2.id;
+if (~inter_biips('is_sampler_built', console))
+   inter_biips('build_smc_sampler', console, false);
+end
+
 param_names = obj.param_names;
+latent_names = obj.latent_names;
 n_param = length(param_names);
 n_latent = length(latent_names);
+
+% Get values of current iteration from PMMH object
+sample_param = obj.param_val;
+sample_latent = obj.latent_val;
+log_prior = obj.log_prior;
+log_marg_like = obj.log_marg_like;
 
 if obj.niter<obj.n_rescale
     rw_rescale = true;
@@ -38,15 +56,14 @@ else
     rw_rescale = false;    
 end
 
+if n_latent>0
+    monitor_biips(console, latent_names, 's'); 
+end
 
-%% Stops biips verbosity
-inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
-
-% Initialize
-[sample_param, sample_latent, log_prior, log_marg_like] =...
-    pmmh_init(console, param_names, n_part, (obj.niter==0),  'latent_names', latent_names,...
-    'rs_thres', rs_thres, 'rs_type', rs_type);
+% % Initialize
+% [sample_param, sample_latent, log_prior, log_marg_like] =...
+%     pmmh_init(console, param_names, n_part, (obj.niter==0),  'latent_names', latent_names,...
+%     'rs_thres', rs_thres, 'rs_type', rs_type);
 pn_param =  cellfun(@parse_varname, param_names);
     
 % Initialize counters
@@ -66,6 +83,11 @@ if return_samples
         samples_param_st{k} = zeros([size(sample_param{k}), n_samples]);    
     end
     n_dim_latent = zeros(n_latent, 1);
+    if isempty(sample_latent)% in case one does not call PMMH_update before
+        error('Please call biips_pmmh_update before biips_pmmh_samples')
+        % TODO: if empty, then need to change the data with current value
+        % and sample a particle
+    end
     for k=1:length(latent_names)
         n_dim_latent(k) = ndims(sample_latent{k});
         samples_latent_st{k} = zeros([size(sample_latent{k}), n_samples]);    
@@ -73,9 +95,8 @@ if return_samples
 end
 
 % display message and progress bar
-% is_adapt = 1;
 if ~return_samples
-    if rw_learn % CHECK IF THIS IS CORRECT
+    if rw_learn 
         inter_biips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
         bar = inter_biips('make_progress_bar', n_iter, '+', 'iterations');
     else
@@ -115,9 +136,7 @@ for i=1:n_iter
     if (rw_rescale && (i==obj.n_rescale))
         rw_rescale = false;  
     end  
-    
-%     rw.cov
-    
+        
     % Store output
     if mod(i-1, thin)==0
         ind_sample = (i-1)/thin + 1;
@@ -154,24 +173,32 @@ for i=1:n_iter
     
 end
 
-if ~isempty(latent_names)
-    clear_monitors(console, 's')
-end
+%% Delete clone console
+inter_biips('clear_console', console); 
+
+% if ~isempty(latent_names)
+%     clear_monitors(console, 's')
+% end
 
 
-% Reset log-norm constant and sampled values if not accepted to store the
-% last of the loglikelihood in the biips model
-if (n_iter>0 && ~accepted)
-    for i=1:n_param
-        var = param_names{i};
-        tag = inter_biips('change_data', console, pn_param(i).name, ...
-            pn_param(i).lower, pn_param(i).upper, sample_param{i}, true);
-        if ~tag
-            error('Cannot reset previous data: %s=%.f', var, sample_param{i});
-        end        
-    end
-    inter_biips('set_log_norm_const', console, log_marg_like)
-end
+% % Reset log-norm constant and sampled values if not accepted to store the
+% % last of the loglikelihood in the biips model
+% if (n_iter>0 && ~accepted)
+%     for i=1:n_param
+%         var = param_names{i};
+%         tag = inter_biips('change_data', console, pn_param(i).name, ...
+%             pn_param(i).lower, pn_param(i).upper, sample_param{i}, true);
+%         if ~tag
+%             error('Cannot reset previous data: %s=%.f', var, sample_param{i});
+%         end        
+%     end
+%     inter_biips('set_log_norm_const', console, log_marg_like)
+% end
+
+obj.param_val = sample_param;
+obj.latent_val = sample_latent;
+obj.log_prior = log_prior;
+obj.log_marg_like = log_marg_like;
 
 if return_samples
     %% Set output structure
@@ -189,13 +216,14 @@ if return_samples
         end
         variable_names{k+n_param} = latent_names{k};
     end
-    varargout{1} = cell2struct_weaknames(samples_all, variable_names);
-    varargout{2} = log_post_st;
-    varargout{3} = log_marg_like_st;    
+    varargout{1} = obj;
+    varargout{2} = cell2struct_weaknames(samples_all, variable_names);
+    varargout{3} = log_post_st;
+    varargout{4} = log_marg_like_st;    
     out.accept_rate = accept_rate;
     out.n_fail = n_fail;
     out.step_rw = step_rw;
-    varargout{4} = out;
+    varargout{5} = out;
 else    
     out.accept_rate = accept_rate;
     out.n_fail = n_fail;

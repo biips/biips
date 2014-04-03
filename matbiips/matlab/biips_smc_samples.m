@@ -5,7 +5,7 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
-%    - struct_model:   structure contening the model, 
+%    - model:           structure contening the model, 
 %                      returned by the 'biips_model' function
 %    - variable_names: cell of strings. Contains the names of the 
 %                      unobserved variables to monitor.
