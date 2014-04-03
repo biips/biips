@@ -42,7 +42,7 @@ function diagn = biips_diagnostic(parts, varargin)
 %% PROCESS AND CHECK INPUTS
 %%% Process and check optional arguments
 optarg_names = {'variable_names', 'type', 'ess_thres', 'quiet'};
-optarg_default = {{}, 'fs', 30, false};
+optarg_default = {{}, '', 30, false};
 optarg_valid = {{}, {'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, intmax],...
     {true, false}};
 optarg_type = {'char', 'char', 'numeric', 'logical'};

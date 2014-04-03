@@ -49,6 +49,8 @@
 %       }
 %     }
 
+set(0, 'DefaultAxesFontsize', 14);
+
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
 % and add the Matbiips folder to the Matlab path
@@ -76,9 +78,9 @@ biips_init;
 
 %%
 % *Compile BUGS model and sample data*
-model = 'hmm_1d_nonlin.bug'; % BUGS model filename
+model_filename = 'hmm_1d_nonlin.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+[model, data] = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
 
 %% BiiPS Sequential Monte Carlo
 % Let now use BiiPS to run a particle filter. 
@@ -87,14 +89,19 @@ sample_data = true; % Boolean
 % *Parameters of the algorithm*. We want to monitor the variable x, and to
 % get the filtering and smoothing particle approximations. The algorithm
 % will use 10000 particles, stratified resampling, with a threshold of 0.5.
-n_part = 10000; % Number of particles
-variables = {'x'}; % Variables to be monitored
-type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+n_part = 100; % Number of particles
+variables = {'x[1:3,1]'}; % Variables to be monitored
+type = 's'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model_id, variables, n_part,...
+out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
+
+% inter_biips('sample_gen_tree_smooth_particle', model.id, randi(1000));
+% % Get sampled value
+% sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', model.id);
+
 
 %%
 % *Diagnostic on the algorithm*. 
@@ -103,6 +110,7 @@ diag = biips_diagnostic(out_smc);
 %%
 % *Summary statistics*
 summary = biips_summary(out_smc, 'probs', [.025, .975]);
+
 
 %%
 % *Plot Filtering estimates*
@@ -138,10 +146,27 @@ legend('boxoff')
 box off
 
 %%
+% *Plot Backward smoothing estimates*
+x_b_mean = summary.x.b.mean;
+x_b_med = summary.x.b.med;
+x_b_quant = summary.x.b.quant;
+figure('name', 'SMC: Backward smoothing estimates')
+h = fill([1:t_max, t_max:-1:1], [x_b_quant(1,:), fliplr(x_b_quant(2,:))],...
+    [.7 .7 1]);
+set(h, 'edgecolor', 'none')
+hold on
+plot(x_b_mean, 'linewidth', 3)
+xlabel('Time')
+ylabel('Estimates')
+legend({'95 % credible interval', 'Filtering Mean Estimate'})
+legend('boxoff')
+box off
+
+%%
 % *Marginal filtering and smoothing densities*
 
 kde_estimates = biips_density(out_smc);
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -154,7 +179,9 @@ for k=1:length(time_index)
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
-legend({'filtering density', 'smoothing density', 'True value'});
+h = legend({'filtering density', 'smoothing density', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend('boxoff')
 
 
 %% BiiPS Particle Independent Metropolis-Hastings
@@ -169,13 +196,14 @@ n_part = 100;
 
 %%
 % *Run PIMH*
-biips_pimh_update(model_id, variables, n_burn, n_part); % burn-in iterations
-[out_pimh, log_marg_like_pimh] = biips_pimh_samples(model_id, variables,...
+obj_pimh = biips_pimh_init(model, variables);
+obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % burn-in iterations
+[obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh,...
     n_iter, n_part, 'thin', thin);
 
 %%
 % *Some summary statistics*
-summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
+summary_pimh = biips_summary(samples_pimh, 'probs', [.025, .975]);
 
 %%
 % *Posterior mean and quantiles*
@@ -195,19 +223,21 @@ box off
 
 %%
 % *Trace of MCMC samples*
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'PIMH: Trace samples')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pimh.x(tk, :))
+    plot(samples_pimh.x(tk, :))
     hold on
     plot(0, data.x_true(tk), '*g');  
     xlabel('Iterations')
     ylabel('PIMH samples')
     title(['t=', num2str(tk)]);
 end
-legend({'PIMH samples', 'True value'});
+h = legend({'PIMH samples', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend('boxoff')
 
 %%
 % *Histograms of posteriors*
@@ -215,18 +245,20 @@ figure('name', 'PIMH: Histograms Marginal Posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    hist(out_pimh.x(tk, :), 20);
+    hist(samples_pimh.x(tk, :), 20);
     hold on    
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('number of samples');
     title(['t=', num2str(tk)]);    
 end
-legend({'posterior density', 'True value'});
+h = legend({'posterior density', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend('boxoff')
 
 %%
 % *Kernel density estimates of posteriors*
-kde_estimates_pimh = biips_density(out_pimh);
+kde_estimates_pimh = biips_density(samples_pimh);
 figure('name', 'PIMH: KDE estimates Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -238,9 +270,11 @@ for k=1:length(time_index)
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
-legend({'posterior density', 'True value'});
+h = legend({'posterior density', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend('boxoff')
 
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

@@ -297,7 +297,7 @@ out = biips_smc_sensitivity(model_id, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
-figure
+figure('name', 'Sensitivity: log-likelihood')
 surf(A, B, reshape(out.log_marg_like, size(A)))
 shading interp
 caxis([0,max(out.log_marg_like(:))])
