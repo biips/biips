@@ -52,13 +52,18 @@ optarg_type = {'char', 'char', 'numeric', 'logical'};
 if (isempty(variable_names))
     variable_names = fieldnames(parts); % vars = {}, take all fields
 end
-presents = fieldnames(getfield(parts, variable_names{1}));
-if (isempty(type)) % retrieve only the field presents in the first variable
-    chaine='fsb';
-    indices=arrayfun(@(x) strfind(strcat(presents{:}),x), chaine, 'UniformOutput', 0);
-    indices=horzcat(indices{:});
-    type=chaine(sort(indices));
+
+if (isempty(type))
+    type='fsb';
 end
+
+% retrieve only the field presents in the first variable
+present = fieldnames(getfield(parts, variable_names{1}));
+present = strcat(present{:});
+indices = arrayfun(@(x) strfind(present, x), type, 'UniformOutput', 0);
+indices = sort([indices{:}]);
+type = present(indices);
+
 % Select only the wanted variables
 s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), variable_names,'UniformOutput',0), variable_names);
 cell_fsb = num2cell(type);
