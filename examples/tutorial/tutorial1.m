@@ -98,11 +98,6 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
-% inter_biips('sample_gen_tree_smooth_particle', model.id, randi(1000));
-% % Get sampled value
-% sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', model.id);
-
-
 %%
 % *Diagnostic on the algorithm*. 
 diag = biips_diagnostic(out_smc);
