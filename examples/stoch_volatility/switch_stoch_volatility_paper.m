@@ -63,6 +63,7 @@
 %     }
 
 set(0, 'DefaultAxesFontsize', 14)
+set(0, 'Defaultlinelinewidth', 2)
 rng('default')
 
 %% Installation of Matbiips
@@ -109,12 +110,14 @@ diag = biips_diagnostic(out_smc);
 figure('name', 'ESS')
 semilogy(out_smc.x.s.ess)
 hold on
-plot([1:t_max], 30*ones(t_max,1), '--k')
+plot(1:t_max, 30*ones(t_max,1), '--k')
 xlabel('Time')
-ylabel('ESS')
+ylabel('SESS')
+box off
 legend('Effective sample size (smoothing)')
-
-pause
+legend boxoff
+saveas(gca, 'volatility_ess', 'png')
+% pause
 
 %% 
 % Plot weighted particles
@@ -206,8 +209,8 @@ saveas(gca, 'volatility_kde', 'epsc2')
 
 %%
 % *Parameters of the PIMH*
-n_burn = 20;
-n_iter = 20;
+n_burn = 10000;
+n_iter = 10000;
 thin = 1;
 n_part = 50;
 
