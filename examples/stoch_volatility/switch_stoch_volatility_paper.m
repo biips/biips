@@ -321,10 +321,10 @@ colormap(hot)
 view(2)
 xlim([min(A(:)), max(A(:))])
 colorbar
-xlabel('$\alpha[1,1]$', 'interpreter', 'latex')
-ylabel('$\alpha[2,1]$', 'interpreter', 'latex')
-saveas(gca, 'volatility_sensibility', 'epsc2')
-
+xlabel('$\alpha_1$', 'interpreter', 'latex', 'fontsize', 20)
+ylabel('$\alpha_2$', 'interpreter', 'latex', 'fontsize', 20)
+saveas(gca, 'volatility_sensitivity', 'epsc2')
+saveas(gca, 'volatility_sensitivity', 'png')
 
 
 %% Clear model

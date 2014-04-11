@@ -39,6 +39,10 @@ for i=1:length(param_names)
     end
     log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
+    if strcmp(pn_param(i).name,'tau')
+        prop{i}
+        log_p
+    end
     log_prior_prop = log_prior_prop + log_p;
 end
 
