@@ -176,18 +176,18 @@ thin = 20; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
 param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+latent_names = {'x','tau'};%,'alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
 inits = {-1, 1,.5,5,.8,.8};
-obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
 % pause
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', thin, 'latent_names', latent_names); % Samples
+[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] =...
+    biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', thin); % Samples
  
 %%
 % *Some summary statistics*
