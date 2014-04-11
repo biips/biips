@@ -46,7 +46,7 @@
 
 
 %% Statistical model in BUGS language
-% Content of the file `switch_stoch_volatility.bug':
+% Content of the file `switch_stoch_volatility_param.bug':
 
 %%
 %
@@ -159,8 +159,8 @@ biips_init;
 
 %%
 % *Compile BUGS model and sample data if simulated data*
-model = 'switch_stoch_volatility.bug'; % BUGS model filename
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
+[model, data] = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
 
 
 %% BiiPS Particle Marginal Metropolis-Hastings
@@ -170,8 +170,8 @@ model = 'switch_stoch_volatility.bug'; % BUGS model filename
 
 %%
 % *Parameters of the PMMH*
-n_burn = 20000; % nb of burn-in/adaptation iterations
-n_iter = 20000; % nb of iterations after burn-in
+n_burn = 20; % nb of burn-in/adaptation iterations
+n_iter = 20; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
@@ -181,12 +181,12 @@ latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables
 %%
 % *Init PMMH*
 inits = {-1, 1,.5,5,.8,.8};
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', inits); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits); % creates a pmmh object
 % pause
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', thin, 'latent_names', latent_names); % Samples
  
 %%
