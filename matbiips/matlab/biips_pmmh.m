@@ -56,6 +56,7 @@ else
     rw_rescale = false;    
 end
 
+n_latent
 if n_latent>0
     monitor_biips(console, latent_names, 's'); 
 end

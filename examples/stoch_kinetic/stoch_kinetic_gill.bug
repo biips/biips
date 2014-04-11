@@ -6,7 +6,7 @@ var x_true[2,t_max/dt], x[2,t_max/dt], y[t_max/dt],c[3]
 
 data
 {
-  x_true[,1] <- x_init+0.0
+  x_true[,1] ~ LV(x_init,c[1],c[2],c[3],dt)
   for (t in 2:t_max/dt)
   {      
     x_true[1:2, t] ~ LV(x_true[1:2,t-1],c[1],c[2],c[3],dt)    
@@ -26,7 +26,7 @@ model
   #c[2] <- exp(logc[2])
   #c[3] <- exp(logc[3])  
   
-  x[,1] <- x_init
+  x[,1] ~ LV(x_init,c[1],c[2],c[3],dt)
   for (t in 2:t_max/dt)
   {    
     x[, t] ~ LV(x[,t-1],c[1],c[2],c[3],dt) 
