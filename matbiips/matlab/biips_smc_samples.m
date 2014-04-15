@@ -5,8 +5,8 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
-%    - model:           structure contening the model, 
-%                      returned by the 'biips_model' function
+%   - model:        structure containing the model, 
+%                   returned by the 'biips_model' function
 %    - variable_names: cell of strings. Contains the names of the 
 %                      unobserved variables to monitor.
 %                      Possible value: {'var1', 'var2[1]', 'var3[1:10]',
@@ -62,7 +62,7 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 13-03-2014

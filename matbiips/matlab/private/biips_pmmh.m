@@ -10,7 +10,7 @@ function varargout = biips_pmmh(obj, n_iter, n_part, return_samples, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -28,8 +28,8 @@ optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
     optarg_type, optarg_valid, optarg_default);
 
 %% Stops biips verbosity
-inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+old_verb = inter_biips('verbosity', 0);
+cleanupObj = onCleanup(@() inter_biips('verbosity', old_verb));% reset verbosity when function terminates
 
 
 %% Create a clone console
@@ -56,16 +56,18 @@ else
     rw_rescale = false;    
 end
 
-n_latent
-if n_latent>0
-    monitor_biips(console, latent_names, 's'); 
-end
 
 % % Initialize
 % [sample_param, sample_latent, log_prior, log_marg_like] =...
 %     pmmh_init(console, param_names, n_part, (obj.niter==0),  'latent_names', latent_names,...
 %     'rs_thres', rs_thres, 'rs_type', rs_type);
 pn_param =  cellfun(@parse_varname, param_names);
+pmmh_get_param(console, pn_param, sample_param, true);
+
+if n_latent>0
+    monitor_biips(console, latent_names, 's'); 
+end
+
     
 % Initialize counters
 n_fail = 0;

@@ -65,9 +65,10 @@ configure_file (COPYING.txt COPYING.txt COPYONLY)
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 
 if (APPLE)
-   set(EXTRA_COMPILE_FLAGS "-fPIC")
+  set(EXTRA_COMPILE_FLAGS "-fPIC")
 elseif(UNIX)
-   set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+    # TODO : if g++ version >= 4.7 or 4.8 ?
+  set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
 elseif(WIN32)
   option(BUILD_64BIT "Build 64bit binaries" ON)
   
@@ -75,10 +76,15 @@ elseif(WIN32)
       set(BITS "64")
   endif()
   
-  set(CMAKE_C_FLAGS "-m${BITS}")
-  set(CMAKE_CXX_FLAGS "-m${BITS}")
-  #add_definitions("-m${BITS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m${BITS}")
+  set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -m${BITS}")
+  set(EXTRA_LINK_FLAGS "${EXTRA_LINK_FLAGS} -m${BITS}")
+  
+#  set(CMAKE_C_FLAGS "-m${BITS}")
+#  set(CMAKE_CXX_FLAGS "-m${BITS}")
+#  add_definitions("-m${BITS}")
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m${BITS}")
+#  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m${BITS}")
+#  set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -m${BITS}")
 endif()
 
 option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
@@ -88,6 +94,8 @@ endif ()
 
 add_definitions(${EXTRA_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
+set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 

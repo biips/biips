@@ -1,4 +1,6 @@
-addpath('../matlab');
+clear
+close all
+
 %data
 t_max=4;
 prec_x=1;

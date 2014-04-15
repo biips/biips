@@ -85,12 +85,10 @@ data = struct('t_max', t_max, 'sigma', sigma,...
         'alpha', alpha, 'phi', phi, 'pi', pi, 'c0', c0, 'x0', x0);
 
 
-% Start Biips console
-biips_init;
-
 % Parse and compile BUGS model, and sample data
 model_filename = 'switch_stoch_volatility.bug'; % BUGS model filename
-[model, data] = biips_model(model_filename, data, 'sample_data', true);
+model = biips_model(model_filename, data, 'sample_data', true);
+data = model.data;
 
 
 %% BiiPS Sequential Monte Carlo

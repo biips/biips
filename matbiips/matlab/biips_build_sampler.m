@@ -1,11 +1,11 @@
-function biips_build_sampler(console, varargin)
+function biips_build_sampler(model, varargin)
 
 %
 % BIIPS_BUILD_SAMPLER assigns a sampler to every node of the graph
 %   biips_build_sampler(console, 'PropertyName', PropertyValue)
 %   INPUT: 
-%   - console:  integer. Id of the console containing the model, 
-%               returned by the 'biips_model' function
+%   - model:        structure containing the model, 
+%                   returned by the 'biips_model' function
 %   Optional Input:
 %   - proposal:string. Keyword defining the type of proposal desired.
 %              Possible values are 'auto' and 'prior'. 'auto' selects the best sampler
@@ -19,7 +19,7 @@ function biips_build_sampler(console, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 17-03-2014
@@ -38,4 +38,4 @@ prior=false;
 if (strcmp(proposal, 'prior'))
     prior = true;
 end
-inter_biips('build_smc_sampler', console, prior);
+inter_biips('build_smc_sampler', model.id, prior);

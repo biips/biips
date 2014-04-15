@@ -107,7 +107,7 @@
 % 
 
 matbiips_path = '../../matbiips/matlab';
-addpath(matbiips_path)
+addpath(matbiips_path, '-end')
 
 %% Load model and load or simulate data
 %
@@ -152,16 +152,11 @@ else
         'alpha_true', alpha_true, 'phi_true', phi_true, 'pi_true', pi_true);
 end
 
-
-%%
-% *Start BiiPS console*
-biips_init;
-
 %%
 % *Compile BUGS model and sample data if simulated data*
 model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
-[model, data] = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
-
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 %% BiiPS Particle Marginal Metropolis-Hastings
 % We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
@@ -175,14 +170,14 @@ n_iter = 20; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x','tau'};%,'alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'gamma[1,1]', 'gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x', 'alpha[1,1]', 'alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
-inits = {-1, 1,.5,5,.8,.8};
+inits = {-1, 1, .5, 5, .8, .8};
 obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
-% pause
+
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations

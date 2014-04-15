@@ -361,7 +361,7 @@ namespace Biips
       range = range_;
     else if (!range_.Contains(range))
       throw RuntimeError(String("Can not change data: variable ") + Name()
-                         + "does not contain subrange " + print(range));
+                         + " does not contain subrange " + print(range));
 
     if (value.Dim().Drop() != range.Dim(true))
       throw RuntimeError(String("Dimension mismatch when setting value of node array ")
@@ -469,9 +469,7 @@ namespace Biips
       range = range_;
     else if (!range_.Contains(range))
       throw RuntimeError(String("Can not sample data: variable ") + Name()
-                         + "does not contain subrange " + print(range));
-
-    Bool set_observed_nodes = false;
+                         + " does not contain subrange " + print(range));
 
     // check that node is valid
     NodeId id = GetNode(range);
@@ -503,7 +501,7 @@ namespace Biips
     }
 
     graph_.SetObserved(id);
-
+    
     // sample value
     graph_.SampleValue(id, pRng, true);
 
@@ -519,7 +517,7 @@ namespace Biips
       range = range_;
     else if (!range_.Contains(range))
       throw RuntimeError(String("Can not remove data: variable ") + Name()
-                         + "does not contain subrange " + print(range));
+                         + " does not contain subrange " + print(range));
 
 //    std::set<NodeId> removed_nodes;
 
