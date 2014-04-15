@@ -5,7 +5,7 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 % obj = biips_pmmh_init(console, param_names, 'PropertyName', propertyvalue, ...)
 %
 %   INPUT 
-%   - model:        structure contening the model, 
+%   - model:        structure containing the model, 
 %                   returned by the 'biips_model' function
 %   - param_names:  cell of strings containing the list of variables to be
 %                   updated with MH proposal. Other are updated with SMC
@@ -35,7 +35,7 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -68,8 +68,8 @@ if ~isempty(inits)
 end
 
 %% Stops biips verbosity
-inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+old_verb = inter_biips('verbosity', 0);
+cleanupObj = onCleanup(@() inter_biips('verbosity', old_verb));% reset verbosity when function terminates
 
 % model
 obj.model = model;
@@ -80,7 +80,7 @@ console = model2.id;
 
 % Init the parameters of the random walk
 pn_param = cellfun(@parse_varname, param_names);
-sample_param = set_param(console, pn_param, inits);
+sample_param = pmmh_get_param(console, pn_param, inits);
 
 %% Delete clone console
 inter_biips('clear_console', console)
@@ -94,7 +94,7 @@ obj.latent_val = [];
 obj.log_marg_like = -Inf;
 obj.log_prior = -Inf;
 
-sampledim = cellfun(@size,sample_param, 'UniformOutput', false);
+sampledim = cellfun(@size, sample_param, 'UniformOutput', false);
 
 obj.dim = sampledim;
 obj.niter = 0;
@@ -104,9 +104,9 @@ obj.beta = beta;
 obj.n_rescale = n_rescale;
 obj.ncov = n_rescale/2; % we start learning the covariance matrix after ncov iterations
 
-obj.d = sum(cellfun(@prod,sampledim, 'UniformOutput', true));
+obj.d = sum(cellfun(@prod, sampledim, 'UniformOutput', true));
 if obj.d==1
-    obj.targetprob  = 0.44;
+    obj.targetprob = 0.44;
 else
     obj.targetprob = 0.234;
 end
@@ -120,16 +120,16 @@ if isempty(rw_step)
 else
     % Check values and dimensions
     for i=1:n_param
-        if sum(isnan(rw_step{i}(:)))>0
+        if any(isnan(rw_step{i}(:)))
             error('NaN values')        
         end
-         if sum(isinf(rw_step{i}(:)))>0
+         if any(isinf(rw_step{i}(:)))
             error('Inf values')        
          end
-        if sum((rw_step{i}(:))<=0)
+        if any((rw_step{i}(:))<=0)
             error('Non-positive values')        
         end
-        if size(rw_step{i})~sample_dim{i}
+        if any(size(rw_step{i})~=sampledim{i})
             error('rw_step must be of the same dimension as the variable %s', param_names)
         end
         % Convert to a vector
@@ -143,29 +143,3 @@ obj.lstep = cell2mat(cellfun(@(x) log(x(:)), rw_step(:), 'UniformOutput', false)
 % Covariance matrix
 obj.mean = [];
 obj.cov = [];  
-
-
-function sample_param = set_param(console, pn_param, inits)
-
-sample_param = cell(length(pn_param), 1);
-% Set init values in Biips
-if ~isempty(inits)
-    for i=1:length(pn_param)
-%         % Take init value in inits parameters
-%         tag = inter_biips('change_data', console, pn_param(i).name, ...
-%             pn_param(i).lower, pn_param(i).upper, inits{i}, true);        
-%         if ~tag
-%             error('Data change failed: invalid initial value for variable %s', pn_param(i).name);
-%         end
-        sample_param{i} = inits{i};
-    end
-else
-    for i=1:length(pn_param)
-        try
-            sample_param{i} = inter_biips('sample_data', console, pn_param(i).name,...
-                pn_param(i).lower, pn_param(i).upper, get_seed());
-        catch
-            warning('CANNOT SAMPLE VARIABLE: BUG TO BE FIXED')
-        end
-    end
-end

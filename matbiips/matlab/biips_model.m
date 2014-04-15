@@ -1,8 +1,8 @@
-function [struct_model, data] = biips_model(filename, data, varargin)
+function model = biips_model(filename, data, varargin)
 
 %
 % BIIPS_MODEL instantiates a stochastic model under a DAG form 
-% [p, data] = biips_model(filename, data, 'Propertyname', propertyvalue, ...)
+% model = biips_model(filename, data, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT: 
 %   - filename:     name of the BUGS file which describes the stochastic model
@@ -21,23 +21,22 @@ function [struct_model, data] = biips_model(filename, data, varargin)
 %                   * filename: filename of bug model
 %                   * definition: char contening the bugs model
 %                   * data: structure containing the data.
-%   - data:         structure containing the data. useful if 'sample_data' is true
 %
 %   See also BIIPS_INIT
 %--------------------------------------------------------------------------
 % EXAMPLES:
 % data = struct('var1', 0, 'var2', 1.2);
-% [obj_model, data] = biips_model('model.bug', data, 'sample_data', true);
+% model = biips_model('model.bug', data, 'sample_data', true);
 %
 % var1 = 0; var2 = 1.2;
 % data_names = {'var1', 'var2'};
-% [obj_model, data] = biips_model('model.bug', data_names, 'sample_data', true);
+% model = biips_model('model.bug', data_names, 'sample_data', true);
 % 
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -99,7 +98,7 @@ if (quiet)
 end
 
 % Biips model structure
-struct_model.id = p;
-struct_model.filename = filename;
-struct_model.definition = fileread(filename);
-struct_model.data = data;
+model.id = p;
+model.filename = filename;
+model.definition = fileread(filename);
+model.data = data;

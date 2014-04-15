@@ -123,9 +123,12 @@ namespace Biips
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
-      if (range_valid.Overlaps(it->right))
-        BaseType::SetFilterMonitor(it->left);
+      if (!range_valid.Overlaps(it->right))
+        continue;
+
+      BaseType::SetFilterMonitor(it->left);
     }
+
 
     filterMonitorsNames_.push_back(name);
     filterMonitorsRanges_.push_back(range);
@@ -134,7 +137,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SetGenTreeSmoothMonitor(const String & name,
-                                       const IndexRange & range)
+                                          const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -157,8 +160,10 @@ namespace Biips
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
-      if (range_valid.Overlaps(it->right))
-        BaseType::SetGenTreeSmoothMonitor(it->left);
+      if (!range_valid.Overlaps(it->right))
+        continue;
+
+      BaseType::SetGenTreeSmoothMonitor(it->left);
     }
 
     genTreeSmoothMonitorsNames_.push_back(name);
@@ -168,7 +173,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SetBackwardSmoothMonitor(const String & name,
-                                   const IndexRange & range)
+                                           const IndexRange & range)
   {
     // TODO use Monitor Factory
 
@@ -191,8 +196,10 @@ namespace Biips
     for (boost::bimap<NodeId, IndexRange>::const_iterator it =
         node_id_range_bimap.begin(); it != node_id_range_bimap.end(); ++it)
     {
-      if (range_valid.Overlaps(it->right))
-        BaseType::SetBackwardSmoothMonitor(it->left);
+      if (!range_valid.Overlaps(it->right))
+        continue;
+
+      BaseType::SetBackwardSmoothMonitor(it->left);
     }
 
     backwardSmoothMonitorsNames_.push_back(name);
@@ -228,7 +235,7 @@ namespace Biips
 
       Size iter = pSampler_->GetNodeSamplingIteration(it->left);
       if (filterMonitors_.size() < iter + 1 || !filterMonitors_[iter]
-          || !filterMonitors_[iter]->Contains(it->left))
+                                                                || !filterMonitors_[iter]->Contains(it->left))
         return false;
     }
 
@@ -236,7 +243,7 @@ namespace Biips
   }
 
   Bool BUGSModel::IsGenTreeSmoothMonitored(const String & name,
-                                        IndexRange range, Bool check_released) const
+                                           IndexRange range, Bool check_released) const
   {
     if (!symbolTable_.Contains(name))
       return false;
@@ -294,9 +301,9 @@ namespace Biips
         continue;
 
       Size iter = pSampler_->NIterations() - 1
-                  - pSampler_->GetNodeSamplingIteration(it->left);
+          - pSampler_->GetNodeSamplingIteration(it->left);
       if (backwardSmoothMonitors_.size() < iter + 1 || (!backwardSmoothMonitors_[iter]
-          && !backwardSmoothMonitors_[iter]->Contains(it->left)))
+                                                                                 && !backwardSmoothMonitors_[iter]->Contains(it->left)))
         return false;
     }
 
@@ -330,8 +337,8 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractGenTreeSmoothStat(String name,
-                                        StatTag statFeature,
-                                        std::map<IndexRange, MultiArray> & statMap) const
+                                           StatTag statFeature,
+                                           std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract smooth statistic: statistics map is not empty.");
@@ -349,7 +356,7 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       MultiArray stat_marray(BaseType::ExtractGenTreeSmoothStat(node_id,
-                                                             statFeature));
+                                                                statFeature));
       statMap.insert(std::make_pair(index_range, stat_marray));
     }
 
@@ -357,8 +364,8 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractBackwardSmoothStat(String name,
-                                    StatTag statFeature,
-                                    std::map<IndexRange, MultiArray> & statMap) const
+                                            StatTag statFeature,
+                                            std::map<IndexRange, MultiArray> & statMap) const
   {
     if (!statMap.empty())
       throw LogicError("Can not extract filter statistic: statistics map is not empty.");
@@ -423,9 +430,9 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractGenTreeSmoothPdf(String name,
-                                       std::map<IndexRange, Histogram> & pdfMap,
-                                       Size numBins,
-                                       Scalar cacheFraction) const
+                                          std::map<IndexRange, Histogram> & pdfMap,
+                                          Size numBins,
+                                          Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract smooth pdf: pdf map is not empty.");
@@ -454,8 +461,8 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       Histogram pdf_hist = BaseType::ExtractGenTreeSmoothPdf(node_id,
-                                                          numBins,
-                                                          cacheFraction);
+                                                             numBins,
+                                                             cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -463,9 +470,9 @@ namespace Biips
   }
 
   Bool BUGSModel::ExtractBackwardSmoothPdf(String name,
-                                   std::map<IndexRange, Histogram> & pdfMap,
-                                   Size numBins,
-                                   Scalar cacheFraction) const
+                                           std::map<IndexRange, Histogram> & pdfMap,
+                                           Size numBins,
+                                           Scalar cacheFraction) const
   {
     if (!pdfMap.empty())
       throw LogicError("Can not extract backward smooth pdf: pdf map is not empty.");
@@ -494,8 +501,8 @@ namespace Biips
       const IndexRange & index_range = it->first;
       NodeId node_id = it->second;
       Histogram pdf_hist = BaseType::ExtractBackwardSmoothPdf(node_id,
-                                                      numBins,
-                                                      cacheFraction);
+                                                              numBins,
+                                                              cacheFraction);
       pdfMap.insert(std::make_pair(index_range, pdf_hist));
     }
 
@@ -602,7 +609,7 @@ namespace Biips
   }
 
   Bool BUGSModel::SampleGenTreeSmoothParticle(Rng * pRng,
-                                           std::map<String, MultiArray> & sampledValues) const
+                                              std::map<String, MultiArray> & sampledValues) const
   {
     if (!pSampler_)
       return false;
@@ -675,18 +682,18 @@ namespace Biips
     return true;
   }
 
-//  void BUGSModel::PrintSamplersSequence(std::ostream & out) const
-//  {
-//    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
-//        pSampler_->GetSamplersSequence();
-//    for (Size i = 0; i < node_id_samplers_seq.size(); ++i)
-//    {
-//      NodeId node_id = node_id_samplers_seq[i].first;
-//      const String & name = node_id_samplers_seq[i].second;
-//      out << i + 1 << ": " << symbolTable_.GetName(node_id) << " (id="
-//          << node_id << "), " << name << std::endl;
-//    }
-//  }
+  //  void BUGSModel::PrintSamplersSequence(std::ostream & out) const
+  //  {
+  //    Types<std::pair<NodeId, String> >::Array node_id_samplers_seq =
+  //        pSampler_->GetSamplersSequence();
+  //    for (Size i = 0; i < node_id_samplers_seq.size(); ++i)
+  //    {
+  //      NodeId node_id = node_id_samplers_seq[i].first;
+  //      const String & name = node_id_samplers_seq[i].second;
+  //      out << i + 1 << ": " << symbolTable_.GetName(node_id) << " (id="
+  //          << node_id << "), " << name << std::endl;
+  //    }
+  //  }
 
   class VarNamePropertyWriter: public VertexPropertyWriter
   {
@@ -695,7 +702,7 @@ namespace Biips
     typedef VarNamePropertyWriter SelfType;
 
     VarNamePropertyWriter(const Graph & graph, const SymbolTable & symTab) :
-        BaseType(graph), symTab_(symTab)
+      BaseType(graph), symTab_(symTab)
     {
     }
 

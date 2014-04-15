@@ -96,10 +96,6 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
     'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
 
 %%
-% *Start BiiPS console*
-biips_init;
-
-%%
 % *Add the user-defined function 'funmat'*
 fun_bugs = 'funmat'; fun_dim = 'f_dim';funeval = 'f_eval';fun_nb_inputs = 2;
 biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, funeval)
@@ -107,9 +103,10 @@ biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, funeval)
 
 %%
 % *Compile BUGS model and sample data*
-model = 'hmm_1d_nonlin_funmat.bug'; % BUGS model filename
+model_filename = 'hmm_1d_nonlin_funmat.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 %% BiiPS Sequential Monte Carlo
 % Let now use BiiPS to run a particle filter. 
@@ -124,7 +121,7 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model_id, variables, n_part,...
+out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %%
@@ -190,4 +187,4 @@ legend({'filtering density', 'smoothing density', 'True value'});
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

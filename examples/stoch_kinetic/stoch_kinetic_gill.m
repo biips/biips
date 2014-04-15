@@ -37,11 +37,6 @@ c = [.5,.0025,.3];
 prec_y = 1/100;
 data = struct('t_max', t_max, 'dt', dt, 'c',c, 'x_init', x_init, 'prec_y', prec_y);
 
-
-%%
-% *Start BiiPS console*
-biips_init;
-
 %%
 % *Add the user-defined function 'LV'*
 fun_bugs = 'LV'; fun_dim = 'lotka_volterra_dim';funeval = 'lotka_volterra_gillespie';fun_nb_inputs = 5;
@@ -52,7 +47,8 @@ biips_add_distrib_sampler(fun_bugs, fun_nb_inputs, fun_dim, funeval)
 % *Compile BUGS model and sample data*
 model_filename = 'stoch_kinetic_gill.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model, data] = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 % Plot data
 figure('name', 'data')

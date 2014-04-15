@@ -1,7 +1,5 @@
 clear
-close
-addpath('../matlab');
-
+close all
 %% define data
 t_max = 10;
 mean_x_init = [0 0 1 0]';
@@ -12,19 +10,18 @@ prec_v = diag(1*ones(2,1));
 prec_y = diag([10 100]);
 delta_t = 1;
 
-%% create model
-biips_init;
-
 %% build evalutations functions
 biips_add_function('funcmat',2, 'myfuncdim', 'myfunceval')
-[p, data] = biips_model('hmm_4d_nonlin_funcmat.bug', who);
+model = biips_model('hmm_4d_nonlin_funcmat.bug', who);
+data = model.data;
 x_true = data.x_true(1:2,:);
 
 %% run SMC
 n_part = 100;
 x_name = ['x[1:2,1:' int2str(t_max) ']'];
-y_name = ['y[1,1:' int2str(t_max) ']'];
-out_smc = biips_smc_samples(p, {x_name, y_name}, n_part, 'type', 'fsb');
+% y_name = ['y[1,1:' int2str(t_max) ']'];
+% out_smc = biips_smc_samples(model, {x_name, y_name}, n_part, 'type', 'fsb');
+out_smc = biips_smc_samples(model, {x_name}, n_part, 'type', 'fsb');
 
 %% filtering stats
 x_summ = biips_summary(out_smc, 'type', 'fs');

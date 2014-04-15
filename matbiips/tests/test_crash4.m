@@ -1,14 +1,17 @@
 %% TESTS BIIPS_PMMH
+clear
+close all
+
 % Test model with cell data structure
 t_max = 20; mean_x_init = 0;prec_x_init = 1;prec_x = 1; mean0 = [0;0]; prec0 = eye(2);
 data = {'t_max', 'prec_x_init',...
     'prec_x', 'mean_x_init', 'mean0', 'prec0'};
-%%% Start BiiPS console
-biips_init;
+
 %%% Compile BUGS model and sample data
-model = 'hmm_1d_nonlin_param2.bug'; % BUGS model filename
+model_filename = 'hmm_1d_nonlin_param2.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data);
+model = biips_model(model_filename, data, 'sample_data', sample_data);
+data = model.data;
 
 param_names = {'log_prec_y[1:2]','log_prec_y2[1:2]'};
 inits = {[0;0], [0;0]};
@@ -18,7 +21,7 @@ n_part = 50;
 n_iter = 520;
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', inits); % creates a pmmh object
+obj_pmmh = biips_pmmh_object(model, param_names, 'inits', inits); % creates a pmmh object
 
 %%
 % *Run PMMH*
@@ -37,4 +40,4 @@ biips_clear
 % sample_param = set_param(console, pn_param, inits);
 % 
 % Error in test_crash4 (line 21)
-%     obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', inits);
+%     obj_pmmh = biips_pmmh_object(model, param_names, 'inits', inits);

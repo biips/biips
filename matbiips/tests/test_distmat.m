@@ -1,6 +1,5 @@
 clear
 close all
-addpath('../matlab');
 
 %% define data
 t_max = 20; 
@@ -9,19 +8,17 @@ prec_x_init = 0.5;
 prec_x = 10;
 prec_y = 1;
 
-%% Start BiiPS console
-biips_init;
-
 %% build evalutations functions
 biips_add_distrib_sampler('distmat', 3, 'mydistdim', 'mydistsample')
 
 %% create model
-[p, data] = biips_model('hmm_1d_nonlin_distmat.bug', who);
+model = biips_model('hmm_1d_nonlin_distmat.bug', who);
+data = model.data;
 x_true = data.x_true;
 
 %% run SMC
 n_part = 100;
-out_smc = biips_smc_samples(p, {'x'}, n_part, 'type', 'fs');
+out_smc = biips_smc_samples(model, {'x'}, n_part, 'type', 'fs');
 
 %% filtering stats
 x_summ = biips_summary(out_smc, 'type', 'fs');

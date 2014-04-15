@@ -20,10 +20,12 @@
 #include "iostream/ProgressBar.hpp"
 using namespace Biips;
 using std::endl;
+
 extern Size VERBOSITY;
+extern Bool BASE_MODULE_LOADED;
+
 typedef boost::shared_ptr<Console>  Console_ptr;
 typedef boost::shared_ptr<ProgressBar>  ProgressBar_ptr;
-
 
 inline
 void myMexErrMsg(const String & identifier, const String & err_msg) {
@@ -55,13 +57,15 @@ void CheckRhs(int nrhs, int nb, String name_func) {
 
 inline 
 Size  GetConsoleId(const std::deque<Console_ptr> consoles, 
-		const mxArray * pm,
-		String name_func) {
-	Size id = static_cast<Size>(*mxGetPr(pm));
-	if ((id >= consoles.size()) || (consoles[id] == NULL)) {
-		myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
-	}
-	return id;
+                   const mxArray * pm,
+                   String name_func) {
+  if (!mxIsNumeric(pm))
+    myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
+  Size id = static_cast<Size>(*mxGetPr(pm));
+  if ((id >= consoles.size()) || (consoles[id] == NULL)) {
+    myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
+  }
+  return id;
 }
 
 
@@ -101,6 +105,10 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
 		if (!mxIsDouble(prhs[(nb)]))\
 		myMexErrMsg(name_func, name_func+" "+print(nb)+"-th argument must be a double");
 
+#define CheckArgIsNumeric(nb) \
+        if (!mxIIsNumeric(prhs[(nb)]))\
+        myMexErrMsg(name_func, name_func+" "+print(nb)+"-th argument must be numeric");
+
 #define CheckArgIsLogical(nb) \
 		if (!mxIsLogical(prhs[(nb)]))\
 		myMexErrMsg(name_func, name_func+" "+print(nb)+"-th argument must be a logical");
@@ -109,6 +117,10 @@ Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
 #define CheckIsString(m)\
 		if (!mxIsChar((m)))\
 		myMexErrMsg(name_func, name_func+": some argument must be a string");
+
+#define CheckIsNumeric(m)\
+        if (!mxIsNumeric((m)))\
+        myMexErrMsg(name_func, name_func+": some argument must be numeric");
 
 #define CheckIsDouble(m)\
 		if (!mxIsDouble((m)))\

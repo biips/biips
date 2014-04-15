@@ -63,6 +63,7 @@ s/'([[:alnum:]_]*)' *, *\1/\1=\1/g
 # struct.field ==> struct$field
 /^#'/!s/\.([[:alpha:]][[:alnum:]_]*)/\$\1/g
 
+# FIXME
 s/Start BiiPS console/Load RBiips package/
 
 s/biips_init/require(RBiips)/
