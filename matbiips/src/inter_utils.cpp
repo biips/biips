@@ -14,8 +14,9 @@
 #include <compiler/Compiler.hpp>
 #include <BiipsBase.hpp>
 
-
 Size VERBOSITY = 1;
+Bool BASE_MODULE_LOADED = false;
+
 template<>
 std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {
@@ -137,6 +138,7 @@ void load_base_module()
 {
 	using namespace Biips;
 	loadBaseModule(Compiler::FuncTab(), Compiler::DistTab());
+    BASE_MODULE_LOADED = true;
 }
 
 template<>

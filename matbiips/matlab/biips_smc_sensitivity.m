@@ -7,7 +7,7 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 %    n_part, 'PropertyName', propertyvalue, ...)
 %
 %   INPUT 
-%   - model:        structure contening the model, 
+%   - model:        structure containing the model, 
 %                   returned by the 'biips_model' function
 %   - param_names:  cell of strings. Contains the names of the 
 %                   unobserved variables for sensitivity analysis
@@ -45,7 +45,7 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -58,7 +58,7 @@ if n_params~=length(param_values)
 end
 pn_param =  cellfun(@parse_varname, param_names);
 
-if ~prod(cellfun(@isnumeric, param_values))
+if ~all(cellfun(@isnumeric, param_values))
     error('param_values must be a cell of numerics');
 end
 

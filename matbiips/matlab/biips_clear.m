@@ -10,12 +10,12 @@ function biips_clear(model)
 %   See also BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE
-% biips_clear(1)
+% biips_clear(0)
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 17-03-2014
@@ -26,5 +26,6 @@ function biips_clear(model)
 if nargin
     inter_biips('clear_console', model.id); 
 else
-    inter_biips('clear_all_console');
+    clear inter_biips
+%     inter_biips('clear_all_console');
 end

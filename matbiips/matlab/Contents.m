@@ -9,7 +9,6 @@
 %   biips_get_data           - returns the data of the current model
 %   biips_get_nodes          - returns the nodes of the current model
 %   biips_get_variable_names - returns the variable names of the current model
-%   biips_init               - loads the biips module
 %   biips_model              - instantiates a stochastic model under a DAG form 
 %   biips_pimh_samples       - performs iterations for the PIMH algorithm and returns samples
 %   biips_pimh_update        - performs burn-in iterations for the PIMH algorithm

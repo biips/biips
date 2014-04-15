@@ -1,4 +1,6 @@
-addpath('../matlab');
+clear
+close all
+
 N=100;
 ids=zeros(N,1);
 for i=1:N;

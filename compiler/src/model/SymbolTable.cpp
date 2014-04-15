@@ -68,14 +68,14 @@ namespace Biips
       throw LogicError(String("Name ") + name
                        + " does not exist in the symbol table.");
 
-    //    // check that nodeId is not already in an existing NodeArray
-    //    for (std::map<String, NodeArray::Ptr>::const_iterator it_table =
-    //        nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
-    //    {
-    //      if (it_table->second->Contains(nodeId))
-    //        throw LogicError(String("Node ") + print(nodeId)
-    //            + " already in use in variable " + it_table->first + ".");
-    //    }
+//    // check that nodeId is not already in an existing NodeArray
+//    for (std::map<String, NodeArray::Ptr>::const_iterator it_table =
+//        nodeArraysMap_.begin(); it_table != nodeArraysMap_.end(); ++it_table)
+//    {
+//      if (it_table->second->Contains(nodeId))
+//        throw LogicError(String("Node ") + print(nodeId)
+//                         + " already in use in variable " + it_table->first + ".");
+//    }
 
     nodeArraysMap_.at(name)->Insert(nodeId, range);
   }
@@ -113,6 +113,7 @@ namespace Biips
 
   String SymbolTable::GetName(NodeId nodeId) const
   {
+    // FIXME several names for the same node can appear, only the first one is returned!
     std::map<String, NodeArray::Ptr>::const_iterator it_table =
         nodeArraysMap_.begin();
     for (; it_table != nodeArraysMap_.end(); ++it_table)

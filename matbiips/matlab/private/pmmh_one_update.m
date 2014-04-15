@@ -14,7 +14,7 @@ function [sample_param, sample_latent, log_prior, log_marg_like, ...
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -30,19 +30,15 @@ n_fail = 0;
 log_prior_prop = 0;
 for i=1:length(param_names)
     var = param_names{i};
-    tag = inter_biips('change_data', console, pn_param(i).name, ...
+    ok = inter_biips('change_data', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper, prop{i}, true);
-    if ~tag % DATA CHANGE FAILED: proposed parameter value is out of bounds
+    if ~ok % DATA CHANGE FAILED: proposed parameter value is out of bounds
         log_prior_prop = -Inf;
 %         n_fail = n_fail + 1;
 %         warning('Data change failed: %s = %.1f', var, prop{i});
     end
     log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
-    if strcmp(pn_param(i).name,'tau')
-        prop{i}
-        log_p
-    end
     log_prior_prop = log_prior_prop + log_p;
 end
 

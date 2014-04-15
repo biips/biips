@@ -1,4 +1,6 @@
-addpath('../matlab');
+clear
+close all
+
 bool_et_un = inter_biips('load_module', 'basemod'); 
 p0=inter_biips('make_console'); 
 inter_biips('verbosity',2);

@@ -84,13 +84,10 @@ data = struct('t_max', t_max, 'mean_x_init', mean_x_init, 'prec_x_init', ...
     'prec_y', prec_y, 'delta_t', delta_t, 'F', F, 'G', G);
 
 %%
-% *Start BiiPS console*
-biips_init;
-
-%%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-[model_id, data] = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_data);
+model = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_data);
+data = model.data;
 x_pos_true = data.x_true(1:2,:);
 
 %% BiiPS: Particle filter
@@ -103,7 +100,7 @@ variables = {'x'}; % Variables to be monitored
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model_id, {'x'}, n_part);
+out_smc = biips_smc_samples(model, {'x'}, n_part);
 
 %% 
 % *Summary statistics*

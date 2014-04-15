@@ -154,13 +154,10 @@ end
 
 
 %%
-% *Start BiiPS console*
-biips_init;
-
-%%
 % *Compile BUGS model and sample data if simulated data*
 model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
-[model, data] = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 
 %% BiiPS Particle Marginal Metropolis-Hastings
@@ -181,13 +178,13 @@ latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables
 %%
 % *Init PMMH*
 inits = {-1, 1,.5,5,.8,.8};
-obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
 % pause
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 [obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', thin, 'latent_names', latent_names); % Samples
+    'thin', thin); % Samples
  
 %%
 % *Some summary statistics*
@@ -324,4 +321,4 @@ end
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

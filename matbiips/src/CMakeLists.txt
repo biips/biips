@@ -5,6 +5,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/*.h
 ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 )
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive")
+
 set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 if (MATLAB OR OCTAVE) 
     include_directories(${Core_INCLUDE_DIRS}

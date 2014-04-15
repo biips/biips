@@ -2,6 +2,9 @@
 % PB: Lorsque l'on veut monitorer x[1:2,1], le programme crashe a la fin du
 % SMC sans message d'erreur
 
+clear
+close all
+
 %%% Model parameters
 t_max = 100;
 mean_x_init = 0;
@@ -13,20 +16,18 @@ prec_y = 10;
 data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
     'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
 
-%%% Start BiiPS console
-biips_init;
-
 %%% Compile BUGS model and sample data
-model = 'hmm_1d_lin2.bug'; % BUGS model filename
+model_filename = 'hmm_1d_lin2.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 %% TESTS BIIPS_SMC_SAMPLES
 n_part = 20; % Number of particles
 variables = {'x', 'x[1:2,1]'}; % Variables to be monitored
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 % Run SMC
-out_smc = biips_smc_samples(model_id, variables, n_part,...
+out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %clear inter_biips

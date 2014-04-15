@@ -113,16 +113,12 @@ c_true = [.5, 0.0025,.3];
 prec_y = 1/10;
 data = struct('t_max', t_max, 'dt', dt, 'c_true',c_true, 'x_init', x_init, 'prec_y', prec_y);
 
-
-%%
-% *Start BiiPS console*
-biips_init;
-
 %%
 % *Compile BUGS model and sample data*
-model = 'stoch_kinetic_cle.bug'; % BUGS model filename
+model_filename = 'stoch_kinetic_cle.bug'; % BUGS model filename
 sample_data = true; % Boolean
-[model_id, data] = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+data = model.data;
 
 figure('name', 'data')
 plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
@@ -145,7 +141,7 @@ param_values = {linspace(-7,1,20),log(beta_true)*ones(20,1),log(gamma_true)*ones
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model_id, param_names, param_values, n_part); 
+out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
 
 %%
 % *Plot penalized log-marginal likelihood*
@@ -177,7 +173,7 @@ latent_names = {'x'}; % name of the variables updated with SMC and that need to 
 
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-1, -6, -1}); % creates a pmmh object
+obj_pmmh = biips_pmmh_object(model, param_names, 'inits', {-1, -6, -1}); % creates a pmmh object
 
 %%
 % *Run PMMH*
@@ -265,4 +261,4 @@ legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey',...
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

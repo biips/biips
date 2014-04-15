@@ -87,17 +87,12 @@ plot(y, '*g')
 xlabel('Time')
 ylabel('y_t')
 
-
-%%
-% *Start BiiPS console*
-biips_init;
-
 %%
 % *Compile BUGS model*
 data = {'rho', 'gamma', 't_max', 'clust_max', 'y', 'mu_0', 'prec_0', 'prec_y', 'alpha'};
-model = 'tvdp.bug'; % BUGS model filename
-[model_id, data] = biips_model(model, data); % Create biips model
-
+model_filename = 'tvdp.bug'; % BUGS model filename
+model = biips_model(model_filename, data); % Create biips model
+data = model.data;
 
 %% BiiPS Sequential Monte Carlo
 %
@@ -109,7 +104,7 @@ variables = {'c', 'mu', 'm'}; % Variables to be monitored
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model_id, variables, n_part);
+out_smc = biips_smc_samples(model, variables, n_part);
 
 %% Plot the true and estimated densities over time
 %
