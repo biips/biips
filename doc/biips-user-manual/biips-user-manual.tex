@@ -9,7 +9,7 @@
 \usepackage{lmodern}
 \newcommand{\biips}{\textsf{BiiPS}}
 \newcommand{\rbiips}{\textsf{rbiips}}
-\newcommand{\release}{0.7.3}
+\newcommand{\release}{0.9.0}
 % \newcommand{\release}{@Biips_VERSION@}
 \newcommand{\email}{\url{biips-project@lists.gforge.inria.fr}}
 % \newcommand{\email}{\url{@Biips_EMAIL@}}
@@ -22,7 +22,7 @@
 \newcommand{\CODA}{\textsf{coda}}
 \begin{document}
 
-\title{\biips\ Version \release\ user manual}
+\title{\biips\ user manual\\Version \release}
 \author{Adrien Todeschini, Marc Fuentes, Fran\c{}ois Caron}
 %\date{1 October 2012}
 
@@ -262,21 +262,57 @@ on node {\em arrays}. As a consequence, an expression such as
 \section{Compilation}
 
 When a model is compiled, a graph representing the model is created in
-computer memory. Compilation can fail for a number of reasons:
-\begin{enumerate}
-\item The graph contains a directed cycle.  These are forbidden
-in \biips.
-\item A top-level parameter is undefined. Any node that is used on
-the right hand side of a relation, but is not defined on the left
-hand side of any relation, is assumed to be a constant node. Its value
-must be supplied in the data file. 
-\item The model uses a function or distribution that has not been
-defined in any of the loaded modules.
-\end{enumerate}
-The number of parallel chains to be run by \biips\ is also defined at
-compilation time.  Each parallel chain should produce an independent
-sequence of samples from the posterior distribution. By default,
-\biips\ only runs a single chain.
+computer memory.
+
+Compilation consists in the following steps :
+\subsection{Variables declaration}
+The variables following the keyword \verb!var! are declared, \textit{i.e.} they are added to the  symbol table with their declared dimensions. Explicit declaration of variables is optional. It might help the compiler to know the dimensions of an array. Errors in this step can be:
+\begin{itemize}
+\item One variable with multiple declarations.
+\item Undefined, non-scalar, non-integer or non-positive dimension value.
+\end{itemize}
+\subsection{Undeclared variables resolution}
+We infer undeclared variables dimensions from the data table and from the model definition.
+ \begin{enumerate}
+ \item Get undeclared variables dimensions from the data table. If the variable has been previously declared, we also check that the data dropped dimensions match the declared ones.
+ \item Traverse the tree and calculate the dimensions of all arrays from the left-hand side of all relations. The dimensions of a variable will correspond to the maximum indices among all its left-hand side instances. If the variable has been previously declared, we check that the data dimensions match the declared ones.
+ \end{enumerate}
+  Errors in this step can be:
+  \begin{itemize}
+  \item Non conforming dropped dimensions between data table and variable declaration.
+  \item Inconsistent number of dimensions.
+  \item ...
+  \end{itemize}
+  
+\subsection{Nodes allocation}
+We allocate all the nodes of the graph.
+ \begin{enumerate}
+ \item Write constant data: Values supplied in the data table, but which DO NOT appear on the left-hand side of a relation, are constants. We have to find these values in order to create the constant nodes that form the top level of any graphical model.
+ \item Resolve all other relations.
+ \end{enumerate}
+ Compilation can fail in this step for a number of reasons:
+ \begin{itemize}
+ \item A top-level parameter is undefined. Any node that is used on
+ the right hand side of a relation, but is not defined on the left
+ hand side of any relation, is assumed to be a constant node. Its value must be supplied in the data file. 
+ \item The model uses a function or distribution that has not been
+ defined in any of the loaded modules.
+ \end{itemize}
+ 
+\subsection{Graph build}
+ \begin{enumerate}
+ \item Check for cycles.
+ \item Topological sort.
+ \item Build stochastic parents graph.
+ \item Build stochastic children graph.
+ \item Build likelihood children graph.
+ \end{enumerate}
+  Errors in this step can be:
+  \begin{itemize}
+  \item The graph contains a directed cycle.  These are forbidden
+  in \biips.
+  \end{itemize}
+
 
 % \subsection{Parameter values}
 % 
