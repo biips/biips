@@ -51,8 +51,8 @@ file (WRITE Description.txt ${Biips_DESCRIPTION})
 set (Boost_VERSION_REQUIRED 1.49.0)
 set (JAGS_VERSION 3.2.0)
 set (rjags_VERSION 3.2)
-set (Rcpp_VERSION 0.9.4)
-set (R_VERSION_REQUIRED 2.13.0)
+set (Rcpp_VERSION 0.10.6)
+set (R_VERSION_REQUIRED 3.0.2)
 
 
 # configure resource files
@@ -109,7 +109,7 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-find_package(Boost COMPONENTS program_options regex)
+find_package(Boost ${Boost_VERSION_REQUIRED} REQUIRED COMPONENTS program_options regex)
 if(Boost_PROGRAM_OPTIONS_FOUND)
     set(EXTRA_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} ${EXTRA_LIBS})
 else()
