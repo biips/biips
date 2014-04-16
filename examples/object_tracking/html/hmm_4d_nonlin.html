@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Matbiips example: Object tracking</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-03-04"><meta name="DC.source" content="hmm_4d_nonlin.m"><style type="text/css">
+      --><title>Matbiips example: Object tracking</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-04-15"><meta name="DC.source" content="hmm_4d_nonlin.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img { margin-bottom:0px; } 
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,11 +38,12 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
 pre { margin:0px 0px 20px; }
-pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -65,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Matbiips example: Object tracking</h1><!--introduction--><p>In this example, we consider the tracking of an object in 2D, observed by a radar.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Statistical model in BUGS language</a></li><li><a href="#3">Installation of Matbiips</a></li><li><a href="#4">Load model and data</a></li><li><a href="#8">BiiPS: Particle filter</a></li></ul></div><h2>Statistical model in BUGS language<a name="1"></a></h2><pre>   var v_true[2,t_max-1], x_true[4,t_max], x_radar_true[2,t_max],
+  </style></head><body><div class="content"><h1>Matbiips example: Object tracking</h1><!--introduction--><p>In this example, we consider the tracking of an object in 2D, observed by a radar.</p><p>Reference: B. Ristic. Beyond the Kalman filter: Particle filters for Tracking applications. Artech House, 2004.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Statistical model</a></li><li><a href="#2">Statistical model in BUGS language</a></li><li><a href="#4">Installation of Matbiips</a></li><li><a href="#5">Load model and data</a></li><li><a href="#9">BiiPS: Particle filter</a></li><li><a href="#17">Clear model</a></li></ul></div><h2>Statistical model<a name="1"></a></h2><p>Let <img src="hmm_4d_nonlin_eq85018.png" alt="$X_t$"> be a 4-D vector containing the position and velocity of an object in 2D. We obtain distance-angular measurements <img src="hmm_4d_nonlin_eq27410.png" alt="$Y_t$"> from a radar.</p><p>The model is defined as follows. For <img src="hmm_4d_nonlin_eq49278.png" alt="$t=1,\ldots,t_{\max}$"></p><p><img src="hmm_4d_nonlin_eq46265.png" alt="$$ X_t = F X_{t-1} + G V_t,~~ V_t\sim\mathcal N(0,Q)$$"></p><p><img src="hmm_4d_nonlin_eq49335.png" alt="$$ Y_{t} = g(X_t) + W_t,~~ W_t \sim\mathcal N(0,R)$$"></p><p><img src="hmm_4d_nonlin_eq86924.png" alt="$F$"> and <img src="hmm_4d_nonlin_eq54377.png" alt="$G$"> are known matrices, <img src="hmm_4d_nonlin_eq20938.png" alt="$g(X_t)$"> is the known nonlinear measurement function and <img src="hmm_4d_nonlin_eq96887.png" alt="$Q$"> and <img src="hmm_4d_nonlin_eq85930.png" alt="$R$"> are known covariance matrices.</p><h2>Statistical model in BUGS language<a name="2"></a></h2><pre>   var v_true[2,t_max-1], x_true[4,t_max], x_radar_true[2,t_max],
    v[2,t_max-1], x[4,t_max], x_radar[2,t_max], y[2,t_max]</pre><pre>   data
    {
      x_true[,1] ~ dmnorm(mean_x_init, prec_x_init)
@@ -96,12 +97,13 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
        mu_y[2,t] &lt;- arctan(x_radar[2,t]/x_radar[1,t])
        y[,t] ~ dmnorm(mu_y[,t], prec_y)
      }
-   }</pre><h2>Installation of Matbiips<a name="3"></a></h2><p>Unzip the Matbiips archive in some folder and add the Matbiips folder to the Matlab path</p><pre class="codeinput">matbiips_path = <span class="string">'..\..\matbiips\matlab'</span>;
+   }</pre><pre class="codeinput">rng(<span class="string">'default'</span>)
+</pre><h2>Installation of Matbiips<a name="4"></a></h2><p>Unzip the Matbiips archive in some folder and add the Matbiips folder to the Matlab path</p><pre class="codeinput">matbiips_path = <span class="string">'../../matbiips/matlab'</span>;
 addpath(matbiips_path)
-</pre><h2>Load model and data<a name="4"></a></h2><p><b>Model parameters</b></p><pre class="codeinput">t_max = 20;
+</pre><h2>Load model and data<a name="5"></a></h2><p><b>Model parameters</b></p><pre class="codeinput">t_max = 20;
 mean_x_init = [0 0 1 0]';
 prec_x_init = diag(1000*ones(4,1));
-x_pos = [-10  0];
+x_pos = [60  0];
 mean_v = zeros(2, 1);
 prec_v = diag(1*ones(2,1));
 prec_y = diag([100 500]);
@@ -119,7 +121,7 @@ data = struct(<span class="string">'t_max'</span>, t_max, <span class="string">'
     <span class="string">'prec_y'</span>, prec_y, <span class="string">'delta_t'</span>, delta_t, <span class="string">'F'</span>, F, <span class="string">'G'</span>, G);
 </pre><p><b>Start BiiPS console</b></p><pre class="codeinput">biips_init;
 </pre><p><b>Compile BUGS model and sample data</b></p><pre class="codeinput">sample_data = true; <span class="comment">% Boolean</span>
-[model_id, data] = biips_model(<span class="string">'hmm_4d_nonlin_tracking.bug'</span>, data, <span class="string">'sample_data'</span>, sample_data);
+[model, data] = biips_model(<span class="string">'hmm_4d_nonlin_tracking.bug'</span>, data, <span class="string">'sample_data'</span>, sample_data);
 x_pos_true = data.x_true(1:2,:);
 </pre><pre class="codeoutput">* Parsing model in: hmm_4d_nonlin_tracking.bug
 * Compiling data graph
@@ -134,22 +136,29 @@ x_pos_true = data.x_true(1:2,:);
   Resolving undeclared variables
   Allocating nodes
   Graph size: 332
-</pre><h2>BiiPS: Particle filter<a name="8"></a></h2><p><b>Parameters of the algorithm</b>.</p><pre class="codeinput">n_part = 1000; <span class="comment">% Number of particles</span>
+</pre><h2>BiiPS: Particle filter<a name="9"></a></h2><p><b>Parameters of the algorithm</b>.</p><pre class="codeinput">n_part = 100000; <span class="comment">% Number of particles</span>
 variables = {<span class="string">'x'</span>}; <span class="comment">% Variables to be monitored</span>
-</pre><p><b>Run SMC</b></p><pre class="codeinput">out_smc = biips_smc_samples(model_id, {<span class="string">'x'</span>}, n_part);
+</pre><p><b>Run SMC</b></p><pre class="codeinput">out_smc = biips_smc_samples(model, {<span class="string">'x'</span>}, n_part);
 </pre><pre class="codeoutput">* Assigning node samplers
-* Running SMC forward sampler with 1000 particles
+* Running SMC forward sampler with 100000 particles
   |--------------------------------------------------| 100%
-  |**************************************************| 20 iterations in 1.19 s
-</pre><p><b>Summary statistics</b></p><pre class="codeinput">summary = biips_summary(out_smc);
+  |**************************************************| 20 iterations in 61.48 s
+</pre><p><b>Diagnostic</b></p><pre class="codeinput">diagnostic = biips_diagnostic(out_smc);
+</pre><pre class="codeoutput">* Diagnosing variable: x
+Filtering (f) diagnostic: GOOD
+Smoothing (s) diagnostic: GOOD
+</pre><p><b>Summary statistics</b></p><pre class="codeinput">summary = biips_summary(out_smc, <span class="string">'probs'</span>, [.025, .975]);
 </pre><p><b>Plot estimates</b></p><pre class="codeinput">x_f_mean = summary.x.f.mean;
 x_s_mean = summary.x.s.mean;
 figure(<span class="string">'name'</span>, <span class="string">'Filtering and Smoothing estimates'</span>)
 plot(x_f_mean(1, :), x_f_mean(2, :), <span class="string">'linewidth'</span>, 2)
 hold <span class="string">on</span>
-plot(x_s_mean(1, :), x_s_mean(2, :), <span class="string">'r'</span>, <span class="string">'linewidth'</span>, 2)
-plot(x_pos_true(1,:), x_pos_true(2,:), <span class="string">'g'</span>, <span class="string">'linewidth'</span>, 2)
-legend(<span class="string">'Filtering estimate'</span>, <span class="string">'Smoothing estimate'</span>, <span class="string">'True trajectory'</span>)
+plot(x_s_mean(1, :), x_s_mean(2, :), <span class="string">'-.r'</span>, <span class="string">'linewidth'</span>, 2)
+plot(x_pos_true(1,:), x_pos_true(2,:), <span class="string">'--g'</span>, <span class="string">'linewidth'</span>, 2)
+plot(x_pos(1), x_pos(2), <span class="string">'sk'</span>)
+legend(<span class="string">'Filtering estimate'</span>, <span class="string">'Smoothing estimate'</span>, <span class="string">'True trajectory'</span>,<span class="keyword">...</span>
+    <span class="string">'Position of the radar'</span>, <span class="string">'location'</span>, <span class="string">'Northwest'</span>)
+legend <span class="string">boxoff</span>
 xlabel(<span class="string">'Position X'</span>)
 ylabel(<span class="string">'Position Y'</span>)
 
@@ -157,15 +166,75 @@ figure(<span class="string">'name'</span>, <span class="string">'Particles'</spa
 plot(out_smc.x.f.values(1,:), out_smc.x.f.values(2,:), <span class="string">'ro'</span>, <span class="keyword">...</span>
     <span class="string">'markersize'</span>, 3, <span class="string">'markerfacecolor'</span>, <span class="string">'r'</span>)
 hold <span class="string">on</span>
-plot(x_pos_true(1,:), x_pos_true(2,:), <span class="string">'g'</span>, <span class="string">'linewidth'</span>, 2)
-legend(<span class="string">'Particles'</span>, <span class="string">'True trajectory'</span>)
+plot(x_pos_true(1,:), x_pos_true(2,:), <span class="string">'--g'</span>, <span class="string">'linewidth'</span>, 2)
+plot(x_pos(1), x_pos(2), <span class="string">'sk'</span>)
+legend(<span class="string">'Particles'</span>, <span class="string">'True trajectory'</span>, <span class="string">'Position of the radar'</span>, <span class="string">'location'</span>, <span class="string">'Northwest'</span>)
+legend <span class="string">boxoff</span>
 xlabel(<span class="string">'Position X'</span>)
 ylabel(<span class="string">'Position Y'</span>)
-</pre><img vspace="5" hspace="5" src="hmm_4d_nonlin_01.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="hmm_4d_nonlin_01.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_02.png" alt=""> <p><b>Plot Filtering estimates</b></p><pre class="codeinput">x_f_quant = summary.x.f.quant;
+title_fig = {<span class="string">'Position X'</span>, <span class="string">'Position Y'</span>, <span class="string">'Velocity X'</span>, <span class="string">'Velocity Y'</span>};
+<span class="keyword">for</span> k=1:4
+    figure(<span class="string">'name'</span>, <span class="string">'SMC: Filtering estimates'</span>)
+    title(title_fig{k})
+    hold <span class="string">on</span>
+    h = fill([1:t_max, t_max:-1:1], [squeeze(x_f_quant(1,k,:))', fliplr(squeeze(x_f_quant(2,k,:))')],<span class="keyword">...</span>
+        [.7 .7 1]);
+    set(h, <span class="string">'edgecolor'</span>, <span class="string">'none'</span>)
+    hold <span class="string">on</span>
+    plot(x_f_mean(k, :), <span class="string">'linewidth'</span>, 3)
+    hold <span class="string">on</span>
+    plot(data.x_true(k,:), <span class="string">'g'</span>, <span class="string">'linewidth'</span>, 2)
+    xlabel(<span class="string">'Time'</span>)
+    ylabel(<span class="string">'Estimates'</span>)
+    legend({<span class="string">'95 % credible interval'</span>, <span class="string">'Filtering Mean Estimate'</span>, <span class="string">'True value'</span>},<span class="keyword">...</span>
+        <span class="string">'location'</span>, <span class="string">'Northwest'</span>)
+    legend(<span class="string">'boxoff'</span>)
+    box <span class="string">off</span>
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="hmm_4d_nonlin_03.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_04.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_05.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_06.png" alt=""> <p><b>Plot Smoothing estimates</b></p><pre class="codeinput">x_s_quant = summary.x.s.quant;
+<span class="keyword">for</span> k=1:4
+    figure(<span class="string">'name'</span>, <span class="string">'SMC: Smoothing estimates'</span>)
+    title(title_fig{k})
+    hold <span class="string">on</span>
+    h = fill([1:t_max, t_max:-1:1], [squeeze(x_s_quant(1,k,:))', fliplr(squeeze(x_s_quant(2,k,:))')],<span class="keyword">...</span>
+    [.7 .7 1]);
+    set(h, <span class="string">'edgecolor'</span>, <span class="string">'none'</span>)
+    hold <span class="string">on</span>
+    plot(x_s_mean(k, :), <span class="string">'linewidth'</span>, 3)
+    hold <span class="string">on</span>
+    plot(data.x_true(k,:), <span class="string">'g'</span>, <span class="string">'linewidth'</span>, 2)
+    xlabel(<span class="string">'Time'</span>)
+    ylabel(<span class="string">'Estimates'</span>)
+    legend({<span class="string">'95 % credible interval'</span>, <span class="string">'Smoothing Mean Estimate'</span>, <span class="string">'True value'</span>},<span class="keyword">...</span>
+        <span class="string">'location'</span>, <span class="string">'Northwest'</span>)
+    legend(<span class="string">'boxoff'</span>)
+    box <span class="string">off</span>
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="hmm_4d_nonlin_07.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_08.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_09.png" alt=""> <img vspace="5" hspace="5" src="hmm_4d_nonlin_10.png" alt=""> <h2>Clear model<a name="17"></a></h2><pre class="codeinput">biips_clear(model)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Matbiips example: Object tracking
 % In this example, we consider the tracking of an object in 2D, observed by
 % a radar.
+%
+% Reference: B. Ristic. Beyond the Kalman filter: Particle filters for
+% Tracking applications. Artech House, 2004.
+
+%% Statistical model
+%
+%
+% Let $X_t$ be a 4-D vector containing the position and velocity of an
+% object in 2D. We obtain distance-angular measurements $Y_t$ from a radar. 
+%
+% The model is defined as follows. For $t=1,\ldots,t_{\max}$
+%
+% $$ X_t = F X_{t-1} + G V_t,~~ V_t\sim\mathcal N(0,Q)$$
+%
+% $$ Y_{t} = g(X_t) + W_t,~~ W_t \sim\mathcal N(0,R)$$
+%
+% $F$ and $G$ are known matrices, $g(X_t)$ is the known nonlinear measurement function and $Q$ and $R$ are known covariance matrices.
+
 
 %% Statistical model in BUGS language
 %
@@ -214,13 +283,14 @@ ylabel(<span class="string">'Position Y'</span>)
 %       }
 %     }
 
+rng('default')
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
 % and add the Matbiips folder to the Matlab path
 % 
 
-matbiips_path = '..\..\matbiips\matlab';
+matbiips_path = '../../matbiips/matlab';
 addpath(matbiips_path)
 
 %% Load model and data
@@ -231,7 +301,7 @@ addpath(matbiips_path)
 t_max = 20;
 mean_x_init = [0 0 1 0]';
 prec_x_init = diag(1000*ones(4,1));
-x_pos = [-10  0];
+x_pos = [60  0];
 mean_v = zeros(2, 1);
 prec_v = diag(1*ones(2,1));
 prec_y = diag([100 500]);
@@ -255,7 +325,7 @@ biips_init;
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-[model_id, data] = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_data);
+[model, data] = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_data);
 x_pos_true = data.x_true(1:2,:);
 
 %% BiiPS: Particle filter
@@ -263,16 +333,20 @@ x_pos_true = data.x_true(1:2,:);
 
 %%
 % *Parameters of the algorithm*. 
-n_part = 1000; % Number of particles
+n_part = 100000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model_id, {'x'}, n_part);
+out_smc = biips_smc_samples(model, {'x'}, n_part);
+
+%% 
+% *Diagnostic*
+diagnostic = biips_diagnostic(out_smc);
 
 %% 
 % *Summary statistics*
-summary = biips_summary(out_smc);
+summary = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %% 
 % *Plot estimates*
@@ -281,9 +355,12 @@ x_s_mean = summary.x.s.mean;
 figure('name', 'Filtering and Smoothing estimates')
 plot(x_f_mean(1, :), x_f_mean(2, :), 'linewidth', 2)
 hold on
-plot(x_s_mean(1, :), x_s_mean(2, :), 'r', 'linewidth', 2)
-plot(x_pos_true(1,:), x_pos_true(2,:), 'g', 'linewidth', 2)
-legend('Filtering estimate', 'Smoothing estimate', 'True trajectory')
+plot(x_s_mean(1, :), x_s_mean(2, :), '-.r', 'linewidth', 2)
+plot(x_pos_true(1,:), x_pos_true(2,:), 'REPLACE_WITH_DASH_DASHg', 'linewidth', 2)
+plot(x_pos(1), x_pos(2), 'sk')
+legend('Filtering estimate', 'Smoothing estimate', 'True trajectory',...
+    'Position of the radar', 'location', 'Northwest')
+legend boxoff
 xlabel('Position X')
 ylabel('Position Y')
 
@@ -291,12 +368,63 @@ figure('name', 'Particles')
 plot(out_smc.x.f.values(1,:), out_smc.x.f.values(2,:), 'ro', ...
     'markersize', 3, 'markerfacecolor', 'r')
 hold on
-plot(x_pos_true(1,:), x_pos_true(2,:), 'g', 'linewidth', 2)
-legend('Particles', 'True trajectory')
+plot(x_pos_true(1,:), x_pos_true(2,:), 'REPLACE_WITH_DASH_DASHg', 'linewidth', 2)
+plot(x_pos(1), x_pos(2), 'sk')
+legend('Particles', 'True trajectory', 'Position of the radar', 'location', 'Northwest')
+legend boxoff
 xlabel('Position X')
 ylabel('Position Y')
 
 
 
+%%
+% *Plot Filtering estimates*
+x_f_quant = summary.x.f.quant;
+title_fig = {'Position X', 'Position Y', 'Velocity X', 'Velocity Y'};
+for k=1:4
+    figure('name', 'SMC: Filtering estimates')
+    title(title_fig{k})
+    hold on
+    h = fill([1:t_max, t_max:-1:1], [squeeze(x_f_quant(1,k,:))', fliplr(squeeze(x_f_quant(2,k,:))')],...
+        [.7 .7 1]);
+    set(h, 'edgecolor', 'none')
+    hold on
+    plot(x_f_mean(k, :), 'linewidth', 3)
+    hold on
+    plot(data.x_true(k,:), 'g', 'linewidth', 2)
+    xlabel('Time')
+    ylabel('Estimates')
+    legend({'95 % credible interval', 'Filtering Mean Estimate', 'True value'},...
+        'location', 'Northwest')
+    legend('boxoff')
+    box off
+end
+
+%%
+% *Plot Smoothing estimates*
+x_s_quant = summary.x.s.quant;
+for k=1:4
+    figure('name', 'SMC: Smoothing estimates')
+    title(title_fig{k})
+    hold on
+    h = fill([1:t_max, t_max:-1:1], [squeeze(x_s_quant(1,k,:))', fliplr(squeeze(x_s_quant(2,k,:))')],...
+    [.7 .7 1]);
+    set(h, 'edgecolor', 'none')
+    hold on
+    plot(x_s_mean(k, :), 'linewidth', 3)
+    hold on
+    plot(data.x_true(k,:), 'g', 'linewidth', 2)
+    xlabel('Time')
+    ylabel('Estimates')
+    legend({'95 % credible interval', 'Smoothing Mean Estimate', 'True value'},...
+        'location', 'Northwest')
+    legend('boxoff')
+    box off
+end
+
+%% Clear model
+% 
+
+biips_clear(model)
 ##### SOURCE END #####
 --></body></html>
