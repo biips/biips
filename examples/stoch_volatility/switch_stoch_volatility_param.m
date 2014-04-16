@@ -107,7 +107,7 @@
 % 
 
 matbiips_path = '../../matbiips/matlab';
-addpath(matbiips_path, '-end')
+addpath(matbiips_path)
 
 %% Load model and load or simulate data
 %
@@ -152,6 +152,7 @@ else
         'alpha_true', alpha_true, 'phi_true', phi_true, 'pi_true', pi_true);
 end
 
+
 %%
 % *Compile BUGS model and sample data if simulated data*
 model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
@@ -167,17 +168,17 @@ data = model.data;
 % *Parameters of the PMMH*
 n_burn = 20; % nb of burn-in/adaptation iterations
 n_iter = 20; % nb of iterations after burn-in
-thin = 20; % thinning of MCMC outputs
+thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'gamma[1,1]', 'gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x', 'alpha[1,1]', 'alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
-inits = {-1, 1, .5, 5, .8, .8};
+inits = {-1, 1,.5,5,.8,.8};
 obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
-
+% pause
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
@@ -319,4 +320,4 @@ end
 %% Clear model
 % 
 
-biips_clear(model_id)
+biips_clear(model)

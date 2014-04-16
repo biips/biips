@@ -81,10 +81,11 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
+model = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model, data, 'sample_data', sample_data); % Create biips model and sample data
 data = model.data;
+
 
 %% BiiPS : Sensitivity analysis with Sequential Monte Carlo
 % Let now use BiiPS to provide estimates of the marginal log-likelihood and 
@@ -204,7 +205,7 @@ legend({'95 % credible interval', 'PMMH Mean Estimate'})
 
 %%
 % *Trace of MCMC samples for x*
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -216,7 +217,9 @@ for k=1:length(time_index)
     ylabel('PMMH samples')
     title(['t=', num2str(tk)]);
 end
-legend({'PMMH samples', 'True value'});
+h = legend({'PMMH samples', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend boxoff
 
 %%
 % *Histogram and kernel density estimate of posteriors of x*
@@ -231,7 +234,9 @@ for k=1:length(time_index)
     ylabel('number of samples');
     title(['t=', num2str(tk)]);    
 end
-legend({'smoothing density', 'True value'});
+h = legend({'posterior samples', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1])
+legend boxoff
 
 figure('name', 'PMMH: KDE estimates Marginal posteriors')
 for k=1:length(time_index)
@@ -244,7 +249,9 @@ for k=1:length(time_index)
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
-legend({'posterior density', 'True value'});
+h = legend({'posterior density', 'True value'});
+set(h, 'position',[0.7 0.25, .1, .1]);
+legend boxoff
 
 
 %% Clear model
