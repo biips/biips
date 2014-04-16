@@ -113,6 +113,8 @@ c_true = [.5, 0.0025,.3];
 prec_y = 1/10;
 data = struct('t_max', t_max, 'dt', dt, 'c_true',c_true, 'x_init', x_init, 'prec_y', prec_y);
 
+
+
 %%
 % *Compile BUGS model and sample data*
 model_filename = 'stoch_kinetic_cle.bug'; % BUGS model filename
@@ -120,6 +122,8 @@ sample_data = true; % Boolean
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
 data = model.data;
 
+%%
+% *Plot data*
 figure('name', 'data')
 plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
 hold on
@@ -163,9 +167,6 @@ ylabel('Penalized log-marginal likelihood')
 n_burn = 2000; % nb of burn-in/adaptation iterations
 n_iter = 20000; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
-n_burn = 2; % nb of burn-in/adaptation iterations
-n_iter = 2; % nb of iterations after burn-in
-thin = 1; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
 param_names = {'logc[1]','logc[2]', 'logc[3]'}; % name of the variables updated with MCMC (others are updated with SMC)
@@ -173,13 +174,14 @@ latent_names = {'x'}; % name of the variables updated with SMC and that need to 
 
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model, param_names, 'inits', {-1, -6, -1}); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1}...
+    , 'latent_names', latent_names); % creates a pmmh object
 
 %%
 % *Run PMMH*
 [obj_pmmh, stats] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', 1, 'latent_names', latent_names); % Samples
+[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', 1); % Samples
  
 %%
 % *Some summary statistics*
