@@ -10,7 +10,7 @@ if "%1" == "" (
 set BIIPS_SRC=%~dp0
 set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
 set BIIPS_ROOT=C:\Users\adrien\biips
-set BOOST_ROOT=C:\Program Files\boost\boost_1_49_0
+set BOOST_ROOT=C:\Program Files\boost\boost_1_53_0
 set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
 set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
