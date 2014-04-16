@@ -41,7 +41,7 @@
 ##' @param name the module name
 ##' @param quiet verbose flag
 ##' @return null
-load.biips.module <- function(name, quiet=FALSE)
+biips_load_module <- function(name, quiet=FALSE)
 {    
   if (!is.character(name) || length(name)>1)
     stop("invalid name")
@@ -53,13 +53,13 @@ load.biips.module <- function(name, quiet=FALSE)
   else if (!quiet) {
     cat("module", name, "loaded\n")
   }
-  invisible(NULL)
+  invisible()
 }
 
 
 
 # TODO
-is_legal_biips_vname <- function(name) {
+is_legal_vname <- function(name) {
   TRUE
 }
 
@@ -92,7 +92,7 @@ data_preprocess <- function(data) { # , varnames) {
   
   names <- names(data) 
   for (n in names) { 
-    if (!is_legal_biips_vname(n))
+    if (!is_legal_vname(n))
       stop('data with name ', n, " is not allowed in Biips")
   } 
   
@@ -565,5 +565,5 @@ biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, fu
     stop("invalid name")
   }
   .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
-  invisible(NULL)
+  invisible()
 }
