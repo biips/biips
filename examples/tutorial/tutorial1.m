@@ -72,6 +72,7 @@ prec_y = 1;
 data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
     'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
 
+
 %%
 % *Compile BUGS model and sample data*
 model_filename = 'hmm_1d_nonlin.bug'; % BUGS model filename
@@ -86,7 +87,7 @@ data = model.data;
 % *Parameters of the algorithm*. We want to monitor the variable x, and to
 % get the filtering and smoothing particle approximations. The algorithm
 % will use 10000 particles, stratified resampling, with a threshold of 0.5.
-n_part = 1000; % Number of particles
+n_part = 10000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
@@ -94,6 +95,11 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 % *Run SMC*
 out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
+
+% inter_biips('sample_gen_tree_smooth_particle', model.id, randi(1000));
+% % Get sampled value
+% sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', model.id);
+
 
 %%
 % *Diagnostic on the algorithm*. 
@@ -173,7 +179,8 @@ for k=1:length(time_index)
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);  
+    xlim([-20,20])
 end
 h = legend({'filtering density', 'smoothing density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
@@ -247,7 +254,8 @@ for k=1:length(time_index)
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('number of samples');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);   
+    xlim([-20,20])
 end
 h = legend({'posterior density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
@@ -266,6 +274,7 @@ for k=1:length(time_index)
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
+    xlim([-20,20])
 end
 h = legend({'posterior density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])

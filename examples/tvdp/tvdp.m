@@ -87,6 +87,7 @@ plot(y, '*g')
 xlabel('Time')
 ylabel('y_t')
 
+
 %%
 % *Compile BUGS model*
 data = {'rho', 'gamma', 't_max', 'clust_max', 'y', 'mu_0', 'prec_0', 'prec_y', 'alpha'};
@@ -157,3 +158,8 @@ xlabel('Time')
 ylabel('y')
 zlabel('$\widehat F_t(y)$', 'interpreter', 'latex')
 title('Estimated Density')
+
+%% Clear model
+% 
+
+biips_clear(model)

@@ -121,6 +121,7 @@ model_filename = 'stoch_volatility.bug'; % BUGS model filename
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
 data = model.data;
 
+
 %% BiiPS Particle Marginal Metropolis-Hastings
 % We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameters \alpha, \beta and \sigma,
@@ -128,9 +129,9 @@ data = model.data;
 
 %%
 % *Parameters of the PMMH*
-n_burn = 1000; % nb of burn-in/adaptation iterations
-n_iter = 1000; % nb of iterations after burn-in
-thin = 1; % thinning of MCMC outputs
+n_burn = 5000; % nb of burn-in/adaptation iterations
+n_iter = 5000; % nb of iterations after burn-in
+thin = 5; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
 param_names = {'alpha', 'logit_beta', 'log_sigma'}; % name of the variables updated with MCMC (others are updated with SMC)
@@ -139,8 +140,9 @@ latent_names = {'x'}; % name of the variables updated with SMC and that need to 
 %%
 % *Init PMMH*
 inits = {0,5,-2};
-obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
-% pause
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits,...
+    'latent_names', latent_names); 
+
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
@@ -223,7 +225,7 @@ ylabel('Estimates')
 
 %%
 % *Trace of MCMC samples for x*
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -238,7 +240,8 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);
 end
 if sample_data
-    legend({'PMMH samples', 'True value'});
+    h = legend({'PMMH samples', 'True value'});
+    set(h, 'position',[0.7 0.25, .1, .1])
 end
 
 %%
@@ -257,7 +260,8 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);    
 end
 if sample_data
-    legend({'smoothing density', 'True value'});
+    h = legend({'smoothing density', 'True value'});
+    set(h, 'position',[0.7 0.25, .1, .1])
 end
 
 figure('name', 'PMMH: KDE estimates Marginal posteriors')
@@ -274,7 +278,8 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);    
 end
 if sample_data
-    legend({'posterior density', 'True value'});
+    h = legend({'posterior density', 'True value'});
+    set(h, 'position',[0.7 0.25, .1, .1])
 end
 
 

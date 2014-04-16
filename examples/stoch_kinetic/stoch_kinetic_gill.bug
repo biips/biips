@@ -2,37 +2,26 @@
 # cf Boys, Wilkinson and Kirkwood
 # Bayesian inference for a discretely observed stochastic kinetic model
 
-var x_true[2,t_max/dt], x[2,t_max/dt], y[t_max/dt],c[3]
+var x_true[2,t_max], x[2,t_max], y[t_max],c[3]
 
 data
 {
-  x_true[,1] ~ LV(x_init,c[1],c[2],c[3],dt)
-  for (t in 2:t_max/dt)
+  x_true[,1] ~ LV(x_init,c[1],c[2],c[3],1)
+  y[1] ~ dnorm(x_true[1,1], 1/sigma^2) 
+  for (t in 2:t_max)
   {      
-    x_true[1:2, t] ~ LV(x_true[1:2,t-1],c[1],c[2],c[3],dt)    
-  }
-  for (t in 1:t_max)	
-  {
-    y[t/dt] ~ dnorm(x_true[1,t/dt], prec_y) 
+    x_true[1:2, t] ~ LV(x_true[1:2,t-1],c[1],c[2],c[3],1)   
+    y[t] ~ dnorm(x_true[1,t], 1/sigma^2)  
   }
 }
 
 model
 {
-  #logc[1] ~ dunif(-7,2)
-  #logc[2] ~ dunif(-7,2)
-  #logc[3] ~ dunif(-7,2)
-  #c[1] <- exp(logc[1])
-  #c[2] <- exp(logc[2])
-  #c[3] <- exp(logc[3])  
-  
-  x[,1] ~ LV(x_init,c[1],c[2],c[3],dt)
-  for (t in 2:t_max/dt)
+  x[,1] ~ LV(x_init,c[1],c[2],c[3],1)
+  y[1] ~ dnorm(x_true[1,1], 1/sigma^2) 
+  for (t in 2:t_max)
   {    
-    x[, t] ~ LV(x[,t-1],c[1],c[2],c[3],dt) 
-  }
-  for (t in 1:t_max)	
-  {     
-    y[t/dt] ~ dnorm(x[1,t/dt], prec_y) 
+    x[, t] ~ LV(x[,t-1],c[1],c[2],c[3],1) 
+    y[t] ~ dnorm(x[1,t], 1/sigma^2) 
   }
 }
