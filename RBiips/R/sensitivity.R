@@ -138,57 +138,74 @@ smc.sensitivity <- function(object, params,
   
   ## restore data
   ##-------------
-  object$recompile()
+#   object$recompile()
   
-  # FIXME: Tentative of removing data without recompiling the model
-  #   for (v in seq(along=variable.names)) {
-  #     if (!(pn$names[[v]] %in% names(data))) {
-  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-  #       if (!ok)
-  #         stop("Failure restoring data")
-  #       next
-  #     }
-  #     
-  #     if (is.null(pn$lower[[v]])) {
-  #       data.sub <- data[[v]]
-  #     } else {
-  #       ## compute offsets
-  #       offsets <- NULL
-  #       dim <- dim(data[[v]])
-  #       if (is.null(dim))
-  #         dim <- length(data[[v]])
-  #       ind <- vector(len=length(dim))
-  #       
-  #       for (i in seq(along=data[[v]])) {
-  #         r <- i
-  #         for (d in seq(along=dim)) {
-  #           ind[d] <- ((r-1) %% dim[d]) +1
-  #           r <- ceiling(r/dim[d])
-  #         }
-  #         print(ind)
-  #         if (any(ind<pn$lower[[v]]) || any(ind>pn$upper[[v]]))
-  #           next
-  #         offsets <- c(offsets, i)
-  #       }
-  #       
-  #       data.sub <- array(data[[v]][offsets], dim=pn$upper[[v]]-pn$lower[[v]]+1)
-  #     }
-  #     
-  #     if (all(is.na(data.sub))) {
-  #       ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
-  #       if (!ok)
-  #         stop("Failure restoring data")
-  #       next
-  #     }
-  #     
-  #     if (any(is.na(data.sub)))
-  #       stop("Failure restoring data")
-  #     
-  #     ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
-  #                 data.sub, FALSE, PACKAGE="RBiips")
-  #     if (!ok)
-  #       stop("Failure restoring data")
-  #   }
+##  FIXME: Tentative of removing data without recompiling the model
+    for (v in seq(along=variable.names)) {
+  
+      ## if the variable is not present in the data
+      ## then it was not observed
+      ## hence remove the data and go to the next variable
+      if (!(pn$names[[v]] %in% names(data))) {
+        ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+        if (!ok)
+          stop("Failure restoring data")
+        next
+      }
+      
+      ## otherwise: the variable might be observed
+      ## then retrieve the original data
+  
+      ## if there is no bounds, then get the full array
+      if (is.null(pn$lower[[v]])) {
+        data.sub <- data[[v]]
+      }
+  
+      ## otherwise get the corresponding components of the data array
+      else {
+        ## compute offsets
+        offsets <- NULL
+        dim <- dim(data[[v]])
+        if (is.null(dim))
+          dim <- length(data[[v]])
+        ind <- vector(len=length(dim))
+        
+        for (i in seq(along=data[[v]])) {
+          r <- i
+          for (d in seq(along=dim)) {
+            ind[d] <- ((r-1) %% dim[d]) +1
+            r <- ceiling(r/dim[d])
+          }
+          print(ind)
+          if (any(ind<pn$lower[[v]]) || any(ind>pn$upper[[v]]))
+            next
+          offsets <- c(offsets, i)
+        }
+        
+        data.sub <- array(data[[v]][offsets], dim=pn$upper[[v]]-pn$lower[[v]]+1)
+      }
+      
+      ## if all the components are NA
+      ## then the variable was not observed
+      ## hence remove the data and go to the next variable
+      if (all(is.na(data.sub))) {
+        ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+        if (!ok)
+          stop("Failure restoring data")
+        next
+      }
+      
+      ## check that no component is NA
+      ## either all are NA or no one is
+      if (any(is.na(data.sub)))
+        stop("Failure restoring data")
+      
+      ## finally restore the data
+      ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]],
+                  data.sub, FALSE, PACKAGE="RBiips")
+      if (!ok)
+        stop("Failure restoring data")
+    }
   
   ## output
   ##--------
