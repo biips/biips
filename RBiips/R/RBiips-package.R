@@ -41,6 +41,7 @@
 ##' @references %%~~ Literature or other references for background information
 ##' ~~
 ##' @keywords package
+##' @useDynLib RBiips
 ##' @examples
 ##' 
 ##' %% ~~ simple examples of the most important functions ~~

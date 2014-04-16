@@ -6,8 +6,8 @@ Title: Bayesian inference with interacting Particle Systems
 Author: Inria
 Maintainer: biips-project <biips-project@lists.gforge.inria.fr>
 Depends:
-    R (>= 2.13.0),
-    Rcpp (>= 0.9.4),
+    R (>= 3.0.2),
+    Rcpp (>= 0.10.6),
     stats
 SystemRequirements: (Linux only) biips (== 0.9.0), boost (>= 1.49.0)
 Description: BiiPS is a general software for Bayesian inference with
