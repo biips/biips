@@ -12,4 +12,4 @@ data=struct('t_max', t_max, 'prec_x_init', prec_x_init, 'prec_x', prec_x,  'prec
 model = biips_model('hmm_1d_lin.bug', data);
 out_smc = biips_smc_samples(model, {'x[1:2]'}, 100);
 % console cleaning 
-inter_biips('clear_console', model.id); 
+biips_clear(model); 

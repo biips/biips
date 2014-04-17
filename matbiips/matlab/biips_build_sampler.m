@@ -38,4 +38,4 @@ prior=false;
 if (strcmp(proposal, 'prior'))
     prior = true;
 end
-inter_biips('build_smc_sampler', model.id, prior);
+matbiips('build_smc_sampler', model.id, prior);

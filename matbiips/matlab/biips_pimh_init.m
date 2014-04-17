@@ -35,13 +35,13 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 03-04-2014
 %--------------------------------------------------------------------------
 
-inter_biips('message', 'Initializing PIMH');
+matbiips('message', 'Initializing PIMH');
 obj_pimh.log_marg_like = - Inf;
 obj_pimh.sample = [];
 obj_pimh.variable_names = variable_names;

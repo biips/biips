@@ -18,4 +18,4 @@ function biips_print_dot(model, filename)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-inter_biips('print_graphviz', model.id, filename);
+matbiips('print_graphviz', model.id, filename);

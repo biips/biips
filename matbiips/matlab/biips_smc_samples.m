@@ -87,7 +87,7 @@ console = model.id; % Get the id of the biips console
 
 %% Monitor
 if (backward)
-    inter_biips('set_default_monitors', console);
+    matbiips('set_default_monitors', console);
 end
 if (~isempty(variable_names))
     monitor_biips(console, variable_names, type); 
@@ -96,12 +96,12 @@ end
 %% Run smc_sample
 run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
 
-log_marg_like = inter_biips('get_log_norm_const', console);
+log_marg_like = matbiips('get_log_norm_const', console);
 
 
 cz=cell(0,1);
 if filtering % Get filtering output
-    mon1 = inter_biips('get_filter_monitors', console);
+    mon1 = matbiips('get_filter_monitors', console);
     noms = fieldnames(mon1);
     cz = struct2cell(mon1);
     if (~backward)
@@ -110,16 +110,16 @@ if filtering % Get filtering output
 end
 
 if smoothing % Get smoothing output
-    mon2 = inter_biips('get_gen_tree_smooth_monitors', console);
+    mon2 = matbiips('get_gen_tree_smooth_monitors', console);
     noms = fieldnames(mon2);
     cz = horzcat(cz, struct2cell(mon2));
     clear_monitors(console, 's');
 end
 
 if (backward) % Get backward smoothing output
-   inter_biips('run_backward_smoother', console);
+   matbiips('run_backward_smoother', console);
    clear_monitors(console, 'f'); 
-   mon3 = inter_biips('get_backward_smooth_monitors', console);
+   mon3 = matbiips('get_backward_smooth_monitors', console);
    noms = fieldnames(mon3);    
    clear_monitors(console, 'b'); 
    cz = horzcat(cz, struct2cell(mon3));
