@@ -1,5 +1,5 @@
 #define sources
-file(GLOB MBIIPS_SRC 
+file(GLOB MATBIIPS_SRC 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.h 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
@@ -16,16 +16,16 @@ if (MATLAB OR OCTAVE)
 		${Boost_INCLUDE_DIRS}
 	)
 	
-	add_library(inter_biips SHARED EXCLUDE_FROM_ALL ${MBIIPS_SRC})
-	target_link_libraries(inter_biips ${BIIPS_LIBS} ${MATLAB_LIBRARIES})
-	set_target_properties(inter_biips PROPERTIES
+	add_library(matbiips SHARED EXCLUDE_FROM_ALL ${MATBIIPS_SRC})
+	target_link_libraries(matbiips ${BIIPS_LIBS} ${MATLAB_LIBRARIES})
+	set_target_properties(matbiips PROPERTIES
 		COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
 		LINK_FLAGS "${MATLAB_LINK_FLAGS}"
 		PREFIX ""
 		SUFFIX .${MEX_EXT}
 	)
 	
-    get_target_property(INTER_TARGET_LOC inter_biips LOCATION)
+    get_target_property(MATBIIPS_TARGET_LOC matbiips LOCATION)
 else()
     message (FATAL_ERROR "MATLAB not found on your computer.\n"
     			 "Try setting MATLAB_ROOT to the root path of 
@@ -36,23 +36,21 @@ else()
     setting BUILD_MATBIIPS=OFF")
 endif()
 
+
 # install mexfile in the build matlab directory
-set(INTER_BIN ${CMAKE_BINARY_DIR}/matbiips/matlab/inter_biips.${MEX_EXT})
-add_custom_command(OUTPUT ${INTER_BIN}
-	DEPENDS inter_biips
-    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
+add_custom_command(TARGET matbiips
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/matlab/"
     COMMENT "Copying mexfile in build matlab directory"
     VERBATIM
 )
 
 if (NOT BIIPS_DEBUG)
 	# copy mexfile in the src matlab directory
-	add_custom_command(TARGET inter_biips
+	add_custom_command(TARGET matbiips
 	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${INTER_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
+	    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/matlab/"
 	    COMMENT "Copying mexfile in source matlab directory"
 	    VERBATIM
 	)
 endif()
-
-add_custom_target(matbiips DEPENDS ${INTER_BIN})

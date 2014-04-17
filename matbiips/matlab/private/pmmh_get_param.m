@@ -11,7 +11,7 @@ if ~isempty(inits)
     for i=1:length(pn_param)
         if change_data
             % Take init value in inits parameters
-            ok = inter_biips('change_data', console, pn_param(i).name, ...
+            ok = matbiips('change_data', console, pn_param(i).name, ...
                 pn_param(i).lower, pn_param(i).upper, inits{i}, true);
             if ~ok
                 error('Data change failed: invalid initial value for variable %s', pn_param(i).name);
@@ -22,7 +22,7 @@ if ~isempty(inits)
 else
     for i=1:length(pn_param)
         try
-            sample_param{i} = inter_biips('sample_data', console, pn_param(i).name,...
+            sample_param{i} = matbiips('sample_data', console, pn_param(i).name,...
                 pn_param(i).lower, pn_param(i).upper, get_seed());
         catch
             error('CANNOT SAMPLE VARIABLE: BUG TO BE FIXED')

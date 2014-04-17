@@ -33,7 +33,7 @@ function obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -53,8 +53,8 @@ optarg_type = {'numeric', 'char'};
 check_struct_model(obj_pimh.model);
 
 %% Stops biips verbosity
-inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+matbiips('verbosity', 0);
+cleanupObj = onCleanup(@() matbiips('verbosity', 1));% set verbosity on again when function terminates
 
 
 %% Create a clone model for the PIMH
@@ -62,8 +62,8 @@ variable_names = obj_pimh.variable_names;
 % model2 = clone_model(obj_pimh.model);
 console = obj_pimh.model.id;
 monitor_biips(console, variable_names, 's'); 
-if (~inter_biips('is_sampler_built', console))
-   inter_biips('build_smc_sampler', console, false);
+if (~matbiips('is_sampler_built', console))
+   matbiips('build_smc_sampler', console, false);
 end
 
 %% Get sample and log likelihood from PIMH object
@@ -73,10 +73,10 @@ log_marg_like = obj_pimh.log_marg_like;
 
 % %% Initialization
 % [sample, log_marg_like] = pimh_init(console, variable_names, n_part, rs_thres, rs_type);
-inter_biips('message', ['Updating PIMH with ' num2str(n_part) ...
+matbiips('message', ['Updating PIMH with ' num2str(n_part) ...
     ' particles and ' num2str(n_iter) ' iterations']);
 
-bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
+bar = matbiips('make_progress_bar', n_iter, '*', 'iterations');
 
 % Independent Metropolis-Hastings iterations
 for i=1:n_iter
@@ -84,14 +84,14 @@ for i=1:n_iter
         variable_names, n_part, rs_thres, rs_type, sample, log_marg_like);
     
     % Progress bar
-    inter_biips('advance_progress_bar', bar, 1);    
+    matbiips('advance_progress_bar', bar, 1);    
 end
 
 % Release monitor memory
 clear_monitors(console, 's', true);
 
 % % Delete clone console
-% inter_biips('clear_console', console);
+% matbiips('clear_console', console);
 
 obj_pimh.sample = sample;
 obj_pimh.log_marg_like = log_marg_like;
