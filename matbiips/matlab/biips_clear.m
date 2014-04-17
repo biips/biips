@@ -24,8 +24,8 @@ function biips_clear(model)
 
 
 if nargin
-    inter_biips('clear_console', model.id); 
+    matbiips('clear_console', model.id); 
 else
-    clear inter_biips
-%     inter_biips('clear_all_console');
+    clear matbiips
+%     matbiips('clear_all_console');
 end

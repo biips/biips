@@ -9,7 +9,7 @@ function [sample_param, sample_latent, log_prior, log_marg_like]...
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -76,7 +76,7 @@ end
 % log-prior density
 log_prior = 0;
 for i=1:length(param_names)
-    log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
+    log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
     if isnan(log_p) || log_p==Inf
         error('Failed to evaluate log-prior density');
@@ -95,26 +95,26 @@ if ~isempty(latent_names)
 end
 
 % build SMC sampler
-if ~inter_biips('is_sampler_built', console)
-    inter_biips('build_smc_sampler', console, false)
+if ~matbiips('is_sampler_built', console)
+    matbiips('build_smc_sampler', console, false)
 end
 
 
 if first_init
-    inter_biips('message', 'Initializing PMMH');   
+    matbiips('message', 'Initializing PMMH');   
     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
     if (~ok)
         error('Run SMC sampler: invalid values');        
     end    
 elseif ~latent_monitored
-    inter_biips('message', 'Initializing PMMH - latent variables');
+    matbiips('message', 'Initializing PMMH - latent variables');
     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
     if (~ok)
         error('Run SMC sampler: invalid values');        
     end    
 end
     
-log_marg_like = inter_biips('get_log_norm_const', console);
+log_marg_like = matbiips('get_log_norm_const', console);
 if isnan(log_marg_like) || isinf(log_marg_like)
     error('Failed to evaluate the log marginal likelihood (Inf or NaN)');
 end
@@ -123,12 +123,12 @@ end
 %% Get latent variables sampled value
 sample_latent = cell(length(latent_names), 1);
 if (~isempty(latent_names))
-    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+    sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
     if isempty(fieldnames(sampled_value))
         % Sample one particle
         rng_seed = get_seed();
-        inter_biips('sample_gen_tree_smooth_particle', console, rng_seed);
-        sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+        matbiips('sample_gen_tree_smooth_particle', console, rng_seed);
+        sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
     end
     for i=1:length(latent_names)
         var_name = latent_names{i};
