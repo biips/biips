@@ -26,8 +26,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-#  \file     particles.R
-#  \brief    R functions manipulating particles objects
+#  \file     smcarray.R
+#  \brief    R functions manipulating smcarray objects
 #
 #  \author   $LastChangedBy$
 #  \date     $LastChangedDate$
@@ -38,23 +38,23 @@
 
 ##' Objects for representing SMC output
 ##' 
-##' A \code{particles} object is used by the \code{smc.samples} function to
+##' A \code{smcarray} object is used by the \code{smc.samples} function to
 ##' represent SMC output from a BiiPS model. It is an array with named
-##' dimensions, for which the dimension \dQuote{particles} has a special
+##' dimensions, for which the dimension \dQuote{smcarray} has a special
 ##' status.
 ##' 
-##' A \code{particles.list} object is a list of \code{particles} objects with
+##' A \code{smcarray.list} object is a list of \code{smcarray} objects with
 ##' different types of monitoring for the same variable.
 ##' 
-##' Functions applying to \code{particles} objects apply identically to
-##' \code{particles.list} objects by a call to each element of the list.
+##' Functions applying to \code{smcarray} objects apply identically to
+##' \code{smcarray.list} objects by a call to each element of the list.
 ##' 
-##' @name particles.object
-##' @aliases particles.object particles.list.object diagnostic
-##' diagnostic.particles diagnostic.particles.list summary.particles
-##' summary.particles.list density.particles density.particles.list
-##' plot.particles plot.particles.list
-##' @param object,x a \code{particles} or \code{particles.list} object
+##' @name smcarray.object
+##' @aliases smcarray.object smcarray.list.object diagnostic
+##' diagnostic.smcarray diagnostic.smcarray.list summary.smcarray
+##' summary.smcarray.list density.smcarray density.smcarray.list
+##' plot.smcarray plot.smcarray.list
+##' @param object,x a \code{smcarray} or \code{smcarray.list} object
 ##' @param fun a character vector indicating the functions to be used to
 ##' generate summary statistics
 ##' @param probs a numerical vector containing the desired quantile
@@ -66,8 +66,8 @@
 ##' @param subset
 ##' @param ess.thres
 ##' @param ... additional arguments to be passed to the default methods
-##' @return The \code{summary} method for \code{particles} objects applies the
-##' given function to the array, marginalizing the \dQuote{particles}
+##' @return The \code{summary} method for \code{smcarray} objects applies the
+##' given function to the array, marginalizing the \dQuote{smcarray}
 ##' dimension.
 ##' @author Adrien Todeschini, Francois Caron
 ##' @seealso \link{density}
@@ -81,38 +81,21 @@
 NULL
 
 
-which.type <- function(x, type=NULL)
-{
-  if (!is.null(type) && !is.character(type))
-    stop("type must be a character vector or NULL.")
-  
-  type <- match.arg(type, c("filtering", "smoothing", "backward.smoothing"), several.ok = TRUE)
-  
-  ind <- c()
-  for (p in seq(along=x)) {      
-    if (is.null(type) || x[[p]]$type %in% type)
-      ind <- c(ind, p)
-  }
-  
-  return(ind)
-}
-
-
-##' @S3method print particles
-print.particles <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75),...)
+##' @S3method print smcarray
+print.smcarray <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75),...)
 {
   print(summary(x, fun, probs), ...)
 }
 
 
-##' @S3method print particles.list
-print.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75), ...)
+##' @S3method print smcarray.list
+print.smcarray.list <- function(x, fun = c("mean","mode"), probs = c(0.25, 0.5, 0.75), ...)
 {
   print(summary(x, fun, probs), ...)
 }
 
 
-stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
+stat.smcarray <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
 {
   if (!is.character(fun))
     stop("invalid fun argument.")
@@ -158,8 +141,8 @@ stat.particles <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
 }
 
 
-##' @S3method summary particles
-summary.particles <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
+##' @S3method summary smcarray
+summary.smcarray <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
 {
   if (is.null(object$values) || is.null(object$weights) || is.null(object$discrete)) {
     NextMethod()
@@ -190,33 +173,33 @@ summary.particles <- function(object, fun, probs = c(0.25,0.5,0.75), ...)
 
   drop.dims <- names(dim(object$values)) %in% c("particle")
   
-  stat <- stat.particles(object, fun, probs)
+  stat <- stat.smcarray(object, fun, probs)
   stat[["drop.dims"]] <- dim(object$values)[drop.dims]
   stat[["name"]] <- deparse.varname(object$name, object$lower, object$upper)
   stat[["type"]] <- object$type
-  class(stat) <- "summary.particles"
+  class(stat) <- "summary.smcarray"
 
   return(stat)
 }
 
 
-##' @S3method summary particles.list
-summary.particles.list <- function(object, ...)
+##' @S3method summary smcarray.list
+summary.smcarray.list <- function(object, ...)
 {
   ans <- list()
   for (n in names(object))
     ans[[n]] <- summary(object[[n]], ...)
   
-  class(ans) <- "summary.particles.list"
+  class(ans) <- "summary.smcarray.list"
 
   return(ans)
 }
 
 
-##' @S3method print summary.particles
-print.summary.particles <- function(x, ...)
+##' @S3method print summary.smcarray
+print.summary.smcarray <- function(x, ...)
 {
-  cat(x$name, x$type, "particles:\n")
+  cat(x$name, x$type, "smcarray:\n")
   print(x[!(names(x) %in% c("drop.dims", "name", "type"))], ...)
   if (length(x$drop.dims) > 0) {
     cat("Marginalizing over:", 
@@ -227,8 +210,8 @@ print.summary.particles <- function(x, ...)
 }
 
 
-##' @S3method print summary.particles.list
-print.summary.particles.list <- function(x, ...)
+##' @S3method print summary.smcarray.list
+print.summary.smcarray.list <- function(x, ...)
 {
   for (n in names(x)) {
     print(x[[n]], ...)
@@ -238,15 +221,15 @@ print.summary.particles.list <- function(x, ...)
 }
 
 
-##' @S3method plot summary.particles
-plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
+##' @S3method plot summary.smcarray
+plot.summary.smcarray <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="offset",
                                    ylab="value", main, sub, args.legend=list(), ...)
 {
   ltyy <- lty
   lwdd <- lwd
   coll <- col
   
-  legend.summary.particles <- function(x="topright", y=NULL,
+  legend.summary.smcarray <- function(x="topright", y=NULL,
                                        lty=ltyy, lwd=lwdd, col=coll, bty="n", inset=c(0.01,0.01), ...)
   {
     return(legend(x=x, y=y, lty=lty, lwd=lwd, col=col, bty=bty, inset=inset, ...))
@@ -278,13 +261,13 @@ plot.summary.particles <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="o
   matplot(mat, type=type, xlab=xlab, ylab=ylab, main=main, sub=sub, lty=lty, lwd=lwd, col=col, ...)
   
   args.legend[["legend"]] <- stat.names
-  do.call("legend.summary.particles", args.legend)
+  do.call("legend.summary.smcarray", args.legend)
   invisible()
 }
 
 
-##' @S3method plot summary.particles.list
-plot.summary.particles.list <- function(x, ...)
+##' @S3method plot summary.smcarray.list
+plot.summary.smcarray.list <- function(x, ...)
 {
   for (n in names(x))
     plot(x[[n]], ...)
@@ -292,16 +275,16 @@ plot.summary.particles.list <- function(x, ...)
 }
 
 
-##' @S3method plot particles
-plot.particles <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
+##' @S3method plot smcarray
+plot.smcarray <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
 {
   plot(summary(x, fun, probs), ...)
   invisible()
 }
 
 
-##' @S3method plot particles.list
-plot.particles.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
+##' @S3method plot smcarray.list
+plot.smcarray.list <- function(x, fun = c("mean","mode"), probs = c(0.25,0.5,0.75), ...)
 {
   for (n in names(x))
     plot(x[[n]], fun, probs, ...)
@@ -314,18 +297,18 @@ diagnostic <- function(object, ...)
   UseMethod("diagnostic")
 
 
-##' @S3method diagnostic particles
-diagnostic.particles <- function(object, ess.thres=30, ...)
+##' @S3method diagnostic smcarray
+diagnostic.smcarray <- function(object, ess.thres=30, ...)
 {
   ess.min <- min(object$ess)
   ans <- list("ESS min."=ess.min, "valid"=ess.min>ess.thres)
-  class(ans) <- "diagnostic.particles"
+  class(ans) <- "diagnostic.smcarray"
   return(ans)
 }
 
 
-##' @S3method print diagnostic.particles
-print.diagnostic.particles <- function(x, ...)
+##' @S3method print diagnostic.smcarray
+print.diagnostic.smcarray <- function(x, ...)
 {
   if (x$valid)
     cat("diagnostic: GOOD\n")
@@ -338,8 +321,8 @@ print.diagnostic.particles <- function(x, ...)
 }
 
 
-##' @S3method diagnostic particles.list
-diagnostic.particles.list <- function(object, ...)
+##' @S3method diagnostic smcarray.list
+diagnostic.smcarray.list <- function(object, ...)
 {
   ans <- list()
   for (n in names(object))
@@ -394,8 +377,8 @@ deparse.varname <- function(name, lower=NULL, upper=lower)
 
 
 ##' @importFrom stats density
-##' @S3method density particles
-density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
+##' @S3method density smcarray
+density.smcarray <- function(x, bw="nrd0", adjust=1, subset, ...)
 {
   ans <- list()
   bww <- bw
@@ -452,23 +435,23 @@ density.particles <- function(x, bw="nrd0", adjust=1, subset, ...)
     }
     
     ans[[varname]] <- list(density=dens, name=varname, type=x$type, n.part=n.part, ess=ess, discrete=discrete)
-    class(ans[[varname]]) <- "density.particles.atomic"
+    class(ans[[varname]]) <- "density.smcarray.atomic"
   }
   
-  class(ans) <- "density.particles"
+  class(ans) <- "density.smcarray"
   return(ans)
 }
 
 
-##' @S3method density particles.list
-density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
+##' @S3method density smcarray.list
+density.smcarray.list <- function(x, bw="nrd0", adjust=1, subset, ...)
 {
   ans <- list()
   bw.s <- bw
   
   # first treat filtering and backward.smoothing
   if (!is.null(x[["filtering"]])) {
-    dens <- density.particles(x[["filtering"]], bw, adjust, subset, ...)
+    dens <- density.smcarray(x[["filtering"]], bw, adjust, subset, ...)
     bw.s <- list()
     for (n in names(dens)) {
       ans[[n]][["filtering"]] <- dens[[n]]
@@ -476,7 +459,7 @@ density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
     }
   }
   if (!is.null(x[["backward.smoothing"]])) {
-    dens <- density.particles(x[["backward.smoothing"]], bw, adjust, subset, ...)
+    dens <- density.smcarray(x[["backward.smoothing"]], bw, adjust, subset, ...)
     bw.s <- list()
     for (n in names(dens)) {
       ans[[n]][["backward.smoothing"]] <- dens[[n]]
@@ -488,21 +471,21 @@ density.particles.list <- function(x, bw="nrd0", adjust=1, subset, ...)
   if (!is.null(x[["smoothing"]])) {
     if (is.list(bw.s))
       adjust <- 1
-    dens <- density.particles(x[["smoothing"]], bw.s, adjust, subset, ...)
+    dens <- density.smcarray(x[["smoothing"]], bw.s, adjust, subset, ...)
     for (n in names(dens))
       ans[[n]][["smoothing"]] <- dens[[n]]
   }
   
   for (n in names(ans))
-    class(ans[[n]]) <- "density.particles.atomic.list"
+    class(ans[[n]]) <- "density.smcarray.atomic.list"
 
-  class(ans) <- "density.particles.list"
+  class(ans) <- "density.smcarray.list"
   return(ans)
 }
 
 
-##' @S3method plot density.particles.atomic
-plot.density.particles.atomic <- function(x, type="l", lwd=1, col=1:6,
+##' @S3method plot density.smcarray.atomic
+plot.density.smcarray.atomic <- function(x, type="l", lwd=1, col=1:6,
                                           xlab="value", ylab, main, sub, 
                                           legend.text=NULL, args.legend=NULL, 
                                           ...)
@@ -510,7 +493,7 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, col=1:6,
   lwdd <- lwd
   coll <- col
   
-  legend.density.particles <- function(x="topright", y=NULL, lwd=lwdd,
+  legend.density.smcarray <- function(x="topright", y=NULL, lwd=lwdd,
                                        col=coll, ...)
   {
     return(legend(x=x, y=y, lwd=lwd, col=col, ...))
@@ -518,7 +501,7 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, col=1:6,
   
   leg.flag <- TRUE
   if (is.logical(legend.text)) {
-    stopifnot(is.atomic(legend.text))
+    stopifnot(length(legend.text)==1)
     leg.flag <- legend.text
   }
   
@@ -556,15 +539,15 @@ plot.density.particles.atomic <- function(x, type="l", lwd=1, col=1:6,
          xlab=xlab, ylab=ylab, main=main, sub=sub, ...)
   
     if (leg.flag)
-      do.call(legend.density.particles, c(legend=legend.text, args.legend))
+      do.call(legend.density.smcarray, c(legend=legend.text, args.legend))
   }
       
   invisible()
 }
 
 
-##' @S3method plot density.particles
-plot.density.particles <- function(x, type="l", lwd=lwd, col=1:6, ...)
+##' @S3method plot density.smcarray
+plot.density.smcarray <- function(x, type="l", lwd=lwd, col=1:6, ...)
 {
   for (n in names(x)) {
     plot(x[[n]], type=type, lwd=lwd, col=col, ...)
@@ -573,8 +556,8 @@ plot.density.particles <- function(x, type="l", lwd=lwd, col=1:6, ...)
 }
 
 
-##' @S3method plot density.particles.atomic.list
-plot.density.particles.atomic.list <- function(x, type="l", lwd=1, col=1:6,
+##' @S3method plot density.smcarray.atomic.list
+plot.density.smcarray.atomic.list <- function(x, type="l", lwd=1, col=1:6,
                                                xlab="value", ylab, main, sub, 
                                                legend.text=NULL, args.legend=NULL, 
                                                ...)
@@ -582,7 +565,7 @@ plot.density.particles.atomic.list <- function(x, type="l", lwd=1, col=1:6,
   lwdd <- lwd
   coll <- col
   
-  legend.density.particles <- function(x="topright", y=NULL, lwd=lwdd, col=coll, ...)
+  legend.density.smcarray <- function(x="topright", y=NULL, lwd=lwdd, col=coll, ...)
   {
     return(legend(x=x, y=y, lwd=lwd, col=col, ...))
   }
@@ -657,15 +640,15 @@ plot.density.particles.atomic.list <- function(x, type="l", lwd=1, col=1:6,
          xlab=xlab, ylab=ylab, main=main, sub=sub, ...)
     
     if (leg.flag)
-      do.call(legend.density.particles, c(legend=legend.text, args.legend))
+      do.call(legend.density.smcarray, c(legend=legend.text, args.legend))
   }
       
   invisible()
 }
 
 
-##' @S3method plot density.particles.list
-plot.density.particles.list <- function(x, type="l", lwd=1, col=1:6, ...)
+##' @S3method plot density.smcarray.list
+plot.density.smcarray.list <- function(x, type="l", lwd=1, col=1:6, ...)
 {
   for (n in names(x)) {
     plot(x[[n]], type=type, lwd=lwd, col=col, ...)

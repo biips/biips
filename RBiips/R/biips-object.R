@@ -26,7 +26,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-#  \file     biips.object.R
+#  \file     biips-object.R
 #  \brief    R functions manipulating biips objects
 #
 #  \author   $LastChangedBy$
@@ -44,7 +44,7 @@
 ##' The \code{variable.names} function returns a character vector of names of
 ##' node arrays used in the model.
 ##' 
-##' @name biips.object 
+##' @name biips-object 
 ##' @aliases biips.object build.sampler build.sampler.biips pmmh.init
 ##' pmmh.init.biips pmmh.update pmmh.update.biips pimh.update pimh.update.biips
 ##' variable.names.biips is.biips
@@ -77,7 +77,7 @@ NULL
 ##' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
 ##' variable name and n,p,q,r are integers
 ##' @param varname string containing the name of the variable to sparse
-parse.varname <- function(varname) {
+parse_varname <- function(varname) {
   
   
   v <- try(parse(text=varname, n=1), silent=TRUE)
@@ -122,12 +122,12 @@ parse.varname <- function(varname) {
 }
 
 
-parse.varnames <- function(varnames)
+parse_varnames <- function(varnames)
 {
   names <- character(length(varnames))
   lower <- upper <- vector("list", length(varnames))
   for (i in seq(along=varnames)) {
-    y <- parse.varname(varnames[i])
+    y <- parse_varname(varnames[i])
     if (is.null(y)) {
       stop("Invalid variable subset ", varnames[i])
     }
@@ -152,9 +152,6 @@ is.biips <- function(object)
 ##' @S3method print biips
 print.biips <- function(x,...)
 {
-  if (!is.biips(x))
-    stop("Invalid BiiPS model.")
-  
   cat("BiiPS model:\n\n")
   
   model <- x$model()
@@ -173,15 +170,17 @@ print.biips <- function(x,...)
   }
 }
 
+
+monitor <- function(object, ...)
+  UseMethod("monitor")
+
+##' @S3method monitor biips
 monitor.biips <- function(object, variable.names, type)
 {
-  if (!is.biips(object))
-    stop("Invalid BiiPS model.")
-  
   if (!is.character(variable.names) || length(variable.names) == 0)
     stop("variable.names must be a character vector")
     
-  pn <- parse.varnames(variable.names)
+  pn <- parse_varnames(variable.names)
   
   type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
   if ("f" %in% type) {
@@ -197,15 +196,16 @@ monitor.biips <- function(object, variable.names, type)
 }
 
 
-is.monitored.biips <- function(object, variable.names, type, check.released=TRUE)
+is_monitored <- function(object, ...)
+  UseMethod("is_monitored")
+
+##' @S3method is_monitored biips
+is_monitored.biips <- function(object, variable.names, type, check.released=TRUE)
 {
-  if (!is.biips(object))
-    stop("Invalid BiiPS model.")
-  
   if (!is.character(variable.names) || length(variable.names) == 0)
     stop("variable.names must be a character vector")
   
-  pn <- parse.varnames(variable.names)
+  pn <- parse_varnames(variable.names)
   
   type <- match.arg(type, c("f", "s", "b"))
   if (type == "f") {
@@ -221,11 +221,12 @@ is.monitored.biips <- function(object, variable.names, type, check.released=TRUE
 }
 
 
-clear.monitors.biips <- function(object, type, release.only=FALSE)
+clear_monitors <- function(object, ...)
+  UseMethod("clear_monitors")
+
+##' @S3method clear_monitors biips
+clear_monitors.biips <- function(object, type, release.only=FALSE)
 {
-  if (!is.biips(object))
-    stop("Invalid BiiPS model.")
-  
   type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
   if ("f" %in% type) {
     .Call("clear_filter_monitors", object$ptr(), release.only, PACKAGE="RBiips")
@@ -241,16 +242,13 @@ clear.monitors.biips <- function(object, type, release.only=FALSE)
 
 
 ##' @export
-build.sampler <- function(object, ...)
-  UseMethod("build.sampler")
+build_sampler <- function(object, ...)
+  UseMethod("build_sampler")
 
 
-##' @S3method build.sampler biips
-build.sampler.biips <- function(object, proposal= "auto", ...)
+##' @S3method build_sampler biips
+build_sampler.biips <- function(object, proposal= "auto", ...)
 {
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-      
   if (!is.character(proposal) || length(proposal)!=1) {
     stop("Invalid proposal argument")
   }
