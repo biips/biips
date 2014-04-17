@@ -52,7 +52,7 @@ if "%4" == "-oct" (
 choice /m "Git pull"
 if "%errorlevel%"=="1" (
     "%PAGEANT%" "%GFORGE_PRIVATE_KEY%"
-    "%TORTOISEGITPROC%" /command:pull origin master /path:"%BIIPS_SRC%" /closeonend:2
+    "%TORTOISEGITPROC%" /command:pull /path:"%BIIPS_SRC%" /closeonend:2
 )
 
 choice /m "Run CMake"
