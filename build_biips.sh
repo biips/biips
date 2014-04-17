@@ -67,7 +67,7 @@ fi
 set +x; echo -n "*** Git pull? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_SRC
-    git pull origin master
+    git pull
 fi
 
 set +x; echo -n "*** Run CMake? (y/[n])"; read ans
