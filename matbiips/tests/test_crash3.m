@@ -30,7 +30,7 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
-%clear inter_biips
+%clear matbiips
 
 % test_crash3
 % * Parsing model in: hmm_1d_lin2.bug

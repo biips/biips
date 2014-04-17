@@ -30,14 +30,14 @@ n_fail = 0;
 log_prior_prop = 0;
 for i=1:length(param_names)
     var = param_names{i};
-    ok = inter_biips('change_data', console, pn_param(i).name, ...
+    ok = matbiips('change_data', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper, prop{i}, true);
     if ~ok % DATA CHANGE FAILED: proposed parameter value is out of bounds
         log_prior_prop = -Inf;
 %         n_fail = n_fail + 1;
 %         warning('Data change failed: %s = %.1f', var, prop{i});
     end
-    log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
+    log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
     log_prior_prop = log_prior_prop + log_p;
 end
@@ -55,7 +55,7 @@ else
             n_fail = n_fail + 1;
             warning('Failure running SMC forward sampler')
         else
-            log_marg_like_prop = inter_biips('get_log_norm_const', console);
+            log_marg_like_prop = matbiips('get_log_norm_const', console);
             if isnan(log_marg_like_prop) || log_marg_like_prop==Inf
                 error('Failed to get log marginal likelihood');
             end
@@ -77,8 +77,8 @@ else
         if ~isempty(latent_names)
             % Sample one realization of the monitored latent variables
             rng_seed = get_seed();
-            inter_biips('sample_gen_tree_smooth_particle', console, rng_seed);
-            sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+            matbiips('sample_gen_tree_smooth_particle', console, rng_seed);
+            sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
             for i=1:length(latent_names)
                 var = latent_names{i};
                 sample_latent{i} = getfield(sampled_value, var);

@@ -23,7 +23,7 @@ function summ = summary(values, weights, probas, order)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -53,11 +53,11 @@ if length(size_q) == 1
     size_q = [size_q, 1];
 end
 if (~isempty(probas))
-%     q = inter_biips('weighted_quantiles', part.values, part.weights, probas)    
-    quantiles = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
+%     q = matbiips('weighted_quantiles', part.values, part.weights, probas)    
+    quantiles = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
     summ.quant = reshape(cat(2, quantiles{:}), [length(probas), size_q]);
 end
-med = cellfun(@(x,w) inter_biips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
+med = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
 
 summ.med = reshape(cat(2, med{:}), size_q);
 end

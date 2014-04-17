@@ -28,15 +28,15 @@ optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
     optarg_type, optarg_valid, optarg_default);
 
 %% Stops biips verbosity
-old_verb = inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', old_verb));% reset verbosity when function terminates
+old_verb = matbiips('verbosity', 0);
+cleanupObj = onCleanup(@() matbiips('verbosity', old_verb));% reset verbosity when function terminates
 
 
 %% Create a clone console
 model2 = clone_model(obj.model);
 console = model2.id;
-if (~inter_biips('is_sampler_built', console))
-   inter_biips('build_smc_sampler', console, false);
+if (~matbiips('is_sampler_built', console))
+   matbiips('build_smc_sampler', console, false);
 end
 
 param_names = obj.param_names;
@@ -100,15 +100,15 @@ end
 % display message and progress bar
 if ~return_samples
     if rw_learn 
-        inter_biips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
-        bar = inter_biips('make_progress_bar', n_iter, '+', 'iterations');
+        matbiips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
+        bar = matbiips('make_progress_bar', n_iter, '+', 'iterations');
     else
-        inter_biips('message', ['Updating PMMH with ', num2str(n_part) ' particles']);
-        bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
+        matbiips('message', ['Updating PMMH with ', num2str(n_part) ' particles']);
+        bar = matbiips('make_progress_bar', n_iter, '*', 'iterations');
     end
 else
-    inter_biips('message', ['Generating ' num2str(n_samples) ' PMMH samples with ', num2str(n_part) ' particles']);
-    bar = inter_biips('make_progress_bar', n_iter, '*', 'iterations');
+    matbiips('message', ['Generating ' num2str(n_samples) ' PMMH samples with ', num2str(n_part) ' particles']);
+    bar = matbiips('make_progress_bar', n_iter, '*', 'iterations');
 end
 
 
@@ -121,7 +121,7 @@ for i=1:n_iter
         rs_type, obj, rw_rescale, rw_learn);
 
     % Print progress bar
-    inter_biips('advance_progress_bar', bar, 1);
+    matbiips('advance_progress_bar', bar, 1);
     
     n_fail = n_fail + n_fail_step;
     n_accept = n_accept + accepted;
@@ -177,7 +177,7 @@ for i=1:n_iter
 end
 
 %% Delete clone console
-inter_biips('clear_console', console); 
+matbiips('clear_console', console); 
 
 % if ~isempty(latent_names)
 %     clear_monitors(console, 's')
@@ -189,13 +189,13 @@ inter_biips('clear_console', console);
 % if (n_iter>0 && ~accepted)
 %     for i=1:n_param
 %         var = param_names{i};
-%         tag = inter_biips('change_data', console, pn_param(i).name, ...
+%         tag = matbiips('change_data', console, pn_param(i).name, ...
 %             pn_param(i).lower, pn_param(i).upper, sample_param{i}, true);
 %         if ~tag
 %             error('Cannot reset previous data: %s=%.f', var, sample_param{i});
 %         end        
 %     end
-%     inter_biips('set_log_norm_const', console, log_marg_like)
+%     matbiips('set_log_norm_const', console, log_marg_like)
 % end
 
 obj.param_val = sample_param;

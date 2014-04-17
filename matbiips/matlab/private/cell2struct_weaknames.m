@@ -15,7 +15,7 @@ function s= cell2struct_weaknames(fields, weak_names)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -34,4 +34,4 @@ if (~all(cellfun(@(x) ischar(x), weak_names)))
 end
 
 
-s = inter_biips('cell2struct_weak_names', fields, weak_names);
+s = matbiips('cell2struct_weak_names', fields, weak_names);
