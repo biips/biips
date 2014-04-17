@@ -96,15 +96,15 @@ optarg_type = {'numeric', 'char'};
 
 
 %% Stops biips verbosity
-inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', 1));% set verbosity on again when function terminates
+matbiips('verbosity', 0);
+cleanupObj = onCleanup(@() matbiips('verbosity', 1));% set verbosity on again when function terminates
 
 %% Create a clone model
 model2 = clone_model(model);
 console = model2.id;
 %monitor_biips(console, variable_names, 's'); 
-if (~inter_biips('is_sampler_built', console))
-   inter_biips('build_smc_sampler', console, false);
+if (~matbiips('is_sampler_built', console))
+   matbiips('build_smc_sampler', console, false);
 end
 
 
@@ -116,9 +116,9 @@ max_log_marg_like_pen = -Inf;
 max_param = [];
 max_param_pen = [];
 
-inter_biips('message', ['Analyzing sensitivity with ' num2str(n_part) ' particles']);
+matbiips('message', ['Analyzing sensitivity with ' num2str(n_part) ' particles']);
 % Progress bar
-bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
+bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
  % Iterate over different values
  for k=1:n_values
      % Update value of each parameter
@@ -137,7 +137,7 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
              case 4
                  value{i} = param_values{i}(:, :, :, k);
          end
-         tag = inter_biips('change_data', console, pn_param(i).name, ...
+         tag = matbiips('change_data', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper, value{i}, false);
          if ~tag
              error('Data change failed: invalid parameter %s = %.f.', var, value{i});
@@ -146,7 +146,7 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
      
      log_prior = 0;
      for i=1:n_params
-         log_p = inter_biips('get_log_prior_density', console, pn_param(i).name, ...
+         log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper);
          log_prior = log_prior + log_p;
      end
@@ -156,7 +156,7 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
      end
      
      % log marginal likelihood
-     log_marg_like(k) = inter_biips('get_log_norm_const', console);
+     log_marg_like(k) = matbiips('get_log_norm_const', console);
      if log_marg_like(k)>max_log_marg_like
          max_log_marg_like = log_marg_like(k);
          max_param = value;
@@ -168,10 +168,10 @@ bar = inter_biips('make_progress_bar', n_values, '*', 'iterations');
      end
      
      % Advance progress bar
-     inter_biips('advance_progress_bar', bar, 1);
+     matbiips('advance_progress_bar', bar, 1);
  end
 %% Delete clone console
-inter_biips('clear_console', console); 
+matbiips('clear_console', console); 
  
 out.log_marg_like = log_marg_like;
 out.log_marg_like_pen = log_marg_like_pen;

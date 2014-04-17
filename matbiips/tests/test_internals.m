@@ -11,8 +11,8 @@ data=struct('t_max', t_max, 'prec_x_init', prec_x_init, 'prec_x', prec_x,  'prec
 model = biips_model('hmm_1d_lin.bug', data);
 out_smc = biips_smc_samples(model, {'x[1:2]'}, 100);
 % test change data
-change_ok = inter_biips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
+change_ok = matbiips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
 %
-sample = inter_biips('sample_data', model.id, 'x', [1] , [1] , rand(1))
+sample = matbiips('sample_data', model.id, 'x', [1] , [1] , rand(1))
 % console cleaning 
-inter_biips('clear_console', model.id); 
+matbiips('clear_console', model.id); 
