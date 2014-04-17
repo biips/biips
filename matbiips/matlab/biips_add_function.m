@@ -78,7 +78,7 @@ end
 
 %% Add function
 try
-    inter_biips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
+    matbiips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
     fprintf('Added function ''%s''\n', name)
 catch
     warning('Cannot add function ''%s'' - the function may already exist', name);

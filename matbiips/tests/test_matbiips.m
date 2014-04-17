@@ -11,11 +11,11 @@ switch(test)
     N=10;
     ids=zeros(N,1);
     for i=1:N;
-      ids(i)=inter_biips('make_console');
+      ids(i)=matbiips('make_console');
     end
     p=randperm(N);
     for i=1:N
-       inter_biips('clear_console',ids(p(i)));
+       matbiips('clear_console',ids(p(i)));
     end
 
     % Test model

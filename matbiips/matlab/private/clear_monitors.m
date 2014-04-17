@@ -14,7 +14,7 @@ function clear_monitors(p, type, release_only)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -26,11 +26,11 @@ end
 
 indices = arrayfun(@(x) strfind(type, x), 'fsb', 'UniformOutput', 0); 
 if (~isempty(indices{1})) % filtering
-  inter_biips('clear_filter_monitors', p, release_only);
+  matbiips('clear_filter_monitors', p, release_only);
 end 
 if (~isempty(indices{2})) % smoothing
-  inter_biips('clear_gen_tree_smooth_monitors', p, release_only);
+  matbiips('clear_gen_tree_smooth_monitors', p, release_only);
 end  
 if (~isempty(indices{3})) %backward_smoothing
-  inter_biips('clear_backward_smooth_monitors', p, release_only);
+  matbiips('clear_backward_smooth_monitors', p, release_only);
 end 

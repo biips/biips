@@ -81,7 +81,7 @@ end
 
 %% Add distribution sampler
 try
-    inter_biips('add_distrib_sampler', name, nb_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
+    matbiips('add_distrib_sampler', name, nb_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
     fprintf('Added distribution sampler ''%s''\n', name)
 catch
     warning('Cannot add distribution sampler ''%s'' - the distribution may already exist', name);

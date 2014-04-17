@@ -49,7 +49,7 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric','char'};
 [inits, rw_step, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-inter_biips('message', 'Initializing PMMH');   
+matbiips('message', 'Initializing PMMH');   
 
 % Check param_names
 for i=1:length(param_names)
@@ -68,8 +68,8 @@ if ~isempty(inits)
 end
 
 %% Stops biips verbosity
-old_verb = inter_biips('verbosity', 0);
-cleanupObj = onCleanup(@() inter_biips('verbosity', old_verb));% reset verbosity when function terminates
+old_verb = matbiips('verbosity', 0);
+cleanupObj = onCleanup(@() matbiips('verbosity', old_verb));% reset verbosity when function terminates
 
 % model
 obj.model = model;
@@ -83,7 +83,7 @@ pn_param = cellfun(@parse_varname, param_names);
 sample_param = pmmh_get_param(console, pn_param, inits);
 
 %% Delete clone console
-inter_biips('clear_console', console)
+matbiips('clear_console', console)
 
 
 % Parameters and latent

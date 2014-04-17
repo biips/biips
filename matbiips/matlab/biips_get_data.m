@@ -22,4 +22,4 @@ function data = biips_get_data(model)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-data = inter_biips('get_data', model);
+data = matbiips('get_data', model);

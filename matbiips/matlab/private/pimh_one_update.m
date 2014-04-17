@@ -38,7 +38,7 @@ function [sample, log_marg_like, accepted] = pimh_one_update(console,...
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -50,7 +50,7 @@ function [sample, log_marg_like, accepted] = pimh_one_update(console,...
 run_smc_forward(console, n_part, rs_thres, rs_type);
 
 %% Acceptance rate
-log_marg_like_prop = inter_biips('get_log_norm_const', console);
+log_marg_like_prop = matbiips('get_log_norm_const', console);
 log_ar = log_marg_like_prop - log_marg_like;
 
 %% Metropolis-Hastings step
@@ -60,10 +60,10 @@ if accepted
     
     % Sample one particle
     rng_seed = get_seed();
-    inter_biips('sample_gen_tree_smooth_particle', console, rng_seed);
+    matbiips('sample_gen_tree_smooth_particle', console, rng_seed);
     
     % Get sampled value
-    sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', console);
+    sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
 %     sampled_value.x
 %     pause
     cell_struct = cell(length(variable_names), 1);

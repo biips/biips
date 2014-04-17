@@ -82,19 +82,19 @@ if (isa(data, 'cell'))
 end
 
 %% Create console
-p = inter_biips('make_console');
+p = matbiips('make_console');
 if (quiet)
-  old_verb = inter_biips('verbosity', 0);
+  old_verb = matbiips('verbosity', 0);
 end
 
 %% Load model and do some checks
-inter_biips('check_model', p, filename)
-inter_biips('compile_model', p, data, sample_data, get_seed());
+matbiips('check_model', p, filename)
+matbiips('compile_model', p, data, sample_data, get_seed());
 
-data = inter_biips('get_data', p);
+data = matbiips('get_data', p);
 
 if (quiet)
-  inter_biips('verbosity', old_verb);
+  matbiips('verbosity', old_verb);
 end
 
 % Biips model structure

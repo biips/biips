@@ -22,4 +22,4 @@ function nodes = biips_get_nodes(model)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-nodes = inter_biips('get_sorted_nodes', model.id);
+nodes = matbiips('get_sorted_nodes', model.id);
