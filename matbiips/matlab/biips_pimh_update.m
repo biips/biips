@@ -61,7 +61,7 @@ cleanupObj = onCleanup(@() matbiips('verbosity', 1));% set verbosity on again wh
 variable_names = obj_pimh.variable_names;
 % model2 = clone_model(obj_pimh.model);
 console = obj_pimh.model.id;
-monitor_biips(console, variable_names, 's'); 
+monitor(console, variable_names, 's'); 
 if (~matbiips('is_sampler_built', console))
    matbiips('build_smc_sampler', console, false);
 end

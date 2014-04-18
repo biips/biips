@@ -102,7 +102,7 @@ addpath(matbiips_path)
 %%
 % *Add the user-defined function 'LV' to simulate from the Lotka-Volterra model*
 fun_bugs = 'LV'; fun_dim = 'lotka_volterra_dim';funeval = 'lotka_volterra_gillespie';fun_nb_inputs = 5;
-biips_add_distrib_sampler(fun_bugs, fun_nb_inputs, fun_dim, funeval)
+biips_add_distribution(fun_bugs, fun_nb_inputs, fun_dim, funeval)
 
 %% Load model and data
 %

@@ -33,7 +33,7 @@ function diagn = biips_diagnostic(parts, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -75,7 +75,7 @@ for i=1:length(variable_names)
     end
     ctemp = cell(size(type));
     for j=1:length(type)
-        ctemp{j} =  diagnostic_biips(getfield(getfield(s, variable_names{i}), type(j)), ess_thres, quiet, type(j));
+        ctemp{j} =  diagnostic(getfield(getfield(s, variable_names{i}), type(j)), ess_thres, quiet, type(j));
     end
     cell_diagn{i} = cell2struct_weaknames(ctemp, cell_fsb);
 end

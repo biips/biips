@@ -65,7 +65,7 @@ pn_param =  cellfun(@parse_varname, param_names);
 pmmh_get_param(console, pn_param, sample_param, true);
 
 if n_latent>0
-    monitor_biips(console, latent_names, 's'); 
+    monitor(console, latent_names, 's'); 
 end
 
     

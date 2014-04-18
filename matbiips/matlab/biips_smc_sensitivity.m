@@ -102,7 +102,7 @@ cleanupObj = onCleanup(@() matbiips('verbosity', 1));% set verbosity on again wh
 %% Create a clone model
 model2 = clone_model(model);
 console = model2.id;
-%monitor_biips(console, variable_names, 's'); 
+%monitor(console, variable_names, 's'); 
 if (~matbiips('is_sampler_built', console))
    matbiips('build_smc_sampler', console, false);
 end
