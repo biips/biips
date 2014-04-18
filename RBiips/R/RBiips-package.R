@@ -15,7 +15,7 @@
 ##' dynamic problems (tracking, signal filtering, etc).
 ##' 
 ##' Typical usage of \emph{RBiips} consits in: \enumerate{ \item
-##' compiling your model with \code{\link{biips.model}} function \item
+##' compiling your model with \code{\link{biips_model}} function \item
 ##' optionally analyzing sensitivity to parameters with
 ##' \code{\link{smc.sensitivity}} \item generate samples from the conditional
 ##' distributions \itemize{ \item using standard SMC algorithm with

@@ -45,7 +45,7 @@
 ##' node arrays used in the model.
 ##' 
 ##' @name biips-object 
-##' @aliases biips.object build.sampler build.sampler.biips pmmh.init
+##' @aliases biips_object build.sampler build.sampler.biips pmmh.init
 ##' pmmh.init.biips pmmh.update pmmh.update.biips pimh.update pimh.update.biips
 ##' variable.names.biips is.biips
 ##' @param object a biips model object
@@ -53,14 +53,12 @@
 ##' @param variable.names a character vector giving the names of variables to
 ##' be monitored
 ##' @param inits
-##' @param n.part number of particles
-##' @param rs.thres threshold on the ESS criterion to control the resampling
+##' @param n_part number of particles
+##' @param rs_thres threshold on the ESS criterion to control the resampling
 ##' step
-##' @param rs.type a string indicating the resampling algorithm used
-##' @param inits.rng.seed optional integer used as the seed for the random
-##' number generator of the initial values generation.
-##' @param n.iter number of iterations of the Markov chain to run
-##' @param max.fail maximum number of failures allowed
+##' @param rs_type a string indicating the resampling algorithm used
+##' @param n_iter number of iterations of the Markov chain to run
+##' @param max_fail maximum number of failures allowed
 ##' @param ... additional arguments
 ##' @return %% ~Describe the value returned
 ##' @author Adrien Todeschini, Francois Caron
@@ -78,7 +76,6 @@ NULL
 ##' variable name and n,p,q,r are integers
 ##' @param varname string containing the name of the variable to sparse
 parse_varname <- function(varname) {
-  
   
   v <- try(parse(text=varname, n=1), silent=TRUE)
   if (!is.expression(v) || length(v) != 1)
@@ -184,13 +181,13 @@ monitor.biips <- function(object, variable.names, type)
   
   type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
   if ("f" %in% type) {
-    .Call("set_filter_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    RBiips("set_filter_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
   }
   if ("s" %in% type) {
-    .Call("set_gen_tree_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    RBiips("set_gen_tree_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
   }
   if ("b" %in% type) {
-    .Call("set_backward_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper, PACKAGE="RBiips")
+    RBiips("set_backward_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
   }
   invisible(NULL)
 }
@@ -209,13 +206,13 @@ is_monitored.biips <- function(object, variable.names, type, check.released=TRUE
   
   type <- match.arg(type, c("f", "s", "b"))
   if (type == "f") {
-    ok <- .Call("is_filter_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
+    ok <- RBiips("is_filter_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
   }
   else if (type == "s") {
-    ok <- .Call("is_gen_tree_smooth_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
+    ok <- RBiips("is_gen_tree_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
   }
   else if (type == "b") {
-    ok <- .Call("is_backward_smooth_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check.released, PACKAGE="RBiips")
+    ok <- RBiips("is_backward_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
   }
   return(ok)
 }
@@ -229,13 +226,13 @@ clear_monitors.biips <- function(object, type, release.only=FALSE)
 {
   type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
   if ("f" %in% type) {
-    .Call("clear_filter_monitors", object$ptr(), release.only, PACKAGE="RBiips")
+    RBiips("clear_filter_monitors",  object$ptr(), release.only)
   }
   if ("s" %in% type) {
-    .Call("clear_gen_tree_smooth_monitors", object$ptr(), release.only, PACKAGE="RBiips")
+    RBiips("clear_gen_tree_smooth_monitors",  object$ptr(), release.only)
   }
   if ("b" %in% type) {
-    .Call("clear_backward_smooth_monitors", object$ptr(), release.only, PACKAGE="RBiips")
+    RBiips("clear_backward_smooth_monitors",  object$ptr(), release.only)
   }
   invisible(NULL)
 }
@@ -256,7 +253,7 @@ build_sampler.biips <- function(object, proposal= "auto", ...)
                                   "prior"))
     
   ## build smc sampler
-  .Call("build_smc_sampler", object$ptr(), proposal=="prior", PACKAGE="RBiips")
+  RBiips("build_smc_sampler",  object$ptr(), proposal=="prior")
   
   invisible(NULL)
 }
@@ -265,5 +262,5 @@ build_sampler.biips <- function(object, proposal= "auto", ...)
 ##' @importFrom stats variable.names
 ##' @S3method variable.names biips
 variable.names.biips <- function(object, ...) {
-    .Call("get_variable_names", object$ptr(), PACKAGE="RBiips")
+    RBiips("get_variable_names",  object$ptr())
 }
