@@ -38,7 +38,7 @@
 
 ##' Objects for representing SMC output
 ##' 
-##' A \code{smcarray} object is used by the \code{smc.samples} function to
+##' A \code{smcarray} object is used by the \code{smc_samples} function to
 ##' represent SMC output from a BiiPS model. It is an array with named
 ##' dimensions, for which the dimension \dQuote{smcarray} has a special
 ##' status.

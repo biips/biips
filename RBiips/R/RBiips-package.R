@@ -19,7 +19,7 @@
 ##' optionally analyzing sensitivity to parameters with
 ##' \code{\link{smc.sensitivity}} \item generate samples from the conditional
 ##' distributions \itemize{ \item using standard SMC algorithm with
-##' \code{\link{smc.samples}} function \item using particle MCMC methods with
+##' \code{\link{smc_samples}} function \item using particle MCMC methods with
 ##' \code{\link{pmmh.samples}} or \code{\link{pimh.samples}} functions } \item
 ##' analysing output from \code{\link[particles.object]{particles}} and
 ##' \code{mcarray} objects }

@@ -40,10 +40,9 @@
 # helper function to call RBiips c++ routines
 RBiips <- function(funcname, ...)
 {
-  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
+  stopifnot(is.character(name), length(name)==1, nchar(name)>0)
   .Call(funcname, ..., PACKAGE="RBiips")
 }
-
 
 
 ##' load the corresponding module into the Biips environment
@@ -52,8 +51,8 @@ RBiips <- function(funcname, ...)
 ##' @return null
 biips_load_module <- function(name, quiet=FALSE)
 {    
-  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
-  stopifnot(is.logical(quiet) && length(quiet)==1)
+  stopifnot(is.character(name), length(name)==1, nchar(name)>0)
+  stopifnot(is.logical(quiet), length(quiet)==1)
   
   ok <- RBiips("load_module", name)
   if (!ok) {
@@ -77,7 +76,7 @@ biips_load_module <- function(name, quiet=FALSE)
 ##' @export
 biips_add_function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
 {    
-  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
+  stopifnot(is.character(name), length(name)==1, nchar(name)>0)
   RBiips("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete)
   invisible()
 }
@@ -213,8 +212,8 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
   if (missing(file)) {
     stop("Model file name missing")
   }
-  stopifnot(is.logical(sample_data) && length(sample_data)==1)
-  stopifnot(is.logical(quiet) && length(quiet)==1)
+  stopifnot(is.logical(sample_data), length(sample_data)==1)
+  stopifnot(is.logical(quiet), length(quiet)==1)
   
   if (is.character(file)) {
     f <- try(file(file, "rt"))
@@ -285,7 +284,7 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
              d=c(),
              count=0,
              buffer=c(),
-             buff.count=c(),
+             buff_count=c(),
              mean=c(),
              cov=c()
   )
@@ -345,15 +344,15 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                 },
                 
                 ## store the dimensions of the variables
-                ".rw.init" = function(sample) {
+                ".rw_init" = function(sample) {
                   ## FIXME
                   
                   ## store the dimensions of the variables
                   sampledim <<- lapply(sample, dim)
-                  dim.null <- sapply(sampledim, is.null)
-                  if (any(dim.null)) {
+                  dim_null <- sapply(sampledim, is.null)
+                  if (any(dim_null)) {
                     len <- lapply(sample, length)
-                    sampledim[d.null] <<- len[d.null]
+                    sampledim[dim_null] <<- len[dim_null]
                   }
                   if (length(rw$dim)!=0) {
                     stopifnot(all(mapply(identical,rw$dim,sampledim)))
@@ -373,7 +372,7 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                     # clear learnt covariance matrix
                     rw$count <<- 0
                     rw$buffer <<- c()
-                    rw$buff.count <<- c()
+                    rw$buff_count <<- c()
                     rw$mean <<- c()
                     rw$cov <<- c()
                   }
@@ -381,25 +380,27 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   invisible(NULL)
                 },
                 
+                ".rw_get_step"=function(){exp(rw$lstep)},
+                
                 ## assign rw step
-                ".rw.step" = function(rw.step) {
+                ".rw_set_step" = function(rw_step) {
                   ## check values and dimensions
-                  for (n in names(rw.step)) {
-                    if (any(is.na(rw.step[[n]])))
-                      stop("Missing (NA) rw.step value for variable:", n)
-                    if (any(is.infinite(rw.step[[n]])))
-                      stop("Infinite rw.step value for variable:", n)
-                    if (any(is.nan(rw.step[[n]])))
-                      stop("NaN rw.step value for variable:", n)
-                    if (any(rw.step[[n]]<=0))
-                      stop("Negative or zero rw.step value for variable:", n)
-                    if (length(rw.step[[n]])==1) {
-                      rw.step[[n]] <- array(rw.step[[n]], dim=rw$dim[[n]])
+                  for (n in names(rw_step)) {
+                    if (any(is.na(rw_step[[n]])))
+                      stop("Missing (NA) rw_step value for variable:", n)
+                    if (any(is.infinite(rw_step[[n]])))
+                      stop("Infinite rw_step value for variable:", n)
+                    if (any(is.nan(rw_step[[n]])))
+                      stop("NaN rw_step value for variable:", n)
+                    if (any(rw_step[[n]]<=0))
+                      stop("Negative or zero rw_step value for variable:", n)
+                    if (length(rw_step[[n]])==1) {
+                      rw_step[[n]] <- array(rw_step[[n]], dim=rw$dim[[n]])
                     } else {
-                      if (is.null(dim(rw.step[[n]])))
-                        dim(rw.step[[n]]) <- length(rw.step[[n]])
-                      if (length(rw.step[[n]]) != length(rw$dim[[n]]) || any(dim(rw.step[[n]]) != rw$dim[[n]]))
-                        stop("Incorrect rw.step dimension for variable:", n)
+                      if (is.null(dim(rw_step[[n]])))
+                        dim(rw_step[[n]]) <- length(rw_step[[n]])
+                      if (length(rw_step[[n]]) != length(rw$dim[[n]]) || any(dim(rw_step[[n]]) != rw$dim[[n]]))
+                        stop("Incorrect rw_step dimension for variable:", n)
                     }
                   }
                   
@@ -407,7 +408,7 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   # always in the order of rw$dim
                   rw$lstep <<- c()
                   for (n in names(rw$dim)) {
-                    rw$lstep <<- c(rw$lstep, log(rw.step[[n]]))
+                    rw$lstep <<- c(rw$lstep, log(rw_step[[n]]))
                   }
                   
                   # clear rescale parameters
@@ -419,18 +420,18 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   # clear learnt covariance matrix
                   rw$count <<- 0
                   rw$buffer <<- c()
-                  rw$buff.count <<- c()
+                  rw$buff_count <<- c()
                   rw$mean <<- c()
                   rw$cov <<- c()
                   
                   invisible(NULL)
                 },
                 
-                ".rw.adapt" = function() {
+                ".rw_adapt" = function() {
                   return(rw$rescale|rw$learn)
                 },
                 
-                ".rw.check.adapt" = function() {
+                ".rw_check_adapt" = function() {
                   if (rw$pmean==0 || rw$pmean==1) {
                     return(FALSE)
                   }
@@ -441,30 +442,30 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   return (dist < 0.5)
                 },
                 
-                ".rw.adapt.off" = function() {
+                ".rw_adapt_off" = function() {
                   rw$rescale <<- FALSE
                   rw$learn <<- FALSE
                   invisible(NULL)
                 },
                 
-                ".rw.rescale.off" = function() {
+                ".rw_rescale_off" = function() {
                   rw$rescale <<- FALSE
                   invisible(NULL)
                 },
                 
-                ".rw.learn.off" = function() {
+                ".rw_learn_off" = function() {
                   rw$learn <<- FALSE
                   invisible(NULL)
                 },
                 
-                ".rw.learn.on" = function() {
+                ".rw_learn_on" = function() {
                   rw$rescale <<- FALSE
                   rw$learn <<- TRUE
                   rw$niter <<- 1
                   invisible(NULL)
                 },
                 
-                ".rw.proposal" = function(sample) {
+                ".rw_proposal" = function(sample) {
                   # concatenate all variables in a vector
                   # always in the order of rw$dim
                   sample_vec <- c()
@@ -495,7 +496,7 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   invisible(prop)
                 },
                 
-                ".rw.rescale" = function(p, type='d') {
+                ".rw_rescale" = function(p, type='d') {
                   # We keep a weighted mean estimate of the mean acceptance probability
                   # with the weights in favour of more recent iterations
                   p <- min(p, 1.0)
@@ -523,7 +524,7 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                   invisible(NULL)
                 },
                 
-                ".rw.learn.cov" = function(sample, accepted) {
+                ".rw_learn_cov" = function(sample, accepted) {
                   if (!rw$learn) {
                     return(NULL)
                   }
@@ -536,22 +537,22 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                     }
                     # push sample back in buffer
                     rw$buffer <<- rbind(rw$buffer, sample_vec, deparse.level=0)
-                    rw$buff.count <<- c(rw$buff.count, 1)
+                    rw$buff_count <<- c(rw$buff_count, 1)
                   } else {
                     # increment last sample counter
                     n <- nrow(rw$buffer)
-                    rw$buff.count[n] <<- rw$buff.count[n]+1
+                    rw$buff_count[n] <<- rw$buff_count[n]+1
                   }
                   
                   naccept <- nrow(rw$buffer)
                   d <- ncol(rw$buffer)
-                  m <- sum(rw$buff.count)
+                  m <- sum(rw$buff_count)
                   
                   # update mean and covariance
                   if (naccept == 2*d) {
                     # empirical mean and covariance of the buffer
-                    mean_buff <- colSums(rw$buffer*rw$buff.count/m)
-                    cov_buff <- t(rw$buffer)%*% (rw$buffer*rw$buff.count/m) - outer(mean_buff, mean_buff)
+                    mean_buff <- colSums(rw$buffer*rw$buff_count/m)
+                    cov_buff <- t(rw$buffer)%*% (rw$buffer*rw$buff_count/m) - outer(mean_buff, mean_buff)
                     
                     if (length(rw$mean) == 0) {
                       rw$mean <<- mean_buff
@@ -570,13 +571,11 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
                     
                     # clear buffer
                     rw$buffer <<- c()
-                    rw$buff.count <<- c()
+                    rw$buff_count <<- c()
                   }
                   
                   invisible(NULL)
-                },
-                
-                ".get.rw.step"=function(){exp(rw$lstep)}
+                }
   )
   class(model) <- "biips"
   
@@ -588,3 +587,76 @@ biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FAL
 }
 
 
+##' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
+##' variable name and n,p,q,r are integers
+##' @param varname string containing the name of the variable to sparse
+parse_varname <- function(varname) {
+  
+  v <- try(parse(text=varname, n=1), silent=TRUE)
+  if (!is.expression(v) || length(v) != 1)
+    return()
+  
+  v <- v[[1]]
+  if (is.name(v)) {
+    ## Full node array requested
+    return(list(name=deparse(v)))
+  }
+  else if (is.call(v) && identical(deparse(v[[1]]), "[") && length(v) > 2) {
+    ## Subset requested
+    ndim <- length(v) - 2
+    lower <- upper <- numeric(ndim)
+    if (any(nchar(sapply(v, deparse)) == 0)) {
+      ## We have to catch empty indices here or they will cause trouble
+      ## below
+      return()
+    }
+    for (i in 1:ndim) {
+      index <- v[[i+2]]
+      if (is.numeric(index)) {
+        ## Single index
+        lower[i] <- upper[i] <- index
+      }
+      else if (is.call(index) && length(index) == 3 &&
+                 identical(deparse(index[[1]]), ":") &&
+                 is.numeric(index[[2]]) && is.numeric(index[[3]]))
+      {
+        ## Index range
+        lower[i] <- index[[2]]
+        upper[i] <- index[[3]]
+      }
+      else return()
+    }
+    if (any(upper < lower))
+      return()
+    return(list(name = deparse(v[[2]]), lower=lower, upper=upper))
+  }
+  return()
+}
+
+
+parse_varnames <- function(varnames)
+{
+  names <- character(length(varnames))
+  lower <- upper <- vector("list", length(varnames))
+  for (i in seq(along=varnames)) {
+    y <- parse_varname(varnames[i])
+    if (is.null(y)) {
+      stop("Invalid variable subset ", varnames[i])
+    }
+    names[i] <- y$name
+    if (!is.null(y$lower)) {
+      lower[[i]] <- y$lower
+    }
+    if (!is.null(y$upper)) {
+      upper[[i]] <- y$upper
+    }
+  }
+  return(list(names=names, lower=lower, upper=upper))
+}
+
+check_type <- function(type, several.ok=TRUE)
+{
+  stopifnot(is.character(type))
+  type <- unlist(strsplit(type, NULL))
+  type <- match.arg(type, c('f', 's', 'b'), several.ok=several.ok)
+}

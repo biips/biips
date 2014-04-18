@@ -1,28 +1,21 @@
-run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified",
-                            smc.rng.seed)
+##' Runs a SMC algorithm
+##' @param id        id (integer) of the console
+##' @param n_part    number (integer) of particules
+##' @param rs_thres  resampling threshold ( if real in  [0,1] ---> percentage of n_part
+##'                                       integer in ]1,nb_part] --> number of particules
+##' @param rs_type string belonging to c('stratified', 'systematic', 'residual', 'multinomial') indicating 
+##'                the algorithm used for resampling
+##'
+##' @return ok boolean. True if success
+run_smc_forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified")
 {
-  if (!is.biips(object))
-    stop("Invalid BiiPS model")
-  
-  if (!is.numeric(n_part) || length(n_part)!=1 || n_part < 1) {
-    stop("Invalid n_part argument")
-  } 
-  if (!is.numeric(rs_thres) || length(rs_thres)!=1 || rs_thres < 0) {
-    stop("Invalid rs_thres argument")
-  }
-  if (!is.character(rs_type) || length(rs_type)!=1) {
-    stop("Invalid rs_type argument")
-  }
+  stopifnot(is.biips(x))
+  stopifnot(is.numeric(n_part), length(n_part)==1, n_part >= 1)
+  stopifnot(is.numeric(rs_thres), length(rs_thres)==1, rs_thres >= 0)
   rs_type <- match.arg(rs_type, c("multinomial",
                                   "residual",
                                   "stratified",
                                   "systematic"))
-  if (missing(smc.rng.seed)) {
-    smc.rng.seed <- runif(1, 0, as.integer(Sys.time()));
-  }
-  if (!is.numeric(smc.rng.seed) || length(smc.rng.seed)!=1 || smc.rng.seed < 0) {
-    stop("Invalid smc.rng.seed argument")
-  }
   
   ## build smc sampler
   if (!RBiips("is_sampler_built",  object$ptr())) {
@@ -30,10 +23,10 @@ run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratifie
   }
   
   ## run smc sampler
-  ok <- .Call("run_smc_sampler", object$ptr(), as.integer(n_part),
-              as.integer(smc.rng.seed), rs_thres, rs_type, PACKAGE="RBiips")
+  ok <- RBiips("run_smc_sampler", object$ptr(), as.integer(n_part),
+               get_seed(), rs_thres, rs_type)
   
-  invisible(ok)
+  return(ok)
 }
 
 
@@ -44,7 +37,7 @@ run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratifie
 ##' Function to extract random weighted samples, aka. particles, from the
 ##' conditional distribution of the parameters of a \code{biips} model.
 ##' 
-##' The \code{smc.samples} function creates monitors for the given types and
+##' The \code{smc_samples} function creates monitors for the given types and
 ##' variables, runs the SMC algorithm for \code{n_part} particles and returns
 ##' the monitored samples.
 ##' 
@@ -53,7 +46,7 @@ run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratifie
 ##' \code{"smoothing"}, \code{"backward.smoothing"}
 ##' 
 ##' @param obj a biips model object
-##' @param variable.names a character vector giving the names of variables to
+##' @param var_names a character vector giving the names of variables to
 ##' be monitored
 ##' @param type a character vector giving the types of monitoring desired.
 ##' @param n_part number of particles
@@ -64,7 +57,7 @@ run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratifie
 ##' @param rs_type a string indicating the resampling algorithm used
 ##' @param ... additional arguments
 ##' @return A list of \code{\link[=particles.list.object]{particles.list}}
-##' objects, with one element for each element of the \code{variable.names}
+##' objects, with one element for each element of the \code{var_names}
 ##' argument.
 ##' 
 ##' A \code{particles.list} object is a list of
@@ -84,25 +77,21 @@ run.smc.forward <- function(object, n_part, rs_thres = 0.5, rs_type = "stratifie
 ##' ##-- ==>  Define data, use random,
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
-smc.samples <- function(object, variable.names, n_part, type="fs",
+smc_samples <- function(object, var_names, n_part, type="fs",
                         rs_thres = 0.5, rs_type = "stratified", ...)
 {
-  if (!is.character(type))
-    stop("'type' must be a character string with characters 'f', 's', 'b'")
-  
-  type <- unlist(strsplit(type, NULL))
-  type <- match.arg(type, c('f', 's', 'b'), several.ok=TRUE)
+  type <- check_type(type, several.ok = TRUE)
   backward <- ('b' %in% type)
   
   ## monitor
   if(backward) {
     RBiips("set_default_monitors",  object$ptr())
   }
-  if (!missing(variable.names))
-    monitor.biips(object, variable.names, type)
+  if (!missing(var_names))
+    monitor.biips(object, var_names, type)
   
   ## smc forward sampler
-  run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type, ...)
+  run_smc_forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type, ...)
   
   log.marg.like <- RBiips("get_log_norm_const",  object$ptr())
   ans <- list()

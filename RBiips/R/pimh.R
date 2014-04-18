@@ -17,7 +17,7 @@ pimh.init.biips <- function(object, variable.names,
   if (!monitored || !atend) {
     ## run smc sampler
     RBiips("message",  "Initializing PIMH")
-    run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
+    run_smc_forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
   }
   log.marg.like <- RBiips("get_log_norm_const",  object$ptr())
   
@@ -45,7 +45,7 @@ one.pimh.update.biips <- function(object, variable.names,
                                   sample, log.marg.like)
 {
   ## SMC
-  run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
+  run_smc_forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
   
   ## Acceptance rate
   log.marg.like.prop <- RBiips("get_log_norm_const",  object$ptr())
@@ -156,7 +156,7 @@ pimh.update.biips <- function(object, variable.names, n_iter,
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
 ##' @seealso \code{\link{biips_model}}, \code{\link{pmmh.samples}},
-##' \code{\link{smc.samples}}
+##' \code{\link{smc_samples}}
 ##' @keywords models
 ##' @export
 ##' @examples

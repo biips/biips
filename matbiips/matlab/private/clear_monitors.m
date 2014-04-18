@@ -1,4 +1,4 @@
-function clear_monitors(p, type, release_only)
+function clear_monitors(console, type, release_only)
 
 %--------------------------------------------------------------------------
 % CLEAR_MONITORS clears some monitors  
@@ -24,13 +24,14 @@ if nargin<3
     release_only = false;
 end
 
-indices = arrayfun(@(x) strfind(type, x), 'fsb', 'UniformOutput', 0); 
+indices = arrayfun(@(x) strfind(type, x), 'fsb', 'UniformOutput', 0);
+
 if (~isempty(indices{1})) % filtering
-  matbiips('clear_filter_monitors', p, release_only);
+  matbiips('clear_filter_monitors', console, release_only);
 end 
 if (~isempty(indices{2})) % smoothing
-  matbiips('clear_gen_tree_smooth_monitors', p, release_only);
+  matbiips('clear_gen_tree_smooth_monitors', console, release_only);
 end  
 if (~isempty(indices{3})) %backward_smoothing
-  matbiips('clear_backward_smooth_monitors', p, release_only);
+  matbiips('clear_backward_smooth_monitors', console, release_only);
 end 
