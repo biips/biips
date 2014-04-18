@@ -108,7 +108,7 @@ switch(test)
     % Run SMC
     out_smc = biips_smc_samples(model, variables, n_part,...
         'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
-    nodes = biips_get_nodes(model)
+    nodes = biips_nodes(model)
     biips_clear(model)
 end
 

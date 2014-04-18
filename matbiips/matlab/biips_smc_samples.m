@@ -2,7 +2,7 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 
 %
 % BIIPS_SMC_SAMPLES runs a sequential Monte Carlo algorithm
-%   [particles, log_marg_like] = biips_smc_samples(console, variable_names, 
+%   [particles, log_marg_like] = biips_smc_samples(model, variable_names, 
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
 %   - model:        structure containing the model, 
@@ -90,7 +90,7 @@ if (backward)
     matbiips('set_default_monitors', console);
 end
 if (~isempty(variable_names))
-    monitor_biips(console, variable_names, type); 
+    monitor(console, variable_names, type); 
 end
 
 %% Run smc_sample
