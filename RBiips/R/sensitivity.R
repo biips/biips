@@ -115,7 +115,7 @@ smc.sensitivity <- function(object, params,
     }
     
     ## run smc sampler
-    ok <- run.smc.forward(object, n_part=n.part, ...)
+    ok <- run_smc_forward(object, n_part=n.part, ...)
     
     if (!ok)
       stop("Failure running smc forward sampler. param: ", paste(names(param),"=", param, sep="", collapse=";"))

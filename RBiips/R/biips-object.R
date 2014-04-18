@@ -45,7 +45,7 @@
 ##' node arrays used in the model.
 ##' 
 ##' @name biips-object 
-##' @aliases biips_object build.sampler build.sampler.biips pmmh.init
+##' @aliases biips-object build.sampler build.sampler.biips pmmh.init
 ##' pmmh.init.biips pmmh.update pmmh.update.biips pimh.update pimh.update.biips
 ##' variable.names.biips is.biips
 ##' @param object a biips model object
@@ -72,73 +72,6 @@
 NULL
 
 
-##' Try to parse string of form "a" or "a[n,p:q,r]" where "a" is a
-##' variable name and n,p,q,r are integers
-##' @param varname string containing the name of the variable to sparse
-parse_varname <- function(varname) {
-  
-  v <- try(parse(text=varname, n=1), silent=TRUE)
-  if (!is.expression(v) || length(v) != 1)
-    return(NULL)
-  
-  v <- v[[1]]
-  if (is.name(v)) {
-    ## Full node array requested
-    return(list(name=deparse(v)))
-  }
-  else if (is.call(v) && identical(deparse(v[[1]]), "[") && length(v) > 2) {
-    ## Subset requested
-    ndim <- length(v) - 2
-    lower <- upper <- numeric(ndim)
-    if (any(nchar(sapply(v, deparse)) == 0)) {
-      ## We have to catch empty indices here or they will cause trouble
-      ## below
-      return(NULL)
-    }
-    for (i in 1:ndim) {
-      index <- v[[i+2]]
-      if (is.numeric(index)) {
-        ## Single index
-        lower[i] <- upper[i] <- index
-      }
-      else if (is.call(index) && length(index) == 3 &&
-                 identical(deparse(index[[1]]), ":") &&
-                 is.numeric(index[[2]]) && is.numeric(index[[3]]))
-      {
-        ## Index range
-        lower[i] <- index[[2]]
-        upper[i] <- index[[3]]
-      }
-      else return(NULL)
-    }
-    if (any(upper < lower))
-      return (NULL)
-    return(list(name = deparse(v[[2]]), lower=lower, upper=upper))
-  }
-  return(NULL)
-}
-
-
-parse_varnames <- function(varnames)
-{
-  names <- character(length(varnames))
-  lower <- upper <- vector("list", length(varnames))
-  for (i in seq(along=varnames)) {
-    y <- parse_varname(varnames[i])
-    if (is.null(y)) {
-      stop("Invalid variable subset ", varnames[i])
-    }
-    names[i] <- y$name
-    if (!is.null(y$lower)) {
-      lower[[i]] <- y$lower
-    }
-    if (!is.null(y$upper)) {
-      upper[[i]] <- y$upper
-    }
-  }
-  return(list(names=names, lower=lower, upper=upper))
-}
-
 
 ##' @export
 is.biips <- function(object)
@@ -147,8 +80,10 @@ is.biips <- function(object)
 }
 
 ##' @S3method print biips
-print.biips <- function(x,...)
+print.biips <- function(x, ...)
 {
+  stopifnot(is.biips(x))
+  
   cat("BiiPS model:\n\n")
   
   model <- x$model()
@@ -168,73 +103,14 @@ print.biips <- function(x,...)
 }
 
 
-monitor <- function(object, ...)
-  UseMethod("monitor")
-
-##' @S3method monitor biips
-monitor.biips <- function(object, variable.names, type)
-{
-  if (!is.character(variable.names) || length(variable.names) == 0)
-    stop("variable.names must be a character vector")
-    
-  pn <- parse_varnames(variable.names)
+##' @importFrom stats variable.names
+##' @S3method variable.names biips
+variable.names.biips <- function(object, ...) {
+  stopifnot(is.biips(object))
   
-  type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
-  if ("f" %in% type) {
-    RBiips("set_filter_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
-  }
-  if ("s" %in% type) {
-    RBiips("set_gen_tree_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
-  }
-  if ("b" %in% type) {
-    RBiips("set_backward_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper)
-  }
-  invisible(NULL)
-}
-
-
-is_monitored <- function(object, ...)
-  UseMethod("is_monitored")
-
-##' @S3method is_monitored biips
-is_monitored.biips <- function(object, variable.names, type, check.released=TRUE)
-{
-  if (!is.character(variable.names) || length(variable.names) == 0)
-    stop("variable.names must be a character vector")
+  var_names <- RBiips("get_variable_names",  object$ptr())
   
-  pn <- parse_varnames(variable.names)
-  
-  type <- match.arg(type, c("f", "s", "b"))
-  if (type == "f") {
-    ok <- RBiips("is_filter_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
-  }
-  else if (type == "s") {
-    ok <- RBiips("is_gen_tree_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
-  }
-  else if (type == "b") {
-    ok <- RBiips("is_backward_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check.released)
-  }
-  return(ok)
-}
-
-
-clear_monitors <- function(object, ...)
-  UseMethod("clear_monitors")
-
-##' @S3method clear_monitors biips
-clear_monitors.biips <- function(object, type, release.only=FALSE)
-{
-  type <- match.arg(type, c("f", "s", "b"), several.ok = TRUE)
-  if ("f" %in% type) {
-    RBiips("clear_filter_monitors",  object$ptr(), release.only)
-  }
-  if ("s" %in% type) {
-    RBiips("clear_gen_tree_smooth_monitors",  object$ptr(), release.only)
-  }
-  if ("b" %in% type) {
-    RBiips("clear_backward_smooth_monitors",  object$ptr(), release.only)
-  }
-  invisible(NULL)
+  return(var_names)
 }
 
 
@@ -243,24 +119,98 @@ build_sampler <- function(object, ...)
   UseMethod("build_sampler")
 
 
+##' Assigns a sampler to each node of the graph
+##' @param object a biips model object
+##' @param proposal string. Keyword defining the type of proposal desired.
+##'              Possible values are "auto" and "prior". "auto" selects the best sampler
+##'              among available ones automatically. "prior" forces asignment of the prior
+##'              sampler to every node. "prior" switches off lots of instructions and can
+##'              speed up the startup of the SMC for big models.
+##'              default is "auto"
+##' @param ... unused
 ##' @S3method build_sampler biips
-build_sampler.biips <- function(object, proposal= "auto", ...)
+build_sampler.biips <- function(object, proposal = "auto", ...)
 {
-  if (!is.character(proposal) || length(proposal)!=1) {
-    stop("Invalid proposal argument")
-  }
-  proposal <- match.arg(proposal, c("auto",
-                                  "prior"))
-    
+  stopifnot(is.biips(object))
+  proposal <- match.arg(proposal, c("auto", "prior"))
+  
   ## build smc sampler
   RBiips("build_smc_sampler",  object$ptr(), proposal=="prior")
   
-  invisible(NULL)
+  invisible()
 }
 
 
-##' @importFrom stats variable.names
-##' @S3method variable.names biips
-variable.names.biips <- function(object, ...) {
-    RBiips("get_variable_names",  object$ptr())
+monitor <- function(object, ...)
+  UseMethod("monitor")
+
+##' @S3method monitor biips
+monitor.biips <- function(object, var_names, type="s", ...)
+{
+  stopifnot(is.biips(object))
+  stopifnot(is.character(var_names), length(var_names)>0)
+  type <- check_type(type, several.ok = TRUE)
+  
+  pn <- parse_varnames(var_names)
+
+  for (t in type) {
+    switch(t,
+           f = RBiips("set_filter_monitors",  object$ptr(), pn$names, pn$lower, pn$upper),
+           s = RBiips("set_gen_tree_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper),
+           b = RBiips("set_backward_smooth_monitors",  object$ptr(), pn$names, pn$lower, pn$upper))
+  }
+  
+  invisible()
 }
+
+
+is_monitored <- function(object, ...)
+  UseMethod("is_monitored")
+
+##' @S3method is_monitored biips
+is_monitored.biips <- function(object, var_names, type="s", check_released=TRUE)
+{
+  stopifnot(is.biips(object))
+  stopifnot(is.character(var_names), length(var_names)>0)
+  type <- check_type(type, several.ok = FALSE)
+  stopifnot(is.logical(check_released), length(check_released)==1)
+  
+  pn <- parse_varnames(var_names)
+  
+  ok <- switch(type,
+           f = RBiips("is_filter_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check_released),
+           s = RBiips("is_gen_tree_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check_released),
+           b = RBiips("is_backward_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check_released))
+
+  return(ok)
+}
+
+
+clear_monitors <- function(object, ...)
+  UseMethod("clear_monitors")
+
+##' Clears some monitors  
+##' @param console      id of the current console
+##' @param type        character vector with  'f' - forward
+##'                                       's' - smoothing
+##'                                       'b' - backward smoothing
+##' @param release_only boolean flag to indicate what kind of clearing has 
+##'                   to be done
+##' @S3method clear_monitors biips
+clear_monitors.biips <- function(object, type="fsb", release_only=FALSE, ...)
+{
+  stopifnot(is.biips(object))
+  type <- check_type(type, several.ok = TRUE)
+  stopifnot(is.logical(release_only), length(release_only)==1)
+  
+  for (t in type) {
+    switch(t,
+           f = RBiips("clear_filter_monitors",  object$ptr(), release_only),
+           s = RBiips("clear_gen_tree_smooth_monitors",  object$ptr(), release_only),
+           b = RBiips("clear_backward_smooth_monitors",  object$ptr(), release_only))
+  }
+  
+  invisible()
+}
+
+

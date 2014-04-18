@@ -138,7 +138,7 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## initialize rw
-  object$.rw.init(sample)
+  object$.rw_init(sample)
   
   ## log prior density
   log.prior <- 0
@@ -187,7 +187,7 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
       RBiips("message",  "Initializing PMMH")
     else if (!latent.monitored)
       RBiips("message",  "Initializing PMMH latent variables")
-    if (!run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type))
+    if (!run_smc_forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type))
       stop("run smc forward sampler: invalid initial values.")
   }
   log.marg.like <- RBiips("get_log_norm_const",  object$ptr())
@@ -230,7 +230,7 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
   n.fail <- 0
   
   ## Random walk proposal
-  prop <- object$.rw.proposal(sample[param.names])
+  prop <- object$.rw_proposal(sample[param.names])
   
   ## check NA
   for (var in names(prop)) {
@@ -276,7 +276,7 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
   log.marg.like.prop <- 0
   
   if (log.prior.prop != -Inf) {
-    ok <- run.smc.forward(object, n_part=n.part, ...)
+    ok <- run_smc_forward(object, n_part=n.part, ...)
     
     if (!ok) {
       log.marg.like.prop <- -Inf
@@ -322,9 +322,9 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
   }
   
   ## rescale random walk step
-  object$.rw.rescale(accept.rate, rw.rescale.type)
+  object$.rw_rescale(accept.rate, rw.rescale.type)
   ## update random walk covariance matrices
-  object$.rw.learn.cov(sample[param.names], accepted)
+  object$.rw_learn_cov(sample[param.names], accepted)
   
   ans <- list(sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
               accept.rate=accept.rate, accepted=accepted, n.fail=n.fail)
@@ -350,7 +350,7 @@ pmmh.update <- function(object, ...)
 ##' @param max_fail integer. maximum number of failures allowed
 ##' @param inits named list of initial values for the variables in param.names.
 ##' If empty, inits are sampled from the prior.
-##' @param rw.step positive steps of the random walk (std. dev. of the proposal
+##' @param rw_step positive steps of the random walk (std. dev. of the proposal
 ##' kernel). If numeric,  the value is duplicated for all variables.
 ##' If named list, the numeric components are assigned to the named variables.
 ##' If unnamed list, the numeric components are assigned to the variables in 
@@ -364,7 +364,7 @@ pmmh.update <- function(object, ...)
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
 ##' @seealso \code{\link{biips_model}}, \code{\link{pimh.samples}},
-##' \code{\link{smc.samples}}
+##' \code{\link{smc_samples}}
 ##' @keywords models
 ##' @export
 ##' @S3method pmmh.update biips
@@ -376,7 +376,7 @@ pmmh.update <- function(object, ...)
 ##' 
 pmmh.update.biips <- function(object, param.names, n_iter, 
                               n_part, max_fail=0, inits=list(),
-                              rw.step, rw.rescale=TRUE, rw.learn=TRUE,
+                              rw_step, rw.rescale=TRUE, rw.learn=TRUE,
                               rw.rescale.type='p', n.rescale=n_iter/4, ...)
 { 
   ### check arguments
@@ -391,48 +391,48 @@ pmmh.update.biips <- function(object, param.names, n_iter,
   n.rescale <- as.integer(n.rescale)
   
   ## check rw.step
-  if (!missing(rw.step))
+  if (!missing(rw_step))
   {
     rw.step.values <- list()
     
-    if (is.numeric(rw.step)) {
+    if (is.numeric(rw_step)) {
       ## duplicate value for each variable
       for (n in param.names) {
         rw.step.values[[n]] <- rw.step
       }
     } else {
-      if (!is.list(rw.step))
-        stop("rw.step must be a numeric or list of numeric.")
+      if (!is.list(rw_step))
+        stop("rw_step must be a numeric or list of numeric.")
       rw.step.values <- rw.step
       step.names <- names(rw.step.values)
       if(is.null(step.names)) ## case unnamed list
       {
         if (length(rw.step.values) != length(param.names))
-          stop("rw.step length does not match param.names length.")
+          stop("rw_step length does not match param.names length.")
         names(rw.step.values) <- param.names
       } else ## case named list
       {
         if (any(nchar(step.names) == 0))
-          stop("rw.step has unnamed values.")
+          stop("rw_step has unnamed values.")
         if (any(duplicated(step.names)))
-          stop("rw.step has duplicated names:", paste(step.names[duplicated(step.names)], collapse=", "))
+          stop("rw_step has duplicated names:", paste(step.names[duplicated(step.names)], collapse=", "))
         ## check missing rw.step
         miss.step <- !param.names %in% step.names
         if (any(miss.step)) {
-          stop("Missing rw.step values for variable:",
+          stop("Missing rw_step values for variable:",
                paste(param.names[miss.step], collapse=", "))
         }
         ## check unkown variables from rw.step
         unknown.step <- !step.names %in% param.names
         if (any(unknown.step)) {
-          stop("Unkown variable in rw.step values:",
+          stop("Unkown variable in rw_step values:",
                paste(step.names[unknown.step], collapse=", "))
         }
       }
       ## check non numeric values
       nonnum.step <- !sapply(rw.step.values, is.numeric)
       if (any(nonnum.step))
-        stop("Non numeric rw.step values for variables:", paste(names(rw.step.values)[nonnum.step], collapse=", "))
+        stop("Non numeric rw_step values for variables:", paste(names(rw.step.values)[nonnum.step], collapse=", "))
     }
   }
   
@@ -448,32 +448,32 @@ pmmh.update.biips <- function(object, param.names, n_iter,
   pn.param <- parse.varnames(param.names)
   
   ### assign rw step
-  if (!missing(rw.step)) {
-#     if (!object$.rw.adapt()) {
+  if (!missing(rw_step)) {
+#     if (!object$.rw_adapt()) {
 #       ### FIXME
-#       warning("Ignoring rw.step argument: adaptation has been stopped.")
+#       warning("Ignoring rw_step argument: adaptation has been stopped.")
 #     } else {
-      object$.rw.step(rw.step.values)
+      object$.rw_set_step(rw.step.values)
 #     }
   }
   
   ### stop adaptation if necessary
   if (!rw.rescale) {
-    object$.rw.rescale.off()
+    object$.rw_rescale_off()
   }
   if (!rw.learn) {
-    object$.rw.learn.off()
+    object$.rw_learn_off()
   }
 #   if (!rw.adapt) {
-#     if (object$.rw.adapt() && !object$.rw.check.adapt())
+#     if (object$.rw_adapt() && !object$.rw_check_adapt())
 #       message("NOTE: Stopping adaptation of the PMMH random walk.\n")
-#     object$.rw.adapt.off()
+#     object$.rw_adapt_off()
 #   }
   
   ### display message and progress bar
-  title <- ifelse(object$.rw.adapt(), "Adapting", "Updating")
+  title <- ifelse(object$.rw_adapt(), "Adapting", "Updating")
   RBiips("message",  paste(title, "PMMH with", n_part, "particles"))
-  symbol <- ifelse(object$.rw.adapt(), '+', '*')
+  symbol <- ifelse(object$.rw_adapt(), '+', '*')
   bar <- RBiips("progress_bar",  n_iter, symbol, "iterations")
   
   ## initialize counters
@@ -499,7 +499,7 @@ pmmh.update.biips <- function(object, param.names, n_iter,
     n.fail <- n.fail + out$n.fail
     n.accept <- n.accept + out$accepted
     accept.rate[i] <- out$accept.rate
-    step[[i]] = object$.get.rw.step()
+    step[[i]] = object$.rw_get_step()
     
     ## check failures
     if (n.fail > max_fail) {
@@ -509,15 +509,15 @@ pmmh.update.biips <- function(object, param.names, n_iter,
     # deactivate rescale and activate learning
     if (rw.rescale && rw.learn) {
       if (i==n.rescale) {
-        object$.rw.rescale.off()
-        object$.rw.learn.on()
+        object$.rw_rescale_off()
+        object$.rw_learn_on()
       }
     }
   }
   
   ### turn off adaptation if checked
-  if (object$.rw.check.adapt())
-    object$.rw.adapt.off()
+  if (object$.rw_check_adapt())
+    object$.rw_adapt_off()
   
   ### reset log norm const and sampled values if not accepted
   ### to store the last value of loglikelihood in the biips model(using set_log_norm_const)
@@ -563,7 +563,7 @@ pmmh.update.biips <- function(object, param.names, n_iter,
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
 ##' @seealso \code{\link{biips_model}}, \code{\link{pimh.samples}},
-##' \code{\link{smc.samples}}
+##' \code{\link{smc_samples}}
 ##' @keywords models
 ##' @export
 ##' @examples
@@ -620,23 +620,23 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n_iter, thin=1,
   
   ### stop adaptation if necessary
   if (!rw.rescale) {
-    object$.rw.rescale.off()
+    object$.rw_rescale_off()
   }
   if (!rw.learn) {
-    object$.rw.learn.off()
+    object$.rw_learn_off()
   }
 #   if (!rw.adapt) {
 #     ## check adaptation
-#     if (object$.rw.adapt() && !object$.rw.check.adapt())
+#     if (object$.rw_adapt() && !object$.rw_check_adapt())
 #       message("NOTE: Stopping adaptation of the PMMH random walk.\n")
 #     ## turn off adaptation
-#     object$.rw.adapt.off()
+#     object$.rw_adapt_off()
 #   }
   
   ### display message and progress bar
-  title <- ifelse(object$.rw.adapt(), " adaptive", "")
+  title <- ifelse(object$.rw_adapt(), " adaptive", "")
   RBiips("message",  paste("Generating", title, " PMMH samples with ", n_part, " particles", sep=''))
-  symbol <- ifelse(object$.rw.adapt(), '+', '*')
+  symbol <- ifelse(object$.rw_adapt(), '+', '*')
   bar <- RBiips("progress_bar",  n_iter, symbol, "iterations")
   
   ## Metropolis-Hastings iterations
@@ -654,7 +654,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n_iter, thin=1,
     n.fail <- n.fail + out$n.fail
     n.accept <- n.accept + out$accepted
     accept.rate[i] <- out$accept.rate
-    step[[i]] = object$.get.rw.step()
+    step[[i]] = object$.rw_get_step()
     
     ## advance progress bar
     RBiips("advance_progress_bar",  bar, 1)
@@ -672,8 +672,8 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n_iter, thin=1,
     
     if (rw.rescale && rw.learn) {
       if (i==n.rescale) {
-        object$.rw.rescale.off()
-        object$.rw.learn.on()
+        object$.rw_rescale_off()
+        object$.rw_learn_on()
       }
     }
   }
