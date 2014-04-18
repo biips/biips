@@ -34,7 +34,16 @@
 #  \version  $LastChangedRevision$
 #  Id:       $Id$
 #
-## COPY: Adapted from rjags module file: jags.R
+## COPY: Adapted from rjags package file: jags.R
+
+
+# helper function to call RBiips c++ routines
+RBiips <- function(funcname, ...)
+{
+  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
+  .Call(funcname, ..., PACKAGE="RBiips")
+}
+
 
 
 ##' load the corresponding module into the Biips environment
@@ -43,16 +52,33 @@
 ##' @return null
 biips_load_module <- function(name, quiet=FALSE)
 {    
-  if (!is.character(name) || length(name)>1)
-    stop("invalid name")
+  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
+  stopifnot(is.logical(quiet) && length(quiet)==1)
   
-  ok <- .Call("load_module", name, PACKAGE="RBiips")
+  ok <- RBiips("load_module", name)
   if (!ok) {
     stop("module ", name, " not found\n")
   }
   else if (!quiet) {
-    cat("module", name, "loaded\n")
+    message("module", name, "loaded\n")
   }
+  invisible()
+}
+
+
+
+##' Add the corresponding R function to the bugs model
+##' @param name of the new  function
+##' @param number of arguments of the new function
+##' @param R function returning a vector containg arguments sizes
+##' @param R function computing the result of function
+##' @param R function checking the arguments 
+##' @param R function telling is new function is discrete wrt its arguments
+##' @export
+biips_add_function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
+{    
+  stopifnot(is.character(name) && length(name)==1 && nchar(name)>0)
+  RBiips("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete)
   invisible()
 }
 
@@ -127,13 +153,15 @@ mklist <- function(names, env = parent.frame()) {
 }
 
 
-
+get_seed <- function() {
+  sample.int(.Machine$integer.max, size=1)
+}
 
 
 
 ##' Create a biips model object
 ##' 
-##' \code{biips.model} is used to create an object representing a Bayesian
+##' \code{biips_model} is used to create an object representing a Bayesian
 ##' graphical model, specified with a BUGS language description of the prior
 ##' distribution, and a set of data.
 ##' 
@@ -145,29 +173,31 @@ mklist <- function(names, env = parent.frame()) {
 ##' @param data a list or environment containing the data. Any numeric objects
 ##' in \code{data} corresponding to node arrays used in \code{file} are taken
 ##' to represent the values of observed nodes in the model
-##' @param sample.data logical flag. If \code{FALSE} then the \code{data} block
+##' @param sample_data logical flag. If \code{FALSE} then the \code{data} block
 ##' of the model will be ignored.
-##' @param data.rng.seed optional integer used as the seed for the random
-##' number generator of the data generation.
 ##' @param quiet if \code{TRUE} then messages generated during compilation will
 ##' be suppressed.
-##' @return \code{biips.model} returns an object inheriting from class
+##' @return \code{biips_model} returns an object inheriting from class
 ##' \code{biips} which can be used to generate dependent samples from the
 ##' posterior distribution of the parameters
 ##' 
 ##' An object of class \code{biips} is a list of functions that share a common
 ##' environment. The functions can be used to query information on the model.
 ##' \item{ptr()}{Returns an external pointer to an object created by the BiiPS
-##' library.} \item{data()}{Returns a list containing the data that defines the
-##' observed nodes in the model.} \item{model()}{Returns a character vector
+##' library.} 
+##' \item{data()}{Returns a list containing the data that defines the
+##' observed nodes in the model.} 
+##' \item{model()}{Returns a character vector
 ##' containing the BUGS-language representation of the model.}
-##' \item{dot(file)}{Writes a description of the graph in dot language in
-##' \code{file}.} \item{nodes(type, observed)}{Returns a \code{data.frame}
+##' \item{print_dot(file)}{Writes a description of the graph in dot language in
+##' \code{file}.} 
+##' \item{nodes(type, observed)}{Returns a \code{data.frame}
 ##' containing information on all the nodes of the graph: rank in the
 ##' topological sort, node id, variable name or formula, type, observed. After
 ##' calling \code{build.sampler} or any algorithm running smc sampler, the
 ##' \code{data.frame} will also contain a column indicating the node sampler
-##' used for unobserved stochastic nodes.} \item{recompile()}{Recompiles the
+##' used for unobserved stochastic nodes.} 
+##' \item{recompile()}{Recompiles the
 ##' model using the original data set.}
 ##' @author Adrien Todeschini, Francois Caron
 ##' @keywords models graphs
@@ -178,41 +208,34 @@ mklist <- function(names, env = parent.frame()) {
 ##' ##-- ==>  Define data, use random,
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
-biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.seed, quiet = FALSE)
+biips_model <- function(file, data=parent.frame(), sample_data=TRUE, quiet = FALSE)
 {
   if (missing(file)) {
     stop("Model file name missing")
   }
+  stopifnot(is.logical(sample_data) && length(sample_data)==1)
+  stopifnot(is.logical(quiet) && length(quiet)==1)
+  
   if (is.character(file)) {
     f <- try(file(file, "rt"))
     if (inherits(f, "try-error")) {
       stop("Cannot open model file \"", file, "\"")
     }
     close(f)
-    model.code <- readLines(file, warn = FALSE)
+    model_code <- readLines(file, warn = FALSE)
     modfile <- file
   }
   else if (!inherits(file, "connection")) {
     stop("'file' must be a character string or connection")
   } else {
-    model.code <- readLines(file, warn = FALSE)
+    model_code <- readLines(file, warn = FALSE)
     modfile <- tempfile()
-    writeLines(model.code, modfile)
-  }
-  
-  if(!is.logical(sample.data) || length(sample.data)>1) {
-    stop("Invalid sample.data argument.");
-  }
-  if(missing("data.rng.seed")) {
-    data.rng.seed <- runif(1, 0, as.integer(Sys.time()));
-  }
-  else if(!is.numeric(data.rng.seed) || length(data.rng.seed)!=1) {
-    stop("Invalid data.rng.seed argument.");
+    writeLines(model_code, modfile)
   }
   
   if (quiet) {
-    verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-    on.exit(.Call("verbosity", verb, PACKAGE="RBiips"), add = TRUE)
+    verb <- RBiips("verbosity", 0)
+    on.exit(RBiips("verbosity", verb), add = TRUE)
   }
   
   # check data before compiling model, which typically takes more time
@@ -220,24 +243,24 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   if (length(data) > 0) data <- data_preprocess(data)
   
   # make console and check model
-  p <- .Call("make_console", PACKAGE="RBiips")
-  .Call("check_model", p, modfile, PACKAGE="RBiips")
+  p <- RBiips("make_console")
+  RBiips("check_model", p, modfile)
   
   # discard unused data
-  varnames <- .Call("get_variable_names", p, PACKAGE="RBiips")
+  varnames <- RBiips("get_variable_names",  p)
   
   v <- names(data)
-  relevant.variables <- v %in% varnames
-  data <- data[relevant.variables]
-  unused.variables <- setdiff(v, varnames)
-  if (length(unused.variables)>0)
-    warning("Unused variables in data: ", paste(unused.variables ,collapse=", "))
+  relevant_variables <- v %in% varnames
+  data <- data[relevant_variables]
+  unused_variables <- setdiff(v, varnames)
+  if (length(unused_variables)>0)
+    warning("Unused variables in data: ", paste(unused_variables ,collapse=", "))
   
   # compile model
-  .Call("compile_model", p, data, sample.data, as.integer(data.rng.seed), PACKAGE="RBiips")
+  RBiips("compile_model",  p, data, sample_data, get_seed())
   
   # data after possible sampling (from "data" block in the BUGS language model)
-  model.data <- .Call("get_data", p, PACKAGE = "RBiips")
+  model_data <- RBiips("get_data",  p)
   
   # local initial parameters of the algorithm of adaptation
   # of the step of random walk in the PMMH algorithm
@@ -268,22 +291,27 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
   )
   
   model <- list("ptr" = function() {p},
-                "model" = function() {model.code},
-                "dot" = function(file) {
-                  .Call("print_graphviz", p, file, PACKAGE="RBiips")
+                
+                "model" = function() {model_code},
+                
+                "print_dot" = function(file) {
+                  RBiips("print_graphviz", p, file)
                   invisible(NULL)
                 },
+                
                 "data" = function() {
-                  model.data
+                  model_data
                 },
-                ".data.sync" = function() {
-                  .Call("get_data", p, PACKAGE="RBiips")
+                
+                ".data_sync" = function() {
+                  RBiips("get_data", p)
                 },
+                
                 "nodes" = function(type, observed) {
-                  sorted.nodes <- data.frame(.Call("get_sorted_nodes", p, PACKAGE="RBiips"))
+                  sorted.nodes <- data.frame(RBiips("get_sorted_nodes", p))
                   
-                  if(.Call("is_sampler_built", p, PACKAGE="RBiips")) {
-                    samplers <- data.frame(.Call("get_node_samplers", p, PACKAGE="RBiips"))
+                  if(RBiips("is_sampler_built", p)) {
+                    samplers <- data.frame(RBiips("get_node_samplers", p))
                     sorted.nodes <- cbind(sorted.nodes, samplers)
                   }
                   if(!missing(type)) {
@@ -301,20 +329,21 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   return(sorted.nodes);
                 },
+                
                 "recompile" = function() {
                   ## Clear the console
-                  .Call("clear_console", p, PACKAGE="RBiips")
-                  p <<- .Call("make_console", PACKAGE="RBiips")
+                  RBiips("clear_console",  p)
+                  p <<- RBiips("make_console")
                   ## Write the model to a temporary file so we can re-read it
                   mf <- tempfile()
-                  writeLines(model.code, mf)
-                  .Call("check_model", p, mf, PACKAGE="RBiips")
+                  writeLines(model_code, mf)
+                  RBiips("check_model",  p, mf)
                   unlink(mf)
                   ## Re-compile
-                  .Call("compile_model", p, data,
-                        FALSE, as.integer(data.rng.seed), PACKAGE="RBiips")
+                  RBiips("compile_model", p, data, FALSE, get_seed())
                   invisible(NULL)
                 },
+                
                 ## store the dimensions of the variables
                 ".rw.init" = function(sample) {
                   ## FIXME
@@ -351,6 +380,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   
                   invisible(NULL)
                 },
+                
                 ## assign rw step
                 ".rw.step" = function(rw.step) {
                   ## check values and dimensions
@@ -392,12 +422,14 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   rw$buff.count <<- c()
                   rw$mean <<- c()
                   rw$cov <<- c()
-                    
+                  
                   invisible(NULL)
                 },
+                
                 ".rw.adapt" = function() {
                   return(rw$rescale|rw$learn)
                 },
+                
                 ".rw.check.adapt" = function() {
                   if (rw$pmean==0 || rw$pmean==1) {
                     return(FALSE)
@@ -408,25 +440,30 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                               - log(rw$targetprob/(1-rw$targetprob)))
                   return (dist < 0.5)
                 },
+                
                 ".rw.adapt.off" = function() {
                   rw$rescale <<- FALSE
                   rw$learn <<- FALSE
                   invisible(NULL)
                 },
+                
                 ".rw.rescale.off" = function() {
                   rw$rescale <<- FALSE
                   invisible(NULL)
                 },
+                
                 ".rw.learn.off" = function() {
                   rw$learn <<- FALSE
                   invisible(NULL)
                 },
+                
                 ".rw.learn.on" = function() {
                   rw$rescale <<- FALSE
                   rw$learn <<- TRUE
                   rw$niter <<- 1
                   invisible(NULL)
                 },
+                
                 ".rw.proposal" = function(sample) {
                   # concatenate all variables in a vector
                   # always in the order of rw$dim
@@ -457,6 +494,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   }
                   invisible(prop)
                 },
+                
                 ".rw.rescale" = function(p, type='d') {
                   # We keep a weighted mean estimate of the mean acceptance probability
                   # with the weights in favour of more recent iterations
@@ -484,6 +522,7 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   
                   invisible(NULL)
                 },
+                
                 ".rw.learn.cov" = function(sample, accepted) {
                   if (!rw$learn) {
                     return(NULL)
@@ -536,8 +575,9 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
                   
                   invisible(NULL)
                 },
+                
                 ".get.rw.step"=function(){exp(rw$lstep)}
-                )
+  )
   class(model) <- "biips"
   
   # TRICK: We return functions in model list that use variables of the parent
@@ -548,22 +588,3 @@ biips.model <- function(file, data=parent.frame(), sample.data=TRUE, data.rng.se
 }
 
 
-
-
-##' Add the corresponding R function to the bugs model
-##' @param name of the new  function
-##' @param number of arguments of the new function
-##' @param R function returning a vector containg arguments sizes
-##' @param R function computing the result of function
-##' @param R function checking the arguments 
-##' @param R function telling is new function is discrete wrt its arguments
-##' @export
-biips.add.function <- function(name, nb.args, fundim, funeval, funcheckparam, funisdiscrete)
-{    
-  if (!is.character(name) || length(name)>1)
-  {
-    stop("invalid name")
-  }
-  .Call("add_function", name, nb.args, fundim , funeval, funcheckparam, funisdiscrete, PACKAGE="RBiips")
-  invisible()
-}

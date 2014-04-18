@@ -113,19 +113,19 @@ stat.smcarray <- function(x, fun="mean", probs = c(0.25, 0.5, 0.75))
     probs <- sort(probs)
   }
   
-  n.part <- dim(x$values)["particle"]
+  n_part <- dim(x$values)["particle"]
   drop.dims <- names(dim(x$values)) %in% c("particle")
   dim.stat <- dim(x$values)[!drop.dims]
   len <- prod(dim.stat)
   
   stat <- list()
   for (d in 1:len) {
-    indvec <- seq(d, len*(n.part-1)+d,len)
+    indvec <- seq(d, len*(n_part-1)+d,len)
     for (f in fun) {
       if (f == "quantiles")
-        d.stat <- .Call("weighted_quantiles", x$values[indvec], n.part*x$weights[indvec], probs, PACKAGE="RBiips")
+        d.stat <- RBiips("weighted_quantiles",  x$values[indvec], n_part*x$weights[indvec], probs)
       else
-        d.stat <- .Call(paste("weighted_",f,sep=""), x$values[indvec], n.part*x$weights[indvec], PACKAGE="RBiips")
+        d.stat <- .Call(paste("weighted_",f,sep=""), x$values[indvec], n_part*x$weights[indvec], PACKAGE="RBiips")
       stat.names <- names(d.stat)[names(d.stat) != "Table"]
       if (d==1) {
         for (n in stat.names) {
@@ -252,7 +252,7 @@ plot.summary.smcarray <- function(x, type="l", lty=1:5, lwd=2, col=1:6, xlab="of
   }
   
   mat <- matrix(values, ncol=length(stat.names))
-  n.part <- x$drop.dims[["particle"]]
+  n_part <- x$drop.dims[["particle"]]
   if (missing(main))
     main <- paste(x$name, x$type, "particle estimates")
   if (missing(sub))
@@ -383,7 +383,7 @@ density.smcarray <- function(x, bw="nrd0", adjust=1, subset, ...)
   ans <- list()
   bww <- bw
   
-  n.part <- dim(x$values)["particle"]
+  n_part <- dim(x$values)["particle"]
   
   if (!missing(subset)) {
     if(!is.character(subset) || length(subset)!=1)
@@ -410,14 +410,14 @@ density.smcarray <- function(x, bw="nrd0", adjust=1, subset, ...)
     varname <- deparse.varname(x$name, ind)
     
     if (!missing(subset)) {
-      ind.mat <- array(c(rep(ind, each=n.part), 1:n.part), dim=c(n.part, length(dim(x$values))))
+      ind.mat <- array(c(rep(ind, each=n_part), 1:n_part), dim=c(n_part, length(dim(x$values))))
       values <- x$values[ind.mat]
       weights <- x$weights[ind.mat]
       ind2 <- array(ind, dim=c(1, length(ind)))
       ess <- x$ess[ind2]
       discrete <- x$discrete[ind2]
     } else {
-      ind.vec <- seq(d, len*(n.part-1)+d, len)
+      ind.vec <- seq(d, len*(n_part-1)+d, len)
       values <- x$values[ind.vec]
       weights <- x$weights[ind.vec]
       ess <- x$ess[d]
@@ -428,13 +428,13 @@ density.smcarray <- function(x, bw="nrd0", adjust=1, subset, ...)
       bww <- bw[[d]]
     
     if (discrete) {
-      table <- .Call("weighted_table", values, weights, PACKAGE="RBiips")
+      table <- RBiips("weighted_table",  values, weights)
       dens <- list(x=table[["Table"]]$x, y=table[["Table"]]$y)
     } else {
       dens <- density(values, weights=weights, bw=bww, adjust=adjust, ...)
     }
     
-    ans[[varname]] <- list(density=dens, name=varname, type=x$type, n.part=n.part, ess=ess, discrete=discrete)
+    ans[[varname]] <- list(density=dens, name=varname, type=x$type, n_part=n.part, ess=ess, discrete=discrete)
     class(ans[[varname]]) <- "density.smcarray.atomic"
   }
   
@@ -519,7 +519,7 @@ plot.density.smcarray.atomic <- function(x, type="l", lwd=1, col=1:6,
     if (missing(main))
       main <- paste(x$name, "discrete law histograms")
     if (missing(sub))
-      sub <- paste("n.part=", x$n.part)
+      sub <- paste("n_part=", x$n_part)
     
     barplot(x$density$y, names.arg=x$density$x,
             col=col, lwd=lwd, xlab=xlab, ylab=ylab, main=main.title, sub=sub,
@@ -531,7 +531,7 @@ plot.density.smcarray.atomic <- function(x, type="l", lwd=1, col=1:6,
       main <- paste(x$name, "kernel density estimates")
     if (missing(sub)) {
       bw <- x$density$bw
-      sub <- paste("n.part=", x$n.part, ", bw=", signif(bw, digits = 2), sep="")
+      sub <- paste("n_part=", x$n_part, ", bw=", signif(bw, digits = 2), sep="")
     }
     
     plot(x$density$x, x$density$y,
@@ -604,7 +604,7 @@ plot.density.smcarray.atomic.list <- function(x, type="l", lwd=1, col=1:6,
     if (missing(main))
       main <- paste(x[[1]]$name, "discrete law histograms")
     if (missing(sub))
-      sub <- paste("n.part=", x[[1]]$n.part, sep="")
+      sub <- paste("n_part=", x[[1]]$n_part, sep="")
     
     if (length(col)>length(x))
       col <- col[1:length(x)]
@@ -632,7 +632,7 @@ plot.density.smcarray.atomic.list <- function(x, type="l", lwd=1, col=1:6,
       main <- paste(x[[1]]$name, "kernel density estimates")
     if (missing(sub)) {
       bw <- x[[1]]$density$bw
-      sub <- paste("n.part=", x[[1]]$n.part, ", bw=", signif(bw, digits = 2), sep="")
+      sub <- paste("n_part=", x[[1]]$n_part, ", bw=", signif(bw, digits = 2), sep="")
     }
   
     matplot(xx, yy,

@@ -36,5 +36,5 @@
 #
 
 .onLoad <- function(lib, pkg) {
-  .Call("load_module", "basemod", PACKAGE="RBiips")
+  RBiips("load_module",  "basemod")
 }
