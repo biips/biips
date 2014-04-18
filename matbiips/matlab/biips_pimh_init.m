@@ -1,7 +1,7 @@
 function [obj_pimh] = biips_pimh_init(model, variable_names)
 
-%--------------------------------------------------------------------------
-% BIIPS_PIMH_INIT initializes the Particle Independent Metropolis-Hastings algorithm
+% BIIPS_PIMH_INIT creates a PIMH object
+% Initializes the Particle Independent Metropolis-Hastings algorithm
 % [sample, log_marg_like] = biips_pimh_init(model, variable_names, n_part, rs_thres, rs_type)
 %
 %   INPUT

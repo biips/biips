@@ -9,7 +9,7 @@ prec_x = 10;
 prec_y = 1;
 
 %% build evalutations functions
-biips_add_distrib_sampler('distmat', 3, 'mydistdim', 'mydistsample')
+biips_add_distribution('distmat', 3, 'mydistdim', 'mydistsample')
 
 %% create model
 model = biips_model('hmm_1d_nonlin_distmat.bug', who);

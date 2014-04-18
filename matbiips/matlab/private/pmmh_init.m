@@ -42,7 +42,7 @@ for i=1:length(latent_names)
 end
 sample_param = cell(length(param_names), 1);
 %% Set init values
-data = biips_get_data(console);    
+data = matbiips('get_data', console);
 for i=1:length(param_names)
     clear var_name;
     if isempty(pn_param(i).lower)
@@ -89,7 +89,7 @@ if ~isempty(latent_names)
     monitored = is_monitored(console, latent_names, 's', false);
     if ~monitored
         % monitor variables
-        monitor_biips(console, latent_names, 's'); 
+        monitor(console, latent_names, 's'); 
         latent_monitored = false;
     end
 end
