@@ -7,7 +7,7 @@
 ##' BiiPS is a general software for Bayesian inference with interacting particle 
 ##' systems, a.k.a. sequential Monte Carlo (SMC) methods.
 ##' It aims at popularizing the use of these methods to non-statistician 
-##' researchers and students, thanks to its automated "black box" inference engine.
+##' researchers and students, thanks to its automated 'black box' inference engine.
 ##' It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, 
 ##' the statistical modeling with graphical models and the language associated 
 ##' with their descriptions.
@@ -47,3 +47,8 @@
 ##' %% ~~ simple examples of the most important functions ~~
 ##' 
 NULL
+
+
+.onLoad <- function(lib, pkg) {
+    RBiips("load_module", "basemod")
+} 
