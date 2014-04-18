@@ -5,7 +5,7 @@
 ##' 
 ##' @param model a biips model object
 ##' @param params
-##' @param n.part number of particles
+##' @param n_part number of particles
 ##' @param ... additional arguments to be passed to the SMC algorithm
 ##' @return %% ~Describe the value returned
 ##' @author Adrien Todeschini, Francois Caron
@@ -18,13 +18,13 @@
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
 smc.sensitivity <- function(object, params,
-                            n.part, ...)
+                            n_part, ...)
 {
   if (!is.biips(object))
     stop("Invalid BiiPS model")
   
-  if (missing(n.part))
-    stop("missing n.part argument")
+  if (missing(n_part))
+    stop("missing n_part argument")
   
   ## check params
   if (!is.list(params) || length(params) == 0)
@@ -66,8 +66,8 @@ smc.sensitivity <- function(object, params,
   }
   
   ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ## initialize
   ##-----------
@@ -76,9 +76,9 @@ smc.sensitivity <- function(object, params,
   max.log.marg.like <- -Inf
   max.log.marg.like.pen <- -Inf
   
-  .Call("message", paste("Analyzing sensitivity with", n.part, "particles"), PACKAGE="RBiips")
+  RBiips("message",  paste("Analyzing sensitivity with", n_part, "particles"))
   ## progress bar
-  bar <- .Call("progress_bar", n.params, '*', "iterations", PACKAGE="RBiips")
+  bar <- RBiips("progress_bar",  n.params, '*', "iterations")
   
   ## Iterate 
   ##--------
@@ -115,13 +115,13 @@ smc.sensitivity <- function(object, params,
     }
     
     ## run smc sampler
-    ok <- run.smc.forward(object, n.part=n.part, ...)
+    ok <- run.smc.forward(object, n_part=n.part, ...)
     
     if (!ok)
       stop("Failure running smc forward sampler. param: ", paste(names(param),"=", param, sep="", collapse=";"))
     
     ## log marginal likelihood
-    log.marg.like[k] <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
+    log.marg.like[k] <- RBiips("get_log_norm_const",  object$ptr())
     if (log.marg.like[k] > max.log.marg.like) {
       max.log.marg.like <- log.marg.like[k]
       max.param <- param
@@ -133,7 +133,7 @@ smc.sensitivity <- function(object, params,
     }
     
     ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    RBiips("advance_progress_bar",  bar, 1)
   }
   
   ## restore data
@@ -147,7 +147,7 @@ smc.sensitivity <- function(object, params,
       ## then it was not observed
       ## hence remove the data and go to the next variable
       if (!(pn$names[[v]] %in% names(data))) {
-        ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+        ok <- RBiips("remove_data",  object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]])
         if (!ok)
           stop("Failure restoring data")
         next
@@ -189,7 +189,7 @@ smc.sensitivity <- function(object, params,
       ## then the variable was not observed
       ## hence remove the data and go to the next variable
       if (all(is.na(data.sub))) {
-        ok <- .Call("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], PACKAGE="RBiips")
+        ok <- RBiips("remove_data",  object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]])
         if (!ok)
           stop("Failure restoring data")
         next

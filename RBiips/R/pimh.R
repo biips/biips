@@ -1,5 +1,5 @@
 pimh.init.biips <- function(object, variable.names,
-                            n.part, rs.thres=0.5, rs.type="stratified")
+                            n_part, rs_thres=0.5, rs_type="stratified")
 {
   monitored <- is.monitored.biips(object, variable.names, "s", FALSE)
   if (!monitored) {
@@ -7,28 +7,28 @@ pimh.init.biips <- function(object, variable.names,
     monitor.biips(object, variable.names, type="s")
   }
   
-  if (!.Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")) {
+  if (!RBiips("is_sampler_built",  object$ptr())) {
     ## build smc sampler
-    .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
+    RBiips("build_smc_sampler",  object$ptr(), FALSE)
   }
   
-  atend <- .Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
+  atend <- RBiips("is_smc_sampler_at_end",  object$ptr())
   ## get log normalizing constant
   if (!monitored || !atend) {
     ## run smc sampler
-    .Call("message", "Initializing PIMH", PACKAGE="RBiips")
-    run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+    RBiips("message",  "Initializing PIMH")
+    run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
   }
-  log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
+  log.marg.like <- RBiips("get_log_norm_const",  object$ptr())
   
   ## get sampled value
-  sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+  sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
   if (length(sampled.value)==0) {
     ## sample one particle
     rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+    RBiips("sample_gen_tree_smooth_particle",  object$ptr(), as.integer(rng.seed))
     
-    sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
   }
   sample <- list()
   for (var in variable.names) {
@@ -41,14 +41,14 @@ pimh.init.biips <- function(object, variable.names,
 
 
 one.pimh.update.biips <- function(object, variable.names,
-                                  n.part, rs.thres=0.5, rs.type="stratified",
+                                  n_part, rs_thres=0.5, rs_type="stratified",
                                   sample, log.marg.like)
 {
   ## SMC
-  run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type)
+  run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type)
   
   ## Acceptance rate
-  log.marg.like.prop <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
+  log.marg.like.prop <- RBiips("get_log_norm_const",  object$ptr())
   log.ar <- log.marg.like.prop - log.marg.like
   
   ## Accept/Reject step
@@ -58,10 +58,10 @@ one.pimh.update.biips <- function(object, variable.names,
     
     ## sample one particle
     rng.seed <- runif(1, 0, as.integer(Sys.time()))
-    .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+    RBiips("sample_gen_tree_smooth_particle",  object$ptr(), as.integer(rng.seed))
     
     ## get sampled value
-    sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
     for (var in variable.names) {
       sample[[var]] <- sampled.value[[var]]
     }
@@ -78,8 +78,8 @@ pimh.update <- function(object, ...)
 
 
 ##' @S3method pimh.update biips
-pimh.update.biips <- function(object, variable.names, n.iter,
-                              n.part, ...)
+pimh.update.biips <- function(object, variable.names, n_iter,
+                              n_part, ...)
 {
   if (!is.biips(object))
     stop("Invalid BiiPS model")
@@ -89,47 +89,47 @@ pimh.update.biips <- function(object, variable.names, n.iter,
     stop("Invalid variable.names argument")
   parse.varnames(variable.names)
   
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
-  n.iter <- as.integer(n.iter)
+  if (!is.numeric(n_iter) || length(n_iter)!=1 || n_iter < 1)
+    stop("Invalid n_iter argument")
+  n_iter <- as.integer(n_iter)
   
   ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ## initialize
   out <- pimh.init.biips(object, variable.names=variable.names,
-                         n.part=n.part, ...)
+                         n_part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
   
-  .Call("message", paste("Updating PIMH with", n.part, "particles"), PACKAGE="RBiips")
+  RBiips("message",  paste("Updating PIMH with", n_part, "particles"))
   ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  bar <- RBiips("progress_bar",  n_iter, '*', "iterations")
   
   n.samples <- 0
   
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
-  for(i in 1:n.iter) {
+  for(i in 1:n_iter) {
     out <- one.pimh.update.biips(object, variable.names=variable.names, 
                                  sample=sample, log.marg.like=log.marg.like,
-                                 n.part=n.part, ...)
+                                 n_part=n.part, ...)
     sample <- out$sample
     log.marg.like <- out$log.marg.like
     accepted <- out$accepted
     
     ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    RBiips("advance_progress_bar",  bar, 1)
   }
   
   ## release monitors memory
   clear.monitors.biips(object, type="s", TRUE)
   
   ## reset log norm const and sampled value
-  if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample, PACKAGE="RBiips")
+  if (n_iter > 0 && !accepted) {
+    RBiips("set_log_norm_const",  object$ptr(), log.marg.like)
+    RBiips("set_sampled_gen_tree_smooth_particle",  object$ptr(), sample)
   }
   
   invisible(NULL)
@@ -141,21 +141,21 @@ pimh.update.biips <- function(object, variable.names, n.iter,
 ##' Generate Particle Independent Metropolis-Hastings samples
 ##' 
 ##' The \code{pimh.samples} function creates monitors for the given variables,
-##' runs the model for \code{n.iter} iterations and returns the monitored
+##' runs the model for \code{n_iter} iterations and returns the monitored
 ##' samples.
 ##' 
 ##' @param model a biips model object
 ##' @param variable.names a character vector giving the names of variables to
 ##' be monitored
-##' @param n.iter number of iterations of the Markov chain to run
+##' @param n_iter number of iterations of the Markov chain to run
 ##' @param thin thinning interval for monitors
-##' @param n.part number of particles
+##' @param n_part number of particles
 ##' @param ... additional arguments to be passed to the SMC algorithm
 ##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
 ##' objects, with one element for each element of the \code{variable.names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips.model}}, \code{\link{pmmh.samples}},
+##' @seealso \code{\link{biips_model}}, \code{\link{pmmh.samples}},
 ##' \code{\link{smc.samples}}
 ##' @keywords models
 ##' @export
@@ -165,8 +165,8 @@ pimh.update.biips <- function(object, variable.names, n.iter,
 ##' ##-- ==>  Define data, use random,
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
-pimh.samples <- function(object, variable.names, n.iter, thin = 1,
-                         n.part, ...)
+pimh.samples <- function(object, variable.names, n_iter, thin = 1,
+                         n_part, ...)
 {
   if (!is.biips(object))
     stop("Invalid BiiPS model")
@@ -176,36 +176,36 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
     stop("Invalid variable.names argument")
   parse.varnames(variable.names)
   
-  if (!is.numeric(n.iter) || length(n.iter)!=1 || n.iter < 1)
-    stop("Invalid n.iter argument")
-  n.iter <- as.integer(n.iter)
+  if (!is.numeric(n_iter) || length(n_iter)!=1 || n_iter < 1)
+    stop("Invalid n_iter argument")
+  n_iter <- as.integer(n_iter)
   if (!is.numeric(thin) || length(thin)!=1 || thin < 1)
     stop("Invalid thin argument")
   thin <- as.integer(thin)
   
   ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ## Initialization
   ##---------------  
   out <- pimh.init.biips(object, variable.names=variable.names,
-                         n.part=n.part, ...)
+                         n_part=n.part, ...)
   sample <- out$sample
   log.marg.like <- out$log.marg.like
   
   ans <- list()
   n.samples <- 0
   
-  .Call("message", paste("Generating PIMH samples with", n.part, "particles"), PACKAGE="RBiips")
+  RBiips("message",  paste("Generating PIMH samples with", n_part, "particles"))
   ## progress bar
-  bar <- .Call("progress_bar", n.iter, '*', "iterations", PACKAGE="RBiips")
+  bar <- RBiips("progress_bar",  n_iter, '*', "iterations")
   
   ## Independant Metropolis-Hastings iterations
   ##-------------------------------------------
-  for(i in 1:n.iter) {
+  for(i in 1:n_iter) {
     out <- one.pimh.update.biips(object, variable.names=variable.names,
-                                 n.part=n.part,
+                                 n_part=n.part,
                                  sample=sample, log.marg.like=log.marg.like, ...)
     sample <- out$sample
     log.marg.like <- out$log.marg.like
@@ -220,15 +220,15 @@ pimh.samples <- function(object, variable.names, n.iter, thin = 1,
     }
     
     ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    RBiips("advance_progress_bar",  bar, 1)
   }
   
   clear.monitors.biips(object, type="s")
   
   ## reset log norm const and sampled value
-  if (n.iter > 0 && !accepted) {
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
-    .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample, PACKAGE="RBiips")
+  if (n_iter > 0 && !accepted) {
+    RBiips("set_log_norm_const",  object$ptr(), log.marg.like)
+    RBiips("set_sampled_gen_tree_smooth_particle",  object$ptr(), sample)
   }
   
   

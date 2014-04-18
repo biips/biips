@@ -10,7 +10,7 @@ pmmh.init <- function(object, ...)
 ##' @param param.names vector of params
 ##'
 pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
-                            n.part, rs.thres=0.5, rs.type="stratified",
+                            n_part, rs_thres=0.5, rs_type="stratified",
                             inits.rng.seed, ...)
 { 
   if (!is.biips(object))
@@ -105,8 +105,8 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ## make init sample
   sample <- list()
@@ -121,7 +121,7 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
       sample[[var]] <- init.values[[var]]
     } else {
       # or sample init value
-      data <- object$.data.sync()
+      data <- object$.data_sync()
       if (var %in% names(data))
         sample[[var]] <- data[[var]]
       else
@@ -174,23 +174,23 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
   }
   
   ## build smc sampler
-  if (!.Call("is_sampler_built", object$ptr(), PACKAGE="RBiips")) {
-    .Call("build_smc_sampler", object$ptr(), FALSE, PACKAGE="RBiips")
+  if (!RBiips("is_sampler_built",  object$ptr())) {
+    RBiips("build_smc_sampler",  object$ptr(), FALSE)
   }
   
-  sampler.atend <- .Call("is_smc_sampler_at_end", object$ptr(), PACKAGE="RBiips")
+  sampler.atend <- RBiips("is_smc_sampler_at_end",  object$ptr())
   
   ## get log normalizing constant
   if (!sampler.atend || !latent.monitored) {
     ## run smc
     if (!sampler.atend)
-      .Call("message", "Initializing PMMH", PACKAGE="RBiips")
+      RBiips("message",  "Initializing PMMH")
     else if (!latent.monitored)
-      .Call("message", "Initializing PMMH latent variables", PACKAGE="RBiips")
-    if (!run.smc.forward(object, n.part=n.part, rs.thres=rs.thres, rs.type=rs.type))
+      RBiips("message",  "Initializing PMMH latent variables")
+    if (!run.smc.forward(object, n_part=n.part, rs_thres=rs.thres, rs_type=rs.type))
       stop("run smc forward sampler: invalid initial values.")
   }
-  log.marg.like <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
+  log.marg.like <- RBiips("get_log_norm_const",  object$ptr())
   
   if (is.nan(log.marg.like)) {
     stop("Failed to get log marginal likelihood: NaN.")
@@ -201,13 +201,13 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
   
   ## get latent variable sampled value
   if (length(latent.names) > 0) {
-    sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+    sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
     if (length(sampled.value)==0) {
       ## sample one particle
       rng.seed <- runif(1, 0, as.integer(Sys.time()))
-      .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+      RBiips("sample_gen_tree_smooth_particle",  object$ptr(), as.integer(rng.seed))
       
-      sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+      sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
     }
     for (var in latent.names) {
       sample[[var]] <- sampled.value[[var]]
@@ -224,7 +224,7 @@ pmmh.init.biips <- function(object, param.names, latent.names=c(), inits=list(),
 ##' using the underlying SMC
 one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.param,
                                   sample, log.prior, log.marg.like,
-                                  n.part, rw.rescale, rw.learn,
+                                  n_part, rw.rescale, rw.learn,
                                   rw.rescale.type, ...)
 {  
   n.fail <- 0
@@ -276,7 +276,7 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
   log.marg.like.prop <- 0
   
   if (log.prior.prop != -Inf) {
-    ok <- run.smc.forward(object, n.part=n.part, ...)
+    ok <- run.smc.forward(object, n_part=n.part, ...)
     
     if (!ok) {
       log.marg.like.prop <- -Inf
@@ -285,7 +285,7 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
               paste(names(prop), "=", prop, sep="", collapse="; "),
               "\n")
     } else {
-      log.marg.like.prop <- .Call("get_log_norm_const", object$ptr(), PACKAGE="RBiips")
+      log.marg.like.prop <- RBiips("get_log_norm_const",  object$ptr())
       if (is.nan(log.marg.like.prop)) {
         stop("Failed to get log marginal likelihood: NaN.")
       }
@@ -311,10 +311,10 @@ one.pmmh.update.biips <- function(object, param.names, latent.names=c(), pn.para
     if (length(latent.names) > 0) {
       ## sample one particle for the latent variables
       rng.seed <- runif(1, 0, as.integer(Sys.time()))
-      .Call("sample_gen_tree_smooth_particle", object$ptr(), as.integer(rng.seed), PACKAGE="RBiips")
+      RBiips("sample_gen_tree_smooth_particle",  object$ptr(), as.integer(rng.seed))
       
       ## get sampled value
-      sampled.value <- .Call("get_sampled_gen_tree_smooth_particle", object$ptr(), PACKAGE="RBiips")
+      sampled.value <- RBiips("get_sampled_gen_tree_smooth_particle",  object$ptr())
       for (var in latent.names) {
         sample[[var]] <- sampled.value[[var]]
       }
@@ -340,14 +340,14 @@ pmmh.update <- function(object, ...)
 ##' Update Particle Marginal Metropolis-Hastings samples
 ##' 
 ##' The \code{pmmh.update} function creates monitors for the given variables,
-##' runs the model for \code{n.iter} iterations and returns the monitored
+##' runs the model for \code{n_iter} iterations and returns the monitored
 ##' samples.
 ##' 
 ##' @param model a biips model object
 ##' @param param.names character vector. names of the variables uptaded with MCMC
-##' @param n.iter integer. number of iterations of the Markov chain
-##' @param n.part integer. number of particles of the SMC
-##' @param max.fail integer. maximum number of failures allowed
+##' @param n_iter integer. number of iterations of the Markov chain
+##' @param n_part integer. number of particles of the SMC
+##' @param max_fail integer. maximum number of failures allowed
 ##' @param inits named list of initial values for the variables in param.names.
 ##' If empty, inits are sampled from the prior.
 ##' @param rw.step positive steps of the random walk (std. dev. of the proposal
@@ -363,7 +363,7 @@ pmmh.update <- function(object, ...)
 ##' objects, with one element for each element of the \code{variable.names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips.model}}, \code{\link{pimh.samples}},
+##' @seealso \code{\link{biips_model}}, \code{\link{pimh.samples}},
 ##' \code{\link{smc.samples}}
 ##' @keywords models
 ##' @export
@@ -374,20 +374,20 @@ pmmh.update <- function(object, ...)
 ##' ##-- ==>  Define data, use random,
 ##' ##--  or do  help(data=index)  for the standard data sets.
 ##' 
-pmmh.update.biips <- function(object, param.names, n.iter, 
-                              n.part, max.fail=0, inits=list(),
+pmmh.update.biips <- function(object, param.names, n_iter, 
+                              n_part, max_fail=0, inits=list(),
                               rw.step, rw.rescale=TRUE, rw.learn=TRUE,
-                              rw.rescale.type='p', n.rescale=n.iter/4, ...)
+                              rw.rescale.type='p', n.rescale=n_iter/4, ...)
 { 
   ### check arguments
   ### -------------------------------
   stopifnot(is.biips(object))
-  stopifnot(is.numeric(n.iter), length(n.iter)==1, n.iter>0)
-  n.iter <- as.integer(n.iter)
+  stopifnot(is.numeric(n_iter), length(n_iter)==1, n_iter>0)
+  n_iter <- as.integer(n_iter)
   stopifnot(is.logical(rw.rescale), length(rw.rescale)==1)
   stopifnot(is.logical(rw.learn), length(rw.learn)==1)
   rw.adapt <- rw.rescale|rw.learn
-  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n.iter)
+  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n_iter)
   n.rescale <- as.integer(n.rescale)
   
   ## check rw.step
@@ -437,12 +437,12 @@ pmmh.update.biips <- function(object, param.names, n.iter,
   }
   
   ### stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ### Initialize
   ### -------------------------------
-  out <- pmmh.init.biips(object, param.names=param.names, n.part=n.part,
+  out <- pmmh.init.biips(object, param.names=param.names, n_part=n.part,
                          inits=inits, ...)
   
   pn.param <- parse.varnames(param.names)
@@ -472,28 +472,28 @@ pmmh.update.biips <- function(object, param.names, n.iter,
   
   ### display message and progress bar
   title <- ifelse(object$.rw.adapt(), "Adapting", "Updating")
-  .Call("message", paste(title, "PMMH with", n.part, "particles"), PACKAGE="RBiips")
+  RBiips("message",  paste(title, "PMMH with", n_part, "particles"))
   symbol <- ifelse(object$.rw.adapt(), '+', '*')
-  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
+  bar <- RBiips("progress_bar",  n_iter, symbol, "iterations")
   
   ## initialize counters
   n.fail <- 0
   n.accept <- 0
-  accept.rate <- vector(length=n.iter)
+  accept.rate <- vector(length=n_iter)
   step=list()
   
   ### Metropolis-Hastings iterations
   ### ------------------------------- 
-  for(i in 1:n.iter) {
+  for(i in 1:n_iter) {
     ## iterate
     out <- one.pmmh.update.biips(object, param.names=param.names,
                                  pn.param=pn.param,
                                  sample=out$sample, log.prior=out$log.prior, log.marg.like=out$log.marg.like,
-                                 n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
+                                 n_part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
                                  rw.rescale.type=rw.rescale.type, ...)
     
     ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    RBiips("advance_progress_bar",  bar, 1)
     
     ## increment counters
     n.fail <- n.fail + out$n.fail
@@ -502,8 +502,8 @@ pmmh.update.biips <- function(object, param.names, n.iter,
     step[[i]] = object$.get.rw.step()
     
     ## check failures
-    if (n.fail > max.fail) {
-      stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
+    if (n.fail > max_fail) {
+      stop("Number of failures exceeds max_fail: ", n.fail, " failures.")
     }
     
     # deactivate rescale and activate learning
@@ -521,7 +521,7 @@ pmmh.update.biips <- function(object, param.names, n.iter,
   
   ### reset log norm const and sampled values if not accepted
   ### to store the last value of loglikelihood in the biips model(using set_log_norm_const)
-  if (n.iter > 0 && !out$accepted) {
+  if (n_iter > 0 && !out$accepted) {
     for (v in seq(along=param.names)) {
       var <- param.names[[v]]
       if(!.Call("change_data", object$ptr(),
@@ -529,7 +529,7 @@ pmmh.update.biips <- function(object, param.names, n.iter,
                 out$sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data: ", var, "=", out$sample[[var]])
     }
-    .Call("set_log_norm_const", object$ptr(), out$log.marg.like, PACKAGE="RBiips")
+    RBiips("set_log_norm_const",  object$ptr(), out$log.marg.like)
   }
   
   
@@ -543,17 +543,17 @@ pmmh.update.biips <- function(object, param.names, n.iter,
 ##' Generate Particle Marginal Metropolis-Hastings samples
 ##' 
 ##' The \code{pmmh.samples} function creates monitors for the given variables,
-##' runs the model for \code{n.iter} iterations and returns the monitored
+##' runs the model for \code{n_iter} iterations and returns the monitored
 ##' samples.
 ##' 
 ##' @param model a biips model object
 ##' @param param.names a character vector giving the variables uptaded with MCMC
 ##' @param latent.names a character vector giving the variables uptaded with SMC
 ##' that you want to monitor
-##' @param n.iter number of iterations of the Markov chain
+##' @param n_iter number of iterations of the Markov chain
 ##' @param thin thinning interval for monitors
-##' @param n.part number of particles of the SMC
-##' @param max.fail maximum number of failures allowed
+##' @param n_part number of particles of the SMC
+##' @param max_fail maximum number of failures allowed
 ##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
 ##' @param rw.learn boolean. Toggle online learning the empirical covariance matrix of
 ##' the parameters
@@ -562,7 +562,7 @@ pmmh.update.biips <- function(object, param.names, n.iter,
 ##' objects, with one element for each element of the \code{variable.names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips.model}}, \code{\link{pimh.samples}},
+##' @seealso \code{\link{biips_model}}, \code{\link{pimh.samples}},
 ##' \code{\link{smc.samples}}
 ##' @keywords models
 ##' @export
@@ -572,29 +572,29 @@ pmmh.update.biips <- function(object, param.names, n.iter,
 ##' ##-- ==>  Define data, use random,
 ##' ##--	or do  help(data=index)  for the standard data sets.
 ##' 
-pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1, 
-                         n.part, max.fail=0, rw.rescale=FALSE, rw.learn=FALSE,
-                         rw.rescale.type='p', n.rescale=n.iter/4, ...)
+pmmh.samples <- function(object, param.names, latent.names=c(), n_iter, thin=1, 
+                         n_part, max_fail=0, rw.rescale=FALSE, rw.learn=FALSE,
+                         rw.rescale.type='p', n.rescale=n_iter/4, ...)
 {  
   stopifnot(is.biips(object))
-  stopifnot(is.numeric(n.iter), length(n.iter)==1, n.iter>0)
-  n.iter <- as.integer(n.iter)
+  stopifnot(is.numeric(n_iter), length(n_iter)==1, n_iter>0)
+  n_iter <- as.integer(n_iter)
   stopifnot(is.logical(rw.rescale), length(rw.rescale)==1)
   stopifnot(is.logical(rw.learn), length(rw.learn)==1)
   rw.adapt <- rw.rescale|rw.learn
-  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n.iter)
+  stopifnot(is.numeric(n.rescale), length(n.rescale)==1, n.rescale <= n_iter)
   n.rescale <- as.integer(n.rescale)
   stopifnot(is.numeric(thin), length(thin)==1, thin>0)
   thin <- as.integer(thin)
   
   ## stop biips verbosity
-  verb <- .Call("verbosity", 0, PACKAGE="RBiips")
-  on.exit(.Call("verbosity", verb, PACKAGE="RBiips"))
+  verb <- RBiips("verbosity",  0)
+  on.exit(RBiips("verbosity",  verb))
   
   ## Initialization
   #----------------
   out <- pmmh.init.biips(object, param.names=param.names, latent.names=latent.names,
-                         n.part=n.part, ...)
+                         n_part=n.part, ...)
   sample <- out$sample
   log.prior <- out$log.prior
   log.marg.like <- out$log.marg.like
@@ -603,8 +603,8 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   
   ## reset log normalizing constant on exit
   on.exit(
-    if (n.iter > 0 && !accepted) {
-      .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
+    if (n_iter > 0 && !accepted) {
+      RBiips("set_log_norm_const",  object$ptr(), log.marg.like)
     }, add=TRUE)
   
   ans <- list()
@@ -615,7 +615,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   accepted <- TRUE
   n.accept <- 0  
   
-  accept.rate <- vector(length=n.iter)
+  accept.rate <- vector(length=n_iter)
   step=list()
   
   ### stop adaptation if necessary
@@ -635,17 +635,17 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   
   ### display message and progress bar
   title <- ifelse(object$.rw.adapt(), " adaptive", "")
-  .Call("message", paste("Generating", title, " PMMH samples with ", n.part, " particles", sep=''), PACKAGE="RBiips")
+  RBiips("message",  paste("Generating", title, " PMMH samples with ", n_part, " particles", sep=''))
   symbol <- ifelse(object$.rw.adapt(), '+', '*')
-  bar <- .Call("progress_bar", n.iter, symbol, "iterations", PACKAGE="RBiips")
+  bar <- RBiips("progress_bar",  n_iter, symbol, "iterations")
   
   ## Metropolis-Hastings iterations
   ##-------------------------------
-  for(i in 1:n.iter) {
+  for(i in 1:n_iter) {
     out <- one.pmmh.update.biips(object, param.names=param.names, latent.names=latent.names,
                                  pn.param=pn.param,
                                  sample=sample, log.prior=log.prior, log.marg.like=log.marg.like,
-                                 n.part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
+                                 n_part=n.part, rw.rescale=rw.rescale, rw.learn=rw.learn, 
                                  rw.rescale.type=rw.rescale.type, ...)
     sample <- out$sample
     log.prior <- out$log.prior
@@ -657,10 +657,10 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
     step[[i]] = object$.get.rw.step()
     
     ## advance progress bar
-    .Call("advance_progress_bar", bar, 1, PACKAGE="RBiips")
+    RBiips("advance_progress_bar",  bar, 1)
     
-    if (n.fail > max.fail) {
-      stop("Number of failures exceeds max.fail: ", n.fail, " failures.")
+    if (n.fail > max_fail) {
+      stop("Number of failures exceeds max_fail: ", n.fail, " failures.")
     }
     
     ## Store output
@@ -681,7 +681,7 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
   clear.monitors.biips(object, type="s")
   
   ## reset log norm const and sampled value for the latent variables
-  if (n.iter > 0 && !accepted) {
+  if (n_iter > 0 && !accepted) {
     for (v in seq(along=param.names)) {
       var <- param.names[[v]]
       if(!.Call("change_data", object$ptr(),
@@ -689,9 +689,9 @@ pmmh.samples <- function(object, param.names, latent.names=c(), n.iter, thin=1,
                 sample[[var]], TRUE, PACKAGE="RBiips"))
         stop("can not reset previous data: ", var, "=", sample[[var]])
     }
-    .Call("set_log_norm_const", object$ptr(), log.marg.like, PACKAGE="RBiips")
+    RBiips("set_log_norm_const",  object$ptr(), log.marg.like)
     if (length(latent.names)>0)
-      .Call("set_sampled_gen_tree_smooth_particle", object$ptr(), sample[latent.names], PACKAGE="RBiips")
+      RBiips("set_sampled_gen_tree_smooth_particle",  object$ptr(), sample[latent.names])
   }
   
   ## output mean acceptance rate
