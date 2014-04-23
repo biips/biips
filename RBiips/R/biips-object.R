@@ -8,12 +8,12 @@
 ##' node arrays used in the model.
 ##' 
 ##' @name biips-object 
-##' @aliases biips-object build.sampler build.sampler.biips pmmh.init
-##' pmmh.init.biips pmmh.update pmmh.update.biips pimh.update pimh.update.biips
+##' @aliases biips-object build_sampler build_sampler.biips pmmh_init
+##' pmmh_init.biips pmmh_update pmmh_update.biips pimh_update pimh_update.biips
 ##' variable.names.biips is.biips
 ##' @param object a biips model object
 ##' @param proposal
-##' @param variable.names a character vector giving the names of variables to
+##' @param variable_names a character vector giving the names of variables to
 ##' be monitored
 ##' @param inits
 ##' @param n_part number of particles
@@ -61,7 +61,9 @@ print.biips <- function(x, ...) {
   if (any(part)) {
     cat("\nPartially observed variables:\n", names(data)[part], "\n")
   }
+  return(invisible())
 }
+
 
 
 ##' @importFrom stats variable.names
@@ -69,9 +71,54 @@ print.biips <- function(x, ...) {
 variable.names.biips <- function(object, ...) {
   stopifnot(is.biips(object))
   
-  var_names <- RBiips("get_variable_names", object$ptr())
+  variable_names <- RBiips("get_variable_names", object$ptr())
   
-  return(var_names)
+  return(variable_names)
+}
+
+
+
+##' @export
+nodes <- function(object, ...) UseMethod("nodes")
+
+##' @S3method nodes biips
+nodes = function(object, type, observed, ...) {
+  stopifnot(is.biips(object))
+  
+  sorted_nodes <- data.frame(RBiips("get_sorted_nodes", object$ptr()))
+  
+  if (RBiips("is_sampler_built", object$ptr())) {
+    samplers <- data.frame(RBiips("get_node_samplers", object$ptr()))
+    sorted_nodes <- cbind(sorted_nodes, samplers)
+  }
+  
+  if (!missing(type)) {
+    if (!is.character(type) || length(type) != 1)
+      stop("Invalid type argument.")
+    
+    type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
+    sorted_nodes <- sorted_nodes[sorted_nodes["type"] == type, ]
+  }
+  
+  if (!missing(observed)) {
+    if (!is.logical(observed) || length(observed) != 1)
+      stop("Invalid observed argument.")
+    sorted_nodes <- sorted_nodes[sorted_nodes["observed"] == observed, ]
+  }
+  
+  return(sorted_nodes)
+}
+
+
+##' @export
+print_dot <- function(object, ...) UseMethod("print_dot")
+
+##' @S3method print_dot biips
+print_dot = function(object, file, ...) {
+  stopifnot(is.biips(x))
+  
+  RBiips("print_graphviz", object$ptr(), file)
+  return(invisible())
 }
 
 
@@ -96,46 +143,46 @@ build_sampler.biips <- function(object, proposal = "auto", ...) {
   ## build smc sampler
   RBiips("build_smc_sampler", object$ptr(), proposal == "prior")
   
-  invisible()
+  return(invisible())
 }
 
 
 monitor <- function(object, ...) UseMethod("monitor")
 
 ##' @S3method monitor biips
-monitor.biips <- function(object, var_names, type = "s", ...) {
+monitor.biips <- function(object, variable_names, type = "s", ...) {
   stopifnot(is.biips(object))
-  stopifnot(is.character(var_names), length(var_names) > 0)
+  stopifnot(is.character(variable_names), length(variable_names) > 0)
   type <- check_type(type, several.ok = TRUE)
   
-  pn <- parse_varnames(var_names)
+  pn <- parse_varnames(variable_names)
   
   for (t in type) {
-    switch(t,
-           f = RBiips("set_filter_monitors", object$ptr(), pn$names, pn$lower, pn$upper),
-           s = RBiips("set_gen_tree_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper),
-           b = RBiips("set_backward_smooth_monitors", object$ptr(), pn$names, pn$lower, pn$upper))
+    switch(t, f = RBiips("set_filter_monitors", object$ptr(), pn$names, pn$lower, 
+      pn$upper), s = RBiips("set_gen_tree_smooth_monitors", object$ptr(), pn$names, 
+      pn$lower, pn$upper), b = RBiips("set_backward_smooth_monitors", object$ptr(), 
+      pn$names, pn$lower, pn$upper))
   }
   
-  invisible()
+  return(invisible())
 }
 
 
 is_monitored <- function(object, ...) UseMethod("is_monitored")
 
 ##' @S3method is_monitored biips
-is_monitored.biips <- function(object, var_names, type = "s", check_released = TRUE) {
+is_monitored.biips <- function(object, variable_names, type = "s", check_released = TRUE) {
   stopifnot(is.biips(object))
-  stopifnot(is.character(var_names), length(var_names) > 0)
+  stopifnot(is.character(variable_names), length(variable_names) > 0)
   type <- check_type(type, several.ok = FALSE)
   stopifnot(is.logical(check_released), length(check_released) == 1)
   
-  pn <- parse_varnames(var_names)
+  pn <- parse_varnames(variable_names)
   
-  ok <- switch(type,
-               f = RBiips("is_filter_monitored", object$ptr(), pn$names, pn$lower, pn$upper, check_released),
-               s = RBiips("is_gen_tree_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check_released),
-               b = RBiips("is_backward_smooth_monitored",  object$ptr(), pn$names, pn$lower, pn$upper, check_released))
+  ok <- switch(type, f = RBiips("is_filter_monitored", object$ptr(), pn$names, 
+    pn$lower, pn$upper, check_released), s = RBiips("is_gen_tree_smooth_monitored", 
+    object$ptr(), pn$names, pn$lower, pn$upper, check_released), b = RBiips("is_backward_smooth_monitored", 
+    object$ptr(), pn$names, pn$lower, pn$upper, check_released))
   
   return(ok)
 }
@@ -156,11 +203,10 @@ clear_monitors.biips <- function(object, type = "fsb", release_only = FALSE, ...
   stopifnot(is.logical(release_only), length(release_only) == 1)
   
   for (t in type) {
-    switch(t,
-           f = RBiips("clear_filter_monitors", object$ptr(), release_only), 
-           s = RBiips("clear_gen_tree_smooth_monitors", object$ptr(), release_only), 
-           b = RBiips("clear_backward_smooth_monitors", object$ptr(), release_only))
+    switch(t, f = RBiips("clear_filter_monitors", object$ptr(), release_only), 
+      s = RBiips("clear_gen_tree_smooth_monitors", object$ptr(), release_only), 
+      b = RBiips("clear_backward_smooth_monitors", object$ptr(), release_only))
   }
   
-  invisible()
+  return(invisible())
 } 

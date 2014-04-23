@@ -18,192 +18,192 @@
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##' 
 smc.sensitivity <- function(object, params, n_part, ...) {
-    if (!is.biips(object)) 
-        stop("Invalid BiiPS model")
-    
-    if (missing(n_part)) 
-        stop("missing n_part argument")
-    
-    ## check params
-    if (!is.list(params) || length(params) == 0) 
-        stop("Invalid params argument")
-    variable.names <- names(params)
-    pn <- parse.varnames(variable.names)
-    
-    ## get parameters array length
-    dim <- list()
-    len <- list()
-    d <- dim(params[[1]])
-    if (is.null(d)) {
-        n.params <- length(params[[1]])
-        dim[[names(params)[1]]] <- 1
-        len[[names(params)[1]]] <- 1
-    } else {
-        n.params <- d[[length(d)]]
+  if (!is.biips(object)) 
+    stop("Invalid BiiPS model")
+  
+  if (missing(n_part)) 
+    stop("missing n_part argument")
+  
+  ## check params
+  if (!is.list(params) || length(params) == 0) 
+    stop("Invalid params argument")
+  variable.names <- names(params)
+  pn <- parse.varnames(variable.names)
+  
+  ## get parameters array length
+  dim <- list()
+  len <- list()
+  d <- dim(params[[1]])
+  if (is.null(d)) {
+    n.params <- length(params[[1]])
+    dim[[names(params)[1]]] <- 1
+    len[[names(params)[1]]] <- 1
+  } else {
+    n.params <- d[[length(d)]]
+    d <- d[1:(length(d) - 1)]
+    dim[[names(params)[1]]] <- d
+    len[[names(params)[1]]] <- prod(d)
+  }
+  if (length(params) > 1) {
+    for (i in 2:length(params)) {
+      d <- dim(params[[i]])
+      if (is.null(d)) {
+        n <- length(params[[i]])
+        dim[[names(params)[i]]] <- 1
+        len[[names(params)[i]]] <- 1
+      } else {
+        n <- d[[length(d)]]
         d <- d[1:(length(d) - 1)]
-        dim[[names(params)[1]]] <- d
-        len[[names(params)[1]]] <- prod(d)
+        dim[[names(params)[i]]] <- d
+        len[[names(params)[i]]] <- prod(d)
+      }
+      # check parameters array length
+      if (n != n.params) 
+        stop("Invalid params argument: different number of parameters.")
     }
-    if (length(params) > 1) {
-        for (i in 2:length(params)) {
-            d <- dim(params[[i]])
-            if (is.null(d)) {
-                n <- length(params[[i]])
-                dim[[names(params)[i]]] <- 1
-                len[[names(params)[i]]] <- 1
-            } else {
-                n <- d[[length(d)]]
-                d <- d[1:(length(d) - 1)]
-                dim[[names(params)[i]]] <- d
-                len[[names(params)[i]]] <- prod(d)
-            }
-            # check parameters array length
-            if (n != n.params) 
-                stop("Invalid params argument: different number of parameters.")
-        }
-    }
+  }
+  
+  ## stop biips verbosity
+  verb <- RBiips("verbosity", 0)
+  on.exit(RBiips("verbosity", verb))
+  
+  ## initialize -----------
+  log_marg_like <- vector(length = n.params)
+  log_marg_like_pen <- vector(length = n.params)
+  max_log_marg_like <- -Inf
+  max_log_marg_like_pen <- -Inf
+  
+  RBiips("message", paste("Analyzing sensitivity with", n_part, "particles"))
+  ## progress bar
+  bar <- RBiips("progress_bar", n.params, "*", "iterations")
+  
+  ## Iterate --------
+  for (k in 1:n.params) {
     
-    ## stop biips verbosity
-    verb <- RBiips("verbosity", 0)
-    on.exit(RBiips("verbosity", verb))
-    
-    ## initialize -----------
-    log.marg.like <- vector(length = n.params)
-    log.marg.like.pen <- vector(length = n.params)
-    max.log.marg.like <- -Inf
-    max.log.marg.like.pen <- -Inf
-    
-    RBiips("message", paste("Analyzing sensitivity with", n_part, "particles"))
-    ## progress bar
-    bar <- RBiips("progress_bar", n.params, "*", "iterations")
-    
-    ## Iterate --------
-    for (k in 1:n.params) {
-        
-        ## make one param
-        param <- list()
-        for (v in seq(along = variable.names)) {
-            var <- variable.names[[v]]
-            ind <- seq(from = (k - 1) * len[[v]] + 1, to = k * len[[v]])
-            param[[var]] <- params[[v]][ind]
-            dim(param[[var]]) <- dim[[v]]
-            
-            ## change param value
-            if (!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
-                pn$upper[[v]], param[[v]], FALSE, PACKAGE = "RBiips")) 
-                stop("data change failed: invalid parameter. variable = ", var, ". value = ", 
-                  param[v])
-        }
-        
-        log.prior <- 0
-        for (v in seq(along = variable.names)) {
-            log.p <- .Call("get_log_prior_density", object$ptr(), pn$names[[v]], 
-                pn$lower[[v]], pn$upper[[v]], PACKAGE = "RBiips")
-            
-            if (is.na(log.p)) {
-                next
-            }
-            
-            if (is.nan(log.p) || (is.infinite(log.p) && log.p < 0)) 
-                stop("Failure evaluating parameter log prior for variable ", variable.names[[v]], 
-                  ". value = ", param[v])
-            
-            log.prior <- log.prior + log.p
-        }
-        
-        ## run smc sampler
-        ok <- run_smc_forward(object, n_part = n.part, ...)
-        
-        if (!ok) 
-            stop("Failure running smc forward sampler. param: ", paste(names(param), 
-                "=", param, sep = "", collapse = ";"))
-        
-        ## log marginal likelihood
-        log.marg.like[k] <- RBiips("get_log_norm_const", object$ptr())
-        if (log.marg.like[k] > max.log.marg.like) {
-            max.log.marg.like <- log.marg.like[k]
-            max.param <- param
-        }
-        log.marg.like.pen[k] <- log.marg.like[k] + log.prior
-        if (log.marg.like.pen[k] > max.log.marg.like.pen) {
-            max.log.marg.like.pen <- log.marg.like.pen[k]
-            max.param.pen <- param
-        }
-        
-        ## advance progress bar
-        RBiips("advance_progress_bar", bar, 1)
-    }
-    
-    ## restore data ------------- object$recompile()
-    
-    ## FIXME: Tentative of removing data without recompiling the model
+    ## make one param
+    param <- list()
     for (v in seq(along = variable.names)) {
-        
-        ## if the variable is not present in the data then it was not observed hence
-        ## remove the data and go to the next variable
-        if (!(pn$names[[v]] %in% names(data))) {
-            ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
-                pn$upper[[v]])
-            if (!ok) 
-                stop("Failure restoring data")
-            next
-        }
-        
-        ## otherwise: the variable might be observed then retrieve the original data
-        
-        if (is.null(pn$lower[[v]])) {
-            ## if there is no bounds, then get the full array
-            data.sub <- data[[v]]
-        } else {
-            ## otherwise get the corresponding components of the data array
-            
-            ## compute offsets
-            offsets <- NULL
-            dim <- dim(data[[v]])
-            if (is.null(dim)) 
-                dim <- length(data[[v]])
-            ind <- vector(len = length(dim))
-            
-            for (i in seq(along = data[[v]])) {
-                r <- i
-                for (d in seq(along = dim)) {
-                  ind[d] <- ((r - 1)%%dim[d]) + 1
-                  r <- ceiling(r/dim[d])
-                }
-                print(ind)
-                if (any(ind < pn$lower[[v]]) || any(ind > pn$upper[[v]])) 
-                  next
-                offsets <- c(offsets, i)
-            }
-            
-            data.sub <- array(data[[v]][offsets], dim = pn$upper[[v]] - pn$lower[[v]] + 
-                1)
-        }
-        
-        ## if all the components are NA then the variable was not observed hence remove
-        ## the data and go to the next variable
-        if (all(is.na(data.sub))) {
-            ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
-                pn$upper[[v]])
-            if (!ok) 
-                stop("Failure restoring data")
-            next
-        }
-        
-        ## check that no component is NA either all are NA or no one is
-        if (any(is.na(data.sub))) 
-            stop("Failure restoring data")
-        
-        ## finally restore the data
-        ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], 
-            data.sub, FALSE, PACKAGE = "RBiips")
-        if (!ok) 
-            stop("Failure restoring data")
+      var <- variable.names[[v]]
+      ind <- seq(from = (k - 1) * len[[v]] + 1, to = k * len[[v]])
+      param[[var]] <- params[[v]][ind]
+      dim(param[[var]]) <- dim[[v]]
+      
+      ## change param value
+      if (!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
+        pn$upper[[v]], param[[v]], FALSE, PACKAGE = "RBiips")) 
+        stop("data change failed: invalid parameter. variable = ", var, ". value = ", 
+          param[v])
     }
     
-    ## output --------
-    ans <- list(log.marg.like = log.marg.like, max.param = max.param, max.log.marg.like = max.log.marg.like, 
-        log.marg.like.pen = log.marg.like.pen, max.param.pen = max.param.pen, max.log.marg.like.pen = max.log.marg.like.pen)
+    log.prior <- 0
+    for (v in seq(along = variable.names)) {
+      log.p <- .Call("get_log_prior_density", object$ptr(), pn$names[[v]], 
+        pn$lower[[v]], pn$upper[[v]], PACKAGE = "RBiips")
+      
+      if (is.na(log.p)) {
+        next
+      }
+      
+      if (is.nan(log.p) || (is.infinite(log.p) && log.p < 0)) 
+        stop("Failure evaluating parameter log prior for variable ", variable.names[[v]], 
+          ". value = ", param[v])
+      
+      log.prior <- log.prior + log.p
+    }
     
-    return(ans)
+    ## run smc sampler
+    ok <- run_smc_forward(object, n_part = n_part, ...)
+    
+    if (!ok) 
+      stop("Failure running smc forward sampler. param: ", paste(names(param), 
+        "=", param, sep = "", collapse = ";"))
+    
+    ## log marginal likelihood
+    log_marg_like[k] <- RBiips("get_log_norm_const", object$ptr())
+    if (log_marg_like[k] > max_log_marg_like) {
+      max_log_marg_like <- log_marg_like[k]
+      max.param <- param
+    }
+    log_marg_like_pen[k] <- log_marg_like[k] + log.prior
+    if (log_marg_like_pen[k] > max_log_marg_like_pen) {
+      max_log_marg_like_pen <- log_marg_like_pen[k]
+      max.param.pen <- param
+    }
+    
+    ## advance progress bar
+    RBiips("advance_progress_bar", bar, 1)
+  }
+  
+  ## restore data ------------- object$recompile()
+  
+  ## FIXME: Tentative of removing data without recompiling the model
+  for (v in seq(along = variable.names)) {
+    
+    ## if the variable is not present in the data then it was not observed hence
+    ## remove the data and go to the next variable
+    if (!(pn$names[[v]] %in% names(data))) {
+      ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
+        pn$upper[[v]])
+      if (!ok) 
+        stop("Failure restoring data")
+      next
+    }
+    
+    ## otherwise: the variable might be observed then retrieve the original data
+    
+    if (is.null(pn$lower[[v]])) {
+      ## if there is no bounds, then get the full array
+      data.sub <- data[[v]]
+    } else {
+      ## otherwise get the corresponding components of the data array
+      
+      ## compute offsets
+      offsets <- NULL
+      dim <- dim(data[[v]])
+      if (is.null(dim)) 
+        dim <- length(data[[v]])
+      ind <- vector(len = length(dim))
+      
+      for (i in seq(along = data[[v]])) {
+        r <- i
+        for (d in seq(along = dim)) {
+          ind[d] <- ((r - 1)%%dim[d]) + 1
+          r <- ceiling(r/dim[d])
+        }
+        print(ind)
+        if (any(ind < pn$lower[[v]]) || any(ind > pn$upper[[v]])) 
+          next
+        offsets <- c(offsets, i)
+      }
+      
+      data.sub <- array(data[[v]][offsets], dim = pn$upper[[v]] - pn$lower[[v]] + 
+        1)
+    }
+    
+    ## if all the components are NA then the variable was not observed hence remove
+    ## the data and go to the next variable
+    if (all(is.na(data.sub))) {
+      ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
+        pn$upper[[v]])
+      if (!ok) 
+        stop("Failure restoring data")
+      next
+    }
+    
+    ## check that no component is NA either all are NA or no one is
+    if (any(is.na(data.sub))) 
+      stop("Failure restoring data")
+    
+    ## finally restore the data
+    ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], 
+      data.sub, FALSE, PACKAGE = "RBiips")
+    if (!ok) 
+      stop("Failure restoring data")
+  }
+  
+  ## output --------
+  ans <- list(log_marg_like = log_marg_like, max.param = max.param, max_log_marg_like = max_log_marg_like, 
+    log_marg_like_pen = log_marg_like_pen, max.param.pen = max.param.pen, max_log_marg_like_pen = max_log_marg_like_pen)
+  
+  return(ans)
 } 
