@@ -36,142 +36,13 @@
  */
 
 #include "Console.hpp"
-#include "RBiipsCommon.h"
+#include "RBiips_utils.h"
 #include "RFunction.h"
 #include "compiler/Compiler.hpp"
 #include <fstream>
 #include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
 #include "BiipsVersion.hpp"
-
-using namespace Biips;
-using std::endl;
-
-static Size VERBOSITY = 1;
-
-static inline void checkConsole(SEXP ptr)
-{
-  // FIXME
-}
-
-
-template<typename StorageOrderType>
-static std::map<String, MultiArray> writeDataTable(SEXP data);
-
-template<>
-std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(SEXP data)
-{
-  std::map<String, MultiArray> data_map;
-
-  if (VERBOSITY>1)
-    rbiips_cout << PROMPT_STRING << "Writing data table" << endl;
-
-  Rcpp::List data_list(data);
-  if (!data_list.hasAttribute("names"))
-  {
-    rbiips_cerr << "Warning: Missing variable names" << endl;
-    return data_map;
-  }
-
-  if (VERBOSITY>1)
-    rbiips_cout << INDENT_STRING << "Variables:";
-
-  Rcpp::CharacterVector names = data_list.attr("names");
-  for (int i=0; i<names.size(); ++i)
-  {
-    String var_name(names[i]);
-    if (VERBOSITY>1)
-      rbiips_cout << " " << var_name;
-
-    Rcpp::NumericVector r_vec = data_list[var_name];
-    MultiArray marray;
-
-    if (!r_vec.hasAttribute("dim"))
-    {
-      DimArray::Ptr p_dim(new DimArray(1, r_vec.size()));
-      ValArray::Ptr p_val(new ValArray(r_vec.size()));
-      std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
-      marray.SetPtr(p_dim, p_val);
-    }
-    else
-    {
-      Rcpp::IntegerVector r_dim = r_vec.attr("dim");
-      DimArray::Ptr p_dim(new DimArray(r_dim.begin(), r_dim.end()));
-      ValArray::Ptr p_val(new ValArray(r_vec.size()));
-      std::replace_copy(r_vec.begin(), r_vec.end(), p_val->begin(), NA_REAL, BIIPS_REALNA);
-      marray.SetPtr(p_dim, p_val);
-    }
-
-    data_map[var_name] = marray;
-  }
-  if (VERBOSITY>1)
-    rbiips_cout << endl;
-
-  return data_map;
-}
-
-
-template<typename StorageOrderType>
-static SEXP readDataTable(const std::map<String, MultiArray> & dataMap);
-
-template<>
-SEXP readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMap)
-{
-  if (VERBOSITY>1)
-    rbiips_cout << PROMPT_STRING << "Reading data table" << endl;
-
-  Rcpp::List data_list;
-
-  if (VERBOSITY>1)
-    rbiips_cout << INDENT_STRING << "Variables:";
-
-  Rcpp::CharacterVector names;
-  std::map<String, MultiArray>::const_iterator it_table = dataMap.begin();
-  for (; it_table!=dataMap.end(); ++it_table)
-  {
-    const String & var_name = it_table->first;
-    const MultiArray & values_array = it_table->second;
-
-    // dim
-    Rcpp::IntegerVector dim(values_array.Dim().begin(), values_array.Dim().end());
-
-    Size len = values_array.Dim().Length();
-    Rcpp::NumericVector values(len);
-
-    std::replace_copy(values_array.Values().begin(), values_array.Values().end(), values.begin(), BIIPS_REALNA, NA_REAL);
-
-    values.attr("dim") = dim;
-
-    data_list[var_name] = values;
-
-    if (VERBOSITY>1)
-      rbiips_cout << " " << var_name;
-  }
-  if (VERBOSITY>1)
-    rbiips_cout << endl;
-
-  return data_list;
-}
-
-
-static IndexRange makeRange(const Rcpp::RObject & lower,
-                            const Rcpp::RObject & upper)
-{
-  if (lower.isNULL() || upper.isNULL())
-    return IndexRange();
-
-  Rcpp::IntegerVector il(lower);
-  Rcpp::IntegerVector iu(upper);
-  if (il.size() != iu.size())
-    throw LogicError("length mismatch between lower and upper limits");
-
-  IndexRange::Indices lind(il.begin(), il.end());
-  IndexRange::Indices uind(iu.begin(), iu.end());
-
-  IndexRange r = IndexRange(lind, uind);
-  return r;
-}
-
 
 RcppExport SEXP get_version()
 {
@@ -724,32 +595,7 @@ RcppExport SEXP get_log_norm_const(SEXP pConsole)
 }
 
 
-RcppExport void set_log_norm_const(SEXP pConsole, SEXP logNormConst)
-{
-  BEGIN_RBIIPS
-  checkConsole(pConsole);
-  Rcpp::XPtr<Console> p_console(pConsole);
-
-  p_console->SetLogNormConst(Rcpp::as<Scalar>(logNormConst));
-
-  VOID_END_RBIIPS
-}
-
-
-RcppExport void sample_gen_tree_smooth_particle(SEXP pConsole, SEXP smcRngSeed)
-{
-  BEGIN_RBIIPS
-  checkConsole(pConsole);
-  Rcpp::XPtr<Console> p_console(pConsole);
-
-  if (!p_console->SampleGenTreeSmoothParticle(Rcpp::as<Size>(smcRngSeed)))
-    throw RuntimeError("Failed to sample smooth particle.");
-
-  VOID_END_RBIIPS
-}
-
-
-RcppExport SEXP get_sampled_gen_tree_smooth_particle(SEXP pConsole)
+RcppExport SEXP sample_gen_tree_smooth_particle(SEXP pConsole, SEXP smcRngSeed)
 {
   BEGIN_RBIIPS
   checkConsole(pConsole);
@@ -757,94 +603,12 @@ RcppExport SEXP get_sampled_gen_tree_smooth_particle(SEXP pConsole)
 
   std::map<String, MultiArray> sampled_value_map;
 
-  if(!p_console->DumpSampledGenTreeSmoothParticle(sampled_value_map))
-    throw RuntimeError("Failed to get sampled smooth particle.");
+  if (!p_console->SampleGenTreeSmoothParticle(Rcpp::as<Size>(smcRngSeed), sampled_value_map))
+    throw RuntimeError("Failed to sample smooth particle.");
 
   return readDataTable<MultiArray::StorageOrderType>(sampled_value_map);
 
   END_RBIIPS
-}
-
-
-RcppExport void set_sampled_gen_tree_smooth_particle(SEXP pConsole, SEXP sampledValue)
-{
-  BEGIN_RBIIPS
-  checkConsole(pConsole);
-  Rcpp::XPtr<Console> p_console(pConsole);
-
-  std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(sampledValue);
-
-  if(!p_console->SetSampledGenTreeSmoothParticle(sampled_value_map))
-    throw RuntimeError("Failed to set sampled smooth particle.");
-
-  VOID_END_RBIIPS
-}
-
-
-template<typename StorageOrderType>
-static SEXP getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type);
-
-template<>
-SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type)
-{
-  Rcpp::List particles_list;
-
-  std::map<String, NodeArrayMonitor>::const_iterator it_map;
-  for (it_map = monitorsMap.begin(); it_map != monitorsMap.end(); ++it_map)
-  {
-    const String & name = it_map->first;
-    const NodeArrayMonitor & monitor = it_map->second;
-
-    // dim
-    Rcpp::IntegerVector dim_particles(monitor.GetValues().Dim().begin(), monitor.GetValues().Dim().end());
-    Rcpp::IntegerVector dim_array(monitor.GetRange().Dim().begin(), monitor.GetRange().Dim().end());
-
-    // names(dim)
-    Rcpp::CharacterVector dim_names(dim_particles.size(), "");
-    dim_names[dim_names.size()-1] = "particle";
-
-    dim_particles.attr("names") = dim_names;
-
-    Size len = monitor.GetValues().Dim().Length();
-    Rcpp::NumericVector values(len);
-    const ValArray & values_val = monitor.GetValues().Values();
-    std::replace_copy(values_val.begin(), values_val.end(), values.begin(), BIIPS_REALNA, NA_REAL);
-    values.attr("dim") = dim_particles;
-
-    const ValArray & weight_val = monitor.GetWeights().Values();
-    Rcpp::NumericVector weights(weight_val.begin(), weight_val.end());
-    weights.attr("dim") = dim_particles;
-
-    const ValArray & ess_val(monitor.GetESS().Values());
-    Rcpp::NumericVector ess(ess_val.begin(), ess_val.end());
-    ess.attr("dim") = dim_array;
-
-    const ValArray & discrete_val(monitor.GetDiscrete().Values());
-    Rcpp::LogicalVector discrete(discrete_val.begin(), discrete_val.end());
-    discrete.attr("dim") = dim_array;
-
-    const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
-    Rcpp::IntegerVector lower(lower_ind.begin(), lower_ind.end());
-
-    const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
-    Rcpp::IntegerVector upper(upper_ind.begin(), upper_ind.end());
-
-    Rcpp::List particles;
-    particles["values"] = values;
-    particles["weights"] = weights;
-    particles["ess"] = ess;
-    particles["discrete"] = discrete;
-    particles["name"] = Rcpp::wrap(monitor.GetName());
-    particles["lower"] = lower;
-    particles["upper"] = upper;
-    particles["type"] = Rcpp::wrap(type);
-
-    particles.attr("class") = "particles";
-
-    particles_list[name] = particles;
-  }
-
-  return particles_list;
 }
 
 
