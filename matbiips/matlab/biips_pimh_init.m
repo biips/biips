@@ -2,7 +2,7 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 
 % BIIPS_PIMH_INIT creates a PIMH object
 % Initializes the Particle Independent Metropolis-Hastings algorithm
-% [sample, log_marg_like] = biips_pimh_init(model, variable_names, n_part, rs_thres, rs_type)
+% obj_pimh = biips_pimh_init(model, variable_names)
 %
 %   INPUT
 %   - model:    structure. Biips model, returned by the 'biips_model' function
@@ -16,7 +16,7 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 %   OUTPUT
 %   - obj_pimh: structure containing
 %               * sample: current sample
-%               * log_marg_lik: current value of the log marginal likelihood
+%               * log_marg_like: current value of the log marginal likelihood
 %               * variable_names: cell with names of the variables to be
 %                 monitored
 %               * model: structure, biips model
@@ -41,6 +41,8 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 % Jan 2014; Last revision: 03-04-2014
 %--------------------------------------------------------------------------
 
+check_struct_model(model);
+% TODO check variable_names ? it is currently done at the monitoring step
 matbiips('message', 'Initializing PIMH');
 obj_pimh.log_marg_like = - Inf;
 obj_pimh.sample = [];

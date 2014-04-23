@@ -94,7 +94,7 @@ if (~isempty(variable_names))
 end
 
 %% Run smc_sample
-run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
+smc_forward_algo(console, n_part, rs_thres, rs_type, get_seed());
 
 log_marg_like = matbiips('get_log_norm_const', console);
 

@@ -6,7 +6,7 @@ function summ = summary(values, weights, probas, order)
 % INPUT:
 % - values:     multidimensional array with last dimension corresponding to
 %               particles
-% - weights:    corresponding multimensional array for the weigths
+% - weights:    corresponding multidimensional array for the weigths
 % - probs:      array containing the probabilities used to compute quantiles
 % -order:       integer. The maximum wanted order for the moment statistics.
 %
