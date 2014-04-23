@@ -1,13 +1,13 @@
-function biips_add_function(name, nb_param, fun_dim, fun_eval, varargin)
+function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 
 %
 % BIIPS_ADD_FUNCTION adds a Matlab function to the BUGS language
-%   biips_add_function(name, nb_param, fun_dim, fun_eval , ...
+%   biips_add_function(name, n_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
 %   - name:     string. name of the function that will be used in the bug file.
 %               must be a valid BUGS language function name
-%   - nb_param: integer. number of arguments of the function
+%   - n_param: integer. number of arguments of the function
 %   - fun_dim:  string. name of the Matlab function returning the size 
 %               vector of the output. The model compiler will request it to build
 %               the graph and compute the dimension of the node
@@ -78,7 +78,7 @@ end
 
 %% Add function
 try
-    matbiips('add_function', name, nb_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
+    matbiips('add_function', name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
     fprintf('Added function ''%s''\n', name)
 catch
     warning('Cannot add function ''%s'' - the function may already exist', name);

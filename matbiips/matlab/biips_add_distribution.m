@@ -1,16 +1,16 @@
-function biips_add_distribution(name, nb_param, fun_dim, fun_sample, varargin)
+function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 
 %
 % BIIPS_ADD_DISTRIBUTION adds a Matlab distribution to the BUGS language
 % Currently, we can only provide the sampling function but not the density
 % function. Consequently the added distributions can only define 
 % unobserved nodes.
-%   biips_add_distribution(name, nb_param, fun_dim, fun_sample, ...
+%   biips_add_distribution(name, n_param, fun_dim, fun_sample, ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
 %   - name:     string. name of the function that will be used in the bug file.
 %               must be a valid BUGS language function name
-%   - nb_param: integer. number of arguments of the function
+%   - n_param: integer. number of arguments of the function
 %   - fun_dim:  string. name of the Matlab function returning the size 
 %               vector of the output. The model compiler will request it to build
 %               the graph and compute the dimension of the node
@@ -32,9 +32,9 @@ function biips_add_distribution(name, nb_param, fun_dim, fun_sample, varargin)
 %  arguments, and they must return a single output.
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% fun_bugs = 'funmat'; fun_dim = 'f_dim'; fun_sample = 'f_sample';
-% fun_nb_inputs = 2;
-% biips_add_random_dist(fun_bugs, fun_nb_inputs, fun_dim, fun_sample);
+% dist_bugs = 'distmat'; fun_dim = 'f_dim'; fun_sample = 'f_sample';
+% dist_nb_inputs = 2;
+% biips_add_distribution(dist_bugs, dist_nb_inputs, fun_dim, fun_sample);
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -82,7 +82,7 @@ end
 
 %% Add distribution sampler
 try
-    matbiips('add_distrib_sampler', name, nb_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
+    matbiips('add_distrib_sampler', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
     fprintf('Added distribution sampler ''%s''\n', name)
 catch
     warning('Cannot add distribution sampler ''%s'' - the distribution may already exist', name);

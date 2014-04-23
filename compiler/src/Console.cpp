@@ -141,7 +141,7 @@ namespace Biips
 
   Console::Console(std::ostream & out, std::ostream & err)
       : out_(out), err_(err), pModel_(NULL), pData_(NULL), pRelations_(NULL),
-          pVariables_(NULL), lockBackward_(false), logNormConst_(BIIPS_NEGINF)
+          pVariables_(NULL), lockBackward_(false)
   {
   }
 
@@ -628,9 +628,6 @@ namespace Biips
 //          printSamplerState(pModel_->Sampler(), out_);
       }
 
-      // normalizing constant
-      logNormConst_ = pModel_->Sampler().LogNormConst();
-
       lockBackward_ = false;
     }
     BIIPS_CONSOLE_CATCH_ERRORS
@@ -662,33 +659,8 @@ namespace Biips
     }
     try
     {
-      logNormConst = logNormConst_;
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::SetLogNormConst(Scalar logNormConst)
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't set log normalizing constant. No model!\n";
-    }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't set log normalizing constant. SMC sampler did not run!\n";
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_ << "Can't set log normalizing constant. SMC sampler did not finish!\n";
-      return false;
-    }
-    try
-    {
-      logNormConst_ = logNormConst;
-      lockBackward_ = true;
+      // normalizing constant
+      logNormConst = pModel_->Sampler().LogNormConst();
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 
@@ -1440,7 +1412,7 @@ namespace Biips
     return true;
   }
 
-  Bool Console::SampleGenTreeSmoothParticle(Size rngSeed)
+  Bool Console::SampleGenTreeSmoothParticle(Size rngSeed, std::map<String, MultiArray> & sampledValueMap)
   {
     if (!pModel_)
     {
@@ -1463,7 +1435,7 @@ namespace Biips
       // FIXME
       boost::scoped_ptr<Rng> p_rng(new Rng(rngSeed));
 
-      Bool ok = pModel_->SampleGenTreeSmoothParticle(p_rng.get(), sampledValueMap_);
+      Bool ok = pModel_->SampleGenTreeSmoothParticle(p_rng.get(), sampledValueMap);
       if (!ok)
       {
         err_ << "Failed to sample smooth particle.\n";
@@ -1475,75 +1447,6 @@ namespace Biips
     return true;
   }
 
-  Bool Console::DumpSampledGenTreeSmoothParticle(
-      std::map<String, MultiArray> & sampledValueMap)
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't sample smooth particle. No model!\n";
-      return false;
-    }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't sample smooth particle. SMC sampler not built!\n";
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_ << "Can't sample smooth particle. SMC sampler still running!\n";
-      return false;
-    }
-
-    try
-    {
-      sampledValueMap = sampledValueMap_;
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
-
-  Bool Console::SetSampledGenTreeSmoothParticle(
-      const std::map<String, MultiArray> & sampledValueMap)
-  {
-    if (!pModel_)
-    {
-      err_ << "Can't set sampled smooth particle. No model!\n";
-      return false;
-    }
-    if (!pModel_->SamplerBuilt())
-    {
-      err_ << "Can't set sampled smooth particle. SMC sampler not built!\n";
-      return false;
-    }
-    if (!pModel_->Sampler().AtEnd())
-    {
-      err_
-          << "Can't set sampled smooth particle. SMC sampler still running!\n";
-      return false;
-    }
-
-    try
-    {
-      std::map<String, MultiArray>::const_iterator it = sampledValueMap.begin();
-      for (; it != sampledValueMap.end(); ++it)
-      {
-        if (!sampledValueMap_.count(it->first))
-          throw RuntimeError("Can't set sampled value: variable not found.");
-
-        // check dropped dimensions
-        if (it->second.Dim().Drop() != sampledValueMap_.at(it->first).Dim().Drop()) {
-          throw RuntimeError("Can't set sampled value: dimension mismatch.");
-        }
-        // change only the values
-        sampledValueMap_[it->first].SetPtr(sampledValueMap_[it->first].DimPtr(),
-                                           it->second.ValuesPtr());
-      }
-    }
-    BIIPS_CONSOLE_CATCH_ERRORS
-
-    return true;
-  }
 
   Bool Console::PrintGraphviz(std::ostream & os)
   {
