@@ -39,7 +39,7 @@ else
     export LIBnn=lib/x86_64-linux-gnu
     # Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
     # OpenSuse: use lib or lib64
-    export MATLAB_ROOT=/usr/local/MATLAB/R2012b
+    export MATLAB_ROOT=/usr/local/MATLAB/R2014a
     export ECLIPSE=/home/adrien-alea/eclipse_4.3/eclipse
     export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"

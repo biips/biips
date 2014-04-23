@@ -840,22 +840,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
     /////////////////////////////////////////
-    // SET_LOG_NORM_CONST FUNCTION
-    /////////////////////////////////////////
-    else if (name_func == "set_log_norm_const") {
-
-      CheckRhs(nrhs, 2, name_func);
-      Size id = GetConsoleId(consoles, prhs[1], name_func);
-      Console_ptr p_console = consoles[id];
-
-      CheckArgIsDouble(2);
-      Scalar logNormConst = static_cast<Scalar>(*mxGetPr(prhs[2]));
-
-      p_console->SetLogNormConst(logNormConst);
-
-    }
-
-    /////////////////////////////////////////
     // MAKE_PROGRESS_BAR FUNCTION
     /////////////////////////////////////////
     else if(name_func == "make_progress_bar") {
@@ -950,24 +934,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     }
 
-    /////////////////////////////////////////////
-    // GET_SAMPLED_GEN_TREE_SMOOTH_PARTICLE FUNCTION
-    /////////////////////////////////////////////
-    else if (name_func == "get_sampled_gen_tree_smooth_particle") {
-
-      CheckRhs(nrhs, 1, name_func);
-      Size id = GetConsoleId(consoles, prhs[1], name_func);
-      Console_ptr p_console = consoles[id];
-
-      std::map<String, MultiArray> sampled_value_map;
-
-      if(!p_console->DumpSampledGenTreeSmoothParticle(sampled_value_map))
-        throw RuntimeError("Failed to get sampled smooth particle.");
-
-      readDataTable<MultiArray::StorageOrderType>(sampled_value_map, &plhs[0]);
-
-    }
-
     ////////////////////////////////////////////
     // SAMPLE_GEN_TREE_SMOOTH_PARTICLE FUNCTION
     ////////////////////////////////////////////
@@ -980,27 +946,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckArgIsDouble(2);
       Size smcRngSeed = static_cast<Size>(*mxGetPr(prhs[2]));
 
-      if (!p_console->SampleGenTreeSmoothParticle(smcRngSeed))
+      std::map<String, MultiArray> sampled_value_map;
+
+      if (!p_console->SampleGenTreeSmoothParticle(smcRngSeed, sampled_value_map))
         throw RuntimeError("Failed to sample smooth particle.");
 
-    }
-
-    ////////////////////////////////////////////
-    // SET_SAMPLED_GEN_TREE_SMOOTH_PARTICLE FUNCTION
-    ////////////////////////////////////////////
-    else if (name_func == "set_sampled_gen_tree_smooth_particle") {
-
-      CheckRhs(nrhs, 2, name_func);
-      Size id = GetConsoleId(consoles, prhs[1], name_func);
-      Console_ptr p_console = consoles[id];
-
-      CheckArgIsStruct(2);
-
-      std::map<String, MultiArray> sampled_value_map = writeDataTable<MultiArray::StorageOrderType>(prhs[2]);
-
-      if(!p_console->SetSampledGenTreeSmoothParticle(sampled_value_map))
-        throw RuntimeError("Failed to set sampled smooth particle.");
-
+      readDataTable<MultiArray::StorageOrderType>(sampled_value_map, &plhs[0]);
     }
 
     /////////////////////////////////////////

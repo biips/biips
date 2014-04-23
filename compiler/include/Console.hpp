@@ -68,8 +68,6 @@ namespace Biips
     Types<ParseTree*>::Array * pVariables_;
     Types<String>::Array nodeArrayNames_;
     Bool lockBackward_;
-    Scalar logNormConst_;
-    std::map<String, MultiArray> sampledValueMap_;
 
     void clearParseTrees();
 
@@ -172,13 +170,8 @@ namespace Biips
     Bool ForwardSamplerAtEnd();
 
     Bool GetLogNormConst(Scalar & logNormConst);
-    Bool SetLogNormConst(Scalar logNormConst);
 
-    Bool SampleGenTreeSmoothParticle(Size rngSeed);
-    Bool
-    DumpSampledGenTreeSmoothParticle(std::map<String, MultiArray> & sampledValueMap);
-    Bool
-    SetSampledGenTreeSmoothParticle(const std::map<String, MultiArray> & sampledValueMap);
+    Bool SampleGenTreeSmoothParticle(Size rngSeed, std::map<String, MultiArray> & sampledValueMap);
 
     Bool RunBackwardSmoother(Size verbosity = 1, Bool progressBar = true);
 
