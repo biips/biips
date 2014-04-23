@@ -1,74 +1,3 @@
-## COPY: Adapted from rjags package file: jags.R
-
-
-# TODO
-is_legal_vname <- function(name) {
-  TRUE
-}
-
-
-##' Preprocess the data (list or env) to list for stan
-##' @param data  A list or an environment of objects.
-##' @details stop if no-name lists; duplicate names.
-##' stop if the objects given name is not found.
-##' remove NULL, non-numeric elements
-##' @author Adapted from rstan.
-data_preprocess <- function(data) {
-  
-  if (is.environment(data)) {
-    data <- as.list(data)
-  } else if (is.list(data)) {
-    v <- names(data)
-    if (is.null(v)) 
-      stop("data must be a named list")
-    
-    if (any(duplicated(v))) {
-      stop("duplicated names in data list: ", paste(v[duplicated(v)], collapse = " "))
-    }
-  } else {
-    stop("data must be a list or an environment")
-  }
-  
-  names <- names(data)
-  for (n in names) {
-    if (!is_legal_vname(n)) 
-      stop("data with name ", n, " is not allowed in Biips")
-  }
-  
-  data <- lapply(data, FUN = function(x) {
-    ## change data.frame to array
-    if (is.data.frame(x)) {
-      x <- data.matrix(x)
-    }
-    
-    # remove those not numeric data
-    if (!is.numeric(x)) {
-      x <- NULL
-    }
-    
-    return(x)
-  })
-  
-  data[!sapply(data, is.null)]
-}
-
-
-##' Make a list using names
-##' @param names character strings of names of objects
-##' @param env the environment to look for objects with names.
-##' @note we use inherits = TRUE when calling mget
-##' @author Adapted from rstan.
-mklist <- function(names, env = parent.frame()) {
-  d <- mget(names, env, ifnotfound = NA, inherits = TRUE, mode = "numeric")
-  n <- which(is.na(d))
-  if (length(n) > 0) {
-    stop("objects ", paste("'", names[n], "'", collapse = ", ", sep = ""), " not found")
-  }
-  d
-}
-
-
-
 
 ##' Create a biips model object
 ##' 
@@ -111,6 +40,7 @@ mklist <- function(names, env = parent.frame()) {
 ##' \item{recompile()}{Recompiles the
 ##' model using the original data set.}
 ##' @author Adrien Todeschini, Francois Caron
+##' COPY: Adapted from rjags jags.model
 ##' @keywords models graphs
 ##' @export
 ##' @examples
@@ -192,34 +122,10 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     p
   }, model = function() {
     model_code
-  }, print_dot = function(file) {
-    RBiips("print_graphviz", p, file)
-    invisible()
   }, data = function() {
     model_data
   }, .data_sync = function() {
     RBiips("get_data", p)
-  }, nodes = function(type, observed) {
-    sorted.nodes <- data.frame(RBiips("get_sorted_nodes", p))
-    
-    if (RBiips("is_sampler_built", p)) {
-      samplers <- data.frame(RBiips("get_node_samplers", p))
-      sorted.nodes <- cbind(sorted.nodes, samplers)
-    }
-    if (!missing(type)) {
-      if (!is.character(type) || length(type) != 1) {
-        stop("Invalid type argument.")
-      }
-      type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
-      sorted.nodes <- sorted.nodes[sorted.nodes["type"] == type, ]
-    }
-    if (!missing(observed)) {
-      if (!is.logical(observed) || length(observed) != 1) {
-        stop("Invalid observed argument.")
-      }
-      sorted.nodes <- sorted.nodes[sorted.nodes["observed"] == observed, ]
-    }
-    return(sorted.nodes)
   }, recompile = function() {
     ## Clear the console
     RBiips("clear_console", p)
@@ -231,7 +137,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     unlink(mf)
     ## Re-compile
     RBiips("compile_model", p, data, FALSE, get_seed())
-    invisible()
+    return(invisible())
   }, .rw_init = function(sample) {
     ## store the dimensions of the variables
     
@@ -266,7 +172,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
       rw$cov <<- c()
     }
     
-    invisible()
+    return(invisible())
   }, .rw_get_step = function() {
     exp(rw$lstep)
   }, .rw_set_step = function(rw_step) {
@@ -311,7 +217,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     rw$mean <<- c()
     rw$cov <<- c()
     
-    invisible()
+    return(invisible())
   }, .rw_adapt = function() {
     return(rw$rescale | rw$learn)
   }, .rw_check_adapt = function() {
@@ -325,18 +231,18 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   }, .rw_adapt_off = function() {
     rw$rescale <<- FALSE
     rw$learn <<- FALSE
-    invisible()
+    return(invisible())
   }, .rw_rescale_off = function() {
     rw$rescale <<- FALSE
-    invisible()
+    return(invisible())
   }, .rw_learn_off = function() {
     rw$learn <<- FALSE
-    invisible()
+    return(invisible())
   }, .rw_learn_on = function() {
     rw$rescale <<- FALSE
     rw$learn <<- TRUE
     rw$niter <<- 1
-    invisible()
+    return(invisible())
   }, .rw_proposal = function(sample) {
     # concatenate all variables in a vector always in the order of rw$dim
     sample_vec <- c()
@@ -388,7 +294,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
       rw$ncrosstarget <<- rw$ncrosstarget + 1
     }
     
-    invisible()
+    return(invisible())
   }, .rw_learn_cov = function(sample, accepted) {
     if (!rw$learn) {
       return()
@@ -439,7 +345,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
       rw$buff_count <<- c()
     }
     
-    invisible()
+    return(invisible())
   })
   class(model) <- "biips"
   
