@@ -25,6 +25,7 @@ if numel(sample_vec)~=obj.len
     error('Problem with dimensions')
 end
 
+% Increment iterations counter
 obj.n_iter = obj.n_iter + 1;
 
 if (isempty(obj.rw_cov) || (obj.n_iter < obj.n_rescale) || (rand<(obj.beta)))
