@@ -95,20 +95,20 @@ smc.sensitivity <- function(object, params, n_part, ...) {
           param[v])
     }
     
-    log.prior <- 0
+    log_prior <- 0
     for (v in seq(along = variable.names)) {
-      log.p <- .Call("get_log_prior_density", object$ptr(), pn$names[[v]], 
+      log_p <- .Call("get_log_prior_density", object$ptr(), pn$names[[v]], 
         pn$lower[[v]], pn$upper[[v]], PACKAGE = "RBiips")
       
-      if (is.na(log.p)) {
+      if (is.na(log_p)) {
         next
       }
       
-      if (is.nan(log.p) || (is.infinite(log.p) && log.p < 0)) 
+      if (is.nan(log_p) || (is.infinite(log_p) && log_p < 0)) 
         stop("Failure evaluating parameter log prior for variable ", variable.names[[v]], 
           ". value = ", param[v])
       
-      log.prior <- log.prior + log.p
+      log_prior <- log_prior + log_p
     }
     
     ## run smc sampler
@@ -124,7 +124,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
       max_log_marg_like <- log_marg_like[k]
       max.param <- param
     }
-    log_marg_like_pen[k] <- log_marg_like[k] + log.prior
+    log_marg_like_pen[k] <- log_marg_like[k] + log_prior
     if (log_marg_like_pen[k] > max_log_marg_like_pen) {
       max_log_marg_like_pen <- log_marg_like_pen[k]
       max.param.pen <- param

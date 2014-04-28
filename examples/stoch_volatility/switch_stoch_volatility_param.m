@@ -320,4 +320,4 @@ end
 %% Clear model
 % 
 
-biips_clear(model)
+biips_clear()

@@ -44,7 +44,8 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 check_struct_model(model);
 % TODO check variable_names ? it is currently done at the monitoring step
 matbiips('message', 'Initializing PIMH');
-obj_pimh.log_marg_like = - Inf;
-obj_pimh.sample = [];
-obj_pimh.variable_names = variable_names;
 obj_pimh.model = model;
+obj_pimh.variable_names = variable_names;
+obj_pimh.sample = [];
+obj_pimh.log_marg_like = - Inf;
+obj_pimh.class = 'pimh';

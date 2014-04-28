@@ -29,7 +29,7 @@ function varargout = parsevar(opt_param, param_names, param_type, param_valid, p
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -55,7 +55,7 @@ for i=1:2:length(opt_param)
       warning(['Unknown optional parameter ' opt_param{i}]);      
   elseif ~iscell(opt_param{i+1}) && ~isa(opt_param{i+1}, param_type{ind}) % Check of valid parameter type
       error('Input parameter ''%s'' should be of type ''%s''', opt_param{i}, param_type{ind});
-  elseif iscell(opt_param{i+1}) && sum(cellfun(@(x) ~isa(x, param_type{ind}),opt_param{i+1}) ) % If cell, check if all elements are of valid type
+  elseif iscell(opt_param{i+1}) && any(cellfun(@(x) ~isa(x, param_type{ind}), opt_param{i+1}) ) % If cell, check if all elements are of valid type
       error('Every entry of the parameter ''%s'' in the cell should be of type ''%s''', opt_param{i}, param_type{ind});
   elseif found(ind)==true
       warning(['Value of the optional parameter ' opt_param{i} ' already specified'])

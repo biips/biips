@@ -1,4 +1,4 @@
-function obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
+function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm
@@ -42,4 +42,9 @@ function obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-obj_pimh = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
+if nargout>=2
+    [obj_pimh, ~, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
+else
+    obj_pimh = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
+end
+    
