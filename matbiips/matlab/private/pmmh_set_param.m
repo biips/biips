@@ -4,7 +4,7 @@ if nargin<4
     change_data = false;
 end
 
-n_param = length(pn_param);
+n_param = numel(pn_param);
 sample_param = cell(n_param, 1);
 
 % Set init values in Biips

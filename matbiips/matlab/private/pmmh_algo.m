@@ -27,7 +27,7 @@ optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
 [thin, max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-check_struct_model(obj.model);
+check_biips(obj.model);
 %%% TODO check pmmh obj structure
 
 %% Stops biips verbosity
@@ -41,37 +41,26 @@ console = obj.model.id;
 % monitor variables
 param_names = obj.param_names;
 latent_names = obj.latent_names;
-n_param = length(param_names);
-n_latent = length(latent_names);
+n_param = numel(param_names);
+n_latent = numel(latent_names);
 
 if n_latent>0
-    monitor(console, latent_names, 's'); 
+    monitor(console, latent_names, 's');
 end
 
 % build smc sampler
 if (~matbiips('is_sampler_built', console))
-   matbiips('build_smc_sampler', console, false);
+    matbiips('build_smc_sampler', console, false);
 end
-
-
-% Get values of current iteration from PMMH object
-sample_param = obj.sample_param;
-sample_latent = obj.sample_latent;
-log_prior = obj.log_prior;
-log_marg_like = obj.log_marg_like;
 
 % toggle rescaling adaptation
-if obj.n_iter<obj.n_rescale
-    rw_rescale = true;
-else
-    rw_rescale = false;    
-end
+rw_rescale = rw_adapt && obj.n_iter<obj.n_rescale;
 
 % set current param value to the model
-pn_param =  cellfun(@parse_varname, param_names);
+sample_param = obj.sample_param;
+pn_param = cellfun(@parse_varname, param_names);
 pmmh_set_param(console, pn_param, sample_param, true);
 
-    
 % Initialize counters
 n_samples = ceil((n_iter)/thin);
 ind_sample = 0;
@@ -79,7 +68,7 @@ n_fail = 0;
 
 % Output structure with MCMC samples
 accept_rate = zeros(n_samples, 1);
-rw_step = zeros(n_samples, length(obj.log_step));
+rw_step = zeros(n_samples, numel(obj.log_step));
 log_marg_like_st = zeros(n_samples, 1);
 log_post_st = zeros(n_samples, 1);
 %%% TODO check dimensions: n_samples should be the last dimension?
@@ -94,8 +83,8 @@ end
 
 % display message and progress bar
 if ~return_samples
-    if rw_adapt 
-        matbiips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);   
+    if rw_adapt
+        matbiips('message', ['Adapting PMMH with ', num2str(n_part) ' particles']);
         bar = matbiips('make_progress_bar', n_iter, '+', 'iterations');
     else
         matbiips('message', ['Updating PMMH with ', num2str(n_part) ' particles']);
@@ -113,12 +102,7 @@ for i=1:n_iter
     [obj, accept_rate_step, n_fail_step] = pmmh_one_update(obj, pn_param, ...
         n_part, rs_thres, rs_type, rw_rescale, rw_adapt);
     
-    % Get values of current iteration from PMMH object
-    sample_param = obj.sample_param;
-    sample_latent = obj.sample_latent;
-    log_prior = obj.log_prior;
-    log_marg_like = obj.log_marg_like;
-
+    
     n_fail = n_fail + n_fail_step;
     
     % Check nb of failures FC: MODIFY THIS EVENTUALLY
@@ -127,16 +111,18 @@ for i=1:n_iter
     end
     
     % Stop rescale
-    if (rw_rescale && (obj.n_iter==obj.n_rescale))
-%     if (rw_rescale && (i==obj.n_rescale))
+    if rw_rescale && (obj.n_iter==obj.n_rescale)
         %%% FIXME problem if n_rescale > n_iter
         %%% should compare to total n_iter
-        rw_rescale = false;  
-    end  
-        
+        rw_rescale = false;
+    end
+    
     % Store output
     if mod(i-1, thin)==0
         ind_sample = ind_sample + 1;
+        
+        log_prior = obj.log_prior;
+        log_marg_like = obj.log_marg_like;
         
         accept_rate(ind_sample) = accept_rate_step;
         rw_step(ind_sample, :) = exp(obj.log_step);
@@ -144,6 +130,10 @@ for i=1:n_iter
         log_post_st(ind_sample) = log_marg_like + log_prior;
         
         if return_samples
+            
+            sample_param = obj.sample_param;
+            sample_latent = obj.sample_latent;
+            
             for k=1:n_param
                 len = numel(sample_param{k});
                 from = (ind_sample-1)*len+1;
@@ -163,12 +153,12 @@ for i=1:n_iter
                 from = (ind_sample-1)*len+1;
                 to = (ind_sample-1)*len+len;
                 samples_st{n_param+k}(from:to) = sample_latent{k};
-            end            
+            end
         end
     end
     
     % Print progress bar
-    matbiips('advance_progress_bar', bar, 1);    
+    matbiips('advance_progress_bar', bar, 1);
 end
 
 

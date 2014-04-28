@@ -22,4 +22,6 @@ function nodes = biips_nodes(model)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
+check_biips(model); % Checks if the structure model is valid
+
 nodes = matbiips('get_sorted_nodes', model.id);

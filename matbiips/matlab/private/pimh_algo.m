@@ -57,7 +57,7 @@ optarg_type = {'numeric', 'numeric', 'char'};
 [thin, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-check_struct_model(obj.model);
+check_biips(obj.model);
 %%% TODO check pimh_obj structure
 
 %% Stops biips verbosity
@@ -82,7 +82,7 @@ sample = obj.sample;
 log_marg_like = obj.log_marg_like;
 
 % Output structure with MCMC samples
-n_var = length(variable_names);
+n_var = numel(variable_names);
     
 if nargout>=2
     n_samples = ceil(n_iter/thin);

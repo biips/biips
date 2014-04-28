@@ -27,11 +27,11 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 %   OUTPUT
 %   - out:          Structure with the following fields:
 %                   * log_marg_like
-%                   * log_marg_like_pen
+%                   * log_post
 %                   * max_param
 %                   * max_log_marg_like
-%                   * max_param_pen
-%                   * max_log_marg_like_pen
+%                   * max_param_post
+%                   * max_log_post
 %
 %   See also BIIPS_MODEL, BIIPS_SMC_SAMPLES
 %--------------------------------------------------------------------------
@@ -51,9 +51,8 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-
-n_param = length(param_names);
-if n_param~=length(param_values)
+n_param = numel(param_names);
+if n_param~=numel(param_values)
     error('param_names and param_values must be cells of the same size')
 end
 pn_param =  cellfun(@parse_varname, param_names);
@@ -65,7 +64,7 @@ end
 
 % Get the number of parameter values to evaluate
 dimension = size(param_values{1});
-if (length(dimension)==2 && dimension(2)==1) % scalar parameter
+if (numel(dimension)==2 && dimension(2)==1) % scalar parameter
     n_values = dimension(1);
 else
     n_values = dimension(end);
@@ -73,7 +72,7 @@ end
 % Check if number of parameter values match
 for i=2:n_param
     dimension = size(param_values{i});
-    if (length(dimension)==2 && dimension(2)==1) % scalar parameter#
+    if (numel(dimension)==2 && dimension(2)==1) % scalar parameter#
         if n_values ~= dimension(1)
             error('Invalid param_values argument: number of values to evaluate do not match')
         end
@@ -94,6 +93,7 @@ optarg_type = {'numeric', 'char'};
 [rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
+check_biips(model); % Checks if the structure model is valid
 
 %% Stops biips verbosity
 matbiips('verbosity', 0);
@@ -110,11 +110,11 @@ end
 
 % initialize
 log_marg_like = zeros(n_values, 1);
-log_marg_like_pen = zeros(n_values, 1);
+log_post = zeros(n_values, 1);
 max_log_marg_like = -Inf;
-max_log_marg_like_pen = -Inf;
+max_log_post = -Inf;
 max_param = [];
-max_param_pen = [];
+max_param_post = [];
 
 matbiips('message', ['Analyzing sensitivity with ' num2str(n_part) ' particles']);
 % Progress bar
@@ -125,7 +125,7 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
      for i=1:n_param
          var = param_names{i};
          size_i = size(param_values{i});
-         switch(length(size_i))
+         switch(numel(size_i))
              case 2
                  if size_i(2)==1
                      value{i} = param_values{i}(k);
@@ -161,10 +161,10 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
          max_log_marg_like = log_marg_like(k);
          max_param = value;
      end
-     log_marg_like_pen(k) = log_marg_like(k) + log_prior;
-     if log_marg_like_pen(k)>max_log_marg_like_pen
-         max_log_marg_like_pen = log_marg_like_pen(k);
-         max_param_pen = value;
+     log_post(k) = log_marg_like(k) + log_prior;
+     if log_post(k)>max_log_post
+         max_log_post = log_post(k);
+         max_param_post = value;
      end
      
      % Advance progress bar
@@ -174,8 +174,8 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
 matbiips('clear_console', console); 
  
 out.log_marg_like = log_marg_like;
-out.log_marg_like_pen = log_marg_like_pen;
+out.log_post = log_post;
 out.max_param = max_param;
 out.max_log_marg_like = max_log_marg_like;
-out.max_param_pen = max_param_pen;
-out.max_log_marg_like_pen = max_log_marg_like_pen; 
+out.max_param_post = max_param_post;
+out.max_log_post = max_log_post; 

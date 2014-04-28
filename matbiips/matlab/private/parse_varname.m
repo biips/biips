@@ -15,7 +15,7 @@ function s=parse_varname(str)
 z1=textscan(str, '%s', 'delimiter', '[');
 z1=z1{1};
 s=struct('name', z1{1}); 
-if (length(z1) == 1)
+if (numel(z1) == 1)
   s.lower = [];
   s.upper = [];
 else

@@ -33,9 +33,9 @@ function [obj_pmmh, log_post, log_marg_like, out_pmmh] = biips_pmmh_update(obj_p
 % n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
 % param_names = {'log_prec_y[1:1]';}
 % latent_names = {'x'};
-% obj_pmmh = biips_pmmh_object(model_id, param_names, 'inits', {-2});
+% obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, log_post, log_marg_like, out_pmmh] = ...
+% [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
 %   biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', 1); 
 %--------------------------------------------------------------------------
 
@@ -57,6 +57,9 @@ optarg_type = {'numeric', 'logical', 'numeric', 'char'};
 [max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
+check_pmmh(obj_pmmh);
+
+%% Call pmmh_algo internal routine
 return_samples = false;
 [obj_pmmh, log_post, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...

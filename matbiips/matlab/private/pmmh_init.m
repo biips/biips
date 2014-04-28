@@ -17,7 +17,7 @@ function [sample_param, sample_latent, log_prior, log_marg_like]...
 
 
 %% PROCESS AND CHECK INPUTS
-for i=1:length(param_names)
+for i=1:numel(param_names)
     if ~ischar(param_names{i})
         warning('Invalid parameter name')
         param_names(i) = [];
@@ -34,16 +34,16 @@ optarg_type = {'char', 'numeric', 'char'};
 [latent_names, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 % Check latent_names
-for i=1:length(latent_names)
+for i=1:numel(latent_names)
     if ~ischar(latent_names{i})
         warning('Invalid latent name')
         latent_names(i) = [];
     end
 end
-sample_param = cell(length(param_names), 1);
+sample_param = cell(numel(param_names), 1);
 %% Set init values
 data = matbiips('get_data', console);
-for i=1:length(param_names)
+for i=1:numel(param_names)
     clear var_name;
     if isempty(pn_param(i).lower)
         var_name = param_names{i};
@@ -59,7 +59,7 @@ for i=1:length(param_names)
         sample_param{i} = getfield(data, var_name);
     else
         samp_full = getfield(data, var_name);
-        switch(length(pn_param(i).lower))
+        switch(numel(pn_param(i).lower))
             case 1
                 sample_param{i} = samp_full(pn_param(i).lower(1):pn_param(i).upper(1));
             case 2
@@ -75,7 +75,7 @@ end
 
 % log-prior density
 log_prior = 0;
-for i=1:length(param_names)
+for i=1:numel(param_names)
     log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
     if isnan(log_p) || log_p==Inf
@@ -121,7 +121,7 @@ end
 
 
 %% Get latent variables sampled value
-sample_latent = cell(length(latent_names), 1);
+sample_latent = cell(numel(latent_names), 1);
 if (~isempty(latent_names))
     sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
     if isempty(fieldnames(sampled_value))
@@ -130,7 +130,7 @@ if (~isempty(latent_names))
         matbiips('sample_gen_tree_smooth_particle', console, rng_seed);
         sampled_value = matbiips('get_sampled_gen_tree_smooth_particle', console);
     end
-    for i=1:length(latent_names)
+    for i=1:numel(latent_names)
         var_name = latent_names{i};
         sample_latent{i} = getfield(sampled_value, var_name);
     end    

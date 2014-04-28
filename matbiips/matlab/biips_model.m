@@ -60,7 +60,7 @@ optarg_type = {'logical', 'logical'};
 
 %%% Processing data argument
 if (isa(data, 'cell'))
-    data = reshape(data, length(data), 1);
+    data = reshape(data, numel(data), 1);
     
     isch = cellfun(@(x) ischar(x), data);
     ignored_var = data(~isch);

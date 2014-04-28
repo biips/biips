@@ -23,9 +23,9 @@ function biips_clear(varargin)
 %--------------------------------------------------------------------------
 
 if nargin>0
-    for k=1:length(varargin)
+    for k=1:numel(varargin)
         obj = varargin{k};
-        if ~isfield(obj, 'class')
+        if ~isstruct(obj) || ~isfield(obj, 'class') || ~ischar(obj.class)
             warning('skipping unrecognized argument nb %d', k)
             continue
         end
