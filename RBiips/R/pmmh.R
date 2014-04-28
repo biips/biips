@@ -143,10 +143,45 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
   }, rw_step = function() {
     return(exp(rw$log_step))
   }, rw_proposal = function() {
+    # concatenate all variables in a vector always in the order of rw$dim
+    
+    sample_param <- state$sample_param
+    
+    sample_vec <- c(unlist(sample_param))
+    
+    ## Check dimension
+    stopifnot(length(sample_vec) == rw$len)
+    
+    ## Increment iterations counter
+    rw$n_iter <<- rw$n_iter + 1
+    
+    if (length(rw$cov) == 0 || (rw$n_iter < rw$n_rescale) || (runif(1) < rw$beta)) {
+      # Proposal with diagonal covariance
+      prop_vec <- sample_vec + exp(rw$log_step) * rnorm(rw$d)
+    } else {
+      # proposal with learnt covariance
+      eps <- 1e-5 # For numerical stability
+      cov_chol <- t(chol(rw$cov + eps * diag(1, nrow = rw$len)))
+      ## TODO use pivot in chol ? check positive semi-definite ?
+      prop_vec <- sample_vec + 2.38/sqrt(rw$len) * cov_chol %*% rnorm(rw$d)
+    }
+    
+    # rearrange vectorized parameter to list of arrays with appropriate dimensions
+    prop <- list()
+    from <- 1
+    for (n in names(rw$dim)) {
+      len <- prod(rw$dim[[n]])
+      to <- from + len - 1
+      prop[[n]] <- array(prop_vec[from:to], dim = rw$dim[[n]])
+      from <- from + len
+    }
+    
     return(prop)
   }, rw_rescale = function(ar) {
+    stop('TO BE IMPLEMENTED')
     return(invisible())
   }, rw_learn_cov = function() {
+    stop('TO BE IMPLEMENTED')
     return(invisible())
   })
   
