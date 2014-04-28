@@ -53,10 +53,10 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-% npart = 100; variables = {'x'}; 
+% model = biips_model('model.bug', data)
+% n_part = 100; variables = {'x'}; 
 % type = 'fs'; rs_type = 'multinomial'; rs_thres = 0.5;
-% out_smc = biips_smc_samples(model_id, variables, npart, 'type', type,...
+% out_smc = biips_smc_samples(model, variables, n_part, 'type', type,...
 %               'rs_type', rs_type, 'rs_thres', rs_thres);
 %--------------------------------------------------------------------------
 

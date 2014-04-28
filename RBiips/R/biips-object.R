@@ -82,7 +82,7 @@ variable.names.biips <- function(object, ...) {
 nodes <- function(object, ...) UseMethod("nodes")
 
 ##' @S3method nodes biips
-nodes = function(object, type, observed, ...) {
+nodes <- function(object, type, observed, ...) {
   stopifnot(is.biips(object))
   
   sorted_nodes <- data.frame(RBiips("get_sorted_nodes", object$ptr()))
@@ -93,7 +93,7 @@ nodes = function(object, type, observed, ...) {
   }
   
   if (!missing(type)) {
-    if (!is.character(type) || length(type) != 1)
+    if (!is.character(type) || length(type) != 1) 
       stop("Invalid type argument.")
     
     type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
@@ -101,7 +101,7 @@ nodes = function(object, type, observed, ...) {
   }
   
   if (!missing(observed)) {
-    if (!is.logical(observed) || length(observed) != 1)
+    if (!is.logical(observed) || length(observed) != 1) 
       stop("Invalid observed argument.")
     sorted_nodes <- sorted_nodes[sorted_nodes["observed"] == observed, ]
   }
@@ -114,7 +114,7 @@ nodes = function(object, type, observed, ...) {
 print_dot <- function(object, ...) UseMethod("print_dot")
 
 ##' @S3method print_dot biips
-print_dot = function(object, file, ...) {
+print_dot <- function(object, file, ...) {
   stopifnot(is.biips(x))
   
   RBiips("print_graphviz", object$ptr(), file)
@@ -209,4 +209,18 @@ clear_monitors.biips <- function(object, type = "fsb", release_only = FALSE, ...
   }
   
   return(invisible())
+}
+
+
+clone_model <- function(object, ...) UseMethod("clone_model")
+
+##' @S3method clone_model biips
+clone_model.biips <- function(object, ...) {
+  stopifnot(is.biips(object))
+  
+  mf <- tempfile()
+  writeLines(object$model(), mf)
+  model <- biips_model(mf, data = object$data(), sample_data = FALSE, quiet = TRUE)
+  unlink(mf)
+  return(model)
 } 

@@ -84,11 +84,11 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     data <- data_preprocess(data)
   
   # make console and check model
-  p <- RBiips("make_console")
-  RBiips("check_model", p, modfile)
+  ptr <- RBiips("make_console")
+  RBiips("check_model", ptr, modfile)
   
   # discard unused data
-  varnames <- RBiips("get_variable_names", p)
+  varnames <- RBiips("get_variable_names", ptr)
   
   v <- names(data)
   relevant_variables <- v %in% varnames
@@ -98,260 +98,37 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     warning("Unused variables in data: ", paste(unused_variables, collapse = ", "))
   
   # compile model
-  RBiips("compile_model", p, data, sample_data, get_seed())
+  RBiips("compile_model", ptr, data, sample_data, get_seed())
   
   # data after possible sampling (from 'data' block in the BUGS language model)
-  model_data <- RBiips("get_data", p)
+  model_data <- RBiips("get_data", ptr)
   
-  # local initial parameters of the algorithm of adaptation of the step of random
-  # walk in the PMMH algorithm
-  rw <- list(rescale = TRUE, learn = FALSE, niter = 1, pmean = 0, lstep = c(), 
-    beta = 0.05, alpha = 1, targetprob = 0.234, povertarget = FALSE, ncrosstarget = 10, 
-    dim = list(), d = c(), count = 0, buffer = c(), buff_count = c(), mean = c(), 
-    cov = c())
-  # targetprob = target acceptance probability. The default seems to be a fairly
-  # robust optimal value. Comes from Rosenthal 2009, Examples of Adaptives MCMC, p
-  # 16. In one-dimensional case, we take 0.44 which is optimal in certain settings.
-  
-  # ncrosstarget = the value ncrosstarget controls the reduction in the step size
-  # when rescale is called. There is no reason to give it an initial value of zero.
-  # In fact this is a poor choice since the step size would be immediately halved.
-  # We start with a value of 10 so the first change in step size is 10%.
-  
+  ## Output object of class biips Note: We return functions in model list that use
+  ## variables of the parent environment (ie the currrent function environment).
+  ## This specific R trick allows to read and write persistent variables,
+  ## surrogating a class with private members and their modifiers.
   model <- list(ptr = function() {
-    p
+    ptr
   }, model = function() {
     model_code
   }, data = function() {
     model_data
   }, .data_sync = function() {
-    RBiips("get_data", p)
+    RBiips("get_data", ptr)
   }, recompile = function() {
     ## Clear the console
-    RBiips("clear_console", p)
-    p <<- RBiips("make_console")
+    RBiips("clear_console", ptr)
+    ptr <<- RBiips("make_console")
     ## Write the model to a temporary file so we can re-read it
     mf <- tempfile()
     writeLines(model_code, mf)
-    RBiips("check_model", p, mf)
+    RBiips("check_model", ptr, mf)
     unlink(mf)
     ## Re-compile
-    RBiips("compile_model", p, data, FALSE, get_seed())
-    return(invisible())
-  }, .rw_init = function(sample) {
-    ## store the dimensions of the variables
-    
-    ## FIXME
-    
-    ## store the dimensions of the variables
-    sampledim <<- lapply(sample, dim)
-    dim_null <- sapply(sampledim, is.null)
-    if (any(dim_null)) {
-      len <- lapply(sample, length)
-      sampledim[dim_null] <<- len[dim_null]
-    }
-    if (length(rw$dim) != 0) {
-      stopifnot(all(mapply(identical, rw$dim, sampledim)))
-    } else {
-      rw$dim <<- sampledim
-      
-      rw$niter <<- 1
-      rw$pmean <<- 0
-      rw$povertarget <<- FALSE
-      rw$ncrosstarget <<- 10
-      
-      rw$d <<- sum(sapply(rw$dim, FUN = prod))
-      rw$targetprob <<- if (rw$d == 1) 0.44 else 0.234
-      rw$lstep <<- log(0.1/sqrt(rw$d))
-      
-      # clear learnt covariance matrix
-      rw$count <<- 0
-      rw$buffer <<- c()
-      rw$buff_count <<- c()
-      rw$mean <<- c()
-      rw$cov <<- c()
-    }
-    
-    return(invisible())
-  }, .rw_get_step = function() {
-    exp(rw$lstep)
-  }, .rw_set_step = function(rw_step) {
-    ## assign rw step
-    
-    ## check values and dimensions
-    for (n in names(rw_step)) {
-      if (any(is.na(rw_step[[n]]))) stop("Missing (NA) rw_step value for variable:", 
-        n)
-      if (any(is.infinite(rw_step[[n]]))) stop("Infinite rw_step value for variable:", 
-        n)
-      if (any(is.nan(rw_step[[n]]))) stop("NaN rw_step value for variable:", 
-        n)
-      if (any(rw_step[[n]] <= 0)) stop("Negative or zero rw_step value for variable:", 
-        n)
-      if (length(rw_step[[n]]) == 1) {
-        rw_step[[n]] <- array(rw_step[[n]], dim = rw$dim[[n]])
-      } else {
-        if (is.null(dim(rw_step[[n]]))) dim(rw_step[[n]]) <- length(rw_step[[n]])
-        if (length(rw_step[[n]]) != length(rw$dim[[n]]) || any(dim(rw_step[[n]]) != 
-          rw$dim[[n]])) stop("Incorrect rw_step dimension for variable:", 
-          n)
-      }
-    }
-    
-    # concatenate all log values in a vector always in the order of rw$dim
-    rw$lstep <<- c()
-    for (n in names(rw$dim)) {
-      rw$lstep <<- c(rw$lstep, log(rw_step[[n]]))
-    }
-    
-    # clear rescale parameters
-    rw$niter <<- 1
-    rw$pmean <<- 0
-    rw$povertarget <<- FALSE
-    rw$ncrosstarget <<- 10
-    
-    # clear learnt covariance matrix
-    rw$count <<- 0
-    rw$buffer <<- c()
-    rw$buff_count <<- c()
-    rw$mean <<- c()
-    rw$cov <<- c()
-    
-    return(invisible())
-  }, .rw_adapt = function() {
-    return(rw$rescale | rw$learn)
-  }, .rw_check_adapt = function() {
-    if (rw$pmean == 0 || rw$pmean == 1) {
-      return(FALSE)
-    }
-    # The distance, on a logistic scale, between pmean and the target acceptance
-    # probability.
-    dist <- abs(log(rw$pmean/(1 - rw$pmean)) - log(rw$targetprob/(1 - rw$targetprob)))
-    return(dist < 0.5)
-  }, .rw_adapt_off = function() {
-    rw$rescale <<- FALSE
-    rw$learn <<- FALSE
-    return(invisible())
-  }, .rw_rescale_off = function() {
-    rw$rescale <<- FALSE
-    return(invisible())
-  }, .rw_learn_off = function() {
-    rw$learn <<- FALSE
-    return(invisible())
-  }, .rw_learn_on = function() {
-    rw$rescale <<- FALSE
-    rw$learn <<- TRUE
-    rw$niter <<- 1
-    return(invisible())
-  }, .rw_proposal = function(sample) {
-    # concatenate all variables in a vector always in the order of rw$dim
-    sample_vec <- c()
-    for (n in names(rw$dim)) {
-      sample_vec <- c(sample_vec, sample[[n]])
-    }
-    stopifnot(length(sample_vec) == rw$d)
-    
-    if (length(rw$cov) == 0 || (rw$learn && (runif(1) < rw$beta))) {
-      # modification with diagonal covariance
-      prop_vec <- sample_vec + exp(rw$lstep) * rnorm(rw$d)
-    } else {
-      eps <- 1/rw$niter
-      cov_chol <- t(chol((1 - eps) * rw$cov + eps * diag(0.1^2, nrow = rw$d)))
-      prop_vec <- sample_vec + 2.38/sqrt(rw$d) * cov_chol %*% rnorm(rw$d)
-    }
-    rw$niter <<- rw$niter + 1
-    
-    # rearrange vectorized parameter to list of arrays with correct dimensions
-    prop <- list()
-    from <- 1
-    for (n in names(rw$dim)) {
-      to <- from + prod(rw$dim[[n]]) - 1
-      prop[[n]] <- array(prop_vec[from:to], dim = rw$dim[[n]])
-      from <- to + 1
-    }
-    invisible(prop)
-  }, .rw_rescale = function(p, type = "d") {
-    # We keep a weighted mean estimate of the mean acceptance probability with the
-    # weights in favour of more recent iterations
-    p <- min(p, 1)
-    rw$pmean <<- rw$pmean + 1 * (p - rw$pmean)/rw$niter
-    
-    if (!rw$rescale) {
-      return()
-    }
-    
-    type <- match.arg(type, c("dureau", "plummer"))
-    if (type == "dureau") {
-      rw$lstep <<- rw$lstep + rw$alpha^(rw$niter) * (rw$pmean - rw$targetprob)
-    } else if (type == "plummer") {
-      # The step size is adapted to achieve the target acceptance rate using a noisy
-      # gradient algorithm.
-      rw$lstep <<- rw$lstep + (p - rw$targetprob)/rw$ncrosstarget
-    }
-    
-    if ((p > rw$targetprob) != rw$povertarget) {
-      rw$povertarget <<- !rw$povertarget
-      rw$ncrosstarget <<- rw$ncrosstarget + 1
-    }
-    
-    return(invisible())
-  }, .rw_learn_cov = function(sample, accepted) {
-    if (!rw$learn) {
-      return()
-    }
-    if (accepted || is.null(rw$buffer)) {
-      # concatenate all variables in a vector always in the order of rw$dim
-      sample_vec <- c()
-      for (n in names(rw$dim)) {
-        sample_vec <- c(sample_vec, sample[[n]])
-      }
-      # push sample back in buffer
-      rw$buffer <<- rbind(rw$buffer, sample_vec, deparse.level = 0)
-      rw$buff_count <<- c(rw$buff_count, 1)
-    } else {
-      # increment last sample counter
-      n <- nrow(rw$buffer)
-      rw$buff_count[n] <<- rw$buff_count[n] + 1
-    }
-    
-    naccept <- nrow(rw$buffer)
-    d <- ncol(rw$buffer)
-    m <- sum(rw$buff_count)
-    
-    # update mean and covariance
-    if (naccept == 2 * d) {
-      # empirical mean and covariance of the buffer
-      mean_buff <- colSums(rw$buffer * rw$buff_count/m)
-      cov_buff <- t(rw$buffer) %*% (rw$buffer * rw$buff_count/m) - outer(mean_buff, 
-        mean_buff)
-      
-      if (length(rw$mean) == 0) {
-        rw$mean <<- mean_buff
-        rw$cov <<- cov_buff
-      } else {
-        # update empirical mean and covariance
-        n <- rw$count
-        N <- n + m
-        rw$mean <<- n/N * rw$mean + m/N * mean_buff
-        diff <- mean_buff - rw$mean
-        rw$cov <<- n/N * rw$cov + m/N * cov_buff + n * m/N^2 * diff %*% t(diff)
-        
-        rw$count <<- N
-      }
-      rw$count <<- rw$count + m
-      
-      # clear buffer
-      rw$buffer <<- c()
-      rw$buff_count <<- c()
-    }
-    
+    RBiips("compile_model", ptr, data, FALSE, get_seed())
     return(invisible())
   })
   class(model) <- "biips"
   
-  # TRICK: We return functions in model list that use variables of the parent
-  # environment (ie the currrent function environment). This specific R trick
-  # allows to read and write persistent variables, surrogating a class with private
-  # members and their modifiers.
   return(model)
 } 

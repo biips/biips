@@ -12,7 +12,13 @@ smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 ##'
 ##' @return ok boolean. True if success
 ##' @S3method smc_forward_algo biips
-smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", ...) {
+smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", 
+  ...) {
+  stopifnot(is.biips(object))
+  stopifnot(is.numeric(n_part), length(n_part) == 1, n_part >= 1, is.finite(n_part))
+  stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0, rs_thres <= 
+    n_part)
+  rs_type <- match.arg(rs_type, c("stratified", "systematic", "residual", "multinomial"))
   
   ## build smc sampler
   if (!RBiips("is_sampler_built", object$ptr())) 
@@ -79,10 +85,7 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
   
   ## check arguments
   stopifnot(is.biips(object))
-  stopifnot(is.numeric(n_part), length(n_part) == 1, n_part >= 1)
   type <- check_type(type, several.ok = TRUE)
-  stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0)
-  rs_type <- match.arg(rs_type, c("multinomial", "residual", "stratified", "systematic"))
   
   backward <- ("b" %in% type)
   

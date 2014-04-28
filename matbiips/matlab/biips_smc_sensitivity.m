@@ -52,8 +52,8 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 %--------------------------------------------------------------------------
 
 
-n_params = length(param_names);
-if n_params~=length(param_values)
+n_param = length(param_names);
+if n_param~=length(param_values)
     error('param_names and param_values must be cells of the same size')
 end
 pn_param =  cellfun(@parse_varname, param_names);
@@ -71,7 +71,7 @@ else
     n_values = dimension(end);
 end
 % Check if number of parameter values match
-for i=2:n_params
+for i=2:n_param
     dimension = size(param_values{i});
     if (length(dimension)==2 && dimension(2)==1) % scalar parameter#
         if n_values ~= dimension(1)
@@ -122,7 +122,7 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
  % Iterate over different values
  for k=1:n_values
      % Update value of each parameter
-     for i=1:n_params
+     for i=1:n_param
          var = param_names{i};
          size_i = size(param_values{i});
          switch(length(size_i))
@@ -145,12 +145,12 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
      end
      
      log_prior = 0;
-     for i=1:n_params
+     for i=1:n_param
          log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper);
          log_prior = log_prior + log_p;
      end
-     ok = run_smc_forward(console, n_part, rs_thres, rs_type, get_seed());
+     ok = smc_forward_algo(console, n_part, rs_thres, rs_type, get_seed());
      if ~ok
          error('Failure running SMC forward sampler')        
      end

@@ -187,4 +187,4 @@ legend({'filtering density', 'smoothing density', 'True value'});
 %% Clear model
 % 
 
-biips_clear(model)
+biips_clear()

@@ -1,4 +1,4 @@
-function biips_clear(model)
+function biips_clear(varargin)
 
 %
 % BIIPS_CLEAR  clears one or several biips consoles
@@ -10,7 +10,8 @@ function biips_clear(model)
 %   See also BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE
-% biips_clear(0)
+% model = biips_model('model.bug');
+% biips_clear(model);
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -21,10 +22,27 @@ function biips_clear(model)
 % Jan 2014; Last revision: 17-03-2014
 %--------------------------------------------------------------------------
 
-
-
-if nargin
-    matbiips('clear_console', model.id); 
+if nargin>0
+    for k=1:length(varargin)
+        obj = varargin{k};
+        if ~isfield(obj, 'class')
+            warning('skipping unrecognized argument nb %d', k)
+            continue
+        end
+        %%% TODO check model obj
+        switch obj.class
+            case 'biips'
+                console = obj.id;
+            case 'pimh'
+                % pimh does not clone the console
+                continue
+            case 'pmmh'
+                console = obj.model.id;
+            otherwise
+                warning('skipping unrecognized argument nb %s', k)
+        end
+        matbiips('clear_console', console); 
+    end
 else
     clear matbiips
 %     matbiips('clear_all_console');

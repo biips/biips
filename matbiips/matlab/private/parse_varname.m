@@ -6,7 +6,7 @@ function s=parse_varname(str)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -26,3 +26,5 @@ else
   s.lower=cellfun(@(x) x(1), res);
   s.upper=cellfun(@(x) x(end), res);
 end
+
+%%% TODO check validity
