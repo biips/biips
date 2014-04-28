@@ -69,12 +69,12 @@ s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), variable_names,'Unifo
 cell_fsb = num2cell(type);
 cell_diagn = cell(size(variable_names));
 
-for i=1:length(variable_names)
+for i=1:numel(variable_names)
     if ~quiet
         disp(['* Diagnosing variable: ' , variable_names{i}]);
     end
     ctemp = cell(size(type));
-    for j=1:length(type)
+    for j=1:numel(type)
         ctemp{j} =  diagnostic(getfield(getfield(s, variable_names{i}), type(j)), ess_thres, quiet, type(j));
     end
     cell_diagn{i} = cell2struct_weaknames(ctemp, cell_fsb);

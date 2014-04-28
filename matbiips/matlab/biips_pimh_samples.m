@@ -53,4 +53,6 @@ function [obj_pimh, samples, log_marg_like] = biips_pimh_samples(obj_pimh, n_ite
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
+check_pimh(obj_pimh);
+
 [obj_pimh, samples, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});

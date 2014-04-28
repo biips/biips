@@ -82,7 +82,7 @@ filtering = ~isempty(indices{1});
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
 
-check_struct_model(model); % Checks if the structure model is valid
+check_biips(model); % Checks if the structure model is valid
 console = model.id; % Get the id of the biips console
 
 %% Monitor
@@ -125,11 +125,11 @@ if (backward) % Get backward smoothing output
    cz = horzcat(cz, struct2cell(mon3));
 end
 
-for i=1:length(type)
+for i=1:numel(type)
     fsb{i} = type(i);
 end
 
-nb_noms = length(noms);
+nb_noms = numel(noms);
 cell_noms = cell(nb_noms, 1);
 for i=1:nb_noms
    cell_noms{i} = cell2struct({cz{i, :}}, fsb, 2);

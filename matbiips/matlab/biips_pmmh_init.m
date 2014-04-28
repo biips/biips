@@ -49,29 +49,30 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'char'};
 [inits, rw_step, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
+check_biips(model); % Checks if the structure model is valid
 
 % Check param_names
-for i=1:length(param_names)
+for i=1:numel(param_names)
     if ~ischar(param_names{i})
         error('Invalid parameter name %s', param_names{i})        
     end
 end
 pn_param = cellfun(@parse_varname, param_names);
-n_param = length(param_names);
+n_param = numel(param_names);
 
 % Check latent_names
 cellfun(@parse_varname, latent_names);
 
 % Check the init values
 if ~isempty(inits)
-    if length(inits)~=length(param_names)
+    if numel(inits)~=numel(param_names)
         error('Inits must be a cell with the same length as param_names')
     end
 end
 
 % Check the rw_step values
 if ~isempty(rw_step)
-    if length(rw_step)~=length(param_names)
+    if numel(rw_step)~=numel(param_names)
         error('rw_step must be a cell with the same length as param_names')
     end
     % Check values

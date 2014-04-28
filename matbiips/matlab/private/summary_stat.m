@@ -1,8 +1,8 @@
-function summ = summary(values, weights, probas, order)
+function summ = summary_stat(values, weights, probas, order)
 
 %--------------------------------------------------------------------------
-% SUMMARY computes some statistics on data
-% summ = summary(part, probas, order)
+% SUMMARY_STAT computes some statistics on data
+% summ = summary_stat(part, probas, order)
 % INPUT:
 % - values:     multidimensional array with last dimension corresponding to
 %               particles
@@ -31,7 +31,7 @@ function summ = summary(values, weights, probas, order)
 
 
 size_part = size(values);
-d = length(size_part);
+d = numel(size_part);
 summ.mean = sum(values .* weights, d);
 err = bsxfun(@minus, values, summ.mean);
 if order>=2
@@ -49,13 +49,13 @@ end
 cv = num2cell(values, d);
 cs = num2cell(weights, d);
 size_q = size_part(1:d-1);
-if length(size_q) == 1
+if numel(size_q) == 1
     size_q = [size_q, 1];
 end
 if (~isempty(probas))
 %     q = matbiips('weighted_quantiles', part.values, part.weights, probas)    
     quantiles = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
-    summ.quant = reshape(cat(2, quantiles{:}), [length(probas), size_q]);
+    summ.quant = reshape(cat(2, quantiles{:}), [numel(probas), size_q]);
 end
 med = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
 

@@ -14,14 +14,14 @@ function [obj, prop] = pmmh_rw_proposal(obj)
 %--------------------------------------------------------------------------
 
 sample_param = obj.sample_param;
-n_param = length(sample_param);
+n_param = numel(sample_param);
 
 % Concatenate all variables in a row vector
 sample_vec = cell2mat(cellfun(@(x) x(:) , sample_param(:),...
     'UniformOutput', false));
 
 % Check dimension
-if length(sample_vec)~=obj.len
+if numel(sample_vec)~=obj.len
     error('Problem with dimensions')
 end
 
@@ -44,7 +44,7 @@ end
 % dimensions
 prop = cell(1, n_param);
 k=1;
-for i=1:length(sample_param)
+for i=1:numel(sample_param)
     len = prod(obj.dim{i});
     prop{i} = reshape(prop_vec(k:k+len-1), obj.dim{i});
     k = k + len;
