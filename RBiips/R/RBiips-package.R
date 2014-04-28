@@ -88,7 +88,8 @@ biips_load_module <- function(name, quiet = FALSE) {
 ##' @param fun_check_param R function checking the arguments 
 ##' @param fun_is_discrete R function telling is new function is discrete wrt its arguments
 ##' @export
-biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete) {
+biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param, 
+  fun_is_discrete) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
   RBiips("add_function", name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete)
   return(invisible())
@@ -107,6 +108,7 @@ biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param
 biips_add_distribution <- function(name, n_param, fun_dim, fun_sample, fun_check_param, 
   fun_is_discrete) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
-  RBiips("add_distribution", name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete)
+  RBiips("add_distribution", name, n_param, fun_dim, fun_sample, fun_check_param, 
+    fun_is_discrete)
   return(invisible())
 } 

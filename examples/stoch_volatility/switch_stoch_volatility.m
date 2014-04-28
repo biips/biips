@@ -327,4 +327,4 @@ saveas(gca, 'volatility_sensitivity', 'png')
 %% Clear model
 % 
 
-biips_clear(model)
+biips_clear()

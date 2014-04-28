@@ -1,8 +1,8 @@
-function [obj_pimh, samples_st, log_marg_like_st] = biips_pimh_samples(obj_pimh, n_iter, n_part, varargin)
+function [obj_pimh, samples, log_marg_like] = biips_pimh_samples(obj_pimh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PIMH_SAMPLES performs iterations for the PIMH algorithm and returns samples
-% [obj_pimh, samples_st, log_marg_like_st] = biips_pimh_samples(obj_pimh,...
+% [obj_pimh, samples, log_marg_like] = biips_pimh_samples(obj_pimh,...
 %                           variable_names, n_iter, n_part, varargin)
 %
 %   INPUT
@@ -30,8 +30,8 @@ function [obj_pimh, samples_st, log_marg_like_st] = biips_pimh_samples(obj_pimh,
 %
 %   OUTPUT
 %   - obj_pimh:     structure. PIMH object modified
-%   - samples_st:       Structure with the PIMH samples for each variable
-%   - log_marg_like_st: vector with log marginal likelihood over iterations
+%   - samples:       Structure with the PIMH samples for each variable
+%   - log_marg_like: vector with log marginal likelihood over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_UPDATE
 %--------------------------------------------------------------------------
@@ -39,10 +39,10 @@ function [obj_pimh, samples_st, log_marg_like_st] = biips_pimh_samples(obj_pimh,
 % data = struct('var1', 0, 'var2', 1.2);
 % model = biips_model('model.bug', data)
 % variables = {'x'};
-% nburn = 1000; niter = 1000; npart = 100;
+% n_burn = 1000; n_iter = 1000; n_part = 100;
 % obj_pimh = biips_pimh_init(model, variables); %Initialize
-% obj_pimh = biips_pimh_update(obj_pimh, nburn, npart); % Burn-in
-% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, niter, npart); % Samples
+% obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % Burn-in
+% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part); % Samples
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -53,4 +53,4 @@ function [obj_pimh, samples_st, log_marg_like_st] = biips_pimh_samples(obj_pimh,
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-[obj_pimh, samples_st, log_marg_like_st] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
+[obj_pimh, samples, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});

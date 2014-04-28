@@ -1,12 +1,12 @@
-function [obj_pimh, samples_st, log_marg_like_st] = pimh_algo(obj_pimh, n_iter, n_part, varargin)
+function [obj, samples_st, log_marg_like_st] = pimh_algo(obj, n_iter, n_part, varargin)
 
 %
 % PIMH_ALGO performs iterations for the PIMH algorithm
-% [obj_pimh, samples_st, log_marg_like_st] = pimh_algo(obj_pimh,...
+% [obj, samples_st, log_marg_like_st] = pimh_algo(obj,...
 %                           n_iter, n_part, varargin)
 %
 %   INPUT
-%   - obj_pimh:     structure. PIMH object
+%   - obj:     structure. PIMH object
 %   - n_iter:       positive integer. Number of iterations
 %   - n_part:       positive integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
@@ -23,7 +23,7 @@ function [obj_pimh, samples_st, log_marg_like_st] = pimh_algo(obj_pimh, n_iter, 
 %                   Indicates the type of algorithm used for the resampling step.
 %
 %   OUTPUT
-%   - obj_pimh:     structure. PIMH object modified
+%   - obj:     structure. PIMH object modified
 %   Optional Outputs:
 %   - samples_st:       Structure with the PIMH samples for each variable
 %   - log_marg_like_st: vector with log marginal likelihood over iterations
@@ -49,15 +49,15 @@ function [obj_pimh, samples_st, log_marg_like_st] = pimh_algo(obj_pimh, n_iter, 
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'rs_thres', 'rs_type', 'thin'};
-optarg_default = {.5, 'stratified', 1};
-optarg_valid = {[0, n_part],...
-    {'multinomial', 'stratified', 'residual', 'systematic'},[1, n_iter]};
-optarg_type = {'numeric', 'char', 'numeric'};
-[rs_thres, rs_type, thin] = parsevar(varargin, optarg_names, optarg_type,...
+optarg_names = {'thin', 'rs_thres', 'rs_type'};
+optarg_default = {1, .5, 'stratified'};
+optarg_valid = {[1, n_iter], [0, n_part],...
+    {'stratified', 'systematic', 'residual', 'multinomial'}};
+optarg_type = {'numeric', 'numeric', 'char'};
+[thin, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-check_struct_model(obj_pimh.model);
+check_struct_model(obj.model);
 %%% TODO check pimh_obj structure
 
 %% Stops biips verbosity
@@ -66,10 +66,10 @@ cleanupObj = onCleanup(@() matbiips('verbosity', verb));% set verbosity on again
 
 
 %% Initialization
+console = obj.model.id;
 
 % monitor variables
-console = obj_pimh.model.id;
-variable_names = obj_pimh.variable_names;
+variable_names = obj.variable_names;
 monitor(console, variable_names, 's');
 
 % build smc sampler
@@ -78,10 +78,22 @@ if (~matbiips('is_sampler_built', console))
 end
 
 % Get sample and log likelihood from PIMH object
-sample = obj_pimh.sample;
-log_marg_like = obj_pimh.log_marg_like;
+sample = obj.sample;
+log_marg_like = obj.log_marg_like;
 
-% displays
+% Output structure with MCMC samples
+n_var = length(variable_names);
+    
+if nargout>=2
+    n_samples = ceil(n_iter/thin);
+    samples_st = cell(n_var, 1);
+    if nargout>=3
+        log_marg_like_st = zeros(n_samples, 1);
+    end
+    ind_sample = 0;
+end
+
+% display message and progress bar
 if nargout>=2
     mess = 'Generating PIMH samples with ';
 else
@@ -91,17 +103,6 @@ matbiips('message', [mess, num2str(n_part), ...
     ' particles and ', num2str(n_iter), ' iterations']);
 bar = matbiips('make_progress_bar', n_iter, '*', 'iterations');
 %%% TODO: display expected time of run
-
-% Output structure with MCMC samples
-if nargout>=2
-    n_samples = ceil(n_iter/thin);
-    n_var = length(variable_names);
-    samples_st = cell(n_var, 1);
-    if nargout>=3
-        log_marg_like_st = zeros(n_samples, 1);
-    end
-    ind_sample = 0;
-end
 
 %% Independent Metropolis-Hastings iterations
 for i=1:n_iter
@@ -121,10 +122,11 @@ for i=1:n_iter
         sampled_value = matbiips('sample_gen_tree_smooth_particle', console, get_seed());
         
         sample = cell(n_var, 1);
-        for i=1:length(variable_names)
-            sample{i} = getfield(sampled_value, variable_names{i});
+        for k=1:n_var
+            %%% FIXME transfrom variable name. eg: x[1,] => x[1,1:100]
+            var = strjoin(strsplit(variable_names{k}, ' '), '');
+            sample{k} = getfield(sampled_value, var);
         end
-        sample = cell2struct_weaknames(sample, variable_names);
     end
     
     % Store output
@@ -134,22 +136,22 @@ for i=1:n_iter
         if ind_sample==1
             % pre-allocation here to be sure that sample is not empty
             for k=1:n_var
-                samples_st{k} = zeros([size(getfield(sample, variable_names{k})), n_samples]);
+                samples_st{k} = zeros([size(sample{k}), n_samples]);
             end
         end
         
         for k=1:n_var
-            var_sample = getfield(sample, variable_names{k});
-            len = numel(var_sample);
+            len = numel(sample{k});
             from = (ind_sample-1)*len+1;
             to = (ind_sample-1)*len+len;
-            samples_st{k}(from:to) = var_sample;
+            samples_st{k}(from:to) = sample{k};
         end
         
         if nargout >=3
             log_marg_like_st(ind_sample) = log_marg_like;
         end
     end
+
     % Progress bar
     matbiips('advance_progress_bar', bar, 1);
 end
@@ -159,8 +161,8 @@ clear_monitors(console, 's', true);
 
 
 %% Output PIMH object with current sample and log marginal likelihood
-obj_pimh.sample = sample;
-obj_pimh.log_marg_like = log_marg_like;
+obj.sample = sample;
+obj.log_marg_like = log_marg_like;
 
 %% Set output structure
 if nargout>=2

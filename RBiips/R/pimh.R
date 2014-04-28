@@ -6,18 +6,18 @@ pimh_init <- function(object, variable_names, ...) {
   
   RBiips("message", "Initializing PIMH")
   
-  current <- list(sample = list(), log_marg_like = -Inf)
+  state <- list(sample = list(), log_marg_like = -Inf)
   
   obj_pimh <- list(model = function() {
-    object
+    return(object)
   }, variable_names = function() {
-    variable_names
+    return(variable_names)
   }, sample = function(sample) {
-    if (!missing(sample)) current$sample <<- sample
-    invisible(sample)
+    if (!missing(sample)) state$sample <<- sample
+    return(invisible(state$sample))
   }, log_marg_like = function(log_marg_like) {
-    if (!missing(log_marg_like)) current$log_marg_like <<- log_marg_like
-    invisible(log_marg_like)
+    if (!missing(log_marg_like)) state$log_marg_like <<- log_marg_like
+    return(invisible(state$log_marg_like))
   })
   class(obj_pimh) <- "pimh"
   
@@ -30,23 +30,27 @@ is.pimh <- function(object) {
 }
 
 
-pimh_algo <- function(object, ...) UseMethod("run_pimh")
+pimh_algo <- function(object, ...) UseMethod("pimh_algo")
 
-##' @S3method run_pimh pimh
-pimh_algo.pimh <- function(object, n_iter, n_part, thin = 1, return_samples, ...) {
+##' @S3method pimh_algo pimh
+pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   ## check arguments
   stopifnot(is.pimh(object))
-  stopifnot(is.numeric(n_iter), length(n_iter) == 1, n_iter >= 1)
+  stopifnot(is.numeric(n_iter), length(n_iter) == 1, n_iter >= 1, is.finite(n_iter))
   n_iter <- as.integer(n_iter)
-  stopifnot(is.numeric(n_part), length(n_part) == 1, n_part >= 1)
-  stopifnot(is.numeric(thin), length(thin) == 1, thin >= 1)
+  stopifnot(is.numeric(n_part), length(n_part) == 1, n_part >= 1, is.finite(n_part))
+  n_part <- as.integer(n_part)
   stopifnot(is.logical(return_samples), length(return_samples) == 1)
+  stopifnot(is.numeric(thin), length(thin) == 1, thin >= 1, thin <= n_iter)
+  thin <- as.integer(thin)
   
   ## stop biips verbosity
   verb <- RBiips("verbosity", 0)
   on.exit(RBiips("verbosity", verb))
   
-  ## Initialization -------------------------------- monitor variables
+  ## Initialization --------------------------------
+  
+  ## monitor variables
   monitored <- is_monitored(object$model(), variable_names, "s", FALSE)
   if (!monitored) 
     monitor(object$model(), variable_names, type = "s")
@@ -59,24 +63,19 @@ pimh_algo.pimh <- function(object, n_iter, n_part, thin = 1, return_samples, ...
   sample <- object$sample()
   log_marg_like <- object$log_marg_like()
   
-  ## displays
+  ## Output structure with MCMC samples
+  n_samples <- ceil(n_iter/thin)
+  ind_sample <- 0
+  
+  out <- list()
+  out$log_marg_like <- mcarray(dim = c(1, n_samples))
+  
+  ## display message and progress bar
   mess <- if (return_samples) 
     "Generating PIMH samples with" else "Updating PIMH with"
   RBiips("message", paste(mess, n_part, "particles"))
   bar <- RBiips("progress_bar", n_iter, "*", "iterations")
   ### TODO: display expected time of run
-  
-  ## Output structure with MCMC samples
-  if (return_samples) {
-    n_samples <- ceil(n_iter/thin)
-    ind_sample <- 0
-    
-    out_pimh <- list()
-    
-    out_pimh$log_mar_like <- array(dim = c(1, n_samples))
-    names(dim(out_pimh[[log_marg_like]])) <- c("", "iteration")
-    class(out_pimh$log_mar_like) <- "mcarray"
-  }
   
   ## Independant Metropolis-Hastings iterations
   ## -------------------------------------------
@@ -99,27 +98,26 @@ pimh_algo.pimh <- function(object, n_iter, n_part, thin = 1, return_samples, ...
     }
     
     ## Store output
-    if (return_samples && (i - 1)%%thin == 0) {
+    if ((i - 1)%%thin == 0) {
       ind_sample <- ind_sample + 1
+      out$log_marg_like[ind_sample] <- log_marg_like
       
-      if (ind_samples == 1) {
-        ## pre-allocation here to be sure that sample is not empty
-        for (var in variable_names) {
+      if (return_samples) {
+        if (ind_samples == 1) {
+          ## pre-allocation here to be sure that sample is not empty
+          for (var in variable_names) {
           dimen <- dim(sample[[var]])
-          out_pimh[[var]] <- array(dim = c(dimen, n_samples))
-          names(dim(out_pimh[[var]])) <- c(rep("", length(dimen)), "iteration")
-          class(out_pimh[[var]]) <- "mcarray"
+          out[[var]] <- mcarray(dim = c(dimen, n_samples))
+          }
+        }
+        
+        for (var in variable_names) {
+          len <- length(sample[[var]])
+          from <- (ind_sample - 1) * len + 1
+          to <- (ind_sample - 1) * len + len
+          out[[var]][from:to] <- sample[[var]]
         }
       }
-      
-      for (var in variable_names) {
-        len <- length(sample[[var]])
-        from <- (ind_sample - 1) * len + 1
-        to <- (ind_sample - 1) * len + len
-        out_pimh[[var]][from:to] <- sample[[var]]
-      }
-      
-      out_pimh$log_marg_like[ind_sample] <- log_marg_like
     }
     
     ## progress bar
@@ -135,7 +133,7 @@ pimh_algo.pimh <- function(object, n_iter, n_part, thin = 1, return_samples, ...
   
   ### TODO: Remove singleton dimensions for vectors? (cf matbiips)
   if (return_samples) 
-    return(out_pimh) else return()
+    return(out) else return(invisible(out))
 }
 
 
@@ -174,7 +172,7 @@ update.pimh <- function(object, n_iter, n_part, ...) {
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##' 
 pimh_samples <- function(object, n_iter, n_part, thin = 1, ...) {
-  out_pimh <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, 
-    return_samples = TRUE, ...)
-  return(out_pimh)
+  out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, return_samples = TRUE, 
+    ...)
+  return(out)
 } 

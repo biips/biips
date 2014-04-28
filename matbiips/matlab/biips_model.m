@@ -102,3 +102,5 @@ model.id = p;
 model.filename = filename;
 model.definition = fileread(filename);
 model.data = data;
+
+model.class = 'biips';
