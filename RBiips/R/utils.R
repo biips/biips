@@ -4,6 +4,13 @@ is_legal_vname <- function(name) {
   return(TRUE)
 }
 
+### FIXME transfrom variable name. eg: x[1, ] => x[1,1:100]
+to_biips_vname <- function(var) {
+  ## remove spaces
+  v <- paste(unlist(strsplit(var, ' ', fixed=TRUE)), collapse='')
+  return(v)
+}
+
 
 ##' Preprocess the data (list or env) to list for stan
 ##' @param data  A list or an environment of objects.

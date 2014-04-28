@@ -39,13 +39,18 @@ for i=1:n_param
     if ~ok
         % DATA CHANGE FAILED: proposed parameter value might be out of
         % bounds ?
+        %%% TODO double check this is the case and there is no other
+        %%% reason.
         log_prior_prop = -Inf;
-        n_fail = n_fail + 1;
-        warning('Data change failed: %s = %.1f', param_names{i}, prop{i});
+%         n_fail = n_fail + 1;
+%         warning('Data change failed: %s = %.1f', param_names{i}, prop{i});
         break;
     end
     log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
+    
+    %%% FIXME check node is not stochastic: log_p = NA in R
+    
     log_prior_prop = log_prior_prop + log_p;
 end
 if isnan(log_prior_prop)
@@ -64,7 +69,8 @@ else
     else
         log_marg_like_prop = matbiips('get_log_norm_const', console);
         if isnan(log_marg_like_prop) || log_marg_like_prop==Inf
-            error('Failed to get log marginal likelihood : %g', log_marg_like_prop);
+            %%% TODO error or n_fail increment ?
+            error('Failed to compute log marginal likelihood : %g', log_marg_like_prop);
         end
     end
     
@@ -80,12 +86,13 @@ else
         sample_param = prop;
         log_prior = log_prior_prop;
         log_marg_like = log_marg_like_prop;
+        
         if n_latent>0
             % Sample one realization of the monitored latent variables
             sampled_value = matbiips('sample_gen_tree_smooth_particle', console, get_seed());
             for i=1:n_latent
                 %%% FIXME transfrom variable name. eg: x[1,] => x[1,1:100]
-                var = strjoin(strsplit(latent_names{i}, ' '), '');
+                var = to_biips_vname(latent_names{i});
                 sample_latent{i} = getfield(sampled_value, var);
             end   
         end

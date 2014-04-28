@@ -142,8 +142,13 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
     return(rw$n_rescale)
   }, rw_step = function() {
     return(exp(rw$log_step))
+  }, rw_proposal = function() {
+    return(prop)
+  }, rw_rescale = function(ar) {
+    return(invisible())
+  }, rw_learn_cov = function() {
+    return(invisible())
   })
-  
   
   class(obj_pmmh) <- "pmmh"
   
@@ -175,6 +180,7 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
   ## Random walk proposal
   prop = object$rw_proposal()
   
+  # TODO: check this is not necessary
   #   ## check NA
   #   for (var in names(prop)) {
   #     if (any(is.na(prop[[var]]))) {
@@ -187,17 +193,19 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
   
   for (i in 1:n_param) {
     ## change model data
-    ok <- RBiips("change_data", object$ptr(), pn_param$names[[i]], pn_param$lower[[i]], 
+    ok <- RBiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
                  pn_param$upper[[i]], prop[[i]], TRUE)
     
     if (!ok) {
+      ## DATA CHANGE FAILED: proposed parameter value might be out of bounds ?
+      ## TODO: double check this is the case and there is no other reason.
       log_prior_prop <- -Inf
-      n_fail <- n_fail + 1
-      warning("Data change failed:", param_names[[i]], "=", prop[[var]], "\n")
+#       n_fail <- n_fail + 1
+#       warning("Data change failed:", param_names[[i]], "=", prop[[var]], "\n")
       break
     }
     
-    log_p <- RBiips("get_log_prior_density", object$ptr(), pn_param$names[[v]], 
+    log_p <- RBiips("get_log_prior_density", console, pn_param$names[[v]], 
                     pn_param$lower[[v]], pn_param$upper[[v]])
     
     if (is.na(log_p))
@@ -222,9 +230,10 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
       n_fail <- n_fail + 1
       warning("Failure running smc forward sampler\n")
     } else {
-      log_marg_like_prop <- RBiips("get_log_norm_const", object$ptr())
+      log_marg_like_prop <- RBiips("get_log_norm_const", console)
       if (is.nan(log_marg_like_prop) || log_marg_like_prop == Inf)
-        stop("Failed to get log marginal likelihood: ", log_marg_like_prop)
+        ### TODO error or n_fail increment ?
+        stop("Failed to compute log marginal likelihood: ", log_marg_like_prop)
     }
   }
   
@@ -232,9 +241,9 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
   accept_rate <- min(1, exp(log_marg_like_prop - log_marg_like + log_prior_prop - 
                               log_prior))
   if (is.nan(accept_rate))
-    stop("Failed to compute acceptance rate: NaN.")
+    stop("Failed to compute acceptance rate:" , accept_rate)
   
-  ## Accept/Reject step
+  ## Accept-Reject step
   if (runif(1) < accept_rate) {
     sample_param <- prop
     log_prior <- log_prior_prop
@@ -245,7 +254,8 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
       sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), get_seed())
       
       for (var in latent_names) {
-        sample_latent[[var]] <- sampled_value[[var]]
+        var_in <- to_biips_vname(var)
+        sample_latent[[var]] <- sampled_value[[var_in]]
       }
     }
   }
@@ -308,18 +318,11 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
     monitor(console, latent_names, "s")
   
   # build smc sampler
-  if (~RBiips("is_sampler_built", console)) 
-    RBiips("build_smc_sampler", console, false)
-  
-  # Get values of current iteration from PMMH object
-  sample_param <- object$sample_param()
-  sample_latent <- object$sample_latent()
-  log_prior <- object$log_prior()
-  log_marg_like <- object$log_marg_like()
+  if (!RBiips("is_sampler_built", console)) 
+    RBiips("build_smc_sampler", console, FALSE)
   
   # toggle rescaling adaptation
-  if (object$n_iter() < object$n_rescale()) 
-    rw_rescale <- TRUE else rw_rescale <- FALSE
+  rw_rescale <- rw_adapt && object$n_iter() < object$n_rescale()
   
   ## FIXME
   # if (!rw.adapt) { ## check adaptation if (object$.rw_adapt() &&
@@ -327,6 +330,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   # random walk.\n') ## turn off adaptation object$.rw_adapt_off() }
   
   # set current param value to the model
+  sample_param <- object$sample_param()
   pn_param <- parse_varnames(param_names)
   pmmh_set_param(console, pn_param, sample_param, TRUE)
   
@@ -336,8 +340,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   n_fail <- 0
   
   # Output structure with MCMC samples
-  out <- list()
-  
+  out <- list()  
   out$accept_rate <- mcarray(dim = c(1, n_samples))
   len <- length(object$rw_step())
   out$rw_step <- mcarray(dim = c(len, n_samples))
@@ -369,11 +372,6 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
                                 n_part = n_part, 
                                 rw_rescale = rw_rescale, rw_learn = rw_adapt, ...)
     
-    sample_param <- out_step$sample_param
-    sample_latent <- out_step$sample_latent
-    log_marg_like <- out_step$log_marg_like
-    log_prior <- out_step$log_prior
-    
     n_fail <- n_fail + out_step$n_fail
     
     ## Check nb of failures FC: MODIFY THIS EVENTUALLY
@@ -390,12 +388,18 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
     ## Store output
     if ((i - 1)%%thin == 0) {
       ind_sample <- ind_sample + 1
+      log_marg_like <- out_step$log_marg_like
+      log_prior <- out_step$log_prior
+      
       out$accept_rate[ind_sample] <- out_step$accept_rate
       out$rw_step[,ind_sample] <- exp(object$rw_step())
       out$log_marg_like[ind_sample] <- log_marg_like
       out$log_post[ind_sample] <- log_marg_like + log_prior
       
       if (return_samples) {
+        sample_param <- out_step$sample_param
+        sample_latent <- out_step$sample_latent
+        
         for (var in param_names) {
           len <- length(sample_param[[var]])
           from <- (ind_sample - 1) * len + 1

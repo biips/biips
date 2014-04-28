@@ -93,8 +93,11 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
       
       ## sample one particle
       sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), 
-        get_seed())
-      for (var in variable_names) sample[[var]] <- sampled_value[[var]]
+                              get_seed())
+      for (var in variable_names) {
+        var_in <- to_biips_vname(var)
+        sample[[var]] <- sampled_value[[var_in]]
+      }
     }
     
     ## Store output
@@ -106,8 +109,8 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
         if (ind_samples == 1) {
           ## pre-allocation here to be sure that sample is not empty
           for (var in variable_names) {
-          dimen <- dim(sample[[var]])
-          out[[var]] <- mcarray(dim = c(dimen, n_samples))
+            dimen <- dim(sample[[var]])
+            out[[var]] <- mcarray(dim = c(dimen, n_samples))
           }
         }
         

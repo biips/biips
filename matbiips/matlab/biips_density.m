@@ -69,12 +69,12 @@ if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the o
     cell_fsb = num2cell(type);
     cell_sum = cell(size(variable_names));
 
-    for i=1:length(variable_names)
+    for i=1:numel(variable_names)
       ctemp = cell(size(type));
-      for j=1:length(type)
+      for j=1:numel(type)
        particles = getfield(getfield(s, variable_names{i}), type(j));
        size_curr = size(particles.values);
-       d = length(size_curr);
+       d = numel(size_curr);
        ctemp{j} = cellfun(@(x,w) kde(x, w, adjust, bw), num2cell(particles.values, d), num2cell(particles.weights, d));  
       end
       cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
@@ -86,11 +86,11 @@ else % samples corresponds to the output of a MCMC algorithm
         'UniformOutput',0), variable_names);
     nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
     cell_sum = cell(size(variable_names));
-    for i=1:length(variable_names)
+    for i=1:numel(variable_names)
       samp = getfield(s, variable_names{i});
       weights = 1/nsamples * ones(size(samp));
       size_curr = size(samp);
-       d = length(size_curr);
+       d = numel(size_curr);
       cell_sum{i} = cellfun(@(x,w) kde(x, w, adjust, bw), num2cell(samp, d), num2cell(weights, d));
     end
     dens = cell2struct_weaknames(cell_sum, variable_names);

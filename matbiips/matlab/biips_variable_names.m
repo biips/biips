@@ -22,4 +22,6 @@ function varnames = biips_variable_names(model)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
+check_biips(model); % Checks if the structure model is valid
+
 varnames = matbiips('get_variable_names', model.id);

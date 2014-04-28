@@ -25,7 +25,7 @@ function [diagn] = diagnostic(parts, ess_thres, quiet, fsb)
 %--------------------------------------------------------------------------
 
 ess_min = parts.ess;
-dim = length(ess_min);
+dim = numel(ess_min);
 
 for d=dim:-1:1
     ess_min=min(ess_min);

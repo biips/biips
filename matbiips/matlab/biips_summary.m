@@ -35,7 +35,7 @@ function [summ] = biips_summary(samples, varargin)
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
 % MatBiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
@@ -72,10 +72,10 @@ if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the o
     cell_fsb = num2cell(type);
     cell_sum = cell(size(variable_names));
 
-    for i=1:length(variable_names)
+    for i=1:numel(variable_names)
       ctemp = cell(size(type));
-      for j=1:length(type)
-          ctemp{j} = summary(getfield(getfield(getfield(s, variable_names{i}), type(j)), 'values'), ...
+      for j=1:numel(type)
+          ctemp{j} = summary_stat(getfield(getfield(getfield(s, variable_names{i}), type(j)), 'values'), ...
              getfield(getfield(getfield(s,variable_names{i}), type(j)), 'weights'), probs, order);
       end
       cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
@@ -87,9 +87,9 @@ else % samples corresponds to the output of a MCMC algorithm
     s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names, 'UniformOutput',0), variable_names);    
     nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
     cell_sum = cell(size(variable_names));
-    for i=1:length(variable_names)  
+    for i=1:numel(variable_names)  
         weights = 1/nsamples * ones(size(getfield(s, variable_names{i})));
-        cell_sum{i} = summary(getfield(s, variable_names{i}), weights, probs, order);
+        cell_sum{i} = summary_stat(getfield(s, variable_names{i}), weights, probs, order);
     end
     summ = cell2struct_weaknames(cell_sum, variable_names);
 end

@@ -21,6 +21,7 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 % 
 %   OUTPUT
 %   - obj_pimh:     structure. PIMH object modified
+%   - log_marg_like: vector with log marginal likelihood over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_SAMPLES
 %--------------------------------------------------------------------------
@@ -41,6 +42,8 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
+
+check_pimh(obj_pimh);
 
 if nargout>=2
     [obj_pimh, ~, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});

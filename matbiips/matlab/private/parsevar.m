@@ -36,7 +36,7 @@ function varargout = parsevar(opt_param, param_names, param_type, param_valid, p
 %--------------------------------------------------------------------------
 
 
-n_params = length(param_names);
+n_params = numel(param_names);
 
 if (nargout ~=n_params)
     error('The number of output arguments should be the same as the number of optional parameters')
@@ -49,7 +49,7 @@ for i=1:n_params
 end
 
 found = false(n_params, 1);
-for i=1:2:length(opt_param)
+for i=1:2:numel(opt_param)
     [tag, ind] = ismember(opt_param{i}, param_names);
   if ~ischar(opt_param{i}) || ~tag % Check if known optional parameter name
       warning(['Unknown optional parameter ' opt_param{i}]);      
