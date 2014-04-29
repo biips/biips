@@ -41,7 +41,7 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 % Jan 2014; Last revision: 03-04-2014
 %--------------------------------------------------------------------------
 
-check_biips(model);
+check_struct(model, 'biips');
 
 % TODO check variable_names ? it is currently done at the monitoring step
 matbiips('message', 'Initializing PIMH');

@@ -3,11 +3,11 @@ function biips_clear(varargin)
 %
 % BIIPS_CLEAR  clears one or several biips consoles
 %
-%   biips_clear(model) clears the console associated to the biips model
-% 
-%   biips_clear()  clears all the consoles and reset the Id counter to 0.
+%   biips_clear(obj) clears the internal console of the biips object
+%   biips_clear(obj, obj2) 
+%   biips_clear()    clears all created consoles
 %
-%   See also BIIPS_MODEL
+%   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PMMH_INIT
 %--------------------------------------------------------------------------
 % EXAMPLE
 % model = biips_model('model.bug');
@@ -22,28 +22,30 @@ function biips_clear(varargin)
 % Jan 2014; Last revision: 17-03-2014
 %--------------------------------------------------------------------------
 
-if nargin>0
+if nargin==0
+    matbiips('clear_all_console');
+    clear matbiips
+else
     for k=1:numel(varargin)
         obj = varargin{k};
         if ~isstruct(obj) || ~isfield(obj, 'class') || ~ischar(obj.class)
             warning('skipping unrecognized argument nb %d', k)
             continue
         end
-        %%% TODO check model obj
         switch obj.class
             case 'biips'
-                console = obj.id;
+                check_struct(obj, 'biips');
+                %%% TODO check console id
+                matbiips('clear_console', obj.id);
             case 'pimh'
+                check_struct(obj, 'pimh');
                 % pimh does not clone the console
                 continue
             case 'pmmh'
-                console = obj.model.id;
+                check_struct(obj, 'pmmh');
+                biips_clear(obj.model);
             otherwise
                 warning('skipping unrecognized argument nb %s', k)
         end
-        matbiips('clear_console', console); 
     end
-else
-    clear matbiips
-%     matbiips('clear_all_console');
 end
