@@ -33,7 +33,7 @@ optarg_type = {'char'};
 [proposal] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-check_biips(model);
+check_struct(model, 'biips');
 
 %% Build sampler
 prior=false;

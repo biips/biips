@@ -93,7 +93,7 @@ optarg_type = {'numeric', 'char'};
 [rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-check_biips(model); % Checks if the structure model is valid
+check_struct(model, 'biips');
 
 %% Stops biips verbosity
 matbiips('verbosity', 0);

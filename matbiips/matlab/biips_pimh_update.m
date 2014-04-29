@@ -43,8 +43,6 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-check_pimh(obj_pimh);
-
 if nargout>=2
     [obj_pimh, ~, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
 else

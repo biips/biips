@@ -57,8 +57,7 @@ optarg_type = {'numeric', 'numeric', 'char'};
 [thin, rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-check_biips(obj.model);
-%%% TODO check pimh_obj structure
+check_struct(obj, 'pimh');
 
 %% Stops biips verbosity
 verb = matbiips('verbosity', 0);
@@ -99,8 +98,7 @@ if nargout>=2
 else
     mess = 'Updating PIMH with ';
 end
-matbiips('message', [mess, num2str(n_part), ...
-    ' particles and ', num2str(n_iter), ' iterations']);
+matbiips('message', [mess, num2str(n_part), ' particles']);
 bar = matbiips('make_progress_bar', n_iter, '*', 'iterations');
 %%% TODO: display expected time of run
 

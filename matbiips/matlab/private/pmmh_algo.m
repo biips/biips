@@ -27,8 +27,7 @@ optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
 [thin, max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-check_biips(obj.model);
-%%% TODO check pmmh obj structure
+check_struct(obj, 'pmmh');
 
 %% Stops biips verbosity
 verb = matbiips('verbosity', 0);
@@ -59,7 +58,7 @@ rw_rescale = rw_adapt && obj.n_iter<obj.n_rescale;
 % set current param value to the model
 sample_param = obj.sample_param;
 pn_param = cellfun(@parse_varname, param_names);
-pmmh_set_param(console, pn_param, sample_param, true);
+pmmh_set_param(console, pn_param, sample_param);
 
 % Initialize counters
 n_samples = ceil((n_iter)/thin);

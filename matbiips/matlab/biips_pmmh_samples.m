@@ -3,8 +3,8 @@ function [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
 
 %
 % BIIPS_PMMH_SAMPLES performs iterations for the PMMH algorithm and returns samples
-% [out, log_post, log_marg_like, stats_pmmh] = ... 
-%     biips_pmmh_samples(obj, n_iter, n_part, 'PropertyName', PropertyValue)
+% [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ... 
+%     biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'PropertyName', PropertyValue)
 %
 %   INPUT 
 %   - obj_pmmh:          PMMH structure (returned by BIIPS_PMMH_OBJECT)
@@ -58,8 +58,6 @@ optarg_valid = {[0, n_iter], [0, n_part],...
 optarg_type = {'numeric', 'numeric', 'numeric', 'char'};
 [thin, max_fail, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
-
-check_pmmh(obj_pmmh);
 
 %% Call pmmh_algo internal routine
 return_samples = true;
