@@ -1,5 +1,8 @@
 function v = to_biips_vname(var)
 
+if ~ischar(var) || numel(var)==0
+    error('invalid variable name')
+end
 %% remove spaces
 v = strjoin(strsplit(var, ' '), '');
 

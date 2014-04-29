@@ -51,22 +51,38 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'char'};
 
 check_struct(model, 'biips'); % Checks if the structure model is valid
 
+%%% TODO check param_names and latent_names are valid
+  
 % Check param_names
 for i=1:numel(param_names)
     if ~ischar(param_names{i})
-        error('Invalid parameter name %s', param_names{i})        
+        error('Invalid parameter name %s', param_names{i})
     end
+end
+pnames = cellfun(@to_biips_vname, param_names, 'uniformoutput', false);
+if numel(pnames)~=numel(unique(pnames))
+    error('duplicated names in param_names')
 end
 pn_param = cellfun(@parse_varname, param_names);
 n_param = numel(param_names);
 
 % Check latent_names
+lnames = cellfun(@to_biips_vname, latent_names, 'uniformoutput', false);
+if numel(lnames)~=numel(unique(lnames))
+    error('duplicated names in latent_names')
+end
 cellfun(@parse_varname, latent_names);
 
 % Check the init values
 if ~isempty(inits)
     if numel(inits)~=numel(param_names)
         error('Inits must be a cell with the same length as param_names')
+    end
+    for i=1:n_param
+        % Check values
+        if any(isnan(inits{i}(:)) | isinf(inits{i}(:)))
+            error('invalid init values for variable %s', param_names{i})
+        end
     end
 end
 
@@ -75,16 +91,10 @@ if ~isempty(rw_step)
     if numel(rw_step)~=numel(param_names)
         error('rw_step must be a cell with the same length as param_names')
     end
-    % Check values
     for i=1:n_param
-        if any(isnan(rw_step{i}(:)))
-            error('rw_step has NaN values')        
-        end
-         if any(isinf(rw_step{i}(:)))
-            error('rw_step has Inf values')        
-         end
-        if any((rw_step{i}(:))<=0)
-            error('rw_step has non-positive values')        
+        % Check values
+        if any(isnan(rw_step{i}(:)) | isinf(rw_step{i}(:)) | rw_step{i}(:)<=0)
+            error('invalid rw_step values for variable %s', param_names{i})
         end
     end
 end
@@ -93,14 +103,15 @@ end
 verb = matbiips('verbosity', 0);
 cleanupObj = onCleanup(@() matbiips('verbosity', verb));% reset verbosity when function terminates
 
+%% display message
 matbiips('message', 'Initializing PMMH');
 
 %% Clone console
 obj.model = clone_model(model);
 console = obj.model.id;
 
-% Init the parameters of the random walk
-sample_param = pmmh_set_param(console, pn_param, inits);
+%% Init the parameters of the random walk
+sample_param = pmmh_set_param(console, param_names, pn_param, inits);
 
 % Parameters and latent
 obj.param_names = param_names;
@@ -129,12 +140,14 @@ end
 
 % Init random walk stepsize for the part with diagonal covariance matrix
 if isempty(rw_step)
+    rw_step = cell(n_param, 1);
+    % default values
     for i=1:n_param
         rw_step{i} = .1/sqrt(obj.len)*ones(sample_dim{i});
     end
 else
-    % Check dimensions
     for i=1:n_param
+        % Check dimensions
         if any(size(rw_step{i})~=sample_dim{i})
             error('rw_step must be of the same dimension as the variable %s', param_names)
         end

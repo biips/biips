@@ -9,15 +9,15 @@ pimh_init <- function(object, variable_names, ...) {
   state <- list(sample = list(), log_marg_like = -Inf)
   
   obj_pimh <- list(model = function() {
-    return(object)
+    object
   }, variable_names = function() {
-    return(variable_names)
+    variable_names
   }, sample = function(sample) {
     if (!missing(sample)) state$sample <<- sample
-    return(invisible(state$sample))
+    invisible(state$sample)
   }, log_marg_like = function(log_marg_like) {
     if (!missing(log_marg_like)) state$log_marg_like <<- log_marg_like
-    return(invisible(state$log_marg_like))
+    invisible(state$log_marg_like)
   })
   class(obj_pimh) <- "pimh"
   
@@ -93,7 +93,7 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
       
       ## sample one particle
       sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), 
-                              get_seed())
+        get_seed())
       for (var in variable_names) {
         var_in <- to_biips_vname(var)
         sample[[var]] <- sampled_value[[var_in]]
@@ -109,8 +109,8 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
         if (ind_samples == 1) {
           ## pre-allocation here to be sure that sample is not empty
           for (var in variable_names) {
-            dimen <- dim(sample[[var]])
-            out[[var]] <- mcarray(dim = c(dimen, n_samples))
+          dimen <- dim(sample[[var]])
+          out[[var]] <- mcarray(dim = c(dimen, n_samples))
           }
         }
         

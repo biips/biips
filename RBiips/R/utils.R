@@ -6,8 +6,9 @@ is_legal_vname <- function(name) {
 
 ### FIXME transfrom variable name. eg: x[1, ] => x[1,1:100]
 to_biips_vname <- function(var) {
+  stopifnot(is.character(var), length(var)==1, nchar(var)>0)
   ## remove spaces
-  v <- paste(unlist(strsplit(var, ' ', fixed=TRUE)), collapse='')
+  v <- paste(unlist(strsplit(var, " ", fixed = TRUE)), collapse = "")
   return(v)
 }
 
