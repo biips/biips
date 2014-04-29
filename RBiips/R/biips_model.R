@@ -126,7 +126,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     unlink(mf)
     ## Re-compile
     RBiips("compile_model", ptr, data, FALSE, get_seed())
-    return(invisible())
+    invisible()
   })
   class(model) <- "biips"
   

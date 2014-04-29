@@ -1,27 +1,40 @@
 
-pmmh_set_param <- function(object, pn_param, inits, change_data = FALSE) {
+pmmh_set_param <- function(object, ...) UseMethod("pmmh_set_param")
+
+##' @S3method pmmh_set_param biips
+pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
   
-  ## make init sample
+  stopifnot(is.biips(object))
+  
+  console <- object$ptr()
+  
+  n_param <- length(pn_param$names)
   sample_param <- list()
-  data <- object$.data_sync()
-  if (length(inits) > 0) {
-    # take init value in inits param
-    for (i in 1:length(inits)) {
-      if (change_data) {
-        ok <- RBiips("change_data", object$ptr(), pn_param$names[[i]], pn_param$lower[[i]], 
-                     pn_param$upper[[i]], inits[[i]], TRUE)
-        if (!ok) 
-          stop("Data change failed: invalid initial value for variable ", 
-               pn_param$names[[i]])
-        ### TODO more precise error message
-        
-      }
-      sample_param[[i]] <- inits[[i]]
+  
+  if (length(values) > 0) {
+    stopifnot(length(values) == n_param)
+    # take sample values in values parameter
+    for (i in 1:n_param) {
+      var <- param_names[[i]]
+      stopifnot(!is.null(values[[var]]))
+      ok <- RBiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
+        pn_param$upper[[i]], values[[var]], TRUE)
+      if (!ok) 
+        stop("Data change failed: invalid value for variable ", var)
+      sample_param[[var]] <- values[[var]]
     }
   } else {
     # or sample init value
-    for (i in 1:length(inits)) sample_param[[i]] <- RBiips("sample_data", object$ptr(), 
-                                                           pn_param$names[[i]], pn_param$lower[[i]], pn_param$upper[[i]], get_seed())
+    for (i in 1:n_param) {
+      tryCatch({
+        var <- param_names[[i]]
+        sample_param[[var]] <- RBiips("sample_data", console, pn_param$names[[i]], 
+          pn_param$lower[[i]], pn_param$upper[[i]], get_seed())
+      }, error = function(e) {
+        print(e)
+        stop("CANNOT SAMPLE VARIABLE ", var, ": BUG TO BE FIXED")
+      })
+    }
     #### FIXME what if the variable is observed ?
   }
   return(invisible(sample_param))
@@ -30,64 +43,75 @@ pmmh_set_param <- function(object, pn_param, inits, change_data = FALSE) {
 
 ##' @export
 pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), rw_step = list(), 
-                      n_adapt = 400, alpha = 0.99, beta = 0.05, ...) {
+  n_adapt = 400, alpha = 0.99, beta = 0.05, ...) {
   ## check arguments
   stopifnot(is.biips(object))
   stopifnot(is.numeric(n_adapt), length(n_adapt) == 1, n_adapt >= 1, is.finite(n_adapt))
   stopifnot(is.numeric(alpha), length(alpha) == 1, alpha >= 0, alpha <= 1)
   stopifnot(is.numeric(beta), length(beta) == 1, beta >= 0, beta <= 1)
-  ## TODO check param_names and latent_names
+  
+  ## TODO check param_names and latent_names are valid
   
   ## check param_names
   stopifnot(is.character(param_names), length(param_names) > 0)
-  if (any(duplicated(param_names))) 
-    stop("duplicated names in param_names: ", paste(param_names[duplicated(param_names)], 
-                                                    collapse = " "))
   pn_param <- parse_varnames(param_names)
   n_param <- length(param_names)
+  if (any(duplicated(sapply(param_names, to_biips_vname))))
+    stop('duplicated names in param_names')
   
   ## check latent_names
-  if (!is.null(latent_names)) {
+  if (length(latent_names)>0) {
     stopifnot(is.character(latent_names))
-    if (any(duplicated(latent_names))) 
-      stop("duplicated names in latent_names: ", paste(latent_names[duplicated(latent_names)], 
-                                                       collapse = " "))
     parse_varnames(latent_names)
+    if (any(duplicated(sapply(latent_names, to_biips_vname))))
+      stop('duplicated names in latent_names')
   }
   
   ## check inits
   stopifnot(is.list(inits))
   if (length(inits) > 0) {
     stopifnot(length(inits) == n_param, sapply(inits, is.numeric))
+    stopifnot(sapply(inits, function(x) all(is.finite(x))))
+    init_names <- names(inits)
+    if (!is.null(step_names)) {
+      stopifnot(init_names %in% param_names)
+      if (any(duplicated(sapply(init_names, to_biips_vname))))
+        stop('duplicated names in inits')
+    }
   }
   
   ## check rw_step
   stopifnot(is.list(rw_step))
   if (length(rw_step) > 0) {
     stopifnot(length(rw_step) == n_param, sapply(rw_step, is.numeric))
+    stopifnot(sapply(rw_step, function(x) all(is.finite(x) && x > 0)))
+    step_names <- names(rw_step)
+    if (!is.null(step_names)) {
+      stopifnot(step_names %in% param_names)
+      if (any(duplicated(sapply(step_names, to_biips_vname))))
+        stop('duplicated names in rw_step')
+    }
   }
   
   ## stop biips verbosity
   verb <- RBiips("verbosity", 0)
   on.exit(RBiips("verbosity", verb))
   
+  ## display message
   RBiips("message", "Initializing PMMH")
   
   ## Clone console
   model <- clone_model(object)
   
   ## Init the parameters of the random walk
-  sample_param <- pmmh_set_param(model, pn_param, inits, TRUE)
+  sample_param <- pmmh_set_param(model, param_names, pn_param, inits)
   
   state <- list(sample_param = sample_param, sample_latent = list(), log_marg_like = -Inf, 
-                log_prior = -Inf)
+    log_prior = -Inf)
   
   ## store the dimensions of the variables
-  fun_get_dim <- function(x) {
-    if (is.null(dim(x))) 
-      length(x) else dim(x)
-  }
-  sample_dim <- lapply(sample, fun_get_dim)
+  fun_get_dim <- function(x) dim(as.array(x))
+  sample_dim <- lapply(sample_param, fun_get_dim)
   sample_len <- sum(sapply(sample_dim, prod))
   
   # target_prob = target acceptance probability. The default seems to be a fairly
@@ -99,13 +123,11 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
   ## Init random walk stepsize for the part with diagonal covariance matrix
   if (length(rw_step) == 0) {
     ## default values
-    rw_step <- lapply(sample, function(x) 1/sqrt(sample_len) * array(1, dim = x))
+    rw_step <- lapply(sample_dim, function(x) 1/sqrt(sample_len) * array(1, dim = x))
   } else {
     ## check dimensions
     rw_step_dim <- lapply(rw_step, fun_get_dim)
     stopifnot(mapply(identical, rw_step_dim, sample_dim))
-    ## check values
-    stopifnot(sapply(rw_step, function(x) all(is.finite(x) && x > 0)))
   }
   
   ## Concatenate all log value
@@ -114,75 +136,49 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
   # local initial parameters of the algorithm of adaptation of the step of random
   # walk in the PMMH algorithm
   rw <- list(n_rescale = n_rescale, n_cov = n_rescale/2, n_iter = 0, ar_mean = 0, 
-             log_step = log_step, beta = 0.05, alpha = alpha, target_prob = target_prob, 
-             dim = list(), len = sample_len, mean = c(), cov = c())
+    log_step = log_step, beta = 0.05, alpha = alpha, target_prob = target_prob, 
+    dim = list(), len = sample_len, mean = c(), cov = c())
   # we start learning the covariance matrix after n_cov iterations
   
   obj_pmmh <- list(model = function() {
-    return(model)
+    model
   }, param_names = function() {
-    return(param_names)
+    param_names
   }, latent_names = function() {
-    return(latent_names)
+    latent_names
   }, sample_param = function(sample) {
     if (!missing(sample)) state$sample_param <<- sample
-    return(invisible(state$sample_param))
+    invisible(state$sample_param)
   }, sample_latent = function(sample) {
     if (!missing(sample)) state$sample_latent <<- sample
-    return(invisible(state$sample_latent))
+    invisible(state$sample_latent)
   }, log_prior = function(log_prior) {
     if (!missing(log_prior)) state$log_prior <<- log_prior
-    return(invisible(state$log_prior))
+    invisible(state$log_prior)
   }, log_marg_like = function(log_marg_like) {
     if (!missing(log_marg_like)) state$log_marg_like <<- log_marg_like
-    return(invisible(state$log_marg_like))
-  }, n_iter = function() {
-    return(rw$n_iter)
+    invisible(state$log_marg_like)
+  }, n_iter = function(n_iter) {
+    if (!missing(n_iter)) rw$n_iter <<- n_iter
+    invisible(rw$n_iter)
   }, n_rescale = function() {
-    return(rw$n_rescale)
+    rw$n_rescale
+  }, rw_dim = function() {
+    rw$dim
+  }, rw_len = function() {
+    rw$len
   }, rw_step = function() {
-    return(exp(rw$log_step))
-  }, rw_proposal = function() {
-    # concatenate all variables in a vector always in the order of rw$dim
-    
-    sample_param <- state$sample_param
-    
-    sample_vec <- c(unlist(sample_param))
-    
-    ## Check dimension
-    stopifnot(length(sample_vec) == rw$len)
-    
-    ## Increment iterations counter
-    rw$n_iter <<- rw$n_iter + 1
-    
-    if (length(rw$cov) == 0 || (rw$n_iter < rw$n_rescale) || (runif(1) < rw$beta)) {
-      # Proposal with diagonal covariance
-      prop_vec <- sample_vec + exp(rw$log_step) * rnorm(rw$d)
-    } else {
-      # proposal with learnt covariance
-      eps <- 1e-5 # For numerical stability
-      cov_chol <- t(chol(rw$cov + eps * diag(1, nrow = rw$len)))
-      ## TODO use pivot in chol ? check positive semi-definite ?
-      prop_vec <- sample_vec + 2.38/sqrt(rw$len) * cov_chol %*% rnorm(rw$d)
-    }
-    
-    # rearrange vectorized parameter to list of arrays with appropriate dimensions
-    prop <- list()
-    from <- 1
-    for (n in names(rw$dim)) {
-      len <- prod(rw$dim[[n]])
-      to <- from + len - 1
-      prop[[n]] <- array(prop_vec[from:to], dim = rw$dim[[n]])
-      from <- from + len
-    }
-    
-    return(prop)
-  }, rw_rescale = function(ar) {
-    stop('TO BE IMPLEMENTED')
-    return(invisible())
-  }, rw_learn_cov = function() {
-    stop('TO BE IMPLEMENTED')
-    return(invisible())
+    exp(rw$log_step)
+  }, rw_mean = function(rw_mean) {
+    if (!missing(rw_mean)) rw$mean <<- rw_mean
+    invisible(rw$mean)
+  }, rw_cov = function(rw_cov) {
+    if (!missing(rw_cov)) rw$cov <<- rw_cov
+    invisible(rw$cov)
+  }, rw_alpha = function() {
+    rw$alpha
+  }, rw_beta = function() {
+    rw$beta
   })
   
   class(obj_pmmh) <- "pmmh"
@@ -191,16 +187,94 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
 }
 
 
+pmmh_rw_proposal <- function(object) {
+  # concatenate all variables in a vector always in the order of rw$dim
+  
+  sample_vec <- c(unlist(object$sample_param()))
+  
+  ## Check dimension
+  rw_len <- object$rw_len()
+  stopifnot(length(sample_vec) == rw_len)
+  
+  ## Increment iterations counter
+  n_iter <- object$n_iter() + 1
+  object$n_iter(n_iter)
+  
+  n_rescale <- object$n_rescale()
+  beta <- object$rw_beta()
+  cov <- object$rw_cov()
+  
+  if (length(cov) == 0 || (n_iter < n_rescale) || (runif(1) < beta)) {
+    # Proposal with diagonal covariance
+    prop_vec <- sample_vec + object$rw_step() * rnorm(rw_len)
+  } else {
+    # proposal with learnt covariance
+    eps <- 1e-05  # For numerical stability
+    cov_chol <- t(chol(cov + eps * diag(1, nrow = rw_len)))
+    ## TODO use pivot in chol ? check positive semi-definite ?
+    prop_vec <- sample_vec + 2.38/sqrt(rw_len) * cov_chol %*% rnorm(rw_len)
+  }
+  
+  # rearrange vectorized parameter to list of arrays with appropriate dimensions
+  rw_dim <- object$rw_dim()
+  prop <- list()
+  from <- 1
+  for (n in names(rw_dim)) {
+    len <- prod(rw_dim[[n]])
+    to <- from + len - 1
+    prop[[n]] <- array(prop_vec[from:to], dim = rw_dim[[n]])
+    from <- from + len
+  }
+  
+  return(prop)
+}
+
+
+
+pmmh_rw_rescale <- function(object, ar) {
+  ar <- min(1, ar)
+  
+  rw$ar_mean <<- rw$ar_mean + 1 * (ar - rw$ar_mean)/rw$n_iter
+  
+  rw$log_step <<- rw$log_step + rw$alpha^(rw$n_iter) * (rw$ar_mean - rw$target_prob)
+  
+  return(invisible())
+}
+
+
+
+pmmh_rw_learn_cov <- function(object) {
+  sample_param <- rw$sample_param
+  n_iter <- rw$n_iter
+  n_cov <- rw$n_cov
+  
+  ## Concatenate all variables in a column vector
+  sample_vec <- unlist(sample_param)
+  
+  if (n_iter == n_cov + 1) {
+    rw$mean <<- sample_vec
+    rw$cov <<- outer(sample_vec, sample_vec)
+  } else if (n_iter > n_cov + 1) {
+    ## Recursive update of the empirical mean and covariance matrix
+    q <- (n_iter - n_cov - 1)/(n_iter - n_cov)
+    q2 <- (n_iter - n_cov - 1)/(n_iter - n_cov)^2
+    z <- sample_vec - rw$mean
+    rw$cov <<- q * rw$cov + q2 * outer(z, z)
+    rw$mean <<- q * rw$mean + (1 - q) * sample_vec
+  }
+  
+  return(invisible())
+}
 
 pmmh_one_update <- function(object, ...) UseMethod("pmmh_one_update")
 
 ##' @S3method pmmh_one_update pmmh
 ##' heart of the pmmh algorithm : realizes one step of the MH algorithm
 ##' using the underlying SMC
-pmmh_one_update.pmmh <- function(object, pn_param, n_part, 
-                                 rw_rescale, rw_learn, ...) {
+pmmh_one_update.pmmh <- function(object, pn_param, n_part, rw_rescale, rw_learn, 
+  ...) {
   
-  console = object$model()$ptr()
+  console <- object$model()$ptr()
   param_names <- object$param_names()
   latent_names <- object$latent_names()
   sample_param <- object$sample_param()
@@ -208,57 +282,59 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
   log_prior <- object$log_prior()
   log_marg_like <- object$log_marg_like()
   
-  n_fail = 0
-  n_param = length(param_names)
-  n_latent = length(latent_names)
+  n_fail <- 0
+  n_param <- length(param_names)
+  n_latent <- length(latent_names)
   
   ## Random walk proposal
-  prop = object$rw_proposal()
+  prop <- pmmh_rw_proposal(object)
   
-  # TODO: check this is not necessary
-  #   ## check NA
-  #   for (var in names(prop)) {
-  #     if (any(is.na(prop[[var]]))) {
-  #       stop("PMMH proposal have NA: ", var, " = ", prop[[var]])
-  #     }
-  #   }
+  ### TODO: check NA ?
+  
+  # for (var in names(prop))
+  # { if
+  # (any(is.na(prop[[var]]))) { stop('PMMH proposal have NA: ', var, ' = ',
+  # prop[[var]]) } }
   
   ## compute log prior density
   log_prior_prop <- 0
   
   for (i in 1:n_param) {
     ## change model data
+    var <- param_names[[i]]
+    stopifnot(!is.null(prop[[var]]))
     ok <- RBiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
-                 pn_param$upper[[i]], prop[[i]], TRUE)
+      pn_param$upper[[i]], prop[[var]], TRUE)
     
     if (!ok) {
-      ## DATA CHANGE FAILED: proposed parameter value might be out of bounds ?
-      ## TODO: double check this is the case and there is no other reason.
+      ## DATA CHANGE FAILED: proposed parameter value might be out of bounds ?  TODO:
+      ## double check this is the case and there is no other reason.
       log_prior_prop <- -Inf
-#       n_fail <- n_fail + 1
-#       warning("Data change failed:", param_names[[i]], "=", prop[[var]], "\n")
+      # n_fail <- n_fail + 1
+      
+      # warning('Data change failed:', var, '=', prop[[var]], '\n')
       break
     }
     
-    log_p <- RBiips("get_log_prior_density", console, pn_param$names[[v]], 
-                    pn_param$lower[[v]], pn_param$upper[[v]])
+    log_p <- RBiips("get_log_prior_density", console, pn_param$names[[i]], pn_param$lower[[i]], 
+      pn_param$upper[[i]])
     
-    if (is.na(log_p))
-      stop("Failed to get log prior density: node ", param_names[[i]], "is not stochastic.")
+    if (is.na(log_p)) 
+      stop("Failed to get log prior density: node ", var, " is not stochastic.")
     
     log_prior_prop <- log_prior_prop + log_p
   }
   
   if (is.nan(log_prior_prop)) {
-#     accept_rate = 0
-    stop('Failed to compute log prior density : ', log_prior_prop)
+    # accept_rate = 0
+    stop("Failed to compute log prior density : ", log_prior_prop)
   }
   if (log_prior_prop == -Inf) {
     ## If proposal is not in the support of the prior
-    accept_rate = 0
+    accept_rate <- 0
   } else {
     ## compute log marginal likelihood: run smc sampler
-    ok <- run_smc_forward(object, n_part = n_part, ...)
+    ok <- run_smc_forward(object$model(), n_part = n_part, ...)
     
     if (!ok) {
       log_marg_like_prop <- -Inf
@@ -266,17 +342,17 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
       warning("Failure running smc forward sampler\n")
     } else {
       log_marg_like_prop <- RBiips("get_log_norm_const", console)
-      if (is.nan(log_marg_like_prop) || log_marg_like_prop == Inf)
+      if (is.nan(log_marg_like_prop) || log_marg_like_prop == Inf) 
         ### TODO error or n_fail increment ?
-        stop("Failed to compute log marginal likelihood: ", log_marg_like_prop)
+      stop("Failed to compute log marginal likelihood: ", log_marg_like_prop)
     }
   }
   
   ## Acceptance rate
   accept_rate <- min(1, exp(log_marg_like_prop - log_marg_like + log_prior_prop - 
-                              log_prior))
-  if (is.nan(accept_rate))
-    stop("Failed to compute acceptance rate:" , accept_rate)
+    log_prior))
+  if (is.nan(accept_rate)) 
+    stop("Failed to compute acceptance rate: ", accept_rate)
   
   ## Accept-Reject step
   if (runif(1) < accept_rate) {
@@ -286,7 +362,8 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
     
     if (n_latent > 0) {
       ## sample one particle for the latent variables
-      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), get_seed())
+      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), 
+        get_seed())
       
       for (var in latent_names) {
         var_in <- to_biips_vname(var)
@@ -295,7 +372,7 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
     }
   }
   
-  ## Update PMMH object with current state 
+  ## Update PMMH object with current state
   object$sample_param(sample_param)
   object$sample_latent(sample_latent)
   object$log_prior(log_prior)
@@ -303,14 +380,14 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part,
   
   ## rescale random walk step
   if (rw_rescale) {
-    object$rw_rescale(accept_rate)
+    pmmh_rw_rescale(object, accept_rate)
   }
   ## update random walk covariance matrices
   if (rw_learn) {
-    object$rw_learn_cov()
+    pmmh_rw_learn_cov(object)
   }
   
-  return(list(accept_rate=accept_rate, n_fail=n_fail))
+  return(list(accept_rate = accept_rate, n_fail = n_fail))
 }
 
 
@@ -322,7 +399,7 @@ pmmh_algo <- function(object, ...) UseMethod("pmmh_algo")
 
 ##' @S3method pmmh_algo pmmh
 pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max_fail = 0, 
-                           rw_adapt = FALSE, ...) {
+  rw_adapt = FALSE, ...) {
   stopifnot(is.biips(object))
   stopifnot(is.numeric(n_iter), length(n_iter) == 1, n_iter > 0, is.finite(n_iter))
   n_iter <- as.integer(n_iter)
@@ -350,7 +427,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   n_latent <- length(latent_names)
   
   if (n_latent > 0) 
-    monitor(console, latent_names, "s")
+    monitor(object$model(), latent_names, "s")
   
   # build smc sampler
   if (!RBiips("is_sampler_built", console)) 
@@ -359,15 +436,14 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   # toggle rescaling adaptation
   rw_rescale <- rw_adapt && object$n_iter() < object$n_rescale()
   
-  ## FIXME
-  # if (!rw.adapt) { ## check adaptation if (object$.rw_adapt() &&
-  # !object$.rw_check_adapt()) message('NOTE: Stopping adaptation of the PMMH
-  # random walk.\n') ## turn off adaptation object$.rw_adapt_off() }
+  ## FIXME if (!rw.adapt) { ## check adaptation if (object$.rw_adapt() &&
+  ## !object$.rw_check_adapt()) message('NOTE: Stopping adaptation of the PMMH
+  ## random walk.\n') ## turn off adaptation object$.rw_adapt_off() }
   
   # set current param value to the model
   sample_param <- object$sample_param()
   pn_param <- parse_varnames(param_names)
-  pmmh_set_param(console, pn_param, sample_param, TRUE)
+  pmmh_set_param(object$model(), param_names, pn_param, sample_param)
   
   # Initialize counters
   n_samples <- ceil(n_iter/thin)
@@ -375,7 +451,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   n_fail <- 0
   
   # Output structure with MCMC samples
-  out <- list()  
+  out <- list()
   out$accept_rate <- mcarray(dim = c(1, n_samples))
   len <- length(object$rw_step())
   out$rw_step <- mcarray(dim = c(len, n_samples))
@@ -392,9 +468,9 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   ## display message and progress bar
   mess <- if (return_samples) 
     "Generating PMMH samples with" else {
-      if (rw_adapt) 
-        "Adapting PMMH with" else "Updating PMMH with"
-    }
+    if (rw_adapt) 
+      "Adapting PMMH with" else "Updating PMMH with"
+  }
   symbol <- if (rw_adapt) 
     "+" else "*"
   RBiips("message", paste(mess, n_part, "particles"))
@@ -403,20 +479,18 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   
   ## Metropolis-Hastings iterations -------------------------------
   for (i in 1:n_iter) {
-    out_step <- pmmh_one_update(object, pn_param = pn_param, 
-                                n_part = n_part, 
-                                rw_rescale = rw_rescale, rw_learn = rw_adapt, ...)
+    out_step <- pmmh_one_update(object, pn_param = pn_param, n_part = n_part, 
+      rw_rescale = rw_rescale, rw_learn = rw_adapt, ...)
     
     n_fail <- n_fail + out_step$n_fail
     
     ## Check nb of failures FC: MODIFY THIS EVENTUALLY
-    if (n_fail > max_fail)
+    if (n_fail > max_fail) 
       stop("Number of failures exceeds max_fail: ", n_fail, " failures.")
     
     # Stop rescale
-    if (rw_rescale && (object$n_iter()==object$n_rescale())) {
-      ## FIXME problem if n_rescale > n_iter
-      ## should compare to total n_iter
+    if (rw_rescale && (object$n_iter() == object$n_rescale())) {
+      ## FIXME problem if n_rescale > n_iter should compare to total n_iter
       rw_rescale <- FALSE
     }
     
@@ -427,7 +501,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
       log_prior <- out_step$log_prior
       
       out$accept_rate[ind_sample] <- out_step$accept_rate
-      out$rw_step[,ind_sample] <- exp(object$rw_step())
+      out$rw_step[, ind_sample] <- exp(object$rw_step())
       out$log_marg_like[ind_sample] <- log_marg_like
       out$log_post[ind_sample] <- log_marg_like + log_prior
       
@@ -445,8 +519,8 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
         if (ind_samples == 1) {
           ## pre-allocation here to be sure that sample is not empty
           for (var in latent_names) {
-            dimen <- dim(sample_latent[[var]])
-            out[[var]] <- mcarray(dim = c(dimen, n_samples))
+          dimen <- dim(sample_latent[[var]])
+          out[[var]] <- mcarray(dim = c(dimen, n_samples))
           }
         }
         

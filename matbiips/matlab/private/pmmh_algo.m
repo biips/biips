@@ -58,7 +58,7 @@ rw_rescale = rw_adapt && obj.n_iter<obj.n_rescale;
 % set current param value to the model
 sample_param = obj.sample_param;
 pn_param = cellfun(@parse_varname, param_names);
-pmmh_set_param(console, pn_param, sample_param);
+pmmh_set_param(console, param_names, pn_param, sample_param);
 
 % Initialize counters
 n_samples = ceil((n_iter)/thin);
