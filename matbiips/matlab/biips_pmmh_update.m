@@ -57,8 +57,6 @@ optarg_type = {'numeric', 'logical', 'numeric', 'char'};
 [max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-check_pmmh(obj_pmmh);
-
 %% Call pmmh_algo internal routine
 return_samples = false;
 [obj_pmmh, log_post, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...

@@ -49,7 +49,7 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'char'};
 [inits, rw_step, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
-check_biips(model); % Checks if the structure model is valid
+check_struct(model, 'biips'); % Checks if the structure model is valid
 
 % Check param_names
 for i=1:numel(param_names)
@@ -100,7 +100,7 @@ obj.model = clone_model(model);
 console = obj.model.id;
 
 % Init the parameters of the random walk
-sample_param = pmmh_set_param(console, pn_param, inits, true);
+sample_param = pmmh_set_param(console, pn_param, inits);
 
 % Parameters and latent
 obj.param_names = param_names;

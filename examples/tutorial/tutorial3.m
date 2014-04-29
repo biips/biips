@@ -143,9 +143,11 @@ h = fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
+hold on
+plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering Mean Estimate'})
+legend({'95 % credible interval', 'Filtering Mean Estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -155,13 +157,15 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
-    [.7 .7 1]);
+    [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_s_mean, 'linewidth', 3)
+plot(x_s_mean, 'r', 'linewidth', 3)
+hold on
+plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing Mean Estimate'})
+legend({'95 % credible interval', 'Smoothing Mean Estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -169,7 +173,7 @@ box off
 % Marginal filtering and smoothing densities
 
 kde_estimates = biips_density(out_smc);
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -178,11 +182,14 @@ for k=1:length(time_index)
     hold on
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);   
+    box off
 end
-legend({'filtering density', 'smoothing density', 'True value'});
+h = legend({'filtering density', 'smoothing density', 'True value'});
+set(h, 'position',[0.7, 0.25, .1, .1])
+legend('boxoff')
 
 %% Clear model
 % 

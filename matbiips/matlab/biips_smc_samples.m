@@ -82,7 +82,7 @@ filtering = ~isempty(indices{1});
 smoothing = ~isempty(indices{2}); 
 backward = ~isempty(indices{3});
 
-check_biips(model); % Checks if the structure model is valid
+check_struct(model, 'biips');
 console = model.id; % Get the id of the biips console
 
 %% Monitor

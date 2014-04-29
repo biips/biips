@@ -135,10 +135,10 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
-    [.7 .7 1]);
+    [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_s_mean, 'linewidth', 3)
+plot(x_s_mean, 'r', 'linewidth', 3)
 hold on
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
@@ -177,13 +177,14 @@ for k=1:length(time_index)
     hold on
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('posterior density');
     title(['t=', num2str(tk)]);  
     xlim([-20,20])
+    box off
 end
 h = legend({'filtering density', 'smoothing density', 'True value'});
-set(h, 'position',[0.7 0.25, .1, .1])
+set(h, 'position',[0.7, 0.25, .1, .1])
 legend('boxoff')
 
 
@@ -238,6 +239,7 @@ for k=1:length(time_index)
     xlabel('Iterations')
     ylabel('PIMH samples')
     title(['t=', num2str(tk)]);
+    box off
 end
 h = legend({'PIMH samples', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
@@ -252,13 +254,14 @@ for k=1:length(time_index)
     hist(samples_pimh.x(tk, :), 20);
     hold on    
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('number of samples');
     title(['t=', num2str(tk)]);   
     xlim([-20,20])
+    box off
 end
 h = legend({'posterior density', 'True value'});
-set(h, 'position',[0.7 0.25, .1, .1])
+set(h, 'position', [0.7, 0.25, .1, .1])
 legend('boxoff')
 
 %%
@@ -271,13 +274,14 @@ for k=1:length(time_index)
     plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f); 
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk) '}']);
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
     xlim([-20,20])
+    box off
 end
 h = legend({'posterior density', 'True value'});
-set(h, 'position',[0.7 0.25, .1, .1])
+set(h, 'position',[0.7, 0.25, .1, .1])
 legend('boxoff')
 
 %% Clear model
