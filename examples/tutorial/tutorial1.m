@@ -56,6 +56,8 @@ set(0, 'DefaultAxesFontsize', 14);
 % and add the Matbiips folder to the Matlab path
 % 
 
+%% 
+% *Add Matbiips functions in the search path*
 matbiips_path = '../../matbiips/matlab';
 addpath(matbiips_path)
 
@@ -96,25 +98,20 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
-% inter_biips('sample_gen_tree_smooth_particle', model.id, randi(1000));
-% % Get sampled value
-% sampled_value = inter_biips('get_sampled_gen_tree_smooth_particle', model.id);
-
-
 %%
 % *Diagnostic on the algorithm*. 
-diag = biips_diagnostic(out_smc);
+biips_diagnostic(out_smc)
 
 %%
 % *Summary statistics*
-summary = biips_summary(out_smc, 'probs', [.025, .975]);
+summ = biips_summary(out_smc, 'probs', [.025, .975]);
 
 
 %%
 % *Plot Filtering estimates*
-x_f_mean = summary.x.f.mean;
-x_f_med = summary.x.f.med;
-x_f_quant = summary.x.f.quant;
+x_f_mean = summ.x.f.mean;
+x_f_med = summ.x.f.med;
+x_f_quant = summ.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
     [.7 .7 1]);
@@ -131,8 +128,8 @@ box off
 
 %%
 % *Plot Smoothing estimates*
-x_s_mean = summary.x.s.mean;
-x_s_quant = summary.x.s.quant;
+x_s_mean = summ.x.s.mean;
+x_s_quant = summ.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
     [1 .7 .7]);
@@ -149,9 +146,9 @@ box off
 
 % %%
 % % *Plot Backward smoothing estimates*
-% x_b_mean = summary.x.b.mean;
-% x_b_med = summary.x.b.med;
-% x_b_quant = summary.x.b.quant;
+% x_b_mean = summ.x.b.mean;
+% x_b_med = summ.x.b.med;
+% x_b_quant = summ.x.b.quant;
 % figure('name', 'SMC: Backward smoothing estimates')
 % h = fill([1:t_max, t_max:-1:1], [x_b_quant(1,:), fliplr(x_b_quant(2,:))],...
 %     [.7 .7 1]);
@@ -207,12 +204,12 @@ obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % burn-in iterations
 
 %%
 % *Some summary statistics*
-summary_pimh = biips_summary(samples_pimh, 'probs', [.025, .975]);
+summ_pimh = biips_summary(samples_pimh, 'probs', [.025, .975]);
 
 %%
 % *Posterior mean and quantiles*
-x_pimh_mean = summary_pimh.x.mean;
-x_pimh_quant = summary_pimh.x.quant;
+x_pimh_mean = summ_pimh.x.mean;
+x_pimh_quant = summ_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
     [.7 .7 1]);

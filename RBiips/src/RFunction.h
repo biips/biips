@@ -1,7 +1,7 @@
 #ifndef BIIPS_RFUNCTION_HPP_
 #define BIIPS_RFUNCTION_HPP_
 
-#include "function/Function.hpp"
+#include <function/Function.hpp>
 #include <Rcpp.h>
 
 

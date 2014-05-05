@@ -40,6 +40,9 @@
 #include <BiipsBase.hpp>
 
 
+Size VERBOSITY = 1;
+
+
 void load_base_module()
 {
   using namespace Biips;

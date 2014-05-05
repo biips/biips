@@ -35,14 +35,13 @@
  * Id:      $Id$
  */
 
-#include "Console.hpp"
 #include "RBiips_utils.h"
 #include "RFunction.h"
-#include "compiler/Compiler.hpp"
+#include <compiler/Compiler.hpp>
 #include <fstream>
-#include "iostream/outStream.hpp"
-#include "iostream/ProgressBar.hpp"
-#include "BiipsVersion.hpp"
+#include <iostream/outStream.hpp>
+#include <iostream/ProgressBar.hpp>
+#include <BiipsVersion.hpp>
 
 RcppExport SEXP get_version()
 {

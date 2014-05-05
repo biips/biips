@@ -44,6 +44,12 @@
 NULL
 
 
+##' @export
+is.smcarray <- function(object) {
+  return(class(object) == "smcarray")
+}
+
+
 ##' @S3method print smcarray
 print.smcarray <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 0.75), 
   ...) {
@@ -221,11 +227,20 @@ plot.smcarray.list <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 
 ##' @export
 diagnostic <- function(object, ...) UseMethod("diagnostic")
 
+##' @S3method diagnostic list
+diagnostic.list <- function(object, ...) {
+  stopifnot(is.list(object))
+  
+  flag <- sapply(object, is.smcarray)
+  out <- lapply(object[flag], function(x) diagnostic(x,...))
+  
+  return(out)
+}
 
 ##' @S3method diagnostic smcarray
 diagnostic.smcarray <- function(object, ess_thres = 30, ...) {
-  ess.min <- min(object$ess)
-  ans <- list(`ESS min.` = ess.min, valid = ess.min > ess_thres)
+  ess_min <- min(object$ess)
+  ans <- list(`ESS min.` = ess_min, valid = ess_min > ess_thres)
   class(ans) <- "diagnostic.smcarray"
   return(ans)
 }

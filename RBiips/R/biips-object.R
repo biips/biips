@@ -82,7 +82,7 @@ variable.names.biips <- function(object, ...) {
 nodes <- function(object, ...) UseMethod("nodes")
 
 ##' @S3method nodes biips
-nodes <- function(object, type, observed, ...) {
+nodes.biips <- function(object, type, observed, ...) {
   stopifnot(is.biips(object))
   
   sorted_nodes <- data.frame(RBiips("get_sorted_nodes", object$ptr()))
@@ -114,7 +114,7 @@ nodes <- function(object, type, observed, ...) {
 print_dot <- function(object, ...) UseMethod("print_dot")
 
 ##' @S3method print_dot biips
-print_dot <- function(object, file, ...) {
+print_dot.biips <- function(object, file, ...) {
   stopifnot(is.biips(x))
   
   RBiips("print_graphviz", object$ptr(), file)
