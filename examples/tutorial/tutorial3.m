@@ -125,8 +125,8 @@ out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %%
-% *Diagnostic on the algorithm*. 
-diag = biips_diagnostic(out_smc);
+% *Diagnosis on the algorithm*. 
+diag = biips_diagnosis(out_smc);
 
 %%
 % *Summary statistics*

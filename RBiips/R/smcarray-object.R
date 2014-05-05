@@ -13,8 +13,8 @@
 ##' \code{smcarray.list} objects by a call to each element of the list.
 ##' 
 ##' @name smcarray-object
-##' @aliases smcarray-object smcarray.list-object diagnostic
-##' diagnostic.smcarray diagnostic.smcarray.list summary.smcarray
+##' @aliases smcarray-object smcarray.list-object diagnosis
+##' diagnosis.smcarray diagnosis.smcarray.list summary.smcarray
 ##' summary.smcarray.list density.smcarray density.smcarray.list
 ##' plot.smcarray plot.smcarray.list
 ##' @param object,x a \code{smcarray} or \code{smcarray.list} object
@@ -49,6 +49,11 @@ is.smcarray <- function(object) {
   return(class(object) == "smcarray")
 }
 
+##' @export
+is.smcarray.list <- function(object) {
+  return(class(object) == "smcarray.list")
+}
+
 
 ##' @S3method print smcarray
 print.smcarray <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 0.75), 
@@ -64,39 +69,43 @@ print.smcarray.list <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5,
 }
 
 
+##' @S3method smcarray mean
+mean.smcarray <- function(x, ...) {
+  s <- stat.smcarray(x, fun = "mean")
+  return(s$Mean)
+}
+
 stat.smcarray <- function(x, fun = "mean", probs = c(0.25, 0.5, 0.75)) {
-  if (!is.character(fun)) 
-    stop("invalid fun argument.")
+  stopifnot(is.character(fun))
+  stopifnot (is.numeric(probs), probs >0, probs < 1)
   
-  fun <- match.arg(fun, c("mean", "var", "skew", "kurt", "median", "quantiles", 
-    "mode"), several.ok = TRUE)
-  if (any(fun == "quantiles")) {
-    if (!is.numeric(probs) || any(probs <= 0) || any(probs >= 1)) 
-      stop("invalid probs argument.")
-    probs <- sort(probs)
-  }
+  fun <- match.arg(fun, c("mean", "var", "skew", "kurt", "median", "quantile", 
+                          "mode"), several.ok = TRUE)
   
   n_part <- dim(x$values)["particle"]
   drop_dims <- names(dim(x$values)) %in% c("particle")
-  dim.stat <- dim(x$values)[!drop_dims]
-  len <- prod(dim.stat)
+  dim_stat <- dim(x$values)[!drop_dims]
+  len <- prod(dim_stat)
   
   stat <- list()
   for (d in 1:len) {
     indvec <- seq(d, len * (n_part - 1) + d, len)
     for (f in fun) {
-      if (f == "quantiles") 
-        d.stat <- RBiips("weighted_quantiles", x$values[indvec], n_part * 
-          x$weights[indvec], probs) else d.stat <- .Call(paste("weighted_", f, sep = ""), x$values[indvec], 
-        n_part * x$weights[indvec], PACKAGE = "RBiips")
-      stat.names <- names(d.stat)[names(d.stat) != "Table"]
+      if (f == "quantile") {
+        stat_d <- RBiips("weighted_quantile", x$values[indvec], n_part * 
+                           x$weights[indvec], probs)
+      } else {
+        stat_d <- RBiips(paste("weighted_", f, sep = ""), x$values[indvec], 
+                         n_part * x$weights[indvec])
+      }
+      stat_names <- names(stat_d)[names(stat_d) != "Table"]
       if (d == 1) {
-        for (n in stat.names) {
+        for (n in stat_names) {
           if (is.null(stat[[n]])) 
-          stat[[n]] <- array(dim = dim.stat)
+            stat[[n]] <- array(dim = dim_stat)
         }
       }
-      for (n in stat.names) stat[[n]][d] <- d.stat[[n]]
+      for (n in stat_names) stat[[n]][d] <- stat_d[[n]]
     }
   }
   return(stat)
@@ -225,45 +234,79 @@ plot.smcarray.list <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 
 
 
 ##' @export
-diagnostic <- function(object, ...) UseMethod("diagnostic")
+diagnosis <- function(object, ...) UseMethod("diagnosis")
 
-##' @S3method diagnostic list
-diagnostic.list <- function(object, ...) {
+##' @S3method diagnosis list
+diagnosis.list <- function(object, type="fsb", quiet=FALSE, ...) {
   stopifnot(is.list(object))
   
-  flag <- sapply(object, is.smcarray)
-  out <- lapply(object[flag], function(x) diagnostic(x,...))
-  
-  return(out)
-}
-
-##' @S3method diagnostic smcarray
-diagnostic.smcarray <- function(object, ess_thres = 30, ...) {
-  ess_min <- min(object$ess)
-  ans <- list(`ESS min.` = ess_min, valid = ess_min > ess_thres)
-  class(ans) <- "diagnostic.smcarray"
-  return(ans)
-}
-
-
-##' @S3method print diagnostic.smcarray
-print.diagnostic.smcarray <- function(x, ...) {
-  if (x$valid) 
-    cat("diagnostic: GOOD\n") else {
-    cat("diagnostic: POOR\n")
-    cat("    The minimum effective sample size is too low: ", x$ESS, "\n", sep = "")
-    cat("    Estimates may be poor for some variables.\n")
-    cat("    You should increase n_part.")
+  out = list()
+  for (n in names(object)) {
+    if (!is.smcarray.list(object[[n]]))
+      next
+    out <- diagnosis(object[[n]], type=type, quiet=quiet, ...)
   }
+  
+  return(invisible(out))
 }
 
-
-##' @S3method diagnostic smcarray.list
-diagnostic.smcarray.list <- function(object, ...) {
-  ans <- list()
-  for (n in names(object)) ans[[n]] <- diagnostic(object[[n]], ...)
-  return(ans)
+##' @S3method diagnosis smcarray.list
+diagnosis.smcarray.list <- function(object, type="fsb", quiet=FALSE, ...) {
+  stopifnot(is.smcarray.list(object))
+  type = check_type(type)
+  
+  if (!quiet) {
+    varname = deparse_varname(object[[1]]$name, object[[1]]$lower,
+                              object[[1]]$upper)
+    cat("* Diagnosis of variable:", varname, "\n")      
+  }
+  
+  out = list()
+  for (n in names(object)) {
+    if (! (n %in% type))
+      next
+    
+    if (!quiet) {
+      switch(n,
+             f = {
+               cat("  Filtering: ")
+             },
+             s = {
+               cat("  Smoothing: ")
+             },
+             b = {
+               cat("  Backward smoothing: ")
+             })
+    }
+    out[[n]] <-  diagnosis(object[[n]], quiet=quiet, ...)
+  }
+  
+  return(invisible(out))
 }
+
+##' @S3method diagnosis smcarray
+diagnosis.smcarray <- function(object, ess_thres = 30, quiet=FALSE, ...) {
+  stopifnot(is.smcarray(object))
+  stopifnot(is.numeric(ess_thres), length(ess_thres)==1, is.finite(ess_thres), ess_thres>=0)
+  stopifnot(is.logical(quiet), length(quiet)==1)
+  
+  ess_min <- min(object$ess)
+  out <- list(ess_min = ess_min, valid = ess_min > ess_thres)
+  
+  if (!quiet) {    
+    if (out$valid) {
+      cat("GOOD\n") 
+    } else {
+      cat("POOR\n")
+      cat("    The minimum effective sample size is too low:", x$ess_min, "\n")
+      cat("    Estimates may be poor for some variables.\n")
+      cat("    You should increase the number of particles.")
+    }
+  }
+  
+  return(invisible(out))
+}
+
 
 
 get.index <- function(offset, lower, upper) {
@@ -282,30 +325,6 @@ get.index <- function(offset, lower, upper) {
 }
 
 
-deparse.varname <- function(name, lower = NULL, upper = lower) {
-  v <- parse(text = name, n = 1)
-  if (!is.expression(v) || length(v) != 1 || !is.name(v[[1]])) 
-    stop("invalid variable name.")
-  varname <- deparse(v[[1]])
-  
-  if (length(lower) == 0) 
-    return(varname)
-  
-  varname <- paste(varname, "[", sep = "")
-  if (length(upper) != length(lower)) 
-    stop("lower and upper lengths mismatch.")
-  if (any(upper < lower)) 
-    stop("incorrect lower and upper values.")
-  sep <- ""
-  for (i in seq(along = lower)) {
-    varname <- paste(varname, lower[[i]], sep = sep)
-    if (upper[[i]] > lower[[i]]) 
-      varname <- paste(varname, upper[[i]], sep = ":")
-    sep <- ","
-  }
-  varname <- paste(varname, "]", sep = "")
-  return(varname)
-}
 
 
 ##' @importFrom stats density

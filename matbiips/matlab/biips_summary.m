@@ -2,14 +2,12 @@ function [summ] = biips_summary(samples, varargin)
 
 %
 % BIIPS_SUMMARY computes some statistics on selected variables
-%  summ = biips_summary(parts, 'Propertyname', propertyvalue, ...)
+%  summ = biips_summary(samples, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT
 %   - samples:      input structure containing either the output of a SMC algorithm
 %                   or of a PIMH/PMMH algorithm.
 %   Optional inputs
-%   - variable_names: cell of strings. subset of the fields of particles struct
-%                   argument. Default is all.
 %   - type:         string containing the characters 'f', 's' and/or 'b'
 %   - probs:        vector of reals in ]0,1[. probability levels for quantiles.
 %                   default is [] for no quantile
@@ -24,7 +22,7 @@ function [summ] = biips_summary(samples, varargin)
 % data = struct('var1', 0, 'var2', 1.2);
 % model_id = biips_model('model.bug', data)
 %
-% n_part = 100; variables = {'x'}; 
+% n_part = 100; variables = {'x'};
 % out_smc = biips_smc_samples(model_id, variables, n_part);
 % summ = biips_summary(out_smc, 'probs', [.025, .975]);
 %
@@ -42,54 +40,43 @@ function [summ] = biips_summary(samples, varargin)
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'variable_names', 'type', 'probs', 'order'};
-optarg_default = {{}, '', [], 2};
-optarg_valid = {{}, {'', 'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 1],...
+optarg_names = {'type', 'probs', 'order'};
+optarg_default = {'fsb', [], 2};
+optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 1],...
     [1,4]};
-optarg_type = {'char', 'char', 'numeric', 'numeric'};
-[variable_names, type, probs, order] = parsevar(varargin, optarg_names, optarg_type,...
+optarg_type = {'char', 'numeric', 'numeric'};
+[type, probs, order] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-if (isempty(variable_names))
-   variable_names = fieldnames(samples); % vars = {}, take all fields
+if ~isstruct(samples)
+    %% corresponds to the output of a MCMC algorithm
+    dim = size(samples);
+    nsamples = dim(end);
+    weights = 1/nsamples * ones(dim);
+    summ = summary_stat(samples, weights, probs, order);
+elseif has_fsb_fields(samples) 
+    %% corresponds to the output of a SMC algorithm
+    names = fieldnames(samples);
+    summ = struct();
+    
+    for i=1:numel(names)
+        fsb = names{i};
+        if ~strfind(type, fsb)
+            continue
+        end
+        s = getfield(samples, fsb);
+        summ_s = summary_stat(s.values, s.weights, probs, order);
+        summ = setfield(summ, fsb, summ_s);
+    end
+else
+    %% contains several variables
+    varnames = fieldnames(samples);
+    summ = cell(size(varnames));
+    for i=1:numel(varnames)
+        s = getfield(samples, varnames{i});
+        summ{i} = biips_summary(s, varargin{:});
+    end
+    summ = cell2struct_weaknames(summ, varnames);
 end
 
-%% Summary statistics
-if isstruct(getfield(samples, variable_names{1})) % samples corresponds to the output of a SMC algorithm
-    
-    if (isempty(type))
-       type='fsb';
-    end
-    % retrieve only the field presents in the first variable
-    present = fieldnames(getfield(samples, variable_names{1}));
-    present = strcat(present{:});
-    indices = arrayfun(@(x) strfind(present, x), type, 'UniformOutput', 0);
-	indices = sort([indices{:}]);
-	type = present(indices);
-
-    % select only the wanted variables
-    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names,'UniformOutput',0), variable_names);
-    cell_fsb = num2cell(type);
-    cell_sum = cell(size(variable_names));
-
-    for i=1:numel(variable_names)
-      ctemp = cell(size(type));
-      for j=1:numel(type)
-          ctemp{j} = summary_stat(getfield(getfield(getfield(s, variable_names{i}), type(j)), 'values'), ...
-             getfield(getfield(getfield(s,variable_names{i}), type(j)), 'weights'), probs, order);
-      end
-      cell_sum{i} = cell2struct_weaknames(ctemp, cell_fsb);
-    end
-    summ = cell2struct_weaknames(cell_sum, variable_names);
-    
-else % samples corresponds to the output of a MCMC algorithm
-    % select only the wanted variables
-    s = cell2struct_weaknames(cellfun(@(x) getfield(samples, x), variable_names, 'UniformOutput',0), variable_names);    
-    nsamples = size(getfield(s, variable_names{1}), ndims(getfield(s, variable_names{1})));
-    cell_sum = cell(size(variable_names));
-    for i=1:numel(variable_names)  
-        weights = 1/nsamples * ones(size(getfield(s, variable_names{i})));
-        cell_sum{i} = summary_stat(getfield(s, variable_names{i}), weights, probs, order);
-    end
-    summ = cell2struct_weaknames(cell_sum, variable_names);
 end
