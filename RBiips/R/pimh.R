@@ -165,7 +165,7 @@ update.pimh <- function(object, n_iter, n_part, ...) {
 ##' objects, with one element for each element of the \code{variable_names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips_model}}, \code{\link{pmmh.samples}},
+##' @seealso \code{\link{biips_model}}, \code{\link{pmmh_samples}},
 ##' \code{\link{smc_samples}}
 ##' @keywords models
 ##' @examples

@@ -27,6 +27,9 @@ extern Bool BASE_MODULE_LOADED;
 typedef boost::shared_ptr<Console>  Console_ptr;
 typedef boost::shared_ptr<ProgressBar>  ProgressBar_ptr;
 
+extern std::deque<Console_ptr> consoles;
+extern std::deque<ProgressBar_ptr> progress;
+
 inline
 void myMexErrMsg(const String & identifier, const String & err_msg) {
 	mexErrMsgIdAndTxt((String("inter_biips:")+identifier).c_str(), err_msg.c_str());

@@ -17,6 +17,9 @@
 Size VERBOSITY = 1;
 Bool BASE_MODULE_LOADED = false;
 
+std::deque<Console_ptr> consoles;
+std::deque<ProgressBar_ptr> progress;
+
 template<>
 std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {

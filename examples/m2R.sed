@@ -50,8 +50,9 @@ s/; *$//
         b add_next_line
     }
     c\
-#' ## Installation of RBiips package\n#' Install *RBiips* package archive depending on your system:\n#' - `RBiips_x.x.x.zip` for Windows\n#' - `RBiips_x.x.x.tgz` for Mac OS X\n#' - `RBiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/RBiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *BiiPS* libraries and headers as well as *Boost*.
+#' ## Installation of RBiips package\n#' Install *RBiips* package archive depending on your system:\n#' - `RBiips_x.x.x.zip` for Windows\n#' - `RBiips_x.x.x.tgz` for Mac OS X\n#' - `RBiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/RBiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *BiiPS* libraries and headers as well as *Boost*.\n\n#+\n#' **Load RBiips package**\nrequire(RBiips)
 }
+
 
 s/Matbiips/RBiips/g
 
@@ -61,34 +62,21 @@ s/struct/list/g
 s/'([[:alnum:]_]*)' *, *\1/\1=\1/g
 
 # struct.field ==> struct$field
-/^#'/!s/\.([[:alpha:]][[:alnum:]_]*)/\$\1/g
+/^#'|filename/!s/\.([[:alpha:]][[:alnum:]_]*)/\$\1/g
 
-# FIXME
-s/Start BiiPS console/Load RBiips package/
-
-s/biips_init/require(RBiips)/
 
 s/([^_])true/\1TRUE/g
 s/([^_])false/\1FALSE/g
 
 # TODO change names in RBiips
-#s/biips_model/biips.model/
-#s/biips_smc_samples/smc.samples/
-#s/biips_diagnostic/diagnostic/
+s/biips_smc_samples/smc_samples/
+s/biips_diagnostic/diagnostic/
 
 s/biips_summary/summary/
 s/biips_density/density/
 
-#s/sample_data=/sample.data=/
-#s/rs_type=/rs.type=/
-#s/rs_thres=/rs.thres=/
-
-# TODO remove data output from .m
-/biips[\._]model/{
-    s/\[model *, *data\]/model/
-    a\
-data = model$data()
-}
+# model$data -> model$data()
+s/model\$data/model\$data()/
 
 # TODO italicize _BiiPS_ in .m
 /^#'/s/ _([[:alpha:]]*)_ / *\1* /g

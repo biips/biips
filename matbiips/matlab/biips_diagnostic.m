@@ -1,11 +1,11 @@
-function diagn = biips_diagnostic(parts, varargin)
+function diagn = biips_diagnostic(out_smc, varargin)
 
 %
 % BIIPS_DIAGNOSTIC returns a diagnostic structure on the SMC algorithm
 % diagn = biips_diagnostic(parts, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT
-%   - parts:    input structure containing the particles of different variables.
+%   - out_smc:    input structure containing the particles of different variables.
 %               usually returned by biips_smc_samples function
 %   Optional Inputs:
 %   - variable_names:   cell of strings. subset of the fields of particles struct
@@ -50,7 +50,7 @@ optarg_type = {'char', 'char', 'numeric', 'logical'};
     optarg_valid, optarg_default);
 
 if (isempty(variable_names))
-    variable_names = fieldnames(parts); % vars = {}, take all fields
+    variable_names = fieldnames(out_smc); % vars = {}, take all fields
 end
 
 if (isempty(type))
@@ -58,14 +58,14 @@ if (isempty(type))
 end
 
 % retrieve only the field presents in the first variable
-present = fieldnames(getfield(parts, variable_names{1}));
+present = fieldnames(getfield(out_smc, variable_names{1}));
 present = strcat(present{:});
 indices = arrayfun(@(x) strfind(present, x), type, 'UniformOutput', 0);
 indices = sort([indices{:}]);
 type = present(indices);
 
 % Select only the wanted variables
-s = cell2struct_weaknames(cellfun(@(x) getfield(parts, x), variable_names,'UniformOutput',0), variable_names);
+s = cell2struct_weaknames(cellfun(@(x) getfield(out_smc, x), variable_names,'UniformOutput',0), variable_names);
 cell_fsb = num2cell(type);
 cell_diagn = cell(size(variable_names));
 

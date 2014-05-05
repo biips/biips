@@ -56,15 +56,15 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
   stopifnot(is.character(param_names), length(param_names) > 0)
   pn_param <- parse_varnames(param_names)
   n_param <- length(param_names)
-  if (any(duplicated(sapply(param_names, to_biips_vname))))
-    stop('duplicated names in param_names')
+  if (any(duplicated(sapply(param_names, to_biips_vname)))) 
+    stop("duplicated names in param_names")
   
   ## check latent_names
-  if (length(latent_names)>0) {
+  if (length(latent_names) > 0) {
     stopifnot(is.character(latent_names))
     parse_varnames(latent_names)
-    if (any(duplicated(sapply(latent_names, to_biips_vname))))
-      stop('duplicated names in latent_names')
+    if (any(duplicated(sapply(latent_names, to_biips_vname)))) 
+      stop("duplicated names in latent_names")
   }
   
   ## check inits
@@ -75,8 +75,8 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
     init_names <- names(inits)
     if (!is.null(step_names)) {
       stopifnot(init_names %in% param_names)
-      if (any(duplicated(sapply(init_names, to_biips_vname))))
-        stop('duplicated names in inits')
+      if (any(duplicated(sapply(init_names, to_biips_vname)))) 
+        stop("duplicated names in inits")
     }
   }
   
@@ -88,8 +88,8 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
     step_names <- names(rw_step)
     if (!is.null(step_names)) {
       stopifnot(step_names %in% param_names)
-      if (any(duplicated(sapply(step_names, to_biips_vname))))
-        stop('duplicated names in rw_step')
+      if (any(duplicated(sapply(step_names, to_biips_vname)))) 
+        stop("duplicated names in rw_step")
     }
   }
   
@@ -179,6 +179,35 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
     rw$alpha
   }, rw_beta = function() {
     rw$beta
+  }, rw_rescale = function(ar) {
+    ar <- min(1, ar)
+    
+    rw$ar_mean <<- rw$ar_mean + 1 * (ar - rw$ar_mean)/rw$n_iter
+    
+    rw$log_step <<- rw$log_step + rw$alpha^(rw$n_iter) * (rw$ar_mean - rw$target_prob)
+    
+    return(invisible())
+  }, rw_learn_cov = function(object) {
+    sample_param <- rw$sample_param
+    n_iter <- rw$n_iter
+    n_cov <- rw$n_cov
+    
+    ## Concatenate all variables in a column vector
+    sample_vec <- unlist(sample_param)
+    
+    if (n_iter == n_cov + 1) {
+      rw$mean <<- sample_vec
+      rw$cov <<- outer(sample_vec, sample_vec)
+    } else if (n_iter > n_cov + 1) {
+      ## Recursive update of the empirical mean and covariance matrix
+      q <- (n_iter - n_cov - 1)/(n_iter - n_cov)
+      q2 <- (n_iter - n_cov - 1)/(n_iter - n_cov)^2
+      z <- sample_vec - rw$mean
+      rw$cov <<- q * rw$cov + q2 * outer(z, z)
+      rw$mean <<- q * rw$mean + (1 - q) * sample_vec
+    }
+    
+    return(invisible())
   })
   
   class(obj_pmmh) <- "pmmh"
@@ -195,10 +224,6 @@ pmmh_rw_proposal <- function(object) {
   ## Check dimension
   rw_len <- object$rw_len()
   stopifnot(length(sample_vec) == rw_len)
-  
-  ## Increment iterations counter
-  n_iter <- object$n_iter() + 1
-  object$n_iter(n_iter)
   
   n_rescale <- object$n_rescale()
   beta <- object$rw_beta()
@@ -231,48 +256,10 @@ pmmh_rw_proposal <- function(object) {
 
 
 
-pmmh_rw_rescale <- function(object, ar) {
-  ar <- min(1, ar)
-  
-  rw$ar_mean <<- rw$ar_mean + 1 * (ar - rw$ar_mean)/rw$n_iter
-  
-  rw$log_step <<- rw$log_step + rw$alpha^(rw$n_iter) * (rw$ar_mean - rw$target_prob)
-  
-  return(invisible())
-}
 
-
-
-pmmh_rw_learn_cov <- function(object) {
-  sample_param <- rw$sample_param
-  n_iter <- rw$n_iter
-  n_cov <- rw$n_cov
-  
-  ## Concatenate all variables in a column vector
-  sample_vec <- unlist(sample_param)
-  
-  if (n_iter == n_cov + 1) {
-    rw$mean <<- sample_vec
-    rw$cov <<- outer(sample_vec, sample_vec)
-  } else if (n_iter > n_cov + 1) {
-    ## Recursive update of the empirical mean and covariance matrix
-    q <- (n_iter - n_cov - 1)/(n_iter - n_cov)
-    q2 <- (n_iter - n_cov - 1)/(n_iter - n_cov)^2
-    z <- sample_vec - rw$mean
-    rw$cov <<- q * rw$cov + q2 * outer(z, z)
-    rw$mean <<- q * rw$mean + (1 - q) * sample_vec
-  }
-  
-  return(invisible())
-}
-
-pmmh_one_update <- function(object, ...) UseMethod("pmmh_one_update")
-
-##' @S3method pmmh_one_update pmmh
-##' heart of the pmmh algorithm : realizes one step of the MH algorithm
+##' heart of the pmmh algorithm: realizes one step of the MH algorithm
 ##' using the underlying SMC
-pmmh_one_update.pmmh <- function(object, pn_param, n_part, rw_rescale, rw_learn, 
-  ...) {
+pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...) {
   
   console <- object$model()$ptr()
   param_names <- object$param_names()
@@ -286,15 +273,17 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part, rw_rescale, rw_learn,
   n_param <- length(param_names)
   n_latent <- length(latent_names)
   
+  ## Increment iterations counter
+  n_iter <- object$n_iter() + 1
+  object$n_iter(n_iter)
+  
   ## Random walk proposal
   prop <- pmmh_rw_proposal(object)
   
   ### TODO: check NA ?
   
-  # for (var in names(prop))
-  # { if
-  # (any(is.na(prop[[var]]))) { stop('PMMH proposal have NA: ', var, ' = ',
-  # prop[[var]]) } }
+  # for (var in names(prop)) { if (any(is.na(prop[[var]]))) { stop('PMMH proposal
+  # have NA: ', var, ' = ', prop[[var]]) } }
   
   ## compute log prior density
   log_prior_prop <- 0
@@ -379,17 +368,14 @@ pmmh_one_update.pmmh <- function(object, pn_param, n_part, rw_rescale, rw_learn,
   object$log_marg_like(log_marg_like)
   
   ## rescale random walk step
-  if (rw_rescale) {
-    pmmh_rw_rescale(object, accept_rate)
-  }
+  if (rw_rescale) 
+    object$rw_rescale(accept_rate)
   ## update random walk covariance matrices
-  if (rw_learn) {
-    pmmh_rw_learn_cov(object)
-  }
+  if (rw_learn) 
+    object$rw_learn_cov()
   
   return(list(accept_rate = accept_rate, n_fail = n_fail))
 }
-
 
 
 
@@ -541,5 +527,91 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   ## number of failures
   out$n_fail <- n_fail
   
+  return(out)
+}
+
+
+
+
+##' Update Particle Marginal Metropolis-Hastings samples
+##' 
+##' The \code{update.pmmh} function creates monitors for the given variables,
+##' runs the model for \code{n_iter} iterations and returns the monitored
+##' samples.
+##' 
+##' @param model a biips model object
+##' @param param_names character vector. names of the variables uptaded with MCMC
+##' @param n_iter integer. number of iterations of the Markov chain
+##' @param n_part integer. number of particles of the SMC
+##' @param max_fail integer. maximum number of failures allowed
+##' @param inits named list of initial values for the variables in param_names.
+##' If empty, inits are sampled from the prior.
+##' @param rw_step positive steps of the random walk (std. dev. of the proposal
+##' kernel). If numeric,  the value is duplicated for all variables.
+##' If named list, the numeric components are assigned to the named variables.
+##' If unnamed list, the numeric components are assigned to the variables in 
+##' param_names with same ordering.
+##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
+##' @param rw.learn boolean. Toggle the online learning the empirical covariance
+##' matrix of the parameters
+##' @param ... additional arguments to be passed to the SMC algorithm
+##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips_model}}, \code{\link{pimh_samples}},
+##' \code{\link{smc_samples}}
+##' @keywords models
+##' @export
+##' @S3method update pmmh
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--  or do  help(data=index)  for the standard data sets.
+##' 
+update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE, ...) {
+  pmmh_algo(object, n_iter, n_part, return_samples = FALSE, max_fail = max_fail, 
+    rw_adapt = rw_adapt, ...)
+  return(invisible())
+}
+
+
+##' Generate Particle Marginal Metropolis-Hastings samples
+##' 
+##' The \code{pmmh.samples} function creates monitors for the given variables,
+##' runs the model for \code{n_iter} iterations and returns the monitored
+##' samples.
+##' 
+##' @param model a biips model object
+##' @param param_names a character vector giving the variables uptaded with MCMC
+##' @param latent_names a character vector giving the variables uptaded with SMC
+##' that you want to monitor
+##' @param n_iter number of iterations of the Markov chain
+##' @param thin thinning interval for monitors
+##' @param n_part number of particles of the SMC
+##' @param max_fail maximum number of failures allowed
+##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
+##' @param rw.learn boolean. Toggle online learning the empirical covariance matrix of
+##' the parameters
+##' @param ... additional arguments to be passed to the SMC algorithm
+##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' objects, with one element for each element of the \code{variable.names}
+##' argument.
+##' @author Adrien Todeschini, Francois Caron
+##' @seealso \code{\link{biips_model}}, \code{\link{pimh_samples}},
+##' \code{\link{smc_samples}}
+##' @keywords models
+##' @export
+##' @examples
+##' 
+##' ## Should be DIRECTLY executable !! 
+##' ##-- ==>  Define data, use random,
+##' ##--\tor do  help(data=index)  for the standard data sets.
+##' 
+pmmh_samples <- function(object, n_iter, n_part, thin = 1, max_fail = 0, ...) {
+  
+  out <- pmmh_algo(object, n_iter, n_part, return_samples = TRUE, max_fail = max_fail, 
+    ...)
   return(out)
 } 
