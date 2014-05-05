@@ -70,7 +70,7 @@ s/([^_])false/\1FALSE/g
 
 # TODO change names in RBiips
 s/biips_smc_samples/smc_samples/
-s/biips_diagnostic/diagnostic/
+s/biips_diagnosis/diagnosis/
 
 s/biips_summary/summary/
 s/biips_density/density/

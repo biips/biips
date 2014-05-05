@@ -99,8 +99,8 @@ out_smc = biips_smc_samples(model, variables, n_part,...
     'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %%
-% *Diagnostic on the algorithm*. 
-biips_diagnostic(out_smc)
+% *Diagnosis on the algorithm*. 
+biips_diagnosis(out_smc);
 
 %%
 % *Summary statistics*
@@ -113,7 +113,7 @@ x_f_mean = summ.x.f.mean;
 x_f_med = summ.x.f.med;
 x_f_quant = summ.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
-h = fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
@@ -131,7 +131,7 @@ box off
 x_s_mean = summ.x.s.mean;
 x_s_quant = summ.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
-h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
@@ -150,7 +150,7 @@ box off
 % x_b_med = summ.x.b.med;
 % x_b_quant = summ.x.b.quant;
 % figure('name', 'SMC: Backward smoothing estimates')
-% h = fill([1:t_max, t_max:-1:1], [x_b_quant(1,:), fliplr(x_b_quant(2,:))],...
+% h = fill([1:t_max, t_max:-1:1], [x_b_quant{1}; flipud(x_b_quant{2})],...
 %     [.7 .7 1]);
 % set(h, 'edgecolor', 'none')
 % hold on
@@ -211,7 +211,7 @@ summ_pimh = biips_summary(samples_pimh, 'probs', [.025, .975]);
 x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
-h = fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on

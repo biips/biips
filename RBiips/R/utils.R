@@ -139,6 +139,33 @@ parse_varnames <- function(varnames) {
 }
 
 
+
+deparse_varname <- function(name, lower = NULL, upper = lower) {
+  v <- parse(text = name, n = 1)
+  if (!is.expression(v) || length(v) != 1 || !is.name(v[[1]])) 
+    stop("invalid variable name.")
+  varname <- deparse(v[[1]])
+  
+  if (length(lower) == 0) 
+    return(varname)
+  
+  varname <- paste(varname, "[", sep = "")
+  if (length(upper) != length(lower)) 
+    stop("lower and upper lengths mismatch.")
+  if (any(upper < lower)) 
+    stop("incorrect lower and upper values.")
+  sep <- ""
+  for (i in seq(along = lower)) {
+    varname <- paste(varname, lower[[i]], sep = sep)
+    if (upper[[i]] > lower[[i]]) 
+      varname <- paste(varname, upper[[i]], sep = ":")
+    sep <- ","
+  }
+  varname <- paste(varname, "]", sep = "")
+  return(varname)
+}
+
+
 check_type <- function(type, several.ok = TRUE) {
   stopifnot(is.character(type))
   type <- unlist(strsplit(type, NULL))
