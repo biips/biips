@@ -39,8 +39,9 @@
 
 #include <Rcpp.h>
 #include <vector>
+#include <Console.hpp>
+#include <common/Error.hpp>
 #include "Rostream.h"
-#include  "common/Error.hpp"
 
 #ifndef BEGIN_RBIIPS
 #define BEGIN_RBIIPS BEGIN_RCPP
@@ -66,12 +67,10 @@
 #define END_RBIIPS CATCH_RBIIPS END_RCPP
 #endif
 
-
 using namespace Biips;
 using std::endl;
 
-
-Size VERBOSITY = 1;
+extern Size VERBOSITY;
 
 inline void checkConsole(SEXP ptr)
 {

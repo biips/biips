@@ -34,9 +34,9 @@
  * Id:      $Id$
  */
 
-#include "RBiipsCommon.h"
-#include "common/Accumulator.hpp"
-#include "common/Utility.hpp"
+#include "RBiips_utils.h"
+#include <common/Accumulator.hpp>
+#include <common/Utility.hpp>
 
 using namespace Biips;
 using std::endl;

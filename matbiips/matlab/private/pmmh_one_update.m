@@ -28,6 +28,9 @@ n_fail = 0;
 n_param = numel(param_names);
 n_latent = numel(latent_names);
 
+% Increment iterations counter
+obj.n_iter = obj.n_iter + 1;
+
 % Random walk proposal
 [obj, prop] = pmmh_rw_proposal(obj);
 

@@ -19,8 +19,6 @@
 #include "MatlabFunction.hpp"
 #include "MatlabDistribSampler.hpp"
 
-std::deque<Console_ptr> consoles;
-std::deque<ProgressBar_ptr> progress;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
