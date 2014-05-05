@@ -167,7 +167,7 @@ IndexRange makeRange(const Rcpp::RObject & lower,
 template<>
 SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type)
 {
-  Rcpp::List particles_list;
+  Rcpp::List smcarray_list;
 
   std::map<String, NodeArrayMonitor>::const_iterator it_map;
   for (it_map = monitorsMap.begin(); it_map != monitorsMap.end(); ++it_map)
@@ -209,21 +209,21 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
     Rcpp::IntegerVector upper(upper_ind.begin(), upper_ind.end());
 
-    Rcpp::List particles;
-    particles["values"] = values;
-    particles["weights"] = weights;
-    particles["ess"] = ess;
-    particles["discrete"] = discrete;
-    particles["name"] = Rcpp::wrap(monitor.GetName());
-    particles["lower"] = lower;
-    particles["upper"] = upper;
-    particles["type"] = Rcpp::wrap(type);
+    Rcpp::List smcarray;
+    smcarray["values"] = values;
+    smcarray["weights"] = weights;
+    smcarray["ess"] = ess;
+    smcarray["discrete"] = discrete;
+    smcarray["name"] = Rcpp::wrap(monitor.GetName());
+    smcarray["lower"] = lower;
+    smcarray["upper"] = upper;
+    smcarray["type"] = Rcpp::wrap(type);
 
-    particles.attr("class") = "particles";
+    smcarray.attr("class") = "smcarray";
 
-    particles_list[name] = particles;
+    smcarray_list[name] = smcarray;
   }
 
-  return particles_list;
+  return smcarray_list;
 }
 

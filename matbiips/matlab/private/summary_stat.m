@@ -1,24 +1,25 @@
-function summ = summary_stat(values, weights, probas, order)
+function summ = summary_stat(values, weights, proba, order)
 
 %--------------------------------------------------------------------------
 % SUMMARY_STAT computes some statistics on data
-% summ = summary_stat(part, probas, order)
+% summ = summary_stat(part, proba, order)
 % INPUT:
 % - values:     multidimensional array with last dimension corresponding to
 %               particles
 % - weights:    corresponding multidimensional array for the weigths
-% - probs:      array containing the probabilities used to compute quantiles
-% -order:       integer. The maximum wanted order for the moment statistics.
+% - proba:      array containing the probabilities used to compute quantiles
+% - order:       integer. The maximum wanted order for the moment statistics.
 %
 % OUTPUT:
 % - summary : structure containing some statistics
 %             * mean
-%             * variance
+%             * var
 %             * momX (with X in {2,3,4}) : moment
 %             * kurt : kurtosis
 %             * skew : skewness
+%             * proba : probabilities
 %             * quant : quantiles
-%             * med : median
+%             * med : median 
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
@@ -29,9 +30,7 @@ function summ = summary_stat(values, weights, probas, order)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-
-size_part = size(values);
-d = numel(size_part);
+d = ndims(values);
 summ.mean = sum(values .* weights, d);
 err = bsxfun(@minus, values, summ.mean);
 if order>=2
@@ -46,18 +45,20 @@ if order>=4
     summ.mom4 =  sum(values.^4 .* weights, d);
     summ.kurt = (summ.mom4 - 4 .* summ.mom3 .* summ.mean + 6 .* summ.mom2.*summ.mean.^2 - 3 * summ.mean.^4)./summ.var.^2 -3;
 end
-cv = num2cell(values, d);
-cs = num2cell(weights, d);
-size_q = size_part(1:d-1);
-if numel(size_q) == 1
-    size_q = [size_q, 1];
-end
-if (~isempty(probas))
-%     q = matbiips('weighted_quantiles', part.values, part.weights, probas)    
-    quantiles = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, probas), cv, cs, 'UniformOutput',0);
-    summ.quant = reshape(cat(2, quantiles{:}), [numel(probas), size_q]);
-end
-med = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, 0.5), cv, cs, 'UniformOutput',0);
 
-summ.med = reshape(cat(2, med{:}), size_q);
+values = num2cell(values, d);
+weights = num2cell(weights, d);
+dim = size(values);
+
+if ~isempty(proba)
+    summ.proba = proba(:);
+    quantiles = cellfun(@(x,w) matbiips('weighted_quantiles', x(:), numel(w)*w(:), proba), values, weights, 'UniformOutput',0);
+    summ.quant = reshape([quantiles{:}], [numel(proba), dim]);
+    summ.quant = shiftdim(summ.quant, 1);
+    summ.quant = reshape(summ.quant, [dim, numel(proba)]);
+    summ.quant = squeeze(num2cell(summ.quant, 1:d-1));
+end
+
+med = cellfun(@(x,w) matbiips('weighted_quantiles', x, numel(w)*w, 0.5), values, weights, 'UniformOutput',0);
+summ.med = reshape([med{:}], dim);
 end
