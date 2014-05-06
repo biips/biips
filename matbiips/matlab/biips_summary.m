@@ -12,7 +12,7 @@ function [summ] = biips_summary(samples, varargin)
 %   - probs:        vector of reals in ]0,1[. probability levels for quantiles.
 %                   default is [] for no quantile
 %   - order:        integer. Moment statistics of order below or equal to the
-%                   value are returned. Default is 2.
+%                   value are returned. Default is 1.
 %   OUTPUT
 %   - summ:         output structure
 %
@@ -39,22 +39,35 @@ function [summ] = biips_summary(samples, varargin)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
+order_default = 1;
+is_mcmc = ~isstruct(samples);
+is_smc = ~is_mcmc && has_fsb_fields(samples);
+if is_smc
+    names = fieldnames(samples);
+    s = getfield(samples, names{1});
+    % by default, do not return the mean if all the components are discrete
+    if all(s.discrete(:))
+        order_default = 0;
+    end
+end
+
 %% PROCESS AND CHECK INPUTS
+    
 optarg_names = {'type', 'probs', 'order'};
-optarg_default = {'fsb', [], 2};
+optarg_default = {'fsb', [], order_default};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 1],...
-    [1,4]};
+    [0,4]};
 optarg_type = {'char', 'numeric', 'numeric'};
 [type, probs, order] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
-if ~isstruct(samples)
+if is_mcmc
     %% corresponds to the output of a MCMC algorithm
     dim = size(samples);
     nsamples = dim(end);
     weights = 1/nsamples * ones(dim);
     summ = summary_stat(samples, weights, probs, order);
-elseif has_fsb_fields(samples) 
+elseif is_smc
     %% corresponds to the output of a SMC algorithm
     names = fieldnames(samples);
     summ = struct();
@@ -65,7 +78,7 @@ elseif has_fsb_fields(samples)
             continue
         end
         s = getfield(samples, fsb);
-        summ_s = summary_stat(s.values, s.weights, probs, order);
+        summ_s = summary_stat(s.values, s.weights, probs, order, all(s.discrete(:)));
         summ = setfield(summ, fsb, summ_s);
     end
 else
