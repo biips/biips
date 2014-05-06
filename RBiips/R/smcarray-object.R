@@ -98,7 +98,7 @@ stat.smcarray <- function(x, fun = "mean", probs = c(0.25, 0.5, 0.75)) {
         stat_d <- RBiips(paste("weighted_", f, sep = ""), x$values[indvec], 
                          n_part * x$weights[indvec])
       }
-      stat_names <- names(stat_d)[names(stat_d) != "Table"]
+      stat_names <- names(stat_d)
       if (d == 1) {
         for (n in stat_names) {
           if (is.null(stat[[n]])) 
@@ -121,10 +121,10 @@ summary.smcarray <- function(object, fun, probs = c(0.25, 0.5, 0.75), ...) {
   if (all(object$discrete)) {
     if (missing(fun)) 
       fun <- "mode" else fun <- match.arg(fun, c("mode", "mean", "var", "skew", "kurt", "median", 
-      "quantiles"), several.ok = TRUE)
+      "quantile"), several.ok = TRUE)
   } else {
     if (missing(fun)) 
-      fun <- "mean" else fun <- match.arg(fun, c("mean", "var", "skew", "kurt", "median", "quantiles"), 
+      fun <- "mean" else fun <- match.arg(fun, c("mean", "var", "skew", "kurt", "median", "quantile"), 
       several.ok = TRUE)
   }
   

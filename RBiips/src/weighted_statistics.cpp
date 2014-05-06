@@ -64,7 +64,37 @@ static Accumulator accumulate(SEXP values, SEXP weights, FeatureIterator firstFe
 }
 
 
-RcppExport SEXP weighted_mean (SEXP values, SEXP weights)
+RcppExport SEXP wtd_stat (SEXP values, SEXP weights, SEXP order)
+{
+  BEGIN_RBIIPS
+
+  Size order_s = Rcpp::as<Size>(order);
+
+  static StatTag features[] = {MEAN, VARIANCE, SKEWNESS, KURTOSIS};
+  Accumulator accu = accumulate(values, weights, features, features + order_s);
+
+  Rcpp::NumericVector stat_vec(order_s);
+
+  stat_vec[0] = accu.Mean();
+  if (order_s>=2)
+    stat_vec[1] = accu.Variance();
+  if (order_s>=3)
+    stat_vec[2] = accu.Skewness();
+  if (order_s>=4)
+    stat_vec[3] = accu.Kurtosis();
+
+  static String names[] = {"mean", "var", "skew", "kurt"};
+
+  Rcpp::CharacterVector names_vec(names, names + order_s);
+
+  stat_vec.attr("names") = names_vec;
+
+  return stat_vec;
+  END_RBIIPS
+}
+
+
+RcppExport SEXP wtd_mean (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
@@ -72,98 +102,50 @@ RcppExport SEXP weighted_mean (SEXP values, SEXP weights)
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
   Rcpp::List stats;
-  stats["Mean"] = Rcpp::wrap(accu.Mean());
+  stats["mean"] = Rcpp::wrap(accu.Mean());
 
   return stats;
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_var (SEXP values, SEXP weights)
+RcppExport SEXP wtd_var (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE, MOMENT2};
+  static StatTag features[] = {VARIANCE};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
-  Rcpp::List stats;
-  stats["Mean"] = Rcpp::wrap(accu.Mean());
-  stats["2nd mt."] = Rcpp::wrap(accu.Moment<2>());
-  stats["Var."] = Rcpp::wrap(accu.Variance());
-  stats["SD"] = Rcpp::wrap(std::sqrt(accu.Variance()));
-
-  return stats;
+  return Rcpp::wrap(accu.Variance());
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_skew (SEXP values, SEXP weights)
+RcppExport SEXP wtd_skew (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE, MOMENT2, MOMENT3, SKEWNESS};
+  static StatTag features[] = {SKEWNESS};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
-  Rcpp::List stats;
-  stats["Mean"] = Rcpp::wrap(accu.Mean());
-  stats["2nd mt."] = Rcpp::wrap(accu.Moment<2>());
-  stats["Var."] = Rcpp::wrap(accu.Variance());
-  stats["SD"] = Rcpp::wrap(std::sqrt(accu.Variance()));
-  stats["3rd mt."] = Rcpp::wrap(accu.Moment<3>());
-  stats["Skew."] = Rcpp::wrap(accu.Skewness());
-
-  return stats;
+  return Rcpp::wrap(accu.Skewness());
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_kurt (SEXP values, SEXP weights)
+RcppExport SEXP wtd_kurt (SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
-  static StatTag features[] = {MEAN, VARIANCE, MOMENT2, MOMENT3, MOMENT4, SKEWNESS, KURTOSIS};
+  static StatTag features[] = {KURTOSIS};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
-  Rcpp::List stats;
-  stats["Mean"] = Rcpp::wrap(accu.Mean());
-  stats["2nd mt."] = Rcpp::wrap(accu.Moment<2>());
-  stats["Var."] = Rcpp::wrap(accu.Variance());
-  stats["SD"] = Rcpp::wrap(std::sqrt(accu.Variance()));
-  stats["3rd mt."] = Rcpp::wrap(accu.Moment<3>());
-  stats["Skew."] = Rcpp::wrap(accu.Skewness());
-  stats["4th mt."] = Rcpp::wrap(accu.Moment<4>());
-  stats["Kurt."] = Rcpp::wrap(accu.Kurtosis());
-
-  return stats;
+  return Rcpp::wrap(accu.Kurtosis());
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_median (SEXP values, SEXP weights)
-{
-  BEGIN_RBIIPS
-
-  Rcpp::NumericVector values_vec(values);
-  Rcpp::NumericVector weights_vec(weights);
-  if (values_vec.size() != weights_vec.size())
-    throw LogicError("values and weights must have same length.");
-
-  static Scalar probs[] = {0.5};
-  QuantileAccumulator accu(probs, probs+sizeof(probs)/sizeof(Scalar));
-  accu.Init();
-
-  for (int i = 0; i<values_vec.size(); ++i)
-    accu.Push(values_vec[i], weights_vec[i]);
-
-  Rcpp::List stats;
-  stats["Median"] = Rcpp::wrap(accu.Quantile(0U));
-
-  return stats;
-  END_RBIIPS
-}
-
-
-RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
+RcppExport SEXP wtd_quantile (SEXP values, SEXP weights, SEXP probs)
 {
   BEGIN_RBIIPS
 
@@ -172,6 +154,7 @@ RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
   Rcpp::NumericVector probs_vec(probs);
+  Rcpp::NumericVector quant_vec(probs_vec.size());
 
   QuantileAccumulator accu(probs_vec.begin(), probs_vec.end());
   accu.Init();
@@ -179,21 +162,40 @@ RcppExport SEXP weighted_quantiles (SEXP values, SEXP weights, SEXP probs)
   for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
-  Rcpp::List stats;
   for (int i = 0; i<probs_vec.size(); ++i)
-  {
-    if (probs_vec[i] == 0.5)
-      stats["Median"] = Rcpp::wrap(accu.Quantile(i));
-    else
-      stats[String("Qu. ")+print(probs_vec[i])] = Rcpp::wrap(accu.Quantile(i));
-  }
+    quant_vec[i] = accu.Quantile(i);
 
-  return stats;
+  quant_vec.attr("names") = Rcpp::CharacterVector(probs);
+
+  return quant_vec;
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_table(SEXP values, SEXP weights)
+RcppExport SEXP wtd_median (SEXP values, SEXP weights)
+{
+  BEGIN_RBIIPS
+
+  Rcpp::NumericVector values_vec(values);
+  Rcpp::NumericVector weights_vec(weights);
+  if (values_vec.size() != weights_vec.size())
+    throw LogicError("values and weights must have same length.");
+
+  std::vector<double> proba(0.5, 1);
+
+  QuantileAccumulator accu(proba.begin(), proba.end());
+  accu.Init();
+
+  for (int i = 0; i<values_vec.size(); ++i)
+    accu.Push(values_vec[i], weights_vec[i]);
+
+  return Rcpp::wrap(accu.Quantile(0));
+  END_RBIIPS
+}
+
+
+
+RcppExport SEXP wtd_table(SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
@@ -208,23 +210,20 @@ RcppExport SEXP weighted_table(SEXP values, SEXP weights)
   for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
-  Rcpp::List stats;
   const DiscreteHistogram & hist = accu.Pdf();
   Types<Scalar>::Array vec = hist.GetPositions();
-  Rcpp::IntegerVector x(vec.begin(), vec.end());
+  Rcpp::CharacterVector x(vec.begin(), vec.end());
   vec = hist.GetFrequencies();
-  Rcpp::NumericVector y(vec.begin(), vec.end());
-  Rcpp::List table;
-  table["x"] = x;
-  table["y"] = y;
-  stats["Table"] = table;
+  Rcpp::NumericVector table(vec.begin(), vec.end());
+  table.attr("names") = x;
+  table.attr("class") = "table";
 
-  return stats;
+  return table;
   END_RBIIPS
 }
 
 
-RcppExport SEXP weighted_mode(SEXP values, SEXP weights)
+RcppExport SEXP wtd_mode(SEXP values, SEXP weights)
 {
   BEGIN_RBIIPS
 
@@ -239,18 +238,6 @@ RcppExport SEXP weighted_mode(SEXP values, SEXP weights)
   for (int i = 0; i<values_vec.size(); ++i)
     accu.Push(values_vec[i], weights_vec[i]);
 
-  Rcpp::List stats;
-  const DiscreteHistogram & hist = accu.Pdf();
-  Types<Scalar>::Array vec = hist.GetPositions();
-  Rcpp::IntegerVector x(vec.begin(), vec.end());
-  vec = hist.GetFrequencies();
-  Rcpp::NumericVector proba(vec.begin(), vec.end());
-  Rcpp::List table;
-  table["x"] = x;
-  table["proba."] = proba;
-  stats["Table"] = table;
-  stats["Mode"] = Rcpp::wrap(accu.Mode());
-
-  return stats;
+  return Rcpp::wrap(accu.Mode());
   END_RBIIPS
 }
