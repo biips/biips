@@ -953,9 +953,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
     /////////////////////////////////////////
-    // WEIGHTED_QUANTILES FUNCTION
+    // WTD_QUANTILE FUNCTION
     /////////////////////////////////////////
-    else if (name_func == "weighted_quantiles") {
+    else if (name_func == "wtd_quantile") {
 
       CheckRhs(nrhs, 3, name_func);
 

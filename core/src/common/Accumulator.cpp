@@ -224,7 +224,7 @@ namespace Biips
 
   Scalar QuantileAccumulator::Quantile(Size i) const
   {
-    if (i > quantileProbs_.size())
+    if (i >= quantileProbs_.size())
       throw LogicError("Invalid quantile index.");
 
     return Scalar(acc::weighted_extended_p_square(acc_)[quantileRanks_[i]]);
