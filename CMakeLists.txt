@@ -102,6 +102,7 @@ option (BIIPS_DEBUG_PARSER "Print BUGS language parser output (ParseTree)." OFF)
 option (BIIPS_CATCH_TEST "Catch exceptions in BiipsTest program." ON)
 option (BIIPS_CATCH_TESTCOMPILER "Catch exceptions in BiipsTestCompiler program." ON)
 
+option(BUILD_TESTS "Activate BiipsTest and BiipsTestCompiler programs build" ON)
 
 # configure and find boost
 option (Boost_USE_STATIC_LIBS "Force the use of the static boost libraries" ON)
@@ -109,18 +110,24 @@ option (Boost_USE_MULTITHREADED "Use the non-multithreaded boost libraries" OFF)
 option (Boost_USE_STATIC_RUNTIME
 	"If enabled, searches for boost libraries linked against a static C++ standard library ('s' ABI tag)" OFF)
 
-find_package(Boost ${Boost_VERSION_REQUIRED} REQUIRED COMPONENTS program_options regex)
-if(Boost_PROGRAM_OPTIONS_FOUND)
-    set(EXTRA_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} ${EXTRA_LIBS})
-else()
-   message(FATAL_ERROR "Boost Program Options Not Found!") 	
+if(BUILD_TESTS)
+  set(BOOST_REQUIRED_COMPONENTS program_options)
 endif()
 
-if(Boost_REGEX_FOUND)
-    set(EXTRA_LIBS ${Boost_REGEX_LIBRARY_RELEASE} ${EXTRA_LIBS})
-else()
-    message(FATAL_ERROR "Boost Regex Not Found!") 	
+find_package(Boost ${Boost_VERSION_REQUIRED} REQUIRED COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
+if (BUILD_TESTS)
+  if(Boost_PROGRAM_OPTIONS_FOUND)
+      set(EXTRA_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} ${EXTRA_LIBS})
+  else()
+     message(FATAL_ERROR "Boost Program Options Not Found!") 	
+  endif()
 endif()
+
+# if(Boost_REGEX_FOUND)
+#     set(EXTRA_LIBS ${Boost_REGEX_LIBRARY_RELEASE} ${EXTRA_LIBS})
+# else()
+#     message(FATAL_ERROR "Boost Regex Not Found!") 	
+# endif()
 
 # configure install directories and output directories
 include (GNUInstallDirs)
@@ -198,9 +205,13 @@ set(Compiler_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/compiler
 # ==============================
 add_subdirectory (core)
 add_subdirectory (base)
-add_subdirectory (test)
+if(BUILD_TESTS)
+  add_subdirectory (test)
+endif ()
 add_subdirectory (compiler)
-add_subdirectory (testcompiler)
+if(BUILD_TESTS)
+  add_subdirectory (testcompiler)
+endif ()
 add_subdirectory (doc)
 add_subdirectory (examples)
 if (BUILD_RBIIPS)

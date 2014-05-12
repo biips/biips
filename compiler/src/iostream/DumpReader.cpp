@@ -38,6 +38,7 @@
 
 #include "iostream/DumpReader.hpp"
 #include <sstream>
+#include <locale>
 
 namespace Biips
 {
