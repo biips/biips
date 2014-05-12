@@ -62,7 +62,7 @@ namespace Biips
   /*!
    * Used for sizes, dimensions, indices, ...
    */
-  typedef unsigned int Size;
+  typedef size_t Size;
 
   //! Integer type
   typedef int Int;
@@ -164,7 +164,7 @@ namespace Biips
 
   inline Bool isFinite(Scalar r)
   {
-    return finite(r);
+	return std::isfinite(r);
   }
 
   inline Bool isNan(Scalar r)
@@ -173,7 +173,7 @@ namespace Biips
   }
   inline Bool isNan(Size s)
   {
-    return std::isnan(s);
+    return std::isnan(Scalar(s));
   }
 
   enum StatTag

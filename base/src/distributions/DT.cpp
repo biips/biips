@@ -40,6 +40,8 @@
 namespace Biips
 {
 
+  static Scalar M_PI = 4 * std::atan(1);
+
   TDistType::TDistType(Scalar mu, Scalar tau, Scalar k) :
     mu_(mu), sqrtTau_(std::sqrt(tau)), k_(k), mathDist_(k), randomDist_(k)
   {

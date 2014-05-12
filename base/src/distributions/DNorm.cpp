@@ -40,6 +40,8 @@
 namespace Biips
 {
 
+  static Scalar M_PI = 4 * std::atan(1);
+
   Bool DNorm::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar mean = paramValues[0].ScalarView();
