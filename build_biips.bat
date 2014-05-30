@@ -17,6 +17,7 @@ set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
 set MATLAB_ROOT=C:\Program Files\MATLAB\R2013b
 set OCTAVE_ROOT=C:\Octave\Octave3.6.4_gcc4.6.2\bin
+set GCC_BINDIR=C:\Rtools\gcc-4.6.3\bin
 set RTOOLS_BINDIR=C:\Rtools\bin
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1
@@ -59,6 +60,7 @@ choice /m "Run CMake"
 if "%errorlevel%"=="1" (
 	call:ask_clear
 	TIMEOUT /T 1
+	set "PATH=%GCC_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
 	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% %CMAKE_OPTIONS% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
 )
