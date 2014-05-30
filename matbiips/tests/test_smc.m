@@ -34,7 +34,8 @@ end
 log_norm=matbiips('get_log_norm_const', p0)
 filter_monitors=matbiips('get_filter_monitors',p0)
 smooth_monitors=matbiips('get_gen_tree_smooth_monitors',p0)
-sample_value = matbiips('sample_gen_tree_smooth_particle', p0, 42);
+matbiips('sample_gen_tree_smooth_particle', p0, 42);
+sample_value =  matbiips('get_sampled_gen_tree_smooth_particle', p0);
 matbiips('clear_gen_tree_smooth_monitors',p0, false);
 % on fait un backward
 if (~matbiips('is_smc_sampler_at_end', p0))
