@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file MatlabDistribSampler.hpp
+/*! \file MatlabDistribution.hpp
  * \brief
  *
  * \author  $LastChangedBy$
@@ -34,14 +34,14 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_MATLABDISTRIBSAMPLER_HPP_
-#define BIIPS_MATLABDISTRIBSAMPLER_HPP_
+#ifndef BIIPS_MATLABDISTRIBUTION_HPP_
+#define BIIPS_MATLABDISTRIBUTION_HPP_
 
 #include "distribution/Distribution.hpp"
 namespace Biips
 {
 
-  class MatlabDistribSampler: public Distribution
+  class MatlabDistribution: public Distribution
   {
   protected:
     String fun_dim_;
@@ -69,10 +69,10 @@ namespace Biips
                                   const NumArray::Array & fixedParamValues) const;
 
   public:
-    typedef MatlabDistribSampler SelfType;
+    typedef MatlabDistribution SelfType;
     typedef Distribution BaseType;
 
-    MatlabDistribSampler(const String & name, Size nParam, const String & fun_dim,
+    MatlabDistribution(const String & name, Size nParam, const String & fun_dim,
                  const String & fun_sample, const String & fun_check_param = "",
                  const String & fun_is_discrete = "")
     : BaseType(name, nParam), fun_dim_(fun_dim), fun_sample_(fun_sample),
@@ -93,7 +93,7 @@ namespace Biips
       return false;
     }
 
-    virtual ~MatlabDistribSampler()
+    virtual ~MatlabDistribution()
     {
     }
 
@@ -101,5 +101,5 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_MATLABDISTRIBSAMPLER_HPP_ */
+#endif /* BIIPS_MATLABDISTRIBUTION_HPP_ */
 

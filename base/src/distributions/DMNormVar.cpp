@@ -46,7 +46,6 @@ namespace Biips
 {
 
   static const Scalar TOL = 1e-7;
-  static const Scalar LOG_2PI = std::log(2 * M_PI);
 
   Bool DMNormVar::checkParamDims(
       const Types<DimArray::Ptr>::Array & paramDims) const

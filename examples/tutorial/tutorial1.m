@@ -110,7 +110,6 @@ summ = biips_summary(out_smc, 'probs', [.025, .975]);
 %%
 % *Plot Filtering estimates*
 x_f_mean = summ.x.f.mean;
-x_f_med = summ.x.f.med;
 x_f_quant = summ.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...

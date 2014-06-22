@@ -30,8 +30,16 @@ set CMAKE_BUILD_TYPE=Release
 
 if "%2"=="-g" (
     set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
-    set CMAKE_BUILD_TYPE=Debug
-) 
+    set CMAKE_BUILD_TYPE=RelWithDebInfo
+)
+
+if "%2"=="-msvc" (
+    set BIIPS_BUILD=C:\Users\adrien\workspace\biips-msvc
+    set CMAKE_BUILD_TYPE=RelWithDebInfo
+::    set CMAKE_BUILD_TYPE=Release
+    set CMAKE_GENERATOR="MinGW Makefiles"
+    set CMAKE_OPTIONS=-DBUILD_RBIIPS=OFF -DBUILD_TESTS=OFF -DBUILD_MATBIIPS=ON -DSUPPRESS_DEPRECATED_WARNINGS=OFF -DBUILD_64BIT=ON
+)
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
@@ -62,6 +70,8 @@ if "%errorlevel%"=="1" (
 	TIMEOUT /T 1
 	set "PATH=%GCC_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
+	set "PATH=%GCC_BINDIR%;%PATH%"
+	TIMEOUT /T 1
 	cmake -G%CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% %CMAKE_OPTIONS% -DCMAKE_INSTALL_PREFIX="%BIIPS_ROOT%" -DCMAKE_ECLIPSE_EXECUTABLE="%ECLIPSE%" "%BIIPS_SRC%"
 )
 
@@ -106,6 +116,7 @@ goto:eof
 choice /m "Clear build directory"
 if "%errorlevel%"=="1" (
 	rmdir /S /Q "%BIIPS_BUILD%"
+	TIMEOUT /T 1
 	mkdir "%BIIPS_BUILD%"
 )
 goto:eof

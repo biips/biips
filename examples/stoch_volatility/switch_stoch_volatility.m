@@ -101,7 +101,7 @@ out_smc = biips_smc_samples(model, variables, n_part);
 
 %%
 % *Diagnostic on the algorithm*. 
-diag = biips_diagnostic(out_smc);
+diag = biips_diagnosis(out_smc);
 
 %%
 % *Plot ESS*
@@ -143,10 +143,9 @@ summary = biips_summary(out_smc, 'probs', [.025, .975]);
 %%
 % *Plot Filtering estimates*
 x_f_mean = summary.x.f.mean;
-x_f_med = summary.x.f.med;
 x_f_quant = summary.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
-h = fill([1:t_max, t_max:-1:1], [x_f_quant(1,:), fliplr(x_f_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
@@ -164,7 +163,7 @@ saveas(gca, 'volatility_f', 'epsc2')
 x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
-h = fill([1:t_max, t_max:-1:1], [x_s_quant(1,:), fliplr(x_s_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
@@ -227,7 +226,7 @@ summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 x_pimh_mean = summary_pimh.x.mean;
 x_pimh_quant = summary_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
-h = fill([1:t_max, t_max:-1:1], [x_pimh_quant(1,:), fliplr(x_pimh_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on

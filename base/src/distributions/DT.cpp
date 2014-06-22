@@ -58,7 +58,7 @@ namespace Biips
     using std::pow;
     using boost::math::lgamma;
     return lgamma(0.5 * (k_ + 1.0)) - lgamma(0.5 * k_) + log(sqrtTau_) - 0.5
-        * log(k_ * M_PI) - 0.5 * (k_ + 1.0) * log(1.0 + pow(y, 2) / k_);
+        * log(k_ * pi<Scalar>()) - 0.5 * (k_ + 1.0) * log(1.0 + pow(y, 2) / k_);
   }
 
   Scalar TDistType::cdf(Scalar t) const
