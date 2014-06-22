@@ -54,12 +54,12 @@ foreach(_cfg ${cfg_files})
         --particles=100 --alpha=1e-6)
 endforeach()
 
-#add target for parse_test
-set(parse_src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/parse_test/parse_test.cpp)
-add_executable(parse_test ${parse_src_files})
-target_link_libraries(parse_test ${EXTRA_LIBS})
+# #add target for parse_test
+# set(parse_src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/parse_test/parse_test.cpp)
+# add_executable(parse_test ${parse_src_files})
+# target_link_libraries(parse_test ${EXTRA_LIBS})
 
-#add test for parse_test
-get_target_property(exe_loc parse_test LOCATION)
-add_test(NAME parse_test COMMAND ${exe_loc})
+# #add test for parse_test
+# get_target_property(exe_loc parse_test LOCATION)
+# add_test(NAME parse_test COMMAND ${exe_loc})
 

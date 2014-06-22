@@ -170,12 +170,12 @@ saveas(gca, 'kinetic_sess', 'epsc2')
 x_smc_mean = summary_smc.x.s.mean;
 x_smc_quant = summary_smc.x.s.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([dt:dt:t_max, t_max:-dt:dt], [squeeze(x_smc_quant(1,1, :))', fliplr(squeeze(x_smc_quant(2,1,:))')],...
+h = fill([dt:dt:t_max, t_max:-dt:dt], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(dt:dt:t_max,x_smc_mean(1, :), 'linewidth', 3)
-h2 = fill([dt:dt:t_max, t_max:-dt:dt], [squeeze(x_smc_quant(1,2, :))', fliplr(squeeze(x_smc_quant(2,2,:))')],...
+h2 = fill([dt:dt:t_max, t_max:-dt:dt], [x_smc_quant{1}(2,:), fliplr(x_smc_quant{2}(2,:))],...
     [1 .7 .7]);
 set(h2, 'edgecolor', 'none')
 plot(dt:dt:t_max,x_smc_mean(2, :),'r', 'linewidth', 3)

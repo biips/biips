@@ -66,7 +66,7 @@ if is_mcmc
     dim = size(samples);
     nsamples = dim(end);
     weights = 1/nsamples * ones(dim);
-    summ = summary_stat(samples, weights, probs, order);
+    summ = summary_stat(samples, weights, probs, order, all(floor(samples) == samples));
 elseif is_smc
     %% corresponds to the output of a SMC algorithm
     names = fieldnames(samples);

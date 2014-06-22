@@ -46,6 +46,10 @@
 #include <limits>
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/fwd.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/constants/constants.hpp>
+
+using namespace boost::math::constants;
 
 //! The namespace where all @biips symbols live.
 namespace Biips
@@ -164,16 +168,16 @@ namespace Biips
 
   inline Bool isFinite(Scalar r)
   {
-    return finite(r);
+	return boost::math::isfinite(r);
   }
 
   inline Bool isNan(Scalar r)
   {
-    return std::isnan(r);
+	  return boost::math::isnan(r);
   }
   inline Bool isNan(Size s)
   {
-    return std::isnan(s);
+	  return boost::math::isnan(Scalar(s));
   }
 
   enum StatTag
@@ -181,6 +185,8 @@ namespace Biips
     SUM, MEAN, VARIANCE, MOMENT2, MOMENT3, MOMENT4, SKEWNESS, KURTOSIS
   };
 
+
+  static const Scalar LOG_2PI = std::log(two_pi<Scalar>());
 }
 
 #endif /* BIIPS_TYPES_HPP_ */

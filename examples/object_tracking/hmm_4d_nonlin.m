@@ -124,7 +124,7 @@ out_smc = biips_smc_samples(model, {'x'}, n_part);
 
 %% 
 % *Diagnostic*
-diagnostic = biips_diagnostic(out_smc);
+diagnostic = biips_diagnosis(out_smc);
 
 %% 
 % *Summary statistics*
@@ -167,7 +167,7 @@ for k=1:4
     figure('name', 'SMC: Filtering estimates')
     title(title_fig{k})
     hold on
-    h = fill([1:t_max, t_max:-1:1], [squeeze(x_f_quant(1,k,:))', fliplr(squeeze(x_f_quant(2,k,:))')],...
+    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
         [.7 .7 1]);
     set(h, 'edgecolor', 'none')
     hold on
@@ -189,7 +189,7 @@ for k=1:4
     figure('name', 'SMC: Smoothing estimates')
     title(title_fig{k})
     hold on
-    h = fill([1:t_max, t_max:-1:1], [squeeze(x_s_quant(1,k,:))', fliplr(squeeze(x_s_quant(2,k,:))')],...
+    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
     [.7 .7 1]);
     set(h, 'edgecolor', 'none')
     hold on

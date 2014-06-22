@@ -1,31 +1,79 @@
 #define sources
-file(GLOB MATBIIPS_SRC 
+file(GLOB Mbiips_SRC 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp 
+)
+file(GLOB Mbiips_HDRS 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.h 
 ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 )
+set(MATBIIPS_SRC ${Mbiips_SRC} ${Mbiips_HDRS})
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive")
 
 set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 if (MATLAB OR OCTAVE) 
-    include_directories(${Core_INCLUDE_DIRS}
-		${Base_INCLUDE_DIRS}
-		${Compiler_INCLUDE_DIRS}
-		${MATLAB_INCLUDE_DIR}
-		${Boost_INCLUDE_DIRS}
-	)
 	
-	add_library(matbiips SHARED EXCLUDE_FROM_ALL ${MATBIIPS_SRC})
-	target_link_libraries(matbiips ${BIIPS_LIBS} ${MATLAB_LIBRARIES})
-	set_target_properties(matbiips PROPERTIES
-		COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
-		LINK_FLAGS "${MATLAB_LINK_FLAGS}"
-		PREFIX ""
-		SUFFIX .${MEX_EXT}
-	)
+	if(WIN32)
+
+		# set incude flags
+		foreach(d ${Boost_INCLUDE_DIRS} ${Core_INCLUDE_DIRS} ${Base_INCLUDE_DIRS} ${Compiler_INCLUDE_DIRS})
+			set(MATBIIPS_INCLUDE_FLAGS ${MATBIIPS_INCLUDE_FLAGS} -I"${d}")
+		endforeach()
+
+		# mex compile flags
+		set(MATBIIPS_COMPILE_FLAGS -DWIN32)
+		if(CMAKE_BUILD_TYPE STREQUAL Debug)
+			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g)
+		elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g -O)
+		endif()
+
+
+		# biips src files targets
+		foreach(f ${Core_SRC} ${Base_SRC} ${Compiler_SRC})
+			# file extension
+			get_filename_component(fext ${f} EXT)
+			# file name
+			get_filename_component(fname ${f} NAME_WE)
+
+			# check cpp source file
+			if(fext STREQUAL .c OR fext STREQUAL .cpp OR fext STREQUAL .cc)
+				# target command
+				add_custom_command(OUTPUT ${fname}.obj
+					COMMAND ${MEX_COMMAND} -c ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${f})
+				set(Biips_OBJ ${Biips_OBJ} ${fname}.obj)
+			endif()
+		endforeach()
+
+		file(TO_CMAKE_PATH ${CMAKE_CURRENT_BINARY_DIR}/matbiips.${MEX_EXT} MATBIIPS_TARGET_LOC)
+
+		# matbiips mexfile target
+		add_custom_target(matbiips
+			DEPENDS ${Biips_OBJ}
+			COMMAND ${MEX_COMMAND} ${MATBIIPS_COMPILE_FLAGS} -output matbiips.${MEX_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_SRC} ${Biips_OBJ}
+			COMMENT "Compiling mexfile"
+		)
+
+
+	else()
+	    include_directories(${Core_INCLUDE_DIRS}
+			${Base_INCLUDE_DIRS}
+			${Compiler_INCLUDE_DIRS}
+			${MATLAB_INCLUDE_DIR}
+			${Boost_INCLUDE_DIRS}
+		)
+
+		add_library(matbiips SHARED EXCLUDE_FROM_ALL ${MATBIIPS_SRC})
+		target_link_libraries(matbiips ${BIIPS_LIBS} ${MATLAB_LIBRARIES})
+		set_target_properties(matbiips PROPERTIES
+			COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
+			LINK_FLAGS "${MATLAB_LINK_FLAGS}"
+			PREFIX ""
+			SUFFIX .${MEX_EXT}
+		)
 	
-    get_target_property(MATBIIPS_TARGET_LOC matbiips LOCATION)
+    	get_target_property(MATBIIPS_TARGET_LOC matbiips LOCATION)
+	endif()
 else()
     message (FATAL_ERROR "MATLAB not found on your computer.\n"
     			 "Try setting MATLAB_ROOT to the root path of 

@@ -17,7 +17,7 @@
 #include "common/Utility.hpp"
 #include "compiler/Compiler.hpp"
 #include "MatlabFunction.hpp"
-#include "MatlabDistribSampler.hpp"
+#include "MatlabDistribution.hpp"
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -1065,13 +1065,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                                                                        funeval,
                                                                        funcheckpar,
                                                                        funisdiscrete)))) {
-        myMexErrMsg(name_func, name_func + ": could not add function" + name);
+        myMexErrMsg(name_func, name_func + ": could not add function " + name);
       }
     }
     ////////////////////////////////////////////
     // ADD_DISTRIB_SAMPLER FUNCTION
     ////////////////////////////////////////////
-    else if (name_func == "add_distrib_sampler") {
+    else if (name_func == "add_distribution") {
 
       CheckRhs(nrhs, 6, name_func);
       CheckArgIsString(1);
@@ -1092,19 +1092,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if (Compiler::DistTab().Contains(name))
       {
         if (Compiler::DistTab().IsLocked(name))
-          myMexErrMsg(name_func, name_func + ": can't add distribution sampler: "
+          myMexErrMsg(name_func, name_func + ": can't add distribution: "
                       + name + " is an existing locked distribution.");
         else
           mbiips_cerr << name_func + ": replacing existing distribution "
           + name;
       }
-      if (!Compiler::DistTab().Insert(Distribution::Ptr(new MatlabDistribSampler(name,
+      if (!Compiler::DistTab().Insert(Distribution::Ptr(new MatlabDistribution(name,
                                                                                  npar,
                                                                                  fundim,
                                                                                  funsample,
                                                                                  funcheckpar,
                                                                                  funisdiscrete)))) {
-        myMexErrMsg(name_func, name_func + ": could not add distribution sampler" + name);
+        myMexErrMsg(name_func, name_func + ": could not add distribution " + name);
       }
     }
     ////////////////////////////////////////////
@@ -1116,15 +1116,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   }
   catch (Biips::LogicError & e)
   {
-    myMexErrMsg(name_func+":LogicError", name_func + ": BiiPS LOGIC ERROR" + e.what());
+    myMexErrMsg(name_func+":LogicError", name_func + ": BiiPS LOGIC ERROR. " + e.what());
   }
   catch (Biips::RuntimeError & e)
   {
-    myMexErrMsg(name_func+":RuntimeError", name_func + ": BiiPS RUNTIME ERROR" + e.what());
+    myMexErrMsg(name_func+":RuntimeError", name_func + ": BiiPS RUNTIME ERROR. " + e.what());
   }
   catch (std::exception& e)
   {
-    myMexErrMsg(name_func+":cppException", name_func + ": BiiPS C++ exception: " + e.what());
+    myMexErrMsg(name_func+":cppException", name_func + ": BiiPS C++ exception. " + e.what());
   }
   return;
 }

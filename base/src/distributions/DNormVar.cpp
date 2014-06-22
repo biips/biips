@@ -75,7 +75,7 @@ namespace Biips
       Scalar var = paramValues[1].ScalarView();
       using std::log;
       using std::pow;
-      return -0.5 * (log(2 * M_PI) + log(var) + pow(x - mean, 2) / var);
+      return -0.5 * (LOG_2PI + log(var) + pow(x - mean, 2) / var);
     }
 
     MathDistType dist = mathDist(paramValues);

@@ -77,7 +77,7 @@ configure_file (
 find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp roxygen2)
 
 # add debug flag
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   set (R_INSTALL_FLAGS -d)
 endif()
 
