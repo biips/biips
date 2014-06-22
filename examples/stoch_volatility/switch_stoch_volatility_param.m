@@ -200,7 +200,7 @@ for i=1:length(param_plot)
     sum_param = getfield(summary_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n',param_plot{i},sum_param.mean);
     fprintf('95%% credibilist interval for %s: [%.3f,%.3f]\n',...
-        param_plot{i}, sum_param.quant(1),  sum_param.quant(2));
+        param_plot{i}, sum_param.quant{1},  sum_param.quant{2});
 end
 
 %%
@@ -245,7 +245,7 @@ end
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on

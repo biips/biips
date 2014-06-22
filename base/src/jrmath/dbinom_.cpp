@@ -41,10 +41,9 @@
 #include "nmath.h"
 
 #include "common/Types.hpp"
+#include <boost/math/special_functions/log1p.hpp>
 
-#ifndef M_2PI
-#define M_2PI       6.283185307179586476925286766559    /* 2*pi */
-#endif
+using boost::math::log1p;
 
 double
 dbinom_raw(double x, double n, double p, double q)
@@ -73,7 +72,7 @@ dbinom_raw(double x, double n, double p, double q)
     /* Upto R 2.7.1:
      * lf = log(M_2PI) + log(x) + log(n-x) - log(n);
      * -- following is much better for  x << n : */
-    lf = log(M_2PI) + log(x) + log1p(- x/n);
+    lf = Biips::LOG_2PI + log(x) + log1p(- x/n);
 
     return lc - 0.5*lf;
 }

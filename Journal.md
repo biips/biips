@@ -1,5 +1,62 @@
-Adrien le 1/4/2014:
-===================
+Adrien le 3/6/2014 :
+====================
+J'ai enfin réussi à compiler matbiips avec Visual Studio.
+J'ai d'abord tenté de compiler, d'une part, les librairies core, base et compiler avec cmake et VS et, d'autre part, matbiips avec la commande mex de matlab, faisant appel à VS.
+J'ai dû résoudre pas mal de conflits en passant à VS (différences sur la librairie standard C++) pour finalement être coincé à l'édition des liens en compilant matbiips.
+Finalement, j'ai opté pour compiler tout le code biips+matiips avec mex.
+Par contre, le crash est toujours là... snif
+J'ai pu compiler en debug et
+- [ ] je vais pouvoir investiguer ce bug avec cette méthode:
+  http://www.mathworks.fr/fr/help/matlab/matlab_external/debugging-on-microsoft-windows-platforms.html
+  ce qui n'était pas encore possible.
+
+François le 16/4/2014 :
+=======================
+J'ai commence a bosser sur la page d'exemples:
+https://alea.bordeaux.inria.fr/biips/doku.php?id=examples
+
+Adrien le 16/4/2014 :
+=====================
+Hello François,
+Ce bug est corrigé. Il mais m'a fait partir dans plusieurs directions mais il était finalement très simple.
+Il suffisait de faire un premier change-data avec les inits avant de monitorer les latentes.
+Sinon :
+* biips_init n'est plus nécessaire
+* biips_model ne renvoie plus data
+* autres corrections mineurs
+* j'ai modifié les exemples et test en conséquence
+Tu peux généralement utiliser les fonctions all/any au lieu de prod/sum pour tester une condition sur un vecteur de booleens.
+
+François le 11/4/2014 :
+=======================
+Salut Adrien,
+As-tu changer qq chose pour le monitoring des noeuds observes dans le SMC?
+
+J'ai un modele avec (attache)
+    tau ~ dgamma(a,b)
+    sigma <- 1/sigma^2
+
+Je fais tourner un PMMH avec tau comme variable de parametre, et sigma 
+comme latente (pour recuperer directement ses valeurs depuis biips).
+Avec la precedente version du PMMH, je n'avais pas de soucis. Maintenant 
+il rale avec l'erreur suivante:
+
+    Warning: LOGIC ERROR: Observed nodes can't have sampling iteration!
+
+    Warning: Failure running SMC forward sampler
+     > In matlab\private\pmmh_one_update at 60
+       In biips_pmmh at 116
+       In biips_pmmh_update at 59
+       In switch_stoch_volatility_param at 188
+    Warning: LOGIC ERROR: Node is not monitored, in NodeArrayMonitor::addMonitoredNode.
+
+    Error using inter_biips
+    sample_gen_tree_smooth_particle: BiiPS c++ exception: Failed to sample smooth particle.
+
+Vois-tu d'ou vient le probleme? Est-ce un bout de code que j'ai oublie de mettre.
+
+Adrien le 1/4/2014 :
+====================
 - [ ]  revoir dimensions et affichage de la sortie de biips_get_nodes.
 
 François le 25/3/2014 :
@@ -18,7 +75,7 @@ François le 25/3/2014 :
 
 Adrien le 24/3/2014 :
 =====================
-- [ ] Pour les crashs windows, essyer de désactiver ReleaseNodes dans sensitivity et pmmh
+- [x] Pour les crashs windows, essyer de désactiver ReleaseNodes dans sensitivity et pmmh --> ca n'a rien donné
 - [ ] Faire tourner les exemples sous Jags, notamment `switching_stoch_volatility`
 - [ ] pmmh: modifier traitement sortie `get_log_prior_density`, NaN = erreur numérique
 - [ ] Tester validité des distributions et samplers

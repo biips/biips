@@ -40,6 +40,12 @@
 #include "nmath.h"
 
 #include "common/Types.hpp"
+#include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/log1p.hpp>
+
+using boost::math::lgamma;
+using boost::math::log1p;
+
 
 namespace Biips
 {

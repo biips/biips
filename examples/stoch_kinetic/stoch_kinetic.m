@@ -111,7 +111,7 @@ dt = 0.20;
 x_init = [100 ;100];
 c_true = [.5, 0.0025,.3];
 prec_y = 1/10;
-data = struct('t_max', t_max, 'dt', dt, 'c_true',c_true, 'x_init', x_init, 'prec_y', prec_y);
+data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true, 'x_init', x_init, 'prec_y', prec_y);
 
 
 
@@ -141,7 +141,7 @@ legend('Prey', 'Predator', 'Measurements')
 % *Parameters of the algorithm*. 
 n_part = 100; % Number of particles
 param_names = {'logc[1]','logc[2]','logc[3]'}; % Parameter for which we want to study sensitivity
-param_values = {linspace(-7,1,20),log(beta_true)*ones(20,1),log(gamma_true)*ones(20,1)}; % Range of values
+param_values = {linspace(-7,1,20),log(c_true(2))*ones(20,1),log(c_true(3))*ones(20,1)}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
@@ -199,7 +199,7 @@ leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 for i=1:length(param_names)
     fprintf('Posterior mean of %s: %.1f\n', leg{i}, summary_pmmh.(param_names{i}).mean);
     fprintf('95%% credibilist interval for %s: [%.1f,%.1f]\n',leg{i},...
-        summary_pmmh.(param_names{1}).quant(1),  summary_pmmh.(param_names{1}).quant(2));
+        summary_pmmh.(param_names{1}).quant{1},  summary_pmmh.(param_names{1}).quant{2});
 end
 
 
@@ -244,12 +244,12 @@ end
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,1, :))', fliplr(squeeze(x_pmmh_quant(2,1,:))')],...
+h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
-h2 = fill([1:t_max/dt, t_max/dt:-1:1], [squeeze(x_pmmh_quant(1,2, :))', fliplr(squeeze(x_pmmh_quant(2,2,:))')],...
+h2 = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
     [1 .7 .7]);
 set(h2, 'edgecolor', 'none')
 plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
