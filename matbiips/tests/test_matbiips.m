@@ -103,7 +103,7 @@ switch(test)
 
     %% TESTS BIIPS_SMC_SAMPLES
     n_part = 20; % Number of particles
-    variables = {'x', 'x[1:2]', 'unknownvariable'}; % Variables to be monitored
+    variables = {'x', 'x[1:2,1]'}; % Variables to be monitored
     type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
     % Run SMC
     out_smc = biips_smc_samples(model, variables, n_part,...

@@ -40,8 +40,6 @@
 namespace Biips
 {
 
-  static Scalar M_PI = 4 * std::atan(1);
-
   Bool DNorm::CheckParamValues(const NumArray::Array & paramValues) const
   {
     Scalar mean = paramValues[0].ScalarView();
@@ -75,7 +73,7 @@ namespace Biips
       Scalar prec = paramValues[1].ScalarView();
       using std::log;
       using std::pow;
-      return -0.5 * (log(2 * M_PI) - log(prec) + pow(x - mean, 2) * prec);
+      return -0.5 * (LOG_2PI - log(prec) + pow(x - mean, 2) * prec);
     }
 
     MathDistType dist = mathDist(paramValues);

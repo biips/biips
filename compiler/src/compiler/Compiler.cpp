@@ -416,7 +416,7 @@ namespace Biips
             throw CompileError(pTree,
                                String("Unable to resolve parameter ")
                                + array.Name() + print(subset_range)
-                               + "(one of its ancestors may be undefined)");
+                               + " (one of its ancestors may be undefined)");
         }
         else if (!indexExpression_)
         {
@@ -836,7 +836,7 @@ namespace Biips
         {
           throw CompileError(var,
                              var->name() + print(target_range)
-                             + " is a logical node and cannot be observed");
+                             + " is a logical node and cannot be observed.");
         }
       }
     }
@@ -860,7 +860,7 @@ namespace Biips
         node_id = allocateLogical(pRelations);
         break;
       default:
-        throw LogicError("Malformed parse tree in Compiler::allocate");
+        throw LogicError("Malformed parse tree in Compiler::allocate.");
         break;
     }
 
@@ -915,7 +915,7 @@ namespace Biips
       // check dropped dimensions (for Matlab users)
       // vector data in Matlab are defined as matrix (2 dimensions)
       const IndexRange var_range_drop = IndexRange(q->second.Dim().Drop());
-      if (!var_range.Contains(range))
+      if (!var_range_drop.Contains(range))
         throw LogicError(String("Subset ") + name + print(range)
                          + " out of range " + print(var_range_drop)
                          + " in Compiler::setConstantMask.");
