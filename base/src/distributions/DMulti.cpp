@@ -40,6 +40,9 @@
 #include <boost/random/variate_generator.hpp>
 #include <algorithm>
 #include <cmath>
+#include <boost/math/special_functions/gamma.hpp>
+
+using boost::math::lgamma;
 
 namespace Biips
 {
@@ -151,7 +154,7 @@ namespace Biips
                                      const NumArray::Array & paramValues) const
   {
     const NumArray & weights = paramValues[0];
-    const Size trials = roundSize(paramValues[1].ScalarView());
+    const Scalar trials = paramValues[1].ScalarView();
     for (Size i=0; i<weights.Length(); ++i) {
       lower[i] = 0;
       if (weights.Values()[i] == 0)

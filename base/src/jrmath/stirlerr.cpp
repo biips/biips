@@ -35,6 +35,9 @@
  */
 #include "nmath.h"
 #include <cmath>
+#include <boost/math/special_functions/gamma.hpp>
+
+using boost::math::lgamma;
 
 #ifndef M_LN_SQRT_2PI
 #define M_LN_SQRT_2PI   0.918938533204672741780329736406    /* log(sqrt(2*pi)) */

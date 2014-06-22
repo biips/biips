@@ -42,6 +42,9 @@
 
 namespace Biips
 {
+
+	static const std::locale loc;
+
   bool DumpReader::scan_single_char(char c_expected)
   {
     int c = in_.peek();
@@ -78,12 +81,12 @@ namespace Biips
   {
     char c;
     in_ >> c; //
-    if (!std::isalpha(c))
+	if (!std::isalpha(c, loc))
       return false;
     name_.push_back(c);
     while (in_.get(c))
     { // get turns off auto space skip
-      if (std::isalpha(c) || std::isdigit(c) || c == '_' || c == '.')
+		if (std::isalpha(c, loc) || std::isdigit(c, loc) || c == '_' || c == '.')
       {
         name_.push_back(c);
       }
@@ -171,14 +174,14 @@ namespace Biips
     // skip preceding spaces
     while (in_.get(c))
     {
-      if (std::isspace(c))
+		if (std::isspace(c, loc))
         continue;
       in_.putback(c);
       break;
     }
     while (in_.get(c))
     {
-      if (std::isdigit(c) || c == '-')
+		if (std::isdigit(c, loc) || c == '-')
       {
         buf.push_back(c);
       }
@@ -225,9 +228,8 @@ namespace Biips
 
   void DumpReader::print_next_char()
   {
-    char c;
-    bool ok = in_.get(c);
-    if (ok)
+	char c = in_.get();
+	if (in_.good())
     {
       std::cout << "next char=" << c << std::endl;
       in_.putback(c);
@@ -431,7 +433,7 @@ namespace Biips
     // skip trailing spaces
     while (in_.get(c))
     {
-      if (std::isspace(c))
+		if (std::isspace(c, loc))
         continue;
       in_.putback(c);
       break;

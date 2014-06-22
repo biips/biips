@@ -134,17 +134,29 @@ if (MATLAB)
 
     # find MATLAB libaries
     find_library(MATLAB_MEX_LIBRARY mex
-        PATHS ${MATLAB_LIBRARY_DIR}
+        PATHS "${MATLAB_LIBRARY_DIR}"
         NO_DEFAULT_PATH
     )
     find_library(MATLAB_MX_LIBRARY mx
-        PATHS ${MATLAB_LIBRARY_DIR}
+        PATHS "${MATLAB_LIBRARY_DIR}"
         NO_DEFAULT_PATH
     )
     find_library(MATLAB_MAT_LIBRARY mat
-        PATHS ${MATLAB_LIBRARY_DIR}
+        PATHS "${MATLAB_LIBRARY_DIR}"
         NO_DEFAULT_PATH
     )
+    # FIXME: windows does not find libraries
+    if (WIN32)
+        if (NOT MATLAB_MEX_LIBRARY)
+            file(TO_CMAKE_PATH "${MATLAB_LIBRARY_DIR}/libmex.dll" MATLAB_MEX_LIBRARY)
+        endif()
+        if (NOT MATLAB_MEX_LIBRARY)
+            file(TO_CMAKE_PATH "${MATLAB_LIBRARY_DIR}/libmx.dll" MATLAB_MX_LIBRARY)
+        endif()
+        if (NOT MATLAB_MEX_LIBRARY)
+            file(TO_CMAKE_PATH "${MATLAB_LIBRARY_DIR}/libmat.dll" MATLAB_MAT_LIBRARY)
+        endif()
+    endif()
     set(MATLAB_LIBRARIES
         "${MATLAB_MEX_LIBRARY}"
         "${MATLAB_MX_LIBRARY}"

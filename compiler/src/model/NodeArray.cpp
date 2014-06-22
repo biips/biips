@@ -57,7 +57,7 @@ namespace Biips
   {
     // COPY: Adapted from JAGS NodeArray::isEmpty function
     if (!range_.Contains(targetRange))
-      throw LogicError("Range error in NodeArray::IsEmpty");
+      throw LogicError("Range error in NodeArray::IsEmpty.");
 
     for (IndexRangeIterator it(targetRange); !it.AtEnd(); it.Next())
       if (nodeIds_.at(range_.GetOffset(it)) != NULL_NODEID)
@@ -78,13 +78,13 @@ namespace Biips
                        + print(targetRange));
     if (graph_.GetNode(nodeId).Dim().Drop() != targetRange.Dim(true))
       throw RuntimeError(String("Cannot insert node into ") + name_
-                         + print(targetRange) + ". Dimension mismatch");
+                         + print(targetRange) + ". Dimension mismatch.");
     if (!range_.Contains(targetRange))
       throw RuntimeError(String("Cannot insert node into ") + name_
-                         + print(targetRange) + ". Range out of bounds");
+                         + print(targetRange) + ". Range out of bounds.");
     if (!IsEmpty(targetRange))
       throw RuntimeError(String("Node ") + name_ + print(targetRange)
-                         + " overlaps previously defined nodes");
+                         + " overlaps previously defined node.s");
 
     IndexRangeIterator it_j(targetRange);
     for (Size k = 0; !it_j.AtEnd(); it_j.Next(), ++k)
@@ -174,7 +174,7 @@ namespace Biips
     //Check validity of target range
     if (!range_.Contains(subsetRange))
       throw RuntimeError(String("Cannot get subset ") + name_
-                         + print(subsetRange) + ". Range out of bounds");
+                         + print(subsetRange) + ". Range out of bounds.");
 
     /* If range corresponds to a set node, then return this */
     NodeId node_id = GetNode(subsetRange);
@@ -255,7 +255,7 @@ namespace Biips
     }
     else
     {
-      throw LogicError("Unable to find node range");
+      throw LogicError("Unable to find node range.");
     }
     // ENDCOPY
   }
@@ -310,7 +310,7 @@ namespace Biips
           // from JAGS 2.1
           //          //Existing node for which we must set value
           //          set_nodes.insert(nodeIds_[i]);
-          throw LogicError("Error in NodeArray::SetData"); // from JAGS 3.1
+          throw LogicError("Error in NodeArray::SetData."); // from JAGS 3.1
         }
       }
     }

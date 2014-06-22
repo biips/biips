@@ -15,13 +15,14 @@ configure_file (
 include_directories(${Core_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 # source files list generation
-file (GLOB_RECURSE SOURCE_FILES
+file (GLOB_RECURSE Core_SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
+set(Core_SRC ${Core_SRC} PARENT_SCOPE)
 
 # add the library
-add_library(BiipsCore ${SOURCE_FILES})
+add_library(BiipsCore ${Core_SRC})
 
 # add the install targets
 install(TARGETS BiipsCore DESTINATION ${Biips_INSTALL_LIBDIR})
