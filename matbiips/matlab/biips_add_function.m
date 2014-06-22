@@ -51,13 +51,13 @@ optarg_type = {'char', 'char'};
     optarg_valid, optarg_default);
 % Check inputs
 if (~isa(name,'char'))
-    error('biips_add_function : 1-st argument�must be a string')
+    error('biips_add_function: 1-st argument�must be a string')
 end
 if (~isa(fun_dim,'char'))
-    error('biips_add_function : 3-d argument�must be a string')
+    error('biips_add_function: 3-d argument�must be a string')
 end
 if (~isa(fun_eval,'char'))
-    error('biips_add_function : 4-th argument�must be a string')
+    error('biips_add_function: 4-th argument�must be a string')
 end
 if (~any(exist(fun_dim)==[2,3,5]))
     error('the function ''%s'' does not exist',fun_dim);

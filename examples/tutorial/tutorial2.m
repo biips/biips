@@ -156,12 +156,12 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 sum_var = getfield(summary_pmmh, var_name);
 fprintf('Posterior mean of log_prec_y: %.1f\n', sum_var.mean);
 fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
-    sum_var.quant(1),  sum_var.quant(2));
+    sum_var.quant{1},  sum_var.quant{2});
 
 
 %%
 % *Trace of MCMC samples for the parameter*
-mcmc_samples = getfield(out_pmmh,var_name);
+mcmc_samples = getfield(out_pmmh, var_name);
 figure('name', 'PMMH: Trace samples parameter')
 plot(mcmc_samples)
 hold on
@@ -200,7 +200,7 @@ legend('boxoff')
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant(1,:), fliplr(x_pmmh_quant(2,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on

@@ -8,16 +8,17 @@ include_directories (
 )
 
 # source files list generation
-file (GLOB_RECURSE SOURCE_FILES
+file (GLOB_RECURSE Compiler_SRC
 	${CMAKE_CURRENT_BINARY_DIR}/include/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 )
+set(Compiler_SRC ${Compiler_SRC} PARENT_SCOPE)
 
 # add the library
-add_library(BiipsCompiler ${SOURCE_FILES})
+add_library(BiipsCompiler ${Compiler_SRC})
 
 # add the install targets
 install(TARGETS BiipsCompiler DESTINATION ${Biips_INSTALL_LIBDIR})

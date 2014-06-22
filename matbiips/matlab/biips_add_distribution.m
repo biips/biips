@@ -55,13 +55,13 @@ optarg_type = {'char', 'char'};
     optarg_valid, optarg_default);
 % Check inputs
 if (~isa(name,'char'))
-    error('biips_add_distrib_sampler : 1-st argument�must be a string')
+    error('biips_add_distribution: 1-st argument�must be a string')
 end
 if (~isa(fun_dim,'char'))
-    error('biips_add_distrib_sampler : 3-d argument�must be a string')
+    error('biips_add_distribution: 3-d argument�must be a string')
 end
 if (~isa(fun_sample,'char'))
-    error('biips_add_distrib_sampler : 4-th argument�must be a string')
+    error('biips_add_distribution: 4-th argument�must be a string')
 end
 if (~any(exist(fun_dim)==[2,3,5]))
     error('the function ''%s'' does not exist',fun_dim);
@@ -82,8 +82,8 @@ end
 
 %% Add distribution sampler
 try
-    matbiips('add_distrib_sampler', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
-    fprintf('Added distribution sampler ''%s''\n', name)
+    matbiips('add_distribution', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
+    fprintf('Added distribution ''%s''\n', name)
 catch
-    warning('Cannot add distribution sampler ''%s'' - the distribution may already exist', name);
+    warning('Cannot add distribution ''%s'' - the distribution may already exist', name);
 end
