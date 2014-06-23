@@ -15,8 +15,9 @@ data = model.data;
 variables = {'x', 'x[1:2]'};
 n_part = 100;
 n_iter = 20;
-biips_pimh_update(model, variables, n_iter, n_part);
-out_pimh = biips_pimh_samples(model, variables, n_iter, n_part);
+obj_pimh = biips_pimh_init(model, variables);
+obj_pimh = biips_pimh_update(obj_pimh, model, n_iter, n_part);
+[obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
 biips_clear(model)
 
 % THE SAME WITH MATRICES IS NOT
@@ -33,6 +34,7 @@ data = model.data;
 variables = {'x', 'x[1:2,1]'};
 n_part = 100;
 n_iter = 20;
-biips_pimh_update(model, variables, n_iter, n_part);
-out_pimh = biips_pimh_samples(model, variables, n_iter, n_part);
+obj_pimh = biips_pimh_init(model, variables);
+obj_pimh = biips_pimh_update(obj_pimh, model, n_iter, n_part);
+[obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
 biips_clear(model)

@@ -21,12 +21,12 @@ n_part = 50;
 n_iter = 520;
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_object(model, param_names, 'inits', inits); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits); % creates a pmmh object
 
 %%
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1, 'latent_names', latent_names); % Samples
     
 biips_clear
