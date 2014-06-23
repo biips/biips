@@ -68,15 +68,15 @@ switch(test)
     end
     
 
-    % MAKES THE PROGRAMM CRASH
-    % % Test model with cell data structure
-    % data = {'t_max', ...
-    %     'prec_x', 'prec_y', 'mean_x_init'};
-    % %%% Compile BUGS model and sample data
-    % model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
-    % sample_data = true; % Boolean
-    % model = biips_model(model_filename, data, 'sample_data', sample_data);
-    % data = model.data;
+%     %MAKES THE PROGRAMM CRASH
+%     % Test model with cell data structure
+%     data = {'t_max', ...
+%         'prec_x', 'prec_y', 'mean_x_init'};
+%     %%% Compile BUGS model and sample data
+%     model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
+%     sample_data = true; % Boolean
+%     model = biips_model(model_filename, data, 'sample_data', sample_data);
+%     data = model.data;
 
 
     % Test model with unknown file
@@ -131,8 +131,9 @@ switch(test)
     variables = {'x', 'x[1:2]'};
     n_part = 100;
     n_iter = 20;
-    biips_pimh_update(model, variables, n_iter, n_part);
-    out_pimh = biips_pimh_samples(model, variables, n_iter, n_part);
+    obj_pimh = biips_pimh_init(model, variables);
+    obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part);
+    [obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
     biips_clear(model)
     
 %     % Test pimh with matrices *** CREATES A BUG ***
@@ -178,12 +179,12 @@ switch(test)
     n_iter = 520;
     %%
     % *Init PMMH*
-    obj_pmmh = biips_pmmh_object(model, param_names, 'inits', inits); % creates a pmmh object
+    obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
 
     %%
     % *Run PMMH*
     obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-    [out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-        'thin', 1, 'latent_names', latent_names); % Samples
+    [obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+        'thin', 1); % Samples
     biips_clear(model)
 end
