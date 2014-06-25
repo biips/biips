@@ -9,7 +9,7 @@ var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt]
 
 data
 {	
-  x_true[,1] <- x_init
+  x_true[,1] ~ dmnormvar(x_init_mean,  x_init_var)
   for (t in 2:t_max/dt)
   { 
     alpha_true[1,t] <- c_true[1] * x_true[1,t-1] - c_true[2]*x_true[1,t-1]*x_true[2,t-1]
@@ -37,7 +37,7 @@ model
   c[1] <- exp(logc[1])
   c[2] <- exp(logc[2])
   c[3] <- exp(logc[3])
-  x[,1] <- x_init
+  x[,1] ~ dmnormvar(x_init_mean,  x_init_var)
   for (t in 2:t_max/dt)
   { 
     alpha[1,t] <- c[1]*x[1,t-1] - c[2]*x[1,t-1]*x[2,t-1]

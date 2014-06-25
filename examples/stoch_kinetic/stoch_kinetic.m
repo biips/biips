@@ -45,7 +45,7 @@
 % 
 %     data
 %     {	
-%       x_true[,1] <- x_init
+%       x_true[,1] ~ dmnormvar(x_init_mean,  x_init_var)
 %       for (t in 2:t_max/dt)
 %       { 
 %         alpha_true[1,t] <- c_true[1] * x_true[1,t-1] - c_true[2]*x_true[1,t-1]*x_true[2,t-1]
@@ -73,7 +73,7 @@
 %       c[1] <- exp(logc[1])
 %       c[2] <- exp(logc[2])
 %       c[3] <- exp(logc[3])
-%       x[,1] <- x_init
+%       x[,1] ~ dmnormvar(x_init_mean,  x_init_var)
 %       for (t in 2:t_max/dt)
 %       { 
 %         alpha[1,t] <- c[1]*x[1,t-1] - c[2]*x[1,t-1]*x[2,t-1]
@@ -108,11 +108,12 @@ addpath(matbiips_path)
 % *Model parameters*
 t_max = 20;
 dt = 0.20;
-x_init = [100 ;100];
+x_init_mean = [100 ;100];
+x_init_var = 10*eye(2);
 c_true = [.5, 0.0025,.3];
 prec_y = 1/10;
-data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true, 'x_init', x_init, 'prec_y', prec_y);
-
+data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true,...
+    'x_init_mean', x_init_mean, 'x_init_var', x_init_var, 'prec_y', prec_y);
 
 
 %%
@@ -150,7 +151,7 @@ out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 %%
 % *Plot penalized log-marginal likelihood*
 figure('name', 'penalized log-marginal likelihood');
-plot(param_values{1}, out.log_marg_like_pen, '.')
+plot(param_values{1}, out.log_post, '.')
 xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
 
@@ -164,8 +165,8 @@ ylabel('Penalized log-marginal likelihood')
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 2000; % nb of burn-in/adaptation iterations
-n_iter = 20000; % nb of iterations after burn-in
+n_burn = 20; % nb of burn-in/adaptation iterations
+n_iter = 20; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
@@ -191,7 +192,7 @@ summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 % *Compute kernel density estimates*
 kde_estimates_pmmh = biips_density(out_pmmh);
 
-param_true = [log(alpha_true), log(beta_true), log(gamma_true)];
+param_true = log(c_true);
 leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 
 %%
