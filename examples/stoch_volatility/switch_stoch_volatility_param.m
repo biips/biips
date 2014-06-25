@@ -166,8 +166,8 @@ data = model.data;
 
 %%
 % *Parameters of the PMMH*
-n_burn = 20; % nb of burn-in/adaptation iterations
-n_iter = 20; % nb of iterations after burn-in
+n_burn = 2000; % nb of burn-in/adaptation iterations
+n_iter = 2000; % nb of iterations after burn-in
 thin = 1; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
