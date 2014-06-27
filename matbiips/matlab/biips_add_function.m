@@ -77,9 +77,5 @@ if ~isempty(fun_is_discrete)
 end
 
 %% Add function
-try
-    matbiips('add_function', name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
-    fprintf('Added function ''%s''\n', name)
-catch
-    warning('Cannot add function ''%s'' - the function may already exist', name);
-end
+matbiips('add_function', name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
+fprintf('Added function ''%s''.\n', name)

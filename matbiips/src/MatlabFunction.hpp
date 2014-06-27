@@ -72,6 +72,7 @@ namespace Biips
     {
       // TODO: check name is valid
       // TODO: check functions exist in matlab
+      // TODO: check functions nb of arguments
     }
 
     virtual Bool IsDiscreteValued(const Flags & mask) const;

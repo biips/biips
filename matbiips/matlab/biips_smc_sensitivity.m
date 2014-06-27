@@ -96,8 +96,8 @@ optarg_type = {'numeric', 'char'};
 check_struct(model, 'biips');
 
 %% Stops biips verbosity
-matbiips('verbosity', 0);
-cleanupObj = onCleanup(@() matbiips('verbosity', 1));% set verbosity on again when function terminates
+verb = matbiips('verbosity', 0);
+cleanupObj = onCleanup(@() matbiips('verbosity', verb));% set verbosity on again when function terminates
 
 %% Create a clone model
 model2 = clone_model(model);
@@ -122,6 +122,7 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
  % Iterate over different values
  for k=1:n_values
      % Update value of each parameter
+     value = cell(n_param, 1);
      for i=1:n_param
          var = param_names{i};
          size_i = size(param_values{i});

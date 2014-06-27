@@ -41,7 +41,7 @@ namespace Biips
 {
 
   const String ConjugateNormalVar::NAME_ =
-      "Conjugate Normal (with known variance)";
+      "ConjugateNormal_knownVar";
 
   MultiArray::Array ConjugateNormalVar::initLikeParamContrib() const
   {

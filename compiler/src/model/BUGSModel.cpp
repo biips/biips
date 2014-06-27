@@ -512,12 +512,12 @@ namespace Biips
   Bool BUGSModel::ChangeData(const String & variable,
                              const IndexRange & range,
                              const MultiArray & data,
-                             Bool mcmc,
-                             Bool & rebuildSampler)
+                             Bool & rebuildSampler,
+                             Bool mcmc)
   {
-    rebuildSampler = symbolTable_.ChangeData(variable, range, data, mcmc);
+    Bool ok = symbolTable_.ChangeData(variable, range, data, rebuildSampler, mcmc);
 
-    return true;
+    return ok;
   }
 
   Bool BUGSModel::SampleData(const String & variable,

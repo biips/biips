@@ -12,37 +12,37 @@ if (~matbiips('load_module', 'basemod'))
     error('problem loading module'); 
 end
 % console init
-p0=matbiips('make_console'); 
+id=matbiips('make_console'); 
 matbiips('verbosity',2);
 
 % verif et compil du modele
-matbiips('check_model', p0, 'hmm_1d_lin.bug'); 
-matbiips('compile_model', p0, data, true, 12);
-matbiips('set_default_monitors',p0);
-matbiips('set_filter_monitors', p0, {'x'} , {1 }, { t_max });
-matbiips('set_gen_tree_smooth_monitors', p0, {'x'}, {1}, {t_max});
-matbiips('set_backward_smooth_monitors', p0, {'x'}, {1}, {t_max });
-if (~matbiips('is_sampler_built',p0))
-  matbiips('build_smc_sampler',p0, false);
-  sort_nodes=matbiips('get_sorted_nodes', p0)
-  node_samplers=matbiips('get_nodes_samplers', p0)
+matbiips('check_model', id, 'hmm_1d_lin.bug'); 
+matbiips('compile_model', id, data, true, 12);
+matbiips('set_default_monitors',id);
+matbiips('set_filter_monitors', id, {'x'} , {1 }, { t_max });
+matbiips('set_gen_tree_smooth_monitors', id, {'x'}, {1}, {t_max});
+matbiips('set_backward_smooth_monitors', id, {'x'}, {1}, {t_max });
+if (~matbiips('is_sampler_built',id))
+  matbiips('build_smc_sampler',id, false);
+  sort_nodes=matbiips('get_sorted_nodes', id)
+  node_samplers=matbiips('get_nodes_samplers', id)
 end
 
-if (~matbiips('run_smc_sampler', p0, 100, 9, 0.5, 'stratified'))
+if (~matbiips('run_smc_sampler', id, 100, 9, 0.5, 'stratified'))
    error('smc sampler failed!');
 end  
-log_norm=matbiips('get_log_norm_const', p0)
-filter_monitors=matbiips('get_filter_monitors',p0)
-smooth_monitors=matbiips('get_gen_tree_smooth_monitors',p0)
-sample_value = matbiips('sample_gen_tree_smooth_particle', p0, 42);
-matbiips('clear_gen_tree_smooth_monitors',p0, false);
+log_norm=matbiips('get_log_norm_const', id)
+filter_monitors=matbiips('get_filter_monitors',id)
+smooth_monitors=matbiips('get_gen_tree_smooth_monitors',id)
+sample_value = matbiips('sample_gen_tree_smooth_particle', id, 42);
+matbiips('clear_gen_tree_smooth_monitors',id, false);
 % on fait un backward
-if (~matbiips('is_smc_sampler_at_end', p0))
+if (~matbiips('is_smc_sampler_at_end', id))
    error('sampler not finish!');
 end   
-matbiips('run_backward_smoother', p0);
-matbiips('clear_filter_monitors', p0, false);
-backward_smooth_monitors=matbiips('get_backward_smooth_monitors',p0)
-matbiips('clear_backward_smooth_monitors', p0, false);
+matbiips('run_backward_smoother', id);
+matbiips('clear_filter_monitors', id, false);
+backward_smooth_monitors=matbiips('get_backward_smooth_monitors',id)
+matbiips('clear_backward_smooth_monitors', id, false);
 % on nettoie la console
-matbiips('clear_console',p0); 
+matbiips('clear_console',id); 

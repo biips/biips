@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file ConjugateMNormalVar.hpp
+/*! \file ConjugateMNormalCovLinear.hpp
  * \brief 
  * 
  * \author  $LastChangedBy$
@@ -34,41 +34,32 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_CONJUGATEMNORMALVAR_HPP_
-#define BIIPS_CONJUGATEMNORMALVAR_HPP_
+#ifndef BIIPS_CONJUGATEMNORMALCOVLINEAR_HPP_
+#define BIIPS_CONJUGATEMNORMALCOVLINEAR_HPP_
 
-#include "distributions/DMNormVar.hpp"
-#include "samplers/ConjugateSampler.hpp"
+#include "sampler/NodeSampler.hpp"
 
 namespace Biips
 {
 
-  class ConjugateMNormalVar: public ConjugateSampler<DMNormVar, DMNormVar, 0>
+  class ConjugateMNormalCovLinear: public NodeSampler
   {
   public:
-    typedef ConjugateMNormalVar SelfType;
-    typedef ConjugateSampler<DMNormVar, DMNormVar, 0> BaseType;
-
-    static const String NAME_;
+    typedef ConjugateMNormalCovLinear SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+    typedef NodeSampler BaseType;
 
   protected:
-    friend class ConjugateSamplerFactory<SelfType> ;
+    static const String NAME_;
 
-    explicit ConjugateMNormalVar(const Graph & graph) :
+    friend class ConjugateMNormalCovLinearFactory;
+
+    explicit ConjugateMNormalCovLinear(const Graph & graph) :
       BaseType(graph)
     {
     }
 
-    virtual void formLikeParamContrib(NodeId likeId,
-                                      MultiArray::Array & likeParamContribValues);
-    virtual MultiArray::Array
-    postParam(const NumArray::Array & priorParamContribValues,
-              const MultiArray::Array & likeParamContribValues) const;
-    virtual Scalar
-    computeLogIncrementalWeight(const NumArray & sampledData,
-                                const NumArray::Array & priorParamValues,
-                                const NumArray::Array & postParamValues,
-                                const MultiArray::Array & likeParamContrib);
+    virtual void sample(const StochasticNode & node);
 
   public:
     virtual const String & Name() const
@@ -76,11 +67,35 @@ namespace Biips
       return NAME_;
     }
 
+    virtual ~ConjugateMNormalCovLinear()
+    {
+    }
   };
 
-  typedef ConjugateSamplerFactory<ConjugateMNormalVar>
-      ConjugateMNormalVarFactory;
+  class ConjugateMNormalCovLinearFactory: public NodeSamplerFactory
+  {
+  public:
+    typedef ConjugateMNormalCovLinearFactory SelfType;
+    typedef Types<SelfType>::Ptr Ptr;
+    typedef ConjugateMNormalCovLinear CreatedType;
+    typedef NodeSamplerFactory BaseType;
+
+  protected:
+    static Ptr pConjugateMNormalCovLinearFactoryInstance_;
+    ConjugateMNormalCovLinearFactory()
+    {
+    }
+
+  public:
+    static BaseType::Ptr Instance()
+    {
+      return pConjugateMNormalCovLinearFactoryInstance_;
+    }
+    virtual Bool Create(const Graph & graph,
+                        NodeId nodeId,
+                        BaseType::CreatedPtr & pNodeSamplerInstance) const;
+  };
 
 }
 
-#endif /* BIIPS_CONJUGATEMNORMALVAR_HPP_ */
+#endif /* BIIPS_CONJUGATEMNORMALCOVLINEAR_HPP_ */
