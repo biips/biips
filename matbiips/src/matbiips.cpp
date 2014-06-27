@@ -171,9 +171,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       for (int i = 0; i < ndim ; ++i) {
         String var_name = names[i];
-        mwSize  nd[] = { static_cast<mwSize>(var_name.size()) };
-        mxArray * value = mxCreateCharArray(1, nd);
-        std::copy(var_name.c_str(), var_name.c_str() + var_name.size(), mxGetChars(value));
+        mxArray * value = mxCreateString(var_name.c_str());
         mxSetCell(plhs[0], i, value);
       }
     }
@@ -557,7 +555,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Size id = GetConsoleId(consoles, prhs[1], name_func);
       Console_ptr p_console = consoles[id];
 
-      const char *field_names[] = { "id", "names", "type", "observed" };
+      const char *field_names[] = { "id", "name", "type", "observed" };
       mwSize  dims[] = { 1};
       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
 
@@ -569,13 +567,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         Types<Size>::Array node_ids_vec;
         if (!p_console->DumpNodeIds(node_ids_vec))
           throw RuntimeError("Failed to dump node ids.");
-        mxArray * id = mxCreateDoubleMatrix(1, node_ids_vec.size(), mxREAL);
+        mxArray * id = mxCreateDoubleMatrix(node_ids_vec.size(), 1, mxREAL);
         std::replace_copy(node_ids_vec.begin(), node_ids_vec.end(), mxGetPr(id),
                           static_cast<Scalar>(NULL_NODEID), std::numeric_limits<Scalar>::quiet_NaN());
         mxSetFieldByNumber(plhs[0], 0, 0, id);
       }
 
-      {// names assignment
+      {// name assignment
         Types<String>::Array node_names_vec;
         if (!p_console->DumpNodeNames(node_names_vec))
           throw RuntimeError("Failed to dump node names.");
@@ -602,13 +600,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           switch (node_types_vec[i])
           {
             case CONSTANT:
-              type_str = "Constant";
+              type_str = "const";
               break;
             case Biips::LOGICAL:
-              type_str = "Logical";
+              type_str = "logic";
               break;
             case STOCHASTIC:
-              type_str = "Stochastic";
+              type_str = "stoch";
               break;
             default:
               break;
@@ -619,16 +617,56 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mxSetFieldByNumber(plhs[0], 0, 2, types);
       }
 
-      {// node_obs assignment
+      {// observed assignment
         Flags node_obs_vec;
         if (!p_console->DumpNodeObserved(node_obs_vec))
           throw RuntimeError("Failed to dump node observed boolean.");
-        mxArray * node_obs = mxCreateDoubleMatrix(1, node_obs_vec.size(), mxREAL);
+        mxArray * node_obs = mxCreateDoubleMatrix(node_obs_vec.size(), 1, mxREAL);
         std::copy(node_obs_vec.begin(), node_obs_vec.end(), mxGetPr(node_obs));
         mxSetFieldByNumber(plhs[0], 0, 3, node_obs);
       }
+    }
+    /////////////////////////////////////////
+    // GET_NODE_SAMPLERS FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_node_samplers") {
 
+      CheckRhs(nrhs, 1, name_func);
+      Size id = GetConsoleId(consoles, prhs[1], name_func);
+      Console_ptr p_console = consoles[id];
 
+      const char *field_names[] = { "iteration", "sampler" };
+      mwSize  dims[] = { 1};
+      plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
+
+      Size graph_size;
+      if (!p_console->GraphSize(graph_size))
+        throw RuntimeError("Failed to get graph size.");
+
+      {// iteration assignment
+        Types<Size>::Array node_iterations_vec;
+        if (!p_console->DumpNodeIterations(node_iterations_vec))
+          throw RuntimeError("Failed to dump node iterations.");
+        mxArray * iterations = mxCreateDoubleMatrix(node_iterations_vec.size(), 1, mxREAL);
+        std::replace_copy(node_iterations_vec.begin(), node_iterations_vec.end(), mxGetPr(iterations),
+                          static_cast<Scalar>(BIIPS_SIZENA), std::numeric_limits<Scalar>::quiet_NaN());
+        mxSetFieldByNumber(plhs[0], 0, 0, iterations);
+      }
+
+      {// sampler assignment
+        Types<String>::Array node_samplers_vec;
+        if (!p_console->DumpNodeSamplers(node_samplers_vec))
+          throw RuntimeError("Failed to dump node samplers.");
+
+        mwSize samplers_ndim = 1;
+        mwSize samplers_dims[] = { static_cast<mwSize>(node_samplers_vec.size()) };
+        mxArray * samplers = mxCreateCellArray(samplers_ndim, samplers_dims);
+        for (int i = 0;  i <  node_samplers_vec.size() ; ++i) {
+          mxArray * str = mxCreateString(node_samplers_vec[i].c_str());
+          mxSetCell(samplers, i, str);
+        }
+        mxSetFieldByNumber(plhs[0], 0, 1, samplers);
+      }
     }
     /////////////////////////////////////////
     // GET_NODES_SAMPLERS FUNCTION

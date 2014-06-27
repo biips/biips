@@ -42,6 +42,7 @@
 #include "graph/StochasticNode.hpp"
 #include "distribution/DistError.hpp"
 #include "iostream/outStream.hpp"
+#include "sampler/GetNodeValueVisitor.hpp"
 
 namespace Biips
 {
@@ -355,6 +356,7 @@ namespace Biips
                              const MultiArray & value,
                              std::map<Size, NodeId> & logicChildrenByRank,
                              std::map<Size, NodeId> & stoChildrenByRank,
+                             Bool & set_observed_nodes,
                              Bool mcmc)
   {
     if (range.IsNull())
@@ -370,7 +372,7 @@ namespace Biips
     if (anyMissing(value))
       throw RuntimeError("Can not change data: there are missing values.");
 
-    Bool set_observed_nodes = false;
+    set_observed_nodes = false;
 
     std::set<NodeId> changed_nodes;
 
@@ -380,10 +382,12 @@ namespace Biips
                          + print(range)
                          + " does not match one node exactly.");
 
+    NodeType type = graph_.GetNode(id).GetType();
+
     // check that nodes are valid
     if (mcmc)
     {
-      if (graph_.GetNode(id).GetType() != STOCHASTIC)
+      if (type != STOCHASTIC)
         throw RuntimeError("Can not change data: node is not stochastic.");
 
       // check node is not discrete
@@ -393,42 +397,39 @@ namespace Biips
         throw RuntimeError(String("Can not change data: node is discrete."));
 
       // TODO check that it has (indirect) unobserved stochastic children ?
+    }
+    else if (type == LOGICAL) {
+      throw RuntimeError("Can not change data: node is logical.");
+    }
+
+    if (type == STOCHASTIC) {
+      const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
+      Distribution::Ptr p_dist = snode.PriorPtr();
 
       // check node is observed
-      if (!graph_.GetObserved()[id])
+      if ( !graph_.GetObserved()[id])
       {
         // check Distribution is observable
-        const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
-        Distribution::Ptr p_dist = snode.PriorPtr();
         if (!p_dist->Observable())
-        {
           throw DistError(p_dist, "Can not change data: distribution not observable.");
-        }
+
         // otherwise set observed
         graph_.SetObserved(id);
         set_observed_nodes = true;
       }
-    }
-    else
-    {
-        NodeType type = graph_.GetNode(id).GetType();
-        if (type == LOGICAL)
-          throw RuntimeError("Can not change data: node is logical.");
 
-        // check node is observed
-        if (type == STOCHASTIC && !graph_.GetObserved()[id])
-        {
-          // check Distribution is observable
-          const StochasticNode & snode = dynamic_cast<const StochasticNode &>(graph_.GetNode(id));
-          Distribution::Ptr p_dist = snode.PriorPtr();
-          if (!p_dist->Observable())
-          {
-            throw DistError(p_dist, "Can not change data: distribution not observable.");
-          }
-          // otherwise set observed
-          graph_.SetObserved(id);
-          set_observed_nodes = true;
-        }
+      // check that support is fixed
+      if (!isSupportFixed(id, graph_))
+        throw NodeError(id, "Can not change data: node distribution support is not fixed.");
+
+      // check that value is in the support
+      Size len = snode.DimPtr()->Length();
+      ValArray lower(len), upper(len);
+      getFixedSupportValues(lower, upper, id, graph_);
+      for (Size i=1; i<len; ++i) {
+        if (value.Values()[i]<lower[i] || value.Values()[i]>upper[i])
+          return false; // Can not change data: value out of distribution support
+      }
     }
 
     changed_nodes.insert(id);
@@ -456,7 +457,7 @@ namespace Biips
         graph_.UpdateDiscreteness(*it, stoChildrenByRank);
     }
 
-    return set_observed_nodes;
+    return true;
   }
 
   void NodeArray::SampleData(IndexRange range,

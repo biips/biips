@@ -48,7 +48,7 @@
 namespace Biips
 {
 
-  const String FiniteSampler::NAME_ = "Finite sampler";
+  const String FiniteSampler::NAME_ = "Finite";
 
   void FiniteSampler::sample(const StochasticNode & node)
   {

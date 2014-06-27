@@ -40,7 +40,7 @@
 #include "BiipsCore.hpp"
 
 #include "samplers/ConjugateMNormalLinear.hpp"
-#include "samplers/ConjugateMNormalVarLinear.hpp"
+#include "samplers/ConjugateMNormalCovLinear.hpp"
 
 #include "KalmanFilter.hpp"
 #include "TestIO.hpp"
@@ -161,7 +161,7 @@ namespace Biips
     if (precFlag_)
       nodeSamplerFactoryInvOrder_.push_back(ConjugateMNormalLinearFactory::Instance());
     else
-      nodeSamplerFactoryInvOrder_.push_back(ConjugateMNormalVarLinearFactory::Instance());
+      nodeSamplerFactoryInvOrder_.push_back(ConjugateMNormalCovLinearFactory::Instance());
   }
 
   void HmmMNormalLinear::PrintIntro()

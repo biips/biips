@@ -1189,9 +1189,9 @@ namespace Biips
         out_ << PROMPT_STRING << "Changing data" << endl;
       }
       Bool rebuild_sampler;
-      if (!pModel_->ChangeData(variable, range, data, mcmc, rebuild_sampler))
+      if (!pModel_->ChangeData(variable, range, data, rebuild_sampler, mcmc))
       {
-        err_ << "Failed to change data.\n";
+        //err_ << "Failed to change data.\n";
         return false;
       }
       if (pModel_->SamplerBuilt() && rebuild_sampler)

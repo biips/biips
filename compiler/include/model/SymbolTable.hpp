@@ -117,6 +117,7 @@ namespace Biips
     Bool ChangeData(const String & variable,
                     const IndexRange & range,
                     const MultiArray & data,
+                    Bool & set_observed_nodes,
                     Bool mcmc);
 
     void SampleData(const String & variable,

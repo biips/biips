@@ -84,11 +84,11 @@ extern "C" {
 #include "samplers/ConjugateNormalVar.hpp"
 #include "samplers/ConjugateNormal.hpp"
 #include "samplers/ConjugateBeta.hpp"
-#include "samplers/ConjugateMNormalVar.hpp"
+#include "samplers/ConjugateMNormalCov.hpp"
 #include "samplers/ConjugateMNormal.hpp"
 #include "samplers/ConjugateNormalVarLinear.hpp"
 #include "samplers/ConjugateNormalLinear.hpp"
-#include "samplers/ConjugateMNormalVarLinear.hpp"
+#include "samplers/ConjugateMNormalCovLinear.hpp"
 #include "samplers/ConjugateMNormalLinear.hpp"
 
 namespace Biips
@@ -175,7 +175,7 @@ namespace Biips
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
                                                                      true));
-    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalVarLinearFactory::Instance(),
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalCovLinearFactory::Instance(),
                                                                      true));
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateNormalLinearFactory::Instance(),
                                                                      true));
@@ -184,7 +184,7 @@ namespace Biips
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalFactory::Instance(),
                                                                      true));
-    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalVarFactory::Instance(),
+    ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalCovFactory::Instance(),
                                                                      true));
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateBetaFactory::Instance(),
                                                                      true));

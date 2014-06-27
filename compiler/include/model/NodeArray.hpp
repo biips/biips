@@ -119,6 +119,7 @@ namespace Biips
                     const MultiArray & value,
                     std::map<Size, NodeId> & logicChildrenByRank,
                     std::map<Size, NodeId> & stoChildrenByRank,
+                    Bool & set_observed_nodes,
                     Bool mcmc);
 
     void SampleData(IndexRange range,

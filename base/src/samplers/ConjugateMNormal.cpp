@@ -42,7 +42,7 @@ namespace Biips
 {
 
   const String ConjugateMNormal::NAME_ =
-      "Conjugate Multivariate Normal (with known precision matrix)";
+      "ConjugateMNormal_knownPrec";
 
   void ConjugateMNormal::formLikeParamContrib(NodeId likeId,
                                               MultiArray::Array & likeParamContribValues)

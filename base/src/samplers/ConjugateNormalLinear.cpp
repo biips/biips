@@ -48,7 +48,7 @@ namespace Biips
 {
 
   const String ConjugateNormalLinear::NAME_ =
-      "Conjugate Normal (with known precision and linear mean function)";
+      "ConjugateNormal_knownPrec_linearMean";
 
   class NormalLinearLikeFormVisitor: public ConstNodeVisitor
   {
