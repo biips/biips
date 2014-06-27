@@ -63,13 +63,13 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     }
     close(f)
     model_code <- readLines(file, warn = FALSE)
-    modfile <- file
+    filename <- file
   } else if (!inherits(file, "connection")) {
     stop("'file' must be a character string or connection")
   } else {
     model_code <- readLines(file, warn = FALSE)
-    modfile <- tempfile()
-    writeLines(model_code, modfile)
+    filename <- tempfile()
+    writeLines(model_code, filename)
   }
   
   if (quiet) {
@@ -85,16 +85,13 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   
   # make console and check model
   ptr <- RBiips("make_console")
-  RBiips("check_model", ptr, modfile)
+  RBiips("check_model", ptr, filename)
   
   # discard unused data
   varnames <- RBiips("get_variable_names", ptr)
-  
-  v <- names(data)
-  relevant_variables <- v %in% varnames
-  data <- data[relevant_variables]
-  unused_variables <- setdiff(v, varnames)
-  if (length(unused_variables) > 0) 
+  unused <- setdiff(names(data), varnames)
+  data[unused] <- NULL
+  if (length(unused) > 0)
     warning("Unused variables in data: ", paste(unused_variables, collapse = ", "))
   
   # compile model
@@ -109,6 +106,8 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   ## surrogating a class with private members and their modifiers.
   model <- list(ptr = function() {
     ptr
+  }, file = function() {
+    file
   }, model = function() {
     model_code
   }, data = function() {
@@ -125,9 +124,12 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     RBiips("check_model", ptr, mf)
     unlink(mf)
     ## Re-compile
-    RBiips("compile_model", ptr, data, FALSE, get_seed())
+    ## generate new data if sample_data is TRUE
+    RBiips("compile_model", ptr, data, sample_data, get_seed())
+    model_data <<- RBiips("get_data", ptr)
     invisible()
-  })
+  }
+  )
   class(model) <- "biips"
   
   return(model)

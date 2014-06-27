@@ -41,6 +41,7 @@ data_preprocess <- function(data) {
       stop("data with name ", n, " is not allowed in Biips")
   }
   
+  v <- names(data)
   data <- lapply(data, FUN = function(x) {
     ## change data.frame to array
     if (is.data.frame(x)) {
@@ -55,7 +56,11 @@ data_preprocess <- function(data) {
     return(x)
   })
   
-  return(data[!sapply(data, is.null)])
+  ignored <- setdiff(v, names(data))
+  if(length(ignored)>0)
+    warning("Ignored non numeric variables in data: ", paste(ignored, collapse = " "))
+  
+  return(data)
 }
 
 

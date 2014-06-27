@@ -118,7 +118,7 @@ namespace Biips
 
     Bool DumpData(std::map<String, MultiArray> & dataMap) const;
     Bool ChangeData(const String & variable, const IndexRange & range,
-                    const MultiArray & data, Bool mcmc, Bool & rebuildSampler);
+                    const MultiArray & data, Bool & rebuildSampler, Bool mcmc);
     Bool SampleData(const String & variable, const IndexRange & range,
                     MultiArray & data, Rng * pRng);
     Bool RemoveData(const String & variable, const IndexRange & range);

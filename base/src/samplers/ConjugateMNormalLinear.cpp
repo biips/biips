@@ -53,7 +53,7 @@ namespace Biips
 
   const String
       ConjugateMNormalLinear::NAME_ =
-          "Conjugate Multivariate Normal (with known precision matrix and linear mean function)";
+          "ConjugateMNormal_knownPrec_linearMean";
 
   class MNormalLinearLikeFormVisitor: public ConstNodeVisitor
   {

@@ -763,13 +763,13 @@ RcppExport SEXP get_sorted_nodes(SEXP pConsole)
       switch (node_types_vec[i])
       {
         case CONSTANT:
-          node_types[i] = "Constant";
+          node_types[i] = "const";
           break;
         case Biips::LOGICAL:
-          node_types[i] = "Logical";
+          node_types[i] = "logic";
           break;
         case STOCHASTIC:
-          node_types[i] = "Stochastic";
+          node_types[i] = "stoch";
           break;
         default:
           break;

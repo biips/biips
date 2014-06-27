@@ -23,7 +23,7 @@ end
 %% specific checks
 switch class
     case 'biips'
-        fields = {'id', 'definition', 'filename', 'data'};
+        fields = {'id', 'model', 'file', 'data'};
         type = {'numeric', 'char', 'char', 'struct'};
         for i=1:numel(fields)
             if ~isfield(obj, fields{i})

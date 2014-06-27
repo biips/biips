@@ -42,6 +42,8 @@ namespace Biips
               fun_check_param_(fun_check_param), 
               fun_is_discrete_(fun_is_discrete)
         {
+          // TODO: check name is valid
+          // TODO: check functions nb of arguments
         }
 
         virtual Bool IsDiscreteValued(const Flags & mask) const;

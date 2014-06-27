@@ -188,6 +188,7 @@ namespace Biips
   Bool SymbolTable::ChangeData(const String & variable,
                                const IndexRange & range,
                                const MultiArray & data,
+                               Bool & set_observed_nodes,
                                Bool mcmc)
   {
     std::map<Size, NodeId> logic_children_by_rank;
@@ -198,16 +199,18 @@ namespace Biips
     NodeArray & array = getNodeArray(variable);
     // change data, get all observed logical children
     // update discreteness and get stochastic children to be updated
-    Bool set_observed_nodes = array.ChangeData(range,
-                                               data,
-                                               logic_children_by_rank,
-                                               sto_children_by_rank,
-                                               mcmc);
+    Bool ok = array.ChangeData(range,
+                               data,
+                               logic_children_by_rank,
+                               sto_children_by_rank,
+                               mcmc, set_observed_nodes);
+    if (!ok)
+      return false;
 
     // update children
     update_children(logic_children_by_rank, sto_children_by_rank, mcmc);
 
-    return set_observed_nodes;
+    return true;
   }
 
   void SymbolTable::SampleData(const String & variable,

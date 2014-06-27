@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file ConjugateMNormalVarLinear.cpp
+/*! \file ConjugateMNormalCovLinear.cpp
  * \brief 
  * 
  * \author  $LastChangedBy$
@@ -37,11 +37,10 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
-#include "samplers/ConjugateMNormalVarLinear.hpp"
+#include "samplers/ConjugateMNormalCovLinear.hpp"
 #include "graph/Graph.hpp"
 #include "sampler/GetNodeValueVisitor.hpp"
 #include "sampler/NodesRelationVisitor.hpp"
-#include "samplers/ConjugateMNormalVarLinear.hpp"
 #include "samplers/GetMLinearTransformVisitor.hpp"
 #include "samplers/IsLinearVisitor.hpp"
 #include "graph/StochasticNode.hpp"
@@ -53,13 +52,13 @@ namespace Biips
 {
 
   const String
-      ConjugateMNormalVarLinear::NAME_ =
-          "Conjugate Multivariate Normal (with known covariance matrix and linear mean function)";
+      ConjugateMNormalCovLinear::NAME_ =
+          "ConjugateMNormal_knownCov_linearMean";
 
-  class MNormalVarLinearLikeFormVisitor: public ConstNodeVisitor
+  class MNormalCovLinearLikeFormVisitor: public ConstNodeVisitor
   {
   protected:
-    typedef MNormalVarLinearLikeFormVisitor SelfType;
+    typedef MNormalCovLinearLikeFormVisitor SelfType;
     typedef Types<SelfType>::Ptr Ptr;
 
     const Graph & graph_;
@@ -129,7 +128,7 @@ namespace Biips
       return obs_;
     }
 
-    MNormalVarLinearLikeFormVisitor(const Graph & graph,
+    MNormalCovLinearLikeFormVisitor(const Graph & graph,
                                     NodeId myId,
                                     NodeSampler & nodeSampler,
                                     Size dimNode) // TODO manage dimension
@@ -140,7 +139,7 @@ namespace Biips
     }
   };
 
-  void ConjugateMNormalVarLinear::sample(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
+  void ConjugateMNormalCovLinear::sample(const StochasticNode & node) // TODO optimize (using effective uBlas functions)
   {
     NodeId prior_mean_id = node.Parents()[0];
     NodeId prior_var_id = node.Parents()[1];
@@ -150,7 +149,7 @@ namespace Biips
     boost::tie(it_offspring, it_offspring_end)
         = graph_.GetLikelihoodChildren(nodeId_);
 
-    MNormalVarLinearLikeFormVisitor like_form_vis(graph_,
+    MNormalCovLinearLikeFormVisitor like_form_vis(graph_,
                                                   nodeId_,
                                                   *this,
                                                   dim_node);
@@ -173,7 +172,7 @@ namespace Biips
     inn_cov = ublas::prod(like_A, kalman_gain) + like_cov;
     Matrix inn_cov_inv = inn_cov;
     if (!ublas::cholesky_factorize(inn_cov_inv))
-      throw LogicError("ConjugateMNormalVarLinear::sample: matrix inn_cov_inv is not positive-semidefinite.");
+      throw LogicError("ConjugateMNormalCovLinear::sample: matrix inn_cov_inv is not positive-semidefinite.");
     ublas::cholesky_invert(inn_cov_inv);
     kalman_gain = ublas::prod(kalman_gain, inn_cov_inv);
 
@@ -226,7 +225,7 @@ namespace Biips
     sampledFlagsMap()[nodeId_] = true;
   }
 
-  class IsConjugateMNormalVarLinearVisitor: public ConstNodeVisitor
+  class IsConjugateMNormalCovLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -256,13 +255,13 @@ namespace Biips
       return conjugate_;
     }
 
-    IsConjugateMNormalVarLinearVisitor(const Graph & graph, NodeId myId) :
+    IsConjugateMNormalCovLinearVisitor(const Graph & graph, NodeId myId) :
       graph_(graph), myId_(myId), conjugate_(false)
     {
     }
   };
 
-  class CanSampleMNormalVarLinearVisitor: public ConstNodeVisitor
+  class CanSampleMNormalCovLinearVisitor: public ConstNodeVisitor
   {
   protected:
     const Graph & graph_;
@@ -273,7 +272,7 @@ namespace Biips
       canSample_ = false;
 
       if (graph_.GetObserved()[nodeId_])
-        throw LogicError("CanSampleMNormalVarLinearVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
+        throw LogicError("CanSampleMNormalCovLinearVisitor can not visit observed node: node id sequence of the forward sampler may be bad.");
 
       if (node.PriorName() != "dmnormvar")
         return;
@@ -282,7 +281,7 @@ namespace Biips
       if (node.IsBounded())
         return;
 
-      IsConjugateMNormalVarLinearVisitor child_vis(graph_, nodeId_);
+      IsConjugateMNormalCovLinearVisitor child_vis(graph_, nodeId_);
 
       GraphTypes::LikelihoodChildIterator it_offspring, it_offspring_end;
       boost::tie(it_offspring, it_offspring_end)
@@ -304,17 +303,17 @@ namespace Biips
       return canSample_;
     }
 
-    CanSampleMNormalVarLinearVisitor(const Graph & graph) :
+    CanSampleMNormalCovLinearVisitor(const Graph & graph) :
       graph_(graph), canSample_(false)
     {
     }
   };
 
-  Bool ConjugateMNormalVarLinearFactory::Create(const Graph & graph,
+  Bool ConjugateMNormalCovLinearFactory::Create(const Graph & graph,
                                                 NodeId nodeId,
                                                 BaseType::CreatedPtr & pNodeSamplerInstance) const
   {
-    CanSampleMNormalVarLinearVisitor can_sample_vis(graph);
+    CanSampleMNormalCovLinearVisitor can_sample_vis(graph);
 
     graph.VisitNode(nodeId, can_sample_vis);
 
@@ -329,7 +328,7 @@ namespace Biips
     return flag_created;
   }
 
-  ConjugateMNormalVarLinearFactory::Ptr
-      ConjugateMNormalVarLinearFactory::pConjugateMNormalVarLinearFactoryInstance_(new ConjugateMNormalVarLinearFactory());
+  ConjugateMNormalCovLinearFactory::Ptr
+      ConjugateMNormalCovLinearFactory::pConjugateMNormalCovLinearFactoryInstance_(new ConjugateMNormalCovLinearFactory());
 
 }

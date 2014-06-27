@@ -87,22 +87,23 @@ nodes.biips <- function(object, type, observed, ...) {
   
   sorted_nodes <- data.frame(RBiips("get_sorted_nodes", object$ptr()))
   
+  # add samplers and iterations if sampler is built
   if (RBiips("is_sampler_built", object$ptr())) {
     samplers <- data.frame(RBiips("get_node_samplers", object$ptr()))
     sorted_nodes <- cbind(sorted_nodes, samplers)
   }
   
+  # filter by type
   if (!missing(type)) {
-    if (!is.character(type) || length(type) != 1) 
-      stop("Invalid type argument.")
+    stopifnot(is.character(type), length(type) == 1)
     
-    type <- match.arg(type, c("Constant", "Logical", "Stochastic"))
+    type <- match.arg(type, c("const", "logic", "stoch"))
     sorted_nodes <- sorted_nodes[sorted_nodes["type"] == type, ]
   }
-  
+
+  # filter by observed
   if (!missing(observed)) {
-    if (!is.logical(observed) || length(observed) != 1) 
-      stop("Invalid observed argument.")
+    stopifnot(is.logical(observed), length(observed) == 1) 
     sorted_nodes <- sorted_nodes[sorted_nodes["observed"] == observed, ]
   }
   

@@ -40,10 +40,8 @@ for i=1:n_param
     ok = matbiips('change_data', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper, prop{i}, true);
     if ~ok
-        % DATA CHANGE FAILED: proposed parameter value might be out of
-        % bounds ?
-        %%% TODO double check this is the case and there is no other
-        %%% reason.
+        % DATA CHANGE FAILED: proposed parameter value must be out of
+        % bounds
         log_prior_prop = -Inf;
 %         n_fail = n_fail + 1;
 %         warning('Data change failed: %s = %.1f', param_names{i}, prop{i});

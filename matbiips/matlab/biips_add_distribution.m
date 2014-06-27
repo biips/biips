@@ -81,9 +81,5 @@ if ~isempty(fun_is_discrete)
 end
 
 %% Add distribution sampler
-try
-    matbiips('add_distribution', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
-    fprintf('Added distribution ''%s''\n', name)
-catch
-    warning('Cannot add distribution ''%s'' - the distribution may already exist', name);
-end
+matbiips('add_distribution', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
+fprintf('Added distribution ''%s''.\n', name)
