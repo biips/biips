@@ -50,7 +50,7 @@ std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  d
 
     ValArray::Ptr p_val(new ValArray(m_nb_elems));
     std::replace_copy( m_ptr , m_ptr + m_nb_elems, p_val->begin(),
-                       std::numeric_limits<Scalar>::quiet_NaN(), BIIPS_REALNA);
+                       mxGetNaN(), BIIPS_REALNA);
     marray.SetPtr(p_dim, p_val);
 
     data_map[var_name] = marray;

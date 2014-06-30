@@ -66,6 +66,7 @@ namespace Biips
     BUGSModel & model_;
     std::map<String, Counter> counterMap_;
     const std::map<String, MultiArray> & dataMap_;
+    Bool clone_;
     std::map<String, Flags> constantMaskMap_;
     Size nResolved_, nRelations_;
     Flags isResolvedFlags_;
@@ -110,7 +111,7 @@ namespace Biips
      * constant expressions in the BUGS language may depend on data
      * values.
      */
-    Compiler(BUGSModel & model, const std::map<String, MultiArray> & dataMap);
+    Compiler(BUGSModel & model, const std::map<String, MultiArray> & dataMap, Bool clone = false);
 
     /*!
      * Adds variables to the symbol table.

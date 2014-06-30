@@ -310,7 +310,7 @@ namespace Biips
   }
 
   Bool Console::Compile(std::map<String, MultiArray> & dataMap, Bool genData,
-                        Size dataRngSeed, Size verbosity)
+                        Size dataRngSeed, Size verbosity, Bool clone)
   {
     if (pModel_)
     {
@@ -326,7 +326,7 @@ namespace Biips
 
       pModel_ = new BUGSModel(true);
 
-      Compiler compiler(*pModel_, dataMap);
+      Compiler compiler(*pModel_, dataMap, clone);
 
       if (verbosity)
         out_ << PROMPT_STRING << "Compiling data graph" << endl;
@@ -437,7 +437,7 @@ namespace Biips
     }
 
     pModel_ = new BUGSModel();
-    Compiler compiler(*pModel_, dataMap);
+    Compiler compiler(*pModel_, dataMap, clone);
 
     if (verbosity)
       out_ << PROMPT_STRING << "Compiling model graph" << endl;
