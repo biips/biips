@@ -1,3 +1,68 @@
+Adrien le 30/06/2014 :
+======================
+- [ ] compiler matbiips avec mex sous linux et mac
+
+François le 26/06/2014 :
+========================
+dans `switch_stoch_param`, j'ai parfois le warning suivant:
+
+        Warning: LOGIC ERROR: Invalid
+        parameters values for function sqrt
+
+c'est du au fait que je fais une marche aleatoire sur un parametre positif. Est-ce que change_data renvoit quelque chose (genre booleen) pour indiquer si le changement s'est bien passe?
+Je pourrais juste faire taire biips, mais c'est un peu limite si jamais il y a d'autres soucis.
+Quelle est la meilleure stratégie tu penses?
+
+---> Adrien: Sur ce problème, je pense qu'il faut faire ce que j'avais noté dans le journal :
+- [x] faire en sorte que `change_data` vérifie qu'une valeur de noeud stochastique est dans le support de sa distribution avant de mettre à jour les enfants.
+Et dans ce cas, ne pas afficher de message d'erreur mais trouver un moyen silencieux d'avertir l'utilisateur (booleen = false?)
+
+
+François le 25/06/2014 :
+========================
+dans `stoch_kinetic`, j'ai l'erreur suivante:
+
+        x[1:2,1] is a logical node and cannot be observed.
+
+c'est parce que je fais `x[,1] <- x_init` ou `x_init` est donné. 
+C'est normal? On ne peut pas avoir un noeud logique observe?
+
+--> Adrien: Oui je l'ai aussi. C'est un mauvais fonctionnement car pour lui `x[,1]` et `x_init` sont le même noeud.
+Il faut que je voie comment empêcher cette erreur tout en empêchant l'utilisateur de fournir une observation sur d'autres types de noeuds logiques.
+
+--> François: ok, j'ai mis `x[,1]` gaussien du coup
+
+--> Adrien : L'erreur "is a logical node and cannot be observed" est envoyée
+dans `Compiler::allocateLogical` au moment de vérifier si la table de valeurs
+ne contient pas de valeur pour un noeud logique (interdit).
+
+Cette erreur intervient dans la fonction `clone_model` qui utilise les données
+récupérées de la première compilation.
+Dans notre cas, ces données contiennent un tableau `x` tel que x[1:2,1] est observé
+et le reste du tableau contien des NaN. La fonction `writeDataTable` de matbiips 
+utilise un `replace_copy` qui est "censé" transformer les NaN (`mxGetNaN()`) par 
+`BIIPS_REALNA` ce qui indique au compilateur biips que la donnée n'est pas observée.
+
+L'erreur avec `x[1:2,1]` peut être évitée avec l'instruction suivante qui empêche les vérifications pour les logique égaux à un noeud observé e.g. `x[,1] <- x_init`:
+          if (expression->treeClass() == P_VAR)
+              return node_id;
+
+Une nouvelle erreur apparait cependant: 
+        x[1,2] is a logical node and cannot be observed.
+
+Elle ne devrait pas arriver puisque `x[1,2]` contient NaN. Apparemment, le remplacement
+dans `writeDataTable` des Nan par `BIIPS_REALNA` n'a pas fonctionné...
+Plusieurs personnes ont signalé des problèmes avec les NaN de matlab en c :
+https://www.mathworks.com/matlabcentral/newsreader/view_thread/157608
+
+Pour éviter le problème, j'ai rajouté un argument booléen `clone` à `compile_model`
+qui permet de désactiver la vérification lorsque l'on clone le modèle.
+
+Adrien le 25/06/2014 :
+======================
+Pour exécuter Matbiips compilé avec mex+VS2012, la machine a besoin de 
+- Visual Studio C++ redistribuable
+
 Adrien le 3/6/2014 :
 ====================
 J'ai enfin réussi à compiler matbiips avec Visual Studio.
@@ -57,7 +122,7 @@ Vois-tu d'ou vient le probleme? Est-ce un bout de code que j'ai oublie de mettre
 
 Adrien le 1/4/2014 :
 ====================
-- [ ]  revoir dimensions et affichage de la sortie de biips_get_nodes.
+- [x]  revoir dimensions et affichage de la sortie de biips_get_nodes.
 
 François le 25/3/2014 :
 =======================
@@ -77,7 +142,7 @@ Adrien le 24/3/2014 :
 =====================
 - [x] Pour les crashs windows, essyer de désactiver ReleaseNodes dans sensitivity et pmmh --> ca n'a rien donné
 - [ ] Faire tourner les exemples sous Jags, notamment `switching_stoch_volatility`
-- [ ] pmmh: modifier traitement sortie `get_log_prior_density`, NaN = erreur numérique
+- [x] pmmh: modifier traitement sortie `get_log_prior_density`, NaN = erreur numérique
 - [ ] Tester validité des distributions et samplers
 
 François le 21/3/2014 :
@@ -89,11 +154,11 @@ François le 21/3/2014 :
 Adrien le 20/3/2014 :
 =====================
 - [ ] faire une liste des fonctions, distributions de biips avec les paramètrisations (cf tables du manuel de jags)
-- [ ] faire en sorte que `change_data` vérifie qu'une valeur de noeud stochastique est dans le support de sa distribution avant de mettre à jour les enfants.
+- [x] faire en sorte que `change_data` vérifie qu'une valeur de noeud stochastique est dans le support de sa distribution avant de mettre à jour les enfants.
     Et dans ce cas, ne pas afficher de message d'erreur mais trouver un moyen silencieux d'avertir l'utilisateur (booleen = false?)
-- [ ] corriger la densité de dbeta, pour qu'elle retourne `-Inf` si pb de bornes. actuellemnt retourne `NaN` parfois
+- [x] corriger la densité de dbeta, pour qu'elle retourne `-Inf` si pb de bornes. actuellement retourne `NaN` parfois
 - [ ] vérifier les calculs de log density dans toutes les distributions de Biips
-- [ ] tester les crashs sous octave
+- [x] tester les crashs sous octave
   --> Il y a bien le meme bug dans octave sous windows. Par exemple `stoch_kinetic` fait crasher octave avec le message:
         panic: segmentation violation
 - [ ] faire version R des `tutorialsX.m`, en rajoutant explications si besoin et repasser sur les labels, boxoff etc.
@@ -125,7 +190,7 @@ Note: un `NaN` peut aussi être renvoyé pour des erreurs numériques. Par exemple 
 
 Adrien le 18/3/2014 :
 =====================
-- [ ] enlever les bornes inutiles dans les arguments de `biips_sensitivity` et `biips_pmmh_samples`  des tutoriels et exemples 
+- [ ] enlever les bornes inutiles dans les arguments de `biips_sensitivity` et `biips_pmmh_samples` des tutoriels et exemples 
 - [ ] `biips_build_sampler` doit renvoyer une structure décrivant les itérations du SMC. Pour chaque itération :
     * liste des noeuds stochastiques mis à jour
     * liste des samplers
@@ -134,7 +199,7 @@ Adrien le 18/3/2014 :
 - [ ] Concernant les crashs MATLAB: est-ce que ça crashe dès la première exécution ou seulement à partir de la deuxième ?
 - [ ] enlever C++0X/11 ?
 - [ ] enlever boost regex (utiliser std::string ou autre?)
-- [ ] crash MATLAB sur exemple `stoch_kinetic`
+- [x] crash MATLAB sur exemple `stoch_kinetic` [Ne crashe plus apparemment]
 
 >> stoch_kinetic
 * Parsing model in: stoch_kinetic_cle.bug
@@ -272,7 +337,7 @@ Marc:
 
 Adrien: 
 - [x] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
-- [ ] Regarder bug exemple stochastic kinetic
+- [x] Regarder bug exemple stochastic kinetic
 - [ ] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
 - [ ] mexfile windows 32 bits
@@ -284,7 +349,7 @@ Adrien le 11/3/2014 :
 =====================
 - [ ] Modifier les benchmarks testcompiler: ne pas inclure le temps initial dans le calcul RMSE.
 - [ ] Utiliser la même taille de fenêtre pour les densités de smoothing et filtering dans `biips_density` de matbiips.
-- [ ] Retourner le mode dans `biips_summary` pour les lois discrètes
+- [x] Retourner le mode dans `biips_summary` pour les lois discrètes
 - [ ] Calculer un histogramme dans `biips_density` pour les lois discrètes
 
 François le 5/3/2014 :
@@ -350,7 +415,7 @@ Stack Trace (from fault):
 
 Adrien le 2/3/2014 :
 ====================
-- [ ] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
+- [x] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
 - [ ] Modifier arguments par défaut de `plot.summary.particles`.
 
 Adrien le 21/02/2014 :

@@ -17,7 +17,7 @@ matbiips('verbosity',2);
 
 % verif et compil du modele
 matbiips('check_model', id, 'hmm_1d_lin.bug'); 
-matbiips('compile_model', id, data, true, 12);
+matbiips('compile_model', id, data, true, 12, false);
 matbiips('set_default_monitors',id);
 matbiips('set_filter_monitors', id, {'x'} , {1 }, { t_max });
 matbiips('set_gen_tree_smooth_monitors', id, {'x'}, {1}, {t_max});
