@@ -144,6 +144,10 @@ n_part = 100; % Number of particles
 param_names = {'logc[1]','logc[2]','logc[3]'}; % Parameter for which we want to study sensitivity
 param_values = {linspace(-7,1,20),log(c_true(2))*ones(20,1),log(c_true(3))*ones(20,1)}; % Range of values
 
+% n_grid = 5;
+% [param_values{1:3}] = meshgrid(linspace(-7,1,n_grid), linspace(-7,1,n_grid), linspace(-7,1,n_grid));
+% param_values = cellfun(@(x) x(:), param_values, 'uniformoutput', false);
+
 %%
 % *Run sensitivity analysis with SMC*
 out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
@@ -165,8 +169,8 @@ ylabel('Penalized log-marginal likelihood')
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 20; % nb of burn-in/adaptation iterations
-n_iter = 20; % nb of iterations after burn-in
+n_burn = 20;%2000; % nb of burn-in/adaptation iterations
+n_iter = 20;%2000; % nb of iterations after burn-in
 thin = 20; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
@@ -245,16 +249,16 @@ end
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
+n_grid = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
     [.7 .7 1]);
-set(h, 'edgecolor', 'none')
+set(n_grid, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
 h2 = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
     [1 .7 .7]);
 set(h2, 'edgecolor', 'none')
 plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
-set(h, 'edgecolor', 'none')
+set(n_grid, 'edgecolor', 'none')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey',...

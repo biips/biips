@@ -87,7 +87,7 @@ end
 %% PROCESS AND CHECK INPUTS
 optarg_names = {'rs_thres', 'rs_type'};
 optarg_default = {.5, 'stratified'};
-optarg_valid = {[0, n_part],...
+optarg_valid = {[0, n_part], ...
     {'multinomial', 'stratified', 'residual', 'systematic'}};
 optarg_type = {'numeric', 'char'};
 [rs_thres, rs_type] = parsevar(varargin, optarg_names, optarg_type,...
@@ -138,10 +138,10 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
              case 4
                  value{i} = param_values{i}(:, :, :, k);
          end
-         tag = matbiips('change_data', console, pn_param(i).name, ...
+         ok = matbiips('change_data', console, pn_param(i).name, ...
              pn_param(i).lower, pn_param(i).upper, value{i}, false);
-         if ~tag
-             error('Data change failed: invalid parameter %s = %.f.', var, value{i});
+         if ~ok
+             error('Data change failed: invalid parameter %s = %.f.\n', var, value{i});
          end              
      end
      

@@ -817,16 +817,25 @@ namespace Biips
         break;
     }
 
-    /* in this case e.g.: x[1,1] <- x_init
-     * a logical node can be observed
-     * so we skip the next check
-     */
-    if (expression->treeClass() == P_VAR)
-      return node_id;
 
-    // FIXME when clone_ is on, we deactivate the checks.
-    if (clone_)
+    if (clone_) {
+      /* in this case e.g.: x[1,1] <- x_init
+       * a logical node can be observed
+       * so we skip the next check
+       */
+//      if (expression->treeClass() == P_VAR)
+//        return node_id;
+
+      // FIXME when clone_ is on, we deactivate the checks.
+      // This is not ideal. When cloning a model, we reuse the data generated
+      // by the first compilation. If the model has e.g.: x[1,1] <- x_init
+      // the whole x array will be in the data with an observed value in x[1,1]
+      // and NaN everywhere else (for matbiips). it appears that the condition
+      //     data_value[j] != BIIPS_REALNA
+      // is not true for eg x[1,2] despite it is NaN and despite the replace_copy
+      // instruction in matbiips writeDataTable function
       return node_id;
+    }
 
     /*
      Check that there are no values in the data table corresponding to
