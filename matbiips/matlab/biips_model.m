@@ -114,15 +114,17 @@ if (numel(unused) > 0)
 end
 
 %% compile model
-matbiips('compile_model', id, data, sample_data, get_seed());
+matbiips('compile_model', id, data, sample_data, get_seed(), false);
 
 %% data after possible sampling (from 'data' block in the BUGS language model)
-data = matbiips('get_data', id);
+model_data = matbiips('get_data', id);
 
 % Biips model structure
 model.id = id;
 model.file = file;
 model.model = fileread(file);
-model.data = data;
+model.data = model_data;
+model.bak.data = data;
+model.bak.sample_data = sample_data;
 
 model.class = 'biips';
