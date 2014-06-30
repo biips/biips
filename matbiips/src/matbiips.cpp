@@ -88,7 +88,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /////////////////////////////////////////
     else if (name_func == "compile_model") {
 
-      CheckRhs(nrhs, 4, name_func);
+      CheckRhs(nrhs, 5, name_func);
       Size id = GetConsoleId(consoles, prhs[1], name_func);
       Console_ptr p_console = consoles[id];
 
@@ -100,8 +100,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Bool sample_data = static_cast<Bool>(*mxGetLogicals(prhs[3]));
       Size data_rng_seed = static_cast<Size>(*mxGetPr(prhs[4]));
 
+      CheckArgIsLogical(5);
+      Bool clone = static_cast<Bool>(*mxGetLogicals(prhs[5]));
+
       // Compile model
-      if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY))
+      if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY, clone))
         throw RuntimeError("Failed to compile model.");
       if (sample_data && VERBOSITY>1)
         mbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;

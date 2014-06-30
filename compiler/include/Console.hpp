@@ -114,7 +114,7 @@ namespace Biips
     Bool Compile(std::map<String, MultiArray> & dataMap,
                  Bool genData,
                  Size dataRngSeed,
-                 Size verbosity = 1);
+                 Size verbosity = 1, Bool clone = false);
 
     Bool PrintGraphviz(std::ostream & os);
     /*!

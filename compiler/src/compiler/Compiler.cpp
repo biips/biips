@@ -817,6 +817,17 @@ namespace Biips
         break;
     }
 
+    /* in this case e.g.: x[1,1] <- x_init
+     * a logical node can be observed
+     * so we skip the next check
+     */
+    if (expression->treeClass() == P_VAR)
+      return node_id;
+
+    // FIXME when clone_ is on, we deactivate the checks.
+    if (clone_)
+      return node_id;
+
     /*
      Check that there are no values in the data table corresponding to
      this node.
@@ -1108,8 +1119,8 @@ namespace Biips
   }
 
   Compiler::Compiler(BUGSModel & model,
-                     const std::map<String, MultiArray> & dataMap) :
-      model_(model), dataMap_(dataMap), nResolved_(0), nRelations_(0), strictResolution_(false), indexExpression_(0), constantFactory_(model.graph()), logicalFactory_(model.graph())
+                     const std::map<String, MultiArray> & dataMap, Bool clone) :
+      model_(model), dataMap_(dataMap), clone_(clone), nResolved_(0), nRelations_(0), strictResolution_(false), indexExpression_(0), constantFactory_(model.graph()), logicalFactory_(model.graph())
   {
     if (!model_.graph().Empty())
       throw LogicError("Non empty graph in Compiler constructor.");
