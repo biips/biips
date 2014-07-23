@@ -388,7 +388,7 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     
     ans[[varname]] <- list(density = dens, name = varname, type = x$type, n_part = n_part, 
       ess = ess, discrete = discrete)
-    class(ans[[varname]]) <- "density.smcarray.atomic"
+    class(ans[[varname]]) <- "density.smcarray.single"
   }
   
   class(ans) <- "density.smcarray"
@@ -427,15 +427,15 @@ density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     for (n in names(dens)) ans[[n]][["smoothing"]] <- dens[[n]]
   }
   
-  for (n in names(ans)) class(ans[[n]]) <- "density.smcarray.atomic.list"
+  for (n in names(ans)) class(ans[[n]]) <- "density.smcarray.single.list"
   
   class(ans) <- "density.smcarray.list"
   return(ans)
 }
 
 
-##' @S3method plot density.smcarray.atomic
-plot.density.smcarray.atomic <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value", 
+##' @S3method plot density.smcarray.single
+plot.density.smcarray.single <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value", 
   ylab, main, sub, legend.text = NULL, args.legend = NULL, ...) {
   lwdd <- lwd
   coll <- col
@@ -501,8 +501,8 @@ plot.density.smcarray <- function(x, type = "l", lwd = lwd, col = 1:6, ...) {
 }
 
 
-##' @S3method plot density.smcarray.atomic.list
-plot.density.smcarray.atomic.list <- function(x, type = "l", lwd = 1, col = 1:6, 
+##' @S3method plot density.smcarray.single.list
+plot.density.smcarray.single.list <- function(x, type = "l", lwd = 1, col = 1:6, 
   xlab = "value", ylab, main, sub, legend.text = NULL, args.legend = NULL, ...) {
   lwdd <- lwd
   coll <- col
@@ -514,7 +514,7 @@ plot.density.smcarray.atomic.list <- function(x, type = "l", lwd = 1, col = 1:6,
   
   leg.flag <- TRUE
   if (is.logical(legend.text)) {
-    stopifnot(is.atomic(legend.text))
+    stopifnot(is.single(legend.text))
     leg.flag <- legend.text
   }
   

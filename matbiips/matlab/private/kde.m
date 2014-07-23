@@ -5,7 +5,7 @@ function [s] = kde(obs, weights, adjust, bw)
 %   INPUT
 %   - obs:      observation 1D data row vector
 %   - weigths:  weights row vector
-%   - adjust:   time factor for the bw
+%   - adjust:   scaling factor for the bw
 %   - bw:       bandwidth. if empty, bw is estimated from the samples
 %
 %   OUTPUT
@@ -40,4 +40,4 @@ xmin = min(obs);
 x = linspace(xmin - 4 * bw, xmax + 4 * bw, 100);
 x_mu = bsxfun(@minus, x', obs);
 f = exp(-0.5*(x_mu./bw).^2) * weights' ./ (sqrt(2 * pi) * bw);
-s=struct('x', x, 'f', f', 'bw', bw);
+s = struct('x', x, 'f', f', 'bw', bw);
