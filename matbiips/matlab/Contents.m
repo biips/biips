@@ -17,7 +17,7 @@
 %   biips_pmmh_update      - performs adaptation and burn-in iterations for the PMMH algorithm
 %   biips_pmmh_samples     - performs iterations for the PMMH algorithm and returns samples
 %   biips_smc_sensitivity  - performs sensitivity analysis of parameters with SMC
-%   biips_diagnostic       - returns a diagnostic structure on the SMC algorithm
 %   biips_summary          - computes some statistics on selected variables
 %   biips_density          - computes 1D kernel density estimates
 %   isoctave               - checks if octave is running
+%   biips_diagnosis        - diagnosis of the SMC algorithm
