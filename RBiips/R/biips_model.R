@@ -91,7 +91,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   varnames <- RBiips("get_variable_names", ptr)
   unused <- setdiff(names(data), varnames)
   data[unused] <- NULL
-  if (length(unused) > 0)
+  if (length(unused) > 0) 
     warning("Unused variables in data: ", paste(unused_variables, collapse = ", "))
   
   # compile model
@@ -123,13 +123,11 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     writeLines(model_code, mf)
     RBiips("check_model", ptr, mf)
     unlink(mf)
-    ## Re-compile
-    ## generate new data if sample_data is TRUE
+    ## Re-compile generate new data if sample_data is TRUE
     RBiips("compile_model", ptr, data, sample_data, get_seed())
     model_data <<- RBiips("get_data", ptr)
     invisible()
-  }
-  )
+  })
   class(model) <- "biips"
   
   return(model)

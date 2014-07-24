@@ -61,22 +61,13 @@ RBiips <- function(funcname, ...) {
 }
 
 
-# ##' load the corresponding module into the Biips environment
-# ##' @param name the module name
-# ##' @param quiet verbose flag
-# ##' @return null
+# ##' load the corresponding module into the Biips environment ##' @param name
+# the module name ##' @param quiet verbose flag ##' @return null
 # biips_load_module <- function(name, quiet = FALSE) {
-#   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
-#   stopifnot(is.logical(quiet), length(quiet) == 1)
-#   
-#   ok <- RBiips("load_module", name)
-#   if (!ok) {
-#     stop("module ", name, " not found\n")
-#   } else if (!quiet) {
-#     message("module", name, "loaded\n")
-#   }
-#   return(invisible())
-# }
+# stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
+# stopifnot(is.logical(quiet), length(quiet) == 1) ok <- RBiips('load_module',
+# name) if (!ok) { stop('module ', name, ' not found\n') } else if (!quiet) {
+# message('module', name, 'loaded\n') } return(invisible()) }
 
 
 
@@ -89,7 +80,7 @@ RBiips <- function(funcname, ...) {
 ##' @param fun_is_discrete R function telling is new function is discrete wrt its arguments
 ##' @export
 biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param = function(...) TRUE, 
-                               fun_is_discrete = function(...) FALSE) {
+  fun_is_discrete = function(...) FALSE) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
   stopifnot(is.numeric(n_param), length(n_param) == 1, n_param > 0)
   stopifnot(is.function(fun_dim))
@@ -98,7 +89,7 @@ biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param
   stopifnot(is.function(fun_is_discrete))
   
   RBiips("add_function", name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete)
-  cat('Added function', name, '.\n')
+  cat("Added function", name, ".\n")
   
   return(invisible())
 }
@@ -114,7 +105,7 @@ biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param
 ##' @param fun_is_discrete R function telling is new function is discrete wrt its arguments
 ##' @export
 biips_add_distribution <- function(name, n_param, fun_dim, fun_sample, fun_check_param = function(...) TRUE, 
-                                   fun_is_discrete = function(...) FALSE) {
+  fun_is_discrete = function(...) FALSE) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
   stopifnot(is.numeric(n_param), length(n_param) == 1, n_param > 0)
   stopifnot(is.function(fun_dim))
@@ -123,8 +114,8 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample, fun_check
   stopifnot(is.function(fun_is_discrete))
   
   RBiips("add_distribution", name, n_param, fun_dim, fun_sample, fun_check_param, 
-         fun_is_discrete)
-  cat('Added distribution', name, '.\n')
+    fun_is_discrete)
+  cat("Added distribution", name, ".\n")
   
   return(invisible())
 } 

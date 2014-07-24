@@ -25,6 +25,8 @@ knit_hooks$set(pars = function(before, options, envir) {
 #' where $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
 #' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
 
+#+
+
 #' ## Statistical model in BUGS language
 #' One needs to describe the model in BUGS language. We create the file
 #'  'hmm_1d_nonlin.bug':
@@ -58,6 +60,7 @@ knit_hooks$set(pars = function(before, options, envir) {
 
 #' ## Installation of RBiips package
 #' Install *RBiips* package archive depending on your system:
+#' 
 #' - `RBiips_x.x.x.zip` for Windows
 #' - `RBiips_x.x.x.tgz` for Mac OS X
 #' - `RBiips_x.x.x.tar.gz` for Linux
@@ -93,7 +96,7 @@ require(RBiips)
 #' **Compile BUGS model and sample data**
 model_file = 'hmm_1d_nonlin.bug' # BUGS model filename
 sample_data = TRUE # Boolean
-model = biips.model(model_file, data, sample.data=sample_data) # Create biips model and sample data
+model = biips_model(model_file, data, sample_data=sample_data) # Create biips model and sample data
 data = model$data()
 
 #' ## BiiPS Sequential Monte Carlo
@@ -109,74 +112,74 @@ type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5 # Optional parameters
 
 #+
 #' **Run SMC**
-out_smc = smc.samples(model, variables, n_part,
-                      type=type, rs.type=rs_type, rs.thres=rs_thres)
+out_smc = smc_samples(model, variables, n_part,
+                      type=type, rs_type=rs_type, rs_thres=rs_thres)
 
 #+
 #' **Diagnostic on the algorithm**
-diagnostic(out_smc$x)
+diagnosis(out_smc$x)
 
 #+
 #' **Summary statistics**
-summ = summary(out_smc$x, fun=c('mean', 'median', 'quantiles'), 
-               probs=c(.025, .975))
+summ = summary(out_smc, probs=c(.025, .975))
 
 #+ fig.cap='SMC: Filtering estimates'
 #' **Plot Filtering estimates**
-x_f_mean = summ$f$Mean
-x_f_med = summ$f$Med
-x_f_inf = summ$f$'Qu. 0.025'
-x_f_sup = summ$f$'Qu. 0.975'
+x_f_mean = summ$x$f$mean
+x_f_inf = summ$x$f$quant[[1]]
+x_f_sup = summ$x$f$quant[[2]]
 
-plot(x_f_mean, type='l', col=4, lwd=3,
+plot(x_f_mean, type='l', col='blue', lwd=3,
      xlab='Time', ylab='Estimates', 
      ylim=c(min(x_f_inf), max(x_f_sup)))
-legend('topright', leg='Filtering Mean Estimate', 
-       col=4, lwd=3, bty='n')
+lines(data$x_true, col='green3', lwd=2)
+legend('topright', leg=c('Filtering mean estimate', 'True value'),
+       col=c('blue','green3'), lwd=c(3,2), bty='n')
 
 lightcols = adjustcolor(palette('default'), alpha.f=.3)
 palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_f_inf, rev(x_f_sup)),
-        col=4, border=NA)
+        col='blue', border=NA)
 legend('topleft', leg='95 % credible interval', 
-       col=4, pch=15, pt.cex=2, bty='n')
+       col='blue', pch=15, pt.cex=2, bty='n')
 palette('default')
 
 #+ fig.cap='SMC: Smoothing estimates'
 #' **Plot Smoothing estimates**
-x_s_mean = summ$s$Mean
-x_s_med = summ$s$Med
-x_s_inf = summ$s$'Qu. 0.025'
-x_s_sup = summ$s$'Qu. 0.975'
+x_s_mean = summ$x$s$mean
+x_s_inf = summ$x$s$quant[[1]]
+x_s_sup = summ$x$s$quant[[2]]
 
-plot(x_s_mean, type='l', col=2, lwd=3, 
+plot(x_s_mean, type='l', col='red', lwd=3, 
      xlab='Time', ylab='Estimates',
      ylim=c(min(x_s_inf), max(x_s_sup)))
-legend('topright', leg='Smoothing Mean Estimate', 
-       col=2, lwd=3, bty='n')
+lines(data$x_true, col='green3', lwd=2)
+legend('topright', leg=c('Smoothing mean estimate', 'True value'),
+       col=c('red','green3'), lwd=c(3,2), bty='n')
 
 palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_s_inf, rev(x_s_sup)),
-        col=2, border=NA)
+        col='red', border=NA)
 legend('topleft', leg='95 % credible interval', 
-       col=2, pt.cex=2, pch=15, bty='n')
+       col='red', pt.cex=2, pch=15, bty='n')
 palette('default')
 
 #+ fig.cap='SMC: Marginal posteriors'
 #' **Marginal filtering and smoothing densities**
-kde_estimates = density(out_smc$x)
-time_index = c(5, 10, 15, 20)
+kde_estimates = density(out_smc)
+time_index = c(5, 10, 15)
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  plot(kde_estimates[[tk]], col=c(4,2), lty=1,
+  plot(kde_estimates$x[[tk]], col=c('blue', 'red'), lty=1,
        xlab=bquote(x[.(tk)]), ylab='Posterior density',
        main=paste('t=', tk, sep=''), sub='', 
        legend.text=FALSE)
-  points(data$x_true[tk], 0, col=3, pch=8)
+  points(data$x_true[tk], 0, col='green3', pch=8)
 }
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('topright', leg=c('Filtering density', 'Smoothing density', 'True value'), 
-       col=c(4, 2, 3), pch=c(NA,NA,8), lty=c(1,1,NA), bg='white')
+       col=c('blue', 'red', 'green3'), pch=c(NA,NA,8), lty=c(1,1,NA), bg='white')
 par(mfrow=c(1,1))
 
 
@@ -192,45 +195,48 @@ n_part = 100
 
 #+
 #' **Run PIMH**
-pimh.update(model, variables, n.iter=n_burn, n.part=n_part) # burn-in iterations
-out_pimh = pimh.samples(model, variables, n_iter, n_part, thin=thin)
+obj_pimh = pimh_init(model, variables)
+pimh_update(obj_pimh, n_burn, n_part) # burn-in iterations
+out_pimh = pimh_samples(obj_pimh, n_iter, n_part, thin=thin)
 
 #+
 #' **Some summary statistics**
-require(rjags)
-summary_pimh = summary(as.mcmc.list(out_pimh$x), quantiles=c(.025, .975))
+summ_pimh = summary(out_pimh, probs=c(.025, .975))
 
 #+ fig.cap='PIMH: Posterior mean and quantiles'
 #' **Posterior mean and quantiles**
-x_pimh_mean = summary_pimh$statistics[,'Mean']
-x_pimh_inf = summary_pimh$quantiles[,1]
-x_pimh_sup = summary_pimh$quantiles[,2]
-plot(x_pimh_mean, lwd=3, type='l', col=2,
+x_pimh_mean = summ_pimh$x$mean
+x_pimh_inf = summ_pimh$x$quant[[1]]
+x_pimh_sup = summ_pimh$x$quant[[2]]
+
+plot(x_pimh_mean, lwd=3, type='l', col='red',
      xlab='Time', ylab='Estimates', 
      ylim=c(min(x_pimh_inf), max(x_pimh_sup)))
-legend('topright', leg='PIMH Mean Estimate', 
-       col=2, lwd=3, bty='n')
+lines(data$x_true, col='green3', lwd=2)
+legend('topright', leg=c('PIMH mean estimate', 'True value'), 
+       col=c('red','green3'), lwd=c(3,2), bty='n')
 
 palette(lightcols)
 polygon(c(1:t_max, t_max:1), c(x_pimh_inf, rev(x_pimh_sup)), 
-        col=2, border=NA)
+        col='red', border=NA)
 legend('topleft', leg='95 % credible interval', 
-       col=2, pch=15, pt.cex=2, bty='n')
+       col='red', pch=15, pt.cex=2, bty='n')
 palette('default')
 
 #+ fig.cap='PIMH: Trace samples'
 #' **Trace of MCMC samples**
-time_index = c(5, 10, 15, 20)
+time_index = c(5, 10, 15)
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  plot(out_pimh$x[tk,], col=4, type='l',
+  plot(out_pimh$x[tk,], col='blue', type='l',
        xlab='Iterations', ylab='PIMH samples',
        main=paste('t=', tk, sep=''))
-  points(0, data$x_true[tk], col=3, pch=8)
+  points(0, data$x_true[tk], col='green3', pch=8)
 }
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('topright', leg=c('PIMH samples', 'True value'), 
-       col=c(4, 3), pch=c(NA,8), lty=c(1,NA), bg='white')
+       col=c('blue', 'green3'), pch=c(NA,8), lty=c(1,NA), bg='white')
 
 
 #+ fig.cap='PIMH: Histograms Marginal Posteriors'
@@ -238,13 +244,14 @@ legend('topright', leg=c('PIMH samples', 'True value'),
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  hist(out_pimh$x[tk,], breaks=20, col=2,
-       xlab='Iterations', ylab='Number of samples',
+  hist(out_pimh$x[tk,], breaks=20, col='red',
+       xlab=bquote(x[.(tk)]), ylab='Number of samples',
        main=paste('t=', tk, sep=''))
-  points(data$x_true[tk], 0, col=3, pch=8)
+  points(data$x_true[tk], 0, col='green3', pch=8)
 }
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('topright', leg=c('Smoothing density', 'True value'), 
-       col=c(1, 3), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(2,NA), 
+       col=c('red', 'green3'), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(2,NA), 
        bg='white')
 
 #+ fig.cap='PIMH: KDE estimates Marginal posteriors'
@@ -253,11 +260,12 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   kde_estimate_pimh = density(out_pimh$x[tk,])
-  plot(kde_estimate_pimh, col=2,
+  plot(kde_estimate_pimh, col='red',
        xlab=bquote(x[.(tk)]), ylab='Posterior density',
        main=paste('t=', tk, sep=''))
-  points(data$x_true[tk], 0, col=3, pch=8)
+  points(data$x_true[tk], 0, col='green3', pch=8)
 }
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('topright', leg=c('Smoothing density', 'True value'), 
-       col=c(2, 3), pch=c(NA,8), lty=c(1,NA), bg='white')
+       col=c('red', 'green3'), pch=c(NA,8), lty=c(1,NA), bg='white')
 par(mfrow=c(1,1))
