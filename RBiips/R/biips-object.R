@@ -41,7 +41,7 @@ is.biips <- function(object) {
   return(class(object) == "biips")
 }
 
-##' @S3method print biips
+##' @export
 print.biips <- function(x, ...) {
   stopifnot(is.biips(x))
   
@@ -67,7 +67,7 @@ print.biips <- function(x, ...) {
 
 
 ##' @importFrom stats variable.names
-##' @S3method variable.names biips
+##' @export
 variable.names.biips <- function(object, ...) {
   stopifnot(is.biips(object))
   
@@ -81,7 +81,7 @@ variable.names.biips <- function(object, ...) {
 ##' @export
 nodes <- function(object, ...) UseMethod("nodes")
 
-##' @S3method nodes biips
+##' @export
 nodes.biips <- function(object, type, observed, ...) {
   stopifnot(is.biips(object))
   
@@ -100,10 +100,10 @@ nodes.biips <- function(object, type, observed, ...) {
     type <- match.arg(type, c("const", "logic", "stoch"))
     sorted_nodes <- sorted_nodes[sorted_nodes["type"] == type, ]
   }
-
+  
   # filter by observed
   if (!missing(observed)) {
-    stopifnot(is.logical(observed), length(observed) == 1) 
+    stopifnot(is.logical(observed), length(observed) == 1)
     sorted_nodes <- sorted_nodes[sorted_nodes["observed"] == observed, ]
   }
   
@@ -114,7 +114,7 @@ nodes.biips <- function(object, type, observed, ...) {
 ##' @export
 print_dot <- function(object, ...) UseMethod("print_dot")
 
-##' @S3method print_dot biips
+##' @export
 print_dot.biips <- function(object, file, ...) {
   stopifnot(is.biips(x))
   
@@ -136,7 +136,7 @@ build_sampler <- function(object, ...) UseMethod("build_sampler")
 ##'              speed up the startup of the SMC for big models.
 ##'              default is 'auto'
 ##' @param ... unused
-##' @S3method build_sampler biips
+##' @export
 build_sampler.biips <- function(object, proposal = "auto", ...) {
   stopifnot(is.biips(object))
   proposal <- match.arg(proposal, c("auto", "prior"))
@@ -150,7 +150,7 @@ build_sampler.biips <- function(object, proposal = "auto", ...) {
 
 monitor <- function(object, ...) UseMethod("monitor")
 
-##' @S3method monitor biips
+##' @export
 monitor.biips <- function(object, variable_names, type = "s", ...) {
   stopifnot(is.biips(object))
   stopifnot(is.character(variable_names), length(variable_names) > 0)
@@ -171,7 +171,7 @@ monitor.biips <- function(object, variable_names, type = "s", ...) {
 
 is_monitored <- function(object, ...) UseMethod("is_monitored")
 
-##' @S3method is_monitored biips
+##' @export
 is_monitored.biips <- function(object, variable_names, type = "s", check_released = TRUE) {
   stopifnot(is.biips(object))
   stopifnot(is.character(variable_names), length(variable_names) > 0)
@@ -197,7 +197,7 @@ clear_monitors <- function(object, ...) UseMethod("clear_monitors")
 ##'                                   's' - smoothing
 ##'                                   'b' - backward smoothing
 ##' @param release_only boolean flag to indicate what kind of clearing has to be done
-##' @S3method clear_monitors biips
+##' @export
 clear_monitors.biips <- function(object, type = "fsb", release_only = FALSE, ...) {
   stopifnot(is.biips(object))
   type <- check_type(type, several.ok = TRUE)
@@ -215,7 +215,7 @@ clear_monitors.biips <- function(object, type = "fsb", release_only = FALSE, ...
 
 clone_model <- function(object, ...) UseMethod("clone_model")
 
-##' @S3method clone_model biips
+##' @export
 clone_model.biips <- function(object, ...) {
   stopifnot(is.biips(object))
   

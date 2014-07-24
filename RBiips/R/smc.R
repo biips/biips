@@ -11,7 +11,7 @@ smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 ##'                the algorithm used for resampling
 ##'
 ##' @return ok boolean. True if success
-##' @S3method smc_forward_algo biips
+##' @export
 smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", 
   ...) {
   stopifnot(is.biips(object))
@@ -73,7 +73,7 @@ smc_samples <- function(object, ...) UseMethod("smc_samples")
 ##' @seealso \code{\link{biips_model}}, \code{\link{pmmh.samples}},
 ##' \code{\link{pimh_samples}}
 ##' @keywords models
-##' @S3method smc_samples biips
+##' @export
 ##' @examples
 ##' 
 ##' ## Should be DIRECTLY executable !! 
@@ -130,6 +130,8 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
   for (n in names(out_smc)) class(out_smc[[n]]) <- "smcarray.list"
   
   out_smc$log_marg_like <- log_marg_like
+  
+  class(out_smc) <- "smcarray.list.list"
   
   return(out_smc)
 } 

@@ -57,7 +57,7 @@ data_preprocess <- function(data) {
   })
   
   ignored <- setdiff(v, names(data))
-  if(length(ignored)>0)
+  if (length(ignored) > 0) 
     warning("Ignored non numeric variables in data: ", paste(ignored, collapse = " "))
   
   return(data)

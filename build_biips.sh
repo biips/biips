@@ -41,9 +41,10 @@ else
     # OpenSuse: use lib or lib64
     export MATLAB_ROOT=/usr/local/MATLAB/R2014a
     export ECLIPSE=/home/adrien-alea/eclipse_4.3/eclipse
+    export CMAKE_ECLIPSE_VERSION=4.3
     export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
-    export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_EXECUTABLE=$ECLIPSE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
+    export CMAKE_OPTIONS="-DCMAKE_ECLIPSE_EXECUTABLE=$ECLIPSE -DCMAKE_ECLIPSE_VERSION=$CMAKE_ECLIPSE_VERSION -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=$1 -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE"
     # OpenSuse: add -DBoost_USE_STATIC_LIBS=OFF
     export CPACK_GENERATOR=DEB
     # OpenSuse: use RPM
@@ -82,7 +83,7 @@ if [[ $ans == "y" ]]; then
     set -x
     cd $BIIPS_BUILD
     if [ -e  _CPack_Packages ]; then
-        rm -rf _CPack_Packages
+        sudo rm -rf _CPack_Packages
     fi
     cmake -G"$CMAKE_GENERATOR" $CMAKE_OPTIONS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$BIIPS_ROOT $BIIPS_SRC
 fi

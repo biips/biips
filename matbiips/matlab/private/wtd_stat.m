@@ -1,8 +1,8 @@
-function summ = summary_stat(values, weights, probs, order, mode)
+function stat = wtd_stat(values, weights, probs, order, mode)
 
 %--------------------------------------------------------------------------
-% SUMMARY_STAT computes univariate statistics on weighted samples
-% summ = summary_stat(values, weights, probs, order, mode)
+% WTD_STAT computes univariate statistics on weighted samples
+% summ = wtd_stat(values, weights, probs, order, mode)
 % 
 % INPUT:
 % - values:     array with last dimension corresponding to particles
@@ -34,42 +34,42 @@ function summ = summary_stat(values, weights, probs, order, mode)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-d = ndims(values);
+m = ndims(values);
 
 %% moment based statistics
 if order>=1
-summ.mean = sum(values .* weights, d);
+stat.mean = sum(values .* weights, m);
 end
 if order>=2
-    summ.var = sum(bsxfun(@minus, values, summ.mean).^2 .* weights, d);
+    stat.var = sum(bsxfun(@minus, values, stat.mean).^2 .* weights, m);
 end
 if order>=3
-    mom2 =  sum(values.^2 .* weights, d);
-    mom3 =  sum(values.^3 .* weights, d);
-    summ.skew = (mom3 - 3 .* mom2 .* summ.mean + 2 .* summ.mean.^3)./summ.var.^(3/2);
+    mom2 =  sum(values.^2 .* weights, m);
+    mom3 =  sum(values.^3 .* weights, m);
+    stat.skew = (mom3 - 3 .* mom2 .* stat.mean + 2 .* stat.mean.^3)./stat.var.^(3/2);
 end
 if order>=4
-    summ.kurt = (sum(values.^4 .* weights, d) - 4 .* mom3 .* summ.mean + ...
-        6 .* mom2.*summ.mean.^2 - 3 * summ.mean.^4)./summ.var.^2 -3;
+    stat.kurt = (sum(values.^4 .* weights, m) - 4 .* mom3 .* stat.mean + ...
+        6 .* mom2.*stat.mean.^2 - 3 * stat.mean.^4)./stat.var.^2 -3;
 end
 
 if ~isempty(probs) || mode
-    values = num2cell(values, d);
-    weights = num2cell(weights, d);
+    values = num2cell(values, m);
+    weights = num2cell(weights, m);
 end
 
 %% quantiles
 if ~isempty(probs)
     dim = size(values);
-    summ.probs = probs(:);
+    stat.probs = probs(:);
     quantiles = cellfun(@(x,w) matbiips('wtd_quantile', x(:), numel(w)*w(:), probs), ...
         values, weights, 'UniformOutput',0);
     
     % reshape quantiles
-    summ.quant = reshape([quantiles{:}], [numel(probs), dim]);
-    summ.quant = shiftdim(summ.quant, 1);
-    summ.quant = reshape(summ.quant, [dim, numel(probs)]);
-    summ.quant = squeeze(num2cell(summ.quant, 1:d-1));
+    stat.quant = reshape([quantiles{:}], [numel(probs), dim]);
+    stat.quant = shiftdim(stat.quant, 1);
+    stat.quant = reshape(stat.quant, [dim, numel(probs)]);
+    stat.quant = squeeze(num2cell(stat.quant, 1:m-1));
     % quant is a cell with as many components as probabilities
 end
 
@@ -85,5 +85,5 @@ if mode
     % indices of the maximum sum of weights
     [~, Im] = cellfun(@max, W, 'uniformoutput', 0);
     % values with the maximum sum of weights
-    summ.mode = cellfun(@(u, im) u(im), U, Im);
+    stat.mode = cellfun(@(u, im) u(im), U, Im);
 end

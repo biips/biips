@@ -121,7 +121,7 @@ hold on
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering Mean Estimate', 'True value'})
+legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -139,14 +139,13 @@ hold on
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing Mean Estimate', 'True value'})
+legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
 legend('boxoff')
 box off
 
 % %%
 % % *Plot Backward smoothing estimates*
 % x_b_mean = summ.x.b.mean;
-% x_b_med = summ.x.b.med;
 % x_b_quant = summ.x.b.quant;
 % figure('name', 'SMC: Backward smoothing estimates')
 % h = fill([1:t_max, t_max:-1:1], [x_b_quant{1}; flipud(x_b_quant{2})],...
@@ -156,7 +155,7 @@ box off
 % plot(x_b_mean, 'linewidth', 3)
 % xlabel('Time')
 % ylabel('Estimates')
-% legend({'95 % credible interval', 'Filtering Mean Estimate'})
+% legend({'95 % credible interval', 'Backward smoothing mean estimate'})
 % legend('boxoff')
 % box off
 
@@ -174,12 +173,12 @@ for k=1:length(time_index)
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
-    ylabel('posterior density');
+    ylabel('Posterior density');
     title(['t=', num2str(tk)]);  
     xlim([-20,20])
     box off
 end
-h = legend({'filtering density', 'smoothing density', 'True value'});
+h = legend({'Filtering density', 'Smoothing density', 'True value'});
 set(h, 'position',[0.7, 0.25, .1, .1])
 legend('boxoff')
 
@@ -218,7 +217,7 @@ plot(x_pimh_mean, 'linewidth', 3)
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PIMH Mean Estimate', 'True value'})
+legend({'95 % credible interval', 'PIMH mean estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -243,7 +242,7 @@ legend('boxoff')
 
 %%
 % *Histograms of posteriors*
-figure('name', 'PIMH: Histograms Marginal Posteriors')
+figure('name', 'PIMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -251,19 +250,19 @@ for k=1:length(time_index)
     hold on    
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
-    ylabel('number of samples');
+    ylabel('Number of samples');
     title(['t=', num2str(tk)]);   
     xlim([-20,20])
     box off
 end
-h = legend({'posterior density', 'True value'});
+h = legend({'Posterior density', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1])
 legend('boxoff')
 
 %%
 % *Kernel density estimates of posteriors*
 kde_estimates_pimh = biips_density(samples_pimh);
-figure('name', 'PIMH: KDE estimates Marginal posteriors')
+figure('name', 'PIMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -271,12 +270,12 @@ for k=1:length(time_index)
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk) '}']);
-    ylabel('posterior density');
+    ylabel('Posterior density');
     title(['t=', num2str(tk)]);    
     xlim([-20,20])
     box off
 end
-h = legend({'posterior density', 'True value'});
+h = legend({'Posterior density', 'True value'});
 set(h, 'position',[0.7, 0.25, .1, .1])
 legend('boxoff')
 

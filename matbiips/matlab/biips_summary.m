@@ -42,11 +42,14 @@ function [summ] = biips_summary(samples, varargin)
 order_default = 1;
 is_mcmc = ~isstruct(samples);
 is_smc = ~is_mcmc && has_fsb_fields(samples);
-if is_smc
+if is_mcmc
+    mode = all(floor(samples) == samples);
+elseif is_smc
     names = fieldnames(samples);
     s = getfield(samples, names{1});
+    mode = all(s.discrete(:));
     % by default, do not return the mean if all the components are discrete
-    if all(s.discrete(:))
+    if mode
         order_default = 0;
     end
 end
@@ -66,7 +69,7 @@ if is_mcmc
     dim = size(samples);
     nsamples = dim(end);
     weights = 1/nsamples * ones(dim);
-    summ = summary_stat(samples, weights, probs, order, all(floor(samples) == samples));
+    summ = wtd_stat(samples, weights, probs, order, mode);
 elseif is_smc
     %% corresponds to the output of a SMC algorithm
     names = fieldnames(samples);
@@ -78,7 +81,7 @@ elseif is_smc
             continue
         end
         s = getfield(samples, fsb);
-        summ_s = summary_stat(s.values, s.weights, probs, order, all(s.discrete(:)));
+        summ_s = wtd_stat(s.values, s.weights, probs, order, mode);
         summ = setfield(summ, fsb, summ_s);
     end
 else
