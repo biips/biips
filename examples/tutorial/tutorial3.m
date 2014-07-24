@@ -146,7 +146,7 @@ hold on
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering Mean Estimate', 'True value'})
+legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -164,7 +164,7 @@ hold on
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing Mean Estimate', 'True value'})
+legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
 legend('boxoff')
 box off
 
@@ -182,11 +182,11 @@ for k=1:length(time_index)
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
-    ylabel('posterior density');
+    ylabel('Posterior density');
     title(['t=', num2str(tk)]);   
     box off
 end
-h = legend({'filtering density', 'smoothing density', 'True value'});
+h = legend({'Filtering density', 'Smoothing density', 'True value'});
 set(h, 'position',[0.7, 0.25, .1, .1])
 legend('boxoff')
 

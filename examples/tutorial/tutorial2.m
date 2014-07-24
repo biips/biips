@@ -104,12 +104,12 @@ out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
-figure('name', 'log-marginal likelihood');
+figure('name', 'Log-marginal likelihood');
 plot(param_values{1}, out.log_marg_like, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Log-marginal likelihood')
 
-figure('name', 'penalized log-marginal likelihood');
+figure('name', 'Penalized log-marginal likelihood');
 plot(param_values{1}, out.log_post, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
@@ -179,7 +179,7 @@ hist(mcmc_samples, 15)
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y')
-ylabel('number of samples')
+ylabel('Number of samples')
 title('log\_prec\_y')
 box off
 legend('boxoff')
@@ -190,7 +190,7 @@ plot(kde_var.x, kde_var.f);
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
-ylabel('posterior density');
+ylabel('Posterior density');
 box off
 legend('boxoff')
 
@@ -207,7 +207,7 @@ hold on
 plot(x_pmmh_mean, 'linewidth', 3)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PMMH Mean Estimate'})
+legend({'95 % credible interval', 'PMMH mean estimate'})
 box off
 legend('boxoff')
 
@@ -232,7 +232,7 @@ legend boxoff
 
 %%
 % *Histogram and kernel density estimate of posteriors of x*
-figure('name', 'PMMH: Histograms Marginal Posteriors')
+figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -240,15 +240,15 @@ for k=1:length(time_index)
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
-    ylabel('number of samples');
+    ylabel('Number of samples');
     title(['t=', num2str(tk)]);
     box off
 end
-h = legend({'posterior samples', 'True value'});
+h = legend({'Posterior samples', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
 legend boxoff
 
-figure('name', 'PMMH: KDE estimates Marginal posteriors')
+figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -256,11 +256,11 @@ for k=1:length(time_index)
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
-    ylabel('posterior density');
+    ylabel('Posterior density');
     title(['t=', num2str(tk)]);
     box off
 end
-h = legend({'posterior density', 'True value'});
+h = legend({'Posterior density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1]);
 legend boxoff
 

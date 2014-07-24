@@ -1,7 +1,7 @@
 
 pmmh_set_param <- function(object, ...) UseMethod("pmmh_set_param")
 
-##' @S3method pmmh_set_param biips
+##' @export
 pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
   
   stopifnot(is.biips(object))
@@ -383,7 +383,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
 
 pmmh_algo <- function(object, ...) UseMethod("pmmh_algo")
 
-##' @S3method pmmh_algo pmmh
+##' @export
 pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max_fail = 0, 
   rw_adapt = FALSE, ...) {
   stopifnot(is.biips(object))
@@ -438,16 +438,16 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   
   # Output structure with MCMC samples
   out <- list()
-  out$accept_rate <- mcarray(dim = c(1, n_samples))
+  out$accept_rate <- mcmcarray(dim = c(1, n_samples))
   len <- length(object$rw_step())
-  out$rw_step <- mcarray(dim = c(len, n_samples))
-  out$log_marg_like <- mcarray(dim = c(1, n_samples))
-  out$log_post <- mcarray(dim = c(1, n_samples))
+  out$rw_step <- mcmcarray(dim = c(len, n_samples))
+  out$log_marg_like <- mcmcarray(dim = c(1, n_samples))
+  out$log_post <- mcmcarray(dim = c(1, n_samples))
   
   if (return_samples) {
     for (var in param_names) {
       dimen <- dim(samples_param[[var]])
-      out[[var]] <- mcarray(dim = c(dimen, n_samples))
+      out[[var]] <- mcmcarray(dim = c(dimen, n_samples))
     }
   }
   
@@ -506,7 +506,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
           ## pre-allocation here to be sure that sample is not empty
           for (var in latent_names) {
           dimen <- dim(sample_latent[[var]])
-          out[[var]] <- mcarray(dim = c(dimen, n_samples))
+          out[[var]] <- mcmcarray(dim = c(dimen, n_samples))
           }
         }
         
@@ -555,7 +555,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
 ##' @param rw.learn boolean. Toggle the online learning the empirical covariance
 ##' matrix of the parameters
 ##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' @return A list of \code{\link[rjags:mcmcarray.object]{mcmcarray}}
 ##' objects, with one element for each element of the \code{variable.names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
@@ -563,14 +563,14 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
 ##' \code{\link{smc_samples}}
 ##' @keywords models
 ##' @export
-##' @S3method update pmmh
 ##' @examples
 ##' 
 ##' ## Should be DIRECTLY executable !! 
 ##' ##-- ==>  Define data, use random,
 ##' ##--  or do  help(data=index)  for the standard data sets.
 ##' 
-update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE, ...) {
+pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE, 
+  ...) {
   pmmh_algo(object, n_iter, n_part, return_samples = FALSE, max_fail = max_fail, 
     rw_adapt = rw_adapt, ...)
   return(invisible())
@@ -595,7 +595,7 @@ update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE, .
 ##' @param rw.learn boolean. Toggle online learning the empirical covariance matrix of
 ##' the parameters
 ##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' @return A list of \code{\link[rjags:mcmcarray.object]{mcmcarray}}
 ##' objects, with one element for each element of the \code{variable.names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron

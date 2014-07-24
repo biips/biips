@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*! \file weighted_statistics.cpp
+/*! \file wtd_stat.cpp
  * \brief 
  * 
  * \author  $LastChangedBy$
@@ -101,10 +101,7 @@ RcppExport SEXP wtd_mean (SEXP values, SEXP weights)
   static StatTag features[] = {MEAN};
   Accumulator accu = accumulate(values, weights, features, features + sizeof(features)/sizeof(StatTag));
 
-  Rcpp::List stats;
-  stats["mean"] = Rcpp::wrap(accu.Mean());
-
-  return stats;
+  return Rcpp::wrap(accu.Mean());
   END_RBIIPS
 }
 

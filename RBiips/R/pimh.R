@@ -30,10 +30,7 @@ is.pimh <- function(object) {
 }
 
 
-pimh_algo <- function(object, ...) UseMethod("pimh_algo")
-
-##' @S3method pimh_algo pimh
-pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
+pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   ## check arguments
   stopifnot(is.pimh(object))
   stopifnot(is.numeric(n_iter), length(n_iter) == 1, n_iter >= 1, is.finite(n_iter))
@@ -51,24 +48,24 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
   ## Initialization --------------------------------
   
   ## monitor variables
-  monitored <- is_monitored(object$model(), variable_names, "s", FALSE)
-  if (!monitored) 
-    monitor(object$model(), variable_names, type = "s")
+  variable_names <- object$variable_names()
+  # monitored <- is_monitored(object$model(), variable_names, 's', FALSE) if
+  # (!monitored)
+  monitor(object$model(), variable_names, type = "s")
   
-  ## build smc sampler
-  if (!RBiips("is_sampler_built", object$model()$ptr())) 
-    RBiips("build_smc_sampler", object$model()$ptr(), FALSE)
+  ## build smc sampler if (!RBiips('is_sampler_built', object$model()$ptr()))
+  ## RBiips('build_smc_sampler', object$model()$ptr(), FALSE)
   
   ## Get sample and log likelihood from PIMH object
   sample <- object$sample()
   log_marg_like <- object$log_marg_like()
   
   ## Output structure with MCMC samples
-  n_samples <- ceil(n_iter/thin)
+  n_samples <- ceiling(n_iter/thin)
   ind_sample <- 0
   
   out <- list()
-  out$log_marg_like <- mcarray(dim = c(1, n_samples))
+  out$log_marg_like <- mcmcarray(dim = c(1, n_samples))
   
   ## display message and progress bar
   mess <- if (return_samples) 
@@ -81,10 +78,10 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
   ## -------------------------------------------
   for (i in 1:n_iter) {
     ## SMC
-    smc_forward_algo(object, n_part = n_part, ...)
+    smc_forward_algo(object$model(), n_part = n_part, ...)
     
     ## Acceptance rate
-    log_marg_like_prop <- RBiips("get_log_norm_const", object$ptr())
+    log_marg_like_prop <- RBiips("get_log_norm_const", object$model()$ptr())
     log_ar <- log_marg_like_prop - log_marg_like
     
     ## Accept/Reject step
@@ -92,7 +89,7 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
       log_marg_like <- log_marg_like_prop
       
       ## sample one particle
-      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), 
+      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$model()$ptr(), 
         get_seed())
       for (var in variable_names) {
         var_in <- to_biips_vname(var)
@@ -106,11 +103,10 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
       out$log_marg_like[ind_sample] <- log_marg_like
       
       if (return_samples) {
-        if (ind_samples == 1) {
+        if (ind_sample == 1) {
           ## pre-allocation here to be sure that sample is not empty
           for (var in variable_names) {
-          dimen <- dim(sample[[var]])
-          out[[var]] <- mcarray(dim = c(dimen, n_samples))
+          out[[var]] <- mcmcarray(dim = c(dim(sample[[var]]), n_samples))
           }
         }
         
@@ -128,11 +124,13 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
   }
   
   ## Release monitor memory
-  clear_monitors(object, type = "s", release_only = TRUE)
+  clear_monitors(object$model(), type = "s", release_only = TRUE)
   
-  ## Output PIMH object with current sample and log marginal likelihood
+  ## Update PIMH object with current sample and log marginal likelihood
   object$sample(sample)
   object$log_marg_like(log_marg_like)
+  
+  class(out) <- "mcmcarray.list"
   
   ### TODO: Remove singleton dimensions for vectors? (cf matbiips)
   if (return_samples) 
@@ -141,8 +139,11 @@ pimh_algo.pimh <- function(object, n_iter, n_part, return_samples, thin = 1, ...
 
 
 
-##' @S3method update pimh
-update.pimh <- function(object, n_iter, n_part, ...) {
+##' @export
+pimh_update <- function(object, ...) UseMethod("pimh_update")
+
+##' @export
+pimh_update.pimh <- function(object, n_iter, n_part, ...) {
   pimh_algo(object, n_iter = n_iter, n_part = n_part, return_samples = FALSE, ...)
   return(invisible())
 }
@@ -161,13 +162,14 @@ update.pimh <- function(object, n_iter, n_part, ...) {
 ##' @param thin thinning interval for monitors
 ##' @param n_part number of particles
 ##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link[rjags:mcarray.object]{mcarray}}
+##' @return A list of \code{\link[rjags:mcmcarray.object]{mcmcarray}}
 ##' objects, with one element for each element of the \code{variable_names}
 ##' argument.
 ##' @author Adrien Todeschini, Francois Caron
 ##' @seealso \code{\link{biips_model}}, \code{\link{pmmh_samples}},
 ##' \code{\link{smc_samples}}
 ##' @keywords models
+##' @export
 ##' @examples
 ##' 
 ##' ## Should be DIRECTLY executable !! 
