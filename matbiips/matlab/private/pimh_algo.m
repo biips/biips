@@ -122,7 +122,7 @@ for i=1:n_iter
         sample = cell(n_var, 1);
         for k=1:n_var
             %%% FIXME transfrom variable name. eg: x[1,] => x[1,1:100]
-            var = strjoin(strsplit(variable_names{k}, ' '), '');
+            var = to_biips_vname(variable_names{k});
             sample{k} = getfield(sampled_value, var);
         end
     end

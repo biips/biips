@@ -57,11 +57,11 @@ gcc must be in the PATH e.g. C:\Rtools\gcc-4.6.3\bin
 
 4. Compile the desired libraries for 64bit architecture and install in the subdirectory stage\lib
 
-        b2 toolset=gcc address-model=64 --build-type=complete --with-program_options --with-regex stage
+        b2 toolset=gcc address-model=64 --build-type=complete --with-program_options stage
 
 5. Compile the desired libraries for 32bit architecture and install in the subdirectory stage32\lib
 
-        b2 toolset=gcc address-model=32 --stagedir=stage32 --build-type=complete --with-program_options --with-regex stage
+        b2 toolset=gcc address-model=32 --stagedir=stage32 --build-type=complete --with-program_options stage
 
 Mac OSX
 -----------------
@@ -75,7 +75,7 @@ Instructions for compiling boost libraries on Mac OSX using XCode compiler.
 
 4. Compile the desired libraries and install in the subdirectory stage/lib
 
-		./b2 --build-type=complete --layout=versioned --with-program_options --with-regex stage
+		./b2 --build-type=complete --layout=versioned --with-program_options stage
 
 
 ---------------------------------------------------------------------

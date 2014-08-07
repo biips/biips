@@ -77,7 +77,7 @@ namespace Biips
       mexCallMATLAB(0, (mxArray **) NULL, 1, &exception, "throw");
     }
     #else
-    mexCallMATLAB(1, plhs, nrhs, prhs, fun_eval_.c_str());
+    mexCallMATLAB(1, plhs, nrhs, prhs, fun_sample_.c_str());
     #endif
 
     // get output

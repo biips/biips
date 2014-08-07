@@ -8,7 +8,9 @@
 # MATLAB_BINDIR
 # MEX_COMMAND
 # MEX_EXT
-# MEX_OPT
+# MEX_OBJ_EXT
+# MEX_FLAGS
+# MEX_OUTPUT_OPT
 # MEXEXT_COMMAND
 # MATLAB_ARCH			equals to "i386" or "x64"
 # MATLAB_LIBRARY_DIR 	
@@ -67,6 +69,7 @@ if (MATLAB)
         PATHS ${MATLAB_BINDIR} 
         NO_DEFAULT_PATH
     )
+    set(MEX_OUTPUT_OPT -output)
 
     # find mexext program
     find_program(MEXEXT_COMMAND
@@ -75,7 +78,7 @@ if (MATLAB)
         NO_DEFAULT_PATH
     )
     if (MEXEXT_COMMAND)
-        # define mex extension
+        # define mex file extension
         execute_process(COMMAND ${MEXEXT_COMMAND}
             OUTPUT_VARIABLE MEX_EXT
             OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -86,15 +89,20 @@ if (MATLAB)
         # use MATLAB_ARCH on Windows to link with the correct BiiPS libs
         if ("${MEX_EXT}" MATCHES ".*64.*")
             set(MATLAB_ARCH x64)
-            set(MEX_OPT -largeArrayDims)
+            set(MEX_FLAGS -largeArrayDims)
         else()
             set(MATLAB_ARCH i386)
         endif()
     endif(MEXEXT_COMMAND)
 
-    # On Windows, do not use mex program (gcc not supported)
-    # to compile mex-files but use cmake commands instead
-    # hence, define compile flags and find MATLAB libraries to link with
+    # define object file extension
+    set(MEX_OBJ_EXT obj)
+
+    # We define compile flags and find MATLAB libraries to link with
+    # for manual compilations not using mex program.
+    # e.g. on windows, mex does not support gcc (mingw) so if you need to compile
+    # with gcc on windows, it has to be done manually using cmake commands instead.
+
     # define compile flags
     set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE")
 
