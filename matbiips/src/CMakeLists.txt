@@ -22,15 +22,16 @@ if (MATLAB OR OCTAVE)
 
 		# mex compile flags
 		set(MATBIIPS_COMPILE_FLAGS -DWIN32)
-		if(CMAKE_BUILD_TYPE STREQUAL Debug)
-			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g)
-		elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+
+		if (CMAKE_BUILD_TYPE STREQUAL Debug)
+			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} )
+		elseif (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
 			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g -O)
 		endif()
 
 
 		# biips src files targets
-		foreach(f ${Core_SRC} ${Base_SRC} ${Compiler_SRC})
+		foreach(f ${Core_SRC} ${Base_SRC} ${Compiler_SRC} ${Mbiips_SRC})
 			# file extension
 			get_filename_component(fext ${f} EXT)
 			# file name
@@ -39,19 +40,23 @@ if (MATLAB OR OCTAVE)
 			# check cpp source file
 			if(fext STREQUAL .c OR fext STREQUAL .cpp OR fext STREQUAL .cc)
 				# target command
-				add_custom_command(OUTPUT ${fname}.obj
-					COMMAND ${MEX_COMMAND} -c ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${f})
-				set(Biips_OBJ ${Biips_OBJ} ${fname}.obj)
+				add_custom_command(OUTPUT ${fname}.${MEX_OBJ_EXT}
+					COMMAND ${MEX_COMMAND} ${MEX_FLAGS} -c ${MEX_OUTPUT_OPT} ${fname}.${MEX_OBJ_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${f}
+					COMMENT "Building ${fname}.${MEX_OBJ_EXT}")
+				set(Mbiips_OBJ ${Mbiips_OBJ} ${fname}.${MEX_OBJ_EXT})
 			endif()
 		endforeach()
 
 		file(TO_CMAKE_PATH ${CMAKE_CURRENT_BINARY_DIR}/matbiips.${MEX_EXT} MATBIIPS_TARGET_LOC)
 
 		# matbiips mexfile target
+		if (OCTAVE)
+			set(MEX_FLAGS ${MEX_FLAGS} --mex)
+		endif()
 		add_custom_target(matbiips
-			DEPENDS ${Biips_OBJ}
-			COMMAND ${MEX_COMMAND} ${MATBIIPS_COMPILE_FLAGS} -output matbiips.${MEX_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_SRC} ${Biips_OBJ}
-			COMMENT "Compiling mexfile"
+			DEPENDS ${Mbiips_OBJ}
+			COMMAND ${MEX_COMMAND} ${MEX_FLAGS} ${MEX_OUTPUT_OPT} matbiips.${MEX_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_OBJ}
+			COMMENT "Linking mexfile matbiips.${MEX_EXT}"
 		)
 
 
