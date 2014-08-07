@@ -5,14 +5,17 @@
 # OCTAVE_CONFIG
 # MATLAB_COMMAND
 # MATLAB_FLAGS
+# MKOCTFILE
+# MEX_COMMAND
 # MEX_EXT
-# MATLAB_LIBRARY_DIR 	
-# MATLAB_INCLUDE_DIR 	
-# MATLAB_COMPILE_FLAGS 	
-# MATLAB_LIBRARIES	
-# OCTAVE_OCTINTERPRET_LIBRARY		
-# OCTAVE_OCTAVE_LIBRARY	
-# OCTAVE_CRUFT_LIBRARY	
+# MEX_OBJ_EXT
+# MATLAB_LIBRARY_DIR
+# MATLAB_INCLUDE_DIR
+# MATLAB_COMPILE_FLAGS
+# MATLAB_LIBRARIES
+# OCTAVE_OCTINTERPRET_LIBRARY
+# OCTAVE_OCTAVE_LIBRARY
+# OCTAVE_CRUFT_LIBRARY
 
 # Variables that can be set by the user:
 # OCTAVE_ROOT		path to the OCTAVE bindir. Helps finding OCTAVE.
@@ -27,26 +30,60 @@ endif()
 
 
 if (OCTAVE_ROOT)
+    file (TO_CMAKE_PATH "${OCTAVE_ROOT}/bin" OCTAVE_BINDIR)
+# elseif(APPLE)
+#     file(GLOB _MATLAB_PATHS "/Applications/MATLAB_*")
+#     find_path(MATLAB_ROOT "license.txt" ${_MATLAB_PATHS})
+#     file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
+endif()
+
+if (OCTAVE_BINDIR)
     # try to find octave
-    find_program(OCTAVE octave HINTS ${OCTAVE_ROOT} NO_DEFAULT_PATH)
+    find_program(OCTAVE octave HINTS ${OCTAVE_BINDIR} NO_DEFAULT_PATH)
 else()
     # try to find octave in default paths
     find_program(OCTAVE octave)
 endif()
 
+# Yes! found it
 if (OCTAVE)
-    message(STATUS "octave found: ${OCTAVE}")
+    message(STATUS "Found octave: ${OCTAVE}")
     set(MATLAB_COMMAND "${OCTAVE}")
     set(MATLAB_FLAGS --traditional)
+    # define mex file extension
     set(MEX_EXT mex)
+    # define object file extension
+    set(MEX_OBJ_EXT o)
 
+    # if (NOT OCTAVE_BINDIR)
+    #     # if octave is found in /usr/local/bin
+    #     # mex and mexext programs will certainly not be there
+    #     # hence we define MATLAB_BINDIR using the 'matlabroot' MATLAB command
+    #     execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
+    #         -r "disp(matlabroot);exit"
+    #         OUTPUT_VARIABLE _out)
+    #     string(REGEX MATCH "/.*$" MATLAB_ROOT ${_out})
+    #     file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
+    # endif()
+
+
+    # find mkoctfile program
+    find_program(MKOCTFILE
+        NAMES mkoctfile mkoctfile.exe
+        PATHS ${OCTAVE_BINDIR} 
+        NO_DEFAULT_PATH
+    )
+    set(MEX_COMMAND ${MKOCTFILE})
+    set(MEX_FLAGS -DOCTAVE)
+    set(MEX_OUTPUT_OPT --output)
+
+    # find octave-config program
     find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT})
 
-    if(NOT OCTAVE_CONFIG)
-        message(ERROR "cannot find octave-config")
-    endif()
+    # We define compile flags and find OCTAVE libraries to link with
+    # for manual compilations not using mkoctfile.
 
-    message (STATUS "octave-config found: ${OCTAVE_CONFIG}")
+    # define compile flags
     set(MATLAB_COMPILE_FLAGS -DOCTAVE)
 
     # find OCTAVE libaries
