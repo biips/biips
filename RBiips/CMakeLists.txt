@@ -155,7 +155,7 @@ elseif (APPLE)
         DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}.tgz
     )
   
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
 
     # add R CMD build target
     add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.tar.gz

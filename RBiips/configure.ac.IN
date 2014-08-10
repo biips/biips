@@ -126,7 +126,7 @@ fi
 
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
-LDFLAGS="-L${BIIPS_LIB}"
+LDFLAGS="-L${BIIPS_LIB} @EXTRA_COMPILE_FLAGS@"
 LIBS="-lm -lstdc++"
 AC_CHECK_LIB(BiipsCore, BiipsCore_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsCore library in ${BIIPS_LIB}")])
