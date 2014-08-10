@@ -65,7 +65,7 @@ configure_file (COPYING.txt COPYING.txt COPYONLY)
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 
 if (APPLE)
-  set(EXTRA_COMPILE_FLAGS "-fPIC")
+  set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC -Wredeclared-class-member")
 elseif(UNIX)
     # TODO : if g++ version >= 4.7 or 4.8 ?
   set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
@@ -80,10 +80,7 @@ elseif(WIN32)
   set(EXTRA_LINK_FLAGS "${EXTRA_LINK_FLAGS} -m${BITS}")
 endif()
 
-option (SUPPRESS_DEPRECATED_WARNINGS "Suppress deprecated warnings: -Wno-deprecated." ON)
-if (SUPPRESS_DEPRECATED_WARNINGS)
-	set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
-endif ()
+set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
 
 add_definitions(${EXTRA_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
