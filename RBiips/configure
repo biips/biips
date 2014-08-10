@@ -622,8 +622,8 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 BIIPS_LD_FLAGS
 BIIPS_INCLUDE
-EXTRA_LINK_FLAGS
-EXTRA_COMPILE_FLAGS
+RBIIPS_LINK_FLAGS
+RBIIPS_COMPILE_FLAGS
 ac_ct_CC
 CFLAGS
 CC
@@ -3216,7 +3216,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-LDFLAGS="-L${BIIPS_LIB}"
+LDFLAGS="-L${BIIPS_LIB} -std=c++11 -fPIC"
 LIBS="-lm -lstdc++"
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -3911,8 +3911,8 @@ LDFLAGS=${OLDFLAGS}
 BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
 
 
-EXTRA_COMPILE_FLAGS="--std=c++0x -fPIC -Wno-deprecated"
-EXTRA_LINK_FLAGS=""
+RBIIPS_COMPILE_FLAGS="-std=c++11 -fPIC"
+RBIIPS_LINK_FLAGS=""
 
 
 
