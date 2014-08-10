@@ -3,6 +3,7 @@
 
 # Variables defined if OCTAVE is not "OCTAVE-NOTFOUND":
 # OCTAVE_CONFIG
+# OCTAVE_VERSION
 # MATLAB_COMMAND
 # MATLAB_FLAGS
 # MKOCTFILE
@@ -43,6 +44,7 @@ if (OCTAVE_BINDIR)
 else()
     # try to find octave in default paths
     find_program(OCTAVE octave)
+    get_filename_component(OCTAVE_BINDIR ${OCTAVE} DIRECTORY)
 endif()
 
 # Yes! found it
@@ -54,18 +56,6 @@ if (OCTAVE)
     set(MEX_EXT mex)
     # define object file extension
     set(MEX_OBJ_EXT o)
-
-    # if (NOT OCTAVE_BINDIR)
-    #     # if octave is found in /usr/local/bin
-    #     # mex and mexext programs will certainly not be there
-    #     # hence we define MATLAB_BINDIR using the 'matlabroot' MATLAB command
-    #     execute_process(COMMAND ${MATLAB_COMMAND} ${MATLAB_FLAGS}
-    #         -r "disp(matlabroot);exit"
-    #         OUTPUT_VARIABLE _out)
-    #     string(REGEX MATCH "/.*$" MATLAB_ROOT ${_out})
-    #     file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
-    # endif()
-
 
     # find mkoctfile program
     find_program(MKOCTFILE
@@ -79,6 +69,11 @@ if (OCTAVE)
 
     # find octave-config program
     find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT})
+
+    # octave version
+    execute_process(COMMAND ${OCTAVE_CONFIG} -p VERSION
+            OUTPUT_VARIABLE OCTAVE_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # We define compile flags and find OCTAVE libraries to link with
     # for manual compilations not using mkoctfile.
@@ -112,15 +107,20 @@ if (OCTAVE)
         PATHS ${MATLAB_LIBRARY_DIR}
         NO_DEFAULT_PATH
     )
-    find_library(OCTAVE_CRUFT_LIBRARY cruft
-        PATHS ${MATLAB_LIBRARY_DIR}
-        NO_DEFAULT_PATH
-    )
     set(MATLAB_LIBRARIES
-        "${OCTAVE_OCTINTERP_LIBRARY}"
-        "${OCTAVE_OCTAVE_LIBRARY}"
-        "${OCTAVE_CRUFT_LIBRARY}"
-    )
+            "${OCTAVE_OCTINTERP_LIBRARY}"
+            "${OCTAVE_OCTAVE_LIBRARY}"
+        )
+    if(OCTAVE_VERSION VERSION_LESS 3.8)
+        find_library(OCTAVE_CRUFT_LIBRARY cruft
+            PATHS ${MATLAB_LIBRARY_DIR}
+            NO_DEFAULT_PATH
+        )
+        set(MATLAB_LIBRARIES
+            ${MATLAB_LIBRARIES}
+            "${OCTAVE_CRUFT_LIBRARY}"
+        )
+    endif()
 
     # find OCTAVE includes
     if (NOT $ENV{OCTAVE_INCLUDEDIR} STREQUAL "")
