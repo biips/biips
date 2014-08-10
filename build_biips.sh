@@ -17,7 +17,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export BIIPS_SRC=`pwd`
     export BIIPS_BUILD=/Users/adrien/workspace/biips-build
     export BIIPS_ROOT=/Users/adrien/biips
-    export BOOST_ROOT=/Users/adrien/boost_1_49_0
+    export BOOST_ROOT=/Users/adrien/boost_1_53_0
     export LIBnn=lib
     export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
     export CMAKE_BUILD_TYPE=Release
@@ -26,7 +26,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export CPACK_GENERATOR="PackageMaker"
     export MAKE="make $1"
     
-    if [[ "$2"=="-g" ]]; then
+    if [[ "$2" == "-g" ]]; then
         export BIIPS_BUILD=/Users/adrien/workspace/biips-debug
         export CMAKE_BUILD_TYPE=Debug
     fi
@@ -49,7 +49,7 @@ else
     export CPACK_GENERATOR=DEB
     # OpenSuse: use RPM
     export MAKE="make $1"
-
+    
     if [[ "$2" == "-g" ]]; then
         export BIIPS_BUILD=/home/adrien-alea/workspace/biips-debug
         export MATLAB_ROOT=/usr/local/MATLAB/R2010b
