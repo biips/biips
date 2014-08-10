@@ -81,15 +81,22 @@ if (UNIX) # Linux or Apple
   string(REGEX MATCH clang|gcc COMPILER_NAME ${COMPILER_INFO_OUT} ${COMPILER_INFO_ERR})
 
   if (COMPILER_NAME STREQUAL clang)
-    set(EXTRA_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
+    # set(BIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
+    # set(BIIPS_LINK_FLAGS "-stdlib=libstdc++")
+    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-redeclared-class-member")
+    set(RBIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
+    set(RBIIPS_LINK_FLAGS "-stdlib=libstdc++")
 
   elseif (COMPILER_NAME STREQUAL gcc)
       # TODO : check if g++ version >= 4.7 or 4.8 ?
-    set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC")
+    set(RBIIPS_COMPILE_FLAGS ${BIIPS_COMPILE_FLAGS})
+    set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
   
   else()
     message(WARNING "FIXME:Could not determine compiler name")
-    set(EXTRA_COMPILE_FLAGS "-fPIC")
+    set(BIIPS_COMPILE_FLAGS "-fPIC")
+    set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   endif()
 
 elseif (WIN32) # Windows
@@ -99,15 +106,17 @@ elseif (WIN32) # Windows
       set(BITS "64")
   endif()
   
-  set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -m${BITS}")
-  set(EXTRA_LINK_FLAGS "${EXTRA_LINK_FLAGS} -m${BITS}")
+  set(BIIPS_COMPILE_FLAGS "-m${BITS}")
+  set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
+  set(BIIPS_LINK_FLAGS "-m${BITS}")
+  set(RBIIPS_LINK_FLAGS "${BIIPS_LINK_FLAGS}")
 endif()
 
-set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
+set(BIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS} -Wno-deprecated")
 
-add_definitions(${EXTRA_COMPILE_FLAGS})
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
+add_definitions(${BIIPS_COMPILE_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BIIPS_LINK_FLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${BIIPS_LINK_FLAGS}")
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
