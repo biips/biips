@@ -60,7 +60,7 @@ if (MATLAB OR OCTAVE)
 		)
 
 
- 	else()
+ 	elseif (UNIX)
  	    include_directories(${Core_INCLUDE_DIRS}
  			${Base_INCLUDE_DIRS}
  			${Compiler_INCLUDE_DIRS}
