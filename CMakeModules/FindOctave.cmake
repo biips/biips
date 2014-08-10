@@ -28,13 +28,13 @@ if (NOT $ENV{OCTAVE_ROOT} STREQUAL "")
     file (TO_CMAKE_PATH "$ENV{OCTAVE_ROOT}" OCTAVE_ROOT)
 endif()
 
+if (APPLE AND NOT OCTAVE_ROOT)
+    file(GLOB _OCTAVE_PATHS "/usr/local/octave/*")
+    list(GET _OCTAVE_PATHS 0 OCTAVE_ROOT)
+endif()
 
-if (OCTAVE_ROOT)
+if(OCTAVE_ROOT)
     file (TO_CMAKE_PATH "${OCTAVE_ROOT}/bin" OCTAVE_BINDIR)
-# elseif(APPLE)
-#     file(GLOB _MATLAB_PATHS "/Applications/MATLAB_*")
-#     find_path(MATLAB_ROOT "license.txt" ${_MATLAB_PATHS})
-#     file (TO_CMAKE_PATH "${MATLAB_ROOT}/bin" MATLAB_BINDIR)
 endif()
 
 if (OCTAVE_BINDIR)
@@ -49,7 +49,7 @@ endif()
 if (OCTAVE)
     message(STATUS "Found octave: ${OCTAVE}")
     set(MATLAB_COMMAND "${OCTAVE}")
-    set(MATLAB_FLAGS --traditional)
+    set(MATLAB_FLAGS --traditional --no-gui)
     # define mex file extension
     set(MEX_EXT mex)
     # define object file extension
@@ -78,7 +78,7 @@ if (OCTAVE)
     set(MEX_OUTPUT_OPT --output)
 
     # find octave-config program
-    find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT})
+    find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT} ${OCTAVE_BINDIR})
 
     # We define compile flags and find OCTAVE libraries to link with
     # for manual compilations not using mkoctfile.
