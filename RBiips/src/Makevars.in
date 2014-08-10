@@ -1,10 +1,10 @@
 # variable substitutions here are processed by the configure script
 # and not by cmake
 
-PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/compiler  @EXTRA_COMPILE_FLAGS@
+PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/compiler  @RBIIPS_COMPILE_FLAGS@
 
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @BIIPS_LD_FLAGS@ @EXTRA_LINK_FLAGS@
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @BIIPS_LD_FLAGS@ @RBIIPS_LINK_FLAGS@
 
 ## As an alternative, one can also add this code in a file 'configure'
 ##
