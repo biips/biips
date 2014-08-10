@@ -178,7 +178,7 @@ RcppExport SEXP wtd_median (SEXP values, SEXP weights)
   if (values_vec.size() != weights_vec.size())
     throw LogicError("values and weights must have same length.");
 
-  std::vector<double> proba(0.5, 1);
+  std::vector<double> proba(1, 0.5);
 
   QuantileAccumulator accu(proba.begin(), proba.end());
   accu.Init();

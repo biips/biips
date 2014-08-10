@@ -29,11 +29,6 @@ if (NOT $ENV{OCTAVE_ROOT} STREQUAL "")
     file (TO_CMAKE_PATH "$ENV{OCTAVE_ROOT}" OCTAVE_ROOT)
 endif()
 
-if (APPLE AND NOT OCTAVE_ROOT)
-    file(GLOB _OCTAVE_PATHS "/usr/local/octave/*")
-    list(GET _OCTAVE_PATHS 0 OCTAVE_ROOT)
-endif()
-
 if(OCTAVE_ROOT)
     file (TO_CMAKE_PATH "${OCTAVE_ROOT}/bin" OCTAVE_BINDIR)
 endif()
@@ -95,7 +90,7 @@ if (OCTAVE)
         execute_process(COMMAND ${OCTAVE_CONFIG} -p OCTLIBDIR
                 OUTPUT_VARIABLE OCTAVE_OCTLIBDIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
-        find_path(MATLAB_LIBRARY_DIR liboctave.so NAMES liboctave.la
+        find_path(MATLAB_LIBRARY_DIR liboctave.so NAMES liboctave.la liboctave.dylib
                   PATHS ${OCTAVE_LIBDIR} ${OCTAVE_OCTLIBDIR})
     endif(OCTAVE_LIBRARYDIR)
 
