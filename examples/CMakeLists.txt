@@ -1,4 +1,5 @@
-set(example_scripts tutorial/tutorial1
+set(example_scripts
+    tutorial/tutorial1
     tutorial/tutorial2
     tutorial/tutorial3
     object_tracking/hmm_4d_nonlin
@@ -27,6 +28,33 @@ foreach(f ${example_scripts})
     )
     
 endforeach()
+
+
+if (WIN32)
+  set(_ext zip)
+else()
+  set(_ext tar.gz)
+endif()
+
+set(EXAMPLES_ARCHIVE "${CMAKE_BINARY_DIR}/$biips-examples_${Biips_VERSION}_.${_ext}")
+
+file(GLOB_RECURSE ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
+    *.m
+    *.bug
+)
+add_custom_command( OUTPUT ${EXAMPLES_ARCHIVE}
+  DEPENDS matbiips
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
+  ${ex_files}
+  COMMENT "Packaging Biips examples"
+)
+    
+#define target
+add_custom_target(examples_package
+    DEPENDS  ${EXAMPLES_ARCHIVE}
+)
+
 
 
 endif(SED)

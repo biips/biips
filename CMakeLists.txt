@@ -49,8 +49,6 @@ file (WRITE Description.txt ${Biips_DESCRIPTION})
 
 # set dependencies versions
 set (Boost_VERSION_REQUIRED 1.49.0)
-set (JAGS_VERSION 3.2.0)
-set (rjags_VERSION 3.2)
 set (Rcpp_VERSION 0.10.6)
 set (R_VERSION_REQUIRED 3.0.2)
 
@@ -64,12 +62,37 @@ configure_file (COPYING.txt COPYING.txt COPYONLY)
 # configure build
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 
-if (APPLE)
-  set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC -Wredeclared-class-member")
-elseif(UNIX)
-    # TODO : if g++ version >= 4.7 or 4.8 ?
-  set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
-elseif(WIN32)
+set(SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+if (UNIX)
+  #execute_process(COMMAND "dpkg" "--print-architecture" OUTPUT_VARIABLE SYSTEM_ARCH)
+  #string(REGEX MATCH "[^\n]*" SYSTEM_ARCH ${SYSTEM_ARCH})
+
+  execute_process(COMMAND uname -m
+    OUTPUT_VARIABLE SYSTEM_ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif ()
+
+# Determine compiler
+if (UNIX) # Linux or Apple
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -v
+      OUTPUT_VARIABLE COMPILER_INFO_OUT
+      ERROR_VARIABLE COMPILER_INFO_ERR
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX MATCH clang|gcc COMPILER_NAME ${COMPILER_INFO_OUT} ${COMPILER_INFO_ERR})
+
+  if (COMPILER_NAME STREQUAL clang)
+    set(EXTRA_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
+
+  elseif (COMPILER_NAME STREQUAL gcc)
+      # TODO : check if g++ version >= 4.7 or 4.8 ?
+    set(EXTRA_COMPILE_FLAGS "--std=c++0x -fPIC")
+  
+  else()
+    message(WARNING "FIXME:Could not determine compiler name")
+    set(EXTRA_COMPILE_FLAGS "-fPIC")
+  endif()
+
+elseif (WIN32) # Windows
   option(BUILD_64BIT "Build 64bit binaries" ON)
   
   if(BUILD_64BIT)
@@ -80,7 +103,7 @@ elseif(WIN32)
   set(EXTRA_LINK_FLAGS "${EXTRA_LINK_FLAGS} -m${BITS}")
 endif()
 
-set (EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
+set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -Wno-deprecated")
 
 add_definitions(${EXTRA_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_LINK_FLAGS}")
@@ -120,12 +143,6 @@ if (BUILD_TESTS)
   endif()
 endif()
 
-# if(Boost_REGEX_FOUND)
-#     set(EXTRA_LIBS ${Boost_REGEX_LIBRARY_RELEASE} ${EXTRA_LIBS})
-# else()
-#     message(FATAL_ERROR "Boost Regex Not Found!") 	
-# endif()
-
 # configure install directories and output directories
 include (GNUInstallDirs)
 if (UNIX)
@@ -155,6 +172,7 @@ option (FIND_OCTAVE "Build Matbiips for Octave instead of Matlab" OFF)
 # print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
 if (PRINT_SYSTEM_INFO)
+    message (CMAKE_SYSTEM=${CMAKE_SYSTEM})
     message (CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
     message (CMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION})
     message (CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
@@ -167,10 +185,14 @@ if (PRINT_SYSTEM_INFO)
     message (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
     message (CMAKE_C_COMPILER=${CMAKE_C_COMPILER})
     message (CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
-    message (CMAKE_COMPILER_IS_GNUCC=${CMAKE_COMPILER_IS_GNUCC})
+    message (CMAKE_COMPILER_IS_GNUC=${CMAKE_COMPILER_IS_GNUC})
     message (CMAKE_COMPILER_IS_GNUCXX=${CMAKE_COMPILER_IS_GNUCXX})
     message (CMAKE_C_FLAGS=${CMAKE_C_FLAGS})
     message (CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS})
+    message (BITS=${BITS})
+    message (SYSTEM_ARCH=${SYSTEM_ARCH})
+    message (COMPILER_NAME=${COMPILER_NAME})
+    message (COMPILER_INFO_STRING=${COMPILER_INFO_STRING})
 endif ()
 
 
@@ -225,15 +247,8 @@ include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_NAME biips)
 set (CPACK_PACKAGE_VENDOR BiiPS)
 
-#if (UNIX)
-#	execute_process(COMMAND "dpkg" "--print-architecture" OUTPUT_VARIABLE SYSTEM_ARCH)
-#	string(REGEX MATCH "[^\n]*" SYSTEM_ARCH ${SYSTEM_ARCH})
-#else ()
-#	set (SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-#endif ()
-
 # Generic package options
-set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_SYSTEM_NAME})
+set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${SYSTEM_ARCH}_${CMAKE_SYSTEM_NAME})
 set (CPACK_PACKAGE_SOURCE_FILE_NAME ${CPACK_PACKAGE_NAME}-src_${Biips_VERSION})
 set (CPACK_PACKAGE_VERSION_MAJOR ${Biips_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${Biips_VERSION_MINOR})

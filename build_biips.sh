@@ -20,9 +20,11 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export BOOST_ROOT=/Users/adrien/boost_1_53_0
     export LIBnn=lib
     export MATLAB_ROOT=/Applications/MATLAB_R2012a.app
+    export OCTAVE_ROOT=/opt/local
     export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Unix Makefiles"
-    export CMAKE_OPTIONS=""
+    export CMAKE_OPTIONS="-DBUILD_TESTS=OFF"
+    #export CMAKE_OPTIONS="-DBUILD_TESTS=OFF -DPRINT_SYSTEM_INFO=ON"
     export CPACK_GENERATOR="PackageMaker"
     export MAKE="make $1"
     
