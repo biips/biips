@@ -113,6 +113,12 @@ if [[ $ans == "y" ]]; then set -x
         sudo cpack -G $CPACK_GENERATOR
         sudo cpack -G TGZ
 	    sudo $MAKE package_source
+        set +x; echo -n "*** Install Biips DEB package ? (y/[n])"; read ans
+        if [[ $ans == "y" ]]; then set -x
+            cd $BIIPS_BUILD
+            sudo dpkg -i $BIIPS_BUILD/*.deb
+            sudo apt-get -f install
+        fi
     fi
 fi
 
