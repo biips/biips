@@ -202,9 +202,11 @@ leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 %%
 % *Posterior mean and credibilist interval for the parameter*
 for i=1:length(param_names)
-    fprintf('Posterior mean of %s: %.1f\n', leg{i}, summary_pmmh.(param_names{i}).mean);
+    quantile_param= getfield(getfield(summary_pmmh,param_names{i}),'quant');
+    fprintf('Posterior mean of %s: %.1f\n', leg{i},...
+        getfield(getfield(summary_pmmh,param_names{i}),'mean'));
     fprintf('95%% credibilist interval for %s: [%.1f,%.1f]\n',leg{i},...
-        summary_pmmh.(param_names{1}).quant{1},  summary_pmmh.(param_names{1}).quant{2});
+        quantile_param{1},quantile_param{2});
 end
 
 
@@ -213,7 +215,7 @@ end
 % *Trace of MCMC samples for the parameter*
 for i=1:length(param_names)
     figure('name', 'PMMH: Trace samples parameter')
-    plot(out_pmmh.(param_names{i}))
+    plot(getfield(out_pmmh,param_names{i}));
     hold on
     plot(0, param_true(i), '*g');  
     xlabel('Iterations')
@@ -225,7 +227,7 @@ end
 % *Histogram and kde estimate of the posterior for the parameter*
 for i=1:length(param_names)
     figure('name', 'PMMH: Histogram posterior parameter')
-    hist(out_pmmh.(param_names{i}), 15)
+    hist(getfield(out_pmmh,param_names{i}), 15)
     hold on
     plot(param_true(i), 0, '*g');  
     xlabel(leg{i})
@@ -234,9 +236,10 @@ for i=1:length(param_names)
 end
 
 for i=1:length(param_names)
+    kde_x = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'x');
+    kde_f = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'f');
     figure('name', 'PMMH: KDE estimate posterior parameter')
-    plot(kde_estimates_pmmh.(param_names{i}).x,...
-        kde_estimates_pmmh.(param_names{i}).f); 
+    plot(kde_x, kde_f); 
     hold on
     plot(param_true(i), 0, '*g');  
     xlabel(leg{i});
