@@ -39,11 +39,11 @@ endif()
 
 set(MATBIIPS_ARCHIVE "${CMAKE_BINARY_DIR}/${_name}_${Biips_VERSION}_${SYSTEM_ARCH}_${CMAKE_SYSTEM_NAME}.${_ext}")
 
-file(GLOB packfiles RELATIVE "${CMAKE_BINARY_DIR}"
+file(GLOB packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
     *.m
     *.${MEX_EXT}
 )
-file(GLOB pvt_packfiles RELATIVE "${CMAKE_BINARY_DIR}"
+file(GLOB pvt_packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
     private/*.m
     private/*.${MEX_EXT}
 )
