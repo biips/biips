@@ -1,3 +1,87 @@
+François le 11/08/2014 :
+========================
+
+Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
+* tutorial1,2,3: OK
+* hmm_nonlin_4d: OK
+* stoch_volatility: OK
+* switch_stoch_volatility_param: OK
+* switch_stoch_volatility: ERREUR sous Matlab/octave:
+---
+Warning: RUNTIME ERROR: Can not change data: node is not stochastic.
+ 
+Error using biips_smc_sensitivity (line 144)
+Data change failed: invalid parameter alpha[1:2,1] = -5.
+Data change failed: invalid parameter  =
+
+Error in switch_stoch_volatility (line 308)
+out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
+---
+* stoch_kinetic: OK
+* stoch_kinetic_gill: Matlab OK, Warning dans octave, mais le programme semble donner les resultats normaux:
+---
+octave:18> stoch_kinetic_gill
+warning: add_distribution: replacing existing distribution LV
+Added distribution 'LV'.
+* Parsing model in: stoch_kinetic_gill.bug
+* Compiling data graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 131
+  Sampling data
+  Reading data back into data table
+* Compiling model graph
+  Declaring variables
+  Resolving undeclared variables
+  Allocating nodes
+  Graph size: 132
+Error: /undefined in nan
+Operand stack:
+   --nostringval--
+Execution stack:
+   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+Dictionary stack:
+   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+Current allocation mode is local
+Last OS error: No such file or directory
+GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+* Assigning node samplers
+* Running SMC forward sampler with 100 particles
+  |--------------------------------------------------| 100%
+  |**************************************************| 40 iterations in 46.41 s
+Error: /undefined in nan
+Operand stack:
+   --nostringval--
+Execution stack:
+   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+Dictionary stack:
+   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+Current allocation mode is local
+Last OS error: No such file or directory
+GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+Error: /undefined in nan
+Operand stack:
+   --nostringval--
+Execution stack:
+   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+Dictionary stack:
+   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+Current allocation mode is local
+Last OS error: No such file or directory
+GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+---
+
+
 Adrien le 30/06/2014 :
 ======================
 - [ ] compiler matbiips avec mex sous linux et mac
