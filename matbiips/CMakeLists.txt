@@ -16,10 +16,13 @@ else()
     endif ()
 endif()
 
-add_subdirectory(matlab)
+add_subdirectory(private)
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(doc)
+
+file(GLOB mfiles *.m)
+file(COPY ${mfiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # create archive
 if (OCTAVE)
@@ -36,15 +39,20 @@ endif()
 
 set(MATBIIPS_ARCHIVE "${CMAKE_BINARY_DIR}/${_name}_${Biips_VERSION}_${SYSTEM_ARCH}_${CMAKE_SYSTEM_NAME}.${_ext}")
 
-file(GLOB_RECURSE packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
-    matlab/*.m
-    matlab/*.${MEX_EXT}
+file(GLOB packfiles RELATIVE "${CMAKE_BINARY_DIR}"
+    *.m
+    *.${MEX_EXT}
 )
+file(GLOB pvt_packfiles RELATIVE "${CMAKE_BINARY_DIR}"
+    private/*.m
+    private/*.${MEX_EXT}
+)
+
 add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
   DEPENDS matbiips
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
-  ${packfiles}
+  ${packfiles} ${pvt_packfiles}
   COMMENT "Packaging MatBiips"
 )
     
