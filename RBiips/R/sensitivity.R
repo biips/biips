@@ -91,8 +91,8 @@ smc.sensitivity <- function(object, params, n_part, ...) {
       ## change param value
       if (!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
         pn$upper[[v]], param[[v]], FALSE, PACKAGE = "RBiips")) 
-        stop("data change failed: invalid parameter. variable = ", var, ". value = ", 
-          param[v])
+        stop("data change failed: invalid parameter. ", var, " = ", 
+          paste0(param[v], collapse=" "))
     }
     
     log_prior <- 0
