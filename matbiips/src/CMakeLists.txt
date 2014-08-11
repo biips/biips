@@ -8,8 +8,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 )
 set(MATBIIPS_SRC ${Mbiips_SRC} ${Mbiips_HDRS})
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive")
-
 set(BIIPS_LIBS BiipsBase BiipsCompiler BiipsCore)
 if (MATLAB OR OCTAVE) 
 	
@@ -24,7 +22,7 @@ if (MATLAB OR OCTAVE)
 		set(MATBIIPS_COMPILE_FLAGS -DWIN32)
 
 		if (CMAKE_BUILD_TYPE STREQUAL Debug)
-			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} )
+			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g)
 		elseif (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
 			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g -O)
 		endif()
@@ -67,6 +65,10 @@ if (MATLAB OR OCTAVE)
  			${MATLAB_INCLUDE_DIR}
  			${Boost_INCLUDE_DIRS}
  		)
+ 		
+ 		if (COMPILER_NAME STREQUAL gcc AND BIIPS_DEBUG)
+ 		    set(MATLAB_COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS} -fpermissive")
+ 		endif()
  
  		add_library(matbiips SHARED EXCLUDE_FROM_ALL ${MATBIIPS_SRC})
  		target_link_libraries(matbiips ${BIIPS_LIBS} ${MATLAB_LIBRARIES})
