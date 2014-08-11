@@ -8,6 +8,7 @@
 # MATLAB_FLAGS
 # MKOCTFILE
 # MEX_COMMAND
+# MEX_FLAGS
 # MEX_EXT
 # MEX_OBJ_EXT
 # MATLAB_LIBRARY_DIR
@@ -62,7 +63,7 @@ if (OCTAVE)
         NO_DEFAULT_PATH
     )
     set(MEX_COMMAND ${MKOCTFILE})
-    set(MEX_FLAGS -DOCTAVE)
+    set(MEX_FLAGS -DOCTAVE --strip)
     set(MEX_OUTPUT_OPT --output)
 
     # find octave-config program
