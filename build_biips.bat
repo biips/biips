@@ -102,6 +102,12 @@ if "%errorlevel%"=="1" (
 	call:ask_test_matbiips
 )
 
+choice /m "Make examples package"
+if "%errorlevel%"=="1" (
+	cd "%BIIPS_BUILD%"
+	"%MAKE%" %MAKE_OPT% examples_package
+)
+
 cd "%BIIPS_SRC%"
 
 pause
