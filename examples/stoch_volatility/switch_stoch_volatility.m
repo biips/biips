@@ -70,7 +70,7 @@ rng('default')
 % and add the Matbiips folder to the Matlab path
 % 
 
-matbiips_path = '../../matbiips/matlab';
+matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% Load model and data
