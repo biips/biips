@@ -58,6 +58,15 @@
 %           }
 %         }
 
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
+
+
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
 % and add the Matbiips folder to the Matlab path
@@ -163,7 +172,7 @@ fprintf('95%% credibilist interval for log_prec_y: [%.1f,%.1f]\n',...
 % *Trace of MCMC samples for the parameter*
 mcmc_samples = getfield(out_pmmh, var_name);
 figure('name', 'PMMH: Trace samples parameter')
-plot(mcmc_samples)
+plot(mcmc_samples, 'r')
 hold on
 plot(0, data.log_prec_y_true, '*g');
 xlabel('Iterations')
@@ -176,6 +185,8 @@ legend('boxoff')
 % *Histogram and kde estimate of the posterior for the parameter*
 figure('name', 'PMMH: Histogram posterior parameter')
 hist(mcmc_samples, 15)
+h = findobj(gca,'Type','patch');
+set(h,'FaceColor','r','EdgeColor','w')
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y')
@@ -186,7 +197,7 @@ legend('boxoff')
 
 kde_var = getfield(kde_estimates_pmmh, var_name);
 figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_var.x, kde_var.f);
+plot(kde_var.x, kde_var.f, 'r');
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
@@ -201,10 +212,10 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [.7 .7 1]);
+    [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'linewidth', 3)
+plot(x_pmmh_mean, 'r', 'linewidth', 3)
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'PMMH mean estimate'})
@@ -218,7 +229,7 @@ figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :))
+    plot(out_pmmh.x(tk, :), 'r')
     hold on
     plot(0, data.x_true(tk), '*g');
     xlabel('Iterations')
@@ -236,9 +247,12 @@ figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    hist(out_pmmh.x(tk, :), 15);
+    hist(out_pmmh.x(tk, :), -16:.3:-7);
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     hold on
     plot(data.x_true(tk), 0, '*g');
+    xlim([-16, -7])
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
@@ -252,9 +266,10 @@ figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f, 'r');
     hold on
     plot(data.x_true(tk), 0, '*g');
+    xlim([-16, -7])
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
