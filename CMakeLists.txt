@@ -62,18 +62,32 @@ configure_file (COPYING.txt COPYING.txt COPYONLY)
 # configure build
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 
+# Determine compiler target architecture
 set(SYSTEM_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-if (UNIX)
+
+if (UNIX) # Linux or MacOSX
   #execute_process(COMMAND "dpkg" "--print-architecture" OUTPUT_VARIABLE SYSTEM_ARCH)
   #string(REGEX MATCH "[^\n]*" SYSTEM_ARCH ${SYSTEM_ARCH})
-
   execute_process(COMMAND uname -m
     OUTPUT_VARIABLE SYSTEM_ARCH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif ()
+
+elseif (WIN32) # Windows
+  option(BUILD_64BIT "Build 64bit binaries" ON)
+  
+  if(BUILD_64BIT)
+      set(BITS "64")
+  endif()
+
+  if (BITS MATCHES 64) 
+    set( SYSTEM_ARCH "x86_64" ) 
+  else() 
+    set( SYSTEM_ARCH "x86" ) 
+  endif() 
+endif()
 
 # Determine compiler
-if (UNIX) # Linux or Apple
+if (UNIX) # Linux or MacOSX
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -v
       OUTPUT_VARIABLE COMPILER_INFO_OUT
       ERROR_VARIABLE COMPILER_INFO_ERR
@@ -100,12 +114,6 @@ if (UNIX) # Linux or Apple
   endif()
 
 elseif (WIN32) # Windows
-  option(BUILD_64BIT "Build 64bit binaries" ON)
-  
-  if(BUILD_64BIT)
-      set(BITS "64")
-  endif()
-  
   set(BIIPS_COMPILE_FLAGS "-m${BITS}")
   set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   set(BIIPS_LINK_FLAGS "-m${BITS}")

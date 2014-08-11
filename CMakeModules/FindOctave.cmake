@@ -46,7 +46,10 @@ endif()
 if (OCTAVE)
     message(STATUS "Found octave: ${OCTAVE}")
     set(MATLAB_COMMAND "${OCTAVE}")
-    set(MATLAB_FLAGS --traditional --no-gui)
+    set(MATLAB_FLAGS --traditional)
+    if (NOT WIN32)
+        set(MATLAB_FLAGS ${MATLAB_FLAGS} --no-gui)
+    endif()
     # define mex file extension
     set(MEX_EXT mex)
     # define object file extension
