@@ -85,7 +85,7 @@
 
 set(0, 'DefaultAxesFontsize', 14)
 set(0, 'Defaultlinelinewidth', 2)
-rng('default')
+% rng('default')
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -110,11 +110,10 @@ biips_add_distribution(fun_bugs, fun_nb_inputs, fun_dim, funeval)
 %%
 % *Model parameters*
 t_max = 40;
-dt = 1;%0.20;
 x_init = [100 ;100];
 c = [.5,.0025,.3];
 sigma = 10;
-data = struct('t_max', t_max, 'dt', dt, 'c',c, 'x_init', x_init, 'sigma', sigma);
+data = struct('t_max', t_max, 'c',c, 'x_init', x_init, 'sigma', sigma);
 
 
 
@@ -146,7 +145,7 @@ saveas(gca, 'kinetic_data', 'epsc2')
 
 %%
 % *Run SMC*
-n_part = 10000; % Number of particles
+n_part = 100;%10000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part, 'type', 'fs');
 
@@ -187,7 +186,7 @@ legend({'95 % interval (prey)', 'Posterior mean (prey)',...
 legend('boxoff')
 box off
 ylim([0,450])
-alpha(.7)
+% alpha(.7)
 saveas(gca, 'kinetic_smc', 'epsc2')
 
 %% Clear model

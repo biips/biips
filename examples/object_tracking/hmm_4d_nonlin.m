@@ -67,7 +67,11 @@
 %       }
 %     }
 
-rng('default')
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -100,7 +104,7 @@ G = [ delta_t.^2/2 0
     0 delta_t];
 data = struct('t_max', t_max, 'mean_x_init', mean_x_init, 'prec_x_init', ...
     prec_x_init, 'x_pos', x_pos, 'mean_v', mean_v, 'prec_v', prec_v,...
-    'prec_y', prec_y, 'delta_t', delta_t, 'F', F, 'G', G);
+    'prec_y', prec_y, 'F', F, 'G', G);
 
 
 %%

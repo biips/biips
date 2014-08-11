@@ -95,7 +95,7 @@ data = model.data;
 
 %%
 % *Run SMC*
-n_part = 5000; % Number of particles
+n_part = 100;%5000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part);
 
@@ -205,8 +205,8 @@ saveas(gca, 'volatility_kde', 'epsc2')
 
 %%
 % *Parameters of the PIMH*
-n_burn = 10000;
-n_iter = 10000;
+n_burn = 10;%10000;
+n_iter = 10;%10000;
 thin = 1;
 n_part = 50;
 
