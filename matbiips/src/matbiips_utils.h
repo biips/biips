@@ -76,6 +76,7 @@ inline
 String GetString(const mxArray * pm) {
 	char * c  = mxArrayToString(pm);
 	String str(c);
+	mxFree(c);
 	return str;
 }
 
