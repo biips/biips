@@ -96,8 +96,8 @@ if (UNIX) # Linux or MacOSX
 
   if (COMPILER_NAME STREQUAL clang)
     # set(BIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
-    # set(BIIPS_LINK_FLAGS "-stdlib=libstdc++")
-    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-redeclared-class-member")
+    set(BIIPS_COMPILE_FLAGS "-std=c++11 -stdlib=libstdc++ -fPIC -Wno-redeclared-class-member")
+    set(BIIPS_LINK_FLAGS "-stdlib=libstdc++")
     set(RBIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
     set(RBIIPS_LINK_FLAGS "-stdlib=libstdc++")
 
