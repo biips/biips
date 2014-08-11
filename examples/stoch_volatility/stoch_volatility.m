@@ -67,6 +67,13 @@
 %       }
 %     }
 
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -176,7 +183,7 @@ title_names = {'\alpha', 'logit(\beta)', 'log(\sigma)'};
 for k=1:3
     out_pmmh_param = getfield(out_pmmh, param_names{k});
     figure
-    plot(out_pmmh_param)
+    plot(out_pmmh_param, 'r')
     if sample_data
         hold on
         plot(0, param_true(k), '*g');  
@@ -193,6 +200,8 @@ for k=1:3
     out_pmmh_param = getfield(out_pmmh, param_names{k});
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(out_pmmh_param, 15)
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     if sample_data
         hold on
         plot(param_true(k),0, '*g');  
@@ -209,10 +218,10 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [.7 .7 1]);
+    [1, .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'linewidth', 3)
+plot(x_pmmh_mean, 'r', 'linewidth', 3)
 if sample_data
     plot(data.x_true, 'g', 'linewidth', 2)
     legend({'95 % credible interval', 'PMMH Mean Estimate', 'True value'})
@@ -230,7 +239,7 @@ figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :))
+    plot(out_pmmh.x(tk, :), 'r')
     if sample_data
         hold on
         plot(0, data.x_true(tk), '*g');  
@@ -251,6 +260,8 @@ for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), 15);
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     if sample_data
         hold on    
         plot(data.x_true(tk), 0, '*g');
@@ -268,7 +279,7 @@ figure('name', 'PMMH: KDE estimates Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f, 'r'); 
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');

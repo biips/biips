@@ -50,6 +50,13 @@
 %     }
 
 set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
+
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -210,10 +217,10 @@ x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    [.7 .7 1]);
+    [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pimh_mean, 'linewidth', 3)
+plot(x_pimh_mean, 'r', 'linewidth', 3)
 plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
@@ -228,7 +235,7 @@ figure('name', 'PIMH: Trace samples')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(samples_pimh.x(tk, :))
+    plot(samples_pimh.x(tk, :), 'r')
     hold on
     plot(0, data.x_true(tk), '*g');  
     xlabel('Iterations')
@@ -246,13 +253,15 @@ figure('name', 'PIMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    hist(samples_pimh.x(tk, :), 20);
+    hist(samples_pimh.x(tk, :), -15:1:15);
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     hold on    
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);   
-    xlim([-20,20])
+    xlim([-15,15])
     box off
 end
 h = legend({'Posterior density', 'True value'});
@@ -266,13 +275,13 @@ figure('name', 'PIMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f); 
+    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f, 'r'); 
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk) '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);    
-    xlim([-20,20])
+    xlim([-15,15])
     box off
 end
 h = legend({'Posterior density', 'True value'});

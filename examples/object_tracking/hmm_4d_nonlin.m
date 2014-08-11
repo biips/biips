@@ -194,10 +194,10 @@ for k=1:4
     title(title_fig{k})
     hold on
     h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
-    [.7 .7 1]);
+    [1, .7 .7]);
     set(h, 'edgecolor', 'none')
     hold on
-    plot(x_s_mean(k, :), 'linewidth', 3)
+    plot(x_s_mean(k, :), 'r', 'linewidth', 3)
     hold on
     plot(data.x_true(k,:), 'g', 'linewidth', 2)
     xlabel('Time')
