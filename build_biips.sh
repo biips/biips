@@ -154,6 +154,12 @@ if [[ $ans == "y" ]]; then set -x
     fi
 fi
 
+set +x; echo -n "*** Make examples package? (y/[n])"; read ans
+if [[ $ans == "y" ]]; then set -x
+    cd $BIIPS_BUILD
+    $MAKE examples_package
+fi
+
 
 set +x; read -p "*** Press [Enter] key to finish..."
 

@@ -14,20 +14,22 @@ find_program(SED sed)
 
 if(SED)
 
-add_custom_target(mat2r_examples
-)
+  add_custom_target(mat2r_examples
+  )
 
-foreach(f ${example_scripts})
+  foreach(f ${example_scripts})
 
-    add_custom_command(
-        TARGET mat2r_examples
-        #OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${f}_spin.R
-        COMMAND ${SED} -E -f m2R.sed ${f}.m > ${f}_spin.R
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Converting example ${f}.m to ${f}_spin.R"
-    )
-    
-endforeach()
+      add_custom_command(
+          TARGET mat2r_examples
+          #OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${f}_spin.R
+          COMMAND ${SED} -E -f m2R.sed ${f}.m > ${f}_spin.R
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+          COMMENT "Converting example ${f}.m to ${f}_spin.R"
+      )
+      
+  endforeach()
+
+endif(SED)
 
 
 if (WIN32)
@@ -36,7 +38,7 @@ else()
   set(_ext tar.gz)
 endif()
 
-set(EXAMPLES_ARCHIVE "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}_.${_ext}")
+file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" EXAMPLES_ARCHIVE)
 
 file(GLOB_RECURSE ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
     *.m
@@ -44,6 +46,7 @@ file(GLOB_RECURSE ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
     *.md
     *.csv
 )
+
 add_custom_command( OUTPUT ${EXAMPLES_ARCHIVE}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} -E tar cafv ${EXAMPLES_ARCHIVE}
@@ -57,5 +60,3 @@ add_custom_target(examples_package
 )
 
 
-
-endif(SED)
