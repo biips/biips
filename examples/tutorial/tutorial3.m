@@ -73,6 +73,13 @@
 % 
 %     out_dim = [1,1];
 
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -181,6 +188,7 @@ for k=1:length(time_index)
     hold on
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
+    xlim([-20, 20])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);   
