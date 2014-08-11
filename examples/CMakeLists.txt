@@ -32,14 +32,6 @@ if(SED)
 endif(SED)
 
 
-if (WIN32)
-  set(_ext zip)
-else()
-  set(_ext tar.gz)
-endif()
-
-file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" EXAMPLES_ARCHIVE)
-
 file(GLOB ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
     *.md
 )
@@ -52,18 +44,27 @@ foreach(ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
     )
     set(ex_files ${ex_files} ${ex_dir_files})
 endforeach()
+    
+if (WIN32)
+  set(_ext_list zip)
+else()
+  set(_ext_list zip tar.gz)
+endif()
 
-add_custom_command( OUTPUT ${EXAMPLES_ARCHIVE}
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  COMMAND ${CMAKE_COMMAND} -E remove ${EXAMPLES_ARCHIVE}
-  COMMAND ${CMAKE_COMMAND} -E tar cafv ${EXAMPLES_ARCHIVE}
-  ${ex_files}
-  COMMENT "Packaging Biips examples"
-)
+foreach (_ext ${_ext_list})
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" ex_archive)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive})
+    
+    add_custom_command( OUTPUT ${ex_archive}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove ${ex_archive}
+      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive}
+      ${ex_files}
+    )
+endforeach()
     
 #define target
 add_custom_target(examples_package
-    DEPENDS  ${EXAMPLES_ARCHIVE}
+    DEPENDS  ${EXAMPLES_ARCHIVE_LIST}
+    COMMENT "Packaging Biips examples"
 )
-
-
