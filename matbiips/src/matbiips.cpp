@@ -155,7 +155,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Size old_verb = VERBOSITY;
       VERBOSITY = static_cast<Size>(*mxGetPr(prhs[1]));
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-      *mxGetPr(plhs[0]) = old_verb;
+      *mxGetPr(plhs[0]) = static_cast<double>(old_verb);
     }
 
     /////////////////////////////////////////
@@ -381,7 +381,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Console_ptr p_console = consoles[id];
 
       plhs[0] = mxCreateLogicalMatrix(1, 1);
-      *mxGetLogicals(plhs[0]) =  (p_console->SamplerBuilt() ? 1 : 0);
+      *mxGetLogicals(plhs[0]) = (p_console->SamplerBuilt() ? 1 : 0);
 
     }
 
@@ -401,7 +401,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Size smc_rng_seed = static_cast<Size>(*mxGetPr(prhs[3]));
 
       CheckArgIsDouble(4);
-      Scalar  ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[4]));
+      Scalar ess_threshold = static_cast<Scalar>(*mxGetPr(prhs[4]));
 
       CheckArgIsString(5);
       String resample_type = GetString(prhs[5]);
@@ -775,7 +775,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       marray.SetPtr(p_dim, p_val);
 
       CheckArgIsLogical(6);
-      Bool mcmc = *mxGetLogicals(prhs[6]);
+      Bool mcmc = static_cast<Bool>(*mxGetLogicals(prhs[6]));
+
       Bool ok = p_console->ChangeData(name, range, marray, mcmc, VERBOSITY);
 
       plhs[0] = mxCreateLogicalMatrix(1, 1);
@@ -812,7 +813,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         throw RuntimeError("Failed to sample data.");
 
       mwSize ndim = data.Dim().size();
-      mwSize *dims = new mwSize [ndim];
+      mwSize *dims = new mwSize[ndim];
       std::copy(data.Dim().begin(), data.Dim().end(), dims);
       plhs[0] = mxCreateNumericArray(ndim, dims, mxDOUBLE_CLASS , mxREAL);
       delete [] dims;
@@ -886,7 +887,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckRhs(nrhs, 3, name_func);
 
       CheckArgIsDouble(1);
-      unsigned long expected_count = static_cast<unsigned long>(*mxGetPr(prhs[1]));
+      Size expected_count = static_cast<Size>(*mxGetPr(prhs[1]));
 
       CheckArgIsString(2);
       String symbol = GetString(prhs[2]);
@@ -900,7 +901,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       progress.push_back(ProgressBar_ptr(new ProgressBar(expected_count, mbiips_cout, INDENT_STRING,
                                                          symbol[0], iter_name)));
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-      *mxGetPr(plhs[0]) = progress.size()-1;
+      *mxGetPr(plhs[0]) = static_cast<double>(progress.size()-1);
     }
 
     /////////////////////////////////////////
@@ -925,7 +926,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       ProgressBar_ptr p = progress[id];
 
       CheckArgIsDouble(2);
-      unsigned long count = static_cast<unsigned long>(*mxGetPr(prhs[2]));
+      Size count = static_cast<Size>(*mxGetPr(prhs[2]));
 
       (*p) += count;
 
