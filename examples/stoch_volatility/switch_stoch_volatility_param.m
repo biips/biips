@@ -100,14 +100,6 @@
 %           }
 %         }
 
-set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
-if isoctave()
-    rand ('state', 0)
-else
-    rng('default')
-end
-
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -116,6 +108,16 @@ end
 
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
+
+%% General settings
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Load model and load or simulate data
 %
