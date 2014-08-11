@@ -40,15 +40,22 @@ endif()
 
 file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" EXAMPLES_ARCHIVE)
 
-file(GLOB_RECURSE ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
-    *.m
-    *.bug
+file(GLOB ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
     *.md
-    *.csv
 )
+foreach(ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
+    file(GLOB ex_dir_files RELATIVE "${CMAKE_SOURCE_DIR}"
+        ${ex_dir}/*.m
+        ${ex_dir}/*.bug
+        ${ex_dir}/*.md
+        ${ex_dir}/*.csv
+    )
+    set(ex_files ${ex_files} ${ex_dir_files})
+endforeach()
 
 add_custom_command( OUTPUT ${EXAMPLES_ARCHIVE}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E remove ${EXAMPLES_ARCHIVE}
   COMMAND ${CMAKE_COMMAND} -E tar cafv ${EXAMPLES_ARCHIVE}
   ${ex_files}
   COMMENT "Packaging Biips examples"
