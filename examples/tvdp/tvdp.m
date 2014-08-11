@@ -52,15 +52,27 @@
 %       }
 %     }
 
-
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
 % and add the Matbiips folder to the Matlab path
-% 
+%
 
-matbiips_path = '../../matbiips/matlab';
+%%
+% *Add Matbiips functions in the search path*
+matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
+%% General settings
+%
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+
+% Set the random numbers generator seed for reproducibility
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Load model and sample data
 % Model parameters
