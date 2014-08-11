@@ -73,8 +73,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
 
 
   mwSize dims[] = { 1 };
-  typedef char * chaine_carac;
-  chaine_carac* field_names= new chaine_carac[dataMap.size()];
+  char ** field_names= new char *[dataMap.size()];
 
   BOOST_AUTO(it, dataMap.begin());
   for(int i = 0; it != dataMap.end(); ++it,++i) {
@@ -98,7 +97,7 @@ void readDataTable<ColumnMajorOrder>(const std::map<String, MultiArray> & dataMa
     const MultiArray & values_array = it_table->second;
 
     mwSize ndim = values_array.Dim().size();
-    mwSize *dims = new mwSize [ndim];
+    mwSize *dims = new mwSize[ndim];
     std::copy(values_array.Dim().begin(), values_array.Dim().end(), dims);
     mxArray * curr_field = mxCreateNumericArray(ndim, dims, mxDOUBLE_CLASS , mxREAL);
 
@@ -148,8 +147,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 {
 
   mwSize dims[] = { 1 };
-  typedef char * chaine_carac;
-  chaine_carac* field_names= new chaine_carac[monitorsMap.size()];
+  char ** field_names= new char *[monitorsMap.size()];
 
   BOOST_AUTO(it, monitorsMap.begin());
   for(int i = 0; it != monitorsMap.end(); ++it,++i) {
@@ -177,7 +175,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const char * curr_field_names[] = { "values", "weights", "ess", "discrete",
                                         "name", "lower", "upper", "type"};
     mwSize curr_dims[] = { 1 };
-    mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(chaine_carac),
+    mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(char *),
                                                curr_field_names);
     int field_number = mxGetFieldNumber(*struct_out, var_name.c_str());
     mxSetFieldByNumber(*struct_out, 0, field_number, curr_field);
@@ -185,11 +183,11 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     // retrieve dimensions
 
     mwSize ndim_part = monitor.GetValues().Dim().size();
-    mwSize *dims_part = new mwSize [ndim_part];
+    mwSize *dims_part = new mwSize[ndim_part];
     std::copy(monitor.GetValues().Dim().begin(),monitor.GetValues().Dim().end(), dims_part);
 
     mwSize ndim_arr = monitor.GetRange().Dim().size();
-    mwSize *dims_arr = new mwSize [ndim_arr];
+    mwSize *dims_arr = new mwSize[ndim_arr];
     std::copy(monitor.GetRange().Dim().begin(),monitor.GetRange().Dim().end(), dims_arr);
 
     // values assignement

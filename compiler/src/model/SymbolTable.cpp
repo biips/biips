@@ -203,7 +203,7 @@ namespace Biips
                                data,
                                logic_children_by_rank,
                                sto_children_by_rank,
-                               mcmc, set_observed_nodes);
+                               set_observed_nodes, mcmc);
     if (!ok)
       return false;
 
