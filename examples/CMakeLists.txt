@@ -36,16 +36,17 @@ else()
   set(_ext tar.gz)
 endif()
 
-set(EXAMPLES_ARCHIVE "${CMAKE_BINARY_DIR}/$biips-examples_${Biips_VERSION}_.${_ext}")
+set(EXAMPLES_ARCHIVE "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}_.${_ext}")
 
 file(GLOB_RECURSE ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
     *.m
     *.bug
+    *.md
+    *.csv
 )
 add_custom_command( OUTPUT ${EXAMPLES_ARCHIVE}
-  DEPENDS matbiips
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cafv ${EXAMPLES_ARCHIVE}
   ${ex_files}
   COMMENT "Packaging Biips examples"
 )

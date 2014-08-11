@@ -58,7 +58,7 @@ set(0, 'DefaultAxesFontsize', 14);
 
 %% 
 % *Add Matbiips functions in the search path*
-matbiips_path = '../../matbiips/matlab';
+matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% Load model and data
