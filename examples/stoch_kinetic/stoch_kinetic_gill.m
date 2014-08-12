@@ -137,11 +137,11 @@ data = model.data;
 %%
 % *Plot data*
 figure('name', 'data')
-plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
+plot(1:t_max, data.x_true(1,:), 'linewidth', 2)
 hold on
-plot(dt:dt:t_max, data.x_true(2,:), 'r', 'linewidth', 2)
+plot(1:t_max, data.x_true(2,:), 'r', 'linewidth', 2)
 hold on
-plot(dt:dt:t_max, data.y, 'g*')
+plot(1:t_max, data.y, 'g*')
 xlabel('Time')
 ylabel('Number of individuals')
 legend('Prey', 'Predator', 'Measurements')
@@ -155,7 +155,7 @@ saveas(gca, 'kinetic_data', 'epsc2')
 
 %%
 % *Run SMC*
-n_part = 100;%10000; % Number of particles
+n_part = 10000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part, 'type', 'fs');
 
@@ -179,15 +179,15 @@ saveas(gca, 'kinetic_sess', 'epsc2')
 x_smc_mean = summary_smc.x.s.mean;
 x_smc_quant = summary_smc.x.s.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([dt:dt:t_max, t_max:-dt:dt], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
+h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
     [.7 .7 1]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(dt:dt:t_max,x_smc_mean(1, :), 'linewidth', 3)
-h2 = fill([dt:dt:t_max, t_max:-dt:dt], [x_smc_quant{1}(2,:), fliplr(x_smc_quant{2}(2,:))],...
+plot(1:t_max, x_smc_mean(1, :), 'linewidth', 3)
+h2 = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(2,:), fliplr(x_smc_quant{2}(2,:))],...
     [1 .7 .7]);
 set(h2, 'edgecolor', 'none')
-plot(dt:dt:t_max,x_smc_mean(2, :),'r', 'linewidth', 3)
+plot(1:t_max, x_smc_mean(2, :),'r', 'linewidth', 3)
 set(h, 'edgecolor', 'none')
 xlabel('Time')
 ylabel('Estimates')
@@ -196,8 +196,8 @@ legend({'95 % interval (prey)', 'Posterior mean (prey)',...
 legend('boxoff')
 box off
 ylim([0,450])
-% alpha(.7)
 saveas(gca, 'kinetic_smc', 'epsc2')
+saveas(gca, 'kinetic_smc', 'png')
 
 %% Clear model
 % 

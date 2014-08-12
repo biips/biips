@@ -1,6 +1,6 @@
-%% Matbiips example: Switching Stochastic volatility
-% In this example, we consider the Markov switching stochastic volatility model for
-% application e.g. in finance.
+%% Matbiips example: Switching Stochastic volatility with estimation of static parameters
+% In this example, we consider the Markov switching stochastic volatility
+% model with parameter estimation.
 %
 % Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
 % stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.
@@ -180,9 +180,9 @@ data = model.data;
 
 %%
 % *Parameters of the PMMH*
-n_burn = 200;%2000; % nb of burn-in/adaptation iterations
-n_iter = 200;%2000; % nb of iterations after burn-in
-thin = 1; % thinning of MCMC outputs
+n_burn = 2000; % nb of burn-in/adaptation iterations
+n_iter = 40000; % nb of iterations after burn-in
+thin = 10; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
 param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
@@ -227,7 +227,7 @@ title_names = {'\alpha[1]','\alpha[2]', '\phi', '\sigma','\pi[1,1]','\pi[2,2]'};
 for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure
-    plot(out_pmmh_param)
+    plot(out_pmmh_param, 'r')
     if sample_data
         hold on
         plot(0, param_true(k), '*g');  
@@ -244,6 +244,8 @@ for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(out_pmmh_param, 15)
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     if sample_data
         hold on
         plot(param_true(k),0, '*g');  
@@ -260,10 +262,10 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [.7 .7 1]);
+    [1 .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'linewidth', 3)
+plot(x_pmmh_mean, 'r', 'linewidth', 3)
 if sample_data
     plot(data.x_true, 'g', 'linewidth', 2)
     legend({'95 % credible interval', 'PMMH Mean Estimate', 'True value'})
@@ -276,12 +278,12 @@ ylabel('Estimates')
 
 %%
 % *Trace of MCMC samples for x*
-time_index = [5, 10, 15, 20];
+time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :))
+    plot(out_pmmh.x(tk, :), 'r')
     if sample_data
         hold on
         plot(0, data.x_true(tk), '*g');  
@@ -291,7 +293,9 @@ for k=1:length(time_index)
     title(['t=', num2str(tk)]);
 end
 if sample_data
-    legend({'PMMH samples', 'True value'});
+    h = legend({'PMMH samples', 'True value'});
+    set(h, 'position',[0.7, 0.25, .1, .1])
+    legend('boxoff')  
 end
 
 %%
@@ -300,34 +304,42 @@ figure('name', 'PMMH: Histograms Marginal Posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    hist(out_pmmh.x(tk, :), 15);
+    hist(out_pmmh.x(tk, :), -10:.5:0);
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     if sample_data
         hold on    
         plot(data.x_true(tk), 0, '*g');
     end
+    xlim([-10,0])
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('number of samples');
     title(['t=', num2str(tk)]);    
 end
 if sample_data
-    legend({'smoothing density', 'True value'});
+    h = legend({'Posterior samples', 'True value'});
+    set(h, 'position',[0.7, 0.25, .1, .1])
+    legend('boxoff')  
 end
 
 figure('name', 'PMMH: KDE estimates Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f); 
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f, 'r'); 
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
+    xlim([-10,0])
     xlabel(['x_{' num2str(tk) '}']);
     ylabel('posterior density');
     title(['t=', num2str(tk)]);    
 end
 if sample_data
-    legend({'posterior density', 'True value'});
+    h = legend({'Posterior density', 'True value'});
+    set(h, 'position',[0.7, 0.25, .1, .1])
+    legend('boxoff')    
 end
 
 

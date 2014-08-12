@@ -32,17 +32,26 @@ if(SED)
 endif(SED)
 
 
-file(GLOB ex_files RELATIVE "${CMAKE_SOURCE_DIR}"
+file(GLOB ex_files_common RELATIVE "${CMAKE_SOURCE_DIR}"
     *.md
 )
-foreach(ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
-    file(GLOB ex_dir_files RELATIVE "${CMAKE_SOURCE_DIR}"
-        ${ex_dir}/*.m
-        ${ex_dir}/*.bug
-        ${ex_dir}/*.md
-        ${ex_dir}/*.csv
+foreach(_ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
+    file(GLOB _ex_files_mat RELATIVE "${CMAKE_SOURCE_DIR}"
+        ${_ex_dir}/*.m
     )
-    set(ex_files ${ex_files} ${ex_dir_files})
+    set(ex_files_mat ${ex_files_mat} ${_ex_files_mat})
+    
+    file(GLOB _ex_files_r RELATIVE "${CMAKE_SOURCE_DIR}"
+        ${_ex_dir}/*.R
+    )
+    set(ex_files_r ${ex_files_r} ${_ex_files_r})
+    
+    file(GLOB _ex_files_common RELATIVE "${CMAKE_SOURCE_DIR}"
+        ${_ex_dir}/*.bug
+        ${_ex_dir}/*.md
+        ${_ex_dir}/*.csv
+    )
+    set(ex_files_common ${ex_files_common} ${_ex_files_common})
 endforeach()
     
 if (WIN32)
@@ -52,14 +61,31 @@ else()
 endif()
 
 foreach (_ext ${_ext_list})
-    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" ex_archive)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive})
-    
-    add_custom_command( OUTPUT ${ex_archive}
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_mat)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
+    add_custom_command( OUTPUT ${ex_archive_mat}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E remove ${ex_archive}
-      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive}
-      ${ex_files}
+      COMMAND ${CMAKE_COMMAND} -E remove ${ex_archive_mat}
+      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_mat}
+      ${ex_files_common} ${ex_files_mat}
+    )
+    
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/rbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_r)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_r})
+    add_custom_command( OUTPUT ${ex_archive_r}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove ${ex_archive_r}
+      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_r}
+      ${ex_files_common} ${ex_files_r}
+    )
+    
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" ex_archive_all)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_all})
+    add_custom_command( OUTPUT ${ex_archive_all}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove ${ex_archive_all}
+      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_all}
+      ${ex_files_common} ${ex_files_mat} ${ex_files_r}
     )
 endforeach()
     
