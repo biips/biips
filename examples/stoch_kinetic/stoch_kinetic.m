@@ -183,9 +183,9 @@ ylabel('Penalized log-marginal likelihood')
 % param_names indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, biips will use a
 % sequential Monte Carlo as proposal.
-n_burn = 20;%2000; % nb of burn-in/adaptation iterations
-n_iter = 20;%2000; % nb of iterations after burn-in
-thin = 20; % thinning of MCMC outputs
+n_burn = 2000; % nb of burn-in/adaptation iterations
+n_iter = 20000; % nb of iterations after burn-in
+thin = 10; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
 param_names = {'logc[1]','logc[2]', 'logc[3]'}; % name of the variables updated with MCMC (others are updated with SMC)
@@ -248,6 +248,8 @@ for i=1:length(param_names)
     ylabel('number of samples')
     title(leg{i})
 end
+saveas(gca, 'stoch_kinetic_param', 'epsc2')
+saveas(gca, 'stoch_kinetic_param', 'png') 
 
 for i=1:length(param_names)
     kde_x = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'x');
@@ -271,16 +273,24 @@ n_grid = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_
 set(n_grid, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
+plot(1:t_max/dt, data.x_true(1,:), '--', 'color', [0,0,.5], 'linewidth', 2)
 h2 = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
     [1 .7 .7]);
 set(h2, 'edgecolor', 'none')
+
 plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
 set(n_grid, 'edgecolor', 'none')
+% plot(1:t_max/dt, data.x_true(2,:), 'g', 'linewidth', 2)
+plot(1:t_max/dt, data.x_true(2,:), '--', 'color', [.5,0,.5], 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey',...
-    '95 % credible interval - predator', 'PMMH Mean Estimate - predator'})
- 
+legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey', 'True number of preys',...
+    '95 % credible interval - predator', 'PMMH Mean Estimate - predator',...
+    'True number of predators'})
+ylim([0,1500])
+legend boxoff
+saveas(gca, 'stoch_kinetic_x', 'epsc2')
+saveas(gca, 'stoch_kinetic_x', 'png') 
 
 %% Clear model
 % 
