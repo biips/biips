@@ -1,3 +1,58 @@
+Adrien le 11/08/2014 :
+======================
+Voici l'url d'accès aux builds de biips :
+
+    http://goo.gl/SyeuNm
+
+A partager avec Arnaud ou autres testeurs éventuels. Je vais l'envoyer aussi à Pierre.
+C'est un lien vers le répertoire biips-builds dans le répertoire Dropbox partagé.
+Le sous répertoire devel contient les derniers binaires de la version en développement.
+Actuellement, il contient les archives de matbiips pour Matlab et Octave pour les 3 principaux OS ainsi que les exemples.
+Les fichiers sont mis à jour régulièrement.
+
+
+Tâches :
+--------
+- [ ] typographies biips, matbiips, rbiips
+- [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
+- [ ] créer paquet source
+- [x] déplacer matbiips/matlab dans matbiips
+- [ ] passer à boost 1.54 (standard sous ubuntu)
+- [x] compilation sous mac osx avec clang (matlab et octave)
+- [ ] compiler avec -DBUILD_TESTS=ON sous mac
+- [ ] passer à cmake 3 ?
+- [ ] compiler avec vm mac
+- [ ] warning "-output ignored" dans compilation matbiips octave windows
+
+Bug :
+-----
+- [ ] test_internals ne passe pas sous linux et windows avec matlab/octave :
+
+        >> test_internals
+        * Parsing model in: hmm_1d_lin.bug
+        * Compiling data graph
+          Declaring variables
+          Resolving undeclared variables
+          Allocating nodes
+          Graph size: 13
+          Sampling data
+          Reading data back into data table
+        * Compiling model graph
+          Declaring variables
+          Resolving undeclared variables
+          Allocating nodes
+          Graph size: 14
+        * Assigning node samplers
+        * Running SMC forward sampler with 100 particles
+          |--------------------------------------------------| 100%
+          |**************************************************| 4 iterations in 0.12 s
+        Error using matbiips
+        change_data: BiiPS C++ exception. change_data: the console with id 0 does not exist
+
+        Error in test_internals (line 14)
+        change_ok = matbiips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
+
+
 François le 11/08/2014 :
 ========================
 
@@ -7,80 +62,93 @@ Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
 * stoch_volatility: OK
 * switch_stoch_volatility_param: OK
 * switch_stoch_volatility: ERREUR sous Matlab/octave:
+    ---> [x] résolu (Adrien)
 ---
-Warning: RUNTIME ERROR: Can not change data: node is not stochastic.
- 
-Error using biips_smc_sensitivity (line 144)
-Data change failed: invalid parameter alpha[1:2,1] = -5.
-Data change failed: invalid parameter  =
+        Warning: RUNTIME ERROR: Can not change data: node is not stochastic.
+         
+        Error using biips_smc_sensitivity (line 144)
+        Data change failed: invalid parameter alpha[1:2,1] = -5.
+        Data change failed: invalid parameter  =
 
-Error in switch_stoch_volatility (line 308)
-out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
+        Error in switch_stoch_volatility (line 308)
+        out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
 ---
 * stoch_kinetic: OK
-* stoch_kinetic_gill: Matlab OK, Warning dans octave, mais le programme semble donner les resultats normaux:
+* stoch_kinetic_gill: Matlab OK
+    - [ ] Warning dans octave, mais le programme semble donner les resultats normaux:
 ---
-octave:18> stoch_kinetic_gill
-warning: add_distribution: replacing existing distribution LV
-Added distribution 'LV'.
-* Parsing model in: stoch_kinetic_gill.bug
-* Compiling data graph
-  Declaring variables
-  Resolving undeclared variables
-  Allocating nodes
-  Graph size: 131
-  Sampling data
-  Reading data back into data table
-* Compiling model graph
-  Declaring variables
-  Resolving undeclared variables
-  Allocating nodes
-  Graph size: 132
-Error: /undefined in nan
-Operand stack:
-   --nostringval--
-Execution stack:
-   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
-pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
-runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-Dictionary stack:
-   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
-Current allocation mode is local
-Last OS error: No such file or directory
-GPL Ghostscript 9.07: Unrecoverable error, exit code 1
-* Assigning node samplers
-* Running SMC forward sampler with 100 particles
-  |--------------------------------------------------| 100%
-  |**************************************************| 40 iterations in 46.41 s
-Error: /undefined in nan
-Operand stack:
-   --nostringval--
-Execution stack:
-   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
-pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
-runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-Dictionary stack:
-   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
-Current allocation mode is local
-Last OS error: No such file or directory
-GPL Ghostscript 9.07: Unrecoverable error, exit code 1
-Error: /undefined in nan
-Operand stack:
-   --nostringval--
-Execution stack:
-   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-  --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
-pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
-runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
-Dictionary stack:
-   --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
-Current allocation mode is local
-Last OS error: No such file or directory
-GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+        octave:18> stoch_kinetic_gill
+        warning: add_distribution: replacing existing distribution LV
+        Added distribution 'LV'.
+        * Parsing model in: stoch_kinetic_gill.bug
+        * Compiling data graph
+          Declaring variables
+          Resolving undeclared variables
+          Allocating nodes
+          Graph size: 131
+          Sampling data
+          Reading data back into data table
+        * Compiling model graph
+          Declaring variables
+          Resolving undeclared variables
+          Allocating nodes
+          Graph size: 132
+        Error: /undefined in nan
+        Operand stack:
+           --nostringval--
+        Execution stack:
+           %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+          --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+        pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+        runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+        Dictionary stack:
+           --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+        Current allocation mode is local
+        Last OS error: No such file or directory
+        GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+        * Assigning node samplers
+        * Running SMC forward sampler with 100 particles
+          |--------------------------------------------------| 100%
+          |**************************************************| 40 iterations in 46.41 s
+        Error: /undefined in nan
+        Operand stack:
+           --nostringval--
+        Execution stack:
+           %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+          --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+        pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+        runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+        Dictionary stack:
+           --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+        Current allocation mode is local
+        Last OS error: No such file or directory
+        GPL Ghostscript 9.07: Unrecoverable error, exit code 1
+        Error: /undefined in nan
+        Operand stack:
+           --nostringval--
+        Execution stack:
+           %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+          --nostringval--   --nostringval--   false   1   %stopped_push   1932   1   3   %oparray_pop   1931   1   3   %oparray_
+        pop   --nostringval--   1915   1   3   %oparray_pop   1803   1   3   %oparray_pop   --nostringval--   %errorexec_pop   .
+        runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+        Dictionary stack:
+           --dict:1174/1684(ro)(G)--   --dict:0/20(G)--   --dict:82/200(L)--   --dict:40/64(L)--
+        Current allocation mode is local
+        Last OS error: No such file or directory
+        GPL Ghostscript 9.07: Unrecoverable error, exit code 1
 ---
 
+Adrien le 07/08/2014 :
+======================
+
+Tâches release avant Compstat :
+- [x] mexfile octave windows 32bit (cette après midi)
+- [ ] terminer rbiips et exemples
+- [ ] conditionnelles
+- [ ] mettre en ligne
+- [ ] article: logiciels similaires: libbi, nimble (paciorek), bugs, jags, stan
+- [x] mac osx
+- [ ] manuel: liste des fonctions et distributions
 
 Adrien le 30/06/2014 :
 ======================
