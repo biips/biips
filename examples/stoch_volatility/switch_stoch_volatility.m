@@ -63,7 +63,11 @@
 
 set(0, 'DefaultAxesFontsize', 14)
 set(0, 'Defaultlinelinewidth', 2)
-rng('default')
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Installation of Matbiips
 % Unzip the Matbiips archive in some folder
@@ -95,7 +99,7 @@ data = model.data;
 
 %%
 % *Run SMC*
-n_part = 100;%5000; % Number of particles
+n_part = 5000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part);
 
@@ -164,10 +168,10 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    [.7 .7 1]);
+    [1, .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_s_mean, 'linewidth', 3)
+plot(x_s_mean, 'r', 'linewidth', 3)
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Smoothing Mean Estimate'})
@@ -185,7 +189,7 @@ figure('name', 'SMC: Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f, '--');
+    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);
     hold on
     plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
@@ -205,8 +209,8 @@ saveas(gca, 'volatility_kde', 'epsc2')
 
 %%
 % *Parameters of the PIMH*
-n_burn = 10;%10000;
-n_iter = 10;%10000;
+n_burn = 2000;
+n_iter = 10000;
 thin = 1;
 n_part = 50;
 
@@ -227,10 +231,10 @@ x_pimh_mean = summary_pimh.x.mean;
 x_pimh_quant = summary_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    [.7 .7 1]);
+    [1, .7 .7]);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pimh_mean, 'linewidth', 3)
+plot(x_pimh_mean, 'r', 'linewidth', 3)
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'PIMH Mean Estimate'})
@@ -245,7 +249,7 @@ figure('name', 'PIMH: Trace samples')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pimh.x(tk, :))
+    plot(out_pimh.x(tk, :), 'r')
     hold on
     plot(0, data.x_true(tk), '*g');  
     xlabel('Iterations')
@@ -263,6 +267,8 @@ for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pimh.x(tk, :), 20);
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor','r','EdgeColor','w')
     hold on    
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
@@ -280,7 +286,7 @@ figure('name', 'PIMH: KDE estimates Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f); 
+    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f, 'r'); 
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{' num2str(tk) '}']);
@@ -312,7 +318,7 @@ out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part
 figure('name', 'Sensitivity: log-likelihood')
 surf(A, B, reshape(out_sensitivity.log_marg_like, size(A)))
 shading interp
-caxis([0,max(out_sensitivity.log_marg_like(:))])
+caxis([-40,max(out_sensitivity.log_marg_like(:))])
 colormap(hot)
 view(2)
 xlim([min(A(:)), max(A(:))])
