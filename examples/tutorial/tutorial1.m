@@ -49,13 +49,6 @@
 %       }
 %     }
 
-set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
-if isoctave()
-    rand ('state', 0)
-else
-    rng('default')
-end
 
 
 %% Installation of Matbiips
@@ -67,6 +60,18 @@ end
 % *Add Matbiips functions in the search path*
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
+
+%% General settings
+%
+set(0, 'DefaultAxesFontsize', 14);
+set(0, 'Defaultlinelinewidth', 2)
+
+% Set the random numbers generator seed for reproducibility
+if isoctave()
+    rand ('state', 0)
+else
+    rng('default')
+end
 
 %% Load model and data
 %

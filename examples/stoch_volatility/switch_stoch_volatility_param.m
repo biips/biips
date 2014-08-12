@@ -101,15 +101,6 @@
 %         }
 
 
-
-%% Installation of Matbiips
-% Unzip the Matbiips archive in some folder
-% and add the Matbiips folder to the Matlab path
-% 
-
-matbiips_path = '../../matbiips';
-addpath(matbiips_path)
-
 %%
 %
 
