@@ -63,7 +63,6 @@ set ( R_PACKAGES )
 if ( R_EXECUTABLE )
 
     if (WIN32)
-
         if ( NOT R_ARCH )
             execute_process( COMMAND ${R_EXECUTABLE} --version
                 OUTPUT_VARIABLE R_VERSION_OUT
