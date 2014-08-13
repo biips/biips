@@ -38,7 +38,6 @@
 
 #include "model/SymbolTable.hpp"
 #include "model/Model.hpp"
-#include "iostream/outStream.hpp"
 #include "model/DeparseVisitor.hpp"
 
 namespace Biips

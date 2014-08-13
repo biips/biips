@@ -12,7 +12,6 @@
 #include <deque>
 #include "matbiips_utils.h"
 #include <fstream>
-#include "iostream/outStream.hpp"
 #include "common/Accumulator.hpp"
 #include "common/Utility.hpp"
 #include "compiler/Compiler.hpp"

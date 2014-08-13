@@ -62,8 +62,16 @@ namespace Biips
     if (!nodeValuesMap()[nodeId_])
       nodeValuesMap()[nodeId_].reset(new ValArray(node.Dim().Length()));
 
+    // FIXME
     // evaluate
-    node.Eval(*nodeValuesMap()[nodeId_], params);
+    try
+    {
+      node.Eval(*nodeValuesMap()[nodeId_], params);
+    }
+    catch (RuntimeError & err)
+    {
+      throw NodeError(nodeId_, String(err.what()));
+    }
 
     sampledFlagsMap()[nodeId_] = true;
   }

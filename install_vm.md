@@ -1,6 +1,11 @@
 
-Installer machine virtuelle Mac OS X
+Installer machine virtuelle Mac OS X (10.8 Mountain Lion)
 ============================================
+2. Créer une nouvelle machine virtuelle dans VirtualBox :
+	* Mémoire : 4096Mo
+	* Disque dur : VDI dynamiquement alloué 60Go
+	* Vidéo : 3D 128Mo
+
 1. Suivre instructions sur l'une des pages suivantes:
 	* http://www.cachem.fr/comment-installer-osx-pc-virtualbox/
 	* http://www.tech2tech.fr/comment-installer-os-x-mountain-lion-sur-votre-pc-via-virtualbox/
@@ -8,10 +13,13 @@ Installer machine virtuelle Mac OS X
 	* http://www.macbreaker.com/2012/07/mountain-lion-virtualbox.html
 
 2. Installer programmes :
-	* XCode (sur l'App Store) + Command Line Tools (Preferences | Downloads)
+	* XCode (sur l'App store) + Command Line Tools (Preferences | Downloads)
+    * Mises à jour de l'App store
+    * OSXFuse (avec compatibilité MacFuse) + NTFS-3G (sans MacFuse)
 	* Sublime Text
 	* Google Chrome
 	* Dropbox
+	* The Unarchiver (App Store)
 
 3. Installer outils de développement pour BiiPS :
 	* Git
@@ -23,7 +31,10 @@ Installer machine virtuelle Mac OS X
 	* MacTex
 	* VPN Inria AnnyConnect : http://dsi.inria.fr/services_offerts/vpn/Guide_utilisation/index_html
 	* Matlab : https://wiki.bordeaux.inria.fr/sed/doku.php?id=intranet:developpementlogiciel:matlabvpn inria
+    * XQuartz
 	* Eclipse CDT (64 bit) + CDT update site + CMakeEd + EGit
+	* Octave via MacPorts
+		sudo ports install octave
 
 
 Installer machine virtuelle Windows

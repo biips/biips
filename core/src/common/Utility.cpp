@@ -36,6 +36,8 @@
 
 #include "BiipsConfig.hpp"
 #include "common/Utility.hpp"
+#include "common/MultiArray.hpp"
+#include "common/Utility.hpp"
 #ifndef WIN32
 #include <pwd.h>
 #endif
@@ -97,4 +99,60 @@ namespace Biips
     }
     else return name;
   }
+
+
+  void printRecursion(std::ostream & os, const ValArray & val, const IndexRange & range, IndexRange::SizeType dim, IndexRange::Indices & indices)
+  {
+    typedef IndexRange::IndexType IndexType;
+    typedef IndexRange::SizeType SizeType;
+    typedef IndexRange::Indices Indices;
+
+    if ( dim > 1 )
+    {
+      indices[dim] = range.Lower()[dim];
+      while ( indices[dim] <= range.Upper()[dim] )
+      {
+        printRecursion(os, val, range, dim-1, indices); // here is the recursion
+        ++indices[dim];
+      }
+    }
+
+    else if ( dim == 1 )
+    {
+      if ( indices.size() > 2 )
+      {
+        os << "(:, :";
+        for (Size i = 2; i < indices.size(); ++i)
+          os << ", " << indices[i];
+        os << ")" << std::endl;
+      }
+
+      indices[dim-1] = range.Lower()[dim-1];
+      while ( indices[dim-1] <= range.Upper()[dim-1] )
+      {
+        indices[dim] = range.Lower()[dim];
+        while ( indices[dim] < range.Upper()[dim] )
+        {
+          os << val[range.GetOffset(indices)] << " ";
+          ++indices[dim];
+        }
+        os << val[range.GetOffset(indices)];
+        if ( indices[dim-1] < range.Upper()[dim-1])
+          os << std::endl;
+        ++indices[dim-1];
+      }
+    }
+
+    else if ( dim == 0 )
+    {
+      indices[dim] = range.Lower()[dim];
+      while ( indices[dim] < range.Upper()[dim] )
+      {
+        os << val[range.GetOffset(indices)] << std::endl;
+        ++indices[dim];
+      }
+      os << val[range.GetOffset(indices)];
+    }
+  }
+
 }

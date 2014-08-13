@@ -38,7 +38,6 @@
 #include "model/NodeArray.hpp"
 #include "common/IndexRangeIterator.hpp"
 #include "graph/Graph.hpp"
-#include "iostream/outStream.hpp"
 
 namespace Biips
 {

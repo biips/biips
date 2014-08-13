@@ -35,6 +35,7 @@
  */
 
 #include "distribution/Distribution.hpp"
+#include "iostream/std_ostream.hpp"
 
 namespace Biips
 {
@@ -70,7 +71,7 @@ namespace Biips
   {
     if (!CheckParamValues(paramValues))
       throw RuntimeError(String("Invalid parameters values in Sample method for distribution ")
-          + name_);
+          + name_ + ": " + print(paramValues));
 
     sample(values, paramValues, boundValues, rng);
   }
@@ -81,7 +82,7 @@ namespace Biips
   {
     if (!CheckDensityParamValues(x, paramValues))
       throw RuntimeError(String("Invalid parameters values in LogDensity method for distribution ")
-          + name_);
+          + name_ + ": " + print(paramValues));
 
     return logDensity(x, paramValues, boundValues);
   }
@@ -93,7 +94,7 @@ namespace Biips
     // FIXME
 //    if (!CheckParamValues(fixedParamValues))
 //      throw RuntimeError(String("Invalid parameters values in fixedUnboundedSupport method for distribution ")
-//          + name_);
+//          + name_ + ": " + print(paramValues));
 
     fixedUnboundedSupport(lower, upper, fixedParamValues);
   }
