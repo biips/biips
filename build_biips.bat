@@ -105,7 +105,7 @@ if "%errorlevel%"=="1" (
 choice /m "Make examples package"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% examples_package
+	"%MAKE%" examples_package
 )
 
 cd "%BIIPS_SRC%"
