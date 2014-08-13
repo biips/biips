@@ -425,7 +425,7 @@ namespace Biips
       Size len = snode.DimPtr()->Length();
       ValArray lower(len), upper(len);
       getFixedSupportValues(lower, upper, id, graph_);
-      for (Size i=1; i<len; ++i) {
+      for (Size i=0; i<len; ++i) {
         if (value.Values()[i]<lower[i] || value.Values()[i]>upper[i])
           return false; // Can not change data: value out of distribution support
       }
