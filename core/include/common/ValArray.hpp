@@ -41,6 +41,7 @@
 
 #include <boost/operators.hpp>
 #include <algorithm>
+#include <sstream>
 
 namespace Biips
 {
@@ -277,6 +278,10 @@ namespace Biips
   ValArray operator >=(Scalar val, const ValArray & rhs);
   ValArray operator <=(Scalar val, const ValArray & rhs);
 
+  /*!
+   * Prints the elements of the ValArray in line and comma separated
+   */
+  std::ostream & operator << (std::ostream & os, const ValArray & val);
 }
 
 namespace std

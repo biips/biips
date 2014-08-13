@@ -54,7 +54,7 @@ else
     
     if [[ "$2" == "-g" ]]; then
         export BIIPS_BUILD=/home/adrien-alea/workspace/biips-debug
-        export MATLAB_ROOT=/usr/local/MATLAB/R2010b
+        # export MATLAB_ROOT=/usr/local/MATLAB/R2010b
         export CMAKE_BUILD_TYPE=Debug
     fi
 fi

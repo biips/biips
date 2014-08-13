@@ -44,7 +44,6 @@
 #include "Console.hpp"
 #include "kolmogorov.hpp"
 #include "common/cholesky.hpp"
-#include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
 #include "iostream/DumpReader.hpp"
 

@@ -36,7 +36,6 @@
 
 #include "model/BUGSModel.hpp"
 #include "common/IndexRangeIterator.hpp"
-#include "iostream/outStream.hpp"
 #include <boost/random/discrete_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 

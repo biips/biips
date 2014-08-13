@@ -47,7 +47,6 @@ extern "C"
 #include "Console.hpp"
 #include "compiler/ParseTree.h"
 #include "compiler/Compiler.hpp"
-#include "iostream/outStream.hpp"
 #include "iostream/ProgressBar.hpp"
 #include "model/BUGSModel.hpp"
 
