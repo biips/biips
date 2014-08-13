@@ -77,7 +77,7 @@ set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2)
 
 % Set the random numbers generator seed for reproducibility
-if isoctave()
+if isoctave() || verLessThan('matlab', '7.12')
     rand ('state', 0)
 else
     rng('default')
@@ -167,6 +167,7 @@ legend('boxoff')
 box off
 ylim([-8,0])
 saveas(gca, 'volatility_f', 'epsc2')
+saveas(gca, 'volatility_f', 'png')
 
 %%
 % *Plot Smoothing estimates*
@@ -185,6 +186,7 @@ legend('boxoff')
 box off
 ylim([-8,0])
 saveas(gca, 'volatility_s', 'epsc2')
+saveas(gca, 'volatility_s', 'png')
 
 %%
 % *Marginal filtering and smoothing densities*
@@ -207,6 +209,7 @@ h =legend({'filtering density', 'smoothing density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
 legend('boxoff')
 saveas(gca, 'volatility_kde', 'epsc2')
+saveas(gca, 'volatility_kde', 'png')
 
 
 
@@ -247,6 +250,7 @@ legend({'95 % credible interval', 'PIMH Mean Estimate'})
 legend('boxoff')
 box off
 saveas(gca, 'volatility_pimh_s', 'epsc2')
+saveas(gca, 'volatility_pimh_s', 'png')
 
 %%
 % *Trace of MCMC samples*
@@ -303,6 +307,7 @@ h = legend({'posterior density', 'True value'});
 set(h, 'position',[0.7 0.25, .1, .1])
 legend('boxoff')
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
+saveas(gca, 'volatility_pimh_kde', 'png')
 
 
 %% BiiPS Sensitivity analysis

@@ -1,3 +1,26 @@
+Adrien le 12/08/2014 :
+======================
+Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
+BiiPS, Biips, biips, MatBiips, matbiips, RBiips, Rbiips, rbiips
+
+Plusieurs possiblités :
+
+1) Biips, Matbiips, Rbiips pour désigner les programmes dans un texte (majuscule au début seulement)
+biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
+
+2) Biips, MatBiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
+biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
+
+3) biips, matbiips, rbiips pour tout (très simple mais moins en valeur dans le texte)
+
+Dans tous les cas je propose de supprimer BiiPS qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiiPS et RBiiPS.
+Je suis pour la 1 ou la 2, qu'en penses-tu ?
+
+- [ ] J'appliquerai les changements partout avec un coup de sed.
+
+---> François :  oui, je suis d'accord.
+    On peut partir sur la solution 1)
+
 Adrien le 11/08/2014 :
 ======================
 Voici l'url d'accès aux builds de biips :
@@ -15,6 +38,7 @@ Tâches :
 --------
 - [ ] typographies biips, matbiips, rbiips
 - [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
+- [ ] ajouter cible publishmatbiipsexamples.m dans cmake
 - [ ] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
 - [ ] passer à boost 1.54 (standard sous ubuntu)
@@ -61,8 +85,7 @@ Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
 * hmm_nonlin_4d: OK
 * stoch_volatility: OK
 * switch_stoch_volatility_param: OK
-* switch_stoch_volatility: ERREUR sous Matlab/octave:
-    ---> [x] résolu (Adrien)
+* switch_stoch_volatility: [x] ERREUR sous Matlab/octave:
 ---
         Warning: RUNTIME ERROR: Can not change data: node is not stochastic.
          

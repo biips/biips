@@ -41,7 +41,6 @@
 #include "graph/Graph.hpp"
 #include "graph/StochasticNode.hpp"
 #include "distribution/DistError.hpp"
-#include "iostream/outStream.hpp"
 #include "sampler/GetNodeValueVisitor.hpp"
 
 namespace Biips
@@ -411,7 +410,7 @@ namespace Biips
       {
         // check Distribution is observable
         if (!p_dist->Observable())
-          throw DistError(p_dist, "Can not change data: distribution not observable.");
+          throw NodeError(id, String("Can not change data: distribution ") + p_dist->Name() + " is not observable.");
 
         // otherwise set observed
         graph_.SetObserved(id);
@@ -426,7 +425,7 @@ namespace Biips
       Size len = snode.DimPtr()->Length();
       ValArray lower(len), upper(len);
       getFixedSupportValues(lower, upper, id, graph_);
-      for (Size i=1; i<len; ++i) {
+      for (Size i=0; i<len; ++i) {
         if (value.Values()[i]<lower[i] || value.Values()[i]>upper[i])
           return false; // Can not change data: value out of distribution support
       }

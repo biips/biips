@@ -25,7 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file outStream.hpp
+/*! \file std_ostream.hpp
  * \brief 
  * 
  * \author  $LastChangedBy$
@@ -34,40 +34,30 @@
  * Id:      $Id$
  */
 
-#ifndef BIIPS_OUTSTREAM_HPP_
-#define BIIPS_OUTSTREAM_HPP_
+#ifndef BIIPS_STD_OSTREAM_HPP_
+#define BIIPS_STD_OSTREAM_HPP_
 
-#include "common/Types.hpp"
+#include <vector>
 #include <sstream>
 
-namespace Biips
+namespace std
 {
 
-  class ValArray;
-
   /*!
-   * Prints the elements of the ValArray in line and comma separated
+   * Prints the elements of a std::vector.
    */
-  std::ostream & operator << (std::ostream & os, const ValArray & val);
-
-
-  class MultiArray;
-
-  /*!
-   * Prints the elements of the MultiArray according to its dimensions.
-   */
-  std::ostream & operator << (std::ostream & os, const MultiArray & dat);
-
-
-  class IndexRange;
-
-  /*!
-   * Prints a BUGS language representation of the
-   * given range: e.g. a range with lower limit (1,2,3) and upper limit
-   * (3,3,3) will be printed as "[1:3,2:3,3]"
-   */
-  std::ostream & operator << (std::ostream & os, const IndexRange & range);
+  template<typename T>
+  std::ostream & operator << (std::ostream & os, const std::vector<T> & vec)
+  {
+    if (vec.size()>0) {
+      os << vec[0];
+      for (unsigned int i=1; i<vec.size(); ++i) {
+        os << ", " << vec[i];
+      }
+    }
+    return os;
+  }
 
 }
 
-#endif /* BIIPS_OUTSTREAM_HPP_ */
+#endif /* BIIPS_STD_OSTREAM_HPP_ */

@@ -40,7 +40,8 @@
 #include <utility>
 #include <sstream>
 
-#include "Types.hpp"
+#include "common/Types.hpp"
+#include "common/IndexRange.hpp"
 
 namespace Biips
 {
@@ -82,6 +83,9 @@ namespace Biips
 
   String expandFileName(const char * s);
 
+  class ValArray;
+
+  void printRecursion(std::ostream & os, const ValArray & val, const IndexRange & range, IndexRange::SizeType dim, IndexRange::Indices & indices);
 }
 
 #endif /* BIIPS_UTILITY_HPP_ */

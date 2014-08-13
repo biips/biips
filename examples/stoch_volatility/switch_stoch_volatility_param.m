@@ -117,7 +117,7 @@ set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2)
 
 % Set the random numbers generator seed for reproducibility
-if isoctave()
+if isoctave() || verLessThan('matlab', '7.12')
     rand ('state', 0)
 else
     rng('default')
@@ -209,7 +209,7 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 param_plot = {'alpha[1,1]','alpha[2,1]', 'phi', 'sigma','pi[1,1]','pi[2,2]'};
 %%
-% *Posterior mean and credibilist interval for the parameters*
+% *Posterior mean and credible interval for the parameters*
 for i=1:length(param_plot)
     sum_param = getfield(summary_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n',param_plot{i},sum_param.mean);
@@ -223,7 +223,7 @@ if sample_data
     param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
 end
 title_names = {'\alpha[1]','\alpha[2]', '\phi', '\sigma','\pi[1,1]','\pi[2,2]'};
-% figure('name', 'PMMH: Trace samples parameter')
+
 for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure
@@ -252,7 +252,9 @@ for k=1:length(param_plot)
     end
     xlabel(title_names{k})
     ylabel('number of samples')
-    title(title_names{k})
+    saveas(gca, ['switch_stoch_param' num2str(k)], 'epsc2')
+    saveas(gca, ['switch_stoch_param' num2str(k)], 'png')
+    title(title_names{k})    
 end
   
 
@@ -274,6 +276,8 @@ else
 end
 xlabel('Time')
 ylabel('Estimates')
+saveas(gca, ['switch_stoch_param_x'], 'epsc2')
+saveas(gca, ['switch_stoch_param_x'], 'png')
 
 
 %%

@@ -113,7 +113,7 @@ add_custom_command(TARGET matbiips
     VERBATIM
 )
 
-if (NOT BIIPS_DEBUG)
+#if (NOT BIIPS_DEBUG)
 	# copy mexfile in the src private directory
 	add_custom_command(TARGET matbiips
 	    POST_BUILD
@@ -121,4 +121,4 @@ if (NOT BIIPS_DEBUG)
 	    COMMENT "Copying mexfile in source private directory"
 	    VERBATIM
 	)
-endif()
+#endif()

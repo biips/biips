@@ -236,6 +236,18 @@ namespace Biips
   {
     return std::sqrt(s);
   }
+
+  std::ostream & operator << (std::ostream & os, const ValArray & val)
+  {
+    if (!val.empty())
+    {
+      os << val[0];
+      for (Size i = 1; i< val.size(); ++i)
+        os << ", " << val[i];
+      os << std::endl;
+    }
+    return os;
+  }
 }
 
 namespace std
