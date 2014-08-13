@@ -41,6 +41,7 @@
 #include "common/DimArray.hpp"
 #include "common/ValArray.hpp"
 #include "common/Error.hpp"
+#include <sstream>
 
 namespace Biips
 {
@@ -321,6 +322,11 @@ namespace Biips
 
   Bool allMissing(const MultiArray & marray);
   Bool anyMissing(const MultiArray & marray);
+
+  /*!
+   * Prints the elements of the MultiArray according to its dimensions.
+   */
+  std::ostream & operator << (std::ostream & os, const MultiArray & dat);
 
   // -----------------------------------------------------------------------------
   // MultiArray Types

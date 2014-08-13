@@ -39,7 +39,6 @@
 #include "compiler/Compiler.hpp"
 #include "compiler/ParseTree.h"
 #include "model/BUGSModel.hpp"
-#include "iostream/outStream.hpp"
 
 namespace Biips
 {

@@ -77,7 +77,7 @@ set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2)
 
 % Set the random numbers generator seed for reproducibility
-if isoctave()
+if isoctave() || verLessThan('matlab', '7.12')
     rand ('state', 0)
 else
     rng('default')

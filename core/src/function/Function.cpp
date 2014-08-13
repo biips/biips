@@ -35,6 +35,7 @@
  */
 
 #include "function/Function.hpp"
+#include "iostream/std_ostream.hpp"
 
 namespace Biips
 {
@@ -42,7 +43,7 @@ namespace Biips
   Bool Function::CheckParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     if (!CheckNParam(paramDims.size()))
-      throw LogicError(String("Incorrect number of parameters for function ")
+      throw RuntimeError(String("Incorrect number of parameters for function ")
           + name_);
 
     return checkParamDims(paramDims);
@@ -60,9 +61,10 @@ namespace Biips
 
   void Function::Eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    if (!CheckParamValues(paramValues))
-      throw LogicError(String("Invalid parameters values for function ")
-          + name_);
+    if (!CheckParamValues(paramValues)) {
+      throw RuntimeError(String("Invalid parameters values for function ")
+          + name_ + ": " + print(paramValues));
+    }
 
     eval(values, paramValues);
   }

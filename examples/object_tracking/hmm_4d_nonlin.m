@@ -78,7 +78,7 @@ addpath(matbiips_path)
 
 %% General settings
 % Set the random numbers generator seed for reproducibility
-if isoctave()
+if isoctave() || verLessThan('matlab', '7.12')
     rand ('state', 0)
 else
     rng('default')
