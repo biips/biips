@@ -41,6 +41,10 @@
 #
 #  R_FOUND - System has R
 #  R_EXECUTABLE - The R interpreter
+#
+# Variables that can be set by the user:
+# R_EXECUTABLE      
+# R_ARCH (Windows only)
 
 
 if ( R_EXECUTABLE)
@@ -54,10 +58,26 @@ find_program ( R_EXECUTABLE
     DOC "Path to the R command interpreter"
 )
 
+
 set ( R_PACKAGES )
 if ( R_EXECUTABLE )
+
     if (WIN32)
-        set (R_FLAGS --vanilla --slave --ess)
+
+        if ( NOT R_ARCH )
+            execute_process( COMMAND ${R_EXECUTABLE} --version
+                OUTPUT_VARIABLE R_VERSION_OUT
+                ERROR_VARIABLE R_VERSION_ERR
+            )
+            string(REGEX MATCH 64-bit|32-bit R_ARCH ${R_VERSION_OUT} ${R_VERSION_ERR})
+            if (R_ARCH STREQUAL 64-bit)
+                set(R_ARCH x64)
+            elseif(R_ARCH STREQUAL 32-bit)
+                set(R_ARCH i386)
+            endif()
+        endif()
+
+        set (R_FLAGS --arch ${R_ARCH} --vanilla --slave --ess)
     else ()
         set (R_FLAGS --vanilla --slave --no-readline)
     endif()
