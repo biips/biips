@@ -1,13 +1,13 @@
 François le 13/08/2014 :
 ========================
-J'ai une erreur qui est apparue quand je lance tutorial2.m:
+J'ai une erreur qui est apparue quand je lance `tutorial2.m`:
 
-Error using biips_smc_sensitivity (line 144)
-Data change failed: invalid parameter log_prec_y = -5 .
+        Error using biips_smc_sensitivity (line 144)
+        Data change failed: invalid parameter log_prec_y = -5 .
 
 
-Error in tutorial2 (line 117)
-out = biips_smc_sensitivity(model, param_names, param_values, n_part);
+        Error in tutorial2 (line 117)
+        out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut etre negatif.
 
@@ -21,21 +21,22 @@ la valeur est en dehors du support donc rejetée...
 Pour que ça passe, dans le script matlab il faut avoir :
         param_values = {-3:.2:3}; % Range of values
 
-on peut aussi changer biips_smc_sensitivity pour avoir log_prior=0, log_marg_like=0 et log_post=0, quand change_data échoue
+on peut aussi changer `biips_smc_sensitivity` pour avoir `log_prior=0`, `log_marg_like=0` et `log_post=0`, quand change_data échoue
 
 François :
 ----------
 le soucis est que la marginal likelihood peut etre bien definie meme 
-quand log_prior=-Inf, comme c'est le cas dans le tutorial 2.
+quand `log_prior=-Inf`, comme c'est le cas dans le tutorial 2.
 
 Adrien :
 --------
-- [ ] En effet, on peut alors désactiver la vérification du support pour cette fonction.
-Par contre, si un noeud logique enfant échoue, ex: sqrt(log_prec_y), cela devra produire une erreur.
+- [x] En effet, on peut alors désactiver la vérification du support pour cette fonction.
+Par contre, si un noeud logique enfant échoue, ex: `sqrt(log_prec_y)`, cela devra produire une erreur.
 
 Adrien le 13/08/2014 :
 ======================
-- [ ] vérifier itérations de backward smoother. cf GetSampledNodes GetUpdatedNodes
+- [ ] vérifier itérations de backward smoother. cf `GetSampledNodes`, `GetUpdatedNodes`
+- [ ] réparer authors/comitters sur le dépôt git (statistiques sur la forge erronées)
 
 Adrien le 12/08/2014 :
 ======================
@@ -77,19 +78,19 @@ Tâches :
 --------
 - [ ] typographies biips, matbiips, rbiips
 - [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
-- [ ] ajouter cible publishmatbiipsexamples.m dans cmake
+- [ ] ajouter cible `publishmatbiipsexamples.m` dans cmake
 - [ ] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
 - [ ] passer à boost 1.54 (standard sous ubuntu)
 - [x] compilation sous mac osx avec clang (matlab et octave)
-- [ ] compiler avec -DBUILD_TESTS=ON sous mac
+- [ ] compiler avec `-DBUILD_TESTS=ON` sous mac
 - [ ] passer à cmake 3 ?
 - [ ] compiler avec vm mac
-- [ ] warning "-output ignored" dans compilation matbiips octave windows
+- [ ] warning `-output ignored` dans compilation matbiips octave windows
 
 Bug :
 -----
-- [ ] test_internals ne passe pas sous linux et windows avec matlab/octave :
+- [ ] `test_internals` ne passe pas sous linux et windows avec matlab/octave :
 
         >> test_internals
         * Parsing model in: hmm_1d_lin.bug
@@ -120,11 +121,11 @@ François le 11/08/2014 :
 ========================
 
 Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
-* tutorial1,2,3: OK
-* hmm_nonlin_4d: OK
-* stoch_volatility: OK
-* switch_stoch_volatility_param: OK
-* switch_stoch_volatility: [x] ERREUR sous Matlab/octave:
+* `tutorial1`,2,3: OK
+* `hmm_nonlin_4d`: OK
+* `stoch_volatility`: OK
+* `switch_stoch_volatility_param`: OK
+* `switch_stoch_volatility`: [x] ERREUR sous Matlab/octave:
 ---
         Warning: RUNTIME ERROR: Can not change data: node is not stochastic.
          
@@ -135,8 +136,8 @@ Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
         Error in switch_stoch_volatility (line 308)
         out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
 ---
-* stoch_kinetic: OK
-* stoch_kinetic_gill: Matlab OK
+* `stoch_kinetic`: OK
+* `stoch_kinetic_gill`: Matlab OK
     - [ ] Warning dans octave, mais le programme semble donner les resultats normaux:
 ---
         octave:18> stoch_kinetic_gill
