@@ -1,3 +1,42 @@
+François le 13/08/2014 :
+========================
+J'ai une erreur qui est apparue quand je lance tutorial2.m:
+
+Error using biips_smc_sensitivity (line 144)
+Data change failed: invalid parameter log_prec_y = -5 .
+
+
+Error in tutorial2 (line 117)
+out = biips_smc_sensitivity(model, param_names, param_values, n_part);
+
+Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut etre negatif.
+
+Adrien :
+--------
+Dans le modèle, il y a 
+        log_prec_y ~ dunif(-3, 3)
+
+la valeur est en dehors du support donc rejetée...
+
+Pour que ça passe, dans le script matlab il faut avoir :
+        param_values = {-3:.2:3}; % Range of values
+
+on peut aussi changer biips_smc_sensitivity pour avoir log_prior=0, log_marg_like=0 et log_post=0, quand change_data échoue
+
+François :
+----------
+le soucis est que la marginal likelihood peut etre bien definie meme 
+quand log_prior=-Inf, comme c'est le cas dans le tutorial 2.
+
+Adrien :
+--------
+- [ ] En effet, on peut alors désactiver la vérification du support pour cette fonction.
+Par contre, si un noeud logique enfant échoue, ex: sqrt(log_prec_y), cela devra produire une erreur.
+
+Adrien le 13/08/2014 :
+======================
+- [ ] vérifier itérations de backward smoother. cf GetSampledNodes GetUpdatedNodes
+
 Adrien le 12/08/2014 :
 ======================
 Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
@@ -373,7 +412,7 @@ Adrien le 18/3/2014 :
     * liste des observations de conditionnement
 - [ ] Concernant les crashs MATLAB: est-ce que ça crashe dès la première exécution ou seulement à partir de la deuxième ?
 - [ ] enlever C++0X/11 ?
-- [ ] enlever boost regex (utiliser std::string ou autre?)
+- [x] enlever boost regex (utiliser std::string ou autre?)
 - [x] crash MATLAB sur exemple `stoch_kinetic` [Ne crashe plus apparemment]
 
 >> stoch_kinetic

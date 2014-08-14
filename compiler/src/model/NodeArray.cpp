@@ -417,17 +417,19 @@ namespace Biips
         set_observed_nodes = true;
       }
 
-      // check that support is fixed
-      if (!isSupportFixed(id, graph_))
-        throw NodeError(id, "Can not change data: node distribution support is not fixed.");
+      if (mcmc) {
+        // check that support is fixed
+        if (!isSupportFixed(id, graph_))
+          throw NodeError(id, "Can not change data: node distribution support is not fixed.");
 
-      // check that value is in the support
-      Size len = snode.DimPtr()->Length();
-      ValArray lower(len), upper(len);
-      getFixedSupportValues(lower, upper, id, graph_);
-      for (Size i=0; i<len; ++i) {
-        if (value.Values()[i]<lower[i] || value.Values()[i]>upper[i])
-          return false; // Can not change data: value out of distribution support
+        // check that value is in the support
+        Size len = snode.DimPtr()->Length();
+        ValArray lower(len), upper(len);
+        getFixedSupportValues(lower, upper, id, graph_);
+        for (Size i=0; i<len; ++i) {
+          if (value.Values()[i]<lower[i] || value.Values()[i]>upper[i])
+            return false; // Can not change data: value out of distribution support
+        }
       }
     }
 
