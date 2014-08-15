@@ -45,6 +45,7 @@ namespace Biips
 {
   class NodeArray;
   class Graph;
+  class SymbolTable;
 
   class NodeArrayMonitor
   {
@@ -58,7 +59,8 @@ namespace Biips
     MultiArray iterations_;
     MultiArray nodeIds_;
     MultiArray discrete_;
-    Types<Types<NodeId>::Array>::Array conditionalNodes_;
+    Types<Types<NodeId>::Array>::Array conditionalNodeIds_;
+    Types<Types<String>::Array>::Array conditionalNodeNames_;
 
     template<typename StorageOrderType>
     void addObservedNode(NodeId id,
@@ -74,7 +76,8 @@ namespace Biips
                      const IndexRange & range,
                      const std::map<NodeId, Monitor*> & monitorsMap,
                      Size nParticles,
-                     const Graph & graph);
+                     const Graph & graph,
+                     const SymbolTable & symtab);
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
                      const Monitor* pMonitor,
@@ -113,9 +116,13 @@ namespace Biips
     {
       return discrete_;
     }
-    const Types<Types<NodeId>::Array>::Array & GetConditionalNodes() const
+    const Types<Types<NodeId>::Array>::Array & GetConditionalNodeIds() const
     {
-      return conditionalNodes_;
+      return conditionalNodeIds_;
+    }
+    const Types<Types<String>::Array>::Array & GetConditionalNodeNames() const
+    {
+      return conditionalNodeNames_;
     }
   };
 

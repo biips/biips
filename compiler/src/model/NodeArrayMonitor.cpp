@@ -38,6 +38,7 @@
 #include "model/NodeArray.hpp"
 #include "common/IndexRangeIterator.hpp"
 #include "graph/Graph.hpp"
+#include "model/SymbolTable.hpp"
 
 namespace Biips
 {
@@ -178,7 +179,8 @@ namespace Biips
                                      const IndexRange & range,
                                      const std::map<NodeId, Monitor*> & monitorsMap,
                                      Size nParticles,
-                                     const Graph & graph) :
+                                     const Graph & graph,
+                                     const SymbolTable & symtab) :
     name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
         ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
                                                         BIIPS_REALNA))),
@@ -188,7 +190,7 @@ namespace Biips
                                                             BIIPS_REALNA))),
         discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
                                                              Scalar(false)))),
-        conditionalNodes_(range.Length())
+        conditionalNodeIds_(range.Length()), conditionalNodeNames_(range.Length())
   {
     if (!nodeArray.Range().Contains(range_))
       throw LogicError(String("NodeArrayMonitor: range ") + print(range_)
@@ -242,9 +244,13 @@ namespace Biips
         throw LogicError("NodeArrayMonitor::NodeArrayMonitor: could not set conditionals. null monitor pointer.");
 
       const Types<NodeId>::Array cond = monitorsMap.at(id)->GetConditionalNodes();
-      conditionalNodes_[i].assign(cond.begin(), cond.end());
+      conditionalNodeIds_[i].assign(cond.begin(), cond.end());
+      conditionalNodeNames_[i].resize(cond.size());
+      for (Size j=0; j<cond.size(); ++j)
+        conditionalNodeNames_[i][j] = symtab.GetName(cond[j]);
     }
   }
+
 
   NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
                                      const IndexRange & range,
@@ -259,7 +265,8 @@ namespace Biips
         nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
                                                             BIIPS_REALNA))),
         discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                             Scalar(false))))
+                                                             Scalar(false)))),
+        conditionalNodeIds_(range.Length()), conditionalNodeNames_(range.Length())
   {
     if (!nodeArray.Range().Contains(range_))
       throw LogicError(String("NodeArrayMonitor: range ") + print(range_)

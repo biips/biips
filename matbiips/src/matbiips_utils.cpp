@@ -172,7 +172,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const String & var_name = it_table->first;
     const NodeArrayMonitor & monitor = it_table->second;
 
-    const char * curr_field_names[] = { "values", "weights", "ess", "discrete",
+    const char * curr_field_names[] = { "values", "weights", "ess", "discrete", "conditionals",
                                         "name", "lower", "upper", "type"};
     mwSize curr_dims[] = { 1 };
     mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(char *),
@@ -217,25 +217,43 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     std::copy(discrete_val.begin(), discrete_val.end(), mxGetPr(sub_field));
     mxSetFieldByNumber(curr_field, 0, 3, sub_field);
 
+    //conditionals assignment
+    const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
+    sub_field = mxCreateCellArray(ndim_arr, dims_arr);
+    Size len = monitor.GetRange().Length();
+    for (Size i=0; i < len; ++i)
+    {
+      mwSize celldims[] = { cond[i].size() };
+      mxArray * cell = mxCreateCellArray(1, celldims);
+      for (Size j=0; j<cond[i].size(); ++j)
+      {
+        mxArray * value = mxCreateString(cond[i][j].c_str());
+        mxSetCell(cell, j, value);
+      }
+      mxSetCell(sub_field, i, cell);
+    }
+    mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+
     //name assignment
-    mxArray * sub_name = mxCreateString(monitor.GetName().c_str());
-    mxSetFieldByNumber(curr_field, 0, 4, sub_name);
+    sub_field = mxCreateString(monitor.GetName().c_str());
+    mxSetFieldByNumber(curr_field, 0, 5, sub_field);
 
     //lower assignement
     const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
     sub_field = mxCreateDoubleMatrix(1, lower_ind.size(), mxREAL);
     std::copy(lower_ind.begin(), lower_ind.end(), mxGetPr(sub_field));
-    mxSetFieldByNumber(curr_field, 0, 5, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 6, sub_field);
 
     //upper assignement
     const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
     sub_field = mxCreateDoubleMatrix(1, upper_ind.size(), mxREAL);
     std::copy(upper_ind.begin(), upper_ind.end(), mxGetPr(sub_field));
-    mxSetFieldByNumber(curr_field, 0, 6, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 7, sub_field);
 
-    //name assignment
-    sub_name = mxCreateString(type.c_str());
-    mxSetFieldByNumber(curr_field, 0, 7, sub_name);
+    //type assignment
+    sub_field = mxCreateString(type.c_str());
+    mxSetFieldByNumber(curr_field, 0, 8, sub_field);
+
 
     delete [] dims_part;
     delete [] dims_arr;

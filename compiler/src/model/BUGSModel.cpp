@@ -569,7 +569,7 @@ namespace Biips
                                                          range,
                                                          filterMonitorsMap_,
                                                          pSampler_->NParticles(),
-                                                         *pGraph_)));
+                                                         *pGraph_, symbolTable_)));
     }
 
     return true;
@@ -675,7 +675,8 @@ namespace Biips
                                                          range,
                                                          backwardSmoothMonitorsMap_,
                                                          pSampler_->NParticles(),
-                                                         *pGraph_)));
+                                                         *pGraph_,
+                                                         symbolTable_)));
     }
 
     return true;
