@@ -36,17 +36,19 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %                   * names of the variables monitored with subfields
 %                       * f, s and/or b for filtering, smoothing or backward
 %                       smoothing with subfields
-%                           * value: matrix of size ndim * N with values of the particles
-%                           * weights: matrix of size ndim * N with weights of the particles
-%                           * ess: matrix of size ndim with effective sample size 
+%                           * values: array of size [dim, n_part] with values of the particles
+%                           * weights: array of size [dim, n_part] with weights of the particles
+%                           * ess: array of size dim with effective sample size 
+%                           * discrete: array of size dim with boolean indicating discreteness
+%                           * conditionals: cell array of size dim with cells of strings containing the 
+%                           list of contitioning node names (filtering only, empty cells for smoothing
+%                           and backward_smoothing)
 %                           * name: string with the name of the variable
-%                           * lower: cell with the lower dimension of the
-%                           variable
-%                           * upper: cell with the upper dimension of the
-%                           variable
-%                           * type: string ('filtering', 'smoothing' or 'backward smoothing')
+%                           * lower: vector with the lower bounds of the variable
+%                           * upper: vector with the upper bounds of the variable
+%                           * type: string ('filtering', 'smoothing' or 'backward_smoothing')
 %                   Example to access values of the particles for smoothing for variable x: 
-%                   particles.var1.s.values
+%                   particles.x.s.values
 %   - log_marg_like:log marginal likelihood
 %
 %   See also BIIPS_MODEL

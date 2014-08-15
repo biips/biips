@@ -1,3 +1,17 @@
+Adrien le 15/8/2014 :
+=====================
+- [x] Conditionnelles retournées dans le champs `conditionals` des monitors
+    sous la forme d'un cell array de me dimension que le node array.
+    Chaque élément du cell array contient la liste des noms des noeuds de conditionnement 
+    du noeud représenté à cette position.
+    Les listes sont vides pour les monitors de smoothing et backward smoothing car la
+    liste est identique pour tous les noeuds = tous les noeuds stochastiques observés.
+
+- [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
+- [ ] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant
+    mex/mkoctfile (windows)
+- [ ] mettre à jour/corriger `matbiips_internals.tex`
+
 François le 13/08/2014 :
 ========================
 J'ai une erreur qui est apparue quand je lance `tutorial2.m`:
@@ -9,7 +23,7 @@ J'ai une erreur qui est apparue quand je lance `tutorial2.m`:
         Error in tutorial2 (line 117)
         out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
-Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut etre negatif.
+Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut être négatif.
 
 Adrien :
 --------
@@ -207,7 +221,7 @@ Adrien le 07/08/2014 :
 Tâches release avant Compstat :
 - [x] mexfile octave windows 32bit (cette après midi)
 - [ ] terminer rbiips et exemples
-- [ ] conditionnelles
+- [x] conditionnelles
 - [ ] mettre en ligne
 - [ ] article: logiciels similaires: libbi, nimble (paciorek), bugs, jags, stan
 - [x] mac osx
@@ -277,6 +291,8 @@ Adrien le 25/06/2014 :
 ======================
 Pour exécuter Matbiips compilé avec mex+VS2012, la machine a besoin de 
 - Visual Studio C++ redistribuable
+
+- [ ] l'ajouter aux instructions d'installation
 
 Adrien le 3/6/2014 :
 ====================
@@ -553,7 +569,7 @@ Marc:
 Adrien: 
 - [x] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
 - [x] Regarder bug exemple stochastic kinetic
-- [ ] ajouter les lois conditionnelles
+- [x] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
 - [ ] mexfile windows 32 bits
 - [ ] quand doc PMMH matbiips finie, verifier et transcrire dans RBiips
@@ -793,7 +809,7 @@ A faire :
        * x[2] est donc seulement conditionné à y[1]
        * x[3] est lui conditionné à y[1], y[2], y[3], y[4]
        - [x] Il faut changer ce comportement
-- [ ] retourner les conditionnelles sous la forme présentée plus haut
+- [x] retourner les conditionnelles sous la forme présentée plus haut
 
 
 François le 07/02/2014 :
@@ -832,7 +848,7 @@ A faire dans Matbiips :
     Rq: L'appel de squeeze modifie les dimensions
 - [x] créer exemple court et l'inclure dans matbiips
 - [x] supprimer `biips_load_module` : l'intégrer dans `biips_init`
-- [ ] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
+- [x] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
 - [x] renommer `make_progress_bar` en `progress_bar`
 - [x] mettre isoctave dans private
 - [ ] revoir et ajouter tests matbiips et ne pas les intégrer dans l'archive
