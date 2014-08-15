@@ -135,7 +135,7 @@ François le 11/08/2014 :
 ========================
 
 Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
-* `tutorial1`,2,3: OK
+* `tutorial1`,`tutorial2`,`tutorial3`: OK
 * `hmm_nonlin_4d`: OK
 * `stoch_volatility`: OK
 * `switch_stoch_volatility_param`: OK
