@@ -24,17 +24,17 @@ nfolders = length(name_folders);
 for i=1:nfolders
     mdir = ['./', name_folders{i} '/'];
     cd(mdir);
-    outputdir = './matbiips/';
+    outputdir = ['D:/caron/Dropbox/biips/website/examples/'  name_folders{i} '/matbiips/'];
     files_i = names_mfiles{i};
     for j=1:length(files_i)
         % Publish html file
         publish([files_i{j} '.m'], 'format', 'html', 'outputDir', outputdir);
         
-        addfiles = names_addfiles{i}{j};
-        addfiles{end+1} = [files_i{j}, '.m'];
-        % zip the Matlab and bugs files
-        zip(files_i{j}, addfiles);
-        movefile([files_i{j}, '.zip'], [outputdir, files_i{j}, '.zip']);            
+%         addfiles = names_addfiles{i}{j};
+%         addfiles{end+1} = [files_i{j}, '.m'];
+%         % zip the Matlab and bugs files
+%         zip(files_i{j}, addfiles);
+%         movefile([files_i{j}, '.zip'], [outputdir, files_i{j}, '.zip']);            
     end
     
     cd('../')
