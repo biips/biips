@@ -32,7 +32,7 @@ extern std::deque<ProgressBar_ptr> progress;
 
 inline
 void myMexErrMsg(const String & identifier, const String & err_msg) {
-	mexErrMsgIdAndTxt((String("inter_biips:")+identifier).c_str(), err_msg.c_str());
+	mexErrMsgIdAndTxt((String("matbiips:")+identifier).c_str(), err_msg.c_str());
 }
 
 template<typename StorageOrderType>
@@ -52,20 +52,19 @@ void getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap,
 IndexRange makeRange(const mxArray * lower, const mxArray * upper);
 
 inline  
-void CheckRhs(int nrhs, int nb, String name_func) { 
+void CheckRhs(int nrhs, int nb, const String & name_func) {
 	if (nrhs != (nb + 1)) {
 		myMexErrMsg(name_func, name_func+" must have "+print(nb)+" argument(s)");
 	}
 }
 
 inline 
-Size  GetConsoleId(const std::deque<Console_ptr> & consoles,
+Size GetConsoleId(const std::deque<Console_ptr> & consoles,
                    const mxArray * pm,
-                   String name_func) {
+                   const String & name_func) {
   if (!mxIsNumeric(pm))
     myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
-  double id_double = *mxGetPr(pm);
-  Size id = static_cast<Size>(id_double);
+  Size id = static_cast<Size>(*mxGetPr(pm));
   if ((id >= consoles.size()) || (consoles[id] == NULL)) {
     myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
   }
@@ -84,7 +83,7 @@ String GetString(const mxArray * pm) {
 inline 
 Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress, 
 		const mxArray * pm,
-		String name_func) {
+		const String & name_func) {
 	Size id = static_cast<Size>(*mxGetPr(pm));
 	if ((id >= progress.size()) || (progress[id] == NULL)) {
 		myMexErrMsg(name_func, name_func+": the progress bar with id "+print(id)+" does not exist");

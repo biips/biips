@@ -233,8 +233,8 @@ namespace Biips
     typedef Types<SelfType>::Ptr Ptr;
     typedef Monitor BaseType;
 
-    SmoothMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
-      BaseType(iter, sampledNodes, Types<NodeId>::Array())
+    SmoothMonitor(Size iter, const Types<NodeId>::Array & updatedNodes) :
+      BaseType(iter, updatedNodes, Types<NodeId>::Array())
     {
     }
     virtual ~SmoothMonitor()

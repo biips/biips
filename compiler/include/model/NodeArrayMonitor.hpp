@@ -71,18 +71,40 @@ namespace Biips
                           const IndexRange & subRange,
                           const Monitor* pMonitor);
 
+    void setMembers(const NodeArray & nodeArray,
+                    const std::map<NodeId, Monitor*> & monitorsMap,
+                    const Graph & graph);
+    void setMembers(const NodeArray & nodeArray,
+                    const Monitor* pMonitor,
+                    const Graph & graph);
+    void setConditionalNodeIds(const NodeArray & nodeArray,
+                             const std::map<NodeId, Monitor*> & monitorsMap,
+                             const Graph & graph);
+    void setConditionalNodeNames(const SymbolTable & symtab);
+
   public:
+    // constructor for filtering monitors
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
                      const std::map<NodeId, Monitor*> & monitorsMap,
                      Size nParticles,
                      const Graph & graph,
                      const SymbolTable & symtab);
+    // constructor for backward smoothing monitors
+    NodeArrayMonitor(const NodeArray & nodeArray,
+                     const IndexRange & range,
+                     const std::map<NodeId, Monitor*> & monitorsMap,
+                     Size nParticles,
+                     const Graph & graph,
+                     const SymbolTable & symtab,
+                     const Types<NodeId>::Array & condNodes);
+    // constructor for smoothing monitors
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
                      const Monitor* pMonitor,
                      Size nParticles,
-                     const Graph & graph);
+                     const Graph & graph,
+                     const SymbolTable & symtab);
 
     const String & GetName() const
     {

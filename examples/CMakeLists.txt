@@ -53,13 +53,10 @@ foreach(_ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
     )
     set(ex_files_common ${ex_files_common} ${_ex_files_common})
 endforeach()
-    
-if (WIN32)
-  set(_ext_list zip)
-else()
-  set(_ext_list zip tar.gz)
-endif()
 
+
+# using cmake -E
+set(_ext_list tar.gz)
 foreach (_ext ${_ext_list})
     file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_mat)
     set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
@@ -88,6 +85,51 @@ foreach (_ext ${_ext_list})
       ${ex_files_common} ${ex_files_mat} ${ex_files_r}
     )
 endforeach()
+
+
+# using zip
+find_package(Zip)
+
+if (ZIP)
+    if (ZIP_NEED_QUOTES)
+        set(_files_lists ex_files_mat ex_files_r ex_files_common)
+        foreach(_fl ${_files_lists})
+            set(_tmp "")
+            foreach(_f ${${_fl}})
+                set(_tmp "${_tmp} \"${_f}\"")
+            endforeach()
+            set(${_fl} ${_tmp})
+        endforeach()
+    endif()
+
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.zip" ex_archive_mat)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
+    add_custom_command( OUTPUT ${ex_archive_mat}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove "${ex_archive_mat}"
+      COMMAND ${ZIP_COMMAND} "${ex_archive_mat}"
+      ${ex_files_common} ${ex_files_mat}
+    )
+
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/rbiips-examples_${Biips_VERSION}.zip" ex_archive_r)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_r})
+    add_custom_command( OUTPUT ${ex_archive_r}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove "${ex_archive_r}"
+      COMMAND ${ZIP_COMMAND} "${ex_archive_r}"
+      ${ex_files_common} ${ex_files_r}
+    )
+
+    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.zip" ex_archive_all)
+    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_all})
+    add_custom_command( OUTPUT ${ex_archive_all}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E remove "${ex_archive_all}"
+      COMMAND ${ZIP_COMMAND} "${ex_archive_all}"
+      ${ex_files_common} ${ex_files_mat} ${ex_files_r}
+    )
+endif()
+
     
 #define target
 add_custom_target(examples_package

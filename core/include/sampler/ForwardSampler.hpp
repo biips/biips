@@ -189,9 +189,9 @@ namespace Biips
     }
     // last sampled nodes at the current iteration (incremental)
     Types<NodeId>::Array LastSampledNodes();
-    // all past sampled nodes at the current iteration (incremental)
+    // all past sampled nodes at the current iteration
     Types<NodeId>::Array SampledNodes();
-    // all past conditional nodes at the current iteration (incremental)
+    // all past conditional nodes at the current iteration
     Types<NodeId>::Array ConditionalNodes();
 
     Scalar GetNodeESS(NodeId nodeId) const;

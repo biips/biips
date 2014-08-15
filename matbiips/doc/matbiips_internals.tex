@@ -249,7 +249,7 @@
    \item \texttt{weigths}: array of weights (same dimensions as values)
    \item \texttt{ess}: array of effective  sample size (size: \texttt{[dim, n\_part]})
    \item \texttt{discrete}: array of booleans (size: \texttt{[dim]}). 1 if the variables is discrete, 0 otherwise
-   \item \texttt{conditionals}: cell array of cells of strings (size:  \texttt{[dim]}). Each element contains the list of conditioning node names of the node at the element position.
+   \item \texttt{conditionals}: cell array (size: \texttt{[dim]}) of conditioning variables (observations). Each element contains a cells of strings with the respective list of conditioning variables of  the monitored node array element.
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds
@@ -287,7 +287,7 @@ ans =
    \item \texttt{weigths}: array of weights (same dimensions as values)
    \item \texttt{ess}: array of effective  sample size (size: \texttt{[dim, n\_part]})
    \item \texttt{discrete}: array of booleans (size: \texttt{[dim]}). 1 if the variables is discrete, 0 otherwise
-   \item \texttt{conditionals}: cell array of empty elements (size:  \texttt{[dim]}). The conditionals are implicitly the same for all nodes, \textit{i.e.} all the observed stochastic nodes.
+   \item \texttt{conditionals}: cell of strings with the list of conditioning variables (observations) of the monitored variable.
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds
@@ -324,7 +324,7 @@ ans =
    \item \texttt{weigths}: array of weights (same dimensions as values)
    \item \texttt{ess}: array of effective  sample size (size: \texttt{[dim, n\_part]})
    \item \texttt{discrete}: array of booleans (size: \texttt{[dim]}). 1 if the variables is discrete, 0 otherwise
-   \item \texttt{conditionals}: cell array of empty elements (size:  \texttt{[dim]}). The conditionals are implicitly the same for all nodes, \textit{i.e.} all the observed stochastic nodes.
+   \item \texttt{conditionals}: cell of strings with the list of conditioning variables (observations) of the monitored variable.
    \item \texttt{name}: name of the variable
    \item \texttt{lower}: vector of lower bounds
    \item \texttt{upper}: vector of upper bounds

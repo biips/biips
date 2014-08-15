@@ -219,21 +219,37 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 
     //conditionals assignment
     const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
-    sub_field = mxCreateCellArray(ndim_arr, dims_arr);
     Size len = monitor.GetRange().Length();
-    for (Size i=0; i < len; ++i)
-    {
-      mwSize ndimcell = cond[i].size();
+    if (cond.size() == len) {
+      sub_field = mxCreateCellArray(ndim_arr, dims_arr);
+      for (Size i=0; i < len; ++i)
+      {
+        mwSize ndimcell = cond[i].size();
+        mwSize celldims[] = { ndimcell };
+        mxArray * cell = mxCreateCellArray(1, celldims);
+        for (Size j=0; j<cond[i].size(); ++j)
+        {
+          mxArray * value = mxCreateString(cond[i][j].c_str());
+          mxSetCell(cell, j, value);
+        }
+        mxSetCell(sub_field, i, cell);
+      }
+      mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+    }
+    else if (cond.size() == 1) {
+      mwSize ndimcell = cond[0].size();
       mwSize celldims[] = { ndimcell };
       mxArray * cell = mxCreateCellArray(1, celldims);
-      for (Size j=0; j<cond[i].size(); ++j)
+      for (Size j=0; j<cond[0].size(); ++j)
       {
-        mxArray * value = mxCreateString(cond[i][j].c_str());
+        mxArray * value = mxCreateString(cond[0][j].c_str());
         mxSetCell(cell, j, value);
       }
-      mxSetCell(sub_field, i, cell);
+      mxSetFieldByNumber(curr_field, 0, 4, cell);
     }
-    mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+    else {
+      myMexErrMsg("getMonitors:invalid_conditionals", "conditionals must either be of the same size as the node array or of size 1.");
+    }
 
     //name assignment
     sub_field = mxCreateString(monitor.GetName().c_str());

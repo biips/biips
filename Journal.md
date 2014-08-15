@@ -4,8 +4,10 @@ Adrien le 15/8/2014 :
     sous la forme d'un cell array de me dimension que le node array.
     Chaque élément du cell array contient la liste des noms des noeuds de conditionnement 
     du noeud représenté à cette position.
-    Les listes sont vides pour les monitors de smoothing et backward smoothing car la
+- [x] A modifier: Les listes sont vides pour les monitors de smoothing et backward smoothing car la
     liste est identique pour tous les noeuds = tous les noeuds stochastiques observés.
+  ---> OK, maintenant pour les monitors de smoothing, contitionals contient un unique cell of strings
+       avec la liste des variables observées.
 
 - [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
 - [ ] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant

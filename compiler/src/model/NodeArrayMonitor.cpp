@@ -175,22 +175,9 @@ namespace Biips
     }
   }
 
-  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
-                                     const IndexRange & range,
-                                     const std::map<NodeId, Monitor*> & monitorsMap,
-                                     Size nParticles,
-                                     const Graph & graph,
-                                     const SymbolTable & symtab) :
-    name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
-        ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                        BIIPS_REALNA))),
-        iterations_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                               BIIPS_REALNA))),
-        nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                            BIIPS_REALNA))),
-        discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                             Scalar(false)))),
-        conditionalNodeIds_(range.Length()), conditionalNodeNames_(range.Length())
+  void NodeArrayMonitor::setMembers(const NodeArray & nodeArray,
+                  const std::map<NodeId, Monitor*> & monitorsMap,
+                  const Graph & graph)
   {
     if (!nodeArray.Range().Contains(range_))
       throw LogicError(String("NodeArrayMonitor: range ") + print(range_)
@@ -227,46 +214,11 @@ namespace Biips
         addMonitoredNode<StorageOrder> (id, sub_range, monitorsMap.at(id));
       }
     }
-
-    // set conditional nodes
-    const Types<NodeId>::Array node_ids = nodeArray.NodeIds();
-    IndexRangeIterator it_range(range_);
-    for (Size i=0; !it_range.AtEnd(); ++i, it_range.Next())
-    {
-      Size offset = nodeArray.Range().GetOffset(it_range);
-      NodeId id = nodeArray.NodeIds()[offset];
-      if (id == NULL_NODEID || graph.GetObserved()[id])
-        continue;
-
-      if (!monitorsMap.count(id))
-        throw LogicError("NodeArrayMonitor::NodeArrayMonitor: could not set conditionals. node is not monitored.");
-      if (!monitorsMap.at(id))
-        throw LogicError("NodeArrayMonitor::NodeArrayMonitor: could not set conditionals. null monitor pointer.");
-
-      const Types<NodeId>::Array cond = monitorsMap.at(id)->GetConditionalNodes();
-      conditionalNodeIds_[i].assign(cond.begin(), cond.end());
-      conditionalNodeNames_[i].resize(cond.size());
-      for (Size j=0; j<cond.size(); ++j)
-        conditionalNodeNames_[i][j] = symtab.GetName(cond[j]);
-    }
   }
 
-
-  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
-                                     const IndexRange & range,
-                                     const Monitor* pMonitor,
-                                     Size nParticles,
-                                     const Graph & graph) :
-    name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
-        ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                        BIIPS_REALNA))),
-        iterations_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                               BIIPS_REALNA))),
-        nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                            BIIPS_REALNA))),
-        discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
-                                                             Scalar(false)))),
-        conditionalNodeIds_(range.Length()), conditionalNodeNames_(range.Length())
+  void NodeArrayMonitor::setMembers(const NodeArray & nodeArray,
+                                    const Monitor* pMonitor,
+                                    const Graph & graph)
   {
     if (!nodeArray.Range().Contains(range_))
       throw LogicError(String("NodeArrayMonitor: range ") + print(range_)
@@ -300,8 +252,112 @@ namespace Biips
       else
         addMonitoredNode<StorageOrder> (id, sub_range, pMonitor);
     }
+  }
 
-    // we do not set conditional nodes for smooth monitor
+  void NodeArrayMonitor::setConditionalNodeIds(const NodeArray & nodeArray,
+                                             const std::map<NodeId, Monitor*> & monitorsMap,
+                                             const Graph & graph)
+  {
+    const Types<NodeId>::Array node_ids = nodeArray.NodeIds();
+    IndexRangeIterator it_range(range_);
+    for (Size i=0; !it_range.AtEnd(); ++i, it_range.Next())
+    {
+      Size offset = nodeArray.Range().GetOffset(it_range);
+      NodeId id = nodeArray.NodeIds()[offset];
+      if (id == NULL_NODEID || graph.GetObserved()[id])
+        continue;
+
+      if (!monitorsMap.count(id))
+        throw LogicError("NodeArrayMonitor::NodeArrayMonitor: could not set conditionals. node is not monitored.");
+      if (!monitorsMap.at(id))
+        throw LogicError("NodeArrayMonitor::NodeArrayMonitor: could not set conditionals. null monitor pointer.");
+
+      const Types<NodeId>::Array cond = monitorsMap.at(id)->GetConditionalNodes();
+      conditionalNodeIds_[i].assign(cond.begin(), cond.end());
+    }
+  }
+
+  void NodeArrayMonitor::setConditionalNodeNames(const SymbolTable & symtab)
+  {
+    conditionalNodeNames_.resize(conditionalNodeIds_.size());
+    for (Size i=0; i<conditionalNodeIds_.size(); ++i)
+    {
+      conditionalNodeNames_[i].resize(conditionalNodeIds_[i].size());
+      for (Size j=0; j<conditionalNodeIds_[i].size(); ++j)
+        conditionalNodeNames_[i][j] = symtab.GetName(conditionalNodeIds_[i][j]);
+    }
+  }
+
+  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
+                                     const IndexRange & range,
+                                     const std::map<NodeId, Monitor*> & monitorsMap,
+                                     Size nParticles,
+                                     const Graph & graph,
+                                     const SymbolTable & symtab) :
+    name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
+        ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                        BIIPS_REALNA))),
+        iterations_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                               BIIPS_REALNA))),
+        nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                            BIIPS_REALNA))),
+        discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                             Scalar(false)))),
+        conditionalNodeIds_(range.Length()), conditionalNodeNames_(range.Length())
+  {
+    // set members
+    setMembers(nodeArray, monitorsMap, graph);
+    // set conditional nodes
+    setConditionalNodeIds(nodeArray, monitorsMap, graph);
+    setConditionalNodeNames(symtab);
+  }
+
+  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
+                                     const IndexRange & range,
+                                     const std::map<NodeId, Monitor*> & monitorsMap,
+                                     Size nParticles,
+                                     const Graph & graph,
+                                     const SymbolTable & symtab,
+                                     const Types<NodeId>::Array & condNodes) :
+    name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
+        ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                        BIIPS_REALNA))),
+        iterations_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                               BIIPS_REALNA))),
+        nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                            BIIPS_REALNA))),
+        discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                             Scalar(false)))),
+        conditionalNodeIds_(1, condNodes), conditionalNodeNames_(1)
+  {
+    // set members
+    setMembers(nodeArray, monitorsMap, graph);
+    // set conditional node names
+    setConditionalNodeNames(symtab);
+  }
+
+
+  NodeArrayMonitor::NodeArrayMonitor(const NodeArray & nodeArray,
+                                     const IndexRange & range,
+                                     const Monitor* pMonitor,
+                                     Size nParticles,
+                                     const Graph & graph,
+                                     const SymbolTable & symtab) :
+    name_(nodeArray.Name()), range_(range), nParticles_(nParticles),
+        ess_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                        BIIPS_REALNA))),
+        iterations_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                               BIIPS_REALNA))),
+        nodeIds_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                            BIIPS_REALNA))),
+        discrete_(range.DimPtr(), ValArray::Ptr(new ValArray(range.Length(),
+                                                             Scalar(false)))),
+        conditionalNodeIds_(1, pMonitor->GetConditionalNodes()), conditionalNodeNames_(1)
+  {
+    // set members
+    setMembers(nodeArray, pMonitor, graph);
+    // set conditional nodes
+    setConditionalNodeNames(symtab);
   }
 
   template<>

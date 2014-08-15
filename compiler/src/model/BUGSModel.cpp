@@ -601,7 +601,8 @@ namespace Biips
                                                          range,
                                                          pGenTreeSmoothMonitor_.get(),
                                                          pSampler_->NParticles(),
-                                                         *pGraph_)));
+                                                         *pGraph_,
+                                                         symbolTable_)));
     }
 
     return true;
@@ -676,7 +677,8 @@ namespace Biips
                                                          backwardSmoothMonitorsMap_,
                                                          pSampler_->NParticles(),
                                                          *pGraph_,
-                                                         symbolTable_)));
+                                                         symbolTable_,
+                                                         pSmoother_->ConditionalNodes())));
     }
 
     return true;

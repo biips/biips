@@ -50,7 +50,8 @@ namespace Biips
                                      const Types<Size>::Array & nodeIterations) :
     graph_(graph), filterMonitors_(filterMonitors), sumOfWeights_(0.0),
         ess_(0.0), iter_(0), initialized_(false),
-        nodeIterations_(nodeIterations)
+        nodeIterations_(nodeIterations),
+        condNodes_(filterMonitors.back()->GetConditionalNodes())
   {
   }
 

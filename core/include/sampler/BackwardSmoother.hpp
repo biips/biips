@@ -61,6 +61,7 @@ namespace Biips
     Size iter_;
     Bool initialized_;
     Types<Size>::Array nodeIterations_;
+    Types<NodeId>::Array condNodes_;
 
     void sumOfWeightsAndEss();
     Monitor * getParentFilterMonitor(NodeId id);
@@ -87,9 +88,16 @@ namespace Biips
     {
       return filterMonitors_.size() == 1;
     }
+    // last updated nodes at the current iteration (incremental)
     const Types<NodeId>::Array & LastUpdatedNodes() const
     {
       return filterMonitors_.back()->GetLastSampledNodes();
+    }
+    ;
+    // all conditional nodes (same at each iteration) = all observed stochastic nodes
+    const Types<NodeId>::Array & ConditionalNodes() const
+    {
+      return condNodes_;
     }
     ;
     Size GetNodeSamplingIteration(NodeId nodeId) const;

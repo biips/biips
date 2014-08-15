@@ -1,0 +1,37 @@
+
+if (WIN32)
+    find_program(ZIP wzzip PATHS "$ENV{ProgramFiles}/WinZip")
+    if(ZIP)
+      #set(ZIP_COMMAND "\"${ZIP}\" -P")
+      set(ZIP_COMMAND "\"${ZIP}\"")
+      set(ZIP_NEED_QUOTES TRUE)
+    endif()
+
+    if(NOT ZIP)
+      find_program(ZIP 7z PATHS "$ENV{ProgramFiles}/7-Zip")
+      if(ZIP)
+        #set(ZIP_COMMAND "\"${ZIP}\" a -tzip \"<ARCHIVE>\" ")
+        set(ZIP_COMMAND "\"${ZIP}\" a -tzip")
+      set(ZIP_NEED_QUOTES TRUE)
+      endif()
+    endif()
+
+    if(NOT ZIP)
+      find_package(Cygwin)
+      find_program(ZIP zip PATHS "${CYGWIN_INSTALL_PATH}/bin")
+      if(ZIP)
+        #set(ZIP_COMMAND "\"${ZIP}\" -r \"<ARCHIVE>\" . -i")
+        set(ZIP_COMMAND "\"${ZIP}\"")
+        set(ZIP_NEED_QUOTES FALSE)
+      endif()
+    endif()
+
+else()
+
+  find_program(ZIP zip)
+  if(ZIP)
+    set(ZIP_COMMAND "${ZIP}")
+    set(ZIP_NEED_QUOTES FALSE)
+  endif()
+
+endif()

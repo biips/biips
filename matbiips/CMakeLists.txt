@@ -48,13 +48,36 @@ file(GLOB pvt_packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
     private/*.${MEX_EXT}
 )
 
-add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
-  DEPENDS matbiips
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
-  ${packfiles} ${pvt_packfiles}
-  COMMENT "Packaging MatBiips"
-)
+if (_ext STREQUAL zip)
+    find_package(Zip)
+    if (ZIP)
+        if (ZIP_NEED_QUOTES)
+            set(_files_lists packfiles pvt_packfiles)
+            foreach(_fl ${_files_lists})
+                set(_tmp "")
+                foreach(_f ${${_fl}})
+                    set(_tmp "${_tmp} \"${_f}\"")
+                endforeach()
+                set(${_fl} ${_tmp})
+            endforeach()
+        endif()
+        add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
+          DEPENDS matbiips
+          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+          COMMAND ${ZIP_COMMAND} "${MATBIIPS_ARCHIVE}"
+          ${packfiles} ${pvt_packfiles}
+          COMMENT "Packaging MatBiips"
+        )
+    endif()
+else ()
+    add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
+      DEPENDS matbiips
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
+      ${packfiles} ${pvt_packfiles}
+      COMMENT "Packaging MatBiips"
+    )
+endif()
     
 #define target
 add_custom_target(matbiips_package
