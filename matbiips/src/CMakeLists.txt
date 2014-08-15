@@ -40,7 +40,8 @@ if (MATLAB OR OCTAVE)
 				# target command
 				add_custom_command(OUTPUT ${fname}.${MEX_OBJ_EXT}
 					COMMAND ${MEX_COMMAND} ${MEX_FLAGS} -c ${MEX_OUTPUT_OPT} ${fname}.${MEX_OBJ_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${f}
-					COMMENT "Building ${fname}.${MEX_OBJ_EXT}")
+					COMMENT "Building ${fname}.${MEX_OBJ_EXT}"
+					IMPLICIT_DEPENDS CXX ${f})
 				set(Mbiips_OBJ ${Mbiips_OBJ} ${fname}.${MEX_OBJ_EXT})
 			endif()
 		endforeach()
@@ -51,10 +52,13 @@ if (MATLAB OR OCTAVE)
 		if (OCTAVE)
 			set(MEX_FLAGS ${MEX_FLAGS} --mex)
 		endif()
-		add_custom_target(matbiips
+		add_custom_command(OUTPUT ${MATBIIPS_TARGET_LOC}
 			DEPENDS ${Mbiips_OBJ}
 			COMMAND ${MEX_COMMAND} ${MEX_FLAGS} ${MEX_OUTPUT_OPT} matbiips.${MEX_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_OBJ}
 			COMMENT "Linking mexfile matbiips.${MEX_EXT}"
+		)
+		add_custom_target(matbiips
+			DEPENDS ${MATBIIPS_TARGET_LOC}
 		)
 
 
