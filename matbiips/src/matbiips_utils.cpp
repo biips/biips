@@ -223,7 +223,8 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     Size len = monitor.GetRange().Length();
     for (Size i=0; i < len; ++i)
     {
-      mwSize celldims[] = { cond[i].size() };
+      mwSize ndimcell = cond[i].size();
+      mwSize celldims[] = { ndimcell };
       mxArray * cell = mxCreateCellArray(1, celldims);
       for (Size j=0; j<cond[i].size(); ++j)
       {
