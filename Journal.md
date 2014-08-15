@@ -10,9 +10,11 @@ Adrien le 15/8/2014 :
        avec la liste des variables observées.
 
 - [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
-- [ ] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant
+- [x] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant
     mex/mkoctfile (windows)
 - [ ] mettre à jour/corriger `matbiips_internals.tex`
+- [ ] améliorer les modules cmake : voir liens sur ce post
+  http://www.cmake.org/pipermail/cmake/2009-January/026284.html
 
 François le 13/08/2014 :
 ========================
