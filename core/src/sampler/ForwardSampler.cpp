@@ -208,13 +208,43 @@ namespace Biips
                     * std::log(LongScalar(sumOfWeights_)));
   }
 
-  Types<NodeId>::Array ForwardSampler::SampledNodes()
+  Types<NodeId>::Array ForwardSampler::LastSampledNodes()
   {
     Types<NodeId>::Array ans;
     for (Size i=0; i<smcIterations_.at(iter_).size(); ++i)
     {
       const Types<NodeId>::Array & sampled = smcIterations_.at(iter_).at(i).SampledNodes();
       ans.insert(ans.end(), sampled.begin(), sampled.end());
+    }
+    return ans;
+  }
+
+  Types<NodeId>::Array ForwardSampler::SampledNodes()
+  {
+    Types<NodeId>::Array ans;
+    for (Size iter=0; iter<=iter_; ++iter) // iter=0,...,iter_
+    {
+      for (Size i=0; i<smcIterations_.at(iter).size(); ++i)
+      {
+        const Types<NodeId>::Array & sampled = smcIterations_.at(iter).at(i).SampledNodes();
+        ans.insert(ans.end(), sampled.begin(), sampled.end());
+      }
+    }
+    return ans;
+  }
+
+  Types<NodeId>::Array ForwardSampler::ConditionalNodes()
+  {
+    Types<NodeId>::Array ans;
+    for (Size iter=0; iter<=iter_; ++iter) // iter=0,...,iter_
+    {
+      for (Size i=0; i<smcIterations_.at(iter).size(); ++i)
+      {
+        const Types<NodeId>::Array & top = smcIterations_.at(iter).at(i).TopConditionalNodes();
+        ans.insert(ans.end(), top.begin(), top.end());
+        const Types<NodeId>::Array & like = smcIterations_.at(iter).at(i).LikelihoodNodes();
+        ans.insert(ans.end(), like.begin(), like.end());
+      }
     }
     return ans;
   }
@@ -228,6 +258,7 @@ namespace Biips
     const Graph & graph_;
     Types<Types<SMCIteration>::Array >::Array & smcIterations_;
     Types<Size>::Array & nodeIterationsMap_;
+    Types<NodeId>::Array topCondNodes_;
 
     virtual void visit(const ConstantNode & node)
     {
@@ -237,19 +268,40 @@ namespace Biips
     {
       if (graph_.GetObserved()[nodeId_])
       {
-        // if smcIterations_ is empty the observed node is not informative
+        // determine if the observed stochastic node has any unobserved parent
+        Bool has_unobs_parent = false;
         if (!smcIterations_.empty())
+        {
+          GraphTypes::ParentIterator it_parents, it_parents_end;
+          boost::tie(it_parents, it_parents_end) = graph_.GetParents(nodeId_);
+          for (; it_parents!=it_parents_end; ++it_parents) {
+            if (!graph_.GetObserved()[*it_parents]) {
+              has_unobs_parent = true;
+              break;
+            }
+          }
+        }
+
+        if (has_unobs_parent) {
+          // it is a likelihood conditional node
           smcIterations_.back().back().PushLikeChild(nodeId_);
+        }
+        else {
+          // it is a top-level conditional node
+          topCondNodes_.push_back(nodeId_);
+        }
         return;
       }
 
       // keep the same iteration if the last node has no likelihood children.
-      if (!smcIterations_.empty() && smcIterations_.back().back().LikeChildren().empty()) {
-        smcIterations_.back().push_back(SMCIteration(nodeId_));
+      if (!smcIterations_.empty() && smcIterations_.back().back().LikelihoodNodes().empty()) {
+        smcIterations_.back().push_back(SMCIteration(nodeId_, topCondNodes_));
+        topCondNodes_.clear();
       }
       // otherwise add new iteration
       else {
-        smcIterations_.push_back(Types<SMCIteration>::Array(1, SMCIteration(nodeId_)));
+        smcIterations_.push_back(Types<SMCIteration>::Array(1, SMCIteration(nodeId_, topCondNodes_)));
+        topCondNodes_.clear();
       }
 
       nodeIterationsMap_[nodeId_] = smcIterations_.size() - 1;

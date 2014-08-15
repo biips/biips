@@ -65,6 +65,7 @@ namespace Biips
     Scalar ess_;
     Scalar sumOfWeights_;
     Types<NodeId>::Array sampledNodes_;
+    Types<NodeId>::Array condNodes_;
     typedef Types<ValArray::Ptr>::Array ParticleValues;
     std::map<NodeId, ParticleValues> particleValuesMap_;
     std::map<NodeId, Size> nodeIterationMap_;
@@ -79,9 +80,10 @@ namespace Biips
     //    void checkLogWeightsSwapped() const;
 
   public:
-    Monitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
+    Monitor(Size iter, const Types<NodeId>::Array & sampledNodes,
+            const Types<NodeId>::Array & condNodes) :
       iter_(iter), ess_(0), sumOfWeights_(0), sampledNodes_(sampledNodes),
-      weightsSet_(false), weightsSwapped_(false)/*, logWeightsSwapped_(false)*/
+      condNodes_(condNodes), weightsSet_(false), weightsSwapped_(false)/*, logWeightsSwapped_(false)*/
     {
     }
     virtual ~Monitor()
@@ -101,9 +103,13 @@ namespace Biips
     {
       return iter_;
     }
-    const Types<NodeId>::Array & GetSampledNodes() const
+    const Types<NodeId>::Array & GetLastSampledNodes() const
     {
       return sampledNodes_;
+    }
+    const Types<NodeId>::Array & GetConditionalNodes() const
+    {
+      return condNodes_;
     }
     Scalar GetESS() const
     {
@@ -190,8 +196,8 @@ namespace Biips
     Scalar logNormConst_;
 
   public:
-    FilterMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
-      BaseType(iter, sampledNodes), resampled_(false), logNormConst_(BIIPS_NEGINF)
+    FilterMonitor(Size iter, const Types<NodeId>::Array & sampledNodes, const Types<NodeId>::Array & condNodes) :
+      BaseType(iter, sampledNodes, condNodes), resampled_(false), logNormConst_(BIIPS_NEGINF)
     {
     }
     virtual ~FilterMonitor()
@@ -228,7 +234,7 @@ namespace Biips
     typedef Monitor BaseType;
 
     SmoothMonitor(Size iter, const Types<NodeId>::Array & sampledNodes) :
-      BaseType(iter, sampledNodes)
+      BaseType(iter, sampledNodes, Types<NodeId>::Array())
     {
     }
     virtual ~SmoothMonitor()

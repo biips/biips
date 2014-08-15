@@ -58,6 +58,7 @@ namespace Biips
     MultiArray iterations_;
     MultiArray nodeIds_;
     MultiArray discrete_;
+    Types<Types<NodeId>::Array>::Array conditionalNodes_;
 
     template<typename StorageOrderType>
     void addObservedNode(NodeId id,
@@ -111,6 +112,10 @@ namespace Biips
     const MultiArray & GetDiscrete() const
     {
       return discrete_;
+    }
+    const Types<Types<NodeId>::Array>::Array & GetConditionalNodes() const
+    {
+      return conditionalNodes_;
     }
   };
 

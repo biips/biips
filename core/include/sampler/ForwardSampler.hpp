@@ -63,12 +63,13 @@ namespace Biips
 
   protected:
     Types<NodeId>::Array sampledNodes_;
-    Types<NodeId>::Array likeChildren_;
+    Types<NodeId>::Array likeNodes_;
+    Types<NodeId>::Array topCondNodes_;
     NodeSampler::Ptr pNodeSampler_;
 
   public:
-    explicit SMCIteration(NodeId stoUnobs) :
-    sampledNodes_(1, stoUnobs)
+    explicit SMCIteration(NodeId stoUnobs, const Types<NodeId>::Array & topCond) :
+    sampledNodes_(1, stoUnobs), topCondNodes_(topCond)
     {
     }
     virtual ~SMCIteration()
@@ -77,12 +78,20 @@ namespace Biips
 
     // modifiers
     void PushLogicalChild(NodeId child) { sampledNodes_.push_back(child); }
-    void PushLikeChild(NodeId like) { likeChildren_.push_back(like); }
+    void PushLikeChild(NodeId like) { likeNodes_.push_back(like); }
 
     // accessors
     NodeId StoUnobs() const { return sampledNodes_.front(); }
+    // sampledNodes_ first element is a stochastic unobserved node.
+    // the following elements are logical children
+
+    // sampled nodes at the current iteration (incremental)
     const Types<NodeId>::Array & SampledNodes() const { return sampledNodes_; }
-    const Types<NodeId>::Array & LikeChildren() const { return likeChildren_; }
+    // top-level conditional nodes at the current iteration (incremental)
+    const Types<NodeId>::Array & TopConditionalNodes() const { return topCondNodes_; }
+    // likelihood conditional nodes at the current iteration (incremental)
+    const Types<NodeId>::Array & LikelihoodNodes() const { return likeNodes_; }
+
     const NodeSampler::Ptr & NodeSamplerPtr() const { return pNodeSampler_; }
 
     // accessor/modifier
@@ -161,6 +170,7 @@ namespace Biips
     {
       return NIterations() == 0 || iter_ + 1 == NIterations();
     }
+    // iteration starts at 0
     Size Iteration() const
     {
       return iter_;
@@ -177,7 +187,12 @@ namespace Biips
     {
       return logNormConst_;
     }
+    // last sampled nodes at the current iteration (incremental)
+    Types<NodeId>::Array LastSampledNodes();
+    // all past sampled nodes at the current iteration (incremental)
     Types<NodeId>::Array SampledNodes();
+    // all past conditional nodes at the current iteration (incremental)
+    Types<NodeId>::Array ConditionalNodes();
 
     Scalar GetNodeESS(NodeId nodeId) const;
 
