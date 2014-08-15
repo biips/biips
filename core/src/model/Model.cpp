@@ -193,12 +193,17 @@ namespace Biips
       pSampler_->LockNode(*it_nodes);
 
     Size t = pSampler_->Iteration();
-    Types<NodeId>::Array sampled_nodes = pSampler_->SampledNodes();
+
+    // nodes sampled at the current iteration
+    Types<NodeId>::Array sampled_nodes = pSampler_->LastSampledNodes();
+    // conditional nodes (observed stochastic parents and children) at the current iteration
+    Types<NodeId>::Array cond_nodes = pSampler_->ConditionalNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    // FIXME Do we create monitor object even if no nodes are monitored ?
-    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes);
+    // We create a monitor object even if no nodes are monitored
+    // used to get the filtering conditionals
+    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes, cond_nodes);
     filterMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSampler_->InitMonitor(*p_monitor);
     for (Size i = 0; i < sampled_nodes.size(); ++i)
@@ -219,8 +224,7 @@ namespace Biips
     }
 
     // Smooth tree Monitors
-    // FIXME Do we create monitor object even if no nodes are monitored ?
-    p_monitor = new FilterMonitor(t, sampled_nodes);
+    p_monitor = new FilterMonitor(t, sampled_nodes, cond_nodes);
     pGenTreeSmoothMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
@@ -244,12 +248,17 @@ namespace Biips
     pSampler_->Iterate();
 
     Size t = pSampler_->Iteration();
-    Types<NodeId>::Array sampled_nodes = pSampler_->SampledNodes();
+
+    // nodes sampled at the current iteration
+    Types<NodeId>::Array sampled_nodes = pSampler_->LastSampledNodes();
+    // conditional nodes (observed stochastic parents and children) at the current iteration
+    Types<NodeId>::Array cond_nodes = pSampler_->ConditionalNodes();
 
     // Filter Monitors
     NodeId node_id = NULL_NODEID;
-    // FIXME Do we create monitor object even if no nodes are monitored ?
-    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes);
+    // We create a monitor object even if no nodes are monitored
+    // used to get the filtering conditionals
+    FilterMonitor * p_monitor = new FilterMonitor(t, sampled_nodes, cond_nodes);
     filterMonitors_.push_back(boost::shared_ptr<Monitor>(p_monitor));
     pSampler_->InitMonitor(*p_monitor);
     for (Size i = 0; i < sampled_nodes.size(); ++i)
@@ -270,8 +279,7 @@ namespace Biips
     }
 
     // Smooth tree Monitors
-    // FIXME Do we create monitor object even if no nodes are monitored ?
-    p_monitor = new FilterMonitor(t, sampled_nodes);
+    p_monitor = new FilterMonitor(t, sampled_nodes, cond_nodes);
     pGenTreeSmoothMonitor_.reset(p_monitor);
     pSampler_->InitMonitor(*p_monitor);
     for (std::set<NodeId>::const_iterator it_ids =
@@ -307,7 +315,7 @@ namespace Biips
 
     pSmoother_->Initialize();
 
-    Types<NodeId>::Array updated_nodes = pSmoother_->UpdatedNodes();
+    Types<NodeId>::Array updated_nodes = pSmoother_->LastUpdatedNodes();
     Size t = pSmoother_->Iteration();
 
     // Smooth Monitors
@@ -335,7 +343,7 @@ namespace Biips
 
     pSmoother_->IterateBack();
 
-    Types<NodeId>::Array updated_nodes = pSmoother_->UpdatedNodes();
+    Types<NodeId>::Array updated_nodes = pSmoother_->LastUpdatedNodes();
     Size t = pSmoother_->Iteration();
 
     // Smooth Monitors

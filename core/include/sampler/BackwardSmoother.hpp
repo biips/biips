@@ -87,9 +87,9 @@ namespace Biips
     {
       return filterMonitors_.size() == 1;
     }
-    const Types<NodeId>::Array & UpdatedNodes() const
+    const Types<NodeId>::Array & LastUpdatedNodes() const
     {
-      return filterMonitors_.back()->GetSampledNodes();
+      return filterMonitors_.back()->GetLastSampledNodes();
     }
     ;
     Size GetNodeSamplingIteration(NodeId nodeId) const;

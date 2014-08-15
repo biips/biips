@@ -155,6 +155,6 @@ goto:eof
 choice /m "Run MatBiips tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\matbiips"
-	"%MAKE%" %MAKE_OPT% test
+	ctest -VV test
 )
 goto:eof

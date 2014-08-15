@@ -48,7 +48,8 @@ namespace Biips
   BackwardSmoother::BackwardSmoother(const Graph & graph,
                                      const Types<Monitor*>::Array & filterMonitors,
                                      const Types<Size>::Array & nodeIterations) :
-    graph_(graph), filterMonitors_(filterMonitors), initialized_(false),
+    graph_(graph), filterMonitors_(filterMonitors), sumOfWeights_(0.0),
+        ess_(0.0), iter_(0), initialized_(false),
         nodeIterations_(nodeIterations)
   {
   }
@@ -139,7 +140,7 @@ namespace Biips
           + print(iter_) + (" of filtering Monitor object."));
     }
 
-    NodeId last_node_id = p_last_monitor->GetSampledNodes().front();
+    NodeId last_node_id = p_last_monitor->GetLastSampledNodes().front();
     if (graph_.GetNode(last_node_id).GetType() != STOCHASTIC)
       throw LogicError("Can not iterate BackwardSmoother: last sampled node is not stochastic.");
 
@@ -278,8 +279,8 @@ namespace Biips
     if (!monitor.WeightsSet())
       throw LogicError("Can not GetNodeESS: weights not set.");
 
-    if (std::find(UpdatedNodes().begin(), UpdatedNodes().end(), nodeId)
-        != UpdatedNodes().end())
+    if (std::find(LastUpdatedNodes().begin(), LastUpdatedNodes().end(), nodeId)
+        != LastUpdatedNodes().end())
       return ess_;
 
     std::map<ValArray*, Types<Size>::Array> indices_table;

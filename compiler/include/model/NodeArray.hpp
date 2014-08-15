@@ -96,6 +96,10 @@ namespace Biips
     {
       return range_;
     }
+    const Types<NodeId>::Array & NodeIds() const
+    {
+      return nodeIds_;
+    }
 
     IndexRange GetRange(NodeId nodeId) const;
 

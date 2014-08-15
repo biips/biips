@@ -501,12 +501,15 @@ namespace Biips
 
     virtual void visit(const StochasticNode & node)
     {
+      // avoid visiting twice
       if (ranks_[nodeId_] != BIIPS_SIZENA)
         return;
 
+      // unobserved can not be visited as children
       if (offspringLevel_ && !graph_.GetObserved()[nodeId_])
         return;
 
+      // check if all its parents have been inserted
       if (parentsInserted_[nodeId_] != node.Parents().size())
         return;
 
@@ -531,6 +534,7 @@ namespace Biips
       if (!offspringLevel_)
         return;
 
+      // avoid visiting twice
       if (ranks_[nodeId_] != BIIPS_SIZENA)
         return;
 

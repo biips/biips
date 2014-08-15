@@ -59,12 +59,13 @@ void CheckRhs(int nrhs, int nb, String name_func) {
 }
 
 inline 
-Size  GetConsoleId(const std::deque<Console_ptr> consoles, 
+Size  GetConsoleId(const std::deque<Console_ptr> & consoles,
                    const mxArray * pm,
                    String name_func) {
   if (!mxIsNumeric(pm))
     myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
-  Size id = static_cast<Size>(*mxGetPr(pm));
+  double id_double = *mxGetPr(pm);
+  Size id = static_cast<Size>(id_double);
   if ((id >= consoles.size()) || (consoles[id] == NULL)) {
     myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
   }
