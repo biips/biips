@@ -108,7 +108,7 @@ if (UNIX) # Linux or MacOSX
     set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
   
   else()
-    message(WARNING "FIXME:Could not determine compiler name")
+    message(WARNING "FIXME: Could not determine compiler name")
     set(BIIPS_COMPILE_FLAGS "-fPIC")
     set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   endif()
