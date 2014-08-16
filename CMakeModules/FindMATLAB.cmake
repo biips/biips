@@ -69,7 +69,16 @@ if (MATLAB)
         PATHS ${MATLAB_BINDIR} 
         NO_DEFAULT_PATH
     )
+    set(MEX_FLAGS_Release -O)
+    set(MEX_FLAGS_Debug -g)
+    set(MEX_FLAGS_RelWithDebInfo -g -O)
+    if (WIN32)
+        set(MEX_FLAGS_Release ${MEX_FLAGS_Release} -DWIN32)
+        set(MEX_FLAGS_Debug ${MEX_FLAGS_Debug} -DWIN32)
+        set(MEX_FLAGS_RelWithDebInfo ${MEX_FLAGS_RelWithDebInfo} -DWIN32)
+    endif ()
     set(MEX_OUTPUT_OPT -output)
+    set(MEX_COMPILE_OPT -c)
 
     # find mexext program
     find_program(MEXEXT_COMMAND
@@ -89,7 +98,9 @@ if (MATLAB)
         # use MATLAB_ARCH on Windows to link with the correct BiiPS libs
         if ("${MEX_EXT}" MATCHES ".*64.*")
             set(MATLAB_ARCH x64)
-            set(MEX_FLAGS -largeArrayDims)
+            set(MEX_FLAGS_Release ${MEX_FLAGS_Release} -largeArrayDims)
+            set(MEX_FLAGS_Debug ${MEX_FLAGS_Debug} -largeArrayDims)
+            set(MEX_FLAGS_RelWithDebInfo ${MEX_FLAGS_RelWithDebInfo} -largeArrayDims)
         else()
             set(MATLAB_ARCH i386)
         endif()

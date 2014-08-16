@@ -63,8 +63,17 @@ if (OCTAVE)
         NO_DEFAULT_PATH
     )
     set(MEX_COMMAND ${MKOCTFILE})
-    set(MEX_FLAGS -DOCTAVE --strip)
+    set(MEX_FLAGS_Release -DOCTAVE --strip)
+    set(MEX_FLAGS_Debug -DOCTAVE -g)
+    set(MEX_FLAGS_RelWithDebInfo -DOCTAVE -g)
+    if (WIN32)
+        set(MEX_FLAGS_Release ${MEX_FLAGS_Release} -DWIN32)
+        set(MEX_FLAGS_Debug ${MEX_FLAGS_Debug} -DWIN32)
+        set(MEX_FLAGS_RelWithDebInfo ${MEX_FLAGS_RelWithDebInfo} -DWIN32)
+    endif ()
     set(MEX_OUTPUT_OPT --output)
+    set(MEX_COMPILE_OPT -c)
+    set(MEX_MEX_OPT --mex)
 
     # find octave-config program
     find_program(OCTAVE_CONFIG octave-config ${OCTAVE_ROOT} ${OCTAVE_BINDIR})
