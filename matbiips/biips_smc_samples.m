@@ -64,7 +64,7 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %               'rs_type', rs_type, 'rs_thres', rs_thres);
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

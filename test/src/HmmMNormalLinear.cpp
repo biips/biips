@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * BiiPS software is a set of C++ libraries for
+ * Biips software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * BiiPS is derived software based on:
+ * Biips is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of BiiPS.
+ * This file is part of Biips.
  *
- * BiiPS is free software: you can redistribute it and/or modify
+ * Biips is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -167,7 +167,7 @@ namespace Biips
   void HmmMNormalLinear::PrintIntro()
   {
     using namespace std;
-    os_ << "BiiPS test: Hidden Markov Model linear gaussian multi-D" << endl;
+    os_ << "Biips test: Hidden Markov Model linear gaussian multi-D" << endl;
     os_ << "comparison between Kalman Filter and Particle Filter" << endl;
     os_ << "=======================================================" << endl;
     os_ << "x[0] --> x[1] --> ... --> x[t-1] --> x[t] --> ..." << endl;

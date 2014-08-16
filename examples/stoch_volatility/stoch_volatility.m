@@ -135,8 +135,8 @@ model = biips_model(model_filename, data, 'sample_data', sample_data); % Create 
 data = model.data;
 
 
-%% BiiPS Particle Marginal Metropolis-Hastings
-% We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
+%% Biips Particle Marginal Metropolis-Hastings
+% We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameters \alpha, \beta and \sigma,
 % and of the variables x.
 

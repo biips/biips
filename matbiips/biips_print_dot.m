@@ -10,7 +10,7 @@ function biips_print_dot(model, filename)
 %   - filename: string 
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

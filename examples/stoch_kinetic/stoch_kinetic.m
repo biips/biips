@@ -149,7 +149,7 @@ xlabel('Time')
 ylabel('Number of individuals')
 legend('Prey', 'Predator', 'Measurements')
 
-%% BiiPS : Sensitivity analysis with Sequential Monte Carlo
+%% Biips : Sensitivity analysis with Sequential Monte Carlo
 
 
 %%
@@ -174,8 +174,8 @@ xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
 
 
-%% BiiPS Particle Marginal Metropolis-Hastings
-% We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
+%% Biips Particle Marginal Metropolis-Hastings
+% We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameters and variables x.
 
 %%

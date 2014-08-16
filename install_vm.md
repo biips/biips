@@ -21,7 +21,7 @@ Installer machine virtuelle Mac OS X (10.8 Mountain Lion)
 	* Dropbox
 	* The Unarchiver (App Store)
 
-3. Installer outils de développement pour BiiPS :
+3. Installer outils de développement pour Biips :
 	* Git
 	* CMake
 	* MacPorts avec autoconf
@@ -64,7 +64,7 @@ Installer machine virtuelle Windows
 	
 6. Ejecter l'image Win7 et redémarrer
 
-7. Installer outils de développement pour BiiPS :
+7. Installer outils de développement pour Biips :
 	* PuTTY
 	* TortoiseGit + msysgit
 	* CMake

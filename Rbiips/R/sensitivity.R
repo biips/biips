@@ -19,7 +19,7 @@
 ##' 
 smc.sensitivity <- function(object, params, n_part, ...) {
   if (!is.biips(object)) 
-    stop("Invalid BiiPS model")
+    stop("Invalid Biips model")
   
   if (missing(n_part)) 
     stop("missing n_part argument")

@@ -95,7 +95,7 @@ if (MATLAB)
         message(STATUS "mex extension on this machine: ${MEX_EXT}")
 
         # define matlab architecture
-        # use MATLAB_ARCH on Windows to link with the correct BiiPS libs
+        # use MATLAB_ARCH on Windows to link with the correct Biips libs
         if ("${MEX_EXT}" MATCHES ".*64.*")
             set(MATLAB_ARCH x64)
             set(MEX_FLAGS_Release ${MEX_FLAGS_Release} -largeArrayDims)

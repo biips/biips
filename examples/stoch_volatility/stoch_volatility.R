@@ -24,7 +24,7 @@ par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
 if (interactive()) {
-  ans <- readline("Compare BiiPS SMC with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
+  ans <- readline("Compare Biips SMC with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
   run.jags <- (ans == "y")
 }
 if(run.jags)
@@ -51,7 +51,7 @@ if(run.jags)
   x.mean.jags <- summary(out.jags$x, mean)$stat
 }
 
-# -------------------- BiiPS SMC --------------------#
+# -------------------- Biips SMC --------------------#
 require(Rbiips)
 
 biips <- biips.model(model, data)
@@ -74,7 +74,7 @@ n.part <- 1000
 
 backward <- FALSE
 if (interactive()) {
-  ans <- readline("Run BiiPS backward smoothing algorithm (requires O(n.part^2) operations) ? y|[n] :")
+  ans <- readline("Run Biips backward smoothing algorithm (requires O(n.part^2) operations) ? y|[n] :")
   backward <- (ans == "y")
 }
 if (backward) {
@@ -119,10 +119,10 @@ legend(x="topright",
        legend=list(paste("Particle filtering (n.part=",n.part,")", sep="")),
        bty=bty, inset=inset, lty=lty, lwd=lwd, col=col)
 
-# -------------------- BiiPS PIMH --------------------#
+# -------------------- Biips PIMH --------------------#
 run.pimh <- FALSE
 if (interactive()) {
-  ans <- readline("Run BiiPS PIMH algorithm (require rjags package) ? y|[n] :")
+  ans <- readline("Run Biips PIMH algorithm (require rjags package) ? y|[n] :")
   run.pimh <- (ans == "y")
 }
 if(run.pimh)

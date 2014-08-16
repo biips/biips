@@ -12,7 +12,7 @@ function clear_monitors(console, type, release_only)
 %                   to be done
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

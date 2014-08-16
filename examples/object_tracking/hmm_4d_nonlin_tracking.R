@@ -29,7 +29,7 @@ par(bty = "n")
 # -------------------- JAGS MCMC --------------------#
 run.jags <- FALSE
 if (interactive()) {
-  ans <- readline("Compare BiiPS SMC with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
+  ans <- readline("Compare Biips SMC with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
   run.jags <- (ans == "y")
 }
 if(run.jags)
@@ -56,7 +56,7 @@ if(run.jags)
   x.mean.jags <- summary(out.jags$x, mean)$stat
 }
 
-# -------------------- BiiPS SMC --------------------#
+# -------------------- Biips SMC --------------------#
 require(Rbiips)
 
 # model

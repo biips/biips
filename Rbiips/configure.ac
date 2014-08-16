@@ -1,12 +1,12 @@
 #                                               -*- autoconf -*-
 #
-#  Rbiips package for GNU R is an interface to BiiPS C++ libraries for
+#  Rbiips package for GNU R is an interface to Biips C++ libraries for
 #  Bayesian inference with interacting Particle Systems.
 #  Copyright (C) Inria, 2012
 #  Authors: Adrien Todeschini, Francois Caron
 #  
 #  Rbiips is derived software based on:
-#  BiiPS, Copyright (C) Inria, 2012
+#  Biips, Copyright (C) Inria, 2012
 #  rjags, Copyright (C) Martyn Plummer, 2002-2010
 #  Rcpp, Copyright (C) Dirk Eddelbuettel and Romain Francois, 2009-2011
 #
@@ -54,14 +54,14 @@ AC_PREFIX_PROGRAM(biips_info)
 
 AC_ARG_WITH([biips-include],
             AC_HELP_STRING([--with-biips-include=INCLUDE_PATH],
-                           [the location of BiiPS header files]),
+                           [the location of Biips header files]),
             [biips_include_path=$withval])
 if test [ -n "$biips_include_path" ] ; then
    BIIPS_INCLUDE=${biips_include_path}
 else
    if test [ -z "${BIIPS_INCLUDE}" ] ; then
       if test [ "$prefix" = "NONE" ]; then
-         AC_MSG_ERROR("Location of BiiPS headers not defined. Use configure arg '--with-biips-include' or environment variable 'BIIPS_INCLUDE'")
+         AC_MSG_ERROR("Location of Biips headers not defined. Use configure arg '--with-biips-include' or environment variable 'BIIPS_INCLUDE'")
       else
          BIIPS_INCLUDE=${prefix}/include/biips
       fi
@@ -79,10 +79,10 @@ AC_LANG_POP()
 
 # There is no consensus on where 64- versus 32-bit libraries should be
 # installed.  We take a hint from R, assuming that if R is installed
-# in, say, /usr/LIBnn/R then we can find the BiiPS libraries in
+# in, say, /usr/LIBnn/R then we can find the Biips libraries in
 # ${prefix}/LIBnn.
 #
-# This is a reasonable assumption if both BiiPS and R have been
+# This is a reasonable assumption if both Biips and R have been
 # properly packaged, but may not be true if either has been manually
 # installed. The user can set the environment variable LIBnn to
 # override this.
@@ -106,7 +106,7 @@ if test [ -n "$biips_lib_path" ] ; then
 else
    if test [ -z "${BIIPS_LIB}" ] ; then
       if test [ "${prefix}" = "NONE" ] ; then 
-         AC_MSG_ERROR("Location of BiiPS libraries not defined. Use configure arg '--with-biips-lib' or environment variable 'BIIPS_LIB'")
+         AC_MSG_ERROR("Location of Biips libraries not defined. Use configure arg '--with-biips-lib' or environment variable 'BIIPS_LIB'")
       else
          # check dpkg-architecture
 		 AC_CHECK_PROG(DPKG_FOUND, dpkg-architecture, "ok")

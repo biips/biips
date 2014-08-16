@@ -2,24 +2,24 @@ Rbiips is derived software based on other open source software components.
 The following is a list of these components (full copies of the license
 agreements or notices used by these components are included below):
 
-- BiiPS
+- Biips
 - rjags
 - Rcpp
 
 
 ================================================================================
-BiiPS notice
+Biips notice
 ================================================================================
-BiiPS software is a set of libraries for
+Biips software is a set of libraries for
 Bayesian inference with interacting Particle Systems.
 Copyright (C) Inria, 2012
 Authors: Adrien Todeschini, Francois Caron
 
-BiiPS is derived software based on:
+Biips is derived software based on:
 JAGS, Copyright (C) Martyn Plummer, 2002-2010
 SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
 
-BiiPS is free software: you can redistribute it and/or modify
+Biips is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.

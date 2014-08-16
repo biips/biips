@@ -58,7 +58,7 @@ install biips from binary
 
 FIXME: a warning message appears when installing the debian package
 
-        Lintian check results for /home/adrien-alea/Dropbox/BiiPS/biips-share/new_release/biips_0.8.1_x86_64_Linux.deb:
+        Lintian check results for /home/adrien-alea/Dropbox/Biips/biips-share/new_release/biips_0.8.1_x86_64_Linux.deb:
         E: biips: control-file-has-bad-permissions md5sums 0664 != 0644
         E: biips: control-file-has-bad-owner md5sums ci/ci != root/root
 

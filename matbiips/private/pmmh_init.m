@@ -7,7 +7,7 @@ function [sample_param, sample_latent, log_prior, log_marg_like]...
 %     = pmmh_init(console, param_names, n_part, first_init, varargin)
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

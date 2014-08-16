@@ -22,7 +22,7 @@ par(bty = "n")
 # -------------------- JAGS  MCMC--------------------#
 run.jags <- FALSE
 if (interactive()) {
-  ans <- readline("Compare BiiPS PMMH with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
+  ans <- readline("Compare Biips PMMH with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
   run.jags <- (ans == "y")
 }
 if(run.jags)
@@ -67,7 +67,7 @@ if(run.jags)
   par(mfcol = c(1,1))
 }
 
-# -------------------- BiiPS --------------------#
+# -------------------- Biips --------------------#
 require(Rbiips)
 
 n.part <- 50
@@ -129,13 +129,13 @@ par(mfcol = c(2,1))
 # plot PMMH samples trace
 plot(drop(out.pmmh$alpha),
      xlab="iteration", ylab="value",
-     main=paste("Trace of", n.iter, "BiiPS PMMH samples"))
+     main=paste("Trace of", n.iter, "Biips PMMH samples"))
 legend("topright", leg="alpha", pch=1, bty="n")
 
 # plot PMMH samples histogram
 hist(out.pmmh$alpha,
      xlab="value", ylab="frequency",
-     main=paste("Histogram of", n.iter, "BiiPS PMMH samples"))
+     main=paste("Histogram of", n.iter, "Biips PMMH samples"))
 legend("topright", leg="alpha", pch=0, bty="n")
 
 par(mfcol = c(1,1))
@@ -147,4 +147,4 @@ par(mfcol = c(1,1))
 if (run.jags) {
   cat("JAGS MCMC mean value: alpha =", mean(out.jags$alpha), "\n")
 }
-cat("BiiPS PMMH mean value: alpha =", mean(out.pmmh$alpha), "\n")
+cat("Biips PMMH mean value: alpha =", mean(out.pmmh$alpha), "\n")

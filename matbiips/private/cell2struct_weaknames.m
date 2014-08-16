@@ -13,7 +13,7 @@ function s= cell2struct_weaknames(fields, weak_names)
 %   - s : the structure with "illegal" names
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

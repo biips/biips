@@ -1184,15 +1184,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   }
   catch (Biips::LogicError & e)
   {
-    myMexErrMsg(name_func+":LogicError", name_func + ": BiiPS LOGIC ERROR. " + e.what());
+    myMexErrMsg(name_func+":LogicError", name_func + ": Biips LOGIC ERROR. " + e.what());
   }
   catch (Biips::RuntimeError & e)
   {
-    myMexErrMsg(name_func+":RuntimeError", name_func + ": BiiPS RUNTIME ERROR. " + e.what());
+    myMexErrMsg(name_func+":RuntimeError", name_func + ": Biips RUNTIME ERROR. " + e.what());
   }
   catch (std::exception& e)
   {
-    myMexErrMsg(name_func+":cppException", name_func + ": BiiPS C++ exception. " + e.what());
+    myMexErrMsg(name_func+":cppException", name_func + ": Biips C++ exception. " + e.what());
   }
   return;
 }

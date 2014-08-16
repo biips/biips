@@ -5,7 +5,7 @@
 ##' graphical model, specified with a BUGS language description of the prior
 ##' distribution, and a set of data.
 ##' 
-##' @param file a file containing a description of the model in the BiiPS/JAGS
+##' @param file a file containing a description of the model in the Biips/JAGS
 ##' dialect of the BUGS language.
 ##' 
 ##' Alternatively, \code{file} can be a readable text-mode connection, or a
@@ -23,7 +23,7 @@
 ##' 
 ##' An object of class \code{biips} is a list of functions that share a common
 ##' environment. The functions can be used to query information on the model.
-##' \item{ptr()}{Returns an external pointer to an object created by the BiiPS
+##' \item{ptr()}{Returns an external pointer to an object created by the Biips
 ##' library.} 
 ##' \item{data()}{Returns a list containing the data that defines the
 ##' observed nodes in the model.} 

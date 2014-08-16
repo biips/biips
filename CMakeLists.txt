@@ -20,7 +20,7 @@ set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Sys
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
 
-set (Biips_DESCRIPTION " BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+set (Biips_DESCRIPTION " Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
  It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).")
@@ -181,8 +181,8 @@ endif ()
 
 
 # configure interfaces build
-option (BUILD_RBIIPS "Activate Rbiips (BiiPS interface for GNU R) build" ON)
-option (BUILD_MATBIIPS "Activate Matbiips (BiiPS interface for Matlab) build" ON)
+option (BUILD_RBIIPS "Activate Rbiips (Biips interface for GNU R) build" ON)
+option (BUILD_MATBIIPS "Activate Matbiips (Biips interface for Matlab) build" ON)
 option (FIND_OCTAVE "Build Matbiips for Octave instead of Matlab" OFF)
 
 
@@ -264,7 +264,7 @@ endif ()
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_NAME biips)
-set (CPACK_PACKAGE_VENDOR BiiPS)
+set (CPACK_PACKAGE_VENDOR Biips)
 
 # Generic package options
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${SYSTEM_ARCH}_${CMAKE_SYSTEM_NAME})
@@ -273,7 +273,7 @@ set (CPACK_PACKAGE_VERSION_MAJOR ${Biips_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${Biips_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${Biips_VERSION_PATCH})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
-set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY "Biips-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description.txt)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.txt)
@@ -328,8 +328,8 @@ if (WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
   set (CPACK_NSIS_EXECUTABLES_DIRECTORY ${Biips_INSTALL_BINDIR})
-  set (CPACK_NSIS_INSTALL_ROOT "\$PROGRAMFILES64\\\\BiiPS")
-  set (CPACK_NSIS_DISPLAY_NAME "BiiPS ${Biips_VERSION}")
+  set (CPACK_NSIS_INSTALL_ROOT "\$PROGRAMFILES64\\\\Biips")
+  set (CPACK_NSIS_DISPLAY_NAME "Biips ${Biips_VERSION}")
   set (CPACK_NSIS_HELP_LINK ${Biips_URL})
   set (CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
   set (CPACK_NSIS_CONTACT ${Biips_CONTACT})

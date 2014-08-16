@@ -45,7 +45,7 @@ is.biips <- function(object) {
 print.biips <- function(x, ...) {
   stopifnot(is.biips(x))
   
-  cat("BiiPS model:\n\n")
+  cat("Biips model:\n\n")
   
   model <- x$model()
   for (i in 1:length(model)) {

@@ -50,7 +50,7 @@ s/; *$//
         b add_next_line
     }
     c\
-#' ## Installation of Rbiips package\n#' Install *Rbiips* package archive depending on your system:\n#' - `Rbiips_x.x.x.zip` for Windows\n#' - `Rbiips_x.x.x.tgz` for Mac OS X\n#' - `Rbiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/Rbiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *BiiPS* libraries and headers as well as *Boost*.\n\n#+\n#' **Load Rbiips package**\nrequire(Rbiips)
+#' ## Installation of Rbiips package\n#' Install *Rbiips* package archive depending on your system:\n#' - `Rbiips_x.x.x.zip` for Windows\n#' - `Rbiips_x.x.x.tgz` for Mac OS X\n#' - `Rbiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/Rbiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *Biips* libraries and headers as well as *Boost*.\n\n#+\n#' **Load Rbiips package**\nrequire(Rbiips)
 }
 
 
@@ -78,7 +78,7 @@ s/biips_density/density/
 # model$data -> model$data()
 s/model\$data/model\$data()/
 
-# TODO italicize _BiiPS_ in .m
+# TODO italicize _Biips_ in .m
 /^#'/s/ _([[:alpha:]]*)_ / *\1* /g
 
 # {'x', 'y'} ==> c('x', 'y')

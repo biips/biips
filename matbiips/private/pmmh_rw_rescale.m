@@ -5,7 +5,7 @@ function obj = pmmh_rw_rescale(obj, ar)
 % obj = pmmh_rw_rescale(obj, ar)
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

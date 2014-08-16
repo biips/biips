@@ -30,7 +30,7 @@ data <- list(t.max = length(y),
 #              y = y)
 
 par(bty = "n")
-# -------------------- BiiPS SMC --------------------#
+# -------------------- Biips SMC --------------------#
 require(Rbiips)
 
 # model

@@ -1,10 +1,10 @@
 ##' Bayesian inference with interacting Particle Systems
 ##' 
-##' \emph{Rbiips} is an interface with the C++ \href{http://alea.bordeaux.inria.fr/biips}{BiiPS}
+##' \emph{Rbiips} is an interface with the C++ \href{http://alea.bordeaux.inria.fr/biips}{Biips}
 ##' libraries for analysing Bayesian graphical models using advanced particle
 ##' methods.
 ##' 
-##' BiiPS is a general software for Bayesian inference with interacting particle 
+##' Biips is a general software for Bayesian inference with interacting particle 
 ##' systems, a.k.a. sequential Monte Carlo (SMC) methods.
 ##' It aims at popularizing the use of these methods to non-statistician 
 ##' researchers and students, thanks to its automated 'black box' inference engine.

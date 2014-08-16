@@ -15,7 +15,7 @@ function [s] = kde(obs, weights, adjust, bw)
 %          * bw:  bandwidth , useful only if computed
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

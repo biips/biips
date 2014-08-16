@@ -60,8 +60,8 @@ Adrien le 13/08/2014 :
 
 Adrien le 12/08/2014 :
 ======================
-Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
-BiiPS, Biips, biips, Matbiips, matbiips, Rbiips, Rbiips, rbiips
+Je propose qu'on simplifie les typographies de Biips car il y a un mélange de toutes les variantes qui apparaissent : 
+Biips, Biips, biips, Matbiips, matbiips, Rbiips, Rbiips, rbiips
 
 Plusieurs possiblités :
 
@@ -73,7 +73,7 @@ biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
 3) biips, matbiips, rbiips pour tout (très simple mais moins en valeur dans le texte)
 
-Dans tous les cas je propose de supprimer BiiPS qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiiPS et RBiiPS.
+Dans tous les cas je propose de supprimer Biips qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiips et RBiips.
 Je suis pour la 1 ou la 2, qu'en penses-tu ?
 
 - [ ] J'appliquerai les changements partout avec un coup de sed.
@@ -131,7 +131,7 @@ Bug :
           |--------------------------------------------------| 100%
           |**************************************************| 4 iterations in 0.12 s
         Error using matbiips
-        change_data: BiiPS C++ exception. change_data: the console with id 0 does not exist
+        change_data: Biips C++ exception. change_data: the console with id 0 does not exist
 
         Error in test_internals (line 14)
         change_ok = matbiips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
@@ -358,7 +358,7 @@ il rale avec l'erreur suivante:
     Warning: LOGIC ERROR: Node is not monitored, in NodeArrayMonitor::addMonitoredNode.
 
     Error using inter_biips
-    sample_gen_tree_smooth_particle: BiiPS c++ exception: Failed to sample smooth particle.
+    sample_gen_tree_smooth_particle: Biips c++ exception: Failed to sample smooth particle.
 
 Vois-tu d'ou vient le probleme? Est-ce un bout de code que j'ai oublie de mettre.
 
@@ -775,7 +775,7 @@ L'erreur se produit dans `inter_biips compile_model` avec l'erreur suivante:
         y = randn(t_max, 1);
         data = struct('y', y, 't_max', t_max, 'prec_x_init', prec_x_init,...
             'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
-        %%% Start BiiPS console
+        %%% Start Biips console
         biips_init;
         %%% Compile BUGS model and sample data
         model = 'hmm_1d_lin.bug'; % BUGS model filename

@@ -26,7 +26,7 @@ par(bty = "n")
 # -------------------- JAGS  MCMC--------------------#
 run.jags <- FALSE
 if (interactive()) {
-  ans <- readline("Compare BiiPS PMMH with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
+  ans <- readline("Compare Biips PMMH with JAGS MCMC algorithm (requires rjags package) ? y|[n] :")
   run.jags <- (ans == "y")
 }
 if(run.jags)
@@ -71,7 +71,7 @@ if(run.jags)
   par(mfcol = c(1,1))
 }
 
-# -------------------- BiiPS --------------------#
+# -------------------- Biips --------------------#
 require(Rbiips)
 
 n.part <- 50
@@ -130,7 +130,7 @@ prec_y_biips <- exp(out.pmmh_burn$log_prec_y)
 # plot PMMH samples trace
 plot(drop(prec_y_biips),
      xlab="iteration", ylab="value",
-     main=paste("Trace of", n.iter, "BiiPS PMMH burnin samples"))
+     main=paste("Trace of", n.iter, "Biips PMMH burnin samples"))
 legend("topright", leg="prec_y", pch=1, bty='n')
 plot(sapply(out.pmmh_burn$step, FUN=identity), ylab='rw.step')
 plot(out.pmmh_burn$accept.rate, ylab='accept.rate')
@@ -148,13 +148,13 @@ par(mfcol = c(2,1))
 # plot PMMH samples trace
 plot(drop(prec_y_biips),
      xlab="iteration", ylab="value",
-     main=paste("Trace of", n.iter, "BiiPS PMMH samples"))
+     main=paste("Trace of", n.iter, "Biips PMMH samples"))
 legend("topright", leg="prec_y", pch=1, bty="n")
 
 # plot PMMH samples histogram
 hist(prec_y_biips,
      xlab="value", ylab="frequency",
-     main=paste("Histogram of", n.iter, "BiiPS PMMH samples"))
+     main=paste("Histogram of", n.iter, "Biips PMMH samples"))
 legend("topright", leg="prec_y", pch=0, bty="n")
 
 
@@ -166,6 +166,6 @@ if (run.jags) {
   cat("JAGS MCMC mean value: prec_y =", mean(out.jags$prec_y), "\n")
 }
 
-cat("BiiPS PMMH mean value: prec_y =", mean(prec_y_biips), "\n")
+cat("Biips PMMH mean value: prec_y =", mean(prec_y_biips), "\n")
 
 par(mfcol = c(1,1))

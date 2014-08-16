@@ -28,7 +28,7 @@ function [dens] = biips_density(samples, varargin)
 % kde_estimates_pimh = biips_density(out_pimh);
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
+% Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria

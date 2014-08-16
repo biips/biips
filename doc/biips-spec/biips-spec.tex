@@ -100,17 +100,17 @@
 \RRdate{\today}
 \RRauthor{Fran\c{c}ois Caron, Adrien Todeschini}
 \authorhead{Fran\c{c}ois Caron, Adrien Todeschini}
-\RRtitle{Projet BiiPS:\\Spécifications fonctionnelles}
-\RRetitle{BiiPS project:\\Functional specifications}
-\titlehead{BiiPS project: Functional specifications}
-\RRresume{Ce rapport décrit les spécifications fonctionnelles du projet BiiPS. Ce projet est porté par l'\href{http://alea.bordeaux.inria.fr/}{équipe ALEA} de l'\href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux Sud Ouest} et constitue une \textit{Action de développement Technologique} INRIA.}
+\RRtitle{Projet Biips:\\Spécifications fonctionnelles}
+\RRetitle{Biips project:\\Functional specifications}
+\titlehead{Biips project: Functional specifications}
+\RRresume{Ce rapport décrit les spécifications fonctionnelles du projet Biips. Ce projet est porté par l'\href{http://alea.bordeaux.inria.fr/}{équipe ALEA} de l'\href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux Sud Ouest} et constitue une \textit{Action de développement Technologique} INRIA.}
 \RRmotcle{Inférence bayésienne, Méthodes de Monte Carlo séquentielles, Filtrage particulaire, Modèles graphiques, Calcul Générique sur un Processeur Graphique}
-\RRabstract{This report describes the functional specifications of the BiiPS project. This project is carried by the \href{http://alea.bordeaux.inria.fr/}{team ALEA} at \href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux} and supported by INRIA through an \textit{Action de développement Technologique}.}
+\RRabstract{This report describes the functional specifications of the Biips project. This project is carried by the \href{http://alea.bordeaux.inria.fr/}{team ALEA} at \href{http://www.inria.fr/bordeaux/}{INRIA Bordeaux} and supported by INRIA through an \textit{Action de développement Technologique}.}
 \RRkeyword{Bayesian Inference, Sequential Monte Carlo, Particle Filters, Graphical Models, General Purpose Graphics Processing Units}
 \RRprojet{ALEA}
 \RRdate{\today}
 \RCBordeaux
-\RRNo{2010-BiiPS-01}
+\RRNo{2010-Biips-01}
 \RRdomaine{1}
 
 \begin{document}
@@ -379,7 +379,7 @@ SMCTC~\cite{Johansen2009} is C++ template class library for the efficient and co
 
 \section{Functional specifications}
 
-Figure~\ref{fig:specgen} shows the input/output flow of the BiiPS software.
+Figure~\ref{fig:specgen} shows the input/output flow of the Biips software.
 
 \begin{figure}[h!]
 \begin{center}
@@ -387,7 +387,7 @@ Figure~\ref{fig:specgen} shows the input/output flow of the BiiPS software.
 \node[input] (stat)   {Statistical\\ Model};
 \node[input] (data)   [below of= stat,node distance=1.5cm] {Data\\~};
 \node (param)   [input,below of=data,node distance=1.5cm] {Parameters\\~};
-\node (biips)   [processing,right of=data] {BiiPS\\Core};
+\node (biips)   [processing,right of=data] {Biips\\Core};
 \node (out)   [output,right of=biips] {Summary\\Statistics};
 %\node (X_t)   [state,right of=X_t-1] {$X_t$};
 %\node (X_t+1)   [state,right of=X_t] {$X_{t+1}$};
