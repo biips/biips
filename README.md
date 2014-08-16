@@ -31,7 +31,7 @@ Features
 - Fixed parameter estimation using particle MCMC
 - Core developped in C++
 - R interface: Rbiips
-- Matlab interface: MatBiips
+- Matlab interface: Matbiips
 - Free and open source software (GPL)
 - Multi-platform: Linux, Windows, Mac OS X
 - Automatically chooses the proposal samplers.

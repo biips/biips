@@ -36,7 +36,7 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

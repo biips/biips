@@ -28,7 +28,7 @@ function varargout = parsevar(opt_param, param_names, param_type, param_valid, p
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

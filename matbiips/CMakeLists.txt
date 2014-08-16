@@ -55,7 +55,7 @@ if (_ext STREQUAL zip)
           WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
           COMMAND ${ZIP_COMMAND} ${MATBIIPS_ARCHIVE}
           ${packfiles} ${pvt_packfiles}
-          COMMENT "Packaging MatBiips"
+          COMMENT "Packaging Matbiips"
         )
     endif()
 else ()
@@ -64,7 +64,7 @@ else ()
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMAND ${CMAKE_COMMAND} -E tar cafv ${MATBIIPS_ARCHIVE}
       ${packfiles} ${pvt_packfiles}
-      COMMENT "Packaging MatBiips"
+      COMMENT "Packaging Matbiips"
     )
 endif()
     

@@ -34,7 +34,7 @@ function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

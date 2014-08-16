@@ -142,12 +142,12 @@ if [[ $ans == "y" ]]; then set -x
     fi
 fi
 
-set +x; echo -n "*** Build MatBiips? (y/[n])"; read ans
+set +x; echo -n "*** Build Matbiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
     $MAKE matbiips_package
 
-    set +x; echo -n "*** Run MatBiips tests? (y/[n])"; read ans
+    set +x; echo -n "*** Run Matbiips tests? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
         ctest -VV

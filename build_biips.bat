@@ -95,7 +95,7 @@ if "%errorlevel%"=="1" (
 	call:ask_make_pdf
 )
 
-choice /m "Build MatBiips"
+choice /m "Build Matbiips"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
 	"%MAKE%" %MAKE_OPT% matbiips_package
@@ -152,7 +152,7 @@ if "%errorlevel%"=="1" (
 goto:eof
 
 :ask_test_matbiips
-choice /m "Run MatBiips tests"
+choice /m "Run Matbiips tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\matbiips"
 	ctest -VV test

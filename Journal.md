@@ -61,14 +61,14 @@ Adrien le 13/08/2014 :
 Adrien le 12/08/2014 :
 ======================
 Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
-BiiPS, Biips, biips, MatBiips, matbiips, Rbiips, Rbiips, rbiips
+BiiPS, Biips, biips, Matbiips, matbiips, Rbiips, Rbiips, rbiips
 
 Plusieurs possiblités :
 
 1) Biips, Matbiips, Rbiips pour désigner les programmes dans un texte (majuscule au début seulement)
 biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
-2) Biips, MatBiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
+2) Biips, Matbiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
 biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
 3) biips, matbiips, rbiips pour tout (très simple mais moins en valeur dans le texte)

@@ -6,7 +6,7 @@ function res = isoctave()
 %--------------------------------------------------------------------------
 
 % BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, François Caron
 % Copyright (C) Inria
 % License: GPL-3

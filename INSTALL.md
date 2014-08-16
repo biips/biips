@@ -9,13 +9,13 @@ install Rbiips
 
         install.packages('path/to/Rbiips_X.X.X.zip')
 
-install MatBiips
+install Matbiips
 ----------------
 * Requirements: Matlab (>=R2012b)
 
-* Extract MatBiips archive
+* Extract Matbiips archive
 
-* Before using MatBiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
+* Before using Matbiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
 
         addpath('path/to/matbiips/matlab')
 
@@ -30,13 +30,13 @@ install Rbiips
 
         install.packages('path/to/Rbiips_X.X.X.tgz')
 
-install MatBiips
+install Matbiips
 ----------------
 * Requirements: Matlab (>=R2012b)
 
-* Extract MatBiips archive
+* Extract Matbiips archive
 
-* Before using MatBiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
+* Before using Matbiips in Matlab, you need to add the directory to the Matlab search path by typing in Matlab console:
 
         addpath('path/to/matbiips/matlab')
 
@@ -79,15 +79,15 @@ install Rbiips
 
         env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
 
-install MatBiips
+install Matbiips
 ----------------
-* Requirements: Matlab (>=R2012b). Previous biips installation is not needed for MatBiips
+* Requirements: Matlab (>=R2012b). Previous biips installation is not needed for Matbiips
 
-* Extract MatBiips archive
+* Extract Matbiips archive
 
         tar xvzf matbiips_X.X.X.tar.gz
 
-* Test MatBiips
+* Test Matbiips
 
         cd path/to/matbiips/tests
         LD_PRELOAD=/usr/libARCH/libstdc++.so.6  matlab

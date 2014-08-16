@@ -182,7 +182,7 @@ endif ()
 
 # configure interfaces build
 option (BUILD_RBIIPS "Activate Rbiips (BiiPS interface for GNU R) build" ON)
-option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
+option (BUILD_MATBIIPS "Activate Matbiips (BiiPS interface for Matlab) build" ON)
 option (FIND_OCTAVE "Build Matbiips for Octave instead of Matlab" OFF)
 
 
