@@ -68,12 +68,12 @@ Plusieurs possiblités :
 1) Biips, Matbiips, Rbiips pour désigner les programmes dans un texte (majuscule au début seulement)
 biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
-2) Biips, Matbiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
+2) Biips, MatBiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
 biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
 3) biips, matbiips, rbiips pour tout (très simple mais moins en valeur dans le texte)
 
-Dans tous les cas je propose de supprimer Biips qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiips et RBiips.
+Dans tous les cas je propose de supprimer BiiPS qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiiPS et RBiiPS.
 Je suis pour la 1 ou la 2, qu'en penses-tu ?
 
 - [ ] J'appliquerai les changements partout avec un coup de sed.
