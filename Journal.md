@@ -76,7 +76,7 @@ biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 Dans tous les cas je propose de supprimer BiiPS qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiiPS et RBiiPS.
 Je suis pour la 1 ou la 2, qu'en penses-tu ?
 
-- [ ] J'appliquerai les changements partout avec un coup de sed.
+- [x] J'appliquerai les changements partout avec un coup de sed.
 
 ---> François :  oui, je suis d'accord.
     On peut partir sur la solution 1)
