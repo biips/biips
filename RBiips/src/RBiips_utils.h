@@ -1,18 +1,18 @@
 //                                               -*- C++ -*-
 /*
- * RBiips package for GNU R is an interface to BiiPS C++ libraries for
+ * Rbiips package for GNU R is an interface to BiiPS C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * RBiips is derived software based on:
+ * Rbiips is derived software based on:
  * BiiPS, Copyright (C) Inria, 2012
  * rjags, Copyright (C) Martyn Plummer, 2002-2010
  * Rcpp, Copyright (C) Dirk Eddelbuettel and Romain Francois, 2009-2011
  *
- * This file is part of RBiips.
+ * This file is part of Rbiips.
  *
- * RBiips is free software: you can redistribute it and/or modify
+ * Rbiips is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*! \file RBiipsUtils.h
+/*! \file RbiipsUtils.h
  * \brief 
  * 
  * \author  $LastChangedBy$

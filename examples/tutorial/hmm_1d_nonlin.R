@@ -51,7 +51,7 @@ if(run.jags)
 }
 
 # -------------------- BiiPS SMC --------------------#
-require(RBiips)
+require(Rbiips)
 
 # model
 biips <- biips.model(model, data)

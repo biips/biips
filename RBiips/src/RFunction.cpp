@@ -1,6 +1,6 @@
 #include "RFunction.h"
 #include <algorithm>
-#include "RBiips_utils.h"
+#include "Rbiips_utils.h"
 
 // FIXME a tester!
 Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) { 

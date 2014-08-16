@@ -1,4 +1,4 @@
-The RBiips package is an interface to the BiiPS libraries.  In order to
+The Rbiips package is an interface to the BiiPS libraries.  In order to
 build a binary package, or install from source, you must have a matching
 installation of the BiiPS librarie as well as Boost headers.
 
@@ -52,7 +52,7 @@ Alternatively, you can use the configure options
 --with-biips-lib=/path/to/biips/libraries
                 (default /usr/local/[lib|lib64])
 
-These options are onto the RBiips configure script with:
+These options are onto the Rbiips configure script with:
 "R CMD INSTALL --configure-args='--with-biips...'
 
 #Exceptionally, you may need to set the location of the BiiPS modules.

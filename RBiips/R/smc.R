@@ -21,11 +21,11 @@ smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "st
   rs_type <- match.arg(rs_type, c("stratified", "systematic", "residual", "multinomial"))
   
   ## build smc sampler
-  if (!RBiips("is_sampler_built", object$ptr())) 
-    RBiips("build_smc_sampler", object$ptr(), FALSE)
+  if (!Rbiips("is_sampler_built", object$ptr())) 
+    Rbiips("build_smc_sampler", object$ptr(), FALSE)
   
   ## run smc sampler
-  ok <- RBiips("run_smc_sampler", object$ptr(), as.integer(n_part), get_seed(), 
+  ok <- Rbiips("run_smc_sampler", object$ptr(), as.integer(n_part), get_seed(), 
     rs_thres, rs_type)
   
   return(ok)
@@ -91,7 +91,7 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
   
   ## monitor
   if (backward) 
-    RBiips("set_default_monitors", object$ptr())
+    Rbiips("set_default_monitors", object$ptr())
   
   if (!missing(variable_names)) 
     monitor(object, variable_names, type)
@@ -100,16 +100,16 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
   smc_forward_algo(object, n_part = n_part, rs_thres = rs_thres, rs_type = rs_type, 
     ...)
   
-  log_marg_like <- RBiips("get_log_norm_const", object$ptr())
+  log_marg_like <- Rbiips("get_log_norm_const", object$ptr())
   out_smc <- list()
   
-  mon <- RBiips("get_filter_monitors", object$ptr())
+  mon <- Rbiips("get_filter_monitors", object$ptr())
   for (n in names(mon)) out_smc[[n]]$f <- mon[[n]]
   
   if (!backward) 
     clear_monitors(object, type = "f")
   
-  mon <- RBiips("get_gen_tree_smooth_monitors", object$ptr())
+  mon <- Rbiips("get_gen_tree_smooth_monitors", object$ptr())
   for (n in names(mon)) out_smc[[n]]$s <- mon[[n]]
   
   clear_monitors(object, type = "s")
@@ -117,11 +117,11 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
   ## smc backward smoother
   if (backward) {
     ## run backward smoother
-    RBiips("run_backward_smoother", object$ptr())
+    Rbiips("run_backward_smoother", object$ptr())
     
     clear_monitors(object, type = "f")
     
-    mon <- RBiips("get_backward_smooth_monitors", object$ptr())
+    mon <- Rbiips("get_backward_smooth_monitors", object$ptr())
     for (n in names(mon)) out_smc[[n]]$b <- mon[[n]]
     
     clear_monitors(object, type = "b")

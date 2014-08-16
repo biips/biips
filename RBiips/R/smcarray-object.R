@@ -127,7 +127,7 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
     
     for (d in 1:len) {
       indvec <- seq(d, len * (n_part - 1) + d, len)
-      stat_d <- RBiips("wtd_quantile", object$values[indvec], n_part * object$weights[indvec], 
+      stat_d <- Rbiips("wtd_quantile", object$values[indvec], n_part * object$weights[indvec], 
         probs)
       stat_names <- names(stat_d)
       if (d == 1) {
@@ -146,7 +146,7 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
     
     for (d in 1:len) {
       indvec <- seq(d, len * (n_part - 1) + d, len)
-      stat_d <- RBiips("wtd_mode", object$values[indvec], n_part * object$weights[indvec])
+      stat_d <- Rbiips("wtd_mode", object$values[indvec], n_part * object$weights[indvec])
       summ$mode[d] <- stat_d[[n]]
     }
   }
@@ -426,7 +426,7 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
       bww <- bw[[d]]
     
     if (discrete) {
-      table <- RBiips("weighted_table", values, weights)
+      table <- Rbiips("weighted_table", values, weights)
       dens <- list(x = table[["Table"]]$x, y = table[["Table"]]$y)
     } else {
       dens <- density(values, weights = weights, bw = bww, adjust = adjust, 

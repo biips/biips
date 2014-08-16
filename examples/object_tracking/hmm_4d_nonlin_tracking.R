@@ -1,5 +1,5 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "hmm_4d_nonlin_tracking.bug")
+model <- file.path(find.package("Rbiips"), "extdata", "hmm_4d_nonlin_tracking.bug")
 model.title <- "Radar tracking"
 
 # data
@@ -57,7 +57,7 @@ if(run.jags)
 }
 
 # -------------------- BiiPS SMC --------------------#
-require(RBiips)
+require(Rbiips)
 
 # model
 if (run.jags)

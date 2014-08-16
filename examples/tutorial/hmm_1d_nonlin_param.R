@@ -72,7 +72,7 @@ if(run.jags)
 }
 
 # -------------------- BiiPS --------------------#
-require(RBiips)
+require(Rbiips)
 
 n.part <- 50
 n.burn <- 1000

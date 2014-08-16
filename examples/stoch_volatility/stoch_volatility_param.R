@@ -1,9 +1,9 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
+model <- file.path(find.package("Rbiips"), "extdata", "stoch_volatility_param.bug")
 model.title <- "Fixed parameter estimation of Stochastic volatility model"
 
 # data
-data(SP500, package="RBiips")
+data(SP500, package="Rbiips")
 y <- SP500[,"Daily.Return"]
 
 ind <- 1:100
@@ -68,7 +68,7 @@ if(run.jags)
 }
 
 # -------------------- BiiPS --------------------#
-require(RBiips)
+require(Rbiips)
 
 n.part <- 50
 n.burn <- 100

@@ -4,7 +4,7 @@ pimh_init <- function(object, variable_names, ...) {
   stopifnot(is.character(variable_names), length(variable_names) > 0)
   ## TODO check variable_names
   
-  RBiips("message", "Initializing PIMH")
+  Rbiips("message", "Initializing PIMH")
   
   state <- list(sample = list(), log_marg_like = -Inf)
   
@@ -42,8 +42,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   thin <- as.integer(thin)
   
   ## stop biips verbosity
-  verb <- RBiips("verbosity", 0)
-  on.exit(RBiips("verbosity", verb))
+  verb <- Rbiips("verbosity", 0)
+  on.exit(Rbiips("verbosity", verb))
   
   ## Initialization --------------------------------
   
@@ -53,8 +53,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   # (!monitored)
   monitor(object$model(), variable_names, type = "s")
   
-  ## build smc sampler if (!RBiips('is_sampler_built', object$model()$ptr()))
-  ## RBiips('build_smc_sampler', object$model()$ptr(), FALSE)
+  ## build smc sampler if (!Rbiips('is_sampler_built', object$model()$ptr()))
+  ## Rbiips('build_smc_sampler', object$model()$ptr(), FALSE)
   
   ## Get sample and log likelihood from PIMH object
   sample <- object$sample()
@@ -70,8 +70,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   ## display message and progress bar
   mess <- if (return_samples) 
     "Generating PIMH samples with" else "Updating PIMH with"
-  RBiips("message", paste(mess, n_part, "particles"))
-  bar <- RBiips("progress_bar", n_iter, "*", "iterations")
+  Rbiips("message", paste(mess, n_part, "particles"))
+  bar <- Rbiips("progress_bar", n_iter, "*", "iterations")
   ### TODO: display expected time of run
   
   ## Independant Metropolis-Hastings iterations
@@ -81,7 +81,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
     smc_forward_algo(object$model(), n_part = n_part, ...)
     
     ## Acceptance rate
-    log_marg_like_prop <- RBiips("get_log_norm_const", object$model()$ptr())
+    log_marg_like_prop <- Rbiips("get_log_norm_const", object$model()$ptr())
     log_ar <- log_marg_like_prop - log_marg_like
     
     ## Accept/Reject step
@@ -89,7 +89,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
       log_marg_like <- log_marg_like_prop
       
       ## sample one particle
-      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$model()$ptr(), 
+      sampled_value <- Rbiips("sample_gen_tree_smooth_particle", object$model()$ptr(), 
         get_seed())
       for (var in variable_names) {
         var_in <- to_biips_vname(var)
@@ -120,7 +120,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
     }
     
     ## progress bar
-    RBiips("advance_progress_bar", bar, 1)
+    Rbiips("advance_progress_bar", bar, 1)
   }
   
   ## Release monitor memory

@@ -125,20 +125,20 @@ if [[ $ans == "y" ]]; then set -x
 fi
 
 
-set +x; echo -n "*** Install/build RBiips? (y/[n])"; read ans
+set +x; echo -n "*** Install/build Rbiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
     if [ "$(uname)" == "Darwin" ]; then
-        $MAKE VERBOSE=1 RBiips_INSTALL_build
+        $MAKE VERBOSE=1 Rbiips_INSTALL_build
     else
-        $MAKE VERBOSE=1 RBiips_INSTALL
-        $MAKE RBiips_build
+        $MAKE VERBOSE=1 Rbiips_INSTALL
+        $MAKE Rbiips_build
     fi
-    set +x; echo -n "*** Make RBiips PDF doc? (y/[n])"; read ans
+    set +x; echo -n "*** Make Rbiips PDF doc? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
-        $MAKE RBiips_Rd2pdf
+        $MAKE Rbiips_Rd2pdf
     fi
 fi
 

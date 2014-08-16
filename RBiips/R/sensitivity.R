@@ -64,8 +64,8 @@ smc.sensitivity <- function(object, params, n_part, ...) {
   }
   
   ## stop biips verbosity
-  verb <- RBiips("verbosity", 0)
-  on.exit(RBiips("verbosity", verb))
+  verb <- Rbiips("verbosity", 0)
+  on.exit(Rbiips("verbosity", verb))
   
   ## initialize -----------
   log_marg_like <- vector(length = n.params)
@@ -73,9 +73,9 @@ smc.sensitivity <- function(object, params, n_part, ...) {
   max_log_marg_like <- -Inf
   max_log_marg_like_pen <- -Inf
   
-  RBiips("message", paste("Analyzing sensitivity with", n_part, "particles"))
+  Rbiips("message", paste("Analyzing sensitivity with", n_part, "particles"))
   ## progress bar
-  bar <- RBiips("progress_bar", n.params, "*", "iterations")
+  bar <- Rbiips("progress_bar", n.params, "*", "iterations")
   
   ## Iterate --------
   for (k in 1:n.params) {
@@ -90,7 +90,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
       
       ## change param value
       if (!.Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
-        pn$upper[[v]], param[[v]], FALSE, PACKAGE = "RBiips")) 
+        pn$upper[[v]], param[[v]], FALSE, PACKAGE = "Rbiips")) 
         stop("data change failed: invalid parameter. ", var, " = ", 
           paste0(param[v], collapse=" "))
     }
@@ -98,7 +98,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
     log_prior <- 0
     for (v in seq(along = variable.names)) {
       log_p <- .Call("get_log_prior_density", object$ptr(), pn$names[[v]], 
-        pn$lower[[v]], pn$upper[[v]], PACKAGE = "RBiips")
+        pn$lower[[v]], pn$upper[[v]], PACKAGE = "Rbiips")
       
       if (is.na(log_p)) {
         next
@@ -119,7 +119,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
         "=", param, sep = "", collapse = ";"))
     
     ## log marginal likelihood
-    log_marg_like[k] <- RBiips("get_log_norm_const", object$ptr())
+    log_marg_like[k] <- Rbiips("get_log_norm_const", object$ptr())
     if (log_marg_like[k] > max_log_marg_like) {
       max_log_marg_like <- log_marg_like[k]
       max.param <- param
@@ -131,7 +131,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
     }
     
     ## advance progress bar
-    RBiips("advance_progress_bar", bar, 1)
+    Rbiips("advance_progress_bar", bar, 1)
   }
   
   ## restore data ------------- object$recompile()
@@ -142,7 +142,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
     ## if the variable is not present in the data then it was not observed hence
     ## remove the data and go to the next variable
     if (!(pn$names[[v]] %in% names(data))) {
-      ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
+      ok <- Rbiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
         pn$upper[[v]])
       if (!ok) 
         stop("Failure restoring data")
@@ -183,7 +183,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
     ## if all the components are NA then the variable was not observed hence remove
     ## the data and go to the next variable
     if (all(is.na(data.sub))) {
-      ok <- RBiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
+      ok <- Rbiips("remove_data", object$ptr(), pn$names[[v]], pn$lower[[v]], 
         pn$upper[[v]])
       if (!ok) 
         stop("Failure restoring data")
@@ -196,7 +196,7 @@ smc.sensitivity <- function(object, params, n_part, ...) {
     
     ## finally restore the data
     ok <- .Call("change_data", object$ptr(), pn$names[[v]], pn$lower[[v]], pn$upper[[v]], 
-      data.sub, FALSE, PACKAGE = "RBiips")
+      data.sub, FALSE, PACKAGE = "Rbiips")
     if (!ok) 
       stop("Failure restoring data")
   }

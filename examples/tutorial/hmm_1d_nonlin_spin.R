@@ -5,7 +5,7 @@ knit_hooks$set(pars = function(before, options, envir) {
   if (before) graphics::par(bty='l')
 })
 
-#' # RBiips: Bayesian inference in nonlinear non-Gaussian hidden Markov model
+#' # Rbiips: Bayesian inference in nonlinear non-Gaussian hidden Markov model
 #' In this tutorial, we consider applying sequential Monte Carlo methods for
 #' Bayesian inference in a nonlinear non-Gaussian hidden Markov model.
 
@@ -58,15 +58,15 @@ knit_hooks$set(pars = function(before, options, envir) {
 #'       }
 #'     }
 
-#' ## Installation of RBiips package
-#' Install *RBiips* package archive depending on your system:
+#' ## Installation of Rbiips package
+#' Install *Rbiips* package archive depending on your system:
 #' 
-#' - `RBiips_x.x.x.zip` for Windows
-#' - `RBiips_x.x.x.tgz` for Mac OS X
-#' - `RBiips_x.x.x.tar.gz` for Linux
+#' - `Rbiips_x.x.x.zip` for Windows
+#' - `Rbiips_x.x.x.tgz` for Mac OS X
+#' - `Rbiips_x.x.x.tar.gz` for Linux
 
 #+ eval=FALSE
-install.packages('path/to/RBiips_x.x.x.ext')
+install.packages('path/to/Rbiips_x.x.x.ext')
 
 #' where `x.x.x` is the version of the package and `ext` is the 
 #' archive extension for your system.
@@ -89,8 +89,8 @@ data = list(t_max=t_max, prec_x_init=prec_x_init,
             prec_x=prec_x, prec_y=prec_y, mean_x_init=mean_x_init)
 
 #+
-#' **Load RBiips package**
-require(RBiips)
+#' **Load Rbiips package**
+require(Rbiips)
 
 #+
 #' **Compile BUGS model and sample data**

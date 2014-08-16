@@ -1,9 +1,9 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
+model <- file.path(find.package("Rbiips"), "extdata", "stoch_volatility_param.bug")
 model.title <- "Animation of the particle filter applied to a model stochastic volatility"
 
 # data
-data(SP500, package="RBiips")
+data(SP500, package="Rbiips")
 y <- SP500[,"Daily.Return"]
 st <- SP500[,"Stock.Price"]
 dates <- row.names(SP500)
@@ -31,7 +31,7 @@ data <- list(t.max = length(y),
 
 par(bty = "n")
 # -------------------- BiiPS SMC --------------------#
-require(RBiips)
+require(Rbiips)
 
 # model
 biips <- biips.model(model, data)

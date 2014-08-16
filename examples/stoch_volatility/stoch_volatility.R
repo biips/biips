@@ -1,9 +1,9 @@
 # BUGS model file
-model <- file.path(find.package("RBiips"), "extdata", "stoch_volatility_param.bug")
+model <- file.path(find.package("Rbiips"), "extdata", "stoch_volatility_param.bug")
 model.title <- "Stochastic volatility"
 
 # data
-data(SP500, package="RBiips")
+data(SP500, package="Rbiips")
 y <- SP500[,"Daily.Return"]
 
 ind <- 1:100
@@ -52,7 +52,7 @@ if(run.jags)
 }
 
 # -------------------- BiiPS SMC --------------------#
-require(RBiips)
+require(Rbiips)
 
 biips <- biips.model(model, data)
 if (!run.jags) {

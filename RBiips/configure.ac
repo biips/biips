@@ -1,18 +1,18 @@
 #                                               -*- autoconf -*-
 #
-#  RBiips package for GNU R is an interface to BiiPS C++ libraries for
+#  Rbiips package for GNU R is an interface to BiiPS C++ libraries for
 #  Bayesian inference with interacting Particle Systems.
 #  Copyright (C) Inria, 2012
 #  Authors: Adrien Todeschini, Francois Caron
 #  
-#  RBiips is derived software based on:
+#  Rbiips is derived software based on:
 #  BiiPS, Copyright (C) Inria, 2012
 #  rjags, Copyright (C) Martyn Plummer, 2002-2010
 #  Rcpp, Copyright (C) Dirk Eddelbuettel and Romain Francois, 2009-2011
 #
-#  This file is part of RBiips.
+#  This file is part of Rbiips.
 #
-#  RBiips is free software: you can redistribute it and/or modify
+#  Rbiips is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
@@ -35,7 +35,7 @@
 #  Id:       $Id$
 #
 
-AC_INIT([RBiips], [0])
+AC_INIT([Rbiips], [0])
 
 if test -z "${R_HOME}"; then
    AC_MSG_ERROR("R_HOME is not defined")

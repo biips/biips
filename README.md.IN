@@ -27,7 +27,7 @@ Features
 - Black-box particle algorithms for filtering and smoothing
 - Fixed parameter estimation using particle MCMC
 - Core developped in C++
-- R interface: RBiips
+- R interface: Rbiips
 - Matlab interface: MatBiips
 - Free and open source software (GPL)
 - Multi-platform: Linux, Windows, Mac OS X

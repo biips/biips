@@ -17,7 +17,7 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
     for (i in 1:n_param) {
       var <- param_names[[i]]
       stopifnot(!is.null(values[[var]]))
-      ok <- RBiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
+      ok <- Rbiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
         pn_param$upper[[i]], values[[var]], TRUE)
       if (!ok) 
         stop("Data change failed: invalid value for variable ", var)
@@ -28,7 +28,7 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
     for (i in 1:n_param) {
       tryCatch({
         var <- param_names[[i]]
-        sample_param[[var]] <- RBiips("sample_data", console, pn_param$names[[i]], 
+        sample_param[[var]] <- Rbiips("sample_data", console, pn_param$names[[i]], 
           pn_param$lower[[i]], pn_param$upper[[i]], get_seed())
       }, error = function(e) {
         print(e)
@@ -94,11 +94,11 @@ pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), r
   }
   
   ## stop biips verbosity
-  verb <- RBiips("verbosity", 0)
-  on.exit(RBiips("verbosity", verb))
+  verb <- Rbiips("verbosity", 0)
+  on.exit(Rbiips("verbosity", verb))
   
   ## display message
-  RBiips("message", "Initializing PMMH")
+  Rbiips("message", "Initializing PMMH")
   
   ## Clone console
   model <- clone_model(object)
@@ -292,7 +292,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
     ## change model data
     var <- param_names[[i]]
     stopifnot(!is.null(prop[[var]]))
-    ok <- RBiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
+    ok <- Rbiips("change_data", console, pn_param$names[[i]], pn_param$lower[[i]], 
       pn_param$upper[[i]], prop[[var]], TRUE)
     
     if (!ok) {
@@ -305,7 +305,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
       break
     }
     
-    log_p <- RBiips("get_log_prior_density", console, pn_param$names[[i]], pn_param$lower[[i]], 
+    log_p <- Rbiips("get_log_prior_density", console, pn_param$names[[i]], pn_param$lower[[i]], 
       pn_param$upper[[i]])
     
     if (is.na(log_p)) 
@@ -330,7 +330,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
       n_fail <- n_fail + 1
       warning("Failure running smc forward sampler\n")
     } else {
-      log_marg_like_prop <- RBiips("get_log_norm_const", console)
+      log_marg_like_prop <- Rbiips("get_log_norm_const", console)
       if (is.nan(log_marg_like_prop) || log_marg_like_prop == Inf) 
         ### TODO error or n_fail increment ?
       stop("Failed to compute log marginal likelihood: ", log_marg_like_prop)
@@ -351,7 +351,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
     
     if (n_latent > 0) {
       ## sample one particle for the latent variables
-      sampled_value <- RBiips("sample_gen_tree_smooth_particle", object$ptr(), 
+      sampled_value <- Rbiips("sample_gen_tree_smooth_particle", object$ptr(), 
         get_seed())
       
       for (var in latent_names) {
@@ -399,9 +399,9 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   stopifnot(is.logical(rw_adapt), length(rw_adapt) == 1)
   
   ## stop biips verbosity
-  verb <- RBiips("verbosity", 0)
+  verb <- Rbiips("verbosity", 0)
   # reset verbosity when function terminates
-  on.exit(RBiips("verbosity", verb))
+  on.exit(Rbiips("verbosity", verb))
   
   ## Initialization -------------------------
   console <- object$model()$ptr()
@@ -416,8 +416,8 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
     monitor(object$model(), latent_names, "s")
   
   # build smc sampler
-  if (!RBiips("is_sampler_built", console)) 
-    RBiips("build_smc_sampler", console, FALSE)
+  if (!Rbiips("is_sampler_built", console)) 
+    Rbiips("build_smc_sampler", console, FALSE)
   
   # toggle rescaling adaptation
   rw_rescale <- rw_adapt && object$n_iter() < object$n_rescale()
@@ -459,8 +459,8 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   }
   symbol <- if (rw_adapt) 
     "+" else "*"
-  RBiips("message", paste(mess, n_part, "particles"))
-  bar <- RBiips("progress_bar", n_iter, symbol, "iterations")
+  Rbiips("message", paste(mess, n_part, "particles"))
+  bar <- Rbiips("progress_bar", n_iter, symbol, "iterations")
   ### TODO: display expected time of run
   
   ## Metropolis-Hastings iterations -------------------------------
@@ -520,7 +520,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
     }
     
     ## advance progress bar
-    RBiips("advance_progress_bar", bar, 1)
+    Rbiips("advance_progress_bar", bar, 1)
   }
   
   

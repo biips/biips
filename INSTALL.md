@@ -1,13 +1,13 @@
 Windows
 =============
 
-install RBiips
+install Rbiips
 --------------
 * Requirements: R (>= 3.0) with Rcpp package
 
-* Install RBiips package from R console:
+* Install Rbiips package from R console:
 
-        install.packages('path/to/RBiips_X.X.X.zip')
+        install.packages('path/to/Rbiips_X.X.X.zip')
 
 install MatBiips
 ----------------
@@ -23,12 +23,12 @@ install MatBiips
 Mac OS X
 ============
 
-install RBiips
+install Rbiips
 --------------
 * Requirements: R (>= 3.0) with Rcpp package
-* Install RBiips package from R console:
+* Install Rbiips package from R console:
 
-        install.packages('path/to/RBiips_X.X.X.tgz')
+        install.packages('path/to/Rbiips_X.X.X.tgz')
 
 install MatBiips
 ----------------
@@ -71,13 +71,13 @@ FIXME: a warning message appears when installing the debian package
     
         sudo urpmi biips_x.x.x_Linux.rpm
 
-install RBiips
+install Rbiips
 --------------
 * Requirements : biips, R (>= 3.0) with Rcpp package
 
-* Install RBiips package from linux terminal:
+* Install Rbiips package from linux terminal:
 
-        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL RBiips_0.8.1.tar.gz
+        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
 
 install MatBiips
 ----------------

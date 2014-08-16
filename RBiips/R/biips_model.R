@@ -73,8 +73,8 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   }
   
   if (quiet) {
-    verb <- RBiips("verbosity", 0)
-    on.exit(RBiips("verbosity", verb), add = TRUE)
+    verb <- Rbiips("verbosity", 0)
+    on.exit(Rbiips("verbosity", verb), add = TRUE)
   }
   
   # check data before compiling model, which typically takes more time
@@ -84,21 +84,21 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
     data <- data_preprocess(data)
   
   # make console and check model
-  ptr <- RBiips("make_console")
-  RBiips("check_model", ptr, filename)
+  ptr <- Rbiips("make_console")
+  Rbiips("check_model", ptr, filename)
   
   # discard unused data
-  varnames <- RBiips("get_variable_names", ptr)
+  varnames <- Rbiips("get_variable_names", ptr)
   unused <- setdiff(names(data), varnames)
   data[unused] <- NULL
   if (length(unused) > 0) 
     warning("Unused variables in data: ", paste(unused_variables, collapse = ", "))
   
   # compile model
-  RBiips("compile_model", ptr, data, sample_data, get_seed())
+  Rbiips("compile_model", ptr, data, sample_data, get_seed())
   
   # data after possible sampling (from 'data' block in the BUGS language model)
-  model_data <- RBiips("get_data", ptr)
+  model_data <- Rbiips("get_data", ptr)
   
   ## Output object of class biips Note: We return functions in model list that use
   ## variables of the parent environment (ie the currrent function environment).
@@ -113,19 +113,19 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   }, data = function() {
     model_data
   }, .data_sync = function() {
-    RBiips("get_data", ptr)
+    Rbiips("get_data", ptr)
   }, recompile = function() {
     ## Clear the console
-    RBiips("clear_console", ptr)
-    ptr <<- RBiips("make_console")
+    Rbiips("clear_console", ptr)
+    ptr <<- Rbiips("make_console")
     ## Write the model to a temporary file so we can re-read it
     mf <- tempfile()
     writeLines(model_code, mf)
-    RBiips("check_model", ptr, mf)
+    Rbiips("check_model", ptr, mf)
     unlink(mf)
     ## Re-compile generate new data if sample_data is TRUE
-    RBiips("compile_model", ptr, data, sample_data, get_seed())
-    model_data <<- RBiips("get_data", ptr)
+    Rbiips("compile_model", ptr, data, sample_data, get_seed())
+    model_data <<- Rbiips("get_data", ptr)
     invisible()
   })
   class(model) <- "biips"

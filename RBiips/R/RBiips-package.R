@@ -1,6 +1,6 @@
 ##' Bayesian inference with interacting Particle Systems
 ##' 
-##' \emph{RBiips} is an interface with the C++ \href{http://alea.bordeaux.inria.fr/biips}{BiiPS}
+##' \emph{Rbiips} is an interface with the C++ \href{http://alea.bordeaux.inria.fr/biips}{BiiPS}
 ##' libraries for analysing Bayesian graphical models using advanced particle
 ##' methods.
 ##' 
@@ -14,7 +14,7 @@
 ##' Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to 
 ##' dynamic problems (tracking, signal filtering, etc).
 ##' 
-##' Typical usage of \emph{RBiips} consits in: \enumerate{ \item
+##' Typical usage of \emph{Rbiips} consits in: \enumerate{ \item
 ##' compiling your model with \code{\link{biips_model}} function \item
 ##' optionally analyzing sensitivity to parameters with
 ##' \code{\link{smc.sensitivity}} \item generate samples from the conditional
@@ -24,10 +24,10 @@
 ##' analysing output from \code{\link[smcarray-object]{smcarray}} and
 ##' \code{mcarray} objects }
 ##' 
-##' @name RBiips-package
-##' @aliases RBiips-package RBiips
+##' @name Rbiips-package
+##' @aliases Rbiips-package Rbiips
 ##' @docType package
-##' @author \emph{RBiips} development is supported by the team
+##' @author \emph{Rbiips} development is supported by the team
 ##' \href{http://alea.bordeaux.inria.fr}{ALEA} at
 ##' \href{http://www.inria.fr/en/centre/bordeaux}{Inria Bordeaux Sud-Ouest}.
 ##' 
@@ -41,7 +41,7 @@
 ##' @references %%~~ Literature or other references for background information
 ##' ~~
 ##' @keywords package
-##' @useDynLib RBiips
+##' @useDynLib Rbiips
 ##' @examples
 ##' 
 ##' %% ~~ simple examples of the most important functions ~~
@@ -50,14 +50,14 @@ NULL
 
 
 .onLoad <- function(lib, pkg) {
-  RBiips("load_module", "basemod")
+  Rbiips("load_module", "basemod")
 }
 
 
-##' helper function to call RBiips c++ routines
-RBiips <- function(funcname, ...) {
+##' helper function to call Rbiips c++ routines
+Rbiips <- function(funcname, ...) {
   stopifnot(is.character(funcname), length(funcname) == 1, nchar(funcname) > 0)
-  .Call(funcname, ..., PACKAGE = "RBiips")
+  .Call(funcname, ..., PACKAGE = "Rbiips")
 }
 
 
@@ -65,7 +65,7 @@ RBiips <- function(funcname, ...) {
 # the module name ##' @param quiet verbose flag ##' @return null
 # biips_load_module <- function(name, quiet = FALSE) {
 # stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
-# stopifnot(is.logical(quiet), length(quiet) == 1) ok <- RBiips('load_module',
+# stopifnot(is.logical(quiet), length(quiet) == 1) ok <- Rbiips('load_module',
 # name) if (!ok) { stop('module ', name, ' not found\n') } else if (!quiet) {
 # message('module', name, 'loaded\n') } return(invisible()) }
 
@@ -88,7 +88,7 @@ biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param
   stopifnot(is.function(fun_check_param))
   stopifnot(is.function(fun_is_discrete))
   
-  RBiips("add_function", name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete)
+  Rbiips("add_function", name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete)
   cat("Added function", name, ".\n")
   
   return(invisible())
@@ -113,7 +113,7 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample, fun_check
   stopifnot(is.function(fun_check_param))
   stopifnot(is.function(fun_is_discrete))
   
-  RBiips("add_distribution", name, n_param, fun_dim, fun_sample, fun_check_param, 
+  Rbiips("add_distribution", name, n_param, fun_dim, fun_sample, fun_check_param, 
     fun_is_discrete)
   cat("Added distribution", name, ".\n")
   

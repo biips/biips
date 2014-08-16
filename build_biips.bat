@@ -87,11 +87,11 @@ if "%errorlevel%"=="1" (
 	call:ask_testcompiler
 )
 
-choice /m "Build/install RBiips"
+choice /m "Build/install Rbiips"
 if "%errorlevel%"=="1" (
 	set "PATH=%RTOOLS_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" VERBOSE=1 RBiips_INSTALL_build
+	"%MAKE%" VERBOSE=1 Rbiips_INSTALL_build
 	call:ask_make_pdf
 )
 
@@ -144,10 +144,10 @@ if "%errorlevel%"=="1" (
 goto:eof
 
 :ask_make_pdf
-choice /m "Make RBiips PDF doc"
+choice /m "Make Rbiips PDF doc"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% RBiips_Rd2pdf
+	"%MAKE%" %MAKE_OPT% Rbiips_Rd2pdf
 )
 goto:eof
 

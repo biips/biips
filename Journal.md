@@ -61,7 +61,7 @@ Adrien le 13/08/2014 :
 Adrien le 12/08/2014 :
 ======================
 Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
-BiiPS, Biips, biips, MatBiips, matbiips, RBiips, Rbiips, rbiips
+BiiPS, Biips, biips, MatBiips, matbiips, Rbiips, Rbiips, rbiips
 
 Plusieurs possiblités :
 
@@ -583,7 +583,7 @@ Adrien:
 - [x] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
 - [ ] mexfile windows 32 bits
-- [ ] quand doc PMMH matbiips finie, verifier et transcrire dans RBiips
+- [ ] quand doc PMMH matbiips finie, verifier et transcrire dans Rbiips
 
 - [ ] On vise d'avoir la version et les tutos/exemples en ligne avec l'article sur arxiv pour la fin du mois.
 
@@ -657,7 +657,7 @@ Stack Trace (from fault):
 
 Adrien le 2/3/2014 :
 ====================
-- [x] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
+- [x] Rationaliser l'usage des arguments seed dans matbiips et Rbiips.
 - [ ] Modifier arguments par défaut de `plot.summary.particles`.
 
 Adrien le 21/02/2014 :
@@ -716,7 +716,7 @@ Adrien le 18/02/2014 :
 
 François le 16/02/2014
 ======================
-- [x] Vérifier s'il n'y a pas un pb dans RBiips.R, ligne 340:
+- [x] Vérifier s'il n'y a pas un pb dans Rbiips.R, ligne 340:
         rw$d <<- sum(sapply(rw$dim, FUN=sum))
 Il me semble que FUN devrait prendre le produit des dimensions plutot que la somme.
 - [x] biips renvoie une erreur lorsque l'on essaie d'ajouter une fonction qui existe déjà. Ce serait bien de renvoyer juste un warning, et si possible de redéfinir la fonction (la fonction matlab peut avoir changer) - pas urgent ajouter message indiquant qu'il faut fermer matlab dans `biips_add_function` pour pouvoir redéfinir la fonction
@@ -867,7 +867,7 @@ A faire dans Matbiips :
 - [x] commenter `inter_biips` en doxygen et générer pdf --> finalement c'est un doc latex séparé
 
 Autres tâches :
-- [ ] tester l'install de RBiips sous linux
+- [ ] tester l'install de Rbiips sous linux
 - [ ] copier binaires depuis CI sur un répertoire accessible (Dropbox ?)
 - [ ] harmonisation Licence, auteurs : Fichiers COPYING et README à la racine + entêtes de fichiers communes avec auteurs, Inria, date etc.
 
@@ -911,7 +911,7 @@ Adrien le 30/1/2014 :
 > `inter_biips('weighted_quantiles', values, weights, probas)` ne renvoit 
 > pas les bonnes valeurs.
 
-En fait, il faut juste multiplier les poids par N, c.f. `stat.particles` dans RBiips.
+En fait, il faut juste multiplier les poids par N, c.f. `stat.particles` dans Rbiips.
 Je ne comprends plus pourquoi mais ça marche... sûrement un problème numérique !?
 Je suppose que l'algo renormalise tout seul. J'ai corrigé `summary.m`.
 
@@ -923,9 +923,9 @@ A faire:
 - [x] Changer les noms de fonctions dans Rbiips : 
 	- `update.pimh` -> `pimh.update`
 	- `update.pmmh` -> `pmmh.update`
-- [x] Améliorer l'install de RBiips:
+- [x] Améliorer l'install de Rbiips:
 
-        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL RBiips_0.8.1.tar.gz
+        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
 
 ARCH directory depends on the machine where biips deb package was installed.
 
@@ -933,9 +933,9 @@ Note: the environment variables should not be needed if the biips deb package wa
 
 ...or type from R console:
 
-        install.packages('path/to/RBiips_X.X.X.tar.gz')
+        install.packages('path/to/Rbiips_X.X.X.tar.gz')
 
-FIXME: error when compiling RBiips
+FIXME: error when compiling Rbiips
 
         g++: error: /usr/lib/libBiipsCompiler.a: Aucun fichier ou dossier de ce type
         g++: error: /usr/lib/libBiipsBase.a: Aucun fichier ou dossier de ce type
@@ -949,7 +949,7 @@ Adrien, le 21/01/2014 :
 - [ ] On a convergé sur un PMMH adaptatif: à modifier dans R, puis à créer dans Matlab
 - [x] Je suis en train de passer la doc de rbiips au format roxygen. Donc on va supprimer les fichiers Rd.
 - [x] Marc tente de résoudre un problème de taille de disque sur Windows CI pour installer Matlab
-- [ ] RBiips sous Windows CI: commandes de build à ajouter (Marc)
+- [ ] Rbiips sous Windows CI: commandes de build à ajouter (Marc)
 
 Adrien, le 05/01/2014 :
 =======================
@@ -960,7 +960,7 @@ A faire :
 - [ ] La comparaison avec Kalman dans `demo(hmm_1d_lin)` utilise un package obsolète
     package 'sspir' is not available (for R version 3.0.2)
 
-- [ ] Note : pimh et pmmh ont besoin du package rjags (sorties de type mcarray). Il faut trouver une alternative à cette dépendance : réimplementer les opérations sur mcarray dans RBiips ?
+- [ ] Note : pimh et pmmh ont besoin du package rjags (sorties de type mcarray). Il faut trouver une alternative à cette dépendance : réimplementer les opérations sur mcarray dans Rbiips ?
 
 - [x] Corriger le formatage du warning:
         Unused variables in data:t.maxmean.x.initprec.x.initprec.xprec.y
@@ -975,7 +975,7 @@ Test des demos (je n'ai pas la version 3.0 de jags installée et passe les compar
  -[x] erreur en lançant `demo(hmm_1d_lin)` :
 
         > biips <- biips.model(model, data=data, sample.data=!run.jags)
-        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/RBiips/extdata/hmm_1d_lin.bug
+        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/Rbiips/extdata/hmm_1d_lin.bug
         * Compiling data graph
           Declaring variables
         RUNTIME ERROR: Compilation error on line 1.
@@ -989,7 +989,7 @@ Test des demos (je n'ai pas la version 3.0 de jags installée et passe les compar
  - [x] erreur en lançant `demo(hmm_1d_lin)` :
 
         > biips <- biips.model(model, data)
-        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/RBiips/extdata/hmm_1d_nonlin.bug
+        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/Rbiips/extdata/hmm_1d_nonlin.bug
         * Compiling model graph
           Declaring variables
         RUNTIME ERROR: Compilation error on line 1.
@@ -1009,13 +1009,13 @@ Adrien, le 29/12/2013:
 =======================
 Ajouts dans new_release:
 * matbiips: archive zip avec mexfiles pour Linux 64bit, Windows 64bit, Mac 64bit
-* RBiips: packages binaires R pour Windows 64bit, Windows 32bit et Mac
+* Rbiips: packages binaires R pour Windows 64bit, Windows 32bit et Mac
 A tester... Voir mise à jour de install.md
 
 A faire:
 - [ ] Configurer l'esclave CI Windows 7
 - [ ] Réorganiser les tests matbiips
-- [ ] Permettre compilation multi-architecture de RBiips sous Windows
+- [ ] Permettre compilation multi-architecture de Rbiips sous Windows
 
 Adrien, le 17/12/2013:
 =======================
@@ -1029,7 +1029,7 @@ Il y a également un bout de doc dans matbbips/doc qu'il faudra compléter ou inté
 
 examples :
 ----------
-Il y a un dossier par modèle. Les scripts R (initialement intégrés au package RBiips) sont à mettre à jour ainsi que les .bug pour qu'ils soient compatibles matbiips.
+Il y a un dossier par modèle. Les scripts R (initialement intégrés au package Rbiips) sont à mettre à jour ainsi que les .bug pour qu'ils soient compatibles matbiips.
 
 Il y a aussi un dossier partagé Rbiips (pas dans new_release) avec des exemples.
 

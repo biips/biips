@@ -1,5 +1,5 @@
 # Name of the R package
-set (PKG_NAME RBiips)
+set (PKG_NAME Rbiips)
 
 # top directory of the sources: useful in subdirectories
 set(PKG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
