@@ -32,13 +32,13 @@ if (~matbiips('run_smc_sampler', id, 100, 9, 0.5, 'stratified'))
    error('smc sampler failed!');
 end  
 log_norm=matbiips('get_log_norm_const', id)
-filter_monitors=matbiips('get_filter_monitors',id)
+filter_monitors=matbiips('get_filter_monitors',id);
 if isoctave()
     getfield(filter_monitors, 'x[1:4]').conditionals{:}
 else
     filter_monitors.('x[1:4]').conditionals{:}
 end
-smooth_monitors=matbiips('get_gen_tree_smooth_monitors',id)
+smooth_monitors=matbiips('get_gen_tree_smooth_monitors',id);
 if isoctave()
     getfield(smooth_monitors, 'x[1:4]').conditionals{:}
 else
@@ -52,7 +52,7 @@ if (~matbiips('is_smc_sampler_at_end', id))
 end   
 matbiips('run_backward_smoother', id);
 matbiips('clear_filter_monitors', id, false);
-backward_smooth_monitors=matbiips('get_backward_smooth_monitors',id)
+backward_smooth_monitors=matbiips('get_backward_smooth_monitors',id);
 if isoctave()
     getfield(backward_smooth_monitors, 'x[1:4]').conditionals{:}
 else
