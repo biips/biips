@@ -89,27 +89,20 @@ else()
 endif()
 
 
-# install mexfile in the build private directory
+# install mexfile in the build directory
 add_custom_command(TARGET matbiips
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/private/"
-    COMMENT "Copying mexfile in build private directory"
-    VERBATIM
-)
-# install mexfile in the build tests directory
-add_custom_command(TARGET matbiips
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/tests/"
-    COMMENT "Copying mexfile in build tests directory"
+    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/"
+    COMMENT "Copying mexfile in build directory"
     VERBATIM
 )
 
 #if (NOT BIIPS_DEBUG)
-	# copy mexfile in the src private directory
+	# copy mexfile in the src directory
 	add_custom_command(TARGET matbiips
 	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/private/"
-	    COMMENT "Copying mexfile in source private directory"
+	    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/"
+	    COMMENT "Copying mexfile in source directory"
 	    VERBATIM
 	)
 #endif()

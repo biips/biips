@@ -20,6 +20,30 @@ Bool BASE_MODULE_LOADED = false;
 std::deque<Console_ptr> consoles(0);
 std::deque<ProgressBar_ptr> progress(0);
 
+Size GetConsoleId(const std::deque<Console_ptr> & consoles,
+                   const mxArray * pm,
+                   const String & name_func) {
+  if (!mxIsNumeric(pm))
+    myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
+  Size id = static_cast<Size>(*mxGetPr(pm));
+  if ((id >= consoles.size()) || (consoles[id] == NULL)) {
+    myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
+  }
+  return id;
+}
+
+Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
+                       const mxArray * pm,
+                       const String & name_func) {
+  if (!mxIsNumeric(pm))
+    myMexErrMsg(name_func, name_func+": the progress bar id argument must be numeric");
+  Size id = static_cast<Size>(*mxGetPr(pm));
+  if ((id >= progress.size()) || (progress[id] == NULL)) {
+    myMexErrMsg(name_func, name_func+": the progress bar with id "+print(id)+" does not exist");
+  }
+  return id;
+}
+
 template<>
 std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {

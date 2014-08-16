@@ -108,7 +108,7 @@ Tâches :
 
 Bug :
 -----
-- [ ] `test_internals` ne passe pas sous linux et windows avec matlab/octave :
+- [x] `test_internals` ne passe pas sous linux et windows avec matlab/octave :
 
         >> test_internals
         * Parsing model in: hmm_1d_lin.bug
@@ -134,6 +134,11 @@ Bug :
         Error in test_internals (line 14)
         change_ok = matbiips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
 
+---> Résolu: bug du à la présence de deux mexfiles: 
+     - un dans private utilisé par les fonctions biips_*
+     - l'autre dans tests utilisé par les scripts de test
+     Les deux mexfiles ont un espace mémoire différent !
+     Solution: supprimer le mexfile de tests et déplacer celui de private à la racine!
 
 François le 11/08/2014 :
 ========================

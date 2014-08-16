@@ -12,6 +12,7 @@
 #define MATBIIPS_UTILS_H_
 
 #include "mex.h"
+#include <deque>
 #include <Console.hpp>
 #include <common/Utility.hpp>
 #include "Mostream.h"
@@ -58,19 +59,13 @@ void CheckRhs(int nrhs, int nb, const String & name_func) {
 	}
 }
 
-inline 
 Size GetConsoleId(const std::deque<Console_ptr> & consoles,
                    const mxArray * pm,
-                   const String & name_func) {
-  if (!mxIsNumeric(pm))
-    myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
-  Size id = static_cast<Size>(*mxGetPr(pm));
-  if ((id >= consoles.size()) || (consoles[id] == NULL)) {
-    myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
-  }
-  return id;
-}
+                   const String & name_func);
 
+Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
+        const mxArray * pm,
+        const String & name_func);
 
 inline
 String GetString(const mxArray * pm) {
@@ -80,16 +75,6 @@ String GetString(const mxArray * pm) {
 	return str;
 }
 
-inline 
-Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress, 
-		const mxArray * pm,
-		const String & name_func) {
-	Size id = static_cast<Size>(*mxGetPr(pm));
-	if ((id >= progress.size()) || (progress[id] == NULL)) {
-		myMexErrMsg(name_func, name_func+": the progress bar with id "+print(id)+" does not exist");
-	}
-	return id;
-}
 
 // macros for arguments checking
 
