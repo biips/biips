@@ -30,7 +30,8 @@ if (MATLAB OR OCTAVE)
 				# target command
 				add_custom_command(OUTPUT ${fname}.${MEX_OBJ_EXT}
 					COMMAND ${MEX_COMMAND} ${MEX_FLAGS_${CMAKE_BUILD_TYPE}} ${MEX_COMPILE_OPT} ${MEX_OUTPUT_OPT} ${fname}.${MEX_OBJ_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${f}
-					COMMENT "Building ${fname}.${MEX_OBJ_EXT}")
+					COMMENT "Building ${fname}.${MEX_OBJ_EXT}"
+					IMPLICIT_DEPENDS CXX ${f})
 				set(Mbiips_OBJ ${Mbiips_OBJ} ${fname}.${MEX_OBJ_EXT})
 			endif()
 		endforeach()
@@ -38,10 +39,13 @@ if (MATLAB OR OCTAVE)
 		file(TO_CMAKE_PATH ${CMAKE_CURRENT_BINARY_DIR}/matbiips.${MEX_EXT} MATBIIPS_TARGET_LOC)
 
 		# matbiips mexfile target
-		add_custom_target(matbiips
+		add_custom_command(OUTPUT ${MATBIIPS_TARGET_LOC}
 			DEPENDS ${Mbiips_OBJ}
 			COMMAND ${MEX_COMMAND} ${MEX_MEX_OPT} ${MEX_FLAGS_${CMAKE_BUILD_TYPE}} ${MEX_OUTPUT_OPT} matbiips.${MEX_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_OBJ}
 			COMMENT "Linking mexfile matbiips.${MEX_EXT}"
+		)
+		add_custom_target(matbiips
+			DEPENDS ${MATBIIPS_TARGET_LOC}
 		)
 
 

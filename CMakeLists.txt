@@ -236,6 +236,8 @@ if (WIN32)
     ${CMAKE_SOURCE_DIR}/compiler/win32)
 endif()
 
+
+find_package(Zip)
 # ==============================
 # Add subdirectories
 # ==============================
