@@ -97,12 +97,10 @@ add_custom_command(TARGET matbiips
     VERBATIM
 )
 
-#if (NOT BIIPS_DEBUG)
-	# copy mexfile in the src directory
-	add_custom_command(TARGET matbiips
-	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/"
-	    COMMENT "Copying mexfile in source directory"
-	    VERBATIM
-	)
-#endif()
+# copy mexfile in the src directory
+add_custom_command(TARGET matbiips
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/"
+    COMMENT "Copying mexfile in source directory"
+    VERBATIM
+)

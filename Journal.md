@@ -15,6 +15,8 @@ Adrien le 15/8/2014 :
 - [ ] mettre à jour/corriger `matbiips_internals.tex`
 - [ ] améliorer les modules cmake : voir liens sur ce post
   http://www.cmake.org/pipermail/cmake/2009-January/026284.html
+- [ ] permettre compilation matbiips pour matlab et octave dans le même répertoire de build
+- [ ] ajouter cibles Contents.m
 
 François le 13/08/2014 :
 ========================
