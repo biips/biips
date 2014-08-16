@@ -79,7 +79,7 @@ elseif (WIN32) # Windows
       set(BITS "64")
   endif()
 
-  if (BITS MATCHES 64) 
+  if (BITS STREQUAL 64) 
     set( SYSTEM_ARCH "x86_64" ) 
   else() 
     set( SYSTEM_ARCH "x86" ) 
