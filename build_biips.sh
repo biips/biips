@@ -112,9 +112,9 @@ if [[ $ans == "y" ]]; then set -x
     set +x; echo -n "*** Package Biips? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD
+	    $MAKE package_source
         sudo cpack -G $CPACK_GENERATOR
         sudo cpack -G TGZ
-	    sudo $MAKE package_source
 
         if [[ "$(uname)" != "Darwin" ]]; then
             set +x; echo -n "*** Install Biips DEB package ? (y/[n])"; read ans
