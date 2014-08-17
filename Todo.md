@@ -1,3 +1,7 @@
+Format:
+- [x] task done
+- [ ] (N) task to be done, where N is an integer indicating priority by decreasing order
+
 Bugs:
 =====  
 - [x] Problème affectation conjugateMNormalLinear sampler avec modèle hmm_4d_gps 

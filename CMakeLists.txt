@@ -337,3 +337,23 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
 endif ()
 include (CPack)
+
+#========= Pandoc commands ============
+find_program(PANDOC pandoc PATHS ~/.cabal/bin)
+
+set(_md_file_names README INSTALL Developers_Guide)
+if (PANDOC)
+    foreach(_fname ${_md_file_names})
+        add_custom_command(OUTPUT ${_fname}.wiki
+            DEPENDS ${_fname}.md
+            COMMAND ${PANDOC} -f markdown -t dokuwiki ${_fname}.md -o ${_fname}.wiki
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
+        set(_wiki_files ${_wiki_files} ${_fname}.wiki)
+    endforeach()
+    add_custom_target(md2wiki
+        DEPENDS ${_wiki_files}
+        COMMENT "Translating md files to dokuwiki"
+    )
+endif()
+
