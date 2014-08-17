@@ -55,14 +55,20 @@ foreach(_ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
 endforeach()
 
 
-# using cmake -E
-set(_ext_list tar.gz)
-foreach (_ext ${_ext_list})
+foreach (_ext tar.gz zip)
+    if (_ext STREQUAL tar.gz)
+        # using cmake -E
+        set (ARCHIVE_COMMAND ${CMAKE_COMMAND} -E tar cvfz)
+    else(_ext STREQUAL zip AND ZIP)
+        # using zip
+        set (ARCHIVE_COMMAND ${ZIP_COMMAND})
+    endif()
+
     file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_mat)
     set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
     add_custom_command( OUTPUT ${ex_archive_mat}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_mat}
+      COMMAND ${ARCHIVE_COMMAND} ${ex_archive_mat}
       ${ex_files_common} ${ex_files_mat}
     )
     
@@ -70,7 +76,7 @@ foreach (_ext ${_ext_list})
     set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_r})
     add_custom_command( OUTPUT ${ex_archive_r}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_r}
+      COMMAND ${ARCHIVE_COMMAND} ${ex_archive_r}
       ${ex_files_common} ${ex_files_r}
     )
     
@@ -78,38 +84,11 @@ foreach (_ext ${_ext_list})
     set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_all})
     add_custom_command( OUTPUT ${ex_archive_all}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E tar cafv ${ex_archive_all}
+      COMMAND ${ARCHIVE_COMMAND} ${ex_archive_all}
       ${ex_files_common} ${ex_files_mat} ${ex_files_r}
     )
 endforeach()
 
-
-# using zip
-if (ZIP)
-    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.zip" ex_archive_mat)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
-    add_custom_command( OUTPUT ${ex_archive_mat}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${ZIP_COMMAND} ${ex_archive_mat}
-      ${ex_files_common} ${ex_files_mat}
-    )
-
-    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/rbiips-examples_${Biips_VERSION}.zip" ex_archive_r)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_r})
-    add_custom_command( OUTPUT ${ex_archive_r}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${ZIP_COMMAND} ${ex_archive_r}
-      ${ex_files_common} ${ex_files_r}
-    )
-
-    file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.zip" ex_archive_all)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_all})
-    add_custom_command( OUTPUT ${ex_archive_all}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${ZIP_COMMAND} ${ex_archive_all}
-      ${ex_files_common} ${ex_files_mat} ${ex_files_r}
-    )
-endif()
 
     
 #define target
