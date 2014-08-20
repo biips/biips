@@ -303,7 +303,7 @@ Adrien le 25/06/2014 :
 Pour exécuter Matbiips compilé avec mex+VS2012, la machine a besoin de 
 - Visual Studio C++ redistribuable
 
-- [ ] l'ajouter aux instructions d'installation
+- [x] l'ajouter aux instructions d'installation
 
 Adrien le 3/6/2014 :
 ====================

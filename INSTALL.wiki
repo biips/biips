@@ -8,7 +8,7 @@
 <code>  install.packages('path/to/Rbiips_X.X.X.zip')</code>
 ===== Install Matbiips =====
 
-  * Requirements: Matlab (>=R2012b)
+  * Requirements: Windows (x64), Matlab (>=R2012b), [[http://www.microsoft.com/en-US/download/details.aspx?id=30679|Redistribuable Visual C++ 2012 (x64)]]
   * Extract Matbiips archive
   * Before using Matbiips, you need to add the directory to the Matlab search path by typing in Matlab console:
 

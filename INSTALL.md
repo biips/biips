@@ -13,7 +13,7 @@ Install Rbiips
 
 Install Matbiips
 ----------------
-* Requirements: Matlab (>=R2012b)
+* Requirements: Windows (x64), Matlab (>=R2012b), [Redistribuable Visual C++ 2012 (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
 
 * Extract Matbiips archive
 
