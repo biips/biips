@@ -69,7 +69,7 @@ n_fail = 0;
 accept_rate = zeros(n_samples, 1);
 rw_step = zeros(n_samples, numel(obj.log_step));
 log_marg_like_st = zeros(n_samples, 1);
-log_post_st = zeros(n_samples, 1);
+log_marg_like_pen_st = zeros(n_samples, 1);
 %%% TODO check dimensions: n_samples should be the last dimension?
 
 if return_samples
@@ -126,7 +126,7 @@ for i=1:n_iter
         accept_rate(ind_sample) = accept_rate_step;
         rw_step(ind_sample, :) = exp(obj.log_step);
         log_marg_like_st(ind_sample) = log_marg_like;
-        log_post_st(ind_sample) = log_marg_like + log_prior;
+        log_marg_like_pen_st(ind_sample) = log_marg_like + log_prior;
         
         if return_samples
             
@@ -177,7 +177,7 @@ if return_samples
         varargout{1} = samples_st;
     end
     if nout>=2
-        varargout{2} = log_post_st;
+        varargout{2} = log_marg_like_pen_st;
     end
     if nout>=3
         varargout{3} = log_marg_like_st;
@@ -191,7 +191,7 @@ if return_samples
     end
 else
     if nout>=1
-        varargout{1} = log_post_st;
+        varargout{1} = log_marg_like_pen_st;
     end
     if nout>=2
         varargout{2} = log_marg_like_st;

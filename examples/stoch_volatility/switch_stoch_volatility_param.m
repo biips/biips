@@ -196,7 +196,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', l
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] =...
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] =...
     biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', thin); % Samples
  
 %%

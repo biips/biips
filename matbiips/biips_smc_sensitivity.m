@@ -27,11 +27,11 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 %   OUTPUT
 %   - out:          Structure with the following fields:
 %                   * log_marg_like
-%                   * log_post
+%                   * log_marg_like_pen
 %                   * max_param
 %                   * max_log_marg_like
 %                   * max_param_post
-%                   * max_log_post
+%                   * max_log_marg_like_pen
 %
 %   See also BIIPS_MODEL, BIIPS_SMC_SAMPLES
 %--------------------------------------------------------------------------
@@ -110,9 +110,9 @@ end
 
 % initialize
 log_marg_like = zeros(n_values, 1);
-log_post = zeros(n_values, 1);
+log_marg_like_pen = zeros(n_values, 1);
 max_log_marg_like = -Inf;
-max_log_post = -Inf;
+max_log_marg_like_pen = -Inf;
 max_param = [];
 max_param_post = [];
 
@@ -162,9 +162,9 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
          max_log_marg_like = log_marg_like(k);
          max_param = value;
      end
-     log_post(k) = log_marg_like(k) + log_prior;
-     if log_post(k)>max_log_post
-         max_log_post = log_post(k);
+     log_marg_like_pen(k) = log_marg_like(k) + log_prior;
+     if log_marg_like_pen(k)>max_log_marg_like_pen
+         max_log_marg_like_pen = log_marg_like_pen(k);
          max_param_post = value;
      end
      
@@ -175,8 +175,8 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
 matbiips('clear_console', console); 
  
 out.log_marg_like = log_marg_like;
-out.log_post = log_post;
+out.log_marg_like_pen = log_marg_like_pen;
 out.max_param = max_param;
 out.max_log_marg_like = max_log_marg_like;
 out.max_param_post = max_param_post;
-out.max_log_post = max_log_post; 
+out.max_log_marg_like_pen = max_log_marg_like_pen; 

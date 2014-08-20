@@ -124,7 +124,7 @@ xlabel('Parameter log\_prec\_y')
 ylabel('Log-marginal likelihood')
 
 figure('name', 'Penalized log-marginal likelihood');
-plot(param_values{1}, out.log_post, '.')
+plot(param_values{1}, out.log_marg_like_pen, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
 
@@ -154,7 +154,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2},...
 %%
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1); % Samples
 
 %%

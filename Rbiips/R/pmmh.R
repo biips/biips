@@ -442,7 +442,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   len <- length(object$rw_step())
   out$rw_step <- mcmcarray(dim = c(len, n_samples))
   out$log_marg_like <- mcmcarray(dim = c(1, n_samples))
-  out$log_post <- mcmcarray(dim = c(1, n_samples))
+  out$log_marg_like_pen <- mcmcarray(dim = c(1, n_samples))
   
   if (return_samples) {
     for (var in param_names) {
@@ -489,7 +489,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
       out$accept_rate[ind_sample] <- out_step$accept_rate
       out$rw_step[, ind_sample] <- exp(object$rw_step())
       out$log_marg_like[ind_sample] <- log_marg_like
-      out$log_post[ind_sample] <- log_marg_like + log_prior
+      out$log_marg_like_pen[ind_sample] <- log_marg_like + log_prior
       
       if (return_samples) {
         sample_param <- out_step$sample_param

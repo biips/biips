@@ -29,7 +29,7 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 % latent_names = {'x'};
 % obj_pmmh = biips_pmmh_object(model, param_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [out_pmmh, log_post, log_marg_like, stats_pmmh] = ...
+% [out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = ...
 %   biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', 1, 'latent_names', latent_names); 
 %--------------------------------------------------------------------------
 

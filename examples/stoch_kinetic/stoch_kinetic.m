@@ -169,7 +169,7 @@ out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 %%
 % *Plot penalized log-marginal likelihood*
 figure('name', 'penalized log-marginal likelihood');
-plot(param_values{1}, out.log_post, '.')
+plot(param_values{1}, out.log_marg_like_pen, '.')
 xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
 
@@ -199,7 +199,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1}...
 %%
 % *Run PMMH*
 [obj_pmmh, stats] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_post, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1); % Samples
  
 %%

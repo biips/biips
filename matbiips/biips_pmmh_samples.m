@@ -1,9 +1,9 @@
-function [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ... 
+function [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ... 
     biips_pmmh_samples(obj_pmmh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PMMH_SAMPLES performs iterations for the PMMH algorithm and returns samples
-% [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ... 
+% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ... 
 %     biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'PropertyName', PropertyValue)
 %
 %   INPUT 
@@ -26,7 +26,7 @@ function [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
 %   OUTPUT
 %   - obj_pmmh:          PMMH structure
 %   - samples:           Structure with the PIMH samples for each variable
-%   - log_post:          vector with log posterior over iterations
+%   - log_marg_like_pen: vector with penalized log marginal likelihood over iterations
 %   - log_marg_like:     vector with log marginal likelihood over iterations
 %   - out_pmmh:          Structure with additional statistics on the MCMC run
 %
@@ -38,7 +38,7 @@ function [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
 % latent_names = {'x'};
 % obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
 %     'thin', 1); 
 %--------------------------------------------------------------------------
 
@@ -61,6 +61,6 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'char'};
 
 %% Call pmmh_algo internal routine
 return_samples = true;
-[obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'thin', thin, 'max_fail',...
     max_fail, 'rs_thres', rs_thres, 'rs_type', rs_type);

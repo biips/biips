@@ -1,8 +1,8 @@
-function [obj_pmmh, log_post, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part, varargin)
+function [obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PMMH_UPDATE performs adaptation and burn-in iterations for the PMMH algorithm
-% [obj_pmmh, log_post, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part,...
+% [obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part,...
 %                               'PropertyName', propertyvalue, ...)
 %
 %   INPUT: 
@@ -23,7 +23,7 @@ function [obj_pmmh, log_post, log_marg_like, out_pmmh] = biips_pmmh_update(obj_p
 %
 %   OUTPUT
 %   - obj_pmmh:          Updated PMMH object
-%   - log_post:          vector with log posterior over iterations
+%   - log_marg_like_pen:          vector with penalized log marginal likelihood over iterations
 %   - log_marg_like:     vector with log marginal likelihood over iterations
 %   - out_pmmh:          Structure with additional statistics on the MCMC run
 %
@@ -35,7 +35,7 @@ function [obj_pmmh, log_post, log_marg_like, out_pmmh] = biips_pmmh_update(obj_p
 % latent_names = {'x'};
 % obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
+% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ...
 %   biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', 1); 
 %--------------------------------------------------------------------------
 
@@ -59,6 +59,6 @@ optarg_type = {'numeric', 'logical', 'numeric', 'char'};
 
 %% Call pmmh_algo internal routine
 return_samples = false;
-[obj_pmmh, log_post, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...
     'rs_thres', rs_thres, 'rs_type', rs_type);
