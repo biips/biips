@@ -43,8 +43,8 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 % out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

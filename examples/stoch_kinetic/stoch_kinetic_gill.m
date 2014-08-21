@@ -105,7 +105,7 @@ else
     rng('default')
 end
 
-%% Add new sampler to BiiPS
+%% Add new sampler to Biips
 %
 
 
@@ -150,7 +150,7 @@ box off
 ylim([0,450])
 saveas(gca, 'kinetic_data', 'epsc2')
 
-%% BiiPS Sequential Monte Carlo algorithm
+%% Biips Sequential Monte Carlo algorithm
 %
 
 %%

@@ -31,8 +31,8 @@ function [summ] = biips_summary(samples, varargin)
 % summ_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

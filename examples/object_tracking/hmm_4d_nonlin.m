@@ -117,7 +117,7 @@ model = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_da
 data = model.data;
 x_pos_true = data.x_true(1:2,:);
 
-%% BiiPS: Particle filter
+%% Biips: Particle filter
 %
 
 %%

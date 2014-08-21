@@ -8,8 +8,8 @@ function [obj, accept_rate, n_fail] = pmmh_one_update(obj, pn_param,...
 %     pn_param, n_part, rs_thres, rs_type, rw_rescale, rw_learn)
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

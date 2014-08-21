@@ -1,6 +1,6 @@
 //                                               -*- C++ -*-
 /*! \file t_Hmm1D_mini.cpp
- * \brief BiiPS minimal example
+ * \brief Biips minimal example
  * 
  * \author  $LastChangedBy$
  * \date    $LastChangedDate: 2010-10-25 18:42:40 +0200 (lun., 25 oct. 2010) $
@@ -8,7 +8,7 @@
  * Id:      $Id$
  *
  *
- * BiiPS example : Hidden Markov Model linear gaussian 1D
+ * Biips example : Hidden Markov Model linear gaussian 1D
  * ======================================================
  * x[0] --> x[1] --> ... --> x[t] --> ...
  *           |                |
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
  /*==================================*
   *                                  *
-  * Instantiate the model with BiiPS *
+  * Instantiate the model with Biips *
   *                                  *
   *==================================*/
 

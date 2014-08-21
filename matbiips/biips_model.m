@@ -34,8 +34,8 @@ function model = biips_model(file, data, varargin)
 % 
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

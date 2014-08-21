@@ -50,11 +50,11 @@ s/; *$//
         b add_next_line
     }
     c\
-#' ## Installation of RBiips package\n#' Install *RBiips* package archive depending on your system:\n#' - `RBiips_x.x.x.zip` for Windows\n#' - `RBiips_x.x.x.tgz` for Mac OS X\n#' - `RBiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/RBiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *BiiPS* libraries and headers as well as *Boost*.\n\n#+\n#' **Load RBiips package**\nrequire(RBiips)
+#' ## Installation of Rbiips package\n#' Install *Rbiips* package archive depending on your system:\n#' - `Rbiips_x.x.x.zip` for Windows\n#' - `Rbiips_x.x.x.tgz` for Mac OS X\n#' - `Rbiips_x.x.x.tar.gz` for Linux\n\n#+ eval=FALSE\ninstall.packages('path\/to\/Rbiips_x.x.x.ext')\n\n#' where `x.x.x` is the version of the package and `ext` is the \n#' archive extension for your system.\n#'\n#' **Note:** Linux installation needs a previous installation of\n#' *Biips* libraries and headers as well as *Boost*.\n\n#+\n#' **Load Rbiips package**\nrequire(Rbiips)
 }
 
 
-s/Matbiips/RBiips/g
+s/Matbiips/Rbiips/g
 
 s/struct/list/g
 
@@ -68,7 +68,7 @@ s/'([[:alnum:]_]*)' *, *\1/\1=\1/g
 s/([^_])true/\1TRUE/g
 s/([^_])false/\1FALSE/g
 
-# TODO change names in RBiips
+# TODO change names in Rbiips
 s/biips_smc_samples/smc_samples/
 s/biips_diagnosis/diagnosis/
 
@@ -78,7 +78,7 @@ s/biips_density/density/
 # model$data -> model$data()
 s/model\$data/model\$data()/
 
-# TODO italicize _BiiPS_ in .m
+# TODO italicize _Biips_ in .m
 /^#'/s/ _([[:alpha:]]*)_ / *\1* /g
 
 # {'x', 'y'} ==> c('x', 'y')
@@ -102,7 +102,7 @@ s/'probs' *, */probs=/g
     s/\[([^]]*)\]/paste(\1, sep='')/g
 }
 
-# TODO make summary field names match in matbiips and RBiips
+# TODO make summary field names match in matbiips and Rbiips
 s/\$mean/\$Mean/g
 s/\$med/\$Med/g
 

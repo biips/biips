@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * BiiPS software is a set of C++ libraries for
+ * Biips software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * BiiPS is derived software based on:
+ * Biips is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of BiiPS.
+ * This file is part of Biips.
  *
- * BiiPS is free software: you can redistribute it and/or modify
+ * Biips is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -71,18 +71,40 @@ namespace Biips
                           const IndexRange & subRange,
                           const Monitor* pMonitor);
 
+    void setMembers(const NodeArray & nodeArray,
+                    const std::map<NodeId, Monitor*> & monitorsMap,
+                    const Graph & graph);
+    void setMembers(const NodeArray & nodeArray,
+                    const Monitor* pMonitor,
+                    const Graph & graph);
+    void setConditionalNodeIds(const NodeArray & nodeArray,
+                             const std::map<NodeId, Monitor*> & monitorsMap,
+                             const Graph & graph);
+    void setConditionalNodeNames(const SymbolTable & symtab);
+
   public:
+    // constructor for filtering monitors
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
                      const std::map<NodeId, Monitor*> & monitorsMap,
                      Size nParticles,
                      const Graph & graph,
                      const SymbolTable & symtab);
+    // constructor for backward smoothing monitors
+    NodeArrayMonitor(const NodeArray & nodeArray,
+                     const IndexRange & range,
+                     const std::map<NodeId, Monitor*> & monitorsMap,
+                     Size nParticles,
+                     const Graph & graph,
+                     const SymbolTable & symtab,
+                     const Types<NodeId>::Array & condNodes);
+    // constructor for smoothing monitors
     NodeArrayMonitor(const NodeArray & nodeArray,
                      const IndexRange & range,
                      const Monitor* pMonitor,
                      Size nParticles,
-                     const Graph & graph);
+                     const Graph & graph,
+                     const SymbolTable & symtab);
 
     const String & GetName() const
     {

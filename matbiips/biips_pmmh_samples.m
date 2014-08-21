@@ -42,8 +42,8 @@ function [obj_pmmh, samples, log_post, log_marg_like, out_pmmh] = ...
 %     'thin', 1); 
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

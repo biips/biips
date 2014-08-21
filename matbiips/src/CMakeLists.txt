@@ -18,16 +18,6 @@ if (MATLAB OR OCTAVE)
 			set(MATBIIPS_INCLUDE_FLAGS ${MATBIIPS_INCLUDE_FLAGS} -I"${d}")
 		endforeach()
 
-		# mex compile flags
-		set(MATBIIPS_COMPILE_FLAGS -DWIN32)
-
-		if (CMAKE_BUILD_TYPE STREQUAL Debug)
-			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g)
-		elseif (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
-			set(MATBIIPS_COMPILE_FLAGS ${MATBIIPS_COMPILE_FLAGS} -g -O)
-		endif()
-
-
 		# biips src files targets
 		foreach(f ${Core_SRC} ${Base_SRC} ${Compiler_SRC} ${Mbiips_SRC})
 			# file extension
@@ -39,8 +29,9 @@ if (MATLAB OR OCTAVE)
 			if(fext STREQUAL .c OR fext STREQUAL .cpp OR fext STREQUAL .cc)
 				# target command
 				add_custom_command(OUTPUT ${fname}.${MEX_OBJ_EXT}
-					COMMAND ${MEX_COMMAND} ${MEX_FLAGS} -c ${MEX_OUTPUT_OPT} ${fname}.${MEX_OBJ_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${f}
-					COMMENT "Building ${fname}.${MEX_OBJ_EXT}")
+					COMMAND ${MEX_COMMAND} ${MEX_FLAGS_${CMAKE_BUILD_TYPE}} ${MEX_COMPILE_OPT} ${MEX_OUTPUT_OPT} ${fname}.${MEX_OBJ_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${f}
+					COMMENT "Building ${fname}.${MEX_OBJ_EXT}"
+					IMPLICIT_DEPENDS CXX ${f})
 				set(Mbiips_OBJ ${Mbiips_OBJ} ${fname}.${MEX_OBJ_EXT})
 			endif()
 		endforeach()
@@ -48,13 +39,13 @@ if (MATLAB OR OCTAVE)
 		file(TO_CMAKE_PATH ${CMAKE_CURRENT_BINARY_DIR}/matbiips.${MEX_EXT} MATBIIPS_TARGET_LOC)
 
 		# matbiips mexfile target
-		if (OCTAVE)
-			set(MEX_FLAGS ${MEX_FLAGS} --mex)
-		endif()
-		add_custom_target(matbiips
+		add_custom_command(OUTPUT ${MATBIIPS_TARGET_LOC}
 			DEPENDS ${Mbiips_OBJ}
-			COMMAND ${MEX_COMMAND} ${MEX_FLAGS} ${MEX_OUTPUT_OPT} matbiips.${MEX_EXT} ${MATBIIPS_COMPILE_FLAGS} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_OBJ}
+			COMMAND ${MEX_COMMAND} ${MEX_MEX_OPT} ${MEX_FLAGS_${CMAKE_BUILD_TYPE}} ${MEX_OUTPUT_OPT} matbiips.${MEX_EXT} ${MATBIIPS_INCLUDE_FLAGS} ${Mbiips_OBJ}
 			COMMENT "Linking mexfile matbiips.${MEX_EXT}"
+		)
+		add_custom_target(matbiips
+			DEPENDS ${MATBIIPS_TARGET_LOC}
 		)
 
 
@@ -98,27 +89,18 @@ else()
 endif()
 
 
-# install mexfile in the build private directory
+# install mexfile in the build directory
 add_custom_command(TARGET matbiips
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/private/"
-    COMMENT "Copying mexfile in build private directory"
-    VERBATIM
-)
-# install mexfile in the build tests directory
-add_custom_command(TARGET matbiips
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/tests/"
-    COMMENT "Copying mexfile in build tests directory"
+    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/"
+    COMMENT "Copying mexfile in build directory"
     VERBATIM
 )
 
-#if (NOT BIIPS_DEBUG)
-	# copy mexfile in the src private directory
-	add_custom_command(TARGET matbiips
-	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/private/"
-	    COMMENT "Copying mexfile in source private directory"
-	    VERBATIM
-	)
-#endif()
+# copy mexfile in the src directory
+add_custom_command(TARGET matbiips
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/"
+    COMMENT "Copying mexfile in source directory"
+    VERBATIM
+)

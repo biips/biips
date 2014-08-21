@@ -2,7 +2,7 @@ function s= cell2struct_weaknames(fields, weak_names)
 
 %--------------------------------------------------------------------------
 % CELL2STRUCT_WEAKNAMES builds a structure with "illegal" names
-% of the form x[1:5]
+% of the form "x[1:5]"
 % s= cell2struct_weaknames(fields, weak_names) 
 %
 %   INPUT 
@@ -13,8 +13,8 @@ function s= cell2struct_weaknames(fields, weak_names)
 %   - s : the structure with "illegal" names
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
@@ -22,15 +22,15 @@ function s= cell2struct_weaknames(fields, weak_names)
 %--------------------------------------------------------------------------
 
 if (~isa(fields,'cell'))
-    error('biips_cell2struct : 1-st argument must be a cell of strings')
+    error('cell2struct_weaknames: 1-st argument must be a cell of strings')
 end
 
 if (~isa(weak_names,'cell'))
-    error('biips_cell2struct : 2-st argument must be a cell of strings')
+    error('cell2struct_weaknames: 2-st argument must be a cell of strings')
 end
 
 if (~all(cellfun(@(x) ischar(x), weak_names)))
-    error('biips_cell2struct : 2-st argument must be a cell of strings')
+    error('cell2struct_weaknames: 2-st argument must be a cell of strings')
 end
 
 

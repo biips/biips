@@ -107,7 +107,7 @@ model_filename = 'tvdp.bug'; % BUGS model filename
 model = biips_model(model_filename, data); % Create biips model
 data = model.data;
 
-%% BiiPS Sequential Monte Carlo
+%% Biips Sequential Monte Carlo
 %
 
 %%

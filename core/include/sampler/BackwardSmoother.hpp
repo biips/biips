@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * BiiPS software is a set of C++ libraries for
+ * Biips software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * BiiPS is derived software based on:
+ * Biips is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of BiiPS.
+ * This file is part of Biips.
  *
- * BiiPS is free software: you can redistribute it and/or modify
+ * Biips is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -61,6 +61,7 @@ namespace Biips
     Size iter_;
     Bool initialized_;
     Types<Size>::Array nodeIterations_;
+    Types<NodeId>::Array condNodes_;
 
     void sumOfWeightsAndEss();
     Monitor * getParentFilterMonitor(NodeId id);
@@ -87,9 +88,16 @@ namespace Biips
     {
       return filterMonitors_.size() == 1;
     }
+    // last updated nodes at the current iteration (incremental)
     const Types<NodeId>::Array & LastUpdatedNodes() const
     {
       return filterMonitors_.back()->GetLastSampledNodes();
+    }
+    ;
+    // all conditional nodes (same at each iteration) = all observed stochastic nodes
+    const Types<NodeId>::Array & ConditionalNodes() const
+    {
+      return condNodes_;
     }
     ;
     Size GetNodeSamplingIteration(NodeId nodeId) const;

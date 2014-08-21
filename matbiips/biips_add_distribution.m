@@ -37,8 +37,8 @@ function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 % biips_add_distribution(dist_bugs, dist_nb_inputs, fun_dim, fun_sample);
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

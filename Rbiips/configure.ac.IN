@@ -1,0 +1,153 @@
+#                                               -*- autoconf -*-
+#
+#  Rbiips package for GNU R is an interface to Biips C++ libraries for
+#  Bayesian inference with interacting Particle Systems.
+#  Copyright (C) Inria, 2012
+#  Authors: Adrien Todeschini, Francois Caron
+#  
+#  Rbiips is derived software based on:
+#  Biips, Copyright (C) Inria, 2012
+#  rjags, Copyright (C) Martyn Plummer, 2002-2010
+#  Rcpp, Copyright (C) Dirk Eddelbuettel and Romain Francois, 2009-2011
+#
+#  This file is part of Rbiips.
+#
+#  Rbiips is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+#  \file     configure.ac
+#  \brief    autoconf script for unix
+#
+#  \author   $LastChangedBy$
+#  \date     $LastChangedDate$
+#  \version  $LastChangedRevision$
+#  Id:       $Id$
+#
+
+AC_INIT([Rbiips], [@Biips_VERSION_MAJOR@])
+
+if test -z "${R_HOME}"; then
+   AC_MSG_ERROR("R_HOME is not defined")
+fi
+CC=`"${R_HOME}/bin/R" CMD config CC`
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
+CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+
+AC_PREFIX_PROGRAM(biips_info)
+# This command looks for program biips_info. If path to biips_info is "/usr/local/bin/biips" then prefix variable will be "/usr/local"
+
+#Set optional include path with option --with-biips-include or
+#environment variable BIIPS_INCLUDE
+
+AC_ARG_WITH([biips-include],
+            AC_HELP_STRING([--with-biips-include=INCLUDE_PATH],
+                           [the location of Biips header files]),
+            [biips_include_path=$withval])
+if test [ -n "$biips_include_path" ] ; then
+   BIIPS_INCLUDE=${biips_include_path}
+else
+   if test [ -z "${BIIPS_INCLUDE}" ] ; then
+      if test [ "$prefix" = "NONE" ]; then
+         AC_MSG_ERROR("Location of Biips headers not defined. Use configure arg '--with-biips-include' or environment variable 'BIIPS_INCLUDE'")
+      else
+         BIIPS_INCLUDE=${prefix}/include/biips
+      fi
+   fi
+fi
+
+AC_LANG_PUSH(C++)
+OCPPFLAGS=${CPPFLAGS}
+CPPFLAGS="-I${BIIPS_INCLUDE}/core -I${BIIPS_INCLUDE}/base -I${BIIPS_INCLUDE}/compiler"
+AC_CHECK_HEADER([Console.hpp], [],
+             [AC_MSG_FAILURE("Problem with header file ${BIIPS_INCLUDE}/compiler/Console.hpp")])
+CPPFLAGS=${OCPPFLAGS}
+AC_LANG_POP()
+
+
+# There is no consensus on where 64- versus 32-bit libraries should be
+# installed.  We take a hint from R, assuming that if R is installed
+# in, say, /usr/LIBnn/R then we can find the Biips libraries in
+# ${prefix}/LIBnn.
+#
+# This is a reasonable assumption if both Biips and R have been
+# properly packaged, but may not be true if either has been manually
+# installed. The user can set the environment variable LIBnn to
+# override this.
+
+# On Debian, we use the dpkg-architecture program to get the  
+# architecture-dependent install library path
+
+if test -z "${LIBnn}"; then 
+   LIBnn=`"${R_HOME}/bin/R" CMD config LIBnn`
+fi
+
+#Set optional library path with option --with-biips-lib or
+#environment variable BIIPS_LIB
+
+AC_ARG_WITH([biips-lib],
+            AC_HELP_STRING([--with-biips-lib=LIB_PATH],
+                           [the location of the BIIPS library]),
+            [biips_lib_path=$withval])
+if test [ -n "$biips_lib_path" ] ; then
+   BIIPS_LIB=$biips_lib_path
+else
+   if test [ -z "${BIIPS_LIB}" ] ; then
+      if test [ "${prefix}" = "NONE" ] ; then 
+         AC_MSG_ERROR("Location of Biips libraries not defined. Use configure arg '--with-biips-lib' or environment variable 'BIIPS_LIB'")
+      else
+         # check dpkg-architecture
+		 AC_CHECK_PROG(DPKG_FOUND, dpkg-architecture, "ok")
+         # if found then use DEB_HOST_MULTIARCH to define BIIPS_LIB
+         # else use LIBnn
+		 if test [ "$DPKG_FOUND" = "ok" ] ; then
+		 	DEB_HOST_MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH`
+			BIIPS_LIB=${prefix}/lib/${DEB_HOST_MULTIARCH}
+		 else
+		 	BIIPS_LIB=${prefix}/${LIBnn}
+		 fi
+      fi
+   fi
+fi
+
+
+
+OLDFLAGS=${LDFLAGS}
+AC_LANG_PUSH(C)
+LDFLAGS="-L${BIIPS_LIB} @RBIIPS_COMPILE_FLAGS@"
+LIBS="-lm -lstdc++"
+AC_CHECK_LIB(BiipsCore, BiipsCore_is_present, [],
+             [AC_MSG_ERROR("Cannot load BiipsCore library in ${BIIPS_LIB}")])
+AC_CHECK_LIB(BiipsBase, BiipsBase_is_present, [],
+             [AC_MSG_ERROR("Cannot load BiipsBase library in ${BIIPS_LIB}")])
+AC_CHECK_LIB(BiipsCompiler, BiipsCompiler_is_present, [],
+             [AC_MSG_ERROR("Cannot load BiipsCompiler library in ${BIIPS_LIB}")])
+AC_LANG_POP()
+LDFLAGS=${OLDFLAGS}
+
+
+BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
+
+
+RBIIPS_COMPILE_FLAGS="@RBIIPS_COMPILE_FLAGS@"
+RBIIPS_LINK_FLAGS="@RBIIPS_LINK_FLAGS@"
+
+AC_SUBST(RBIIPS_COMPILE_FLAGS)
+AC_SUBST(RBIIPS_LINK_FLAGS)
+AC_SUBST(BIIPS_INCLUDE)
+AC_SUBST(BIIPS_LD_FLAGS)
+
+AC_CONFIG_FILES([src/Makevars])
+AC_OUTPUT

@@ -36,17 +36,21 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %                   * names of the variables monitored with subfields
 %                       * f, s and/or b for filtering, smoothing or backward
 %                       smoothing with subfields
-%                           * value: matrix of size ndim * N with values of the particles
-%                           * weights: matrix of size ndim * N with weights of the particles
-%                           * ess: matrix of size ndim with effective sample size 
+%                           * values: array of size [dim, n_part] with values of the particles
+%                           * weights: array of size [dim, n_part] with weights of the particles
+%                           * ess: array of size dim with effective sample size 
+%                           * discrete: array of size dim with boolean indicating discreteness
+%                           * conditionals: lists of the contitioning variables (observations).
+%                               - filtering: cell array of size dim. each element is a cell of strings
+%                                 with the respective contitioning variables of the node array element.
+%                               - smoothing/backward_smoothing: cell of strings, the same for all the 
+%                                 elements of the node array.
 %                           * name: string with the name of the variable
-%                           * lower: cell with the lower dimension of the
-%                           variable
-%                           * upper: cell with the upper dimension of the
-%                           variable
-%                           * type: string ('filtering', 'smoothing' or 'backward smoothing')
+%                           * lower: vector with the lower bounds of the variable
+%                           * upper: vector with the upper bounds of the variable
+%                           * type: string ('filtering', 'smoothing' or 'backward_smoothing')
 %                   Example to access values of the particles for smoothing for variable x: 
-%                   particles.var1.s.values
+%                   particles.x.s.values
 %   - log_marg_like:log marginal likelihood
 %
 %   See also BIIPS_MODEL
@@ -60,8 +64,8 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %               'rs_type', rs_type, 'rs_thres', rs_thres);
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

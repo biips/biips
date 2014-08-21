@@ -101,8 +101,8 @@ model = biips_model(model, data, 'sample_data', sample_data); % Create biips mod
 data = model.data;
 
 
-%% BiiPS : Sensitivity analysis with Sequential Monte Carlo
-% Let now use BiiPS to provide estimates of the marginal log-likelihood and
+%% Biips : Sensitivity analysis with Sequential Monte Carlo
+% Let now use Biips to provide estimates of the marginal log-likelihood and
 % log-posterior (up to a normalizing constant) given various values of the
 % log-precision parameters $\log(\lambda_y)$ .
 
@@ -129,8 +129,8 @@ xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
 
 
-%% BiiPS Particle Marginal Metropolis-Hastings
-% We now use BiiPS to run a Particle Marginal Metropolis-Hastings in order
+%% Biips Particle Marginal Metropolis-Hastings
+% We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameter and variables x.
 
 %%

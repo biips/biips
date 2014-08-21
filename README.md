@@ -1,9 +1,9 @@
-BiiPS
+Biips
 =============================================================================
-BiiPS is a general software for Bayesian inference with interacting Particle Systems.
+Biips is a general software for Bayesian inference with interacting Particle Systems.
 
 - Version:       0.9.0
-- Last modified: 2014-08-15
+- Last modified: 2014-08-18
 - Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
 - License:       GPL-3
 - Website:       http://alea.bordeaux.inria.fr/biips
@@ -13,7 +13,7 @@ Its main objective is to popularize the use of particle methods to researchers, 
 
 Overview
 -----------------------------------------------------------------------------
- BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+ Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
  It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).
@@ -30,8 +30,8 @@ Features
 - Black-box particle algorithms for filtering and smoothing
 - Fixed parameter estimation using particle MCMC
 - Core developped in C++
-- R interface: RBiips
-- Matlab interface: MatBiips
+- R interface: Rbiips
+- Matlab interface: Matbiips
 - Free and open source software (GPL)
 - Multi-platform: Linux, Windows, Mac OS X
 - Automatically chooses the proposal samplers.
@@ -44,8 +44,8 @@ Otherwise you can use the discusssion forum.
 
 Getting Help
 ----------------------------------------------------------------------------- 
-The discusssion forum can be used for any question or feedback about BiiPS.
-This is the best place for getting help. All BiiPS users are invited to participate.
+The discusssion forum can be used for any question or feedback about Biips.
+This is the best place for getting help. All Biips users are invited to participate.
 
 Feel free to use it at https://gforge.inria.fr/forum/?group_id=2515
 
@@ -55,27 +55,27 @@ In the registration form, you can enter "ALEA" in the *INRIA research team* fiel
 Development
 ----------------------------------------------------------------------------- 
 The core software libraries are written in C++.
-An R package allows running BiiPS from the R statistical software and provides posterior analysis and plotting functions.
+An R package allows running Biips from the R statistical software and provides posterior analysis and plotting functions.
 A Matlab toolbox provides similar capabilities.
 
-The BiiPS source code is hosted on a git repository at Sourceforge. If you want to keep track of the development version, you can find downloading instructions here
+The Biips source code is hosted on a git repository at Sourceforge. If you want to keep track of the development version, you can find downloading instructions here
 
   https://gforge.inria.fr/projects/biips/
 
 License
 ----------------------------------------------------------------------------- 
-BiiPS is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
+Biips is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
 
 Authors
 -----------------------------------------------------------------------------
-BiiPS code is Copyright (C) Inria, 2012 
+Biips code is Copyright (C) Inria, 2012 
 
 Authors:
 - [Adrien TODESCHINI](https://sites.google.com/site/adrientodeschini/), software designer and developer
 - [Francois CARON](http://www.stats.ox.ac.uk/~caron/), probability expertise and specifications
 - Marc FUENTES, software designer and developer
 
-BiiPS code is adapted from:
+Biips code is adapted from:
 - JAGS, Copyright (C) Martyn Plummer, 2002-2010
 - SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
   

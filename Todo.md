@@ -1,3 +1,7 @@
+Format:
+- [x] task done
+- [ ] (N) task to be done, where N is an integer indicating priority by decreasing order
+
 Bugs:
 =====  
 - [x] Problème affectation conjugateMNormalLinear sampler avec modèle hmm_4d_gps 
@@ -11,7 +15,7 @@ Features:
 =========   
 - [x] Monitor de sub range 
 - [ ] (1) fonctions, distributions 
-- [ ] (1) Revoir les messages affichés dans RBiips 
+- [ ] (1) Revoir les messages affichés dans Rbiips 
 - [ ] (2) option quiet 
 - [ ] (2) calcul de stat par Monitor 
 - [ ] (2) Samplers conjugate 

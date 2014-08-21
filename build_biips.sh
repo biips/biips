@@ -112,52 +112,67 @@ if [[ $ans == "y" ]]; then set -x
     set +x; echo -n "*** Package Biips? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD
+	    $MAKE package_source
         sudo cpack -G $CPACK_GENERATOR
         sudo cpack -G TGZ
-	    sudo $MAKE package_source
-        set +x; echo -n "*** Install Biips DEB package ? (y/[n])"; read ans
-        if [[ $ans == "y" ]]; then set -x
-            cd $BIIPS_BUILD
-            sudo dpkg -i $BIIPS_BUILD/*.deb
-            sudo apt-get -f install
+
+        if [[ "$(uname)" != "Darwin" ]]; then
+            set +x; echo -n "*** Install Biips DEB package ? (y/[n])"; read ans
+            if [[ $ans == "y" ]]; then set -x
+                cd $BIIPS_BUILD
+                sudo dpkg -i $BIIPS_BUILD/*.deb
+                sudo apt-get -f install
+            fi
         fi
     fi
 fi
 
 
-set +x; echo -n "*** Install/build RBiips? (y/[n])"; read ans
+set +x; echo -n "*** Install/build Rbiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
     if [ "$(uname)" == "Darwin" ]; then
-        $MAKE VERBOSE=1 RBiips_INSTALL_build
+        $MAKE VERBOSE=1 Rbiips_INSTALL_build
     else
-        $MAKE VERBOSE=1 RBiips_INSTALL
-        $MAKE RBiips_build
+        $MAKE VERBOSE=1 Rbiips_INSTALL
+        $MAKE Rbiips_build
     fi
-    set +x; echo -n "*** Make RBiips PDF doc? (y/[n])"; read ans
+    set +x; echo -n "*** Make Rbiips PDF doc? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
-        $MAKE RBiips_Rd2pdf
+        $MAKE Rbiips_Rd2pdf
     fi
 fi
 
-set +x; echo -n "*** Build MatBiips? (y/[n])"; read ans
+set +x; echo -n "*** Build Matbiips? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
     $MAKE matbiips_package
 
-    set +x; echo -n "*** Run MatBiips tests? (y/[n])"; read ans
+    set +x; echo -n "*** Run Matbiips tests? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/matbiips
         ctest -VV
     fi
 fi
 
+set +x; echo -n "*** Translate Matbiips examples to R? (y/[n])"; read ans
+if [[ $ans == "y" ]]; then set -x
+    cd $BIIPS_BUILD
+    $MAKE mat2r_examples
+fi
+
 set +x; echo -n "*** Make examples package? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
     $MAKE examples_package
+fi
+
+set +x; echo -n "*** Translate md file to wiki? (y/[n])"; read ans
+if [[ $ans == "y" ]]; then set -x
+    cd $BIIPS_BUILD
+    $MAKE md2wiki
 fi
 
 

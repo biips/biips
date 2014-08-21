@@ -121,8 +121,8 @@ sample_data = true; % Boolean
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
 data = model.data;
 
-%% BiiPS Sequential Monte Carlo
-% Let now use BiiPS to run a particle filter. 
+%% Biips Sequential Monte Carlo
+% Let now use Biips to run a particle filter. 
 
 %%
 % *Parameters of the algorithm*. We want to monitor the variable x, and to

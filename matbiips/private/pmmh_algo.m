@@ -8,8 +8,8 @@ function [obj, varargout] = pmmh_algo(obj, n_iter, n_part, return_samples, varar
 %   See also  BIIPS_PMMH_UPDATE, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
 
-% BiiPS Project - Bayesian Inference with interacting Particle Systems
-% MatBiips interface
+% Biips Project - Bayesian Inference with interacting Particle Systems
+% Matbiips interface
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3

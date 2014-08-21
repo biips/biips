@@ -1,3 +1,23 @@
+Adrien le 15/8/2014 :
+=====================
+- [x] Conditionnelles retournées dans le champs `conditionals` des monitors
+    sous la forme d'un cell array de me dimension que le node array.
+    Chaque élément du cell array contient la liste des noms des noeuds de conditionnement 
+    du noeud représenté à cette position.
+- [x] A modifier: Les listes sont vides pour les monitors de smoothing et backward smoothing car la
+    liste est identique pour tous les noeuds = tous les noeuds stochastiques observés.
+  ---> OK, maintenant pour les monitors de smoothing, contitionals contient un unique cell of strings
+       avec la liste des variables observées.
+
+- [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
+- [x] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant
+    mex/mkoctfile (windows)
+- [ ] mettre à jour/corriger `matbiips_internals.tex`
+- [ ] améliorer les modules cmake : voir liens sur ce post
+  http://www.cmake.org/pipermail/cmake/2009-January/026284.html
+- [ ] permettre compilation matbiips pour matlab et octave dans le même répertoire de build
+- [ ] ajouter cibles Contents.m
+
 François le 13/08/2014 :
 ========================
 J'ai une erreur qui est apparue quand je lance `tutorial2.m`:
@@ -9,7 +29,7 @@ J'ai une erreur qui est apparue quand je lance `tutorial2.m`:
         Error in tutorial2 (line 117)
         out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
-Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut etre negatif.
+Pourtant normalement il n'y a pas de soucis car c'est le log de la precision, donc ca peut être négatif.
 
 Adrien :
 --------
@@ -40,8 +60,8 @@ Adrien le 13/08/2014 :
 
 Adrien le 12/08/2014 :
 ======================
-Je propose qu'on simplifie les typographies de BiiPS car il y a un mélange de toutes les variantes qui apparaissent : 
-BiiPS, Biips, biips, MatBiips, matbiips, RBiips, Rbiips, rbiips
+Je propose qu'on simplifie les typographies de Biips car il y a un mélange de toutes les variantes qui apparaissent : 
+Biips, Biips, biips, Matbiips, matbiips, Rbiips, Rbiips, rbiips
 
 Plusieurs possiblités :
 
@@ -56,7 +76,7 @@ biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 Dans tous les cas je propose de supprimer BiiPS qui a une typo compliquée et devient un peu lourd si on fait les extensions MatBiiPS et RBiiPS.
 Je suis pour la 1 ou la 2, qu'en penses-tu ?
 
-- [ ] J'appliquerai les changements partout avec un coup de sed.
+- [x] J'appliquerai les changements partout avec un coup de sed.
 
 ---> François :  oui, je suis d'accord.
     On peut partir sur la solution 1)
@@ -90,7 +110,7 @@ Tâches :
 
 Bug :
 -----
-- [ ] `test_internals` ne passe pas sous linux et windows avec matlab/octave :
+- [x] `test_internals` ne passe pas sous linux et windows avec matlab/octave :
 
         >> test_internals
         * Parsing model in: hmm_1d_lin.bug
@@ -111,17 +131,22 @@ Bug :
           |--------------------------------------------------| 100%
           |**************************************************| 4 iterations in 0.12 s
         Error using matbiips
-        change_data: BiiPS C++ exception. change_data: the console with id 0 does not exist
+        change_data: Biips C++ exception. change_data: the console with id 0 does not exist
 
         Error in test_internals (line 14)
         change_ok = matbiips('change_data', model.id, 'x', [3] , [3] , 0.5, true)
 
+---> Résolu: bug du à la présence de deux mexfiles: 
+     - un dans private utilisé par les fonctions biips_*
+     - l'autre dans tests utilisé par les scripts de test
+     Les deux mexfiles ont un espace mémoire différent !
+     Solution: supprimer le mexfile de tests et déplacer celui de private à la racine!
 
 François le 11/08/2014 :
 ========================
 
 Test des exemples sous Windows 64 bits, Matlab R2014a et Octave 3.6.4_gcc4.6.2
-* `tutorial1`,2,3: OK
+* `tutorial1`,`tutorial2`,`tutorial3`: OK
 * `hmm_nonlin_4d`: OK
 * `stoch_volatility`: OK
 * `switch_stoch_volatility_param`: OK
@@ -207,7 +232,7 @@ Adrien le 07/08/2014 :
 Tâches release avant Compstat :
 - [x] mexfile octave windows 32bit (cette après midi)
 - [ ] terminer rbiips et exemples
-- [ ] conditionnelles
+- [x] conditionnelles
 - [ ] mettre en ligne
 - [ ] article: logiciels similaires: libbi, nimble (paciorek), bugs, jags, stan
 - [x] mac osx
@@ -278,6 +303,8 @@ Adrien le 25/06/2014 :
 Pour exécuter Matbiips compilé avec mex+VS2012, la machine a besoin de 
 - Visual Studio C++ redistribuable
 
+- [ ] l'ajouter aux instructions d'installation
+
 Adrien le 3/6/2014 :
 ====================
 J'ai enfin réussi à compiler matbiips avec Visual Studio.
@@ -331,7 +358,7 @@ il rale avec l'erreur suivante:
     Warning: LOGIC ERROR: Node is not monitored, in NodeArrayMonitor::addMonitoredNode.
 
     Error using inter_biips
-    sample_gen_tree_smooth_particle: BiiPS c++ exception: Failed to sample smooth particle.
+    sample_gen_tree_smooth_particle: Biips c++ exception: Failed to sample smooth particle.
 
 Vois-tu d'ou vient le probleme? Est-ce un bout de code que j'ai oublie de mettre.
 
@@ -553,10 +580,10 @@ Marc:
 Adrien: 
 - [x] Pb dans `change_data` lorsque l'on ne fourni pas les dimensions des variable (lower et upper not defined)
 - [x] Regarder bug exemple stochastic kinetic
-- [ ] ajouter les lois conditionnelles
+- [x] ajouter les lois conditionnelles
 - [ ] quand exemples matbiips finis, transcrire en Rbiips
 - [ ] mexfile windows 32 bits
-- [ ] quand doc PMMH matbiips finie, verifier et transcrire dans RBiips
+- [ ] quand doc PMMH matbiips finie, verifier et transcrire dans Rbiips
 
 - [ ] On vise d'avoir la version et les tutos/exemples en ligne avec l'article sur arxiv pour la fin du mois.
 
@@ -630,7 +657,7 @@ Stack Trace (from fault):
 
 Adrien le 2/3/2014 :
 ====================
-- [x] Rationaliser l'usage des arguments seed dans matbiips et RBiips.
+- [x] Rationaliser l'usage des arguments seed dans matbiips et Rbiips.
 - [ ] Modifier arguments par défaut de `plot.summary.particles`.
 
 Adrien le 21/02/2014 :
@@ -689,7 +716,7 @@ Adrien le 18/02/2014 :
 
 François le 16/02/2014
 ======================
-- [x] Vérifier s'il n'y a pas un pb dans RBiips.R, ligne 340:
+- [x] Vérifier s'il n'y a pas un pb dans Rbiips.R, ligne 340:
         rw$d <<- sum(sapply(rw$dim, FUN=sum))
 Il me semble que FUN devrait prendre le produit des dimensions plutot que la somme.
 - [x] biips renvoie une erreur lorsque l'on essaie d'ajouter une fonction qui existe déjà. Ce serait bien de renvoyer juste un warning, et si possible de redéfinir la fonction (la fonction matlab peut avoir changer) - pas urgent ajouter message indiquant qu'il faut fermer matlab dans `biips_add_function` pour pouvoir redéfinir la fonction
@@ -748,7 +775,7 @@ L'erreur se produit dans `inter_biips compile_model` avec l'erreur suivante:
         y = randn(t_max, 1);
         data = struct('y', y, 't_max', t_max, 'prec_x_init', prec_x_init,...
             'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
-        %%% Start BiiPS console
+        %%% Start Biips console
         biips_init;
         %%% Compile BUGS model and sample data
         model = 'hmm_1d_lin.bug'; % BUGS model filename
@@ -793,7 +820,7 @@ A faire :
        * x[2] est donc seulement conditionné à y[1]
        * x[3] est lui conditionné à y[1], y[2], y[3], y[4]
        - [x] Il faut changer ce comportement
-- [ ] retourner les conditionnelles sous la forme présentée plus haut
+- [x] retourner les conditionnelles sous la forme présentée plus haut
 
 
 François le 07/02/2014 :
@@ -832,7 +859,7 @@ A faire dans Matbiips :
     Rq: L'appel de squeeze modifie les dimensions
 - [x] créer exemple court et l'inclure dans matbiips
 - [x] supprimer `biips_load_module` : l'intégrer dans `biips_init`
-- [ ] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
+- [x] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
 - [x] renommer `make_progress_bar` en `progress_bar`
 - [x] mettre isoctave dans private
 - [ ] revoir et ajouter tests matbiips et ne pas les intégrer dans l'archive
@@ -840,7 +867,7 @@ A faire dans Matbiips :
 - [x] commenter `inter_biips` en doxygen et générer pdf --> finalement c'est un doc latex séparé
 
 Autres tâches :
-- [ ] tester l'install de RBiips sous linux
+- [ ] tester l'install de Rbiips sous linux
 - [ ] copier binaires depuis CI sur un répertoire accessible (Dropbox ?)
 - [ ] harmonisation Licence, auteurs : Fichiers COPYING et README à la racine + entêtes de fichiers communes avec auteurs, Inria, date etc.
 
@@ -884,7 +911,7 @@ Adrien le 30/1/2014 :
 > `inter_biips('weighted_quantiles', values, weights, probas)` ne renvoit 
 > pas les bonnes valeurs.
 
-En fait, il faut juste multiplier les poids par N, c.f. `stat.particles` dans RBiips.
+En fait, il faut juste multiplier les poids par N, c.f. `stat.particles` dans Rbiips.
 Je ne comprends plus pourquoi mais ça marche... sûrement un problème numérique !?
 Je suppose que l'algo renormalise tout seul. J'ai corrigé `summary.m`.
 
@@ -896,9 +923,9 @@ A faire:
 - [x] Changer les noms de fonctions dans Rbiips : 
 	- `update.pimh` -> `pimh.update`
 	- `update.pmmh` -> `pmmh.update`
-- [x] Améliorer l'install de RBiips:
+- [x] Améliorer l'install de Rbiips:
 
-        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL RBiips_0.8.1.tar.gz
+        env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
 
 ARCH directory depends on the machine where biips deb package was installed.
 
@@ -906,9 +933,9 @@ Note: the environment variables should not be needed if the biips deb package wa
 
 ...or type from R console:
 
-        install.packages('path/to/RBiips_X.X.X.tar.gz')
+        install.packages('path/to/Rbiips_X.X.X.tar.gz')
 
-FIXME: error when compiling RBiips
+FIXME: error when compiling Rbiips
 
         g++: error: /usr/lib/libBiipsCompiler.a: Aucun fichier ou dossier de ce type
         g++: error: /usr/lib/libBiipsBase.a: Aucun fichier ou dossier de ce type
@@ -922,7 +949,7 @@ Adrien, le 21/01/2014 :
 - [ ] On a convergé sur un PMMH adaptatif: à modifier dans R, puis à créer dans Matlab
 - [x] Je suis en train de passer la doc de rbiips au format roxygen. Donc on va supprimer les fichiers Rd.
 - [x] Marc tente de résoudre un problème de taille de disque sur Windows CI pour installer Matlab
-- [ ] RBiips sous Windows CI: commandes de build à ajouter (Marc)
+- [ ] Rbiips sous Windows CI: commandes de build à ajouter (Marc)
 
 Adrien, le 05/01/2014 :
 =======================
@@ -933,7 +960,7 @@ A faire :
 - [ ] La comparaison avec Kalman dans `demo(hmm_1d_lin)` utilise un package obsolète
     package 'sspir' is not available (for R version 3.0.2)
 
-- [ ] Note : pimh et pmmh ont besoin du package rjags (sorties de type mcarray). Il faut trouver une alternative à cette dépendance : réimplementer les opérations sur mcarray dans RBiips ?
+- [ ] Note : pimh et pmmh ont besoin du package rjags (sorties de type mcarray). Il faut trouver une alternative à cette dépendance : réimplementer les opérations sur mcarray dans Rbiips ?
 
 - [x] Corriger le formatage du warning:
         Unused variables in data:t.maxmean.x.initprec.x.initprec.xprec.y
@@ -948,7 +975,7 @@ Test des demos (je n'ai pas la version 3.0 de jags installée et passe les compar
  -[x] erreur en lançant `demo(hmm_1d_lin)` :
 
         > biips <- biips.model(model, data=data, sample.data=!run.jags)
-        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/RBiips/extdata/hmm_1d_lin.bug
+        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/Rbiips/extdata/hmm_1d_lin.bug
         * Compiling data graph
           Declaring variables
         RUNTIME ERROR: Compilation error on line 1.
@@ -962,7 +989,7 @@ Test des demos (je n'ai pas la version 3.0 de jags installée et passe les compar
  - [x] erreur en lançant `demo(hmm_1d_lin)` :
 
         > biips <- biips.model(model, data)
-        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/RBiips/extdata/hmm_1d_nonlin.bug
+        * Parsing model in: C:/Users/fcaron/Documents/R/win-library/3.0/Rbiips/extdata/hmm_1d_nonlin.bug
         * Compiling model graph
           Declaring variables
         RUNTIME ERROR: Compilation error on line 1.
@@ -982,13 +1009,13 @@ Adrien, le 29/12/2013:
 =======================
 Ajouts dans new_release:
 * matbiips: archive zip avec mexfiles pour Linux 64bit, Windows 64bit, Mac 64bit
-* RBiips: packages binaires R pour Windows 64bit, Windows 32bit et Mac
+* Rbiips: packages binaires R pour Windows 64bit, Windows 32bit et Mac
 A tester... Voir mise à jour de install.md
 
 A faire:
 - [ ] Configurer l'esclave CI Windows 7
 - [ ] Réorganiser les tests matbiips
-- [ ] Permettre compilation multi-architecture de RBiips sous Windows
+- [ ] Permettre compilation multi-architecture de Rbiips sous Windows
 
 Adrien, le 17/12/2013:
 =======================
@@ -1002,7 +1029,7 @@ Il y a également un bout de doc dans matbbips/doc qu'il faudra compléter ou inté
 
 examples :
 ----------
-Il y a un dossier par modèle. Les scripts R (initialement intégrés au package RBiips) sont à mettre à jour ainsi que les .bug pour qu'ils soient compatibles matbiips.
+Il y a un dossier par modèle. Les scripts R (initialement intégrés au package Rbiips) sont à mettre à jour ainsi que les .bug pour qu'ils soient compatibles matbiips.
 
 Il y a aussi un dossier partagé Rbiips (pas dans new_release) avec des exemples.
 

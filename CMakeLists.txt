@@ -20,7 +20,7 @@ set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Sys
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
 
-set (Biips_DESCRIPTION " BiiPS is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+set (Biips_DESCRIPTION " Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
  It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).")
@@ -79,7 +79,7 @@ elseif (WIN32) # Windows
       set(BITS "64")
   endif()
 
-  if (BITS MATCHES 64) 
+  if (BITS STREQUAL 64) 
     set( SYSTEM_ARCH "x86_64" ) 
   else() 
     set( SYSTEM_ARCH "x86" ) 
@@ -108,7 +108,7 @@ if (UNIX) # Linux or MacOSX
     set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
   
   else()
-    message(WARNING "FIXME:Could not determine compiler name")
+    message(WARNING "FIXME: Could not determine compiler name")
     set(BIIPS_COMPILE_FLAGS "-fPIC")
     set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   endif()
@@ -181,8 +181,8 @@ endif ()
 
 
 # configure interfaces build
-option (BUILD_RBIIPS "Activate RBiips (BiiPS interface for GNU R) build" ON)
-option (BUILD_MATBIIPS "Activate MatBiips (BiiPS interface for Matlab) build" ON)
+option (BUILD_RBIIPS "Activate Rbiips (Biips interface for GNU R) build" ON)
+option (BUILD_MATBIIPS "Activate Matbiips (Biips interface for Matlab) build" ON)
 option (FIND_OCTAVE "Build Matbiips for Octave instead of Matlab" OFF)
 
 
@@ -236,6 +236,8 @@ if (WIN32)
     ${CMAKE_SOURCE_DIR}/compiler/win32)
 endif()
 
+
+find_package(Zip)
 # ==============================
 # Add subdirectories
 # ==============================
@@ -251,7 +253,7 @@ endif ()
 add_subdirectory (doc)
 add_subdirectory (examples)
 if (BUILD_RBIIPS)
-    add_subdirectory (RBiips)
+    add_subdirectory (Rbiips)
 endif ()
 if (BUILD_MATBIIPS)
     add_subdirectory (matbiips)
@@ -262,7 +264,7 @@ endif ()
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_NAME biips)
-set (CPACK_PACKAGE_VENDOR BiiPS)
+set (CPACK_PACKAGE_VENDOR Biips)
 
 # Generic package options
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${Biips_VERSION}_${SYSTEM_ARCH}_${CMAKE_SYSTEM_NAME})
@@ -271,7 +273,7 @@ set (CPACK_PACKAGE_VERSION_MAJOR ${Biips_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${Biips_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${Biips_VERSION_PATCH})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
-set (CPACK_PACKAGE_INSTALL_DIRECTORY "BiiPS-${Biips_VERSION}")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY "Biips-${Biips_VERSION}")
 set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description.txt)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.txt)
@@ -288,7 +290,24 @@ set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
 "\\\\.project$" 
 "/\\\\.settings/" 
 ".*\\\\.html$" 
+".*\\\\.wiki$" 
+".*\\\\.sh"
+".*\\\\.bat"
+".*\\\\.pdf"
+".*\\\\.Rproj.*"
+"/\\\\.Rproj\\\\.user"
+".*\\\\.mex.*"
+".*_m2R\\\\.R"
+"/old/" 
+"/html/"
 ".*~" 
+"Journal.*" 
+"journal.*" 
+"todo.*"
+"Todo.*"
+"TODO.*"
+"TODO.*"
+"install_vm.*"
 ${CPACK_SOURCE_IGNORE_FILES})
 
 #set (CPACK_PACKAGE_EXECUTABLES "biips_info;Biips info")
@@ -326,8 +345,8 @@ if (WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
   set (CPACK_NSIS_EXECUTABLES_DIRECTORY ${Biips_INSTALL_BINDIR})
-  set (CPACK_NSIS_INSTALL_ROOT "\$PROGRAMFILES64\\\\BiiPS")
-  set (CPACK_NSIS_DISPLAY_NAME "BiiPS ${Biips_VERSION}")
+  set (CPACK_NSIS_INSTALL_ROOT "\$PROGRAMFILES64\\\\Biips")
+  set (CPACK_NSIS_DISPLAY_NAME "Biips ${Biips_VERSION}")
   set (CPACK_NSIS_HELP_LINK ${Biips_URL})
   set (CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
   set (CPACK_NSIS_CONTACT ${Biips_CONTACT})
@@ -335,3 +354,23 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
 endif ()
 include (CPack)
+
+#========= Pandoc commands ============
+find_program(PANDOC pandoc PATHS ~/.cabal/bin)
+
+set(_md_file_names README INSTALL Developers_Guide)
+if (PANDOC)
+    foreach(_fname ${_md_file_names})
+        add_custom_command(OUTPUT ${_fname}.wiki
+            DEPENDS ${_fname}.md
+            COMMAND ${PANDOC} -f markdown -t dokuwiki ${_fname}.md -o ${_fname}.wiki
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
+        set(_wiki_files ${_wiki_files} ${_fname}.wiki)
+    endforeach()
+    add_custom_target(md2wiki
+        DEPENDS ${_wiki_files}
+        COMMENT "Translating md files to dokuwiki"
+    )
+endif()
+

@@ -9,7 +9,6 @@
  * Id:      $Id$
  */
 
-#include <deque>
 #include "matbiips_utils.h"
 #include <fstream>
 #include "common/Accumulator.hpp"
@@ -79,7 +78,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       String filename = GetString(prhs[2]);
 
-      if (! p_console->CheckModel(filename, VERBOSITY))
+      Bool ok = p_console->CheckModel(filename, VERBOSITY);
+      if (!ok)
         myMexErrMsg(name_func, name_func + "Model syntax is incorrect.");
     }
     /////////////////////////////////////////
@@ -103,7 +103,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Bool clone = static_cast<Bool>(*mxGetLogicals(prhs[5]));
 
       // Compile model
-      if (! p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY, clone))
+      Bool ok = p_console->Compile(data_map, sample_data, data_rng_seed, VERBOSITY, clone);
+      if (!ok)
         throw RuntimeError("Failed to compile model.");
       if (sample_data && VERBOSITY>1)
         mbiips_cout << INDENT_STRING << "data.rng.seed = " << data_rng_seed << endl;
@@ -120,7 +121,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       std::map<String, MultiArray> data_table;
 
-      if (! p_console->DumpData(data_table))
+      Bool ok = p_console->DumpData(data_table);
+      if (!ok)
         throw RuntimeError("Failed to read data.");
 
       readDataTable<MultiArray::StorageOrderType>(data_table, &plhs[0]);
@@ -189,7 +191,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if (VERBOSITY>1)
         mbiips_cout << PROMPT_STRING << "Setting default filter monitors for backward smoothing step" << endl;
 
-      if (!p_console->SetDefaultFilterMonitors())
+      Bool ok = p_console->SetDefaultFilterMonitors();
+      if (!ok)
         throw RuntimeError("Failed to set default filter monitors");
 
     }
@@ -366,7 +369,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckArgIsLogical(2);
       Bool prior_flag = static_cast<Bool>(*mxGetLogicals(prhs[2]));
 
-      if (!p_console->BuildSampler(prior_flag, VERBOSITY))
+      Bool ok = p_console->BuildSampler(prior_flag, VERBOSITY);
+      if (!ok)
         throw RuntimeError("Failed to build sampler.");
     }
 
@@ -422,7 +426,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Console_ptr p_console = consoles[id];
 
       Scalar log_norm_const;
-      if(!p_console->GetLogNormConst(log_norm_const))
+      Bool ok = p_console->GetLogNormConst(log_norm_const);
+      if(!ok)
         throw RuntimeError("Failed to get log normalizing constant.");
 
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
@@ -441,7 +446,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       std::map<String, NodeArrayMonitor> monitors_map;
 
-      if (!p_console->DumpFilterMonitors(monitors_map))
+      Bool ok = p_console->DumpFilterMonitors(monitors_map);
+      if (!ok)
         throw RuntimeError("Failed to dump filter monitors.");
 
       getMonitors<ColumnMajorOrder>(monitors_map, "filtering", &plhs[0]);
@@ -459,7 +465,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       std::map<String, NodeArrayMonitor> monitors_map;
 
-      if (!p_console->DumpGenTreeSmoothMonitors(monitors_map))
+      Bool ok = p_console->DumpGenTreeSmoothMonitors(monitors_map);
+      if (!ok)
         throw RuntimeError("Failed to dump smooth monitors.");
 
       getMonitors<ColumnMajorOrder>(monitors_map, "smoothing", &plhs[0]);
@@ -477,7 +484,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       std::map<String, NodeArrayMonitor> monitors_map;
 
-      if (!p_console->DumpBackwardSmoothMonitors(monitors_map))
+      Bool ok = p_console->DumpBackwardSmoothMonitors(monitors_map);
+      if (!ok)
         throw RuntimeError("Failed to dump backward smooth monitors.");
 
       getMonitors<ColumnMajorOrder>(monitors_map, "backward_smoothing", &plhs[0]);
@@ -496,7 +504,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckArgIsLogical(2);
       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
 
-      if (!p_console->ClearFilterMonitors(release_only))
+      Bool ok = p_console->ClearFilterMonitors(release_only);
+      if (!ok)
         throw RuntimeError("Failed to clear filter monitors.");
 
     }
@@ -513,7 +522,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckArgIsLogical(2);
       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
 
-      if (!p_console->ClearGenTreeSmoothMonitors(release_only))
+      Bool ok = p_console->ClearGenTreeSmoothMonitors(release_only);
+      if (!ok)
         throw RuntimeError("Failed to clear smooth monitors.");
 
     }
@@ -530,7 +540,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       CheckArgIsLogical(2);
       Bool release_only = static_cast<Bool>(*mxGetLogicals(prhs[2]));
 
-      if (!p_console->ClearBackwardSmoothMonitors(release_only))
+      Bool ok = p_console->ClearBackwardSmoothMonitors(release_only);
+      if (!ok)
         throw RuntimeError("Failed to clear backward smooth monitors.");
 
     }
@@ -544,7 +555,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Size id = GetConsoleId(consoles, prhs[1], name_func);
       Console_ptr p_console = consoles[id];
 
-      if (!p_console->RunBackwardSmoother(VERBOSITY,VERBOSITY))
+      Bool ok = p_console->RunBackwardSmoother(VERBOSITY,VERBOSITY);
+      if (!ok)
         throw RuntimeError("Failed to run backward smoother.");
 
     }
@@ -562,12 +574,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
 
       Size graph_size;
-      if (!p_console->GraphSize(graph_size))
+      Bool ok = p_console->GraphSize(graph_size);
+      if (!ok)
         throw RuntimeError("Failed to get graph size.");
 
       {// id assignment
         Types<Size>::Array node_ids_vec;
-        if (!p_console->DumpNodeIds(node_ids_vec))
+        Bool ok_dump = p_console->DumpNodeIds(node_ids_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node ids.");
         mxArray * id = mxCreateDoubleMatrix(node_ids_vec.size(), 1, mxREAL);
         std::replace_copy(node_ids_vec.begin(), node_ids_vec.end(), mxGetPr(id),
@@ -577,7 +591,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       {// name assignment
         Types<String>::Array node_names_vec;
-        if (!p_console->DumpNodeNames(node_names_vec))
+        Bool ok_dump = p_console->DumpNodeNames(node_names_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node names.");
 
         mwSize name_ndim = 1;
@@ -591,7 +606,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       }
       { // type assignment
         Types<NodeType>::Array node_types_vec;
-        if (!p_console->DumpNodeTypes(node_types_vec))
+        Bool ok_dump = p_console->DumpNodeTypes(node_types_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node types.");
         mwSize type_ndim = 1;
         mwSize type_dims[] = { static_cast<mwSize>(node_types_vec.size()) };
@@ -621,7 +637,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       {// observed assignment
         Flags node_obs_vec;
-        if (!p_console->DumpNodeObserved(node_obs_vec))
+        Bool ok_dump = p_console->DumpNodeObserved(node_obs_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node observed boolean.");
         mxArray * node_obs = mxCreateDoubleMatrix(node_obs_vec.size(), 1, mxREAL);
         std::copy(node_obs_vec.begin(), node_obs_vec.end(), mxGetPr(node_obs));
@@ -642,12 +659,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
 
       Size graph_size;
-      if (!p_console->GraphSize(graph_size))
+      Bool ok = p_console->GraphSize(graph_size);
+      if (!ok)
         throw RuntimeError("Failed to get graph size.");
 
       {// iteration assignment
         Types<Size>::Array node_iterations_vec;
-        if (!p_console->DumpNodeIterations(node_iterations_vec))
+        Bool ok_dump = p_console->DumpNodeIterations(node_iterations_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node iterations.");
         mxArray * iterations = mxCreateDoubleMatrix(node_iterations_vec.size(), 1, mxREAL);
         std::replace_copy(node_iterations_vec.begin(), node_iterations_vec.end(), mxGetPr(iterations),
@@ -657,7 +676,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       {// sampler assignment
         Types<String>::Array node_samplers_vec;
-        if (!p_console->DumpNodeSamplers(node_samplers_vec))
+        Bool ok_dump = p_console->DumpNodeSamplers(node_samplers_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node samplers.");
 
         mwSize samplers_ndim = 1;
@@ -684,12 +704,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
 
       Size graph_size;
-      if (!p_console->GraphSize(graph_size))
+      Bool ok = p_console->GraphSize(graph_size);
+      if (!ok)
         throw RuntimeError("Failed to get graph size.");
 
       {// node_iterations assignment
         Types<Size>::Array node_iterations_vec;
-        if (!p_console->DumpNodeIterations(node_iterations_vec))
+        Bool ok_dump = p_console->DumpNodeIterations(node_iterations_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node iterationss.");
         mxArray * node_iterations = mxCreateDoubleMatrix(1, node_iterations_vec.size(), mxREAL);
         std::replace_copy(node_iterations_vec.begin(), node_iterations_vec.end(), mxGetPr(node_iterations),
@@ -699,7 +721,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       {// node_samplers assignment
         Types<String>::Array node_samplers_vec;
-        if (!p_console->DumpNodeSamplers(node_samplers_vec))
+        Bool ok_dump = p_console->DumpNodeSamplers(node_samplers_vec);
+        if (!ok_dump)
           throw RuntimeError("Failed to dump node samplers.");
 
         mwSize name_ndim = 1;
@@ -734,7 +757,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if (ofs.fail())
         throw RuntimeError(String("Failed to open file ") + dot_file_name);
 
-      if (!p_console->PrintGraphviz(ofs))
+      Bool ok = p_console->PrintGraphviz(ofs);
+      if (!ok)
         throw RuntimeError("Failed to print dot file.");
 
     }
@@ -843,7 +867,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       IndexRange range = makeRange(lower, upper);
       Scalar prior;
 
-      if(!p_console->GetLogPriorDensity(prior, name, range))
+      Bool ok = p_console->GetLogPriorDensity(prior, name, range);
+      if(!ok)
         throw RuntimeError("Failed to get prior density.");
 
       if (prior == BIIPS_REALNA)
@@ -964,7 +989,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         IndexRange range = makeRange(low, up);
 
-        if (!p_console->IsGenTreeSmoothMonitored(name, range, check_released)) {
+        Bool ok = p_console->IsGenTreeSmoothMonitored(name, range, check_released);
+        if (!ok) {
           *mxGetLogicals(plhs[0]) = 0;
           return;
         }
@@ -987,7 +1013,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       std::map<String, MultiArray> sampled_value_map;
 
-      if (!p_console->SampleGenTreeSmoothParticle(smcRngSeed, sampled_value_map))
+      Bool ok = p_console->SampleGenTreeSmoothParticle(smcRngSeed, sampled_value_map);
+      if (!ok)
         throw RuntimeError("Failed to sample smooth particle.");
 
       readDataTable<MultiArray::StorageOrderType>(sampled_value_map, &plhs[0]);
@@ -1157,15 +1184,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   }
   catch (Biips::LogicError & e)
   {
-    myMexErrMsg(name_func+":LogicError", name_func + ": BiiPS LOGIC ERROR. " + e.what());
+    myMexErrMsg(name_func+":LogicError", name_func + ": Biips LOGIC ERROR. " + e.what());
   }
   catch (Biips::RuntimeError & e)
   {
-    myMexErrMsg(name_func+":RuntimeError", name_func + ": BiiPS RUNTIME ERROR. " + e.what());
+    myMexErrMsg(name_func+":RuntimeError", name_func + ": Biips RUNTIME ERROR. " + e.what());
   }
   catch (std::exception& e)
   {
-    myMexErrMsg(name_func+":cppException", name_func + ": BiiPS C++ exception. " + e.what());
+    myMexErrMsg(name_func+":cppException", name_func + ": Biips C++ exception. " + e.what());
   }
   return;
 }

@@ -100,7 +100,7 @@ model = biips_model(model_filename, data, 'sample_data', true);
 data = model.data;
 
 
-%% BiiPS Sequential Monte Carlo
+%% Biips Sequential Monte Carlo
 % 
 
 %%
@@ -213,7 +213,7 @@ saveas(gca, 'volatility_kde', 'png')
 
 
 
-%% BiiPS Particle Independent Metropolis-Hastings
+%% Biips Particle Independent Metropolis-Hastings
 % 
 
 %%
@@ -310,7 +310,7 @@ saveas(gca, 'volatility_pimh_kde', 'epsc2')
 saveas(gca, 'volatility_pimh_kde', 'png')
 
 
-%% BiiPS Sensitivity analysis
+%% Biips Sensitivity analysis
 %
 
 %%

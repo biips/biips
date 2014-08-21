@@ -20,6 +20,30 @@ Bool BASE_MODULE_LOADED = false;
 std::deque<Console_ptr> consoles(0);
 std::deque<ProgressBar_ptr> progress(0);
 
+Size GetConsoleId(const std::deque<Console_ptr> & consoles,
+                   const mxArray * pm,
+                   const String & name_func) {
+  if (!mxIsNumeric(pm))
+    myMexErrMsg(name_func, name_func+": the console id argument must be numeric");
+  Size id = static_cast<Size>(*mxGetPr(pm));
+  if ((id >= consoles.size()) || (consoles[id] == NULL)) {
+    myMexErrMsg(name_func, name_func+": the console with id "+print(id)+" does not exist");
+  }
+  return id;
+}
+
+Size  GetProgressBarId(const std::deque<ProgressBar_ptr> progress,
+                       const mxArray * pm,
+                       const String & name_func) {
+  if (!mxIsNumeric(pm))
+    myMexErrMsg(name_func, name_func+": the progress bar id argument must be numeric");
+  Size id = static_cast<Size>(*mxGetPr(pm));
+  if ((id >= progress.size()) || (progress[id] == NULL)) {
+    myMexErrMsg(name_func, name_func+": the progress bar with id "+print(id)+" does not exist");
+  }
+  return id;
+}
+
 template<>
 std::map<String, MultiArray> writeDataTable<ColumnMajorOrder>(const mxArray *  data)
 {
@@ -219,20 +243,37 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 
     //conditionals assignment
     const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
-    sub_field = mxCreateCellArray(ndim_arr, dims_arr);
     Size len = monitor.GetRange().Length();
-    for (Size i=0; i < len; ++i)
-    {
-      mwSize celldims[] = { cond[i].size() };
-      mxArray * cell = mxCreateCellArray(1, celldims);
-      for (Size j=0; j<cond[i].size(); ++j)
+    if (cond.size() == len) {
+      sub_field = mxCreateCellArray(ndim_arr, dims_arr);
+      for (Size i=0; i < len; ++i)
       {
-        mxArray * value = mxCreateString(cond[i][j].c_str());
+        mwSize ndimcell = cond[i].size();
+        mwSize celldims[] = { ndimcell };
+        mxArray * cell = mxCreateCellArray(1, celldims);
+        for (Size j=0; j<cond[i].size(); ++j)
+        {
+          mxArray * value = mxCreateString(cond[i][j].c_str());
+          mxSetCell(cell, j, value);
+        }
+        mxSetCell(sub_field, i, cell);
+      }
+      mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+    }
+    else if (cond.size() == 1) {
+      mwSize ndimcell = cond[0].size();
+      mwSize celldims[] = { ndimcell };
+      mxArray * cell = mxCreateCellArray(1, celldims);
+      for (Size j=0; j<cond[0].size(); ++j)
+      {
+        mxArray * value = mxCreateString(cond[0][j].c_str());
         mxSetCell(cell, j, value);
       }
-      mxSetCell(sub_field, i, cell);
+      mxSetFieldByNumber(curr_field, 0, 4, cell);
     }
-    mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+    else {
+      myMexErrMsg("getMonitors:invalid_conditionals", "conditionals must either be of the same size as the node array or of size 1.");
+    }
 
     //name assignment
     sub_field = mxCreateString(monitor.GetName().c_str());
