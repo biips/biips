@@ -114,10 +114,23 @@ out_smc = biips_smc_samples(model, variables, n_part,...
 % *Diagnosis on the algorithm*. 
 biips_diagnosis(out_smc);
 
+
+%%
+% The sequence of filtering distributions is automatically chosen by Biips
+% based on the topology of the graphical model, and is returned in the
+% subfield 'f.conditionals'. For this particular example, the sequence of
+% filtering distributions is $\pi(x_{t}|y_{1:t})$, for $t=1,\ldots,t_{max}$.
+
+fprintf('Filtering distributions:\n')
+for i=1:length(out_smc.x.f.conditionals)
+    fprintf('%i: x[%i]|',i, i);
+    fprintf('%s,',out_smc.x.f.conditionals{i}{:});
+     fprintf('\n')
+end
+
 %%
 % *Summary statistics*
 summ = biips_summary(out_smc, 'probs', [.025, .975]);
-
 
 %%
 % *Plot Filtering estimates*
