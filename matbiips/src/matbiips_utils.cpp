@@ -196,8 +196,8 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const String & var_name = it_table->first;
     const NodeArrayMonitor & monitor = it_table->second;
 
-    const char * curr_field_names[] = { "values", "weights", "ess", "discrete", "conditionals",
-                                        "name", "lower", "upper", "type"};
+    const char * curr_field_names[] = { "values", "weights", "ess", "discrete", "iterations",
+                                        "conditionals", "name", "lower", "upper", "type"};
     mwSize curr_dims[] = { 1 };
     mxArray * curr_field = mxCreateStructArray(1, curr_dims, sizeof(curr_field_names)/sizeof(char *),
                                                curr_field_names);
@@ -241,6 +241,12 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     std::copy(discrete_val.begin(), discrete_val.end(), mxGetPr(sub_field));
     mxSetFieldByNumber(curr_field, 0, 3, sub_field);
 
+    // iterations assignement
+    const ValArray & iter_val = monitor.GetIterations().Values() + 1;
+    sub_field = mxCreateNumericArray(ndim_arr, dims_arr, mxDOUBLE_CLASS , mxREAL);
+    std::copy(iter_val.begin(), iter_val.end(), mxGetPr(sub_field));
+    mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+
     //conditionals assignment
     const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
     Size len = monitor.GetRange().Length();
@@ -258,7 +264,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
         }
         mxSetCell(sub_field, i, cell);
       }
-      mxSetFieldByNumber(curr_field, 0, 4, sub_field);
+      mxSetFieldByNumber(curr_field, 0, 5, sub_field);
     }
     else if (cond.size() == 1) {
       mwSize ndimcell = cond[0].size();
@@ -269,7 +275,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
         mxArray * value = mxCreateString(cond[0][j].c_str());
         mxSetCell(cell, j, value);
       }
-      mxSetFieldByNumber(curr_field, 0, 4, cell);
+      mxSetFieldByNumber(curr_field, 0, 5, cell);
     }
     else {
       myMexErrMsg("getMonitors:invalid_conditionals", "conditionals must either be of the same size as the node array or of size 1.");
@@ -277,23 +283,23 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 
     //name assignment
     sub_field = mxCreateString(monitor.GetName().c_str());
-    mxSetFieldByNumber(curr_field, 0, 5, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 6, sub_field);
 
     //lower assignement
     const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
     sub_field = mxCreateDoubleMatrix(1, lower_ind.size(), mxREAL);
     std::copy(lower_ind.begin(), lower_ind.end(), mxGetPr(sub_field));
-    mxSetFieldByNumber(curr_field, 0, 6, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 7, sub_field);
 
     //upper assignement
     const IndexRange::Indices & upper_ind = monitor.GetRange().Upper();
     sub_field = mxCreateDoubleMatrix(1, upper_ind.size(), mxREAL);
     std::copy(upper_ind.begin(), upper_ind.end(), mxGetPr(sub_field));
-    mxSetFieldByNumber(curr_field, 0, 7, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 8, sub_field);
 
     //type assignment
     sub_field = mxCreateString(type.c_str());
-    mxSetFieldByNumber(curr_field, 0, 8, sub_field);
+    mxSetFieldByNumber(curr_field, 0, 9, sub_field);
 
 
     delete [] dims_part;
