@@ -78,4 +78,4 @@ end
 
 %% Add function
 matbiips('add_function', name, n_param, fun_dim, fun_eval, fun_check_param, fun_is_discrete);
-fprintf('Added function ''%s''.\n', name)
+fprintf('* Added function ''%s''.\n', name)
