@@ -6,7 +6,7 @@ Matbiips:
 - [ ] ajouter champs `iterations` dans help `biips_smc_samples`
 
 exemples:
-- [ ] pousser nouveaux scripts sur git (François)
+- [x] pousser nouveaux scripts sur git (François)
 - [ ] renommer `log_post` -> `log_marg_like_pen` (et changer texte)
 - [ ] renommer BiiPS/biips -> Biips
 - [ ] utiliser commande `type` pour afficher contenu des fichiers `.bug` et fonctions `.m`

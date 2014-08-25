@@ -14,83 +14,44 @@
 %
 % $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 %
-% with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
+% where $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
 % of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
 
 %% Statistical model in BUGS language
-% One needs to describe the model in BUGS language. We create the file
-%  'hmm_1d_nonlin_funmat.bug':
+% We describe the model in BUGS language in the file |'hmm_1d_nonlin_fext.bug'|:
+type('hmm_1d_nonlin_fext.bug');
 
 %%
-%
-% 
-%     var x_true[t_max], x[t_max], y[t_max]
-% 
-%     data
-%     {
-%       x_true[1] ~ dnorm(mean_x_init, prec_x_init)
-%       y[1] ~ dnorm(x_true[1]^2/20, prec_y)
-%       for (t in 2:t_max)
-%       {
-%         x_true[t] ~ dnorm(funmat(x_true[t-1],t-1), prec_x)
-%         y[t] ~ dnorm(x_true[t]^2/20, prec_y)
-%       }
-%     }
-% 
-% 
-%     model
-%     {
-%       x[1] ~ dnorm(mean_x_init, prec_x_init)
-%       y[1] ~ dnorm(x[1]^2/20, prec_y)
-%       for (t in 2:t_max)
-%       {
-%         x[t] ~ dnorm(funmat(x[t-1],t-1), prec_x)
-%         y[t] ~ dnorm(x[t]^2/20, prec_y)
-%       }
-%     }
-%
-% Although the nonlinear function f can be defined in BUGS language, we
-% choose here to use an external user-defined function 'funmat', which will
+% Although the nonlinear function $f$ can be defined in BUGS language, we
+% choose here to use an external user-defined function |fext|, which will
 % call a Matlab function. 
 
 %% User-defined functions in Matlab
-% The BUGS model calls a function funcmat. In order to be able to use this
+% The BUGS model calls a function |fext|. In order to be able to use this
 % function, one needs to create two functions in Matlab. The first
-% function, called here 'f_eval.m' provides the evaluation of the function.
-%
-% *f_eval.m*
-%
-%     function out = f_eval(x, k)
-% 
-%     out = .5 * x + 25*x/(1+x^2) + 8*cos(1.2*k);
-%
-% The second function, f_dim.m, provides the dimensions of the output of f_eval, 
-% possibly depending on the dimensions of the inputs.
-%
-% *f_dim.m* 
-%
-%     function out_dim = f_dim(x_dim, k_dim)
-% 
-%     out_dim = [1,1];
-
-%% Installation of Matbiips
-% Unzip the Matbiips archive in some folder
-% and add the Matbiips folder to the Matlab path
-%
+% function, called here |'f_eval.m'| provides the evaluation of the function.
+type('f_eval.m')
 
 %%
-% *Add Matbiips functions in the search path*
+% The second function, |'f_dim.m'|, provides the dimensions of the output of |f_eval|, 
+% possibly depending on the dimensions of the inputs.
+type('f_dim.m')
+
+%% Installation of Matbiips
+% # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
+% # Unzip the archive in some folder
+% # Add the Matbiips folder to the Matlab search path
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% General settings
 %
 set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
+set(0, 'Defaultlinelinewidth', 2);
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
-    rand ('state', 0)
+    rand('state', 0)
 else
     rng('default')
 end
@@ -105,37 +66,37 @@ mean_x_init = 0;
 prec_x_init = 1/5;
 prec_x = 1/10;
 prec_y = 1;
-data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
-    'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
+data = struct('t_max', t_max, 'prec_x_init', prec_x_init, ...
+    'prec_x', prec_x, 'prec_y', prec_y, 'mean_x_init', mean_x_init);
 
 %%
-% *Add the user-defined function 'funmat'*
-fun_bugs = 'funmat'; fun_dim = 'f_dim';funeval = 'f_eval';fun_nb_inputs = 2;
-biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, funeval)
+% *Add the user-defined function |fext|*
+fun_bugs = 'fext'; fun_dim = 'f_dim'; fun_eval = 'f_eval'; fun_nb_inputs = 2;
+biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, fun_eval);
 
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'hmm_1d_nonlin_funmat.bug'; % BUGS model filename
+model_filename = 'hmm_1d_nonlin_fext.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %% Biips Sequential Monte Carlo
 % Let now use Biips to run a particle filter. 
 
 %%
-% *Parameters of the algorithm*. We want to monitor the variable x, and to
+% *Parameters of the algorithm*. We want to monitor the variable |x|, and to
 % get the filtering and smoothing particle approximations. The algorithm
 % will use 10000 particles, stratified resampling, with a threshold of 0.5.
 n_part = 10000; % Number of particles
 variables = {'x'}; % Variables to be monitored
-type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+mn_type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
 
 %%
 % *Run SMC*
-out_smc = biips_smc_samples(model, variables, n_part,...
-    'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
+out_smc = biips_smc_samples(model, variables, n_part, ...
+    'type', mn_type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %%
 % *Diagnosis on the algorithm*. 
@@ -151,7 +112,7 @@ x_f_mean = summary.x.f.mean;
 x_f_quant = summary.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
-    [.7 .7 1]);
+    [.7, .7, 1]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
@@ -160,7 +121,7 @@ plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
-legend('boxoff')
+legend boxoff
 box off
 
 %%
@@ -169,7 +130,7 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    [1 .7 .7]);
+    [1, .7, .7]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_s_mean, 'r', 'linewidth', 3)
@@ -178,12 +139,11 @@ plot(data.x_true, 'g', 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
-legend('boxoff')
+legend boxoff
 box off
 
 %%
 % Marginal filtering and smoothing densities
-
 kde_estimates = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
@@ -197,14 +157,13 @@ for k=1:length(time_index)
     xlim([-20, 20])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
-    title(['t=', num2str(tk)]);   
+    title(['t=', num2str(tk)]);
     box off
 end
 h = legend({'Filtering density', 'Smoothing density', 'True value'});
-set(h, 'position',[0.7, 0.25, .1, .1])
-legend('boxoff')
+set(h, 'position', [0.7, 0.25, .1, .1])
+legend boxoff
 
 %% Clear model
 % 
-
 biips_clear()

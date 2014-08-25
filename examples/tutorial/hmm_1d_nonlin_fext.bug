@@ -6,7 +6,7 @@ data
   y[1] ~ dnorm(x_true[1]^2/20, prec_y)
   for (t in 2:t_max)
   {
-    x_true[t] ~ dnorm(funmat(x_true[t-1],t-1), prec_x)
+    x_true[t] ~ dnorm(fext(x_true[t-1],t-1), prec_x)
     y[t] ~ dnorm(x_true[t]^2/20, prec_y)
   }
 }
@@ -18,7 +18,7 @@ model
   y[1] ~ dnorm(x[1]^2/20, prec_y)
   for (t in 2:t_max)
   {
-    x[t] ~ dnorm(funmat(x[t-1],t-1), prec_x)
+    x[t] ~ dnorm(fext(x[t-1],t-1), prec_x)
     y[t] ~ dnorm(x[t]^2/20, prec_y)
   }
 }
