@@ -13,7 +13,7 @@ Install Rbiips
 
 Install Matbiips
 ----------------
-* Requirements: Windows (x64), Matlab (>=R2012b), [Redistribuable Visual C++ 2012 (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
+* Requirements: Windows (x64), Matlab (>=R2011a), [Redistribuable Visual C++ 2012 (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
 
 * Extract Matbiips archive
 
@@ -40,7 +40,7 @@ install.packages('path/to/Rbiips_X.X.X.tgz')
 
 Install Matbiips
 ----------------
-* Requirements: Matlab (>=R2012b)
+* Requirements: Matlab (>=R2011a)
 
 * Extract Matbiips archive
 
@@ -88,7 +88,7 @@ env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/
 
 Install Matbiips
 ----------------
-* Requirements: Matlab (>=R2012b). Previous biips installation is not needed for Matbiips
+* Requirements: Matlab (>=R2011a). Previous biips installation is not needed for Matbiips
 
 * Extract Matbiips archive
 

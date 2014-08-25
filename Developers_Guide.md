@@ -8,7 +8,7 @@ Requirements
 * gcc (>= 4.7)
 * boost (>=1.49.0)
 * R (>= 3.0) + Rcpp package
-* Matlab (>=R2012b) or Octave (>=3.6.4)
+* Matlab (>=R2011a) or Octave (>=3.6.4)
 
 Development tools
 ----------------  

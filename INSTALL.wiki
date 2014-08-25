@@ -8,7 +8,7 @@
 <code>  install.packages('path/to/Rbiips_X.X.X.zip')</code>
 ===== Install Matbiips =====
 
-  * Requirements: Windows (x64), Matlab (>=R2012b), [[http://www.microsoft.com/en-US/download/details.aspx?id=30679|Redistribuable Visual C++ 2012 (x64)]]
+  * Requirements: Windows (x64), Matlab (>=R2011a), [[http://www.microsoft.com/en-US/download/details.aspx?id=30679|Redistribuable Visual C++ 2012 (x64)]]
   * Extract Matbiips archive
   * Before using Matbiips, you need to add the directory to the Matlab search path by typing in Matlab console:
 
@@ -26,7 +26,7 @@
 <code>install.packages('path/to/Rbiips_X.X.X.tgz')</code>
 ===== Install Matbiips =====
 
-  * Requirements: Matlab (>=R2012b)
+  * Requirements: Matlab (>=R2011a)
   * Extract Matbiips archive
   * Before using Matbiips, you need to add the directory to the search Matlab path by typing in Matlab console:
 
@@ -59,7 +59,7 @@
 <code>env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz</code>
 ===== Install Matbiips =====
 
-  * Requirements: Matlab (>=R2012b). Previous biips installation is not needed for Matbiips
+  * Requirements: Matlab (>=R2011a). Previous biips installation is not needed for Matbiips
   * Extract Matbiips archive
 
 <code>tar -xvzf matbiips_X.X.X.tar.gz</code>

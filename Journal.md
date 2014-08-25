@@ -1,4 +1,20 @@
-Adrien le 15/8/2014 :
+Adrien le 21/08/2014 :
+======================
+Matbiips:
+- [x] renommer `log_post` -> `log_marg_like_pen`
+- [ ] vérifier champs `iterations` backward smoothing
+- [ ] ajouter champs `iterations` dans help `biips_smc_samples`
+
+exemples:
+- [ ] pousser nouveaux scripts sur git (François)
+- [ ] renommer `log_post` -> `log_marg_like_pen` (et changer texte)
+- [ ] renommer BiiPS/biips -> Biips
+- [ ] utiliser commande `type` pour afficher contenu des fichiers `.bug` et fonctions `.m`
+- [ ] mettre html en ligne
+
+- [ ] mettre à jour archives matbiips
+
+Adrien le 15/08/2014 :
 =====================
 - [x] Conditionnelles retournées dans le champs `conditionals` des monitors
     sous la forme d'un cell array de me dimension que le node array.
