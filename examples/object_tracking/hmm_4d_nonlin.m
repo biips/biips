@@ -7,9 +7,8 @@
 
 %% Statistical model
 %
-%
 % Let $X_t$ be a 4-D vector containing the position and velocity of an
-% object in 2D. We obtain distance-angular measurements $Y_t$ from a radar. 
+% object in 2D. We obtain distance-angular measurements $Y_t$ from a radar.
 %
 % The model is defined as follows. For $t=1,\ldots,t_{\max}$
 %
@@ -18,7 +17,6 @@
 % $$ Y_{t} = g(X_t) + W_t,~~ W_t \sim\mathcal N(0,R)$$
 %
 % $F$ and $G$ are known matrices, $g(X_t)$ is the known nonlinear measurement function and $Q$ and $R$ are known covariance matrices.
-
 
 %% Statistical model in BUGS language
 %
@@ -35,6 +33,8 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -68,7 +68,6 @@ data = struct('t_max', t_max, 'mean_x_init', mean_x_init, 'prec_x_init', ...
     prec_x_init, 'x_pos', x_pos, 'mean_v', mean_v, 'prec_v', prec_v,...
     'prec_y', prec_y, 'F', F, 'G', G);
 
-
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
@@ -80,7 +79,7 @@ x_pos_true = data.x_true(1:2,:);
 %
 
 %%
-% *Parameters of the algorithm*. 
+% *Parameters of the algorithm*.
 n_part = 100000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 
@@ -88,23 +87,23 @@ variables = {'x'}; % Variables to be monitored
 % *Run SMC*
 out_smc = biips_smc_samples(model, {'x'}, n_part);
 
-%% 
+%%
 % *Diagnostic*
 diagnostic = biips_diagnosis(out_smc);
 
-%% 
+%%
 % *Summary statistics*
 summary = biips_summary(out_smc, 'probs', [.025, .975]);
 
-%% 
+%%
 % *Plot estimates*
 x_f_mean = summary.x.f.mean;
 x_s_mean = summary.x.s.mean;
 figure('name', 'SMC: Filtering and smoothing estimates')
-plot(x_f_mean(1, :), x_f_mean(2, :), 'linewidth', 2)
+plot(x_f_mean(1, :), x_f_mean(2, :))
 hold on
-plot(x_s_mean(1, :), x_s_mean(2, :), '-.r', 'linewidth', 2)
-plot(x_pos_true(1,:), x_pos_true(2,:), '--g', 'linewidth', 2)
+plot(x_s_mean(1, :), x_s_mean(2, :), '-.r')
+plot(x_pos_true(1,:), x_pos_true(2,:), '--g')
 plot(x_pos(1), x_pos(2), 'sk')
 legend('Filtering estimate', 'Smoothing estimate', 'True trajectory',...
     'Position of the radar', 'location', 'Northwest')
@@ -113,21 +112,19 @@ xlabel('Position X')
 ylabel('Position Y')
 box off
 
-%% 
+%%
 % *Plot particles*
-figure('name', 'SMC: Particles')
+figure('name', 'SMC: Particles (filtering)')
 plot(out_smc.x.f.values(1,:), out_smc.x.f.values(2,:), 'ro', ...
     'markersize', 3, 'markerfacecolor', 'r')
 hold on
-plot(x_pos_true(1,:), x_pos_true(2,:), '--g', 'linewidth', 2)
+plot(x_pos_true(1,:), x_pos_true(2,:), '--g')
 plot(x_pos(1), x_pos(2), 'sk')
-legend('Particles', 'True trajectory', 'Position of the radar', 'location', 'Northwest')
+legend('Particles (filtering)', 'True trajectory', 'Position of the radar', 'location', 'Northwest')
 legend boxoff
 xlabel('Position X')
 ylabel('Position Y')
 box off
-
-
 
 %%
 % *Plot Filtering estimates*
@@ -138,17 +135,15 @@ for k=1:4
     title(title_fig{k})
     hold on
     h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
-        [.7, .7, 1]);
+        light_blue);
     set(h, 'edgecolor', 'none')
-    hold on
     plot(x_f_mean(k, :), 'linewidth', 3)
-    hold on
-    plot(data.x_true(k,:), 'g', 'linewidth', 2)
+    plot(data.x_true(k,:), 'g')
     xlabel('Time')
     ylabel('Estimates')
     legend({'95 % credible interval', 'Filtering mean estimate', 'True value'},...
         'location', 'Northwest')
-    legend boxoff 
+    legend boxoff
     box off
 end
 
@@ -160,12 +155,10 @@ for k=1:4
     title(title_fig{k})
     hold on
     h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
-    [1, .7, .7]);
+        light_red);
     set(h, 'edgecolor', 'none')
-    hold on
     plot(x_s_mean(k, :), 'r', 'linewidth', 3)
-    hold on
-    plot(data.x_true(k,:), 'g', 'linewidth', 2)
+    plot(data.x_true(k,:), 'g')
     xlabel('Time')
     ylabel('Estimates')
     legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'},...
@@ -175,5 +168,5 @@ for k=1:4
 end
 
 %% Clear model
-% 
+%
 biips_clear()

@@ -1,7 +1,6 @@
-%% Matbiips example: Stochastic kinetic prey/predator model
+%% Matbiips example: Stochastic kinetic predator-prey model
 %
-%
-% Reference: A. Golightly and D. J. Wilkinson. Bayesian parameter inference 
+% Reference: A. Golightly and D. J. Wilkinson. Bayesian parameter inference
 % for stochastic biochemical network models using particle Markov chain
 % Monte Carlo. Interface Focus, vol.1, pp. 807-820, 2011.
 
@@ -9,32 +8,29 @@
 %
 % Let $\delta_t=1/m$ where $m$ is an integer, and $T$ a multiple of $m$.
 % For $t=1,\ldots,T$
-% $$ x_t|x_{t-1}\sim \mathcal N(x_{t-1}+\alpha(x_{t-1},c)\delta_t,\beta(x_{t-1},c)\delta_t)$$
-% 
-% where $$\alpha(x,c) = \left(
+% $$ x_t|x_{t-1}\sim \mathcal N(x_{t-1}+\alpha(x_{t-1},c)\delta_t,\beta(x_{t-1},c)\delta_t) $$
+%
+% where $$ \alpha(x,c) = \left(
 %                   \begin{array}{c}
-%                     c_1x_1-c_2x_1x_2  \\
+%                     c_1x_1-c_2x_1x_2 \\
 %                     c_2x_1x_2-c_3x_2 \\
 %                   \end{array}
-%                 \right)$$
-% 
-%      $$\beta(x,c) = \left(
+%                 \right) $$
+% and $$ \beta(x,c) = \left(
 %                   \begin{array}{cc}
-%                     c_1x_1+c_2x_1x_2 & -c_2x_1x_2\\
+%                     c_1x_1+c_2x_1x_2 & -c_2x_1x_2 \\
 %                     -c_2x_1x_2 & c_2x_1x_2 + c_3x_2 \\
 %                   \end{array}
-%                 \right)$$ 
-% 
-% 
-% For $t=m,2m,3m,\ldots,T$, 
-% $$y_t|x_t\sim \mathcal N(x_{1t},\sigma^2)$$
-% 
-%           
+%                 \right) $$
+%
+% For $t=m,2m,3m,\ldots,T$,
+% $$ y_t|x_t\sim \mathcal N(x_{1t},\sigma^2) $$
+%
+%
 % and for $i=1,\ldots,3$
-% 
+%
 % $$ \log(c_i)\sim Unif(-7,2) $$
-% 
-% 
+%
 % $x_{t1}$ and $x_{t2}$ respectively correspond to the number of preys and predators and $y_t$ is the approximated number of preys. The model is the approximation of the Lotka-Volterra model.
 
 %% Statistical model in BUGS language
@@ -52,6 +48,10 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
+dark_blue = [0, 0, .5];
+dark_red = [.5, 0, 0];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -84,10 +84,9 @@ data = model.data;
 %%
 % *Plot data*
 figure('name', 'Data')
-plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
+plot(dt:dt:t_max, data.x_true(1,:))
 hold on
-plot(dt:dt:t_max, data.x_true(2,:), 'r', 'linewidth', 2)
-hold on
+plot(dt:dt:t_max, data.x_true(2,:), 'r')
 plot(dt:dt:t_max, data.y, 'g*')
 xlabel('Time')
 ylabel('Number of individuals')
@@ -110,7 +109,7 @@ param_values = {linspace(-7,1,20), log(c_true(2))*ones(20,1), log(c_true(3))*one
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model, param_names, param_values, n_part); 
+out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot penalized log-marginal likelihood*
@@ -148,7 +147,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1},...
 [obj_pmmh, stats] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 [obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', 1); % Samples
- 
+
 %%
 % *Some summary statistics*
 summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
@@ -174,9 +173,9 @@ end
 % *Trace of MCMC samples for the parameter*
 for i=1:length(param_names)
     figure('name', 'PMMH: Trace samples parameter')
-    plot(getfield(out_pmmh,param_names{i}));
+    plot(getfield(out_pmmh,param_names{i}), 'linewidth', 1);
     hold on
-    plot(0, param_true(i), '*g');  
+    plot(0, param_true(i), '*g');
     xlabel('Iterations')
     ylabel('PMMH samples')
     title(leg{i})
@@ -188,59 +187,58 @@ end
 for i=1:length(param_names)
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(getfield(out_pmmh,param_names{i}), 15)
+    h = findobj(gca, 'Type', 'patch');
+    set(h, 'EdgeColor', 'w')
     hold on
-    plot(param_true(i), 0, '*g');  
+    plot(param_true(i), 0, '*g');
     xlabel(leg{i})
     ylabel('Number of samples')
     title(leg{i})
     box off
 end
 saveas(gca, 'stoch_kinetic_param', 'epsc2')
-saveas(gca, 'stoch_kinetic_param', 'png') 
+saveas(gca, 'stoch_kinetic_param', 'png')
 
 for i=1:length(param_names)
     kde_x = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'x');
     kde_f = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'f');
     figure('name', 'PMMH: KDE estimate posterior parameter')
-    plot(kde_x, kde_f); 
+    plot(kde_x, kde_f);
     hold on
-    plot(param_true(i), 0, '*g');  
+    plot(param_true(i), 0, '*g');
     xlabel(leg{i});
     ylabel('Posterior density');
     box off
 end
-   
+
 
 %%
-% *Posterior mean and quantiles for x*
+% *Posterior mean and quantiles for $x$ *
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
-n_grid = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
-    [.7, .7, 1]);
-set(n_grid, 'edgecolor', 'none')
+h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
+    light_blue);
+set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean(1, :), 'linewidth', 3)
-plot(1:t_max/dt, data.x_true(1,:), '--', 'color', [0, 0, .5], 'linewidth', 2)
-h2 = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
-    [1, .7, .7]);
-set(h2, 'edgecolor', 'none')
-
-plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
-set(n_grid, 'edgecolor', 'none')
-% plot(1:t_max/dt, data.x_true(2,:), 'g', 'linewidth', 2)
-plot(1:t_max/dt, data.x_true(2,:), '--', 'color', [.5, 0, .5], 'linewidth', 2)
+plot(1:t_max/dt, x_pmmh_mean(1, :), 'linewidth', 3)
+plot(1:t_max/dt, data.x_true(1,:), '--', 'color', dark_blue)
+h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
+    light_red);
+set(h, 'edgecolor', 'none')
+plot(1:t_max/dt, x_pmmh_mean(2, :), 'r', 'linewidth', 3)
+plot(1:t_max/dt, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval - prey', 'PMMH mean estimate - prey', 'True number of preys',...
-    '95 % credible interval - predator', 'PMMH mean estimate - predator',...
-    'True number of predators'})
 ylim([0, 1500])
+legend({'95 % credible interval (prey)', 'PMMH mean estimate (prey)', 'True number of preys',...
+    '95 % credible interval (predator)', 'PMMH mean estimate (predator)',...
+    'True number of predators'})
 legend boxoff
-saveas(gca, 'stoch_kinetic_x', 'epsc2')
-saveas(gca, 'stoch_kinetic_x', 'png') 
 box off
+saveas(gca, 'stoch_kinetic_x', 'epsc2')
+saveas(gca, 'stoch_kinetic_x', 'png')
 
 %% Clear model
-% 
+%
 biips_clear(model)

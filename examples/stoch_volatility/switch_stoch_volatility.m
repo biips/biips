@@ -9,7 +9,7 @@
 % Let $y_t$ be the response variable and $x_t$ the unobserved
 % log-volatility of $y_t$. The stochastic volatility model is defined as follows
 % for $t\leq t_{max}$
-% 
+%
 % $$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$
 %
 % $$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$
@@ -20,11 +20,11 @@
 % $$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$
 %
 % $\mathcal N(m,\sigma^2)$ denotes the normal
-% distribution of mean $m$ and variance $\sigma^2$. 
+% distribution of mean $m$ and variance $\sigma^2$.
 
 
 %% Statistical model in BUGS language
-% Content of the file |switch_stoch_volatility.bug|:
+% Content of the file |'switch_stoch_volatility.bug'|:
 type('switch_stoch_volatility.bug');
 
 
@@ -39,6 +39,8 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -55,7 +57,7 @@ end
 sigma = .4; alpha = [-2.5; -1]; phi = .5; c0 = 1; x0 = 0; t_max = 100;
 pi = [.9, .1; .1, .9];
 data = struct('t_max', t_max, 'sigma', sigma,...
-        'alpha', alpha, 'phi', phi, 'pi', pi, 'c0', c0, 'x0', x0);
+    'alpha', alpha, 'phi', phi, 'pi', pi, 'c0', c0, 'x0', x0);
 
 %%
 % *Parse and compile BUGS model, and sample data*
@@ -64,7 +66,7 @@ model = biips_model(model_filename, data, 'sample_data', true);
 data = model.data;
 
 %% Biips Sequential Monte Carlo
-% 
+%
 
 %%
 % *Run SMC*
@@ -73,7 +75,7 @@ variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part);
 
 %%
-% *Diagnosis of the algorithm*. 
+% *Diagnosis of the algorithm*.
 diag = biips_diagnosis(out_smc);
 
 %%
@@ -89,9 +91,9 @@ legend('Effective sample size (smoothing)')
 legend boxoff
 saveas(gca, 'volatility_ess', 'png')
 
-%% 
+%%
 % *Plot weighted particles*
-figure('name', 'SMC: Particles')
+figure('name', 'SMC: Particles (smoothing)')
 hold on
 for t=1:t_max
     val = unique(out_smc.x.s.values(t,:,:));
@@ -100,9 +102,9 @@ for t=1:t_max
         ind = out_smc.x.s.values(t,:,:)==val(j);
         weight(j) = sum(out_smc.x.s.weights(t,:,ind));
         plot(t, val(j), 'ro',...
-                'markersize', min(7, n_part/10* weight(j)), 'markerfacecolor', 'r')
-
-    end 
+            'markersize', min(7, n_part/10* weight(j)), 'markerfacecolor', 'r')
+        
+    end
 end
 xlabel('Time')
 ylabel('Particles (smoothing)')
@@ -118,14 +120,15 @@ x_f_mean = summary.x.f.mean;
 x_f_quant = summary.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
-    [.7 .7 1]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering mean estimate'})
-legend boxoff 
+legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
+legend boxoff
 box off
 ylim([-8, 0])
 saveas(gca, 'volatility_f', 'epsc2')
@@ -137,14 +140,15 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    [1, .7, .7]);
+    light_red);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_s_mean, 'r', 'linewidth', 3)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing mean estimate'})
-legend boxoff 
+legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
+legend boxoff
 box off
 ylim([-8, 0])
 saveas(gca, 'volatility_s', 'epsc2')
@@ -164,16 +168,17 @@ for k=1:length(time_index)
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);
+    box off
 end
 h =legend({'Filtering density', 'Smoothing density', 'True value'});
-set(h, 'position',[0.7 0.25, .1, .1])
-legend boxoff 
+set(h, 'position',[0.7, 0.25, .1, .1])
+legend boxoff
 saveas(gca, 'volatility_kde', 'epsc2')
 saveas(gca, 'volatility_kde', 'png')
 
 %% Biips Particle Independent Metropolis-Hastings
-% 
+%
 
 %%
 % *Parameters of the PIMH*
@@ -199,14 +204,15 @@ x_pimh_mean = summary_pimh.x.mean;
 x_pimh_quant = summary_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    [1, .7, .7]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pimh_mean, 'r', 'linewidth', 3)
+plot(x_pimh_mean, 'linewidth', 3)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PIMH mean estimate'})
-legend boxoff 
+legend({'95 % credible interval', 'PIMH mean estimate', 'True value'})
+legend boxoff
 box off
 saveas(gca, 'volatility_pimh_s', 'epsc2')
 saveas(gca, 'volatility_pimh_s', 'png')
@@ -218,9 +224,9 @@ figure('name', 'PIMH: Trace samples')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pimh.x(tk, :), 'r')
+    plot(out_pimh.x(tk, :), 'linewidth', 1)
     hold on
-    plot(0, data.x_true(tk), '*g');  
+    plot(0, data.x_true(tk), '*g');
     xlabel('Iterations')
     ylabel('PIMH samples')
     title(['t=', num2str(tk)]);
@@ -228,7 +234,7 @@ for k=1:length(time_index)
 end
 h = legend({'PIMH samples', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1])
-legend boxoff 
+legend boxoff
 
 %%
 % *Histograms of posteriors*
@@ -238,17 +244,17 @@ for k=1:length(time_index)
     subplot(2, 2, k)
     hist(out_pimh.x(tk, :), 20);
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
-    hold on    
+    set(h, 'EdgeColor', 'w')
+    hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);
     box off
 end
 h =legend({'PIMH samples', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1])
-legend boxoff 
+legend boxoff
 
 %%
 % *Kernel density estimates of posteriors*
@@ -257,17 +263,17 @@ figure('name', 'PIMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f, 'r'); 
+    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('posterior density');
-    title(['t=', num2str(tk)]);     
-    box off 
+    title(['t=', num2str(tk)]);
+    box off
 end
 h = legend({'Posterior density', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1])
-legend boxoff 
+legend boxoff
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
 saveas(gca, 'volatility_pimh_kde', 'png')
 
@@ -276,7 +282,7 @@ saveas(gca, 'volatility_pimh_kde', 'png')
 %
 
 %%
-% *Parameters of the algorithm*. 
+% *Parameters of the algorithm*.
 n_part = 50; % Number of particles
 param_names = {'alpha[1:2,1]'}; % Parameter for which we want to study sensitivity
 [A, B] = meshgrid(-5:.2:2, -5:.2:2);
@@ -284,7 +290,7 @@ param_values = {[A(:), B(:)]'}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
-out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part); 
+out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
@@ -302,5 +308,5 @@ saveas(gca, 'volatility_sensitivity', 'epsc2')
 saveas(gca, 'volatility_sensitivity', 'png')
 
 %% Clear model
-% 
+%
 biips_clear()

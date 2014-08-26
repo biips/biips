@@ -15,8 +15,8 @@
 %
 % $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 %
-% with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
-% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
+% where $\mathcal N\left (m, S\right )$ denotes the Gaussian distribution
+% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin.bug'|:
@@ -31,8 +31,10 @@ addpath(matbiips_path)
 
 %% General settings
 %
-set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2);
+set(0, 'defaultaxesfontsize', 14);
+set(0, 'defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -63,7 +65,7 @@ model = biips_model(model_filename, data, 'sample_data', sample_data); % Create 
 data = model.data;
 
 %% Biips Sequential Monte Carlo
-% Let now use Biips to run a particle filter. 
+% Let now use Biips to run a particle filter.
 
 %%
 % *Parameters of the algorithm*. We want to monitor the variable |x|, and to
@@ -118,12 +120,11 @@ x_f_mean = summ.x.f.mean;
 x_f_quant = summ.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
-    [.7, .7, 1]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
-hold on
-plot(data.x_true, 'g', 'linewidth', 2)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
@@ -136,12 +137,11 @@ x_s_mean = summ.x.s.mean;
 x_s_quant = summ.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    [1, .7, .7]);
+    light_red);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_s_mean, 'r', 'linewidth', 3)
-hold on
-plot(data.x_true, 'g', 'linewidth', 2)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
@@ -154,10 +154,11 @@ box off
 % x_b_quant = summ.x.b.quant;
 % figure('name', 'SMC: Backward smoothing estimates')
 % h = fill([1:t_max, t_max:-1:1], [x_b_quant{1}; flipud(x_b_quant{2})],...
-%     [.7, .7, 1]);
+%     light_red);
 % set(h, 'edgecolor', 'none')
 % hold on
-% plot(x_b_mean, 'linewidth', 3)
+% plot(x_b_mean, 'r', 'linewidth', 3)
+% plot(data.x_true, 'g')
 % xlabel('Time')
 % ylabel('Estimates')
 % legend({'95 % credible interval', 'Backward smoothing mean estimate'})
@@ -178,7 +179,7 @@ for k=1:length(time_index)
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
-    title(['t=', num2str(tk)]);  
+    title(['t=', num2str(tk)]);
     xlim([-20, 20])
     box off
 end
@@ -214,11 +215,11 @@ x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    [1, .7, .7]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pimh_mean, 'r', 'linewidth', 3)
-plot(data.x_true, 'g', 'linewidth', 2)
+plot(x_pimh_mean, 'linewidth', 3)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'PIMH mean estimate', 'True value'})
@@ -232,9 +233,9 @@ figure('name', 'PIMH: Trace samples')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(samples_pimh.x(tk, :), 'r')
+    plot(samples_pimh.x(tk, :), 'linewidth', 1)
     hold on
-    plot(0, data.x_true(tk), '*g');  
+    plot(0, data.x_true(tk), '*g');
     xlabel('Iterations')
     ylabel('PIMH samples')
     title(['t=', num2str(tk)]);
@@ -252,12 +253,12 @@ for k=1:length(time_index)
     subplot(2, 2, k)
     hist(samples_pimh.x(tk, :), -15:1:15);
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
-    hold on    
+    set(h, 'EdgeColor', 'w')
+    hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
-    title(['t=', num2str(tk)]);   
+    title(['t=', num2str(tk)]);
     xlim([-15, 15])
     box off
 end
@@ -272,12 +273,12 @@ figure('name', 'PIMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f, 'r'); 
+    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);
     xlim([-15, 15])
     box off
 end
@@ -286,5 +287,5 @@ set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 
 %% Clear model
-% 
+%
 biips_clear()

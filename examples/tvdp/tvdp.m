@@ -2,8 +2,8 @@
 % In this example, we consider the (parametric version) of the dynamic
 % Chinese restaurant process derived in the reference below.
 %
-% Reference: F. Caron, M. Davy, A. Doucet. Generalized Polya Urn for 
-% Time-Varying Dirichlet Process Mixtures. Uncertainty in Artificial Intelligence, 2007. 
+% Reference: F. Caron, M. Davy, A. Doucet. Generalized Polya Urn for
+% Time-Varying Dirichlet Process Mixtures. Uncertainty in Artificial Intelligence, 2007.
 %
 % <http://arxiv.org/ftp/arxiv/papers/1206/1206.5254.pdf>
 %
@@ -11,7 +11,7 @@
 % Statistical Toolbox
 
 %% Statistical model in BUGS language
-% Content of the file |tvdp.bug|:
+% *Content of the file |'tvdp.bug'|:*
 type('tvdp.bug');
 
 %% Installation of Matbiips
@@ -108,9 +108,9 @@ end
 
 % True density
 figure
+hold on
 for t=stepsize:stepsize:t_max
     line(t*ones(length(x0),1), x0, out_true(t, :), 'color', 'k')
-    hold on
 end
 view(-70, 52)
 xlabel('Time')
@@ -121,11 +121,11 @@ box off
 
 % Estimated density
 figure
+hold on
 for t=stepsize:stepsize:t_max
     line(t*ones(length(x0),1), x0, out(t, :), 'color', 'k')
-    hold on
 end
-view(-70,52)
+view(-70, 52)
 xlabel('Time')
 ylabel('y')
 zlabel('$\widehat F_t(y)$', 'interpreter', 'latex')
@@ -133,5 +133,5 @@ title('Estimated density')
 box off
 
 %% Clear model
-% 
+%
 biips_clear()

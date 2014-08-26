@@ -30,9 +30,9 @@ Adrien le 15/08/2014 :
     mex/mkoctfile (windows)
 - [ ] mettre à jour/corriger `matbiips_internals.tex`
 - [ ] améliorer les modules cmake : voir liens sur ce post
-  http://www.cmake.org/pipermail/cmake/2009-January/026284.html
+  <http://www.cmake.org/pipermail/cmake/2009-January/026284.html>
 - [ ] permettre compilation matbiips pour matlab et octave dans le même répertoire de build
-- [ ] ajouter cibles Contents.m
+- [ ] ajouter cibles `Contents.m`
 
 François le 13/08/2014 :
 ========================
@@ -101,7 +101,7 @@ Adrien le 11/08/2014 :
 ======================
 Voici l'url d'accès aux builds de biips :
 
-    http://goo.gl/SyeuNm
+    <http://goo.gl/SyeuNm>
 
 A partager avec Arnaud ou autres testeurs éventuels. Je vais l'envoyer aussi à Pierre.
 C'est un lien vers le répertoire biips-builds dans le répertoire Dropbox partagé.
@@ -112,10 +112,10 @@ Les fichiers sont mis à jour régulièrement.
 
 Tâches :
 --------
-- [ ] typographies biips, matbiips, rbiips
+- [x] typographies biips, matbiips, rbiips
 - [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
 - [ ] ajouter cible `publishmatbiipsexamples.m` dans cmake
-- [ ] créer paquet source
+- [x] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
 - [ ] passer à boost 1.54 (standard sous ubuntu)
 - [x] compilation sous mac osx avec clang (matlab et octave)
@@ -356,35 +356,36 @@ Salut Adrien,
 As-tu changer qq chose pour le monitoring des noeuds observes dans le SMC?
 
 J'ai un modele avec (attache)
-    tau ~ dgamma(a,b)
-    sigma <- 1/sigma^2
+
+        tau ~ dgamma(a,b)
+        sigma <- 1/sigma^2
 
 Je fais tourner un PMMH avec tau comme variable de parametre, et sigma 
 comme latente (pour recuperer directement ses valeurs depuis biips).
 Avec la precedente version du PMMH, je n'avais pas de soucis. Maintenant 
 il rale avec l'erreur suivante:
 
-    Warning: LOGIC ERROR: Observed nodes can't have sampling iteration!
+        Warning: LOGIC ERROR: Observed nodes can't have sampling iteration!
 
-    Warning: Failure running SMC forward sampler
-     > In matlab\private\pmmh_one_update at 60
-       In biips_pmmh at 116
-       In biips_pmmh_update at 59
-       In switch_stoch_volatility_param at 188
-    Warning: LOGIC ERROR: Node is not monitored, in NodeArrayMonitor::addMonitoredNode.
+        Warning: Failure running SMC forward sampler
+         > In matlab\private\pmmh_one_update at 60
+           In biips_pmmh at 116
+           In biips_pmmh_update at 59
+           In switch_stoch_volatility_param at 188
+        Warning: LOGIC ERROR: Node is not monitored, in NodeArrayMonitor::addMonitoredNode.
 
-    Error using inter_biips
-    sample_gen_tree_smooth_particle: Biips c++ exception: Failed to sample smooth particle.
+        Error using inter_biips
+        sample_gen_tree_smooth_particle: Biips c++ exception: Failed to sample smooth particle.
 
 Vois-tu d'ou vient le probleme? Est-ce un bout de code que j'ai oublie de mettre.
 
 Adrien le 1/4/2014 :
 ====================
-- [x]  revoir dimensions et affichage de la sortie de biips_get_nodes.
+- [x]  revoir dimensions et affichage de la sortie de `biips_get_nodes`.
 
 François le 25/3/2014 :
 =======================
-- [x] Il faudrait une fonction biips add_function_rnd, qui rajouterait une 
+- [x] Il faudrait une fonction biips `add_function_rnd`, qui rajouterait une 
     fonction pour simuler, que l'on ne pourrait appeler dand bugs que pour 
     des noeuds stochastiques non observés. (sinon renvoit une erreur). On ne 
     prendrait pas en compte le cas plus compliqué des noeuds observés, car 

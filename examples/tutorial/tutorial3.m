@@ -14,8 +14,8 @@
 %
 % $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 %
-% where $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution 
-% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$. 
+% where $\mathcal N\left (m, S\right )$ denotes the Gaussian distribution
+% of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin_fext.bug'|:
@@ -24,7 +24,7 @@ type('hmm_1d_nonlin_fext.bug');
 %%
 % Although the nonlinear function $f$ can be defined in BUGS language, we
 % choose here to use an external user-defined function |fext|, which will
-% call a Matlab function. 
+% call a Matlab function.
 
 %% User-defined functions in Matlab
 % The BUGS model calls a function |fext|. In order to be able to use this
@@ -33,7 +33,7 @@ type('hmm_1d_nonlin_fext.bug');
 type('f_eval.m')
 
 %%
-% The second function, |'f_dim.m'|, provides the dimensions of the output of |f_eval|, 
+% The second function, |'f_dim.m'|, provides the dimensions of the output of |f_eval|,
 % possibly depending on the dimensions of the inputs.
 type('f_dim.m')
 
@@ -48,6 +48,8 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -83,7 +85,7 @@ model = biips_model(model_filename, data, 'sample_data', sample_data); % Create 
 data = model.data;
 
 %% Biips Sequential Monte Carlo
-% Let now use Biips to run a particle filter. 
+% Let now use Biips to run a particle filter.
 
 %%
 % *Parameters of the algorithm*. We want to monitor the variable |x|, and to
@@ -99,7 +101,7 @@ out_smc = biips_smc_samples(model, variables, n_part, ...
     'type', mn_type, 'rs_type', rs_type, 'rs_thres', rs_thres);
 
 %%
-% *Diagnosis on the algorithm*. 
+% *Diagnosis on the algorithm*.
 diagnostic = biips_diagnosis(out_smc);
 
 %%
@@ -112,12 +114,11 @@ x_f_mean = summary.x.f.mean;
 x_f_quant = summary.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
-    [.7, .7, 1]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_f_mean, 'linewidth', 3)
-hold on
-plot(data.x_true, 'g', 'linewidth', 2)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
@@ -130,12 +131,11 @@ x_s_mean = summary.x.s.mean;
 x_s_quant = summary.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    [1, .7, .7]);
+    light_red);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_s_mean, 'r', 'linewidth', 3)
-hold on
-plot(data.x_true, 'g', 'linewidth', 2)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
 legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
@@ -165,5 +165,5 @@ set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 
 %% Clear model
-% 
+%
 biips_clear()

@@ -10,7 +10,7 @@
 % Let $y_t$ be the response variable and $x_t$ the unobserved
 % log-volatility of $y_t$. The stochastic volatility model is defined as follows
 % for $t\leq t_{max}$
-% 
+%
 % $$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$
 %
 % $$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$
@@ -40,13 +40,13 @@
 % $$\pi_{22} \sim Beta(0.5,0.5)$$
 %
 % $\mathcal N(m,\sigma^2)$ denotes the normal
-% distribution of mean $m$ and variance $\sigma^2$. 
+% distribution of mean $m$ and variance $\sigma^2$.
 % $\mathcal {TN}_{(a,b)}(m,\sigma^2)$ denotes the truncated normal
-% distribution of mean $m$ and variance $\sigma^2$. 
+% distribution of mean $m$ and variance $\sigma^2$.
 
 
 %% Statistical model in BUGS language
-% Content of the file |switch_stoch_volatility_param.bug|:
+% Content of the file |'switch_stoch_volatility_param.bug'|:
 type('switch_stoch_volatility_param.bug');
 
 %% Installation of Matbiips
@@ -60,6 +60,7 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -73,16 +74,16 @@ end
 sample_data = true; % Simulated data or SP500 data
 t_max = 200;
 
-if ~sample_data    
+if ~sample_data
     % Load the data
     T = readtable('SP500.csv', 'delimiter', ';');
     y = diff(log(T.Close(end:-1:1)));
     SP500_date_str = T.Date(end:-1:2);
-
+    
     ind = 1:t_max;
     y = y(ind);
     SP500_date_str = SP500_date_str(ind);
-
+    
     SP500_date_num = datenum(SP500_date_str);
     
     % Plot the SP500 data
@@ -99,7 +100,7 @@ if ~sample_data
 else
     sigma_true = .4;
     alpha_true = [-2.5; -1];
-    phi_true = .5;    
+    phi_true = .5;
     pi11 = .9;
     pi22 = .9;
     pi_true = [pi11, 1-pi11;
@@ -140,7 +141,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', l
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 [obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] =...
     biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', thin); % Samples
- 
+
 %%
 % *Some summary statistics*
 summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
@@ -170,10 +171,10 @@ title_names = {'\alpha[1]', '\alpha[2]', '\phi', '\sigma', '\pi[1,1]', '\pi[2,2]
 for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure
-    plot(out_pmmh_param, 'r')
+    plot(out_pmmh_param, 'linewidth', 1)
     if sample_data
         hold on
-        plot(0, param_true(k), '*g');  
+        plot(0, param_true(k), '*g');
     end
     xlabel('Iterations')
     ylabel('PMMH samples')
@@ -188,19 +189,19 @@ for k=1:length(param_plot)
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(out_pmmh_param, 15)
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
+    set(h, 'EdgeColor', 'w')
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g');  
+        plot(param_true(k), 0, '*g');
     end
     xlabel(title_names{k})
     ylabel('number of samples')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
-    title(title_names{k})  
-    box off  
+    title(title_names{k})
+    box off
 end
-  
+
 
 %%
 % *Posterior mean and quantiles for $x$*
@@ -208,12 +209,12 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [1, .7, .7]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'r', 'linewidth', 3)
+plot(x_pmmh_mean, 'linewidth', 3)
 if sample_data
-    plot(data.x_true, 'g', 'linewidth', 2)
+    plot(data.x_true, 'g')
     legend({'95 % credible interval', 'PMMH mean estimate', 'True value'})
 else
     legend({'95 % credible interval', 'PMMH mean estimate'})
@@ -233,10 +234,10 @@ figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :), 'r')
+    plot(out_pmmh.x(tk, :), 'linewidth', 1)
     if sample_data
         hold on
-        plot(0, data.x_true(tk), '*g');  
+        plot(0, data.x_true(tk), '*g');
     end
     xlabel('Iterations')
     ylabel('PMMH samples')
@@ -246,7 +247,7 @@ end
 if sample_data
     h = legend({'PMMH samples', 'True value'});
     set(h, 'position', [0.7, 0.25, .1, .1])
-    legend boxoff  
+    legend boxoff
 end
 
 %%
@@ -257,27 +258,28 @@ for k=1:length(time_index)
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), -10:.5:0);
     h = findobj(gca, 'Type' ,'patch');
-    set(h,'FaceColor', 'r', 'EdgeColor', 'w')
+    set(h, 'EdgeColor', 'w')
     if sample_data
-        hold on    
+        hold on
         plot(data.x_true(tk), 0, '*g');
     end
     xlim([-10, 0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
-    title(['t=', num2str(tk)]);    
+    title(['t=', num2str(tk)]);
+    box off
 end
 if sample_data
     h = legend({'Posterior samples', 'True value'});
     set(h, 'position', [0.7, 0.25, .1, .1])
-    legend boxoff   
+    legend boxoff
 end
 
 figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f, 'r'); 
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');
@@ -285,16 +287,16 @@ for k=1:length(time_index)
     xlim([-10, 0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
-    title(['t=', num2str(tk)]);   
-    box off 
+    title(['t=', num2str(tk)]);
+    box off
 end
 if sample_data
     h = legend({'Posterior density', 'True value'});
     set(h, 'position', [0.7, 0.25, .1, .1])
-    legend boxoff    
+    legend boxoff
 end
 
 
 %% Clear model
-% 
+%
 biips_clear()

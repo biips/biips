@@ -15,7 +15,7 @@
 %
 % $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 %
-% with $\mathcal N\left (m, S\right )$ stands for the Gaussian distribution
+% where $\mathcal N\left (m, S\right )$ denotes the Gaussian distribution
 % of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5
 % x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x
 % = 0.1$. The precision of the observation noise
@@ -39,6 +39,7 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
+light_blue = [.7, .7, 1];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -89,11 +90,13 @@ figure('name', 'Log-marginal likelihood');
 plot(param_values{1}, out.log_marg_like, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Log-marginal likelihood')
+box off
 
 figure('name', 'Penalized log-marginal likelihood');
 plot(param_values{1}, out.log_marg_like_pen, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
+box off
 
 
 %% Biips Particle Marginal Metropolis-Hastings
@@ -144,7 +147,7 @@ fprintf('95%% credibilist interval for log_prec_y: [%.1f, %.1f]\n',...
 % *Trace of MCMC samples for the parameter*
 mcmc_samples = getfield(out_pmmh, var_name);
 figure('name', 'PMMH: Trace samples parameter')
-plot(mcmc_samples, 'r')
+plot(mcmc_samples, 'linewidth', 1)
 hold on
 plot(0, data.log_prec_y_true, '*g');
 xlabel('Iterations')
@@ -158,7 +161,7 @@ legend boxoff
 figure('name', 'PMMH: Histogram posterior parameter')
 hist(mcmc_samples, 15)
 h = findobj(gca, 'Type', 'patch');
-set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
+set(h, 'EdgeColor', 'w')
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y')
@@ -168,7 +171,7 @@ box off
 
 kde_var = getfield(kde_estimates_pmmh, var_name);
 figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_var.x, kde_var.f, 'r');
+plot(kde_var.x, kde_var.f);
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
@@ -182,13 +185,14 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [1, .7, .7]);
+    light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'r', 'linewidth', 3)
+plot(x_pmmh_mean, 'linewidth', 3)
+plot(data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PMMH mean estimate'})
+legend({'95 % credible interval', 'PMMH mean estimate', 'True value'})
 box off
 legend boxoff
 
@@ -199,7 +203,7 @@ figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(out_pmmh.x(tk, :), 'r')
+    plot(out_pmmh.x(tk, :), 'linewidth', 1)
     hold on
     plot(0, data.x_true(tk), '*g');
     xlabel('Iterations')
@@ -219,7 +223,7 @@ for k=1:length(time_index)
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), -16:.3:-7);
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
+    set(h, 'EdgeColor', 'w')
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlim([-16, -7])
@@ -236,7 +240,7 @@ figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f, 'r');
+    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlim([-16, -7])
