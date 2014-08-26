@@ -46,86 +46,30 @@
 
 
 %% Statistical model in BUGS language
-% Content of the file `switch_stoch_volatility_param.bug':
-
-%%
-%
-%
-%         var y[t_max,1], x[t_max,1], prec_y[t_max,1],mu[t_max,1],mu_true[t_max,1],alpha[2,1],gamma[2,1],c[t_max],c_true[t_max],pi[2,2]
-% 
-%         data
-%         {  
-%           c_true[1] ~ dcat(pi_true[1,])
-%           mu_true[1,1] <- alpha_true[1,1] * (c_true[1]==1) + alpha_true[2,1]*(c_true[1]==2)
-%           x_true[1,1] ~ dnorm(mu_true[1,1], 1/sigma_true^2)
-%           prec_y_true[1,1] <- exp(-x_true[1,1]) 
-%           y[1,1] ~ dnorm(0, prec_y_true[1,1])
-%           for (t in 2:t_max)
-%           { 
-%             c_true[t] ~ dcat(ifelse(c_true[t-1]==1,pi_true[1,],pi_true[2,]))
-%             mu_true[t,1] <- alpha_true[1,1]*(c_true[t]==1) + alpha_true[2,1]*(c_true[t]==2) + phi_true*x_true[t-1,1];
-%             x_true[t,1] ~ dnorm(mu_true[t,1], 1/sigma_true^2)
-%             prec_y_true[t,1] <- exp(-x_true[t,1])  
-%             y[t,1] ~ dnorm(0, prec_y_true[t,1])
-%           }
-%         }
-% 
-%         model
-%         {
-%           gamma[1,1] ~ dnorm(0, 1/100)
-%           gamma[2,1] ~ dnorm(0, 1/100)T(0,)
-%           alpha[1,1] <- gamma[1,1]
-%           alpha[2,1] <- gamma[1,1] + gamma[2,1]
-%           phi ~ dnorm(0, 1/100)T(-1,1)
-%           tau ~ dgamma(2.001, 1)
-%           sigma <- 1/sqrt(tau)
-%           pi[1,1] ~ dbeta(.5, .5)
-%           pi[1,2] <- 1.00 - pi[1,1]
-%           pi[2,2] ~ dbeta(.5, .5)
-%           pi[2,1] <- 1.00 - pi[2,2]
-% 
-% 
-%           c[1] ~ dcat(pi[1,])
-%           mu[1,1] <- alpha[1,1] * (c[1]==1) + alpha[2,1]*(c[1]==2)
-%           x[1,1] ~ dnorm(mu[1,1], 1/sigma^2)
-%           prec_y[1,1] <- exp(-x[1,1]) 
-%           y[1,1] ~ dnorm(0, prec_y[1,1])
-%           for (t in 2:t_max)
-%           { 
-%             c[t] ~ dcat(ifelse(c[t-1]==1, pi[1,], pi[2,]))
-%             mu[t,1] <- alpha[1,1] * (c[t]==1) + alpha[2,1]*(c[t]==2) + phi*x[t-1,1]
-%             x[t,1] ~ dnorm(mu[t,1], 1/sigma^2)
-%             prec_y[t,1] <- exp(-x[t,1])  
-%             y[t,1] ~ dnorm(0, prec_y[t,1])
-%           }
-%         }
-
+% Content of the file |switch_stoch_volatility_param.bug|:
+type('switch_stoch_volatility_param.bug');
 
 %% Installation of Matbiips
-% Unzip the Matbiips archive in some folder
-% and add the Matbiips folder to the Matlab path
-%
-
-%%
-% *Add Matbiips functions in the search path*
+% # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
+% # Unzip the archive in some folder
+% # Add the Matbiips folder to the Matlab search path
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% General settings
 %
 set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
+set(0, 'Defaultlinelinewidth', 2);
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
-    rand ('state', 0)
+    rand('state', 0)
 else
     rng('default')
 end
 
 %% Load model and load or simulate data
 %
-
 sample_data = true; % Simulated data or SP500 data
 t_max = 200;
 
@@ -142,10 +86,10 @@ if ~sample_data
     SP500_date_num = datenum(SP500_date_str);
     
     % Plot the SP500 data
-    figure('name', 'log-returns')
+    figure('name', 'Log-returns')
     plot(SP500_date_num, y)
     datetick('x', 'mmmyyyy', 'keepticks')
-    ylabel('log-returns')
+    ylabel('Log-returns')
 end
 
 %%
@@ -158,25 +102,23 @@ else
     phi_true = .5;    
     pi11 = .9;
     pi22 = .9;
-    pi_true = [
-        pi11, 1-pi11;
+    pi_true = [pi11, 1-pi11;
         1-pi22, pi22];
     
     data = struct('t_max', t_max, 'sigma_true', sigma_true,...
         'alpha_true', alpha_true, 'phi_true', phi_true, 'pi_true', pi_true);
 end
 
-
 %%
 % *Compile BUGS model and sample data if simulated data*
 model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
-% to obtain posterior MCMC samples of the parameters \alpha, \beta and \sigma,
-% and of the variables x.
+% to obtain posterior MCMC samples of the parameters $\alpha$, $\beta$ and $\sigma$,
+% and of the variables $x$.
 
 %%
 % *Parameters of the PMMH*
@@ -185,14 +127,14 @@ n_iter = 40000; % nb of iterations after burn-in
 thin = 10; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'gamma[1,1]','gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x','alpha[1,1]','alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'gamma[1,1]', 'gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x', 'alpha[1,1]', 'alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
-inits = {-1, 1,.5,5,.8,.8};
+inits = {-1, 1, .5, 5, .8, .8};
 obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
-% pause
+
 %%
 % *Run PMMH*
 [obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
@@ -207,14 +149,15 @@ summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 % *Compute kernel density estimates*
 kde_estimates_pmmh = biips_density(out_pmmh);
 
-param_plot = {'alpha[1,1]','alpha[2,1]', 'phi', 'sigma','pi[1,1]','pi[2,2]'};
+param_plot = {'alpha[1,1]', 'alpha[2,1]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
+
 %%
 % *Posterior mean and credible interval for the parameters*
 for i=1:length(param_plot)
     sum_param = getfield(summary_pmmh, param_plot{i});
-    fprintf('Posterior mean of %s: %.3f\n',param_plot{i},sum_param.mean);
-    fprintf('95%% credibilist interval for %s: [%.3f,%.3f]\n',...
-        param_plot{i}, sum_param.quant{1},  sum_param.quant{2});
+    fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, sum_param.mean);
+    fprintf('95%% credibilist interval for %s: [%.3f, %.3f]\n',...
+        param_plot{i}, sum_param.quant{1}, sum_param.quant{2});
 end
 
 %%
@@ -222,7 +165,7 @@ end
 if sample_data
     param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
 end
-title_names = {'\alpha[1]','\alpha[2]', '\phi', '\sigma','\pi[1,1]','\pi[2,2]'};
+title_names = {'\alpha[1]', '\alpha[2]', '\phi', '\sigma', '\pi[1,1]', '\pi[2,2]'};
 
 for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
@@ -235,8 +178,8 @@ for k=1:length(param_plot)
     xlabel('Iterations')
     ylabel('PMMH samples')
     title(title_names{k})
+    box off
 end
-
 
 %%
 % *Histogram and kde estimate of the posterior for the parameters*
@@ -244,44 +187,47 @@ for k=1:length(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(out_pmmh_param, 15)
-    h = findobj(gca,'Type','patch');
-    set(h,'FaceColor','r','EdgeColor','w')
+    h = findobj(gca, 'Type', 'patch');
+    set(h, 'FaceColor', 'r', 'EdgeColor', 'w')
     if sample_data
         hold on
-        plot(param_true(k),0, '*g');  
+        plot(param_true(k), 0, '*g');  
     end
     xlabel(title_names{k})
     ylabel('number of samples')
-    saveas(gca, ['switch_stoch_param' num2str(k)], 'epsc2')
-    saveas(gca, ['switch_stoch_param' num2str(k)], 'png')
-    title(title_names{k})    
+    saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
+    saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
+    title(title_names{k})  
+    box off  
 end
   
 
 %%
-% *Posterior mean and quantiles for x*
+% *Posterior mean and quantiles for $x$*
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    [1 .7 .7]);
+    [1, .7, .7]);
 set(h, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean, 'r', 'linewidth', 3)
 if sample_data
     plot(data.x_true, 'g', 'linewidth', 2)
-    legend({'95 % credible interval', 'PMMH Mean Estimate', 'True value'})
+    legend({'95 % credible interval', 'PMMH mean estimate', 'True value'})
 else
-    legend({'95 % credible interval', 'PMMH Mean Estimate'})
+    legend({'95 % credible interval', 'PMMH mean estimate'})
 end
 xlabel('Time')
 ylabel('Estimates')
-saveas(gca, ['switch_stoch_param_x'], 'epsc2')
-saveas(gca, ['switch_stoch_param_x'], 'png')
+saveas(gca, 'switch_stoch_param_x', 'epsc2')
+saveas(gca, 'switch_stoch_param_x', 'png')
+box off
+legend boxoff
 
 
 %%
-% *Trace of MCMC samples for x*
+% *Trace of MCMC samples for $x$*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
@@ -295,38 +241,39 @@ for k=1:length(time_index)
     xlabel('Iterations')
     ylabel('PMMH samples')
     title(['t=', num2str(tk)]);
+    box off
 end
 if sample_data
     h = legend({'PMMH samples', 'True value'});
-    set(h, 'position',[0.7, 0.25, .1, .1])
-    legend('boxoff')  
+    set(h, 'position', [0.7, 0.25, .1, .1])
+    legend boxoff  
 end
 
 %%
-% *Histogram and kernel density estimate of posteriors of x*
-figure('name', 'PMMH: Histograms Marginal Posteriors')
+% *Histogram and kernel density estimate of posteriors of $x$*
+figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), -10:.5:0);
-    h = findobj(gca,'Type','patch');
-    set(h,'FaceColor','r','EdgeColor','w')
+    h = findobj(gca, 'Type' ,'patch');
+    set(h,'FaceColor', 'r', 'EdgeColor', 'w')
     if sample_data
         hold on    
         plot(data.x_true(tk), 0, '*g');
     end
-    xlim([-10,0])
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('number of samples');
+    xlim([-10, 0])
+    xlabel(['x_{', num2str(tk), '}']);
+    ylabel('Number of samples');
     title(['t=', num2str(tk)]);    
 end
 if sample_data
     h = legend({'Posterior samples', 'True value'});
-    set(h, 'position',[0.7, 0.25, .1, .1])
-    legend('boxoff')  
+    set(h, 'position', [0.7, 0.25, .1, .1])
+    legend boxoff   
 end
 
-figure('name', 'PMMH: KDE estimates Marginal posteriors')
+figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -335,19 +282,19 @@ for k=1:length(time_index)
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
-    xlim([-10,0])
-    xlabel(['x_{' num2str(tk) '}']);
-    ylabel('posterior density');
-    title(['t=', num2str(tk)]);    
+    xlim([-10, 0])
+    xlabel(['x_{', num2str(tk), '}']);
+    ylabel('Posterior density');
+    title(['t=', num2str(tk)]);   
+    box off 
 end
 if sample_data
     h = legend({'Posterior density', 'True value'});
-    set(h, 'position',[0.7, 0.25, .1, .1])
-    legend('boxoff')    
+    set(h, 'position', [0.7, 0.25, .1, .1])
+    legend boxoff    
 end
 
 
 %% Clear model
 % 
-
 biips_clear()

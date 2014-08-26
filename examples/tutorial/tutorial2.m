@@ -22,7 +22,7 @@
 % $\lambda_y$ is also assumed to be unknown. We will assume a uniform prior
 % for $\log(\lambda_y)$:
 %
-% $$ \log(\lambda_y) \sim Unif[-3,3] $$
+% $$ \log(\lambda_y) \sim Unif(-3,3) $$
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin.bug'|:
@@ -98,7 +98,7 @@ ylabel('Penalized log-marginal likelihood')
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
-% to obtain posterior MCMC samples of the parameter and variables |x|.
+% to obtain posterior MCMC samples of the parameter and the variables $x$.
 
 %%
 % *Parameters of the PMMH*.
@@ -137,7 +137,7 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 sum_var = getfield(summary_pmmh, var_name);
 fprintf('Posterior mean of log_prec_y: %.1f\n', sum_var.mean);
 fprintf('95%% credibilist interval for log_prec_y: [%.1f, %.1f]\n',...
-    sum_var.quant{1},  sum_var.quant{2});
+    sum_var.quant{1}, sum_var.quant{2});
 
 
 %%
@@ -177,7 +177,7 @@ box off
 
 
 %%
-% *Posterior mean and quantiles for |x|*
+% *Posterior mean and quantiles for $x$*
 x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
@@ -193,7 +193,7 @@ box off
 legend boxoff
 
 %%
-% *Trace of MCMC samples for |x|*
+% *Trace of MCMC samples for $x$*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
@@ -212,7 +212,7 @@ set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 
 %%
-% *Histogram and kernel density estimate of posteriors of |x|*
+% *Histogram and kernel density estimate of posteriors of $x$*
 figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
@@ -223,7 +223,7 @@ for k=1:length(time_index)
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlim([-16, -7])
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
     box off
@@ -240,7 +240,7 @@ for k=1:length(time_index)
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlim([-16, -7])
-    xlabel(['x_{' num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
     box off

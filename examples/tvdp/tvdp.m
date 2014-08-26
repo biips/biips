@@ -6,70 +6,29 @@
 % Time-Varying Dirichlet Process Mixtures. Uncertainty in Artificial Intelligence, 2007. 
 %
 % <http://arxiv.org/ftp/arxiv/papers/1206/1206.5254.pdf>
+%
+% Note: this example requires the |normpdf| function present in the Matlab
+% Statistical Toolbox
 
 %% Statistical model in BUGS language
-% Content of the file `tvdp.bug':
-
-%%
-%
-%
-%     var c[t_max, clust_max],mu[t_max, clust_max],mu_y[t_max], m[t_max, clust_max],m_up[t_max, clust_max], p[t_max,clust_max],y[t_max,1]
-% 
-% 
-%     model
-%     {
-%       m[1,1] <- 1
-%       c[1,1] <- 1
-%       for (i in 2:clust_max)
-%       {
-%         m[1,i] <- 0
-%         c[1,i] <- 0
-%       }
-%       for (i in 1:clust_max)
-%       {
-%           mu[1,i] ~ dnorm(mu_0, prec_0)  
-%       }
-%       y[1,1] ~ dnorm(mu[1,1], prec_y)
-%       for (t in 2:t_max)
-%       {
-%         for (i in 1:clust_max)
-%         {
-%             m_up[t-1,i] ~ dbinom(rho, m[t-1,i])
-%         }
-%         p[t,] <- (m_up[t-1,] + alpha/clust_max)/(sum(m_up[t-1,])+alpha)    
-%         c[t,] ~ dmulti(p[t,], 1)
-%         m[t,] <- m_up[t-1,] + c[t,]
-% 
-%         # Cluster evolution
-%         for (i in 1:clust_max)
-%         {
-%             mu[t,i] ~ dnorm(gamma * mu[t-1,i] + (1-gamma)*mu_0, 1/(1-gamma^2)*prec_0)
-%         }
-% 
-%         mu_y[t] <- sum(c[t,]*mu[t,])
-% 
-%         y[t,1] ~ dnorm(mu_y[t], prec_y)
-%       }
-%     }
+% Content of the file |tvdp.bug|:
+type('tvdp.bug');
 
 %% Installation of Matbiips
-% Unzip the Matbiips archive in some folder
-% and add the Matbiips folder to the Matlab path
-%
-
-%%
-% *Add Matbiips functions in the search path*
+% # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
+% # Unzip the archive in some folder
+% # Add the Matbiips folder to the Matlab search path
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% General settings
 %
 set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
+set(0, 'Defaultlinelinewidth', 2);
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
-    rand ('state', 0)
+    rand('state', 0)
 else
     rng('default')
 end
@@ -92,19 +51,19 @@ y = zeros(t_max, 1);
 y(1:300) = sqrt(1/prec_y)*randn(300, 1) + 2*(rand(300, 1)>0.4) -1;
 u = rand(300, 1);
 y(301:600) = sqrt(1/prec_y)*randn(300, 1) + 3*(u>0.25) + 3*(u>0.75)  -3;
-mov_mean = linspace(0,3,400);
+mov_mean = linspace(0, 3, 400);
 y(601:1000) = sqrt(1/prec_y)*randn(400, 1) + repmat(mov_mean', 1, 1);
 figure
 plot(y, '*g')
 xlabel('Time')
 ylabel('y_t')
-
+box off
 
 %%
 % *Compile BUGS model*
 data = {'rho', 'gamma', 't_max', 'clust_max', 'y', 'mu_0', 'prec_0', 'prec_y', 'alpha'};
 model_filename = 'tvdp.bug'; % BUGS model filename
-model = biips_model(model_filename, data); % Create biips model
+model = biips_model(model_filename, data); % Create Biips model
 data = model.data;
 
 %% Biips Sequential Monte Carlo
@@ -137,10 +96,10 @@ for t=stepsize:stepsize:t_max
             repmat(mu_i', 1, n0), 1/sqrt(prec_y)))/sum(m_i);
     end
     if t<301
-        out_true(t,:) = .5*normpdf(x0, 1, 1/sqrt(prec_y)) +  .5*normpdf(x0, -1, 1/sqrt(prec_y));
+        out_true(t,:) = .5*normpdf(x0, 1, 1/sqrt(prec_y)) + .5*normpdf(x0, -1, 1/sqrt(prec_y));
     elseif (t>300 && t<=600)
         out_true(t,:) = .25*normpdf(x0, -3, 1/sqrt(prec_y)) ...
-            +  .25*normpdf(x0, 3, 1/sqrt(prec_y)) + .5*normpdf(x0, 0, 1/sqrt(prec_y));
+            + .25*normpdf(x0, 3, 1/sqrt(prec_y)) + .5*normpdf(x0, 0, 1/sqrt(prec_y));
     else
         out_true(t,:) = normpdf(x0, mov_mean(t-600), 1/sqrt(prec_y));
     end
@@ -153,11 +112,12 @@ for t=stepsize:stepsize:t_max
     line(t*ones(length(x0),1), x0, out_true(t, :), 'color', 'k')
     hold on
 end
-view(-70,52)
+view(-70, 52)
 xlabel('Time')
 ylabel('y')
 zlabel('$F_t(y)$', 'interpreter', 'latex')
-title('True Density')
+title('True density')
+box off
 
 % Estimated density
 figure
@@ -169,9 +129,9 @@ view(-70,52)
 xlabel('Time')
 ylabel('y')
 zlabel('$\widehat F_t(y)$', 'interpreter', 'latex')
-title('Estimated Density')
+title('Estimated density')
+box off
 
 %% Clear model
 % 
-
 biips_clear()

@@ -275,7 +275,7 @@ for k=1:length(time_index)
     plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f, 'r'); 
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{', num2str(tk) '}']);
+    xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);    
     xlim([-15, 15])

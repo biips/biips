@@ -37,80 +37,25 @@
 % 
 % $x_{t1}$ and $x_{t2}$ respectively correspond to the number of preys and predators and $y_t$ is the approximated number of preys. The model is the approximation of the Lotka-Volterra model.
 
-
-
 %% Statistical model in BUGS language
 %
-%     var x_true[2,t_max/dt],x_true_temp[2,t_max/dt],x_temp[2,t_max/dt], x[2,t_max/dt], y[t_max/dt], beta[2,2,t_max/dt], beta_true[2,2,t_max/dt], logc[3],c[3],c_true[3]
-% 
-%     data
-%     {	
-%       x_true[,1] ~ dmnormvar(x_init_mean,  x_init_var)
-%       for (t in 2:t_max/dt)
-%       { 
-%         alpha_true[1,t] <- c_true[1] * x_true[1,t-1] - c_true[2]*x_true[1,t-1]*x_true[2,t-1]
-%         alpha_true[2,t] <- c_true[2]*x_true[1,t-1]*x_true[2,t-1] - c_true[3]*x_true[2,t-1]
-%         beta_true[1,1,t] <- c_true[1]*x_true[1,t-1] + c_true[2]*x_true[1,t-1]*x_true[2,t-1]
-%         beta_true[1,2,t] <- -c_true[2]*x_true[1,t-1]*x_true[2,t-1]
-%         beta_true[2,1,t] <- beta_true[1,2,t]
-%         beta_true[2,2,t] <- c_true[2]*x_true[1,t-1]*x_true[2,t-1] + c_true[3]*x_true[2,t-1]
-%         x_true_temp[,t] ~ dmnormvar(x_true[,t-1]+alpha_true[,t]*dt, (beta_true[,,t])*dt) 
-%         # To avoid extinction
-%         x_true[1,t] <- max(x_true_temp[1,t],1) 
-%         x_true[2,t] <- max(x_true_temp[2,t],1) 
-%       }
-%       for (t in 1:t_max)	
-%       {
-%         y[t/dt] ~ dnorm(x_true[1,t/dt], prec_y) 
-%       }
-%     }
-% 
-%     model
-%     {
-%       logc[1] ~ dunif(-7,2)
-%       logc[2] ~ dunif(-7,2)
-%       logc[3] ~ dunif(-7,2)
-%       c[1] <- exp(logc[1])
-%       c[2] <- exp(logc[2])
-%       c[3] <- exp(logc[3])
-%       x[,1] ~ dmnormvar(x_init_mean,  x_init_var)
-%       for (t in 2:t_max/dt)
-%       { 
-%         alpha[1,t] <- c[1]*x[1,t-1] - c[2]*x[1,t-1]*x[2,t-1]
-%         alpha[2,t] <- c[2]*x[1,t-1]*x[2,t-1] - c[3]*x[2,t-1]
-%         beta[1,1,t] <- c[1]*x[1,t-1] + c[2]*x[1,t-1]*x[2,t-1]
-%         beta[1,2,t] <- -c[2]*x[1,t-1]*x[2,t-1]
-%         beta[2,1,t] <- beta[1,2,t]
-%         beta[2,2,t] <- c[2]*x[1,t-1]*x[2,t-1] + c[3]*x[2,t-1]
-%         x_temp[,t] ~ dmnormvar(x[,t-1]+alpha[,t]*dt, beta[,,t]*dt)  
-%         # To avoid extinction 
-%         x[1,t] <- max(x_temp[1,t],1)
-%         x[2,t] <- max(x_temp[2,t],1)
-%       }
-%       for (t in 1:t_max)	
-%       {
-%         y[t/dt] ~ dnorm(x[1,t/dt], prec_y) 
-%       }
-%     }
+type('stoch_kinetic_cle.bug');
 
 %% Installation of Matbiips
-% Unzip the Matbiips archive in some folder
-% and add the Matbiips folder to the Matlab path
-%
-
-%%
-% *Add Matbiips functions in the search path*
+% # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
+% # Unzip the archive in some folder
+% # Add the Matbiips folder to the Matlab search path
 matbiips_path = '../../matbiips';
 addpath(matbiips_path)
 
 %% General settings
 %
 set(0, 'DefaultAxesFontsize', 14);
-set(0, 'Defaultlinelinewidth', 2)
+set(0, 'Defaultlinelinewidth', 2);
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
-    rand ('state', 0)
+    rand('state', 0)
 else
     rng('default')
 end
@@ -122,24 +67,23 @@ end
 % *Model parameters*
 t_max = 20;
 dt = 0.20;
-x_init_mean = [100 ;100];
+x_init_mean = [100; 100];
 x_init_var = 10*eye(2);
-c_true = [.5, 0.0025,.3];
+c_true = [.5, 0.0025, .3];
 prec_y = 1/10;
 data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true,...
     'x_init_mean', x_init_mean, 'x_init_var', x_init_var, 'prec_y', prec_y);
-
 
 %%
 % *Compile BUGS model and sample data*
 model_filename = 'stoch_kinetic_cle.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %%
 % *Plot data*
-figure('name', 'data')
+figure('name', 'Data')
 plot(dt:dt:t_max, data.x_true(1,:), 'linewidth', 2)
 hold on
 plot(dt:dt:t_max, data.x_true(2,:), 'r', 'linewidth', 2)
@@ -148,15 +92,17 @@ plot(dt:dt:t_max, data.y, 'g*')
 xlabel('Time')
 ylabel('Number of individuals')
 legend('Prey', 'Predator', 'Measurements')
+box off
+legend boxoff
 
-%% Biips : Sensitivity analysis with Sequential Monte Carlo
-
+%% Biips Sensitivity analysis with Sequential Monte Carlo
+%
 
 %%
-% *Parameters of the algorithm*. 
+% *Parameters of the algorithm*
 n_part = 100; % Number of particles
-param_names = {'logc[1]','logc[2]','logc[3]'}; % Parameter for which we want to study sensitivity
-param_values = {linspace(-7,1,20),log(c_true(2))*ones(20,1),log(c_true(3))*ones(20,1)}; % Range of values
+param_names = {'logc[1]', 'logc[2]', 'logc[3]'}; % Parameter for which we want to study sensitivity
+param_values = {linspace(-7,1,20), log(c_true(2))*ones(20,1), log(c_true(3))*ones(20,1)}; % Range of values
 
 % n_grid = 5;
 % [param_values{1:3}] = meshgrid(linspace(-7,1,n_grid), linspace(-7,1,n_grid), linspace(-7,1,n_grid));
@@ -168,33 +114,34 @@ out = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot penalized log-marginal likelihood*
-figure('name', 'penalized log-marginal likelihood');
+figure('name', 'Sensitivity: Penalized log-marginal likelihood');
 plot(param_values{1}, out.log_marg_like_pen, '.')
 xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
+box off
 
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
-% to obtain posterior MCMC samples of the parameters and variables x.
+% to obtain posterior MCMC samples of the parameters and variables $x$.
 
 %%
-% *Parameters of the PMMH*
+% *Parameters of the PMMH*.
 % param_names indicates the parameters to be sampled using a random walk
-% Metroplis-Hastings step. For all the other variables, biips will use a
+% Metroplis-Hastings step. For all the other variables, Biips will use a
 % sequential Monte Carlo as proposal.
 n_burn = 2000; % nb of burn-in/adaptation iterations
 n_iter = 20000; % nb of iterations after burn-in
 thin = 10; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
-param_names = {'logc[1]','logc[2]', 'logc[3]'}; % name of the variables updated with MCMC (others are updated with SMC)
+param_names = {'logc[1]', 'logc[2]', 'logc[3]'}; % name of the variables updated with MCMC (others are updated with SMC)
 latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1}...
-    , 'latent_names', latent_names); % creates a pmmh object
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1},...
+    'latent_names', latent_names); % creates a pmmh object
 
 %%
 % *Run PMMH*
@@ -216,14 +163,12 @@ leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 %%
 % *Posterior mean and credibilist interval for the parameter*
 for i=1:length(param_names)
-    quantile_param= getfield(getfield(summary_pmmh,param_names{i}),'quant');
+    quantile_param = getfield(getfield(summary_pmmh,param_names{i}), 'quant');
     fprintf('Posterior mean of %s: %.1f\n', leg{i},...
-        getfield(getfield(summary_pmmh,param_names{i}),'mean'));
-    fprintf('95%% credibilist interval for %s: [%.1f,%.1f]\n',leg{i},...
-        quantile_param{1},quantile_param{2});
+        getfield(getfield(summary_pmmh, param_names{i}), 'mean'));
+    fprintf('95%% credibilist interval for %s: [%.1f, %.1f]\n', leg{i},...
+        quantile_param{1}, quantile_param{2});
 end
-
-
 
 %%
 % *Trace of MCMC samples for the parameter*
@@ -235,6 +180,7 @@ for i=1:length(param_names)
     xlabel('Iterations')
     ylabel('PMMH samples')
     title(leg{i})
+    box off
 end
 
 %%
@@ -245,8 +191,9 @@ for i=1:length(param_names)
     hold on
     plot(param_true(i), 0, '*g');  
     xlabel(leg{i})
-    ylabel('number of samples')
+    ylabel('Number of samples')
     title(leg{i})
+    box off
 end
 saveas(gca, 'stoch_kinetic_param', 'epsc2')
 saveas(gca, 'stoch_kinetic_param', 'png') 
@@ -259,7 +206,8 @@ for i=1:length(param_names)
     hold on
     plot(param_true(i), 0, '*g');  
     xlabel(leg{i});
-    ylabel('posterior density');
+    ylabel('Posterior density');
+    box off
 end
    
 
@@ -269,30 +217,30 @@ x_pmmh_mean = summary_pmmh.x.mean;
 x_pmmh_quant = summary_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 n_grid = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
-    [.7 .7 1]);
+    [.7, .7, 1]);
 set(n_grid, 'edgecolor', 'none')
 hold on
 plot(x_pmmh_mean(1, :), 'linewidth', 3)
-plot(1:t_max/dt, data.x_true(1,:), '--', 'color', [0,0,.5], 'linewidth', 2)
+plot(1:t_max/dt, data.x_true(1,:), '--', 'color', [0, 0, .5], 'linewidth', 2)
 h2 = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
-    [1 .7 .7]);
+    [1, .7, .7]);
 set(h2, 'edgecolor', 'none')
 
 plot(x_pmmh_mean(2, :),'r', 'linewidth', 3)
 set(n_grid, 'edgecolor', 'none')
 % plot(1:t_max/dt, data.x_true(2,:), 'g', 'linewidth', 2)
-plot(1:t_max/dt, data.x_true(2,:), '--', 'color', [.5,0,.5], 'linewidth', 2)
+plot(1:t_max/dt, data.x_true(2,:), '--', 'color', [.5, 0, .5], 'linewidth', 2)
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval - prey', 'PMMH Mean Estimate - prey', 'True number of preys',...
-    '95 % credible interval - predator', 'PMMH Mean Estimate - predator',...
+legend({'95 % credible interval - prey', 'PMMH mean estimate - prey', 'True number of preys',...
+    '95 % credible interval - predator', 'PMMH mean estimate - predator',...
     'True number of predators'})
-ylim([0,1500])
+ylim([0, 1500])
 legend boxoff
 saveas(gca, 'stoch_kinetic_x', 'epsc2')
 saveas(gca, 'stoch_kinetic_x', 'png') 
+box off
 
 %% Clear model
 % 
-
 biips_clear(model)
