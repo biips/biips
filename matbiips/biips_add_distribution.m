@@ -82,4 +82,4 @@ end
 
 %% Add distribution sampler
 matbiips('add_distribution', name, n_param, fun_dim, fun_sample, fun_check_param, fun_is_discrete);
-fprintf('* Added distribution ''%s''.\n', name)
+fprintf('* Added distribution ''%s''\n', name)
