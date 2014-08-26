@@ -40,6 +40,7 @@ function [particles, log_marg_like] = biips_smc_samples(model, variable_names, n
 %                           * weights: array of size [dim, n_part] with weights of the particles
 %                           * ess: array of size dim with effective sample size 
 %                           * discrete: array of size dim with boolean indicating discreteness
+%                           * iterations: array of size dim with sampling iterations
 %                           * conditionals: lists of the contitioning variables (observations).
 %                               - filtering: cell array of size dim. each element is a cell of strings
 %                                 with the respective contitioning variables of the node array element.

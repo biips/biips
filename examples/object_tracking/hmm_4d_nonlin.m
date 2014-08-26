@@ -22,7 +22,7 @@
 
 %% Statistical model in BUGS language
 %
-type('hmm_4d_nonlin_tracking.m');
+type('hmm_4d_nonlin_tracking.bug');
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
