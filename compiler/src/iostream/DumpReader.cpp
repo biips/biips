@@ -392,7 +392,7 @@ namespace Biips
     for (size_t i = 0; i < stack_r_.size(); ++i)
     {
       std::cout << "  [" << i << "] ";
-      if (stack_r_[i] == BIIPS_REALNA)
+      if (isNA(stack_r_[i]))
         std::cout << "NA";
       else
         std::cout << stack_r_[i];
@@ -402,7 +402,7 @@ namespace Biips
     for (size_t i = 0; i < stack_i_.size(); ++i)
     {
       std::cout << "  [" << i << "] ";
-      if (stack_i_[i] == BIIPS_INTNA)
+      if (isNA(stack_i_[i]))
         std::cout << "NA";
       else
         std::cout << stack_i_[i];

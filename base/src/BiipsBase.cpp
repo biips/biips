@@ -79,6 +79,7 @@ extern "C" {
 //#include "distributions/DDexp.hpp"
 //#include "distributions/DGenGamma.hpp"
 #include "distributions/DMulti.hpp"
+#include "distributions/DInterval.hpp"
 
 #include "samplers/FiniteSampler.hpp"
 #include "samplers/ConjugateNormalVar.hpp"
@@ -172,6 +173,7 @@ namespace Biips
 //    distTab.Insert(DDexp::Instance(), true);
 //    distTab.Insert(DGenGamma::Instance(), true);
     distTab.Insert(DMulti::Instance(), true);
+    distTab.Insert(DInterval::Instance(), true);
 
     ForwardSampler::NodeSamplerFactories().push_front(std::make_pair(ConjugateMNormalLinearFactory::Instance(),
                                                                      true));

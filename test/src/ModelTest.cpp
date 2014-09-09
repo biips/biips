@@ -316,7 +316,7 @@ namespace Biips
 //    }
 
     Types<boost::progress_display>::Ptr p_show_progress;
-    if (verbose_ == 1 && showProgress)
+    if (verbose_ >= 1 && showProgress)
       p_show_progress
           = Types<boost::progress_display>::Ptr(new boost::progress_display(pSampler_->NIterations(),
                                                                             os_,
@@ -336,9 +336,9 @@ namespace Biips
 //    else if (verbose_ >= 2)
 //      printSamplerState(*pSampler_, os_);
 
-    Size t_max = pSampler_->NIterations();
+    Size n_iter = pSampler_->NIterations();
 
-    for (Size t = 1; t < t_max; ++t)
+    for (Size iter = 1; iter < n_iter; ++iter)
     {
       pSampler_->Iterate();
       if (verbose_ >= 1 && showProgress)
@@ -347,7 +347,7 @@ namespace Biips
 //      else if (verbose_ >= 2)
 //        printSamplerState(*pSampler_, os_);
 
-      filterAccumulate(t);
+      filterAccumulate(iter);
     }
 
     if (verbose_ >= 2)
@@ -368,9 +368,9 @@ namespace Biips
     initSmoothAccumulators(nParticles, numBins);
 
     // smoothing
-    for (Size t = 0; t < t_max; ++t)
+    for (Size iter = 0; iter < n_iter; ++iter)
     {
-      smoothAccumulate(t);
+      smoothAccumulate(iter);
     }
 
     if (verbose_ >= 2)

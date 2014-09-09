@@ -945,8 +945,12 @@ namespace Biips
     {
       // check discreteness
       for (Size i = 0; i < pObsValue->size(); ++i)
+      {
+        if (isNA((*pObsValue)[i]))
+          throw LogicError("Can not set observed value. value is missing.");
         if (!checkInteger((*pObsValue)[i]))
-          throw RuntimeError("Can not set observed value: value is not discrete.");
+          throw RuntimeError("Can not set observed value. value is not discrete:" + print((*pObsValue)[i]));
+      }
     }
     boost::put(boost::vertex_value, parentsGraph_, nodeId, pObsValue);
   }

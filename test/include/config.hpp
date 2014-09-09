@@ -39,7 +39,7 @@
 
 #include "BiipsConfig.hpp"
 
-#define BIIPS_CATCH_TEST
+//#define BIIPS_CATCH_TEST
 /* #undef USE_Qwt5_Qt4 */
 
 #endif /* BIIPS_TEST_CONFIG_HPP_ */

@@ -3,21 +3,28 @@ Windows
 
 Install Rbiips
 --------------
-* Requirements: R (>= 3.0) with Rcpp package
+* **Requirements**: R (>= 3.0) with Rcpp package
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
 
 * Install Rbiips package from R console:
 
 ```
-  install.packages('path/to/Rbiips_X.X.X.zip')
+install.packages('path/to/Rbiips_X.X.X.zip')
 ```
 
 Install Matbiips
 ----------------
-* Requirements: Windows (x64), Matlab (>=R2011a), [Redistribuable Visual C++ 2012 (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
+* **Requirements**:
+
+    - Matlab: Windows (x64), Matlab (>=R2011a), [Visual C++ Redistributable for Visual Studio (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
+    - Octave: Windows (x86 or x64), Octave (MinGW, x86, >=3.6.4)
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
 
 * Extract Matbiips archive
 
-* Before using Matbiips, you need to add the directory to the Matlab search path by typing in Matlab console:
+* Before using Matbiips, you need to add the directory to the Matlab/Octave search path by typing in Matlab/Octave console:
 
 ```
 addpath('path/to/matbiips')
@@ -30,7 +37,9 @@ Mac OS X
 
 Install Rbiips
 --------------
-* Requirements: R (>= 3.0) with Rcpp package
+* **Requirements**: R (>= 3.0) with Rcpp package
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
 
 * Install Rbiips package from R console:
 
@@ -40,15 +49,21 @@ install.packages('path/to/Rbiips_X.X.X.tgz')
 
 Install Matbiips
 ----------------
-* Requirements: Matlab (>=R2011a)
+* **Requirements**:
+
+    - Matlab (>=R2011a)
+    - Octave (>=3.6.4)
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
 
 * Extract Matbiips archive
 
-* Before using Matbiips, you need to add the directory to the search Matlab path by typing in Matlab console:
+* Before using Matbiips, you need to add the directory to the search Matlab/Octave path by typing in Matlab/Octave console:
 
 ```
 addpath('path/to/matbiips')
 ```
+
 -------------------------------------------------------------------------------
 
 Linux
@@ -56,20 +71,22 @@ Linux
 
 Install biips from binary
 -------------------------
-* Requirements: libboost-dev (>=1.49)
+* **Requirements**: Debian/Ubuntu, libboost-dev (>=1.49)
 
-* Root installation (Debian/Ubuntu) from terminal:
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) biips package
+
+* Root installation from terminal:
 
 ```
 sudo dpkg -i biips_x.x.x_Linux.deb
 ```
 
-...or double-click on the deb file in your file browser. This will install it as root in /usr/...
+...or double-click on the deb file in your file browser. This will install it as root in `/usr/` directory.
 
-* Local installation (Debian/Ubuntu) from terminal:
+* Local installation from terminal:
 
 ```
-dpkg-deb -x biips_x.x.x.deb  path/to/install
+dpkg-deb -x biips_x.x.x.deb  path/to/biips
 ```
 
 * Other Linux distributions:
@@ -78,17 +95,32 @@ dpkg-deb -x biips_x.x.x.deb  path/to/install
 
 Install Rbiips
 --------------
-* Requirements : biips, R (>= 3.0) with Rcpp package
+* **Requirements**: biips, R (>= 3.0) with Rcpp package
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
 
 * Install Rbiips package from linux terminal:
 
+If biips was installed as root in the standard paths:
+
 ```
-env BIIPS_INCLUDE=path/to/install/usr/include/biips/ BIIPS_LIB=/path/to/install/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
+R CMD INSTALL Rbiips_0.8.1.tar.gz
+```
+
+Else, if biips was installed in local paths:
+
+```
+env BIIPS_INCLUDE=path/to/biips/include/biips/ BIIPS_LIB=/path/to/biips/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
 ```
 
 Install Matbiips
 ----------------
-* Requirements: Matlab (>=R2011a). Previous biips installation is not needed for Matbiips
+* **Requirements**: No previous biips installation is needed for Matbiips
+
+    - Matlab (>=R2011a)
+    - Octave (>=3.6.4)
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
 
 * Extract Matbiips archive
 
@@ -118,13 +150,15 @@ addpath('path/to/matbiips')
 
 Install biips from sources
 --------------------------
-* Requirements:
+* **Requirements**:
     - git
     - cmake
     - gcc (>= 4.7)
     - boost (>=1.49.0)
     - R (>= 3.0) + Rcpp package
     - Matlab or Octave
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) biips sources
 
 * Extract source archive
 

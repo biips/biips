@@ -59,8 +59,8 @@ namespace Biips
                     std::map<String, MultiArray::Array> & statsValuesMap,
                     const String & title);
 
-    virtual void filterAccumulate(Size t);
-    virtual void smoothAccumulate(Size t);
+    virtual void filterAccumulate(Size iter);
+    virtual void smoothAccumulate(Size iter);
 
   public:
     typedef ModelTest BaseType;

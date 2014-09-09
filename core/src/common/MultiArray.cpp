@@ -47,7 +47,7 @@ namespace Biips
     const ValArray & v = marray.Values();
     for (Size i = 0; i < N; ++i)
     {
-      if (v[i] != BIIPS_REALNA)
+      if (!isNA(v[i]))
         return false;
     }
     return true;
@@ -59,7 +59,7 @@ namespace Biips
     const ValArray & v = marray.Values();
     for (Size i = 0; i < N; ++i)
     {
-      if (v[i] == BIIPS_REALNA)
+      if (isNA(v[i]))
         return true;
     }
     return false;

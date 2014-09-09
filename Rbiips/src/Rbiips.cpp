@@ -877,7 +877,7 @@ RcppExport SEXP get_log_prior_density(SEXP pConsole, SEXP varName, SEXP lower, S
   if(!p_console->GetLogPriorDensity(prior, name, range))
     throw RuntimeError("Failed to get prior density.");
 
-  if (prior == BIIPS_REALNA)
+  if (isNA(prior))
     prior = NA_REAL;
 
   return Rcpp::wrap(prior);

@@ -871,7 +871,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if(!ok)
         throw RuntimeError("Failed to get prior density.");
 
-      if (prior == BIIPS_REALNA)
+      if (isNA(prior))
         prior = std::numeric_limits<Scalar>::quiet_NaN();
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
       *mxGetPr(plhs[0]) = prior;

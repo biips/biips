@@ -121,8 +121,8 @@ namespace Biips
     virtual void initFilterAccumulators(Size nParticles, Size numBins) = 0;
     virtual void initSmoothAccumulators(Size nParticles, Size numBins) = 0;
 
-    virtual void filterAccumulate(Size t) = 0;
-    virtual void smoothAccumulate(Size t) = 0;
+    virtual void filterAccumulate(Size iter) = 0;
+    virtual void smoothAccumulate(Size iter) = 0;
 
     void setName(const String & name)
     {

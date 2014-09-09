@@ -134,14 +134,14 @@ namespace Biips
     return getOffset<StorageOrderType> (indices);
   }
 
-  Bool IndexRange::Contains(const IndexRange & range) const
+  Bool IndexRange::Contains(const IndexRange & range, Bool dropped) const
   {
-    if (NDim() != range.NDim())
+    if (range.NDim() > NDim() || range.NDim() < NDim(dropped))
       return false;
 //      throw LogicError(String("IndexRange::Contains. Number of dimensions mismatch: ")
 //          + print(NDim()) + " != " + print(range.NDim()) + "\nwhen checking "
 //          + print(*this) + " contains " + print(range));
-    for (Size i = 0; i < upper_.size(); ++i)
+    for (Size i = 0; i < range.NDim(); ++i)
       if (range.lower_[i] < lower_[i] || range.upper_[i] > upper_[i])
         return false;
     return true;

@@ -56,7 +56,7 @@ namespace Biips
   Bool NodeArray::IsEmpty(const IndexRange & targetRange) const
   {
     // COPY: Adapted from JAGS NodeArray::isEmpty function
-    if (!range_.Contains(targetRange))
+    if (!range_.Contains(targetRange, true))
       throw LogicError("Range error in NodeArray::IsEmpty.");
 
     for (IndexRangeIterator it(targetRange); !it.AtEnd(); it.Next())
@@ -79,7 +79,7 @@ namespace Biips
     if (graph_.GetNode(nodeId).Dim().Drop() != targetRange.Dim(true))
       throw RuntimeError(String("Cannot insert node into ") + name_
                          + print(targetRange) + ". Dimension mismatch.");
-    if (!range_.Contains(targetRange))
+    if (!range_.Contains(targetRange, true))
       throw RuntimeError(String("Cannot insert node into ") + name_
                          + print(targetRange) + ". Range out of bounds.");
     if (!IsEmpty(targetRange))
@@ -296,7 +296,7 @@ namespace Biips
     //    std::set<NodeId> set_nodes; // from JAGS 2.1
     for (Size i = 0; i < range_.Length(); ++i)
     {
-      if (x[i] != BIIPS_REALNA)
+      if (!isNA(x[i]))
       {
         if (nodeIds_[i] == NULL_NODEID)
         {

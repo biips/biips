@@ -92,7 +92,7 @@ namespace Biips
         {
           Size offset = marray_range.GetOffset(i);
           (*pval)[j] = marray.Values()[offset];
-          if ((*pval)[j] == BIIPS_REALNA)
+          if (isNA((*pval)[j]))
             return NULL_NODEID;
         }
 
@@ -103,7 +103,7 @@ namespace Biips
       {
         Size offset = marray_range.GetOffset(subset_range.Lower());
         ValArray::Ptr pval(new ValArray(1, marray.Values()[offset]));
-        if (pval->ScalarView() == BIIPS_REALNA)
+        if (isNA(pval->ScalarView()))
           return NULL_NODEID;
         else
           node_id = constantFactory_.NewNode(P_SCALAR_DIM, pval);
@@ -204,11 +204,13 @@ namespace Biips
       return defaultRange;
     }
 
-    // Check size and integrity of range expression
+    // Check size and integrity of range expression.
+    // NEW: allow to take subset of dropped dimension range (for Matlab users).
+    // e.g. if y is an array of size [10, 1], y[1] is allowed.
     Size size = range_list.size();
-    if (!defaultRange.IsNull() && size != defaultRange.NDim(false))
+    if (!defaultRange.IsNull() && (size > defaultRange.NDim(false) || size < defaultRange.NDim(true)))
       throw CompileError(pTree,
-                         String("Dimension mismatch taking subset of ") + name);
+                         String("Dimension mismatch taking subset of ") + name + print(defaultRange));
 
     for (Size i = 0; i < size; ++i)
     {
@@ -293,15 +295,17 @@ namespace Biips
       // It's a declared node
       const std::vector<ParseTree*> & range_list = var->parameters();
 
-      if (range_list.empty())
-      {
-        //Missing range implies the whole node
-        return array.Range();
-      }
-      if (range_list.size() != array.Range().NDim(false))
-        throw CompileError(var,
-                           String("Dimension mismatch in subset expression of ")
-                           + name + print(array.Range()));
+//      if (range_list.empty())
+//      {
+//        //Missing range implies the whole node
+//        return array.Range();
+//      }
+//      if (range_list.size() > array.Range().NDim(false) || range_list.size() != array.Range().NDim(true))
+//      {
+//        throw CompileError(var,
+//                           String("Dimension mismatch in subset expression of ")
+//                           + name + print(array.Range()));
+//      }
 
       IndexRange range = getRange(var, array.Range());
       if (range.IsNull())
@@ -698,14 +702,14 @@ namespace Biips
 
       IndexRange target_range = variableSubsetRange(var);
       data_length = target_range.Length();
-      p_this_data = ValArray::Ptr(new ValArray(data_length));
+      p_this_data = ValArray::Ptr(new ValArray(data_length, BIIPS_REALNA));
 
       Size i = 0;
       Size nmissing = 0;
       for (IndexRangeIterator p(target_range); !p.AtEnd(); p.Next())
       {
         Size j = data_range.GetOffset(p);
-        if (data_value[j] == BIIPS_REALNA)
+        if (isNA(data_value[j]))
         {
           ++nmissing;
         }
@@ -851,7 +855,7 @@ namespace Biips
       for (IndexRangeIterator p(target_range); !p.AtEnd(); p.Next())
       {
         Size j = data_range.GetOffset(p);
-        if (data_value[j] != BIIPS_REALNA)
+        if (!isNA(data_value[j]))
         {
           throw CompileError(var,
                              var->name() + print(target_range)
@@ -1219,14 +1223,18 @@ namespace Biips
         //Node already declared. Check consistency
         const NodeArray & array =
             model_.GetSymbolTable().GetNodeArray(it->first);
-        const Indices & upper = array.Range().Upper();
-        if (upper.size() != it->second[1].size())
+        // Check size and integrity of range expression.
+        // NEW: allow to take subset of dropped dimension range (for Matlab users).
+        // e.g. if y is an array of size [10, 1], y[1] is allowed.
+        IndexRange range_infered(it->second[0], it->second[1]);
+        Size ndim = range_infered.NDim(false);
+        if (ndim > array.Range().NDim(false) || range_infered.NDim(true) < array.Range().NDim(true) )
           throw RuntimeError(String("Dimension mismatch between data and model for node ")
                              + it->first);
 
-        for (Size j = 0; j < upper.size(); ++j)
+        for (Size j = 0; j < ndim; ++j)
         {
-          if (it->second[1][j] > upper[j])
+          if (range_infered.Upper()[j] > array.Range().Upper()[j])
             throw RuntimeError(String("Index out of range for node ")
                                + it->first);
         }

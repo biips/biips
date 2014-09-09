@@ -486,9 +486,11 @@ namespace Biips
                     ValArray::Ptr(new ValArray(arrayAcc_.Mean().Values())));
   }
 
-  void HmmMNormalLinear::filterAccumulate(Size t)
+  void HmmMNormalLinear::filterAccumulate(Size iter)
   {
-    accumulate(t, smcFilterValuesMap_, "Filtering");
+    if (iter==0)
+      accumulate(iter, smcFilterValuesMap_, "Filtering");
+    accumulate(iter+1, smcFilterValuesMap_, "Filtering");
   }
 
   void HmmMNormalLinear::initSmoothAccumulators(Size nParticles, Size numBins)
@@ -496,9 +498,11 @@ namespace Biips
     initAccumulators(nParticles, numBins, smcSmoothValuesMap_);
   }
 
-  void HmmMNormalLinear::smoothAccumulate(Size t)
+  void HmmMNormalLinear::smoothAccumulate(Size iter)
   {
-    accumulate(t, smcSmoothValuesMap_, "Smoothing");
+    if (iter==0)
+      accumulate(iter, smcSmoothValuesMap_, "Smoothing");
+    accumulate(iter+1, smcSmoothValuesMap_, "Smoothing");
   }
 
   void HmmMNormalLinear::PlotResults(const String & plotFileName) const

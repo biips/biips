@@ -180,6 +180,19 @@ namespace Biips
 	  return boost::math::isnan(Scalar(s));
   }
 
+  inline Bool isNA(Scalar r)
+  {
+    return r==BIIPS_REALNA || boost::math::isnan(r);
+  }
+  inline Bool isNA(Size r)
+  {
+    return r==BIIPS_SIZENA;
+  }
+  inline Bool isNA(Int r)
+  {
+    return r==BIIPS_INTNA;
+  }
+
   enum StatTag
   {
     SUM, MEAN, VARIANCE, MOMENT2, MOMENT3, MOMENT4, SKEWNESS, KURTOSIS
