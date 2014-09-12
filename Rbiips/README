@@ -1,4 +1,4 @@
-The Rbiips package is an interface to the Biips libraries.  In order to
+The Rbiips package is an interface to the Biips libraries. In order to
 build a binary package, or install from source, you must have a matching
 installation of the Biips librarie as well as Boost headers.
 
@@ -31,10 +31,10 @@ libraries installation. It will look in /<prefix>/<lib>, where
   For example, if this is "/usr/local/bin/biips", then prefix will
   be "/usr/local"
 
-- <lib> is derived from the value of "LIBnn", returned by 
+- <lib> is derived from the value of "LIBnn", returned by
   "R CMD config LIBnn".
 
-  This is particularly important on 64-bit unix, where R is 
+  This is particularly important on 64-bit unix, where R is
   installed by default in /usr/local/lib64 and LIBnn is "lib64"
 
 The configure script will also look for Biips headers in
@@ -46,7 +46,7 @@ to point to the correct directory.
 
 Alternatively, you can use the configure options
 
---with-biips-include=/path/to/biips/headers 
+--with-biips-include=/path/to/biips/headers
                     (default /usr/local/include/biips)
 
 --with-biips-lib=/path/to/biips/libraries
@@ -54,15 +54,3 @@ Alternatively, you can use the configure options
 
 These options are onto the Rbiips configure script with:
 "R CMD INSTALL --configure-args='--with-biips...'
-
-#Exceptionally, you may need to set the location of the Biips modules.
-#But this will only be necessary if you reset moddir when installing
-#Biips. This can be done by setting the environment variable BIIPS_MODULES
-#or by using the configure option
-#
-#--with-biips-modules=/path/to/biips/modules
-#                    (default /usr/local/[lib|lib64]/biips/modules-w.y.z)
-#                     where w.y.z is the version number of Biips
-
-
-

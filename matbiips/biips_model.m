@@ -65,40 +65,7 @@ if quiet
 end
 
 %%% Process and check data argument
-if iscell(data)
-    data = data(:);
-    
-    isch = cellfun(@ischar, data);
-    if ~all(isch)
-        error('non character elements in ''data'' cell argument.');
-    end
-    
-    ispres = cellfun(@(x) evalin('base', ['exist(''' x ''', ''var'')']), data);
-    if ~all(ispres)
-        miss = data(~ispres);
-        varnames = sprintf('%s ', miss{:});
-        error('variables not found: %s', varnames);
-    end
-    
-    data = cell2struct(cellfun(@(x) evalin('base',x), data, 'UniformOutput', false), data, 1);
-elseif isstruct(data)
-    if numel(data)>1
-        error('''data'' argument is a non-scalar structure array.')
-    end
-else
-    error('''data'' argument must either be a struct or a cell of strings.')
-end
-
-isnum = structfun(@isnumeric, data);
-if ~all(isnum)
-    v = fieldnames(data);
-    ignored = v(~isnum);
-    data = rmfield(data, ignored);
-    warning('Ignored non numeric variables in data: %s ', sprintf('%s ', ignored{:}));
-end
-
-%%% TODO: check names are legal biips variable names
-  
+data = data_preprocess(data); 
 
 %% make console and check model
 id = matbiips('make_console');
