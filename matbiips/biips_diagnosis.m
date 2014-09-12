@@ -48,13 +48,48 @@ optarg_type = {'char', 'numeric', 'logical'};
     optarg_valid, optarg_default);
 
 
-if has_fsb_fields(S) 
-    %% S contains only one variable
-    names = fieldnames(S);
-    s = getfield(S, names{1});
-    varname = deparse_varname(s.name, s.lower, s.upper);
+if ~isstruct(S)
+    error('S must be a struct')
+end
+
+if is_smc_array(S) 
+    %% S contains only one variable 
+    ess_min = min(S.ess(:));
+    valid = (ess_min > ess_thres);
+    
+    diagn.ess_min = ess_min;
+    diagn.valid = valid;
     
     if ~quiet
+        varname = deparse_varname(S.name, S.lower, S.upper);
+        disp(['* Diagnosis of variable: ' , varname]);
+    end
+    
+    if ~quiet
+        switch (S.type)
+            case 'filtering'
+                name = '  Filtering: ';
+            case 'smoothing'
+                name = '  Smoothing: ';
+            case 'backward_smoothing'
+                name = '  Backward smoothing: ';
+        end
+        if valid
+            disp([name, 'GOOD']);
+        else
+            disp([name, 'POOR'])
+            disp(['    The minimum effective sample size is too low: ', num2str(ess_min)])
+            disp('    Estimates may be poor for some variables.')
+            disp('    You should increase the number of particles.')
+        end
+    end
+elseif has_fsb_fields(S) 
+    %% S contains only one variable with f,s,b fields
+    names = fieldnames(S);
+    s = getfield(S, names{1});
+    
+    if ~quiet
+        varname = deparse_varname(s.name, s.lower, s.upper);
         disp(['* Diagnosis of variable: ' , varname]);
     end
     
@@ -62,7 +97,7 @@ if has_fsb_fields(S)
     
     for i=1:numel(names)
         fsb = names{i};
-        if ~strfind(type, fsb)
+        if isempty(strfind(type, fsb))
             continue
         end
         

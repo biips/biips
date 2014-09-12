@@ -35,6 +35,7 @@ tmax = 20; % time horizon
 sigma = 1;
 rho = .9;
 interv = repmat([1, 5]', 1, tmax); % intervals bounds
+% interv = [-exp(-(0:tmax-1)/tmax); exp(-(0:tmax-1)/tmax)]; % decreasing intervals
 
 % indicator variable s.t. y[i] = { 0 if x[i] <= interv[1]
 %                                { k if interv[k] < x[i] <= interv[k+1]
@@ -46,7 +47,6 @@ interv = repmat([1, 5]', 1, tmax); % intervals bounds
 % y(31:40) = 1; % x in ]1, 5]
 % y(41:50) = NaN; % unobserved
 
-% interv = [-exp(-(0:tmax-1)/tmax); exp(-(0:tmax-1)/tmax)]; % intervals bounds
 y = ones(tmax, 1);
 
 %% Compile model
@@ -75,8 +75,8 @@ summ = biips_summary(out_smc, 'probs', [.025,.975]);
 
 
 %%
-% Plot posterior density of x
-kde = biips_density(out_smc, 'variable_names', {'x'});
+% Plot filtering posterior density of x
+kde = biips_density(out_smc);
 
 t_all = [5, 10, 15, 20];
 figure

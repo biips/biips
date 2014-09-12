@@ -40,11 +40,18 @@ function [summ] = biips_summary(samples, varargin)
 %--------------------------------------------------------------------------
 
 order_default = 1;
-is_mcmc = ~isstruct(samples);
-is_smc = ~is_mcmc && has_fsb_fields(samples);
+is_mcmc = isnumeric(samples);
+is_smc = ~is_mcmc && is_smc_array(samples);
+is_smc_fsb = ~is_mcmc && ~is_smc && has_fsb_fields(samples);
 if is_mcmc
     mode = all(floor(samples) == samples);
 elseif is_smc
+    mode = all(samples.discrete(:));
+    % by default, do not return the mean if all the components are discrete
+    if mode
+        order_default = 0;
+    end
+elseif is_smc_fsb
     names = fieldnames(samples);
     s = getfield(samples, names{1});
     mode = all(s.discrete(:));
@@ -52,6 +59,8 @@ elseif is_smc
     if mode
         order_default = 0;
     end
+elseif ~isstruct(samples)
+    error('samples must either be a numeric array or a struct')
 end
 
 %% PROCESS AND CHECK INPUTS
@@ -72,12 +81,15 @@ if is_mcmc
     summ = wtd_stat(samples, weights, probs, order, mode);
 elseif is_smc
     %% corresponds to the output of a SMC algorithm
+    summ = wtd_stat(samples.values, samples.weights, probs, order, mode);
+elseif is_smc_fsb
+    %% corresponds to the output of a SMC algorithm with f,s,b fields
     names = fieldnames(samples);
     summ = struct();
     
     for i=1:numel(names)
         fsb = names{i};
-        if ~strfind(type, fsb)
+        if isempty(strfind(type, fsb))
             continue
         end
         s = getfield(samples, fsb);

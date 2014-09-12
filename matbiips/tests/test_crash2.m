@@ -1,4 +1,4 @@
-% test_crash2
+% [SOLVED] test_crash2
 % PB: Pb avec les dimensions de y
 
 clear

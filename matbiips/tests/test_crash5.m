@@ -1,4 +1,4 @@
-clear
+% [SOLVED] test_crash5
 close all
 
 % THIS IS OK
@@ -16,7 +16,7 @@ variables = {'x', 'x[1:2]'};
 n_part = 100;
 n_iter = 20;
 obj_pimh = biips_pimh_init(model, variables);
-obj_pimh = biips_pimh_update(obj_pimh, model, n_iter, n_part);
+obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part);
 [obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
 biips_clear(model)
 
@@ -35,6 +35,6 @@ variables = {'x', 'x[1:2,1]'};
 n_part = 100;
 n_iter = 20;
 obj_pimh = biips_pimh_init(model, variables);
-obj_pimh = biips_pimh_update(obj_pimh, model, n_iter, n_part);
+obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part);
 [obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
 biips_clear(model)

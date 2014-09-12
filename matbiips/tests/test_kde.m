@@ -1,9 +1,10 @@
 function test_kde()
-x1=4*randn(1,30)+12;
-x2=0.5*randn(1,30)-3;
-s=kde(x1+x2, ones(size(x1))/length(x1));
+X=4*randn(1,30)+12+0.5*randn(1,30)-3;
+w=ones(size(X))/length(X);
+bw=bw_select(X, w);
+s=kde(X, w, bw, 100);
 figure(1);
 plot(s.x,s.f);
-[f,x,u]=ksdensity(x1+x2);
+[f,x,u]=ksdensity(X);
 figure(2);
 plot(x,f);

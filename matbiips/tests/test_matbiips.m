@@ -68,15 +68,21 @@ switch(test)
     end
     
 
-%     %MAKES THE PROGRAMM CRASH
-%     % Test model with cell data structure
-%     data = {'t_max', ...
-%         'prec_x', 'prec_y', 'mean_x_init'};
-%     %%% Compile BUGS model and sample data
-%     model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
-%     sample_data = true; % Boolean
-%     model = biips_model(model_filename, data, 'sample_data', sample_data);
-%     data = model.data;
+    %MAKES THE PROGRAMM CRASH [SOLVED]
+    % Test model with cell data structure
+    data = {'t_max', ...
+        'prec_x', 'prec_y', 'mean_x_init'};
+    %%% Compile BUGS model and sample data
+    model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
+    sample_data = true; % Boolean
+    try(biips_model(model_filename, data, 'sample_data', sample_data))
+    catch err;
+        if ~isoctave()
+            fprintf('[\bError: %s]\b\n', err.message)
+        else
+            fprintf('[\bError: %s]\b\n', lasterr)
+        end
+    end
 
 
     % Test model with unknown file
@@ -136,7 +142,7 @@ switch(test)
     [obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
     biips_clear(model)
     
-    % Test pimh with matrices *** CREATES A BUG ***
+    % Test pimh with matrices *** CREATES A BUG *** [SOLVED]
     t_max = 10; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;
     data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
         'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);
