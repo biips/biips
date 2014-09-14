@@ -106,37 +106,33 @@ log_marg_like = matbiips('get_log_norm_const', console);
 
 cz=cell(0,1);
 if filtering % Get filtering output
-    mon1 = matbiips('get_filter_monitors', console);
-    names = fieldnames(mon1);
-    cz = struct2cell(mon1);
+    mon = matbiips('get_filter_monitors', console);
+    names = fieldnames(mon);
+    cz = struct2cell(mon);
     if (~backward)
        clear_monitors(console, 'f');
     end   
 end
 
 if smoothing % Get smoothing output
-    mon2 = matbiips('get_gen_tree_smooth_monitors', console);
-    names = fieldnames(mon2);
-    cz = horzcat(cz, struct2cell(mon2));
+    mon = matbiips('get_gen_tree_smooth_monitors', console);
+    names = fieldnames(mon);
+    cz = horzcat(cz, struct2cell(mon));
     clear_monitors(console, 's');
 end
 
 if (backward) % Get backward smoothing output
    matbiips('run_backward_smoother', console);
    clear_monitors(console, 'f'); 
-   mon3 = matbiips('get_backward_smooth_monitors', console);
-   names = fieldnames(mon3);    
+   mon = matbiips('get_backward_smooth_monitors', console);
+   names = fieldnames(mon);    
    clear_monitors(console, 'b'); 
-   cz = horzcat(cz, struct2cell(mon3));
-end
-
-for i=1:numel(type)
-    fsb{i} = type(i);
+   cz = horzcat(cz, struct2cell(mon));
 end
 
 nb_names = numel(names);
-cell_names = cell(nb_names, 1);
+particles = cell(nb_names, 1);
 for i=1:nb_names
-   cell_names{i} = cell2struct({cz{i, :}}, fsb, 2);
+   particles{i} = cell2struct({cz{i, :}}, num2cell(type), 2);
 end
-particles = cell2struct_weaknames(cell_names, names); % Allows to add fields with brackets in the structure
+particles = cell2struct_weaknames(particles, names); % Allows to add fields with brackets in the name

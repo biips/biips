@@ -13,9 +13,6 @@ varnames = matbiips('get_variable_names', id);
 v = fieldnames(model.data);
 unused = setdiff(v, varnames);
 data = rmfield(model.data, unused);
-if (numel(unused) > 0)
-    warning('Unused variables in data: %s ', sprintf('%s ', unused{:}));
-end
 
 %% compile model
 matbiips('compile_model', id, data, false, get_seed(), true);

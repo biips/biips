@@ -7,6 +7,9 @@ Legend
 -------
 - [code][doc] function
 
+- [x] = conformity ok
+- [v] = validity temporary
+
 RBiips-package.R
 -----------------
 - [x][ ] .onLoad
@@ -18,54 +21,52 @@ utils.R
 -----------------
 - [x][ ] is_legal_vname
 - [x][ ] to_biips_vname
+- [v][ ] parse_varname
+- [v][ ] parse_varnames
+- [x][ ] deparse_varname
 - [x][ ] data_preprocess
 - [x][ ] mklist
 - [x][ ] get_seed
-- [ ][ ] deparse_varname
-- [ ][ ] parse_varname
-- [ ][ ] parse_varnames
-- [ ][ ] check_type
+- [v][ ] check_type
 
 biips_model.R
 ---------------
-- [ ][ ] biips_model
+- [x][ ] biips_model
 
 biips-object.R
 ---------------
 - [x][ ] is.biips
-- [ ][ ] print.biips
-- [ ][ ] variable.names
+- [v][ ] print.biips
+- [x][ ] variable.names
 - [x][ ] nodes
-- [ ][ ] print_dot
-- [ ][ ] build_sampler
-- [ ][ ] monitor
-- [ ][ ] is_monitored
-- [ ][ ] clear_monitors
-- [ ][ ] clone_model
+- [x][ ] print_dot
+- [x][ ] build_sampler
+- [v][ ] monitor
+- [v][ ] is_monitored
+- [v][ ] clear_monitors
+- [v][ ] clone_model
 
 smc.R
 ---------------
-- [ ][ ] smc_samples
-- [ ][ ] smc_forward_algo
+- [v][ ] smc_samples
+- [v][ ] smc_forward_algo
 
 smcarray-object.R
 ---------------
 - [x][ ] is.smcarray
-- [ ][ ] print.smcarray
+- [v][ ] print.smcarray
 - [ ][ ] summary
 - [ ][ ] print.summary
-- [ ][ ] plot.summary
 - [ ][ ] mean
 - [x][ ] print.diagnosis
 - [x][ ] diagnosis
 - [ ][ ] get_index
 - [ ][ ] density
-- [ ][ ] plot.density
 
 pimh.R
 --------
 - [ ][ ] pimh_init
-- [x][ ] is.pimh
+- [ ][ ] is.pimh
 - [ ][ ] pimh_algo
 - [ ][ ] pimh_update
 - [ ][ ] pimh_samples
@@ -75,7 +76,6 @@ mcmcarray-object.R
 - [x][ ] is.mcmcarray
 - [ ][ ] summary
 - [ ][ ] print.summary
-- [ ][ ] plot.summary
 - [ ][ ] mean
 - [ ][ ] density
 - [ ][ ] plot.density

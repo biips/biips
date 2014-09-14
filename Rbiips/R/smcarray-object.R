@@ -224,66 +224,6 @@ print.summary.smcarray.list.list <- function(x, ...) {
 
 
 ##' @export
-plot.summary.smcarray <- function(x, type = "l", lty = 1:5, lwd = 2, col = 1:6, xlab = "offset",
-  ylab = "value", main, sub, args_legend = list(), ...) {
-  ltyy <- lty
-  lwdd <- lwd
-  coll <- col
-
-  legend.summary.smcarray <- function(x = "topright", y = NULL, lty = ltyy, lwd = lwdd,
-    col = coll, bty = "n", inset = c(0.01, 0.01), ...) {
-    return(legend(x = x, y = y, lty = lty, lwd = lwd, col = col, bty = bty, inset = inset,
-      ...))
-  }
-
-  stat_names <- names(x)[!(names(x) %in% c("2nd mt.", "Var.", "SD", "3rd mt.",
-    "Skew.", "4th mt.", "Kurt.", "drop_dims", "name", "type"))]
-
-  values <- c()
-  for (n in stat_names) {
-    values <- c(values, x[[n]])
-  }
-
-  mat <- matrix(values, ncol = length(stat_names))
-  n_part <- x$drop_dims[["particle"]]
-  if (missing(main))
-    main <- paste(x$name, x$type, "particle estimates")
-  if (missing(sub))
-    sub <- paste("Marginalizing over:", paste(paste(names(x$drop_dims), "(",
-      x$drop_dims, ")", sep = ""), collapse = ","))
-  matplot(mat, type = type, xlab = xlab, ylab = ylab, main = main, sub = sub, lty = lty,
-    lwd = lwd, col = col, ...)
-
-  args_legend[["legend"]] <- stat_names
-  do.call("legend.summary.smcarray", args_legend)
-  invisible()
-}
-
-
-##' @export
-plot.summary.smcarray.list <- function(x, ...) {
-  for (n in names(x)) plot(x[[n]], ...)
-  invisible()
-}
-
-
-##' @export
-plot.smcarray <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 0.75),
-  ...) {
-  plot(summary(x, fun, probs), ...)
-  invisible()
-}
-
-
-##' @export
-plot.smcarray.list <- function(x, fun = c("mean", "mode"), probs = c(0.25, 0.5, 0.75),
-  ...) {
-  for (n in names(x)) plot(x[[n]], fun, probs, ...)
-  invisible()
-}
-
-
-##' @export
 print.diagnosis.smcarray <- function(x, ...) {
   if (x$valid) {
     cat("GOOD\n")
@@ -400,8 +340,7 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
   n_part <- dim(x$values)["particle"]
 
   if (!missing(subset)) {
-    if (!is.character(subset) || length(subset) != 1)
-      stop("invalid subset argument.")
+    stopifnot(is.character(subset), length(subset) == 1)
     pn <- parse.varname(subset)
     if (pn$name != x$name)
       stop("invalid subset argument: wrong variable name.")
@@ -409,14 +348,14 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
       stop("invalid subset argument: index out of range.")
     lower <- pn$lower
     upper <- pn$upper
-    subset.dim <- upper - lower + 1
-    len <- prod(subset.dim)
+    subset_dim <- upper - lower + 1
+    len <- prod(subset_dim)
   } else {
     lower <- x$lower
     upper <- x$upper
-    drop.dim <- names(dim(x$values)) %in% c("particle")
-    subset.dim <- dim(x$values)[!drop.dim]
-    len <- prod(subset.dim)
+    drop_dim <- names(dim(x$values)) %in% c("particle")
+    subset_dim <- dim(x$values)[!drop_dim]
+    len <- prod(subset_dim)
   }
 
   for (d in 1:len) {
@@ -424,27 +363,27 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     varname <- deparse_varname(x$name, ind)
 
     if (!missing(subset)) {
-      ind.mat <- array(c(rep(ind, each = n_part), 1:n_part), dim = c(n_part,
+      ind_mat <- array(c(rep(ind, each = n_part), 1:n_part), dim = c(n_part,
         length(dim(x$values))))
-      values <- x$values[ind.mat]
-      weights <- x$weights[ind.mat]
+      values <- x$values[ind_mat]
+      weights <- x$weights[ind_mat]
       ind2 <- array(ind, dim = c(1, length(ind)))
       ess <- x$ess[ind2]
       discrete <- x$discrete[ind2]
     } else {
-      ind.vec <- seq(d, len * (n_part - 1) + d, len)
-      values <- x$values[ind.vec]
-      weights <- x$weights[ind.vec]
+      ind_vec <- seq(d, len * (n_part - 1) + d, len)
+      values <- x$values[ind_vec]
+      weights <- x$weights[ind_vec]
       ess <- x$ess[d]
       discrete <- x$discrete[d]
     }
 
-    if (length(bw) != 1)
+    if (length(bw) > 1)
       bww <- bw[[d]]
 
     if (discrete) {
-      table <- Rbiips("weighted_table", values, weights)
-      dens <- list(x = table[["Table"]]$x, y = table[["Table"]]$y)
+      tab <- Rbiips("wtd_table", values, weights)
+      dens <- list(x = as.numeric(names(tab)), y = as.numeric(tab))
     } else {
       dens <- density(values, weights = weights, bw = bww, adjust = adjust,
         ...)
@@ -452,7 +391,7 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
 
     ans[[varname]] <- list(density = dens, name = varname, type = x$type, n_part = n_part,
       ess = ess, discrete = discrete)
-    class(ans[[varname]]) <- "density.smcarray.single"
+    class(ans[[varname]]) <- "density.smcarray.univariate"
   }
 
   class(ans) <- "density.smcarray"
@@ -491,7 +430,7 @@ density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     for (n in names(dens)) ans[[n]]$s <- dens[[n]]
   }
 
-  for (n in names(ans)) class(ans[[n]]) <- "density.smcarray.single.list"
+  for (n in names(ans)) class(ans[[n]]) <- "density.smcarray.univariate.list"
 
   class(ans) <- "density.smcarray.list"
   return(ans)
@@ -513,165 +452,165 @@ density.smcarray.list.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) 
 }
 
 
-##' @export
-plot.density.smcarray.single <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value",
-  ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
-  lwdd <- lwd
-  coll <- col
-
-  legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
-    ...) {
-    return(legend(x = x, y = y, lwd = lwd, col = col, ...))
-  }
-
-  leg_flag <- TRUE
-  if (is.logical(legend.text)) {
-    stopifnot(length(legend.text) == 1)
-    leg_flag <- legend.text
-  }
-
-  if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
-    legend.text <- c()
-    for (t in names(x)) {
-      legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
-        sep = ""))
-    }
-  }
-
-
-  if (x$discrete) {
-    if (missing(ylab))
-      ylab <- "probability"
-    if (missing(main))
-      main <- paste(x$name, "discrete law histograms")
-    if (missing(sub))
-      sub <- paste("n_part=", x$n_part)
-
-    barplot(x$density$y, names.arg = x$density$x, col = col, lwd = lwd, xlab = xlab,
-      ylab = ylab, main = main.title, sub = sub, legend.text = legend.text,
-      args_legend = args_legend, ...)
-  } else {
-    if (missing(ylab))
-      ylab <- "density"
-    if (missing(main))
-      main <- paste(x$name, "kernel density estimates")
-    if (missing(sub)) {
-      bw <- x$density$bw
-      sub <- paste("n_part=", x$n_part, ", bw=", signif(bw, digits = 2), sep = "")
-    }
-
-    plot(x$density$x, x$density$y, type = type, lwd = lwd, col = col, xlab = xlab,
-      ylab = ylab, main = main, sub = sub, ...)
-
-    if (leg_flag)
-      do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
-  }
-
-  invisible()
-}
-
-
-##' @export
-plot.density.smcarray <- function(x, type = "l", lwd = lwd, col = 1:6, ...) {
-  for (n in names(x)) {
-    plot(x[[n]], type = type, lwd = lwd, col = col, ...)
-  }
-  invisible()
-}
-
-
-##' @export
-plot.density.smcarray.single.list <- function(x, type = "l", lwd = 1, col = 1:6,
-  xlab = "value", ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
-  lwdd <- lwd
-  coll <- col
-
-  legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
-    ...) {
-    return(legend(x = x, y = y, lwd = lwd, col = col, ...))
-  }
-
-  leg_flag <- TRUE
-  if (is.logical(legend.text)) {
-    stopifnot(length(legend.text) > 0)
-    leg_flag <- legend.text
-  }
-
-  if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
-    legend.text <- c()
-    for (t in names(x)) {
-      legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
-        sep = ""))
-    }
-  }
-
-  if (x[[1]]$discrete) {
-    # get table locations
-    xx <- c()
-    for (t in names(x)) xx <- c(xx, x[[t]]$density$x)
-    xx <- sort(unique(xx))
-
-    yy <- c()
-    for (t in names(x)) {
-      # resize values with missing 0 to empty locations
-      y <- rep(0, length(xx))
-      y[xx %in% x[[t]]$density$x] <- x[[t]]$density$y
-      yy <- c(yy, y)
-    }
-    yy <- matrix(yy, nrow = length(x), byrow = TRUE)
-
-    if (missing(ylab))
-      ylab <- "probability"
-    if (missing(main))
-      main <- paste(x[[1]]$name, "discrete law histograms")
-    if (missing(sub))
-      sub <- paste("n_part=", x[[1]]$n_part, sep = "")
-
-    if (length(col) > length(x))
-      col <- col[1:length(x)]
-    if (length(density) > length(x))
-      density <- density[1:length(x)]
-    if (length(angle) > length(x))
-      angle <- angle[1:length(x)]
-    barplot(yy, names.arg = xx, col = col, xlab = xlab, ylab = ylab, main = main,
-      sub = sub, legend.text = legend.text, args_legend = args_legend, beside = TRUE,
-      ...)
-  } else {
-    xx <- c()
-    yy <- c()
-
-    for (t in names(x)) {
-      xx <- c(xx, x[[t]]$density$x)
-      yy <- c(yy, x[[t]]$density$y)
-    }
-    xx <- matrix(xx, ncol = length(x))
-    yy <- matrix(yy, ncol = length(x))
-
-    if (missing(ylab))
-      ylab <- "density"
-    if (missing(main))
-      main <- paste(x[[1]]$name, "kernel density estimates")
-    if (missing(sub)) {
-      bw <- x[[1]]$density$bw
-      sub <- paste("n_part=", x[[1]]$n_part, ", bw=", signif(bw, digits = 2),
-        sep = "")
-    }
-
-    matplot(xx, yy, type = type, lwd = lwd, col = col, xlab = xlab, ylab = ylab,
-      main = main, sub = sub, ...)
-
-    if (leg_flag)
-      do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
-  }
-
-  invisible()
-}
-
-
-##' @export
-plot.density.smcarray.list <- function(x, type = "l", lwd = 1, col = 1:6, ...) {
-  for (n in names(x)) {
-    plot(x[[n]], type = type, lwd = lwd, col = col, ...)
-  }
-  invisible()
-}
+# ##' @export
+# plot.density.smcarray.univariate <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value",
+#   ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
+#   lwdd <- lwd
+#   coll <- col
+#
+#   legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
+#     ...) {
+#     return(legend(x = x, y = y, lwd = lwd, col = col, ...))
+#   }
+#
+#   leg_flag <- TRUE
+#   if (is.logical(legend.text)) {
+#     stopifnot(length(legend.text) == 1)
+#     leg_flag <- legend.text
+#   }
+#
+#   if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
+#     legend.text <- c()
+#     for (t in names(x)) {
+#       legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
+#         sep = ""))
+#     }
+#   }
+#
+#
+#   if (x$discrete) {
+#     if (missing(ylab))
+#       ylab <- "probability"
+#     if (missing(main))
+#       main <- paste(x$name, "discrete law histograms")
+#     if (missing(sub))
+#       sub <- paste("n_part=", x$n_part)
+#
+#     barplot(x$density$y, names.arg = x$density$x, col = col, lwd = lwd, xlab = xlab,
+#       ylab = ylab, main = main.title, sub = sub, legend.text = legend.text,
+#       args_legend = args_legend, ...)
+#   } else {
+#     if (missing(ylab))
+#       ylab <- "density"
+#     if (missing(main))
+#       main <- paste(x$name, "kernel density estimates")
+#     if (missing(sub)) {
+#       bw <- x$density$bw
+#       sub <- paste("n_part=", x$n_part, ", bw=", signif(bw, digits = 2), sep = "")
+#     }
+#
+#     plot(x$density$x, x$density$y, type = type, lwd = lwd, col = col, xlab = xlab,
+#       ylab = ylab, main = main, sub = sub, ...)
+#
+#     if (leg_flag)
+#       do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
+#   }
+#
+#   invisible()
+# }
+#
+#
+# ##' @export
+# plot.density.smcarray <- function(x, type = "l", lwd = lwd, col = 1:6, ...) {
+#   for (n in names(x)) {
+#     plot(x[[n]], type = type, lwd = lwd, col = col, ...)
+#   }
+#   invisible()
+# }
+#
+#
+# ##' @export
+# plot.density.smcarray.univariate.list <- function(x, type = "l", lwd = 1, col = 1:6,
+#   xlab = "value", ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
+#   lwdd <- lwd
+#   coll <- col
+#
+#   legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
+#     ...) {
+#     return(legend(x = x, y = y, lwd = lwd, col = col, ...))
+#   }
+#
+#   leg_flag <- TRUE
+#   if (is.logical(legend.text)) {
+#     stopifnot(length(legend.text) > 0)
+#     leg_flag <- legend.text
+#   }
+#
+#   if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
+#     legend.text <- c()
+#     for (t in names(x)) {
+#       legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
+#         sep = ""))
+#     }
+#   }
+#
+#   if (x[[1]]$discrete) {
+#     # get table locations
+#     xx <- c()
+#     for (t in names(x)) xx <- c(xx, x[[t]]$density$x)
+#     xx <- sort(unique(xx))
+#
+#     yy <- c()
+#     for (t in names(x)) {
+#       # resize values with missing 0 to empty locations
+#       y <- rep(0, length(xx))
+#       y[xx %in% x[[t]]$density$x] <- x[[t]]$density$y
+#       yy <- c(yy, y)
+#     }
+#     yy <- matrix(yy, nrow = length(x), byrow = TRUE)
+#
+#     if (missing(ylab))
+#       ylab <- "probability"
+#     if (missing(main))
+#       main <- paste(x[[1]]$name, "discrete law histograms")
+#     if (missing(sub))
+#       sub <- paste("n_part=", x[[1]]$n_part, sep = "")
+#
+#     if (length(col) > length(x))
+#       col <- col[1:length(x)]
+#     if (length(density) > length(x))
+#       density <- density[1:length(x)]
+#     if (length(angle) > length(x))
+#       angle <- angle[1:length(x)]
+#     barplot(yy, names.arg = xx, col = col, xlab = xlab, ylab = ylab, main = main,
+#       sub = sub, legend.text = legend.text, args_legend = args_legend, beside = TRUE,
+#       ...)
+#   } else {
+#     xx <- c()
+#     yy <- c()
+#
+#     for (t in names(x)) {
+#       xx <- c(xx, x[[t]]$density$x)
+#       yy <- c(yy, x[[t]]$density$y)
+#     }
+#     xx <- matrix(xx, ncol = length(x))
+#     yy <- matrix(yy, ncol = length(x))
+#
+#     if (missing(ylab))
+#       ylab <- "density"
+#     if (missing(main))
+#       main <- paste(x[[1]]$name, "kernel density estimates")
+#     if (missing(sub)) {
+#       bw <- x[[1]]$density$bw
+#       sub <- paste("n_part=", x[[1]]$n_part, ", bw=", signif(bw, digits = 2),
+#         sep = "")
+#     }
+#
+#     matplot(xx, yy, type = type, lwd = lwd, col = col, xlab = xlab, ylab = ylab,
+#       main = main, sub = sub, ...)
+#
+#     if (leg_flag)
+#       do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
+#   }
+#
+#   invisible()
+# }
+#
+#
+# ##' @export
+# plot.density.smcarray.list <- function(x, type = "l", lwd = 1, col = 1:6, ...) {
+#   for (n in names(x)) {
+#     plot(x[[n]], type = type, lwd = lwd, col = col, ...)
+#   }
+#   invisible()
+# }

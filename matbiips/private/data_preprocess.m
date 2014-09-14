@@ -34,9 +34,9 @@ end
 
 %% check names are legal biips variable names
 names = fieldnames(data);
-for n = names
-    if ~is_legal_vname(n)
-        stop(['data with name ', n, ' is not allowed in Biips'])
+for i = 1:numel(names)
+    if ~is_legal_vname(names{i})
+        stop(['data with name ', names{i}, ' is not allowed in Biips'])
     end
 end
 

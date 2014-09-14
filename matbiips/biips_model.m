@@ -91,7 +91,7 @@ model.id = id;
 model.file = file;
 model.model = fileread(file);
 model.data = model_data;
-model.bak.data = data;
-model.bak.sample_data = sample_data;
+% model.bak.data = data;
+% model.bak.sample_data = sample_data;
 
 model.class = 'biips';
