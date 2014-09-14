@@ -19,8 +19,8 @@ utils.R
 - [x][ ] is_legal_vname
 - [x][ ] to_biips_vname
 - [x][ ] data_preprocess
-- [ ][ ] mklist
-- [ ][ ] get_seed
+- [x][ ] mklist
+- [x][ ] get_seed
 - [ ][ ] deparse_varname
 - [ ][ ] parse_varname
 - [ ][ ] parse_varnames
@@ -35,7 +35,7 @@ biips-object.R
 - [x][ ] is.biips
 - [ ][ ] print.biips
 - [ ][ ] variable.names
-- [ ][ ] nodes
+- [x][ ] nodes
 - [ ][ ] print_dot
 - [ ][ ] build_sampler
 - [ ][ ] monitor
