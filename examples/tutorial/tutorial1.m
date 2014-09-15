@@ -92,7 +92,7 @@ biips_diagnosis(out_smc);
 % filtering distributions is $\pi(x_{t}|y_{1:t})$, for $t=1,\ldots,t_{max}$.
 
 fprintf('Filtering distributions:\n')
-for i=1:length(out_smc.x.f.conditionals)
+for i=1:numel(out_smc.x.f.conditionals)
     fprintf('%i: x[%i] | ', out_smc.x.f.iterations(i), i);
     fprintf('%s,', out_smc.x.f.conditionals{i}{1:end-1});
     fprintf('%s', out_smc.x.f.conditionals{i}{end});
@@ -103,7 +103,7 @@ end
 % while the smoothing distributions are $\pi(x_{t}|y_{1:t_{max}})$, for $t=1,\ldots,t_{max}$.
 
 fprintf('Smoothing distributions:\n')
-for i=1:length(out_smc.x.s.conditionals)
+for i=1:numel(out_smc.x.s.conditionals)
     fprintf('x[%i] | ', i);
     fprintf('%s,', out_smc.x.s.conditionals{1:end-1});
     fprintf('%s', out_smc.x.s.conditionals{end});
@@ -189,7 +189,7 @@ legend boxoff
 
 
 %% Biips Particle Independent Metropolis-Hastings
-% We now use Biips to run a Particle Independent Metropolis-Hastings
+% We now use Biips to run a Particle Independent Metropolis-Hastings.
 
 %%
 % *Parameters of the PIMH*

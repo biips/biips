@@ -9,7 +9,7 @@ end
 varname = name;
 
 if ~isempty(lower) || ~isempty(upper)
-    if ~isnumeric(lower) || isnumeric(upper) || numel(lower)~=numel(upper) || any(upper < lower)
+    if ~isnumeric(lower) || ~isnumeric(upper) || numel(lower)~=numel(upper) || any(upper < lower)
         error('invalid variable bounds')
     end
     

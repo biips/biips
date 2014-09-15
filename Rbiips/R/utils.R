@@ -7,7 +7,7 @@ get_seed <- function() {
 is_legal_vname <- function(name) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
 
-  m <- regmatches("[[:alpha:]][[:alnum:]_\\.]*", name)
+  m <- regexpr("[[:alpha:]][[:alnum:]_\\.]*", name)
   is_legal <- (nchar(name) == attr(m, "match.length")) && (name != "log_norm_const")
   return(is_legal)
 }
@@ -88,7 +88,7 @@ deparse_varname <- function(name, lower = NULL, upper = lower) {
 
   stopifnot (is.numeric(lower), is.numeric(lower), length(upper) == length(lower), upper >= lower)
 
-  varname <- paste(varname, "[", sep = "")
+  varname <- paste(name, "[", sep = "")
   sep <- ""
   for (i in seq(along = lower)) {
     varname <- paste(varname, lower[[i]], sep = sep)
@@ -124,9 +124,9 @@ data_preprocess <- function(data) {
   }
 
   names <- names(data)
-  for (n in names) {
-    if (!is_legal_vname(n))
-      stop("data with name ", n, " is not allowed in Biips")
+  for (nn in names) {
+    if (!is_legal_vname(nn))
+      stop("data with name ", nn, " is not allowed in Biips")
   }
 
   v <- names(data)
