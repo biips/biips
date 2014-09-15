@@ -22,7 +22,8 @@
 
 %% Statistical model in BUGS language
 % Content of the file |'stoch_kinetic_gill.bug'|:
-type('stoch_kinetic_gill.bug');
+model_filename = 'stoch_kinetic_gill.bug'; % BUGS model filename
+type(model_filename);
 
 %% User-defined Matlab functions
 %
@@ -77,7 +78,6 @@ data = struct('t_max', t_max, 'c', c, 'x_init', x_init, 'sigma', sigma);
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'stoch_kinetic_gill.bug'; % BUGS model filename
 sample_data = true; % Boolean
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;

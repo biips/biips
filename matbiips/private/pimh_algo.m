@@ -1,14 +1,17 @@
-function [obj, samples_st, log_marg_like_st] = pimh_algo(obj, n_iter, n_part, varargin)
+function [obj, varargout] = pimh_algo(obj, n_iter, n_part, return_samples, varargin)
 
 %
 % PIMH_ALGO performs iterations for the PIMH algorithm
 % [obj, samples_st, log_marg_like_st] = pimh_algo(obj,...
-%                           n_iter, n_part, varargin)
+%                           n_iter, n_part, true, varargin)
+% [obj, log_marg_like_st] = pimh_algo(obj,...
+%                           n_iter, n_part, false, varargin)
 %
 %   INPUT
 %   - obj:     structure. PIMH object
 %   - n_iter:       positive integer. Number of iterations
 %   - n_part:       positive integer. Number of particles used in SMC algorithms
+%   - return_samples: boolean. 
 %   Optional Inputs:
 %   - thin :        positive integer. Returns samples every thin iterations
 %                   (default=1)
@@ -83,14 +86,14 @@ log_marg_like = obj.log_marg_like;
 % Output structure with MCMC samples
 n_var = numel(variable_names);
     
-if nargout>=2
-    n_samples = ceil(n_iter/thin);
+n_samples = ceil(n_iter/thin);
+log_marg_like_st = zeros(n_samples, 1);
+
+if return_samples
     samples_st = cell(n_var, 1);
-    if nargout>=3
-        log_marg_like_st = zeros(n_samples, 1);
-    end
-    ind_sample = 0;
 end
+
+ind_sample = 0;
 
 % display message and progress bar
 if nargout>=2
@@ -128,25 +131,24 @@ for i=1:n_iter
     end
     
     % Store output
-    if nargout>=2 && mod(i-1, thin)==0
+    if mod(i-1, thin)==0
         ind_sample = ind_sample + 1;
+        log_marg_like_st(ind_sample) = log_marg_like;
         
-        if ind_sample==1
-            % pre-allocation here to be sure that sample is not empty
-            for k=1:n_var
-                samples_st{k} = zeros([size(sample{k}), n_samples]);
+        if return_samples
+            if ind_sample==1
+                % pre-allocation here to be sure that sample is not empty
+                for k=1:n_var
+                    samples_st{k} = zeros([size(sample{k}), n_samples]);
+                end
             end
-        end
-        
-        for k=1:n_var
-            len = numel(sample{k});
-            from = (ind_sample-1)*len+1;
-            to = (ind_sample-1)*len+len;
-            samples_st{k}(from:to) = sample{k};
-        end
-        
-        if nargout >=3
-            log_marg_like_st(ind_sample) = log_marg_like;
+            
+            for k=1:n_var
+                len = numel(sample{k});
+                from = (ind_sample-1)*len+1;
+                to = (ind_sample-1)*len+len;
+                samples_st{k}(from:to) = sample{k};
+            end
         end
     end
 
@@ -163,12 +165,22 @@ obj.sample = sample;
 obj.log_marg_like = log_marg_like;
 
 %% Set output structure
-if nargout>=2
-    for k=1:n_var % Remove singleton dimensions for vectors
-        samples_st{k} = squeeze(samples_st{k});
-        if size(samples_st{k}, ndims(samples_st{k}))==1 % needed because weird behavior of squeeze with [1,1,n]
-            samples_st{k} = samples_st{k}';
+nout = nargout-1;
+if return_samples
+    if nout>=1
+        for k=1:n_var % Remove singleton dimensions for vectors
+            samples_st{k} = squeeze(samples_st{k});
+            if size(samples_st{k}, ndims(samples_st{k}))==1 % needed because weird behavior of squeeze with [1,1,n]
+                samples_st{k} = samples_st{k}';
+            end
         end
+        varargout{1} = cell2struct_weaknames(samples_st, variable_names);
     end
-    samples_st = cell2struct_weaknames(samples_st, variable_names);
+    if nout>=2
+        varargout{2} = log_marg_like_st;
+    end
+else
+    if nout>=1
+        varargout{1} = log_marg_like_st;
+    end
 end

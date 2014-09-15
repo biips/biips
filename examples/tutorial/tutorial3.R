@@ -1,5 +1,5 @@
 #' ---
-#' title: "Rbiips: Tutorial 1"
+#' title: "Rbiips: Tutorial 3"
 #' author: NULL
 #' date: NULL
 #' output:
@@ -13,8 +13,7 @@
 #'     fig_caption: true
 #'     highlight: tango
 #' ---
-#' In this tutorial, we consider applying sequential Monte Carlo methods for
-#' Bayesian inference in a nonlinear non-Gaussian hidden Markov model.
+#' In this tutorial, we will see how to introduce user-defined functions in the BUGS model.
 
 #+ setup, include=FALSE
 knitr::opts_chunk$set(cache=TRUE, comment=NA, warning=FALSE, fig.show='hold', fig.align='center', pars=TRUE)
@@ -44,7 +43,20 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 model_file = 'hmm_1d_nonlin.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
+#' Although the nonlinear function `f` can be defined in BUGS language, we
+#' choose here to use an external user-defined function `fext`, which will call a R function.
+
 #+
+#' ## User-defined functions in R
+#' The BUGS model calls a function `fext`. In order to be able to use this function,
+#' one needs to create two functions in R. The first function, called here `f_eval`
+#' provides the evaluation of the function.
+f_eval <- function(x, k) { .5 * x + 25*x/(1+x^2) + 8*cos(1.2*k) }
+
+#' The second function, `f_dim`, provides the dimensions of the output of `f_eval`,
+#' possibly depending on the dimensions of the inputs.
+f_dim <- function(x_dim, k_dim) { c(1) }
+
 #' ## Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the latest version of Rbiips package depending on your system
 #'
@@ -86,6 +98,10 @@ prec_y = 1
 data = list(t_max=t_max, prec_x_init=prec_x_init,
             prec_x=prec_x, prec_y=prec_y, mean_x_init=mean_x_init)
 
+#' **Add the user-defined function `fext`**
+fun_bugs = 'fext'; fun_dim = f_dim; fun_eval = f_eval; fun_nb_inputs = 2;
+biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, fun_eval);
+
 #' **Compile BUGS model and sample data**
 sample_data = TRUE # Boolean
 model = biips_model(model_file, data, sample_data=sample_data) # Create Biips model and sample data
@@ -108,25 +124,6 @@ out_smc = smc_samples(model, variables, n_part,
 
 #' **Diagnosis of the algorithm**
 diagnostic = diagnosis(out_smc$x)
-
-#' The sequence of filtering distributions is automatically chosen by Biips
-#' based on the topology of the graphical model, and is returned in the
-#' subfield `f$conditionals`. For this particular example, the sequence of
-#' filtering distributions is $\pi(x_{t}|y_{1:t})$, for $t=1,\ldots,t_{max}$.
-#+ results='hold'
-cat('Filtering distributions:\n')
-for (i in 1:length(out_smc$x$f$conditionals)) {
-  cat(out_smc$x$f$iterations[i], ': x[', i, '] | ', sep='');
-  cat(paste(out_smc$x$f$conditionals[[i]], collapse=','), '\n');
-}
-
-#' while the smoothing distributions are $\pi(x_{t}|y_{1:t_{max}})$, for $t=1,\ldots,t_{max}$.
-#+ results='hold'
-cat('Smoothing distributions:\n')
-for (i in 1:length(out_smc$x$s$iterations)) {
-  cat('x[', i, '] | ', sep='');
-  cat(paste(out_smc$x$s$conditionals, collapse=','), '\n');
-}
 
 #' **Summary statistics**
 summ = summary(out_smc, probs=c(.025, .975))
@@ -180,89 +177,5 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('topright', leg=c('Filtering density', 'Smoothing density', 'True value'),
        col=c('blue', 'red', 'green3'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
-       bg='white', bty='n')
-par(mfrow=c(1,1))
-
-#' ## Biips Particle Independent Metropolis-Hastings
-#' We now use Biips to run a Particle Independent Metropolis-Hastings.
-
-#+
-#' **Parameters of the PIMH**
-n_burn = 500
-n_iter = 500
-thin = 1
-n_part = 100
-
-#' **Run PIMH**
-obj_pimh = pimh_init(model, variables)
-pimh_update(obj_pimh, n_burn, n_part) # burn-in iterations
-out_pimh = pimh_samples(obj_pimh, n_iter, n_part, thin=thin)
-
-#' **Some summary statistics**
-summ_pimh = summary(out_pimh, probs=c(.025, .975))
-
-#' **Posterior mean and quantiles**
-#+ fig.cap='PIMH: Posterior mean and quantiles'
-x_pimh_mean = summ_pimh$x$mean
-x_pimh_quant = summ_pimh$x$quant
-
-xx = c(1:t_max, t_max:1)
-yy = c(x_pimh_quant[[1]], rev(x_pimh_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
-     ylim=c(min(x_pimh_quant[[1]]), max(x_pimh_quant[[2]])))
-
-polygon(xx, yy, col=light_blue, border=NA)
-lines(x_pimh_mean, col='blue', lwd=3)
-lines(data$x_true, col='green3', lwd=2)
-legend('topright', leg=c('95 % credible interval', 'PIMH mean estimate', 'True value'),
-       col=c(light_blue,'blue','green3'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
-       bty='n')
-
-#' **Trace of MCMC samples**
-#+ fig.cap='PIMH: Trace samples'
-time_index = c(5, 10, 15)
-par(mfrow=c(2,2))
-for (k in 1:length(time_index)) {
-  tk = time_index[k]
-  plot(out_pimh$x[tk,], col='blue', type='l',
-       xlab='Iterations', ylab='PIMH samples',
-       main=paste('t=', tk, sep=''))
-  points(0, data$x_true[tk], col='green3', pch=8, lwd=2)
-}
-plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
-legend('topright', leg=c('PIMH samples', 'True value'),
-       col=c('blue', 'green3'), pch=c(NA,8), lty=c(1,NA),
-       bg='white', bty='n')
-
-
-#' **Histograms of posteriors**
-#+ fig.cap='PIMH: Histograms marginal posteriors'
-par(mfrow=c(2,2))
-for (k in 1:length(time_index)) {
-  tk = time_index[k]
-  hist(out_pimh$x[tk,], breaks=20, col='blue', border='white',
-       xlab=bquote(x[.(tk)]), ylab='Number of samples',
-       main=paste('t=', tk, sep=''))
-  points(data$x_true[tk], 0, col='green3', pch=8, lwd=2)
-}
-plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
-legend('topright', leg=c('Posterior density', 'True value'),
-       col=c('blue', 'green3'), pch=c(22,8), lwd=1, lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
-       bg='white', bty='n')
-
-#' **Kernel density estimates of posteriors**
-#+ fig.cap='PIMH: KDE estimates marginal posteriors'
-par(mfrow=c(2,2))
-for (k in 1:length(time_index)) {
-  tk = time_index[k]
-  kde_estimate_pimh = density(out_pimh$x[tk,])
-  plot(kde_estimate_pimh, col='blue', lwd=2,
-       xlab=bquote(x[.(tk)]), ylab='Posterior density',
-       main=paste('t=', tk, sep=''))
-  points(data$x_true[tk], 0, col='green3', pch=8, lwd=2)
-}
-plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
-legend('topright', leg=c('Posterior density', 'True value'),
-       col=c('blue', 'green3'), pch=c(NA,8), lty=c(1,NA), lwd=2,
        bg='white', bty='n')
 par(mfrow=c(1,1))

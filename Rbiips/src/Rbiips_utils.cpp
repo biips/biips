@@ -185,8 +185,8 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 
     dim_particles.attr("names") = dim_names;
 
-    Size len = monitor.GetValues().Dim().Length();
-    Rcpp::NumericVector values(len);
+    Size len_part = monitor.GetValues().Dim().Length();
+    Rcpp::NumericVector values(len_part);
     const ValArray & values_val = monitor.GetValues().Values();
     std::replace_copy(values_val.begin(), values_val.end(), values.begin(), BIIPS_REALNA, NA_REAL);
     values.attr("dim") = dim_particles;
@@ -203,6 +203,29 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     Rcpp::LogicalVector discrete(discrete_val.begin(), discrete_val.end());
     discrete.attr("dim") = dim_array;
 
+    const ValArray & iter_val(monitor.GetIterations().Values()+1);
+    Rcpp::NumericVector iterations(iter_val.begin(), iter_val.end());
+    iterations.attr("dim") = dim_array;
+
+    const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
+    Size len = monitor.GetRange().Length();
+    Rcpp::List cond_list(len);
+    Rcpp::CharacterVector cond_vec;
+    if (cond.size() == len) {
+      for (Size i=0; i < len; ++i)
+      {
+        cond_list[i] = Rcpp::CharacterVector(cond[i].begin(), cond[i].end());
+      }
+      cond_list.attr("dim") = dim_array;
+    }
+    else if (cond.size() == 1) {
+      cond_vec.assign(cond[0].begin(), cond[0].end());
+    }
+    else {
+      throw LogicError("conditionals must either be of the same size as the node array or of size 1.");
+    }
+
+
     const IndexRange::Indices & lower_ind = monitor.GetRange().Lower();
     Rcpp::IntegerVector lower(lower_ind.begin(), lower_ind.end());
 
@@ -214,6 +237,11 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     smcarray["weights"] = weights;
     smcarray["ess"] = ess;
     smcarray["discrete"] = discrete;
+    smcarray["iterations"] = iterations;
+    if (cond.size() == len)
+      smcarray["conditionals"] = cond_list;
+    else
+      smcarray["conditionals"] = cond_vec;
     smcarray["name"] = Rcpp::wrap(monitor.GetName());
     smcarray["lower"] = lower;
     smcarray["upper"] = upper;
@@ -227,3 +255,20 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
   return smcarray_list;
 }
 
+
+Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) {
+  const Biips::ValArray & values = array.Values();
+  const Biips::DimArray & dims = array.Dim();
+  const int ndim = dims.size();
+  Rcpp::Dimension * pdim;
+  switch (ndim) {
+    case 1: pdim = new Rcpp::Dimension(dims[0]); break;
+    case 2: pdim = new Rcpp::Dimension(dims[0], dims[1]); break;
+    case 3: pdim = new Rcpp::Dimension(dims[0], dims[1], dims[2]); break;
+    default : throw Biips::RuntimeError("Array limited to 3 dims max in RDistribution"); break;
+  }
+  Rcpp::NumericVector vec(*pdim);
+  vec.assign(values.begin(), values.end());
+  delete pdim;
+  return vec;
+}

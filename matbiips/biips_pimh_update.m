@@ -1,4 +1,4 @@
-function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
+function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm
@@ -21,6 +21,7 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 % 
 %   OUTPUT
 %   - obj_pimh:     structure. PIMH object modified
+%   Optional Output:
 %   - log_marg_like: vector with log marginal likelihood over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_SAMPLES
@@ -43,9 +44,7 @@ function [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part,
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-if nargout>=2
-    [obj_pimh, ~, log_marg_like] = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
-else
-    obj_pimh = pimh_algo(obj_pimh, n_iter, n_part, varargin{:});
-end
+return_samples = false;
+
+[obj_pimh, varargout{:}] = pimh_algo(obj_pimh, n_iter, n_part, return_samples, varargin{:});
     

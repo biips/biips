@@ -82,7 +82,7 @@ out_smc = biips_smc_samples(model, variables, n_part,...
 
 %%
 % *Diagnosis of the algorithm*
-biips_diagnosis(out_smc);
+diagnostic = biips_diagnosis(out_smc);
 
 
 %%

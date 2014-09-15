@@ -37,6 +37,7 @@
 
 #include "Rbiips_utils.h"
 #include "RFunction.h"
+#include "RDistribution.h"
 #include <compiler/Compiler.hpp>
 #include <fstream>
 #include <iostream/ProgressBar.hpp>
@@ -174,6 +175,29 @@ RcppExport void add_function(SEXP f_name, SEXP nargs, SEXP fun_eval, SEXP fun_di
        if (!Compiler::FuncTab().Insert(Function::Ptr(new RFunction(name, npar, feval, fdim, fcheckparam, fisdiscrete))))
        {
          throw RuntimeError(String("Could not add function") + name);
+       }
+  VOID_END_RBIIPS
+}
+
+RcppExport void add_distribution(SEXP f_name, SEXP nargs, SEXP fun_sample, SEXP fun_dim, SEXP fun_check_param, SEXP fun_is_discrete) {
+  BEGIN_RBIIPS
+       String name = Rcpp::as<String>(f_name);
+       Size npar = Rcpp::as<Size>(nargs);
+       Rcpp::Function fsample = Rcpp::as<Rcpp::Function>(fun_sample);
+       Rcpp::Function fdim = Rcpp::as<Rcpp::Function>(fun_dim);
+       Rcpp::Function fcheckparam = Rcpp::as<Rcpp::Function>(fun_check_param);
+       Rcpp::Function fisdiscrete = Rcpp::as<Rcpp::Function>(fun_is_discrete);
+       if (Compiler::DistTab().Contains(name))
+       {
+         if (Compiler::DistTab().IsLocked(name))
+           throw RuntimeError(String("Can't add distribution: ")
+                              + name + " is an existing locked distribution.");
+         else
+           rbiips_cerr << "Warning: replacing existing distribution " << name << endl;
+       }
+       if (!Compiler::DistTab().Insert(Distribution::Ptr(new RDistribution(name, npar, fsample, fdim, fcheckparam, fisdiscrete))))
+       {
+         throw RuntimeError(String("Could not add distribution") + name);
        }
   VOID_END_RBIIPS
 }

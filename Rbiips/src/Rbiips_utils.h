@@ -42,6 +42,7 @@
 #include <Console.hpp>
 #include <common/Error.hpp>
 #include "Rostream.h"
+#include <common/NumArray.hpp>
 
 #ifndef BEGIN_RBIIPS
 #define BEGIN_RBIIPS BEGIN_RCPP
@@ -116,6 +117,7 @@ InType apply(const std::vector<InType> & invec, const Rcpp::Function & fun, int 
     return outvec;
 }
 
+Rcpp::NumericVector convArrayVector(const Biips::NumArray & array );
 
 
 #endif /* RBIIPS_UTILS_H_ */

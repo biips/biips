@@ -25,7 +25,8 @@
 
 %% Statistical model in BUGS language
 % Content of the file |'switch_stoch_volatility.bug'|:
-type('switch_stoch_volatility.bug');
+model_filename = 'switch_stoch_volatility.bug'; % BUGS model filename
+type(model_filename);
 
 
 %% Installation of Matbiips
@@ -61,7 +62,6 @@ data = struct('t_max', t_max, 'sigma', sigma,...
 
 %%
 % *Parse and compile BUGS model, and sample data*
-model_filename = 'switch_stoch_volatility.bug'; % BUGS model filename
 model = biips_model(model_filename, data, 'sample_data', true);
 data = model.data;
 

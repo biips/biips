@@ -20,7 +20,8 @@
 
 %% Statistical model in BUGS language
 %
-type('hmm_4d_nonlin_tracking.bug');
+model_filename = 'hmm_4d_nonlin_tracking.bug'; % BUGS model filename
+type(model_filename);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -71,7 +72,7 @@ data = struct('t_max', t_max, 'mean_x_init', mean_x_init, 'prec_x_init', ...
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-model = biips_model('hmm_4d_nonlin_tracking.bug', data, 'sample_data', sample_data);
+model = biips_model(model_filename, data, 'sample_data', sample_data);
 data = model.data;
 x_pos_true = data.x_true(1:2,:);
 

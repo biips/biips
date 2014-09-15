@@ -2,25 +2,6 @@
 #include <algorithm>
 #include "Rbiips_utils.h"
 
-// FIXME a tester!
-Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) { 
-   const Biips::ValArray & values = array.Values();
-   const Biips::DimArray & dims = array.Dim();
-   const int ndim = dims.size();  
-   Rcpp::Dimension * pdim;
-   switch (ndim) {
-        case 1: pdim = new Rcpp::Dimension(dims[0]); break;
-        case 2: pdim = new Rcpp::Dimension(dims[0], dims[1]); break;
-        case 3: pdim = new Rcpp::Dimension(dims[0], dims[1], dims[2]); break;
-        default : throw Biips::RuntimeError("Array limited to 3 dims max in RFunction"); break;
-   }
-   Rcpp::NumericVector vec(*pdim);
-   vec.assign(values.begin(), values.end());
-   delete pdim;
-   return vec;
-}
-
-
 namespace Biips 
 {
 

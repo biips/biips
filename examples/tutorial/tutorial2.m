@@ -26,7 +26,8 @@
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin.bug'|:
-type('hmm_1d_nonlin_param.bug');
+model_filename = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
+type(model_filename);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -59,15 +60,14 @@ prec_x_init = 1;
 prec_x = 10;
 log_prec_y_true = log(1); % True value used to sample the data
 data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
-    'prec_x', prec_x, 'log_prec_y_true', log_prec_y_true, 'mean_x_init', mean_x_init);
+    'prec_x', prec_x, 'log_prec_y_true', log_prec_y_true,...
+    'mean_x_init', mean_x_init);
 
 %%
 % *Compile BUGS model and sample data*
-model = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
-
 
 %% Biips Sensitivity analysis with Sequential Monte Carlo
 % Let now use Biips to provide estimates of the marginal log-likelihood and
@@ -82,18 +82,18 @@ param_values = {-5:.2:3}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model, param_names, param_values, n_part);
+out_sens = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
 figure('name', 'Log-marginal likelihood');
-plot(param_values{1}, out.log_marg_like, '.')
+plot(param_values{1}, out_sens.log_marg_like, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Log-marginal likelihood')
 box off
 
 figure('name', 'Penalized log-marginal likelihood');
-plot(param_values{1}, out.log_marg_like_pen, '.')
+plot(param_values{1}, out_sens.log_marg_like_pen, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
 box off
@@ -125,11 +125,11 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2},...
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 [obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', 1); % Samples
+    'thin', thin); % samples
 
 %%
 % *Some summary statistics*
-summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 
 %%
 % *Compute kernel density estimates*
@@ -137,7 +137,7 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credibilist interval for the parameter*
-sum_var = getfield(summary_pmmh, var_name);
+sum_var = getfield(summ_pmmh, var_name);
 fprintf('Posterior mean of log_prec_y: %.1f\n', sum_var.mean);
 fprintf('95%% credibilist interval for log_prec_y: [%.1f, %.1f]\n',...
     sum_var.quant{1}, sum_var.quant{2});
@@ -181,8 +181,8 @@ box off
 
 %%
 % *Posterior mean and quantiles for $x$*
-x_pmmh_mean = summary_pmmh.x.mean;
-x_pmmh_quant = summary_pmmh.x.quant;
+x_pmmh_mean = summ_pmmh.x.mean;
+x_pmmh_quant = summ_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     light_blue);

@@ -251,6 +251,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
     const Types<Types<String>::Array>::Array & cond = monitor.GetConditionalNodeNames();
     Size len = monitor.GetRange().Length();
     if (cond.size() == len) {
+      // one conditional per component
       sub_field = mxCreateCellArray(ndim_arr, dims_arr);
       for (Size i=0; i < len; ++i)
       {
@@ -267,6 +268,7 @@ void getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
       mxSetFieldByNumber(curr_field, 0, 5, sub_field);
     }
     else if (cond.size() == 1) {
+      // same conditional for each component
       mwSize ndimcell = cond[0].size();
       mwSize celldims[] = { ndimcell };
       mxArray * cell = mxCreateCellArray(1, celldims);

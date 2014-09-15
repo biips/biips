@@ -35,7 +35,8 @@
 
 %% Statistical model in BUGS language
 %
-type('stoch_kinetic_cle.bug');
+model_filename = 'stoch_kinetic_cle.bug'; % BUGS model filename
+type(model_filename);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -76,7 +77,6 @@ data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true,...
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'stoch_kinetic_cle.bug'; % BUGS model filename
 sample_data = true; % Boolean
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;

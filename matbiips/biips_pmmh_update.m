@@ -1,8 +1,8 @@
-function [obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part, varargin)
+function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PMMH_UPDATE performs adaptation and burn-in iterations for the PMMH algorithm
-% [obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part,...
+% [obj_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part,...
 %                               'PropertyName', propertyvalue, ...)
 %
 %   INPUT: 
@@ -23,9 +23,10 @@ function [obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_upd
 %
 %   OUTPUT
 %   - obj_pmmh:          Updated PMMH object
-%   - log_marg_like_pen:          vector with penalized log marginal likelihood over iterations
+%   Optional Output:
+%   - log_marg_like_pen:  vector with penalized log marginal likelihood over iterations
 %   - log_marg_like:     vector with log marginal likelihood over iterations
-%   - out_pmmh:          Structure with additional statistics on the MCMC run
+%   - info_pmmh:          Structure with additional information on the MCMC run
 %
 %   See also BIIPS_MODEL, BIIPS_PMMH_OBJECT, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
@@ -59,6 +60,6 @@ optarg_type = {'numeric', 'logical', 'numeric', 'char'};
 
 %% Call pmmh_algo internal routine
 return_samples = false;
-[obj_pmmh, log_marg_like_pen, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, varargout{:}] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...
     'rs_thres', rs_thres, 'rs_type', rs_type);

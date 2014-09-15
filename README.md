@@ -3,7 +3,7 @@ Biips
 **Biips** is a probabilistic programming software for **Bayesian inference with interacting particle systems**.
 
 - Version:       0.9.1
-- Last modified: 2014-09-14
+- Last modified: 2014-09-15
 - Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
 - License:       GPL-3
 - Website:       <http://alea.bordeaux.inria.fr/biips>

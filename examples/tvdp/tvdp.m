@@ -12,7 +12,8 @@
 
 %% Statistical model in BUGS language
 % *Content of the file |'tvdp.bug'|:*
-type('tvdp.bug');
+model_filename = 'tvdp.bug'; % BUGS model filename
+type(model_filename);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -62,7 +63,6 @@ box off
 %%
 % *Compile BUGS model*
 data = {'rho', 'gamma', 't_max', 'clust_max', 'y', 'mu_0', 'prec_0', 'prec_y', 'alpha'};
-model_filename = 'tvdp.bug'; % BUGS model filename
 model = biips_model(model_filename, data); % Create Biips model
 data = model.data;
 

@@ -1,5 +1,5 @@
-#ifndef BIIPS_RFUNCTION_HPP_
-#define BIIPS_RFUNCTION_HPP_
+#ifndef RFUNCTION_H_
+#define RFUNCTION_H_
 
 #include <function/Function.hpp>
 #include <Rcpp.h>
@@ -56,4 +56,4 @@ namespace Biips
 
 }
 
-#endif /* BIIPS_RFUNCTION_HPP_ */
+#endif /* RFUNCTION_H_ */

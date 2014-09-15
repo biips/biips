@@ -114,7 +114,7 @@ log_marg_like_pen = zeros(n_values, 1);
 max_log_marg_like = -Inf;
 max_log_marg_like_pen = -Inf;
 max_param = [];
-max_param_post = [];
+max_param_pen = [];
 
 matbiips('message', ['Analyzing sensitivity with ' num2str(n_part) ' particles']);
 % Progress bar
@@ -165,7 +165,7 @@ bar = matbiips('make_progress_bar', n_values, '*', 'iterations');
      log_marg_like_pen(k) = log_marg_like(k) + log_prior;
      if log_marg_like_pen(k)>max_log_marg_like_pen
          max_log_marg_like_pen = log_marg_like_pen(k);
-         max_param_post = value;
+         max_param_pen = value;
      end
      
      % Advance progress bar
@@ -178,5 +178,5 @@ out.log_marg_like = log_marg_like;
 out.log_marg_like_pen = log_marg_like_pen;
 out.max_param = max_param;
 out.max_log_marg_like = max_log_marg_like;
-out.max_param_post = max_param_post;
+out.max_param_pen = max_param_pen;
 out.max_log_marg_like_pen = max_log_marg_like_pen; 

@@ -1,9 +1,9 @@
-function [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ... 
+function [obj_pmmh, samples, varargout] = ... 
     biips_pmmh_samples(obj_pmmh, n_iter, n_part, varargin)
 
 %
 % BIIPS_PMMH_SAMPLES performs iterations for the PMMH algorithm and returns samples
-% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ... 
+% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, info_pmmh] = ... 
 %     biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'PropertyName', PropertyValue)
 %
 %   INPUT 
@@ -26,9 +26,10 @@ function [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ...
 %   OUTPUT
 %   - obj_pmmh:          PMMH structure
 %   - samples:           Structure with the PIMH samples for each variable
+%   Optional Output:
 %   - log_marg_like_pen: vector with penalized log marginal likelihood over iterations
 %   - log_marg_like:     vector with log marginal likelihood over iterations
-%   - out_pmmh:          Structure with additional statistics on the MCMC run
+%   - info_pmmh:         Structure with additional information on the MCMC run
 %
 %   See also BIIPS_MODEL, BIIPS_PMMH_OBJECT, BIIPS_PMMH_UPDATE
 %--------------------------------------------------------------------------
@@ -61,6 +62,7 @@ optarg_type = {'numeric', 'numeric', 'numeric', 'char'};
 
 %% Call pmmh_algo internal routine
 return_samples = true;
-[obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = pmmh_algo(obj_pmmh, n_iter, n_part,...
+
+[obj_pmmh, samples, varargout{:}] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'thin', thin, 'max_fail',...
     max_fail, 'rs_thres', rs_thres, 'rs_type', rs_type);

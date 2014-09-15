@@ -29,7 +29,8 @@
 
 %% Statistical model in BUGS language
 % Content of the file |'stoch_volatility.bug'|:
-type('stoch_volatility.bug');
+model_filename = 'stoch_volatility.bug'; % BUGS model filename
+type(model_filename);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -90,7 +91,6 @@ end
 
 %%
 % *Compile BUGS model and sample data if simulated data*
-model_filename = 'stoch_volatility.bug'; % BUGS model filename
 model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
