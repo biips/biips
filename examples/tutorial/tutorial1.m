@@ -36,6 +36,7 @@ set(0, 'defaultlinelinewidth', 2);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
 
+%%%
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
     rand('state', 0)
@@ -45,8 +46,6 @@ end
 
 %% Load model and data
 %
-
-%%
 % *Model parameters*
 t_max = 20;
 mean_x_init = 0;
@@ -67,8 +66,10 @@ data = model.data;
 %% Biips Sequential Monte Carlo
 % Let now use Biips to run a particle filter.
 
-%%
-% *Parameters of the algorithm*. We want to monitor the variable |x|, and to
+%%%
+% *Parameters of the algorithm*.
+% 
+% We want to monitor the variable |x|, and to
 % get the filtering and smoothing particle approximations. The algorithm
 % will use 10000 particles, stratified resampling, with a threshold of 0.5.
 n_part = 10000; % Number of particles
@@ -83,7 +84,6 @@ out_smc = biips_smc_samples(model, variables, n_part,...
 %%
 % *Diagnosis of the algorithm*
 diagnostic = biips_diagnosis(out_smc);
-
 
 %%
 % The sequence of filtering distributions is automatically chosen by Biips
@@ -190,8 +190,7 @@ legend boxoff
 
 %% Biips Particle Independent Metropolis-Hastings
 % We now use Biips to run a Particle Independent Metropolis-Hastings.
-
-%%
+%
 % *Parameters of the PIMH*
 n_burn = 500;
 n_iter = 500;

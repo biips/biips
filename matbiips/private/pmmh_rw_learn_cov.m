@@ -13,12 +13,11 @@ function obj = pmmh_rw_learn_cov(obj)
 % Jan 2014; Last revision: 18-03-2014
 %--------------------------------------------------------------------------
 
-sample_param = obj.sample_param;
 n_iter = obj.n_iter;
 n_cov = obj.n_cov; 
 
 % Concatenate all variables in a column vector
-sample_vec = cell2mat(cellfun(@(x) x(:) , sample_param(:),...
+sample_vec = cell2mat(cellfun(@(x) x(:), obj.sample_param(:),...
     'UniformOutput', false));
 
 if n_iter == n_cov + 1

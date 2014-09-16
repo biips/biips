@@ -96,7 +96,7 @@ end
 ind_sample = 0;
 
 % display message and progress bar
-if nargout>=2
+if return_samples
     mess = 'Generating PIMH samples with ';
 else
     mess = 'Updating PIMH with ';
@@ -133,6 +133,7 @@ for i=1:n_iter
     % Store output
     if mod(i-1, thin)==0
         ind_sample = ind_sample + 1;
+        
         log_marg_like_st(ind_sample) = log_marg_like;
         
         if return_samples

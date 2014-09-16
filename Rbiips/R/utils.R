@@ -8,7 +8,7 @@ is_legal_vname <- function(name) {
   stopifnot(is.character(name), length(name) == 1, nchar(name) > 0)
 
   m <- regexpr("[[:alpha:]][[:alnum:]_\\.]*", name)
-  is_legal <- (nchar(name) == attr(m, "match.length")) && (name != "log_norm_const")
+  is_legal <- nchar(name) == attr(m, "match.length")
   return(is_legal)
 }
 

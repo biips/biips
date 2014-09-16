@@ -12,7 +12,7 @@ smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 ##'
 ##' @return ok boolean. True if success
 ##' @export
-smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified",
+smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", seed = get_seed(),
   ...) {
   stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0, rs_thres <=
               n_part)
@@ -23,7 +23,7 @@ smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "st
     Rbiips("build_smc_sampler", object$ptr(), FALSE)
 
   ## run smc sampler
-  ok <- Rbiips("run_smc_sampler", object$ptr(), as.integer(n_part), get_seed(),
+  ok <- Rbiips("run_smc_sampler", object$ptr(), as.integer(n_part), seed,
     rs_thres, rs_type)
 
   return(ok)
@@ -58,11 +58,11 @@ smc_samples <- function(object, ...) UseMethod("smc_samples")
 ##' step
 ##' @param rs_type a string indicating the resampling algorithm used
 ##' @param ... additional arguments to be passed to the SMC algorithm (currently unused)
-##' @return A list of \code{\link[=smcarray.list.object]{smcarray.list}}
+##' @return A list of \code{\link[=smcarray.fsb.object]{smcarray.fsb}}
 ##' objects, with one element for each element of the \code{variable_names}
 ##' argument.
 ##'
-##' A \code{smcarray.list} object is a list of
+##' A \code{smcarray.fsb} object is a list of
 ##' \code{\link[=smcarray.object]{smcarray}} object, with one element for
 ##' each type of monitoring \code{type} argument.
 ##' @note By default, the seed of the random number generation is chosen
@@ -126,11 +126,11 @@ smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_th
     clear_monitors(object, type = "b")
   }
 
-  for (n in names(out_smc)) class(out_smc[[n]]) <- "smcarray.list"
+  for (n in names(out_smc)) class(out_smc[[n]]) <- "smcarray.fsb"
 
   out_smc$log_marg_like <- log_marg_like
 
-  class(out_smc) <- "smcarray.list.list"
+  class(out_smc) <- "smcarray.fsb.list"
 
   return(out_smc)
 }

@@ -1,22 +1,19 @@
 %% Example for Pierre
-% Trajectory constrained on a tube
-% 
+% Trajectory constrained on a tube 
 
-
-%%
-%
+%%%
 clear all
 close all
 
 addpath('../../matbiips')
 
 %% General settings
-%
 set(0, 'defaultaxesfontsize', 14);
 set(0, 'defaultlinelinewidth', 2);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
 
+%%%
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
     rand('state', 0)
@@ -52,10 +49,11 @@ y = ones(tmax, 1);
 %% Compile model
 model = biips_model('censor.bug', {'x0', 'tmax', 'interv', 'y', 'sigma', 'rho'});
 
-%% Estimate x with SMC
+%% Estimate |x| with SMC
 [out_smc, log_marg_like] = biips_smc_samples(model, {'x'}, 1000);
 
-%% Plot trajectories of the particles constrained to a tube
+%% 
+% *Plot trajectories of the particles constrained to a tube*
 figure;
 plot(out_smc.x.s.values(:,out_smc.x.s.weights(end,:)>0));
 hold on
@@ -64,18 +62,19 @@ ylim([0,6])
 xlabel('Time')
 ylabel('x')
 title('particles')
+box off
 % saveas(gca, 'tube1', 'png')
 
 
 biips_diagnosis(out_smc);
 
 %%
-% Summary statistics
+% *Summary statistics*
 summ = biips_summary(out_smc, 'probs', [.025,.975]);
 
 
 %%
-% Plot filtering posterior density of x
+% *Plot filtering posterior density of |x|*
 kde = biips_density(out_smc);
 
 t_all = [5, 10, 15, 20];
@@ -87,11 +86,12 @@ for k=1:length(t_all)
     xlabel(['x[' num2str(t_all(k)) ']'])
     ylabel('posterior density')   
     xlim([0, 6])
+    box off
 end
 % saveas(gca, 'tube2', 'png')
 
 %% 
-% Plot estimates of x
+% *Plot estimates of |x|*
 x_mean = summ.x.s.mean;
 x_inf = summ.x.s.quant{1};
 x_sup = summ.x.s.quant{2};
@@ -107,5 +107,6 @@ ylabel('x')
 y_lim = ylim;
 legend({'95 % credible interval', 'Mean estimate', 'Cutpoints'})
 box off
+legend boxoff
 ylim([0,6])
 % saveas(gca, 'tube3', 'png')

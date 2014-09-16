@@ -42,6 +42,7 @@ set(0, 'DefaultAxesFontsize', 14);
 set(0, 'Defaultlinelinewidth', 2);
 light_blue = [.7, .7, 1];
 
+%%%
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
     rand('state', 0)
@@ -74,7 +75,7 @@ data = model.data;
 % penalized marginal log-likelihood given various values of the
 % log-precision parameters $\log(\lambda_y)$.
 
-%%
+%%%
 % *Parameters of the algorithm*.
 n_part = 100; % Number of particles
 param_names = {'log_prec_y'}; % Parameter for which we want to study sensitivity
@@ -103,8 +104,9 @@ box off
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameter and the variables $x$.
 
-%%
+%%%
 % *Parameters of the PMMH*.
+% 
 % |param_names| indicates the parameters to be sampled using a random walk
 % Metroplis-Hastings step. For all the other variables, Biips will use a
 % sequential Monte Carlo as proposal.
@@ -137,10 +139,10 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credibilist interval for the parameter*
-sum_var = getfield(summ_pmmh, var_name);
-fprintf('Posterior mean of log_prec_y: %.1f\n', sum_var.mean);
+summ_var = getfield(summ_pmmh, var_name);
+fprintf('Posterior mean of log_prec_y: %.1f\n', summ_var.mean);
 fprintf('95%% credibilist interval for log_prec_y: [%.1f, %.1f]\n',...
-    sum_var.quant{1}, sum_var.quant{2});
+    summ_var.quant{1}, summ_var.quant{2});
 
 
 %%
@@ -154,7 +156,6 @@ xlabel('Iterations')
 ylabel('PMMH samples')
 title('log\_prec\_y')
 box off
-legend boxoff
 
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
@@ -252,7 +253,6 @@ end
 h = legend({'Posterior density', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1]);
 legend boxoff
-
 
 %% Clear model
 %

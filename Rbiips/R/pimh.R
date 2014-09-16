@@ -30,7 +30,7 @@ is.pimh <- function(object) {
 }
 
 
-pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
+pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output="l", ...) {
   ## check arguments
   stopifnot(is.pimh(object))
   stopifnot(is.numeric(n_iter), length(n_iter) == 1, n_iter >= 1, is.finite(n_iter))
@@ -40,6 +40,10 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   stopifnot(is.logical(return_samples), length(return_samples) == 1)
   stopifnot(is.numeric(thin), length(thin) == 1, thin >= 1, thin <= n_iter)
   thin <- as.integer(thin)
+  stopifnot(is.character(output))
+  output <- unlist(strsplit(output, NULL))
+  output <- match.arg(output, c("l"), several.ok = TRUE)
+  output <- unique(output)
 
   ## stop biips verbosity
   verb <- Rbiips("verbosity", 0)
@@ -65,7 +69,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
   ind_sample <- 0
 
   out <- list()
-  out$log_marg_like <- mcmcarray(dim = c(1, n_samples))
+  if ("l" %in% output)
+    out$log_marg_like <- mcmcarray(dim = c(1, n_samples))
 
   ## display message and progress bar
   mess <- if (return_samples)
@@ -100,7 +105,9 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
     ## Store output
     if ((i - 1)%%thin == 0) {
       ind_sample <- ind_sample + 1
-      out$log_marg_like[ind_sample] <- log_marg_like
+
+      if ("l" %in% output)
+        out$log_marg_like[ind_sample] <- log_marg_like
 
       if (return_samples) {
         if (ind_sample == 1) {
@@ -143,8 +150,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, ...) {
 pimh_update <- function(object, ...) UseMethod("pimh_update")
 
 ##' @export
-pimh_update.pimh <- function(object, n_iter, n_part, ...) {
-  out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, return_samples = FALSE, ...)
+pimh_update.pimh <- function(object, n_iter, n_part, output="l", ...) {
+  out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, return_samples = FALSE, output=output, ...)
   return(invisible(out))
 }
 
@@ -176,8 +183,8 @@ pimh_update.pimh <- function(object, n_iter, n_part, ...) {
 ##' ##-- ==>  Define data, use random,
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##'
-pimh_samples <- function(object, n_iter, n_part, thin = 1, ...) {
+pimh_samples <- function(object, n_iter, n_part, thin = 1, output="l", ...) {
   out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, return_samples = TRUE,
-    ...)
+    output=output, ...)
   return(out)
 }

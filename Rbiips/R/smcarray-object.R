@@ -6,21 +6,21 @@
 ##' dimensions, for which the dimension \dQuote{smcarray} has a special
 ##' status.
 ##'
-##' A \code{smcarray.list} object is a list of \code{smcarray} objects with
+##' A \code{smcarray.fsb} object is a list of \code{smcarray} objects with
 ##' different types of monitoring for the same variable.
 ##'
-##' A \code{smcarray.list.list} object is a list of \code{smcarray.list} objects with
+##' A \code{smcarray.fsb.list} object is a list of \code{smcarray.fsb} objects with
 ##' different variables.
 ##'
 ##' Functions applying to \code{smcarray} objects apply identically to
-##' \code{smcarray.list} and \code{smcarray.list.list} objects by a call to each element of the list.
+##' \code{smcarray.fsb} and \code{smcarray.fsb.list} objects by a call to each element of the list.
 ##'
 ##' @name smcarray-object
-##' @aliases smcarray-object smcarray.list-object smcarray.list.list-object diagnosis
-##' diagnosis.smcarray diagnosis.smcarray.list summary.smcarray
-##' summary.smcarray.list summary.smcarray.list.list density.smcarray density.smcarray.list
-##' plot.smcarray plot.smcarray.list
-##' @param object,x a \code{smcarray} or \code{smcarray.list} or\code{smcarray.list.list} object
+##' @aliases smcarray-object smcarray.fsb-object smcarray.fsb.list-object diagnosis
+##' diagnosis.smcarray diagnosis.smcarray.fsb summary.smcarray
+##' summary.smcarray.fsb summary.smcarray.fsb.list density.smcarray density.smcarray.fsb
+##' plot.smcarray plot.smcarray.fsb
+##' @param object,x a \code{smcarray} or \code{smcarray.fsb} or\code{smcarray.fsb.list} object
 ##' @param fun a character vector indicating the functions to be used to
 ##' generate summary statistics
 ##' @param probs a numerical vector containing the desired quantile
@@ -53,13 +53,13 @@ is.smcarray <- function(object) {
 }
 
 ##' @export
-is.smcarray.list <- function(object) {
-  return(class(object) == "smcarray.list")
+is.smcarray.fsb <- function(object) {
+  return(class(object) == "smcarray.fsb")
 }
 
 ##' @export
-is.smcarray.list.list <- function(object) {
-  return(class(object) == "smcarray.list.list")
+is.smcarray.fsb.list <- function(object) {
+  return(class(object) == "smcarray.fsb.list")
 }
 
 
@@ -70,12 +70,12 @@ print.smcarray <- function(x, ...) {
 
 
 ##' @export
-print.smcarray.list <- function(x, ...) {
+print.smcarray.fsb <- function(x, ...) {
   print(summary(x), ...)
 }
 
 ##' @export
-print.smcarray.list.list <- function(x, ...) {
+print.smcarray.fsb.list <- function(x, ...) {
   print(summary(x), ...)
   if ("log_marg_like" %in% names(x))
     cat("Log-marginal likelihood: ", x$log_marg_like, "\n")
@@ -168,28 +168,28 @@ mean.smcarray <- function(x, ...) {
 
 
 ##' @export
-summary.smcarray.list <- function(object, ...) {
-  ans <- list()
-  for (n in names(object)) ans[[n]] <- summary(object[[n]], ...)
+summary.smcarray.fsb <- function(object, ...) {
+  out <- list()
+  for (n in names(object)) out[[n]] <- summary(object[[n]], ...)
 
-  class(ans) <- "summary.smcarray.list"
+  class(out) <- "summary.smcarray.fsb"
 
-  return(ans)
+  return(out)
 }
 
 ##' @export
-summary.smcarray.list.list <- function(object, ...) {
-  ans <- list()
+summary.smcarray.fsb.list <- function(object, ...) {
+  out <- list()
 
   for (n in names(object)) {
-    if (!is.smcarray.list(object[[n]]))
+    if (!is.smcarray.fsb(object[[n]]))
       next
-    ans[[n]] <- summary(object[[n]], ...)
+    out[[n]] <- summary(object[[n]], ...)
   }
 
-  class(ans) <- "summary.smcarray.list.list"
+  class(out) <- "summary.smcarray.fsb.list"
 
-  return(ans)
+  return(out)
 }
 
 
@@ -206,7 +206,7 @@ print.summary.smcarray <- function(x, ...) {
 
 
 ##' @export
-print.summary.smcarray.list <- function(x, ...) {
+print.summary.smcarray.fsb <- function(x, ...) {
   for (n in names(x)) {
     print(x[[n]], ...)
     cat("\n")
@@ -215,7 +215,7 @@ print.summary.smcarray.list <- function(x, ...) {
 }
 
 ##' @export
-print.summary.smcarray.list.list <- function(x, ...) {
+print.summary.smcarray.fsb.list <- function(x, ...) {
   for (n in names(x)) {
     print(x[[n]], ...)
   }
@@ -269,8 +269,8 @@ diagnosis.smcarray <- function(object, ess_thres = 30, quiet = FALSE, ...) {
 }
 
 ##' @export
-diagnosis.smcarray.list <- function(object, type = "fsb", quiet = FALSE, ...) {
-  stopifnot(is.smcarray.list(object))
+diagnosis.smcarray.fsb <- function(object, type = "fsb", quiet = FALSE, ...) {
+  stopifnot(is.smcarray.fsb(object))
   type <- check_type(type)
 
   if (!quiet) {
@@ -299,12 +299,12 @@ diagnosis.smcarray.list <- function(object, type = "fsb", quiet = FALSE, ...) {
 }
 
 ##' @export
-diagnosis.smcarray.list.list <- function(object, type = "fsb", quiet = FALSE, ...) {
-  stopifnot(is.smcarray.list.list(object))
+diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...) {
+  stopifnot(is.smcarray.fsb.list(object))
 
   out <- list()
   for (n in names(object)) {
-    if (!is.smcarray.list(object[[n]]))
+    if (!is.smcarray.fsb(object[[n]]))
       next
     out <- diagnosis(object[[n]], type = type, quiet = quiet, ...)
   }
@@ -334,14 +334,14 @@ get_index <- function(offset, lower, upper) {
 ##' @importFrom stats density
 ##' @export
 density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
-  ans <- list()
+  out <- list()
   bww <- bw
 
   n_part <- dim(x$values)["particle"]
 
   if (!missing(subset)) {
     stopifnot(is.character(subset), length(subset) == 1)
-    pn <- parse.varname(subset)
+    pn <- parse_varname(subset)
     if (pn$name != x$name)
       stop("invalid subset argument: wrong variable name.")
     if (any(pn$lower < x$lower) || any(pn$upper > x$upper))
@@ -389,19 +389,19 @@ density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
         ...)
     }
 
-    ans[[varname]] <- list(density = dens, name = varname, type = x$type, n_part = n_part,
+    out[[varname]] <- list(density = dens, name = varname, type = x$type, n_part = n_part,
       ess = ess, discrete = discrete)
-    class(ans[[varname]]) <- "density.smcarray.univariate"
+    class(out[[varname]]) <- "density.smcarray.univariate"
   }
 
-  class(ans) <- "density.smcarray"
-  return(ans)
+  class(out) <- "density.smcarray"
+  return(out)
 }
 
 
 ##' @export
-density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
-  ans <- list()
+density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
+  out <- list()
   bw_s <- bw
 
   # first treat filtering and backward.smoothing
@@ -409,7 +409,7 @@ density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     dens <- density(x$f, bw, adjust, subset, ...)
     bw_s <- list()
     for (n in names(dens)) {
-      ans[[n]]$f <- dens[[n]]
+      out[[n]]$f <- dens[[n]]
       bw_s[[n]] <- dens[[n]]$density$bw
     }
   }
@@ -417,7 +417,7 @@ density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     dens <- density(x$b, bw, adjust, subset, ...)
     bw_s <- list()
     for (n in names(dens)) {
-      ans[[n]]$b <- dens[[n]]
+      out[[n]]$b <- dens[[n]]
       bw_s[[n]] <- dens[[n]]$density$bw
     }
   }
@@ -427,28 +427,28 @@ density.smcarray.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
     if (is.list(bw_s))
       adjust <- 1
     dens <- density(x$s, bw_s, adjust, subset, ...)
-    for (n in names(dens)) ans[[n]]$s <- dens[[n]]
+    for (n in names(dens)) out[[n]]$s <- dens[[n]]
   }
 
-  for (n in names(ans)) class(ans[[n]]) <- "density.smcarray.univariate.list"
+  for (n in names(out)) class(out[[n]]) <- "density.smcarray.univariate.list"
 
-  class(ans) <- "density.smcarray.list"
-  return(ans)
+  class(out) <- "density.smcarray.fsb"
+  return(out)
 }
 
 
 ##' @export
-density.smcarray.list.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
-  ans <- list()
+density.smcarray.fsb.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
+  out <- list()
   for (n in names(x)) {
-    if (!is.smcarray.list(x[[n]]))
+    if (!is.smcarray.fsb(x[[n]]))
       next
-    ans[[n]] <- density(x[[n]], bw = bw, adjust = adjust, subset = subset, ...)
+    out[[n]] <- density(x[[n]], bw = bw, adjust = adjust, subset = subset, ...)
   }
 
-  class(ans) <- "density.smcarray.list.list"
+  class(out) <- "density.smcarray.fsb.list"
 
-  return(ans)
+  return(out)
 }
 
 
@@ -608,7 +608,7 @@ density.smcarray.list.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) 
 #
 #
 # ##' @export
-# plot.density.smcarray.list <- function(x, type = "l", lwd = 1, col = 1:6, ...) {
+# plot.density.smcarray.fsb <- function(x, type = "l", lwd = 1, col = 1:6, ...) {
 #   for (n in names(x)) {
 #     plot(x[[n]], type = type, lwd = lwd, col = col, ...)
 #   }

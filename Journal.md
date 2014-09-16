@@ -330,13 +330,13 @@ Finalement, j'ai opté pour compiler tout le code biips+matiips avec mex.
 Par contre, le crash est toujours là... snif
 J'ai pu compiler en debug et
 - [ ] je vais pouvoir investiguer ce bug avec cette méthode:
-  http://www.mathworks.fr/fr/help/matlab/matlab_external/debugging-on-microsoft-windows-platforms.html
+  <http://www.mathworks.fr/fr/help/matlab/matlab_external/debugging-on-microsoft-windows-platforms.html>
   ce qui n'était pas encore possible.
 
 François le 16/4/2014 :
 =======================
-J'ai commence a bosser sur la page d'exemples:
-https://alea.bordeaux.inria.fr/biips/doku.php?id=examples
+J'ai commencé a bosser sur la page d'exemples:
+<https://alea.bordeaux.inria.fr/biips/doku.php?id=examples>
 
 Adrien le 16/4/2014 :
 =====================
@@ -872,14 +872,14 @@ A faire dans Matbiips :
 - [x] traitement des sorties MCMC dans `biips_summary` et `biips_density`
     Rq: si out.varname a les champs f, s ou b -> traitement SMC sur les sous-champs values et weights
     sinon -> traitement MCMC : pas de sous-champs values, les poids sont tous égaux
-- [ ] `biips_pimh_samples` : améliorer stockage des échantillons. cf. switch/case dans le code
+- [x] `biips_pimh_samples` : améliorer stockage des échantillons. cf. switch/case dans le code
     Rq: L'appel de squeeze modifie les dimensions
 - [x] créer exemple court et l'inclure dans matbiips
 - [x] supprimer `biips_load_module` : l'intégrer dans `biips_init`
 - [x] vérifier `biips_get_nodes` : peut-on connaître les conditionnelles ? renvoie-t-elle les samplers ?
 - [x] renommer `make_progress_bar` en `progress_bar`
 - [x] mettre isoctave dans private
-- [ ] revoir et ajouter tests matbiips et ne pas les intégrer dans l'archive
+- [x] revoir et ajouter tests matbiips et ne pas les intégrer dans l'archive
 - [ ] ajouter un README.md
 - [x] commenter `inter_biips` en doxygen et générer pdf --> finalement c'est un doc latex séparé
 

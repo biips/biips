@@ -6,8 +6,7 @@ if ~ischar(name) || numel(name)==0
     error('invalid variable name: %s', name)
 end
 
-is_legal = strcmp(regexp(name, '[a-zA-Z][\.\w]*', 'match'), name)...
-    && ~strcmp(name, 'log_marg_like');
+is_legal = strcmp(regexp(name, '[a-zA-Z][\.\w]*', 'match'), name);
 
 end
 
