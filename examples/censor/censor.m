@@ -49,7 +49,7 @@ y = ones(tmax, 1);
 %% Compile model
 model = biips_model('censor.bug', {'x0', 'tmax', 'interv', 'y', 'sigma', 'rho'});
 
-%% Estimate |x| with SMC
+%% Estimate x with SMC
 [out_smc, log_marg_like] = biips_smc_samples(model, {'x'}, 1000);
 
 %% 
@@ -74,7 +74,7 @@ summ = biips_summary(out_smc, 'probs', [.025,.975]);
 
 
 %%
-% *Plot filtering posterior density of |x|*
+% *Plot filtering posterior density of x*
 kde = biips_density(out_smc);
 
 t_all = [5, 10, 15, 20];
@@ -91,7 +91,7 @@ end
 % saveas(gca, 'tube2', 'png')
 
 %% 
-% *Plot estimates of |x|*
+% *Plot estimates of x*
 x_mean = summ.x.s.mean;
 x_inf = summ.x.s.quant{1};
 x_sup = summ.x.s.quant{2};

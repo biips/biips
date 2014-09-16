@@ -78,7 +78,7 @@ light_blue = rgb(.7, .7, 1);
 light_red = rgb(1, .7, .7);
 
 #' Set the random numbers generator seed for reproducibility
-set.seed(0)
+set.seed(1)
 
 #' # Load model and data
 
@@ -167,6 +167,9 @@ plot(c(mcmc_samples), col='blue', type='l', lwd=1,
      ylab='PMMH samples',
      main=var_name)
 points(0, data$log_prec_y_true, col='green', pch=8, lwd=2)
+legend('topright', leg=c('PMMH samples', 'True value'),
+       col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
+       bg='white', bty='n')
 
 #' #### Histogram and kde estimate of the posterior for the parameter
 #+ fig.cap = 'PMMH: Histogram posterior parameter'
@@ -174,6 +177,9 @@ hist(c(mcmc_samples), breaks=15, col='blue', border='white',
      xlab=var_name, ylab='Number of samples',
      main=var_name)
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
+legend('topright', leg=c('Posterior samples', 'True value'),
+       col=c('blue', 'green'), pch=c(22,8), lwd=c(NA,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
+       bg='white', bty='n')
 
 #+ fig.cap = 'PMMH: KDE estimate posterior parameter'
 kde_var = kde_estimates_pmmh[[var_name]]
@@ -181,6 +187,9 @@ plot(kde_var[[1]], col='blue', lwd=2,
      xlab=var_name, ylab='Posterior density',
      main=var_name)
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
+legend('topright', leg=c('Posterior density', 'True value'),
+       col=c('blue', 'green'), pch=c(NA,8), lty=c(1,NA), lwd=2,
+       bg='white', bty='n')
 
 #' #### Posterior mean and quantiles for x
 #+ fig.cap = 'PMMH: Posterior mean and quantiles'

@@ -176,7 +176,7 @@ for (k in 1:length(time_index)) {
   points(data$x_true[tk], 0, col='green', pch=8, lwd=2)
 }
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
-legend('topright', leg=c('Filtering density', 'Smoothing density', 'True value'),
+legend('center', leg=c('Filtering density', 'Smoothing density', 'True value'),
        col=c('blue', 'red', 'green'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
        bg='white', bty='n')
 par(mfrow=c(1,1))

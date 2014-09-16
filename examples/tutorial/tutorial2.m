@@ -155,6 +155,8 @@ plot(0, data.log_prec_y_true, '*g');
 xlabel('Iterations')
 ylabel('PMMH samples')
 title('log\_prec\_y')
+legend({'PMMH samples', 'True value'})
+legend boxoff
 box off
 
 %%
@@ -167,7 +169,8 @@ hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y')
 ylabel('Number of samples')
-title('log\_prec\_y')
+legend({'Posterior samples', 'True value'})
+legend boxoff
 box off
 
 kde_var = getfield(kde_estimates_pmmh, var_name);
@@ -177,11 +180,13 @@ hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
 ylabel('Posterior density');
+legend({'Posterior density', 'True value'})
+legend boxoff
 box off
 
 
 %%
-% *Posterior mean and quantiles for $x$*
+% *Posterior mean and quantiles for x*
 x_pmmh_mean = summ_pmmh.x.mean;
 x_pmmh_quant = summ_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
@@ -198,7 +203,7 @@ box off
 legend boxoff
 
 %%
-% *Trace of MCMC samples for $x$*
+% *Trace of MCMC samples for x*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:length(time_index)
@@ -217,7 +222,7 @@ set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 
 %%
-% *Histogram and kernel density estimate of posteriors of $x$*
+% *Histogram and kernel density estimate of posteriors of x*
 figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);

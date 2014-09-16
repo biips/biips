@@ -167,15 +167,15 @@ box off
 
 %%
 % *Marginal filtering and smoothing densities*
-kde_estimates = biips_density(out_smc);
+kde_smc = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);
+    plot(kde_smc.x.f(tk).x, kde_smc.x.f(tk).f);
     hold on
-    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
+    plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
@@ -190,7 +190,8 @@ legend boxoff
 
 %% Biips Particle Independent Metropolis-Hastings
 % We now use Biips to run a Particle Independent Metropolis-Hastings.
-%
+
+%%%
 % *Parameters of the PIMH*
 n_burn = 500;
 n_iter = 500;
@@ -267,12 +268,12 @@ legend boxoff
 
 %%
 % *Kernel density estimates of posteriors*
-kde_estimates_pimh = biips_density(samples_pimh);
+kde_pimh = biips_density(samples_pimh);
 figure('name', 'PIMH: KDE estimates marginal posteriors')
 for k=1:length(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f);
+    plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
