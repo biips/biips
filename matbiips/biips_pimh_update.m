@@ -46,5 +46,6 @@ function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, var
 
 return_samples = false;
 
+varargout = cell(nargout-1,1);
 [obj_pimh, varargout{:}] = pimh_algo(obj_pimh, n_iter, n_part, return_samples, varargin{:});
     

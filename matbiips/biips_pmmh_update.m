@@ -60,6 +60,8 @@ optarg_type = {'numeric', 'logical', 'numeric', 'char'};
 
 %% Call pmmh_algo internal routine
 return_samples = false;
+
+varargout = cell(nargout-1,1);
 [obj_pmmh, varargout{:}] = pmmh_algo(obj_pmmh, n_iter, n_part,...
     return_samples, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...
     'rs_thres', rs_thres, 'rs_type', rs_type);

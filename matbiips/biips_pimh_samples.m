@@ -55,5 +55,5 @@ function [obj_pimh, samples, varargout] = biips_pimh_samples(obj_pimh, n_iter, n
 %--------------------------------------------------------------------------
 
 return_samples = true;
-
+varargout = cell(nargout-2,1);
 [obj_pimh, samples, varargout{:}] = pimh_algo(obj_pimh, n_iter, n_part, return_samples, varargin{:});
