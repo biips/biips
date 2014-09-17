@@ -39,8 +39,8 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 
 #+
 #' # Statistical model in BUGS language
-#' We describe the model in BUGS language in the file `'hmm_1d_nonlin.bug'`:
-model_file = 'hmm_1d_nonlin.bug' # BUGS model filename
+#' We describe the model in BUGS language in the file `'hmm_1d_nonlin_fext.bug'`:
+model_file = 'hmm_1d_nonlin_fext.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
 #' Although the nonlinear function `f` can be defined in BUGS language, we

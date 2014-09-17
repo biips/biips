@@ -2,7 +2,42 @@ Adrien le 17/09/2014 :
 ======================
 - [ ] arguments cycliques pour density et plot.density
 - [ ] cas discret pour density et plot.density
-- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips ?
+- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips ?
+- [ ] vérifier choix de la bandwidth dans matbiips
+- [ ] Rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
+- [ ] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
+- [ ] compiler paquets binaires pour centos 64bit, mandriva, opensuse
+- [ ] ajouter références sur méthodes SMC dans les liens du site
+- [ ] ajouter calcul régions HDP
+
+Article/exemples :
+- [ ] diagnosis: expliquer pourquoi ess>=30 ?
+- [ ] tutorial1: backward smoothing en commentaire ?
+- [ ] préciser que les fonctions externes sont obligatoirement des `.m`
+- [ ] préciser : `biips_add_function` doit être déterministe
+- [ ] préciser : `biips_add_distribution` limité aux lois d'exploration, pas vraisemblance
+- [ ] expliquer différence entre smoothing et backward smoothing
+- [ ] numéroter exemples dans l'article : Exemple 1, Exemple 2
+- [ ] figures de l'article : `box off`
+- [ ] lisibilité figure 9
+- [ ] vérifier code matbiips et BUGS
+- [ ] police et couleur de fond matbbips
+- [ ] ajouter abbréviations : PIMH
+- [ ] appliquer style JSS <http://www.jstatsoft.org/style> :
+    - vérifier capitalization, title s'applique aussi aux sections et sous sections ?
+    - citation de software, R packages (ajouter Rbiips ?)
+    - enlever commentaires dans le code ?
+
+Communication :
+- [ ] Référencement : wikipédia, <http://probabilistic-programming.org>
+- [ ] Réseaux sociaux : twitter, Google+, LinkedIn, google groups
+- [ ] Article : Arxiv, HAL, R journal
+- [ ] Conf/Séminaire : 
+    - NIPS workshop on Probabilistic programming <http://probabilistic-programming.org/wiki/NIPS*2014_Workshop>, submission due Nov. 1st
+    - Oxford Probabilistic programming RG <http://www.robots.ox.ac.uk/~perov/reading_groups/probprob2013/>
+    - AppliBUGS <http://w3.jouy.inra.fr/unites/miaj/public/matrisq/Contacts/applibugs.welcome.html>
+- [ ] mailing list pour les news/releases ?
+
 
 Adrien le 21/08/2014 :
 ======================
@@ -18,7 +53,7 @@ exemples:
 - [x] utiliser commande `type` pour afficher contenu des fichiers `.bug` et fonctions `.m`
 - [ ] mettre html en ligne
 
-- [ ] mettre à jour archives matbiips
+- [ ] mettre à jour archives matbiips
 
 Adrien le 15/08/2014 :
 =====================
@@ -31,14 +66,14 @@ Adrien le 15/08/2014 :
   ---> OK, maintenant pour les monitors de smoothing, contitionals contient un unique cell of strings
        avec la liste des variables observées.
 
-- [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
+- [ ] ajouter flag `-b (--batch)` aux scripts `build_biips` pour désactiver les questions
 - [x] ajouter dépendances aux fichiers sources dans les cibles matbiips utilisant
     mex/mkoctfile (windows)
-- [ ] mettre à jour/corriger `matbiips_internals.tex`
+- [ ] mettre à jour/corriger `matbiips_internals.tex`
 - [ ] améliorer les modules cmake : voir liens sur ce post
   <http://www.cmake.org/pipermail/cmake/2009-January/026284.html>
 - [ ] permettre compilation matbiips pour matlab et octave dans le même répertoire de build
-- [ ] ajouter cibles `Contents.m`
+- [ ] ajouter cibles `Contents.m`
 
 François le 13/08/2014 :
 ========================
@@ -406,7 +441,7 @@ François le 25/3/2014 :
 Adrien le 24/3/2014 :
 =====================
 - [x] Pour les crashs windows, essyer de désactiver ReleaseNodes dans sensitivity et pmmh --> ca n'a rien donné
-- [ ] Faire tourner les exemples sous Jags, notamment `switching_stoch_volatility`
+- [ ] Faire tourner les exemples sous Jags, notamment `switching_stoch_volatility`
 - [x] pmmh: modifier traitement sortie `get_log_prior_density`, NaN = erreur numérique
 - [ ] Tester validité des distributions et samplers
 
@@ -426,13 +461,13 @@ Adrien le 20/3/2014 :
 - [x] tester les crashs sous octave
   --> Il y a bien le meme bug dans octave sous windows. Par exemple `stoch_kinetic` fait crasher octave avec le message:
         panic: segmentation violation
-- [ ] faire version R des `tutorialsX.m`, en rajoutant explications si besoin et repasser sur les labels, boxoff etc.
-- [ ] faire publish de l'exemple `switch_stoch_volatility.m` sous linux
+- [ ] faire version R des `tutorialsX.m`, en rajoutant explications si besoin et repasser sur les labels, boxoff etc.
+- [ ] faire publish de l'exemple `switch_stoch_volatility.m` sous linux
 
 Note: on peut générer un fichier `contents.m` avec matlab depuis le répertoire en question: Reports -> Contents report 
 
 Questions en suspens:
-- [ ] est-ce qu'on applique une transformation des paramètres pour la marche aléatoire en fonction de leur support ?
+- [ ] est-ce qu'on applique une transformation des paramètres pour la marche aléatoire en fonction de leur support ?
 
 A rajouter dans la doc de `inter_biips` :
 `get_log_prior_density` lance une erreur si :
