@@ -1,3 +1,9 @@
+Adrien le 17/09/2014 :
+======================
+- [ ] arguments cycliques pour density et plot.density
+- [ ] cas discret pour density et plot.density
+- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips ?
+
 Adrien le 21/08/2014 :
 ======================
 Matbiips:

@@ -151,7 +151,7 @@ out_pmmh = pmmh_samples(obj_pmmh, n_iter, n_part, thin=thin) # samples
 summ_pmmh = summary(out_pmmh, probs=c(.025, .975))
 
 #' #### Compute kernel density estimates
-kde_estimates_pmmh = density(out_pmmh)
+kde_pmmh = density(out_pmmh)
 
 #' #### Posterior mean and credibilist interval for the parameter
 summ_var = summ_pmmh[[var_name]]
@@ -182,8 +182,8 @@ legend('topright', leg=c('Posterior samples', 'True value'),
        bg='white', bty='n')
 
 #+ fig.cap = 'PMMH: KDE estimate posterior parameter'
-kde_var = kde_estimates_pmmh[[var_name]]
-plot(kde_var[[1]], col='blue', lwd=2,
+kde_var = kde_pmmh[[var_name]]
+plot(kde_var, col='blue', lwd=2,
      xlab=var_name, ylab='Posterior density',
      main=var_name)
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
@@ -248,7 +248,7 @@ par(mfrow=c(1,1))
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  plot(kde_estimates_pmmh$x[[tk]], col='blue', lwd=2,
+  plot(kde_pmmh$x[[tk]], col='blue', lwd=2,
        xlab=bquote(x[.(tk)]),
        ylab='Posterior density',
        main=paste('t=', tk, sep=''))

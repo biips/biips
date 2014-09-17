@@ -163,16 +163,14 @@ legend('topright', leg=c('95 % credible interval', 'Smoothing mean estimate', 'T
 
 #' #### Marginal filtering and smoothing densities
 #+ fig.cap='SMC: Marginal posteriors'
-kde_estimates = density(out_smc)
+kde_smc = density(out_smc)
 time_index = c(5, 10, 15)
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  ymax = max(kde_estimates$x[[tk]]$f$dens$y, kde_estimates$x[[tk]]$s$dens$y)
-  plot(kde_estimates$x[[tk]]$f$dens, col='blue', type='l', lwd=2,
+  plot(kde_smc$x[[tk]], col=c('blue', 'red'), lwd=2,
        xlab=bquote(x[.(tk)]), ylab='Posterior density',
-       main=paste('t=', tk, sep=''), ylim = c(0,ymax))
-  lines(kde_estimates$x[[tk]]$s$dens, col='red', lwd=2)
+       main=paste('t=', tk, sep=''))
   points(data$x_true[tk], 0, col='green', pch=8, lwd=2)
 }
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
@@ -252,8 +250,8 @@ legend('center', leg=c('Posterior density', 'True value'),
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  kde_estimate_pimh = density(out_pimh$x[tk,])
-  plot(kde_estimate_pimh, col='blue', lwd=2,
+  kde_pimh = density(out_pimh$x[tk,])
+  plot(kde_pimh, col='blue', lwd=2,
        xlab=bquote(x[.(tk)]), ylab='Posterior density',
        main=paste('t=', tk, sep=''))
   points(data$x_true[tk], 0, col='green', pch=8, lwd=2)

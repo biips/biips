@@ -145,41 +145,33 @@ print.summary.mcmcarray.list <- function(x, ...) {
 
 ##' @importFrom stats density
 ##' @export
-density.mcmcarray <- function(x, bw = "nrd0", adjust = 1, ...) {
+density.mcmcarray <- function(x, bw = "nrd0", ...) {
   out <- list()
   bww <- bw
 
-  mc_dim <- dim(x)
-  drop_dim <- names(mc_dim) %in% c("iteration", "chain")
+  dimen <- dim(x)
+  drop_dim <- names(dimen) %in% c("iteration", "chain")
 
-  n_iter <- mc_dim["iteration"]
+  n_iter <- dimen["iteration"]
   if (is.na(n_iter))
     n_iter <- 1
-  n_chain <- mc_dim["chain"]
+  n_chain <- dimen["chain"]
   if (is.na(n_chain))
     n_chain <- 1
 
-  ndim <- sum(!drop_dim)
-  lower <- rep(1, ndim)
-  upper <- mc_dim[!drop_dim]
-  len <- prod(upper)
+  len <- prod(dimen[!drop_dim])
 
   for (d in 1:len) {
-    ind <- get_index(d, lower, upper)
-    varname <- deparse_varname("Z", ind)
-    varname <- substring(varname, 2)
-
     ind_vec <- seq(d, len * (n_iter*n_chain - 1) + d, len)
     values <- x[ind_vec]
 
     if (length(bw) > 1)
       bww <- bw[[d]]
 
-    dens <- density(values, bw = bww, adjust = adjust, ...)
-
-    out[[varname]] <- dens
+    out[[d]] <- density(values, bw = bww, ...)
   }
 
+  dim(out) <- dimen[!drop_dim]
   class(out) <- "density.mcmcarray"
   return(out)
 }
@@ -197,4 +189,18 @@ density.mcmcarray.list <- function(x, bw = "nrd0", adjust = 1, ...) {
   class(out) <- "density.mcmcarray.list"
 
   return(out)
+}
+
+##' @export
+plot.density.mcmcarray <- function(x, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], ...)
+  }
+}
+
+##' @export
+plot.density.mcmcarray.list <- function(x, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], ...)
+  }
 }

@@ -106,7 +106,7 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
 
   if (order >= 2)
     summ$var <- apply(mapply("-", object$values, summ$mean)^2 * object$weights,
-      m, FUN = sum)
+                      m, FUN = sum)
 
   if (order >= 3) {
     mom2 <- apply(object$values^2 * object$weights, m, FUN = sum)
@@ -117,7 +117,7 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
   if (order >= 4) {
     mom4 <- apply(object$values^4 * object$weights, m, FUN = sum)
     summ$kurt <- (mom4 - 4 * mom3 * summ$mean + 6 * mom2 * summ$mean^2 - 3 *
-      summ$mean^4)/summ$var^2 - 3
+                    summ$mean^4)/summ$var^2 - 3
   }
 
   ### quantiles
@@ -128,12 +128,12 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
     for (d in 1:len) {
       indvec <- seq(d, len * (n_part - 1) + d, len)
       stat_d <- Rbiips("wtd_quantile", object$values[indvec], n_part * object$weights[indvec],
-        probs)
+                       probs)
       stat_names <- names(stat_d)
       if (d == 1) {
         for (n in stat_names) {
           if (is.null(summ[[n]]))
-          summ$quant[[n]] <- array(dim = dim_array)
+            summ$quant[[n]] <- array(dim = dim_array)
         }
       }
       for (n in stat_names) summ$quant[[n]][d] <- stat_d[[n]]
@@ -151,9 +151,7 @@ summary.smcarray <- function(object, probs = c(), order, ...) {
     }
   }
 
-  summ$drop.dims <- dim(object$values)[drop_dims]
-  summ$name <- deparse_varname(object$name, object$lower, object$upper)
-  summ$type <- object$type
+  summ$drop_dims <- dim(object$values)[drop_dims]
 
   class(summ) <- "summary.smcarray"
 
@@ -195,19 +193,22 @@ summary.smcarray.fsb.list <- function(object, ...) {
 
 ##' @export
 print.summary.smcarray <- function(x, ...) {
-  cat(x$name, x$type, "smcarray:\n")
-  print(x[!(names(x) %in% c("drop.dims", "name", "type"))], ...)
-  if (length(x$drop.dims) > 0) {
-    cat("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,
-      ")", sep = ""), collapse = ","), "\n")
+  cat("smcarray:\n")
+  print(x[!(names(x) %in% c("drop_dims"))], ...)
+  if (length(x$drop_dims) > 0) {
+    cat("Marginalizing over:", paste(paste(names(x$drop_dims), "(", x$drop_dims,
+                                           ")", sep = ""), collapse = ","), "\n")
   }
   invisible()
 }
 
 
 ##' @export
-print.summary.smcarray.fsb <- function(x, ...) {
+print.summary.smcarray.fsb <- function(x, prefix=NULL, ...) {
   for (n in names(x)) {
+    if (!is.null(prefix))
+      cat(prefix, " ", sep="")
+    switch(n, f=cat("filtering "), s=cat("smoothing "), f=cat("backward smoothing "))
     print(x[[n]], ...)
     cat("\n")
   }
@@ -217,7 +218,8 @@ print.summary.smcarray.fsb <- function(x, ...) {
 ##' @export
 print.summary.smcarray.fsb.list <- function(x, ...) {
   for (n in names(x)) {
-    print(x[[n]], ...)
+    print(x[[n]], prefix=n, ...)
+    cat("\n")
   }
   invisible()
 }
@@ -245,7 +247,7 @@ diagnosis <- function(object, ...) UseMethod("diagnosis")
 diagnosis.smcarray <- function(object, ess_thres = 30, quiet = FALSE, ...) {
   stopifnot(is.smcarray(object))
   stopifnot(is.numeric(ess_thres), length(ess_thres) == 1, is.finite(ess_thres),
-    ess_thres >= 0)
+            ess_thres >= 0)
   stopifnot(is.logical(quiet), length(quiet) == 1)
 
   ess_min <- min(object$ess)
@@ -313,124 +315,88 @@ diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...
 }
 
 
-
-get_index <- function(offset, lower, upper) {
-  stopifnot(length(lower) == length(upper))
-  dim <- upper - lower + 1
-  stopifnot(dim > 0)
-
-  ind <- lower
-  offset <- offset - 1
-  for (i in 1:length(dim)) {
-    ind[i] <- ind[i] + (offset)%%dim[i]
-    offset <- offset%/%dim[i]
-  }
-  return(ind)
-}
-
-
-
-
 ##' @importFrom stats density
 ##' @export
-density.smcarray <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
+density.smcarray <- function(x, bw = "nrd0", ...) {
   out <- list()
   bww <- bw
 
-  n_part <- dim(x$values)["particle"]
+  dimen <- dim(x$values)
+  drop_dim <- names(dimen) %in% c("particle")
 
-  if (!missing(subset)) {
-    stopifnot(is.character(subset), length(subset) == 1)
-    pn <- parse_varname(subset)
-    if (pn$name != x$name)
-      stop("invalid subset argument: wrong variable name.")
-    if (any(pn$lower < x$lower) || any(pn$upper > x$upper))
-      stop("invalid subset argument: index out of range.")
-    lower <- pn$lower
-    upper <- pn$upper
-    subset_dim <- upper - lower + 1
-    len <- prod(subset_dim)
-  } else {
-    lower <- x$lower
-    upper <- x$upper
-    drop_dim <- names(dim(x$values)) %in% c("particle")
-    subset_dim <- dim(x$values)[!drop_dim]
-    len <- prod(subset_dim)
-  }
+  n_part <- dimen["particle"]
+  if (is.na(n_part))
+    n_part <- 1
+
+  len <- prod(dimen[!drop_dim])
 
   for (d in 1:len) {
-    ind <- get_index(d, lower, upper)
-    varname <- deparse_varname(x$name, ind)
-
-    if (!missing(subset)) {
-      ind_mat <- array(c(rep(ind, each = n_part), 1:n_part), dim = c(n_part,
-        length(dim(x$values))))
-      values <- x$values[ind_mat]
-      weights <- x$weights[ind_mat]
-      ind2 <- array(ind, dim = c(1, length(ind)))
-      ess <- x$ess[ind2]
-      discrete <- x$discrete[ind2]
-    } else {
-      ind_vec <- seq(d, len * (n_part - 1) + d, len)
-      values <- x$values[ind_vec]
-      weights <- x$weights[ind_vec]
-      ess <- x$ess[d]
-      discrete <- x$discrete[d]
-    }
+    ind_vec <- seq(d, len * (n_part - 1) + d, len)
+    values <- x$values[ind_vec]
+    weights <- x$weights[ind_vec]
 
     if (length(bw) > 1)
       bww <- bw[[d]]
 
-    if (discrete) {
-      tab <- Rbiips("wtd_table", values, weights)
-      dens <- list(x = as.numeric(names(tab)), y = as.numeric(tab))
+    if (x$discrete[d]) {
+      out[[d]] <- Rbiips("wtd_table", values, weights)
     } else {
-      dens <- density(values, weights = weights, bw = bww, adjust = adjust,
-        ...)
+      out[[d]] <- density(values, weights = weights, bw = bww, ...)
     }
-
-    out[[varname]] <- list(density = dens, name = varname, type = x$type, n_part = n_part,
-      ess = ess, discrete = discrete)
-    class(out[[varname]]) <- "density.smcarray.univariate"
   }
 
+  dim(out) <- dimen[!drop_dim]
   class(out) <- "density.smcarray"
   return(out)
 }
 
 
 ##' @export
-density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
+density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, ...) {
   out <- list()
   bw_s <- bw
 
   # first treat filtering and backward.smoothing
   if (!is.null(x$f)) {
-    dens <- density(x$f, bw, adjust, subset, ...)
+    dimen <- dim(x$f$values)
+    dens <- density(x$f, bw, adjust=adjust, ...)
     bw_s <- list()
-    for (n in names(dens)) {
-      out[[n]]$f <- dens[[n]]
-      bw_s[[n]] <- dens[[n]]$density$bw
+    for (d in 1:length(dens)) {
+      if (length(out)<d)
+        out[[d]] <- list()
+      out[[d]]$f <- dens[[d]]
+      bw_s[[d]] <- dens[[d]]$bw
     }
   }
   if (!is.null(x$b)) {
-    dens <- density(x$b, bw, adjust, subset, ...)
+    dimen <- dim(x$b$values)
+    dens <- density(x$b, bw, adjust=adjust, ...)
     bw_s <- list()
-    for (n in names(dens)) {
-      out[[n]]$b <- dens[[n]]
-      bw_s[[n]] <- dens[[n]]$density$bw
+    for (d in 1:length(dens)) {
+      if (length(out)<d)
+        out[[d]] <- list()
+      out[[d]]$b <- dens[[d]]
+      bw_s[[d]] <- dens[[d]]$bw
     }
   }
 
   # then treat smoothing (applying previous bandwidth if any)
   if (!is.null(x$s)) {
+    dimen <- dim(x$s$values)
     if (is.list(bw_s))
       adjust <- 1
-    dens <- density(x$s, bw_s, adjust, subset, ...)
-    for (n in names(dens)) out[[n]]$s <- dens[[n]]
+    dens <- density(x$s, bw_s, adjust=adjust, ...)
+    for (d in 1:length(dens)) {
+      if (length(out)<d)
+        out[[d]] <- list()
+      out[[d]]$s <- dens[[d]]
+    }
   }
 
-  for (n in names(out)) class(out[[n]]) <- "density.smcarray.univariate.list"
+  for (d in 1:length(dens)) class(out[[d]]) <- "density.smcarray.fsb.univariate"
+
+  drop_dim <- names(dimen) %in% c("particle")
+  dim(out) <- dimen[!drop_dim]
 
   class(out) <- "density.smcarray.fsb"
   return(out)
@@ -438,12 +404,12 @@ density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
 
 
 ##' @export
-density.smcarray.fsb.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
+density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
   out <- list()
   for (n in names(x)) {
     if (!is.smcarray.fsb(x[[n]]))
       next
-    out[[n]] <- density(x[[n]], bw = bw, adjust = adjust, subset = subset, ...)
+    out[[n]] <- density(x[[n]], bw = bw, ...)
   }
 
   class(out) <- "density.smcarray.fsb.list"
@@ -451,6 +417,55 @@ density.smcarray.fsb.list <- function(x, bw = "nrd0", adjust = 1, subset, ...) {
   return(out)
 }
 
+##' @export
+plot.density.smcarray <- function(x, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], ...)
+  }
+}
+
+##' @export
+plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6,
+                                                 main = NULL, xlab = NULL, ylab = "Density", xlim, ylim, ...) {
+
+  if (missing(xlim)) {
+    xmin <- +Inf
+    xmax <- -Inf
+
+    for (fsb in 1:length(x)) {
+      xmin <- min(xmin, x[[fsb]]$x)
+      xmax <- max(xmin, x[[fsb]]$x)
+    }
+    xlim <- c(xmin,xmax)
+  }
+  if (missing(ylim)) {
+    ymax <- -Inf
+    for (fsb in 1:length(x))
+      ymax <- max(ymax, x[[fsb]]$y)
+    ylim <- c(0,ymax)
+  }
+
+  plot(NA, type="n",
+       main=main, xlab=xlab, ylab=ylab,
+       xlim=xlim, ylim=ylim, ...)
+  for (fsb in 1:length(x)) {
+    lines(x[[fsb]], type=type, col=col[fsb], ...)
+  }
+}
+
+##' @export
+plot.density.smcarray.fsb <- function(x, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], ...)
+  }
+}
+
+##' @export
+plot.density.smcarray.fsb.list <- function(x, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], ...)
+  }
+}
 
 # ##' @export
 # plot.density.smcarray.univariate <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value",
