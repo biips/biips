@@ -1,13 +1,13 @@
 mcmcarray <- function(data = NA, dim = length(data), dimnames = NULL, iteration = length(dim),
-  chain = NA) {
+                      chain = NA) {
   stopifnot(length(iteration) == 1, length(chain) == 1)
   if (is.na(iteration))
     stopifnot(is.na(chain)) else {
-    stopifnot(is.numeric(iteration), iteration >= 1, iteration <= length(dim))
-    if (!any(is.na(chain)))
-      stopifnot(is.numeric(chain), chain >= 1, chain <= length(dim), chain !=
-        iteration)
-  }
+      stopifnot(is.numeric(iteration), iteration >= 1, iteration <= length(dim))
+      if (!any(is.na(chain)))
+        stopifnot(is.numeric(chain), chain >= 1, chain <= length(dim), chain !=
+                    iteration)
+    }
 
   x <- array(data, dim, dimnames)
 
@@ -74,7 +74,7 @@ summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == a
   if (order >= 4) {
     mom4 <- apply(object^4, marg, FUN = mean)
     summ$kurt <- (mom4 - 4 * mom3 * summ$mean + 6 * mom2 * summ$mean^2 - 3 *
-      summ$mean^4)/summ$var^2 - 3
+                    summ$mean^4)/summ$var^2 - 3
   }
 
   ### quantiles
@@ -88,7 +88,7 @@ summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == a
     summ$quant <- list()
     for (i in 1:length(probs)) {
       summ$quant[[as.character(probs[i])]] <- array(quant[((i - 1) * len +
-        1):(i * len)], dim = dim_array)
+                                                             1):(i * len)], dim = dim_array)
     }
   }
 
@@ -124,7 +124,7 @@ print.summary.mcmcarray <- function(x, ...) {
   print(x[!(names(x) %in% c("drop.dims"))], ...)
   if (length(x$drop.dims) > 0) {
     cat("Marginalizing over:", paste(paste(names(x$drop.dims), "(", x$drop.dims,
-      ")", sep = ""), collapse = ","), "\n")
+                                           ")", sep = ""), collapse = ","), "\n")
   }
 }
 
@@ -148,21 +148,14 @@ table.mcmcarray <- function(x, ...) {
 
   dimen <- dim(x)
   drop_dim <- names(dimen) %in% c("iteration", "chain")
-
-  n_iter <- dimen["iteration"]
-  if (is.na(n_iter))
-    n_iter <- 1
-  n_chain <- dimen["chain"]
-  if (is.na(n_chain))
-    n_chain <- 1
-
+  n_samples <- prod(dimen[drop_dim])
   len <- prod(dimen[!drop_dim])
 
   for (d in 1:len) {
-    ind_vec <- seq(d, len * (n_iter*n_chain - 1) + d, len)
+    ind_vec <- seq(d, len * (n_samples - 1) + d, len)
     values <- x[ind_vec]
 
-    out[[d]] <- table(values, ...)
+    out[[d]] <- table(values, ...)/n_samples
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -178,18 +171,11 @@ density.mcmcarray <- function(x, bw = "nrd0", ...) {
 
   dimen <- dim(x)
   drop_dim <- names(dimen) %in% c("iteration", "chain")
-
-  n_iter <- dimen["iteration"]
-  if (is.na(n_iter))
-    n_iter <- 1
-  n_chain <- dimen["chain"]
-  if (is.na(n_chain))
-    n_chain <- 1
-
+  n_samples <- prod(dimen[drop_dim])
   len <- prod(dimen[!drop_dim])
 
   for (d in 1:len) {
-    ind_vec <- seq(d, len * (n_iter*n_chain - 1) + d, len)
+    ind_vec <- seq(d, len * (n_samples - 1) + d, len)
     values <- x[ind_vec]
 
     out[[d]] <- density(values, bw = rec(bw,d), ...) # recycle
@@ -200,6 +186,26 @@ density.mcmcarray <- function(x, bw = "nrd0", ...) {
   return(out)
 }
 
+##' @export
+hist.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
+  out <- list()
+
+  dimen <- dim(x)
+  drop_dim <- names(dimen) %in% c("iteration", "chain")
+  n_samples <- prod(dimen[drop_dim])
+  len <- prod(dimen[!drop_dim])
+
+  for (d in 1:len) {
+    ind_vec <- seq(d, len * (n_samples - 1) + d, len)
+    values <- x[ind_vec]
+
+    out[[d]] <- hist(values, main=rec(main, d), xlab=rec(xlab, d), ...) # recycle arguments
+  }
+
+  dim(out) <- dimen[!drop_dim]
+  class(out) <- "histogram.mcmcarray"
+  return(invisible(out))
+}
 
 ##' @export
 table.mcmcarray.list <- function(x, ...) {
@@ -210,9 +216,7 @@ table.mcmcarray.list <- function(x, ...) {
       next
     out[[name]] <- table(x[[i]], ...)
   }
-
   class(out) <- "table.mcmcarray.list"
-
   return(out)
 }
 
@@ -225,49 +229,67 @@ density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
       next
     out[[name]] <- density(x[[i]], bw = rec(bw,i), ...) # recycle bw
   }
-
   class(out) <- "density.mcmcarray.list"
-
   return(out)
 }
 
 ##' @export
-plot.table.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab=NULL, ...) {
+hist.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
+  out <- list()
   for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+    name <- names(x)[i]
+    if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
+      next
+    out[[name]] <- hist(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
+  }
+  class(out) <- "histogram.mcmcarray.list"
+  return(invisible(out))
+}
+
+##' @export
+plot.table.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab="Probability", ...) {
+  for (d in 1:length(x)) {
+    plot(x[[d]], main=rec(main,d), xlab=rec(xlab,d), ylab=ylab, ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-plot.density.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
-  for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+plot.density.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
+  for (d in 1:length(x)) {
+    plot(x[[d]], main=rec(main,d), xlab=rec(xlab,d), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-plot.table.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ylab=NULL, ...) {
-  for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+plot.histogram.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
+  for (d in 1:length(x)) {
+    plot(x[[d]], main=rec(main,d), xlab=rec(xlab,d), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-plot.density.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
+plot.table.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-hist.mcmcarray <- function(x, ...) {
-  hist(c(x), ...)
+plot.density.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
+  }
+  invisible(NULL)
+}
+
+##' @export
+plot.histogram.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
+  }
+  invisible(NULL)
 }

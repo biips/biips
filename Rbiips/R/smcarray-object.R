@@ -341,7 +341,7 @@ table.smcarray <- function(x, ...) {
 
 ##' @importFrom stats density
 ##' @export
-density.smcarray <- function(x, bw = "nrd0", ...) {
+density.smcarray <- function(x, bw="nrd0", ...) {
   out <- list()
 
   dimen <- dim(x$values)
@@ -358,7 +358,7 @@ density.smcarray <- function(x, bw = "nrd0", ...) {
     values <- x$values[ind_vec]
     weights <- x$weights[ind_vec]
 
-    out[[d]] <- density(values, weights = weights, bw = rec(bw,d), ...) # recycle bw
+    out[[d]] <- density(values, weights=weights, bw=rec(bw,d), ...) # recycle bw
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -381,7 +381,7 @@ table.smcarray.fsb <- function(x, ...) {
 }
 
 ##' @export
-density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, ...) {
+density.smcarray.fsb <- function(x, bw="nrd0", adjust=1, ...) {
   out <- list()
   bw_s <- bw
 
@@ -433,7 +433,7 @@ density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, ...) {
 
 
 ##' @export
-table.smcarray.fsb.list <- function(x,...) {
+table.smcarray.fsb.list <- function(x, ...) {
   out <- list()
   for (i in 1:length(x)) {
     if (!is.smcarray.fsb(x[[i]]))
@@ -448,13 +448,13 @@ table.smcarray.fsb.list <- function(x,...) {
 
 
 ##' @export
-density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
+density.smcarray.fsb.list <- function(x, bw="nrd0", ...) {
   out <- list()
   for (i in 1:length(x)) {
     if (!is.smcarray.fsb(x[[i]]))
       next
     name <- names(x)[i]
-    out[[name]] <- density(x[[i]], bw = rec(bw,i), ...) # recycle bw
+    out[[name]] <- density(x[[i]], bw=rec(bw,i), ...) # recycle bw
   }
 
   class(out) <- "density.smcarray.fsb.list"
@@ -465,15 +465,14 @@ density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
 ##' @export
 plot.density.smcarray <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
 plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6, pch=NULL, lwd=NULL, lty=NULL,
-                                                 main = NULL, xlab = NULL, ylab = "Density", xlim, ylim, ...) {
+                                                 main=NULL, xlab=NULL, xlim, ylim, ...) {
 
   # compute axis limits
   if (missing(xlim)) {
@@ -494,30 +493,28 @@ plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6, pch=NULL,
   }
 
   plot(NA, type="n",
-       main=main, xlab=xlab, ylab=ylab,
+       main=main, xlab=xlab,
        xlim=xlim, ylim=ylim, ...)
   for (fsb in 1:length(x)) {
     lines(x[[fsb]], type=rec(type,fsb), col=rec(col,fsb),
-          pch = rec(pch,fsb), lwd = rec(lwd,fsb),
-          lty = rec(lty,fsb), ...) # recycle arguments
+          pch=rec(pch,fsb), lwd=rec(lwd,fsb),
+          lty=rec(lty,fsb), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-plot.density.smcarray.fsb <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
+plot.density.smcarray.fsb <- function(x, main=NULL, xlab=NULL, ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
   }
   invisible(NULL)
 }
 
 ##' @export
-plot.density.smcarray.fsb.list <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
+plot.density.smcarray.fsb.list <- function(x, main=NULL, xlab=NULL, ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], rec(main,i), rec(xlab,i),
-         rec(ylab,i), ...) # recycle arguments
+    plot(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
   }
   invisible(NULL)
 }
