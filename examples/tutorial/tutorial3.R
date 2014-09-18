@@ -6,8 +6,8 @@
 #'   html_document:
 #'     toc: TRUE
 #'     fig_caption: TRUE
-#'     theme: cerulean
 #'     highlight: tango
+#'     theme: cerulean
 #'   pdf_document:
 #'     toc: TRUE
 #'     fig_caption: TRUE

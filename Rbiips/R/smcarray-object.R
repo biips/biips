@@ -83,13 +83,12 @@ print.smcarray.fsb.list <- function(x, ...) {
 
 
 ##' @export
-summary.smcarray <- function(object, probs = c(), order, ...) {
+summary.smcarray <- function(object, probs = c(), order, mode = all(object$discrete), ...) {
 
   ### TODO check arguments
   if (length(probs) > 0)
     stopifnot(is.numeric(probs), probs > 0, probs < 1)
 
-  mode <- all(object$discrete)
   if (missing(order))
     order <- ifelse(mode, 0, 1)
 
@@ -314,12 +313,9 @@ diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...
   return(invisible(out))
 }
 
-
-##' @importFrom stats density
 ##' @export
-density.smcarray <- function(x, bw = "nrd0", ...) {
+table.smcarray <- function(x, ...) {
   out <- list()
-  bww <- bw
 
   dimen <- dim(x$values)
   drop_dim <- names(dimen) %in% c("particle")
@@ -335,14 +331,34 @@ density.smcarray <- function(x, bw = "nrd0", ...) {
     values <- x$values[ind_vec]
     weights <- x$weights[ind_vec]
 
-    if (length(bw) > 1)
-      bww <- bw[[d]]
+    out[[d]] <- Rbiips("wtd_table", values, weights) # recycle bw
+  }
 
-    if (x$discrete[d]) {
-      out[[d]] <- Rbiips("wtd_table", values, weights)
-    } else {
-      out[[d]] <- density(values, weights = weights, bw = bww, ...)
-    }
+  dim(out) <- dimen[!drop_dim]
+  class(out) <- "table.smcarray"
+  return(out)
+}
+
+##' @importFrom stats density
+##' @export
+density.smcarray <- function(x, bw = "nrd0", ...) {
+  out <- list()
+
+  dimen <- dim(x$values)
+  drop_dim <- names(dimen) %in% c("particle")
+
+  n_part <- dimen["particle"]
+  if (is.na(n_part))
+    n_part <- 1
+
+  len <- prod(dimen[!drop_dim])
+
+  for (d in 1:len) {
+    ind_vec <- seq(d, len * (n_part - 1) + d, len)
+    values <- x$values[ind_vec]
+    weights <- x$weights[ind_vec]
+
+    out[[d]] <- density(values, weights = weights, bw = rec(bw,d), ...) # recycle bw
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -350,6 +366,19 @@ density.smcarray <- function(x, bw = "nrd0", ...) {
   return(out)
 }
 
+
+##' @export
+table.smcarray.fsb <- function(x, ...) {
+  out <- list()
+  for (fsb in names(x)) {
+    if (!is.smcarray(x[[fsb]]))
+      next
+    out[[fsb]] <- table(x[[fsb]],...)
+  }
+
+  class(out) <- "table.smcarray.fsb"
+  return(out)
+}
 
 ##' @export
 density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, ...) {
@@ -404,12 +433,28 @@ density.smcarray.fsb <- function(x, bw = "nrd0", adjust = 1, ...) {
 
 
 ##' @export
+table.smcarray.fsb.list <- function(x,...) {
+  out <- list()
+  for (i in 1:length(x)) {
+    if (!is.smcarray.fsb(x[[i]]))
+      next
+    name <- names(x)[i]
+    out[[name]] <- table(x[[i]], ...)
+  }
+
+  class(out) <- "table.smcarray.fsb.list"
+  return(out)
+}
+
+
+##' @export
 density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
   out <- list()
-  for (n in names(x)) {
-    if (!is.smcarray.fsb(x[[n]]))
+  for (i in 1:length(x)) {
+    if (!is.smcarray.fsb(x[[i]]))
       next
-    out[[n]] <- density(x[[n]], bw = bw, ...)
+    name <- names(x)[i]
+    out[[name]] <- density(x[[i]], bw = rec(bw,i), ...) # recycle bw
   }
 
   class(out) <- "density.smcarray.fsb.list"
@@ -418,16 +463,19 @@ density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
 }
 
 ##' @export
-plot.density.smcarray <- function(x, ...) {
+plot.density.smcarray <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], ...)
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
   }
+  invisible(NULL)
 }
 
 ##' @export
-plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6,
+plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6, pch=NULL, lwd=NULL, lty=NULL,
                                                  main = NULL, xlab = NULL, ylab = "Density", xlim, ylim, ...) {
 
+  # compute axis limits
   if (missing(xlim)) {
     xmin <- +Inf
     xmax <- -Inf
@@ -449,183 +497,27 @@ plot.density.smcarray.fsb.univariate <- function(x, type="l", col=1:6,
        main=main, xlab=xlab, ylab=ylab,
        xlim=xlim, ylim=ylim, ...)
   for (fsb in 1:length(x)) {
-    lines(x[[fsb]], type=type, col=col[fsb], ...)
+    lines(x[[fsb]], type=rec(type,fsb), col=rec(col,fsb),
+          pch = rec(pch,fsb), lwd = rec(lwd,fsb),
+          lty = rec(lty,fsb), ...) # recycle arguments
   }
+  invisible(NULL)
 }
 
 ##' @export
-plot.density.smcarray.fsb <- function(x, ...) {
+plot.density.smcarray.fsb <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], ...)
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
   }
+  invisible(NULL)
 }
 
 ##' @export
-plot.density.smcarray.fsb.list <- function(x, ...) {
+plot.density.smcarray.fsb.list <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], ...)
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
   }
+  invisible(NULL)
 }
-
-# ##' @export
-# plot.density.smcarray.univariate <- function(x, type = "l", lwd = 1, col = 1:6, xlab = "value",
-#   ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
-#   lwdd <- lwd
-#   coll <- col
-#
-#   legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
-#     ...) {
-#     return(legend(x = x, y = y, lwd = lwd, col = col, ...))
-#   }
-#
-#   leg_flag <- TRUE
-#   if (is.logical(legend.text)) {
-#     stopifnot(length(legend.text) == 1)
-#     leg_flag <- legend.text
-#   }
-#
-#   if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
-#     legend.text <- c()
-#     for (t in names(x)) {
-#       legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
-#         sep = ""))
-#     }
-#   }
-#
-#
-#   if (x$discrete) {
-#     if (missing(ylab))
-#       ylab <- "probability"
-#     if (missing(main))
-#       main <- paste(x$name, "discrete law histograms")
-#     if (missing(sub))
-#       sub <- paste("n_part=", x$n_part)
-#
-#     barplot(x$density$y, names.arg = x$density$x, col = col, lwd = lwd, xlab = xlab,
-#       ylab = ylab, main = main.title, sub = sub, legend.text = legend.text,
-#       args_legend = args_legend, ...)
-#   } else {
-#     if (missing(ylab))
-#       ylab <- "density"
-#     if (missing(main))
-#       main <- paste(x$name, "kernel density estimates")
-#     if (missing(sub)) {
-#       bw <- x$density$bw
-#       sub <- paste("n_part=", x$n_part, ", bw=", signif(bw, digits = 2), sep = "")
-#     }
-#
-#     plot(x$density$x, x$density$y, type = type, lwd = lwd, col = col, xlab = xlab,
-#       ylab = ylab, main = main, sub = sub, ...)
-#
-#     if (leg_flag)
-#       do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
-#   }
-#
-#   invisible()
-# }
-#
-#
-# ##' @export
-# plot.density.smcarray <- function(x, type = "l", lwd = lwd, col = 1:6, ...) {
-#   for (n in names(x)) {
-#     plot(x[[n]], type = type, lwd = lwd, col = col, ...)
-#   }
-#   invisible()
-# }
-#
-#
-# ##' @export
-# plot.density.smcarray.univariate.list <- function(x, type = "l", lwd = 1, col = 1:6,
-#   xlab = "value", ylab, main, sub, legend.text = NULL, args_legend = NULL, ...) {
-#   lwdd <- lwd
-#   coll <- col
-#
-#   legend.density.smcarray <- function(x = "topright", y = NULL, lwd = lwdd, col = coll,
-#     ...) {
-#     return(legend(x = x, y = y, lwd = lwd, col = col, ...))
-#   }
-#
-#   leg_flag <- TRUE
-#   if (is.logical(legend.text)) {
-#     stopifnot(length(legend.text) > 0)
-#     leg_flag <- legend.text
-#   }
-#
-#   if (leg_flag && (is.logical(legend.text) || is.null(legend.text))) {
-#     legend.text <- c()
-#     for (t in names(x)) {
-#       legend.text <- c(legend.text, paste(x[[t]]$type, ", ess=", round(x$ess),
-#         sep = ""))
-#     }
-#   }
-#
-#   if (x[[1]]$discrete) {
-#     # get table locations
-#     xx <- c()
-#     for (t in names(x)) xx <- c(xx, x[[t]]$density$x)
-#     xx <- sort(unique(xx))
-#
-#     yy <- c()
-#     for (t in names(x)) {
-#       # resize values with missing 0 to empty locations
-#       y <- rep(0, length(xx))
-#       y[xx %in% x[[t]]$density$x] <- x[[t]]$density$y
-#       yy <- c(yy, y)
-#     }
-#     yy <- matrix(yy, nrow = length(x), byrow = TRUE)
-#
-#     if (missing(ylab))
-#       ylab <- "probability"
-#     if (missing(main))
-#       main <- paste(x[[1]]$name, "discrete law histograms")
-#     if (missing(sub))
-#       sub <- paste("n_part=", x[[1]]$n_part, sep = "")
-#
-#     if (length(col) > length(x))
-#       col <- col[1:length(x)]
-#     if (length(density) > length(x))
-#       density <- density[1:length(x)]
-#     if (length(angle) > length(x))
-#       angle <- angle[1:length(x)]
-#     barplot(yy, names.arg = xx, col = col, xlab = xlab, ylab = ylab, main = main,
-#       sub = sub, legend.text = legend.text, args_legend = args_legend, beside = TRUE,
-#       ...)
-#   } else {
-#     xx <- c()
-#     yy <- c()
-#
-#     for (t in names(x)) {
-#       xx <- c(xx, x[[t]]$density$x)
-#       yy <- c(yy, x[[t]]$density$y)
-#     }
-#     xx <- matrix(xx, ncol = length(x))
-#     yy <- matrix(yy, ncol = length(x))
-#
-#     if (missing(ylab))
-#       ylab <- "density"
-#     if (missing(main))
-#       main <- paste(x[[1]]$name, "kernel density estimates")
-#     if (missing(sub)) {
-#       bw <- x[[1]]$density$bw
-#       sub <- paste("n_part=", x[[1]]$n_part, ", bw=", signif(bw, digits = 2),
-#         sep = "")
-#     }
-#
-#     matplot(xx, yy, type = type, lwd = lwd, col = col, xlab = xlab, ylab = ylab,
-#       main = main, sub = sub, ...)
-#
-#     if (leg_flag)
-#       do.call(legend.density.smcarray, c(legend = legend.text, args_legend))
-#   }
-#
-#   invisible()
-# }
-#
-#
-# ##' @export
-# plot.density.smcarray.fsb <- function(x, type = "l", lwd = 1, col = 1:6, ...) {
-#   for (n in names(x)) {
-#     plot(x[[n]], type = type, lwd = lwd, col = col, ...)
-#   }
-#   invisible()
-# }

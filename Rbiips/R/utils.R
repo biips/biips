@@ -175,3 +175,9 @@ check_type <- function(type, several.ok = TRUE) {
   type <- match.arg(type, c("f", "s", "b"), several.ok = several.ok)
   return(unique(type))
 }
+
+
+##' Access i-th element of x with recycling
+rec <- function(x, i) {
+  x[[(i-1)%%length(x)+1]]
+}

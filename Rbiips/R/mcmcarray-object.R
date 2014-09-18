@@ -44,13 +44,12 @@ print.mcmcarray.list <- function(x, ...) {
 }
 
 ##' @export
-summary.mcmcarray <- function(object, probs = c(), order, ...) {
+summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == as.integer(object)), ...) {
 
   ### TODO check arguments
   if (length(probs) > 0)
     stopifnot(is.numeric(probs), probs > 0, probs < 1)
 
-  mode <- all(object == as.integer(object))
   if (missing(order))
     order <- ifelse(mode, 0, 1)
 
@@ -143,11 +142,9 @@ print.summary.mcmcarray.list <- function(x, ...) {
 }
 
 
-##' @importFrom stats density
 ##' @export
-density.mcmcarray <- function(x, bw = "nrd0", ...) {
+table.mcmcarray <- function(x, ...) {
   out <- list()
-  bww <- bw
 
   dimen <- dim(x)
   drop_dim <- names(dimen) %in% c("iteration", "chain")
@@ -165,10 +162,37 @@ density.mcmcarray <- function(x, bw = "nrd0", ...) {
     ind_vec <- seq(d, len * (n_iter*n_chain - 1) + d, len)
     values <- x[ind_vec]
 
-    if (length(bw) > 1)
-      bww <- bw[[d]]
+    out[[d]] <- table(values, ...)
+  }
 
-    out[[d]] <- density(values, bw = bww, ...)
+  dim(out) <- dimen[!drop_dim]
+  class(out) <- "table.mcmcarray"
+  return(out)
+}
+
+
+##' @importFrom stats density
+##' @export
+density.mcmcarray <- function(x, bw = "nrd0", ...) {
+  out <- list()
+
+  dimen <- dim(x)
+  drop_dim <- names(dimen) %in% c("iteration", "chain")
+
+  n_iter <- dimen["iteration"]
+  if (is.na(n_iter))
+    n_iter <- 1
+  n_chain <- dimen["chain"]
+  if (is.na(n_chain))
+    n_chain <- 1
+
+  len <- prod(dimen[!drop_dim])
+
+  for (d in 1:len) {
+    ind_vec <- seq(d, len * (n_iter*n_chain - 1) + d, len)
+    values <- x[ind_vec]
+
+    out[[d]] <- density(values, bw = rec(bw,d), ...) # recycle
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -178,12 +202,28 @@ density.mcmcarray <- function(x, bw = "nrd0", ...) {
 
 
 ##' @export
-density.mcmcarray.list <- function(x, bw = "nrd0", adjust = 1, ...) {
+table.mcmcarray.list <- function(x, ...) {
   out <- list()
-  for (n in names(x)) {
-    if (!is.mcmcarray(x[[n]]) || n %in% c("log_marg_like_pen", "log_marg_like", "info"))
+  for (i in 1:length(x)) {
+    name <- names(x)[i]
+    if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
       next
-    out[[n]] <- density(x[[n]], bw = bw, adjust = adjust, ...)
+    out[[name]] <- table(x[[i]], ...)
+  }
+
+  class(out) <- "table.mcmcarray.list"
+
+  return(out)
+}
+
+##' @export
+density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
+  out <- list()
+  for (i in 1:length(x)) {
+    name <- names(x)[i]
+    if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
+      next
+    out[[name]] <- density(x[[i]], bw = rec(bw,i), ...) # recycle bw
   }
 
   class(out) <- "density.mcmcarray.list"
@@ -192,15 +232,42 @@ density.mcmcarray.list <- function(x, bw = "nrd0", adjust = 1, ...) {
 }
 
 ##' @export
-plot.density.mcmcarray <- function(x, ...) {
+plot.table.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab=NULL, ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], ...)
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
   }
+  invisible(NULL)
 }
 
 ##' @export
-plot.density.mcmcarray.list <- function(x, ...) {
+plot.density.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {
-    plot(x[[i]], ...)
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
   }
+  invisible(NULL)
+}
+
+##' @export
+plot.table.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ylab=NULL, ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
+  }
+  invisible(NULL)
+}
+
+##' @export
+plot.density.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], rec(main,i), rec(xlab,i),
+         rec(ylab,i), ...) # recycle arguments
+  }
+  invisible(NULL)
+}
+
+##' @export
+hist.mcmcarray <- function(x, ...) {
+  hist(c(x), ...)
 }

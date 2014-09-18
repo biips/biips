@@ -3,7 +3,7 @@ function stat = wtd_stat(values, weights, probs, order, mode)
 %--------------------------------------------------------------------------
 % WTD_STAT computes univariate statistics on weighted samples
 % summ = wtd_stat(values, weights, probs, order, mode)
-% 
+%
 % INPUT:
 % - values:     array with last dimension corresponding to particles
 % - weights:    array of the same size as values
@@ -38,7 +38,7 @@ m = ndims(values);
 
 %% moment based statistics
 if order>=1
-stat.mean = sum(values .* weights, m);
+    stat.mean = sum(values .* weights, m);
 end
 if order>=2
     stat.var = sum(bsxfun(@minus, values, stat.mean).^2 .* weights, m);

@@ -1,7 +1,7 @@
 Package: Rbiips
 Version: 0.9.1
 Type: Package
-Date: 2014-09-17
+Date: 2014-09-18
 Title: Bayesian inference with interacting Particle Systems
 Author: Inria
 Maintainer: biips-project <biips-project@lists.gforge.inria.fr>

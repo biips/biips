@@ -1,14 +1,16 @@
 Adrien le 17/09/2014 :
 ======================
-- [ ] arguments cycliques pour density et plot.density
-- [ ] cas discret pour density et plot.density
+- [x] arguments cycliques pour density et plot.density
+- [ ] ajouter plot.table.smcarray
+- [ ] ajouter biips_table pour variables discrètes
 - [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips ?
-- [ ] vérifier choix de la bandwidth dans matbiips
+- [x] vérifier choix de la bandwidth dans matbiips
 - [ ] Rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
 - [ ] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
 - [ ] compiler paquets binaires pour centos 64bit, mandriva, opensuse
 - [ ] ajouter références sur méthodes SMC dans les liens du site
 - [ ] ajouter calcul régions HDP
+- [ ] ajouter histogrammes de particules
 
 Article/exemples :
 - [ ] diagnosis: expliquer pourquoi ess>=30 ?
@@ -21,7 +23,7 @@ Article/exemples :
 - [ ] figures de l'article : `box off`
 - [ ] lisibilité figure 9
 - [ ] vérifier code matbiips et BUGS
-- [ ] police et couleur de fond matbbips
+- [ ] police et couleur de fond matbiips
 - [ ] ajouter abbréviations : PIMH
 - [ ] appliquer style JSS <http://www.jstatsoft.org/style> :
     - vérifier capitalization, title s'applique aussi aux sections et sous sections ?

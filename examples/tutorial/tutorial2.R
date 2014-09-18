@@ -6,8 +6,8 @@
 #'   html_document:
 #'     toc: TRUE
 #'     fig_caption: TRUE
-#'     theme: cerulean
 #'     highlight: tango
+#'     theme: cerulean
 #'   pdf_document:
 #'     toc: TRUE
 #'     fig_caption: TRUE
@@ -173,7 +173,7 @@ legend('topright', leg=c('PMMH samples', 'True value'),
 
 #' #### Histogram and kde estimate of the posterior for the parameter
 #+ fig.cap = 'PMMH: Histogram posterior parameter'
-hist(c(mcmc_samples), breaks=15, col='blue', border='white',
+hist(mcmc_samples, breaks=15, col='blue', border='white',
      xlab=var_name, ylab='Number of samples',
      main=var_name)
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
@@ -231,7 +231,7 @@ par(mfrow=c(1,1))
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
-  hist(c(out_pmmh$x[tk,]), breaks=30, col='blue', border='white',
+  hist(out_pmmh$x[tk,], breaks=30, col='blue', border='white',
        xlab=bquote(x[.(tk)]),
        ylab='Number of samples',
        main=paste('t=', tk, sep=''))

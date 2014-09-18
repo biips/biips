@@ -161,7 +161,7 @@ box off
 % plot(data.x_true, 'g')
 % xlabel('Time')
 % ylabel('Estimates')
-% legend({'95 % credible interval', 'Backward smoothing mean estimate'})
+% legend({'95 % credible interval', 'Backward smoothing mean estimate', 'True value'})
 % legend boxoff
 % box off
 
