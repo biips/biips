@@ -138,10 +138,10 @@ summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
-% *Posterior mean and credibilist interval for the parameter*
+% *Posterior mean and credible interval for the parameter*
 summ_var = getfield(summ_pmmh, var_name);
 fprintf('Posterior mean of log_prec_y: %.1f\n', summ_var.mean);
-fprintf('95%% credibilist interval for log_prec_y: [%.1f, %.1f]\n',...
+fprintf('95%% credible interval for log_prec_y: [%.1f, %.1f]\n',...
     summ_var.quant{1}, summ_var.quant{2});
 
 

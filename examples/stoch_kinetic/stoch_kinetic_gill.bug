@@ -18,10 +18,10 @@ data
 model
 {
   x[,1] ~ LV(x_init,c[1],c[2],c[3],1)
-  y[1] ~ dnorm(x_true[1,1], 1/sigma^2) 
+  y[1] ~ dnorm(x[1,1], 1/sigma^2) 
   for (t in 2:t_max)
   {    
-    x[, t] ~ LV(x[,t-1],c[1],c[2],c[3],1) 
+    x[,t] ~ LV(x[,t-1],c[1],c[2],c[3],1) 
     y[t] ~ dnorm(x[1,t], 1/sigma^2) 
   }
 }

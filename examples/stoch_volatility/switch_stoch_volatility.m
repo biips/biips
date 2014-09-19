@@ -100,7 +100,7 @@ for t=1:t_max
     
     weight = arrayfun(@(x) sum(out_smc.x.s.weights(t, out_smc.x.s.values(t,:) == x)), val);
     
-    scatter(t*ones(size(val)), val, min(20, .6*n_part*weight), 'r',...
+    scatter(t*ones(size(val)), val, min(50, .5*n_part*weight), 'r',...
         'markerfacecolor', 'r')
 end
 xlabel('Time')
@@ -299,8 +299,8 @@ colormap(hot)
 view(2)
 xlim([min(A(:)), max(A(:))])
 colorbar
-xlabel('$\alpha_1$', 'interpreter', 'latex', 'fontsize', 20)
-ylabel('$\alpha_2$', 'interpreter', 'latex', 'fontsize', 20)
+xlabel('\alpha_1', 'fontsize', 20)
+ylabel('\alpha_2', 'fontsize', 20)
 saveas(gca, 'volatility_sensitivity', 'epsc2')
 saveas(gca, 'volatility_sensitivity', 'png')
 

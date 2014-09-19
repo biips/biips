@@ -68,8 +68,8 @@ require(Rbiips)
 #+
 #' # General settings
 par(bty='l')
-light_blue = rgb(.7, .7, 1);
-light_red = rgb(1, .7, .7);
+light_blue = rgb(.7, .7, 1)
+light_red = rgb(1, .7, .7)
 
 #' Set the random numbers generator seed for reproducibility
 set.seed(2)
@@ -144,7 +144,8 @@ polygon(xx, yy, col=light_blue, border=NA)
 lines(x_f_mean, col='blue', lwd=3)
 lines(data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95 % credible interval', 'Filtering mean estimate', 'True value'),
-       col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1), bty='n')
+       col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
+       bty='n')
 
 #' #### Plot Smoothing estimates
 #+ fig.cap='SMC: Smoothing estimates'
@@ -176,7 +177,7 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Filtering density', 'Smoothing density', 'True value'),
        col=c('blue', 'red', 'green'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))
 
 #' # Biips Particle Independent Metropolis-Hastings
@@ -227,7 +228,7 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('PIMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
-       bg='white', bty='n')
+       bty='n')
 
 
 #' #### Histograms of posteriors
@@ -243,7 +244,7 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(22,8), lwd=c(NA,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
-       bg='white', bty='n')
+       bty='n')
 
 #' #### Kernel density estimates of posteriors
 #+ fig.cap='PIMH: KDE estimates marginal posteriors'
@@ -259,5 +260,5 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=2, lty=c(1,NA),
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))

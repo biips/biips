@@ -92,6 +92,8 @@ if ~sample_data
     plot(SP500_date_num, y)
     datetick('x', 'mmmyyyy', 'keepticks')
     ylabel('Log-returns')
+    xlabel('Date')
+    title('Observed data: S&P 500')
 end
 
 %%
@@ -113,7 +115,7 @@ end
 
 %%
 % *Compile BUGS model and sample data if simulated data*
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_filename, data, 'sample_data', sample_data);
 data = model.data;
 
 %% Biips Particle Marginal Metropolis-Hastings
@@ -138,27 +140,27 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', l
 
 %%
 % *Run PMMH*
-[obj_pmmh, stats_pmmh_update] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] =...
-    biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', thin); % Samples
+obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like] =...
+    biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', thin); % Samples
 
 %%
 % *Some summary statistics*
-summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 
 %%
 % *Compute kernel density estimates*
-kde_estimates_pmmh = biips_density(out_pmmh);
+kde_pmmh = biips_density(out_pmmh);
 
 param_plot = {'alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
 
 %%
 % *Posterior mean and credible interval for the parameters*
 for i=1:numel(param_plot)
-    sum_param = getfield(summary_pmmh, param_plot{i});
-    fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, sum_param.mean);
+    summ_param = getfield(summ_pmmh, param_plot{i});
+    fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, summ_param.mean);
     fprintf('95%% credibilist interval for %s: [%.3f, %.3f]\n',...
-        param_plot{i}, sum_param.quant{1}, sum_param.quant{2});
+        param_plot{i}, summ_param.quant{1}, summ_param.quant{2});
 end
 
 %%
@@ -166,47 +168,63 @@ end
 if sample_data
     param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
 end
-title_names = {'\alpha[1]', '\alpha[2]', '\phi', '\sigma', '\pi[1,1]', '\pi[2,2]'};
+title_names = {'\alpha_1', '\alpha_2', '\phi', '\sigma', '\pi_{11}', '\pi_{22}'};
 
 for k=1:numel(param_plot)
-    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    mcmc_samples_param = getfield(out_pmmh, param_plot{k});
     figure
-    plot(out_pmmh_param, 'linewidth', 1)
+    plot(mcmc_samples_param, 'linewidth', 1)
     if sample_data
         hold on
-        plot(0, param_true(k), '*g');
+        plot(0, param_true(k), '*g', 'markersize', 10);
     end
-    xlabel('Iterations')
-    ylabel('PMMH samples')
-    title(title_names{k})
+    xlabel('Iterations', 'fontsize', 20)
+    ylabel('PMMH samples', 'fontsize', 20)
+    title(title_names{k}, 'fontsize', 20)
     box off
 end
 
 %%
 % *Histogram and kde estimate of the posterior for the parameters*
 for k=1:numel(param_plot)
-    out_pmmh_param = getfield(out_pmmh, param_plot{k});
+    mcmc_samples_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
-    hist(out_pmmh_param, 15)
+    hist(mcmc_samples_param, 15)
     h = findobj(gca, 'Type', 'patch');
     set(h, 'EdgeColor', 'w')
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g');
+        plot(param_true(k), 0, '*g', 'markersize', 10);
     end
-    xlabel(title_names{k})
-    ylabel('number of samples')
+    xlabel(title_names{k}, 'fontsize', 20)
+    ylabel('Number of samples', 'fontsize', 20)
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
-    title(title_names{k})
+%     title(title_names{k}, 'fontsize', 20)
+    box off
+end
+
+for k=1:numel(param_plot)
+    kde_param = getfield(kde_pmmh, param_plot{k});
+    figure('name', 'PMMH: KDE estimate posterior parameter')
+    plot(kde_param.x, kde_param.f)
+    if sample_data
+        hold on
+        plot(param_true(k), 0, '*g', 'markersize', 10);
+    end
+    xlabel(title_names{k}, 'fontsize', 20)
+    ylabel('Posterior density', 'fontsize', 20)
+    saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'epsc2')
+    saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'png')
+%     title(title_names{k}, 'fontsize', 20)
     box off
 end
 
 
 %%
-% *Posterior mean and quantiles for $x$*
-x_pmmh_mean = summary_pmmh.x.mean;
-x_pmmh_quant = summary_pmmh.x.quant;
+% *Posterior mean and quantiles for x*
+x_pmmh_mean = summ_pmmh.x.mean;
+x_pmmh_quant = summ_pmmh.x.quant;
 figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     light_blue);
@@ -228,7 +246,7 @@ legend boxoff
 
 
 %%
-% *Trace of MCMC samples for $x$*
+% *Trace of MCMC samples for x*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
 for k=1:numel(time_index)
@@ -251,7 +269,7 @@ if sample_data
 end
 
 %%
-% *Histogram and kernel density estimate of posteriors of $x$*
+% *Histogram and kernel density estimate of posteriors of x*
 figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
@@ -279,7 +297,7 @@ figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
+    plot(kde_pmmh.x(tk).x, kde_pmmh.x(tk).f);
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');

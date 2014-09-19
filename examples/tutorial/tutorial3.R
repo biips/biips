@@ -55,7 +55,7 @@ f_eval <- function(x, k) { .5 * x + 25*x/(1+x^2) + 8*cos(1.2*k) }
 
 #' The second function, `f_dim`, provides the dimensions of the output of `f_eval`,
 #' possibly depending on the dimensions of the inputs.
-f_dim <- function(x_dim, k_dim) { c(1) }
+f_dim <- function(x_dim, k_dim) { 1 }
 
 #' # Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the latest version of Rbiips package depending on your system
@@ -80,8 +80,8 @@ require(Rbiips)
 #+
 #' # General settings
 par(bty='l')
-light_blue = rgb(.7, .7, 1);
-light_red = rgb(1, .7, .7);
+light_blue = rgb(.7, .7, 1)
+light_red = rgb(1, .7, .7)
 
 #' Set the random numbers generator seed for reproducibility
 set.seed(2)
@@ -173,5 +173,5 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Filtering density', 'Smoothing density', 'True value'),
        col=c('blue', 'red', 'green'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))

@@ -74,8 +74,8 @@ require(Rbiips)
 #+
 #' # General settings
 par(bty='l')
-light_blue = rgb(.7, .7, 1);
-light_red = rgb(1, .7, .7);
+light_blue = rgb(.7, .7, 1)
+light_red = rgb(1, .7, .7)
 
 #' Set the random numbers generator seed for reproducibility
 set.seed(1)
@@ -153,23 +153,23 @@ summ_pmmh = summary(out_pmmh, probs=c(.025, .975))
 #' #### Compute kernel density estimates
 kde_pmmh = density(out_pmmh)
 
-#' #### Posterior mean and credibilist interval for the parameter
+#' #### Posterior mean and credible interval for the parameter
 summ_var = summ_pmmh[[var_name]]
 cat('Posterior mean of log_prec_y:', summ_var$mean, '\n');
-cat('95% credibilist interval for log_prec_y: [', summ_var$quant[[1]], ', ', summ_var$quant[[2]],']\n', sep="")
+cat('95% credible interval for log_prec_y: [', summ_var$quant[[1]], ', ', summ_var$quant[[2]],']\n', sep='')
 
 
 #' #### Trace of MCMC samples for the parameter
 #+ fig.cap = 'PMMH: Trace samples parameter'
 mcmc_samples = out_pmmh[[var_name]]
-plot(c(mcmc_samples), col='blue', type='l', lwd=1,
+plot(mcmc_samples[1,], col='blue', type='l', lwd=1,
      xlab='Iterations',
      ylab='PMMH samples',
      main=var_name)
 points(0, data$log_prec_y_true, col='green', pch=8, lwd=2)
 legend('topright', leg=c('PMMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
-       bg='white', bty='n')
+       bty='n')
 
 #' #### Histogram and kde estimate of the posterior for the parameter
 #+ fig.cap = 'PMMH: Histogram posterior parameter'
@@ -179,7 +179,7 @@ hist(mcmc_samples, breaks=15, col='blue', border='white',
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
 legend('topright', leg=c('Posterior samples', 'True value'),
        col=c('blue', 'green'), pch=c(22,8), lwd=c(NA,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
-       bg='white', bty='n')
+       bty='n')
 
 #+ fig.cap = 'PMMH: KDE estimate posterior parameter'
 kde_var = kde_pmmh[[var_name]]
@@ -189,12 +189,12 @@ plot(kde_var, col='blue', lwd=2,
 points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
 legend('topright', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lty=c(1,NA), lwd=2,
-       bg='white', bty='n')
+       bty='n')
 
 #' #### Posterior mean and quantiles for x
 #+ fig.cap = 'PMMH: Posterior mean and quantiles'
-x_pmmh_mean = summ_pmmh$x$mean;
-x_pmmh_quant = summ_pmmh$x$quant;
+x_pmmh_mean = summ_pmmh$x$mean
+x_pmmh_quant = summ_pmmh$x$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_pmmh_quant[[1]], rev(x_pmmh_quant[[2]]))
@@ -223,7 +223,7 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('PMMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lty=c(1,NA), lwd=c(1,2),
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))
 
 #' #### Histogram and kernel density estimate of posteriors of x
@@ -240,7 +240,7 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Posterior samples', 'True value'),
        col=c('blue', 'green'), pch=c(22,8), lwd=c(1,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))
 
 
@@ -257,5 +257,5 @@ for (k in 1:length(time_index)) {
 plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=2, lty=c(1,NA), pt.cex=c(2,1), pt.bg=c(4,NA),
-       bg='white', bty='n')
+       bty='n')
 par(mfrow=c(1,1))
