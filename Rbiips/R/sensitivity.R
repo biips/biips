@@ -29,7 +29,8 @@ smc_sensitivity <- function(object, param_values, n_part, ...) {
   pn <- parse_varnames(varnames)
 
   ## Get the sizes of parameter values
-  sizes <- lapply(param_values, function(x) { d <- dim(x)
+  sizes <- lapply(param_values, function(x) {
+    d <- dim(x)
     if (is.null(d))
       length(x)
     else

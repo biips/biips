@@ -148,7 +148,7 @@ box off
 kde_estimates = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);

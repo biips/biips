@@ -25,8 +25,8 @@
 
 %% Statistical model in BUGS language
 % Content of the file |'switch_stoch_volatility.bug'|:
-model_filename = 'switch_stoch_volatility.bug'; % BUGS model filename
-type(model_filename);
+model_file = 'switch_stoch_volatility.bug'; % BUGS model filename
+type(model_file);
 
 
 %% Installation of Matbiips
@@ -62,7 +62,7 @@ data = struct('t_max', t_max, 'sigma', sigma,...
 
 %%
 % *Parse and compile BUGS model, and sample data*
-model = biips_model(model_filename, data, 'sample_data', true);
+model = biips_model(model_file, data, 'sample_data', true);
 data = model.data;
 
 %% Biips Sequential Monte Carlo
@@ -76,7 +76,7 @@ out_smc = biips_smc_samples(model, variables, n_part);
 
 %%
 % *Diagnosis of the algorithm*.
-diag = biips_diagnosis(out_smc);
+diagnostic = biips_diagnosis(out_smc);
 
 %%
 % *Plot ESS*
@@ -96,15 +96,12 @@ saveas(gca, 'volatility_ess', 'png')
 figure('name', 'SMC: Particles (smoothing)')
 hold on
 for t=1:t_max
-    val = unique(out_smc.x.s.values(t,:,:));
-    weight = zeros(size(val));
-    for j=1:length(val)
-        ind = out_smc.x.s.values(t,:,:)==val(j);
-        weight(j) = sum(out_smc.x.s.weights(t,:,ind));
-        plot(t, val(j), 'ro',...
-            'markersize', min(7, n_part/10* weight(j)), 'markerfacecolor', 'r')
-        
-    end
+    val = unique(out_smc.x.s.values(t,:));
+    
+    weight = arrayfun(@(x) sum(out_smc.x.s.weights(t, out_smc.x.s.values(t,:) == x)), val);
+    
+    scatter(t*ones(size(val)), val, min(20, .6*n_part*weight), 'r',...
+        'markerfacecolor', 'r')
 end
 xlabel('Time')
 ylabel('Particles (smoothing)')
@@ -112,12 +109,12 @@ saveas(gca, 'volatility_particles_s', 'png')
 
 %%
 % *Summary statistics*
-summary = biips_summary(out_smc, 'probs', [.025, .975]);
+summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Plot Filtering estimates*
-x_f_mean = summary.x.f.mean;
-x_f_quant = summary.x.f.quant;
+x_f_mean = summ_smc.x.f.mean;
+x_f_quant = summ_smc.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     light_blue);
@@ -136,8 +133,8 @@ saveas(gca, 'volatility_f', 'png')
 
 %%
 % *Plot Smoothing estimates*
-x_s_mean = summary.x.s.mean;
-x_s_quant = summary.x.s.quant;
+x_s_mean = summ_smc.x.s.mean;
+x_s_quant = summ_smc.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     light_red);
@@ -156,15 +153,15 @@ saveas(gca, 'volatility_s', 'png')
 
 %%
 % *Marginal filtering and smoothing densities*
-kde_estimates = biips_density(out_smc);
+kde_smc = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);
+    plot(kde_smc.x.f(tk).x, kde_smc.x.f(tk).f);
     hold on
-    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
+    plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
@@ -196,12 +193,12 @@ obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % burn-in iterations
 
 %%
 % *Some summary statistics*
-summary_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
+summ_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 
 %%
 % *Posterior mean and quantiles*
-x_pimh_mean = summary_pimh.x.mean;
-x_pimh_quant = summary_pimh.x.quant;
+x_pimh_mean = summ_pimh.x.mean;
+x_pimh_quant = summ_pimh.x.quant;
 figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
     light_blue);
@@ -221,7 +218,7 @@ saveas(gca, 'volatility_pimh_s', 'png')
 % *Trace of MCMC samples*
 time_index = [5, 10, 15];
 figure('name', 'PIMH: Trace samples')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(out_pimh.x(tk, :), 'linewidth', 1)
@@ -239,7 +236,7 @@ legend boxoff
 %%
 % *Histograms of posteriors*
 figure('name', 'PIMH: Histograms marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pimh.x(tk, :), 20);
@@ -258,12 +255,12 @@ legend boxoff
 
 %%
 % *Kernel density estimates of posteriors*
-kde_estimates_pimh = biips_density(out_pimh);
+kde_pimh = biips_density(out_pimh);
 figure('name', 'PIMH: KDE estimates marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pimh.x(tk).x, kde_estimates_pimh.x(tk).f);
+    plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
@@ -282,22 +279,22 @@ saveas(gca, 'volatility_pimh_kde', 'png')
 %
 
 %%
-% *Parameters of the algorithm*.
+% *Parameters of the algorithm*
 n_part = 50; % Number of particles
-param_names = {'alpha[1:2,1]'}; % Parameter for which we want to study sensitivity
+param_names = {'alpha'}; % Parameter for which we want to study sensitivity
 [A, B] = meshgrid(-5:.2:2, -5:.2:2);
 param_values = {[A(:), B(:)]'}; % Range of values
 
 %%
 % *Run sensitivity analysis with SMC*
-out_sensitivity = biips_smc_sensitivity(model, param_names, param_values, n_part);
+out_sens = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
 figure('name', 'Sensitivity: Log-likelihood')
-surf(A, B, reshape(out_sensitivity.log_marg_like, size(A)))
-shading interp
-caxis([-40, max(out_sensitivity.log_marg_like(:))])
+surf(A, B, reshape(out_sens.log_marg_like, size(A)))
+shading interp, 
+caxis([-40, max(out_sens.log_marg_like(:))])
 colormap(hot)
 view(2)
 xlim([min(A(:)), max(A(:))])

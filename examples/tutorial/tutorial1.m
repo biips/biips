@@ -170,7 +170,7 @@ box off
 kde_smc = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_smc.x.f(tk).x, kde_smc.x.f(tk).f);
@@ -230,7 +230,7 @@ box off
 % *Trace of MCMC samples*
 time_index = [5, 10, 15];
 figure('name', 'PIMH: Trace samples')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(samples_pimh.x(tk, :), 'linewidth', 1)
@@ -248,7 +248,7 @@ legend boxoff
 %%
 % *Histograms of posteriors*
 figure('name', 'PIMH: Histograms marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(samples_pimh.x(tk, :), -15:1:15);
@@ -270,7 +270,7 @@ legend boxoff
 % *Kernel density estimates of posteriors*
 kde_pimh = biips_density(samples_pimh);
 figure('name', 'PIMH: KDE estimates marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f);

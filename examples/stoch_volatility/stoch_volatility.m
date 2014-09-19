@@ -131,7 +131,7 @@ kde_estimates_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credibilist interval for the parameters*
-for i=1:length(param_names)
+for i=1:numel(param_names)
     sum_param = getfield(summary_pmmh, param_names{i});
     fprintf('Posterior mean of %s: %.3f\n', param_names{i}, sum_param.mean);
     fprintf('95%% credibilist interval for %s: [%.3f, %.3f]\n',...
@@ -206,7 +206,7 @@ legend boxoff
 % *Trace of MCMC samples for $x$*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(out_pmmh.x(tk, :), 'linewidth', 1)
@@ -228,7 +228,7 @@ end
 %%
 % *Histogram and kernel density estimate of posteriors of $x$*
 figure('name', 'PMMH: Histograms marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), 15);
@@ -250,7 +250,7 @@ if sample_data
 end
 
 figure('name', 'PMMH: KDE estimates marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);

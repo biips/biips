@@ -128,8 +128,8 @@ n_iter = 40000; % nb of iterations after burn-in
 thin = 10; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
-param_names = {'gamma[1,1]', 'gamma[2,1]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x', 'alpha[1,1]', 'alpha[2,1]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'gamma[1]', 'gamma[2]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x', 'alpha[1]', 'alpha[2]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
@@ -150,11 +150,11 @@ summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 % *Compute kernel density estimates*
 kde_estimates_pmmh = biips_density(out_pmmh);
 
-param_plot = {'alpha[1,1]', 'alpha[2,1]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
+param_plot = {'alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
 
 %%
 % *Posterior mean and credible interval for the parameters*
-for i=1:length(param_plot)
+for i=1:numel(param_plot)
     sum_param = getfield(summary_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, sum_param.mean);
     fprintf('95%% credibilist interval for %s: [%.3f, %.3f]\n',...
@@ -168,7 +168,7 @@ if sample_data
 end
 title_names = {'\alpha[1]', '\alpha[2]', '\phi', '\sigma', '\pi[1,1]', '\pi[2,2]'};
 
-for k=1:length(param_plot)
+for k=1:numel(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure
     plot(out_pmmh_param, 'linewidth', 1)
@@ -184,7 +184,7 @@ end
 
 %%
 % *Histogram and kde estimate of the posterior for the parameters*
-for k=1:length(param_plot)
+for k=1:numel(param_plot)
     out_pmmh_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(out_pmmh_param, 15)
@@ -231,7 +231,7 @@ legend boxoff
 % *Trace of MCMC samples for $x$*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(out_pmmh.x(tk, :), 'linewidth', 1)
@@ -253,7 +253,7 @@ end
 %%
 % *Histogram and kernel density estimate of posteriors of $x$*
 figure('name', 'PMMH: Histograms marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), -10:.5:0);
@@ -276,7 +276,7 @@ if sample_data
 end
 
 figure('name', 'PMMH: KDE estimates marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);

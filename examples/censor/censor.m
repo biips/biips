@@ -80,7 +80,7 @@ kde = biips_density(out_smc);
 t_all = [5, 10, 15, 20];
 figure
 hold on
-for k=1:length(t_all)
+for k=1:numel(t_all)
     subplot(2,2,k)
     plot(kde.x.f(t_all(k)).x, kde.x.f(t_all(k)).f)
     xlabel(['x[' num2str(t_all(k)) ']'])

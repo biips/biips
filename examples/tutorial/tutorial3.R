@@ -123,7 +123,7 @@ out_smc = smc_samples(model, variables, n_part,
                       type=mn_type, rs_type=rs_type, rs_thres=rs_thres)
 
 #' #### Diagnosis of the algorithm
-diagnostic = diagnosis(out_smc$x)
+diagnostic = diagnosis(out_smc)
 
 #' #### Summary statistics
 summ = summary(out_smc, probs=c(.025, .975))

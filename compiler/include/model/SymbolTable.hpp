@@ -78,9 +78,9 @@ namespace Biips
     }
 
     NodeId GetNodeArraySubset(const String & name,
-                              const IndexRange & subsetRange) const
+                              const IndexRange & subsetRange, Bool dropped = false) const
     {
-      return nodeArraysMap_.at(name)->GetSubset(subsetRange);
+      return nodeArraysMap_.at(name)->GetSubset(subsetRange, dropped);
     }
 
     Bool Contains(const String & name) const

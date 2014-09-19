@@ -133,7 +133,7 @@ for k=1:n_values
         ok = matbiips('change_data', console, pn_param(i).name, ...
             pn_param(i).lower, pn_param(i).upper, value{i}, false);
         if ~ok
-            error('Data change failed: invalid parameter %s = %s.\n', var, sprintf('%g ', value{i}));
+            error('Data change failed: invalid parameter %s = %s\n', var, sprintf('%g ', value{i}));
         end
     end
     

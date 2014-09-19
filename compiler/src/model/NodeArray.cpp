@@ -167,12 +167,12 @@ namespace Biips
     // ENDCOPY
   }
 
-  NodeId NodeArray::GetSubset(const IndexRange & subsetRange) //, Model & model)
+  NodeId NodeArray::GetSubset(const IndexRange & subsetRange, Bool dropped) //, Model & model)
   {
     // COPY: Adapted from JAGS NodeArray::getSubset function
 
     //Check validity of target range
-    if (!range_.Contains(subsetRange))
+    if (!range_.Contains(subsetRange, dropped))
       throw RuntimeError(String("Cannot get subset ") + name_
                          + print(subsetRange) + ". Range out of bounds.");
 
@@ -360,7 +360,7 @@ namespace Biips
   {
     if (range.IsNull())
       range = range_;
-    else if (!range_.Contains(range))
+    else if (!range_.Contains(range, true))
       throw RuntimeError(String("Can not change data: variable ") + Name()
                          + " does not contain subrange " + print(range));
 

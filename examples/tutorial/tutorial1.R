@@ -107,7 +107,7 @@ out_smc = smc_samples(model, variables, n_part,
                       type=mn_type, rs_type=rs_type, rs_thres=rs_thres)
 
 #' #### Diagnosis of the algorithm
-diagnostic = diagnosis(out_smc$x)
+diagnostic = diagnosis(out_smc)
 
 #' The sequence of filtering distributions is automatically chosen by Biips
 #' based on the topology of the graphical model, and is returned in the

@@ -406,15 +406,15 @@ namespace Biips
         if (!subset_range.IsNull())
         {
           //A fixed subset
-          if (!array.Range().Contains(subset_range))
+          if (!array.Range().Contains(subset_range, true))
             throw CompileError(pTree,
                                String("Subset ") + array.Name()
-                               + print(subset_range) + " out of range"
+                               + print(subset_range) + " out of range "
                                + print(array.Range()));
 
           //          node_id = array.GetSubset(subset_range);//, model_);
           node_id = model_.GetSymbolTable().GetNodeArraySubset(pTree->name(),
-                                                               subset_range);
+                                                               subset_range, true);
           if ((node_id == NULL_NODEID) && strictResolution_)
             throw CompileError(pTree,
                                String("Unable to resolve parameter ")

@@ -1,4 +1,4 @@
-var c[t_max, clust_max],mu[t_max, clust_max],mu_y[t_max], m[t_max, clust_max],m_up[t_max, clust_max], p[t_max,clust_max],y[t_max,1]
+var c[t_max, clust_max],mu[t_max, clust_max],mu_y[t_max], m[t_max, clust_max],m_up[t_max, clust_max], p[t_max,clust_max],y[t_max]
 
 
 model
@@ -14,7 +14,7 @@ model
   {
       mu[1,i] ~ dnorm(mu_0, prec_0)  
   }
-  y[1,1] ~ dnorm(mu[1,1], prec_y)
+  y[1] ~ dnorm(mu[1,1], prec_y)
   for (t in 2:t_max)
   {
     for (i in 1:clust_max)
@@ -33,6 +33,6 @@ model
     
     mu_y[t] <- sum(c[t,]*mu[t,])
     
-    y[t,1] ~ dnorm(mu_y[t], prec_y)
+    y[t] ~ dnorm(mu_y[t], prec_y)
   }
 }

@@ -161,7 +161,7 @@ leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 
 %%
 % *Posterior mean and credibilist interval for the parameter*
-for i=1:length(param_names)
+for i=1:numel(param_names)
     quantile_param = getfield(getfield(summary_pmmh,param_names{i}), 'quant');
     fprintf('Posterior mean of %s: %.1f\n', leg{i},...
         getfield(getfield(summary_pmmh, param_names{i}), 'mean'));
@@ -171,7 +171,7 @@ end
 
 %%
 % *Trace of MCMC samples for the parameter*
-for i=1:length(param_names)
+for i=1:numel(param_names)
     figure('name', 'PMMH: Trace samples parameter')
     plot(getfield(out_pmmh,param_names{i}), 'linewidth', 1);
     hold on
@@ -184,7 +184,7 @@ end
 
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
-for i=1:length(param_names)
+for i=1:numel(param_names)
     figure('name', 'PMMH: Histogram posterior parameter')
     hist(getfield(out_pmmh,param_names{i}), 15)
     h = findobj(gca, 'Type', 'patch');
@@ -199,7 +199,7 @@ end
 saveas(gca, 'stoch_kinetic_param', 'epsc2')
 saveas(gca, 'stoch_kinetic_param', 'png')
 
-for i=1:length(param_names)
+for i=1:numel(param_names)
     kde_x = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'x');
     kde_f = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'f');
     figure('name', 'PMMH: KDE estimate posterior parameter')

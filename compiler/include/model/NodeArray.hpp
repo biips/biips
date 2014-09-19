@@ -89,7 +89,7 @@ namespace Biips
 
     void Insert(NodeId nodeId, const IndexRange & targetRange);
 
-    NodeId GetSubset(const IndexRange & subsetRange);
+    NodeId GetSubset(const IndexRange & subsetRange, Bool dropped=false);
 
     // Accessors
     const IndexRange & Range() const

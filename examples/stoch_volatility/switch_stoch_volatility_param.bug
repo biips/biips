@@ -2,51 +2,51 @@
 # Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
 # stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.
 
-var y[t_max,1], x[t_max,1], prec_y[t_max,1],mu[t_max,1],mu_true[t_max,1],alpha[2,1],gamma[2,1],c[t_max],c_true[t_max],pi[2,2]
+var y[t_max], x[t_max], prec_y[t_max],mu[t_max],mu_true[t_max],alpha[2],gamma[2],c[t_max],c_true[t_max],pi[2,2]
 
 data
 {  
   c_true[1] ~ dcat(pi_true[1,])
-  mu_true[1,1] <- alpha_true[1,1] * (c_true[1]==1) + alpha_true[2,1]*(c_true[1]==2)
-  x_true[1,1] ~ dnorm(mu_true[1,1], 1/sigma_true^2)
-  prec_y_true[1,1] <- exp(-x_true[1,1]) 
-  y[1,1] ~ dnorm(0, prec_y_true[1,1])
+  mu_true[1] <- alpha_true[1] * (c_true[1]==1) + alpha_true[2]*(c_true[1]==2)
+  x_true[1] ~ dnorm(mu_true[1], 1/sigma_true^2)
+  prec_y_true[1] <- exp(-x_true[1]) 
+  y[1] ~ dnorm(0, prec_y_true[1])
   for (t in 2:t_max)
   { 
     c_true[t] ~ dcat(ifelse(c_true[t-1]==1,pi_true[1,],pi_true[2,]))
-    mu_true[t,1] <- alpha_true[1,1]*(c_true[t]==1) + alpha_true[2,1]*(c_true[t]==2) + phi_true*x_true[t-1,1];
-    x_true[t,1] ~ dnorm(mu_true[t,1], 1/sigma_true^2)
-    prec_y_true[t,1] <- exp(-x_true[t,1])  
-    y[t,1] ~ dnorm(0, prec_y_true[t,1])
+    mu_true[t] <- alpha_true[1]*(c_true[t]==1) + alpha_true[2]*(c_true[t]==2) + phi_true*x_true[t-1];
+    x_true[t] ~ dnorm(mu_true[t], 1/sigma_true^2)
+    prec_y_true[t] <- exp(-x_true[t])  
+    y[t] ~ dnorm(0, prec_y_true[t])
   }
 }
 
 model
 {
-  gamma[1,1] ~ dnorm(0, 1/100)
-  gamma[2,1] ~ dnorm(0, 1/100)T(0,)
-  alpha[1,1] <- gamma[1,1]
-  alpha[2,1] <- gamma[1,1] + gamma[2,1]
-  phi ~ dnorm(0, 1/100)T(-1,1)
+  gamma[1] ~ dnorm(0, 1/100)
+  gamma[2] ~ dnorm(0, 1/100) T(0,)
+  alpha[1] <- gamma[1]
+  alpha[2] <- gamma[1] + gamma[2]
+  phi ~ dnorm(0, 1/100) T(-1,1)
   tau ~ dgamma(2.001, 1)
   sigma <- 1/sqrt(tau)
   pi[1,1] ~ dbeta(.5, .5)
-  pi[1,2] <- 1.00 - pi[1,1]
+  pi[1,2] <- 1 - pi[1,1]
   pi[2,2] ~ dbeta(.5, .5)
-  pi[2,1] <- 1.00 - pi[2,2]
+  pi[2,1] <- 1 - pi[2,2]
   
   
   c[1] ~ dcat(pi[1,])
-  mu[1,1] <- alpha[1,1] * (c[1]==1) + alpha[2,1]*(c[1]==2)
-  x[1,1] ~ dnorm(mu[1,1], 1/sigma^2)
-  prec_y[1,1] <- exp(-x[1,1]) 
-  y[1,1] ~ dnorm(0, prec_y[1,1])
+  mu[1] <- alpha[1] * (c[1]==1) + alpha[2]*(c[1]==2)
+  x[1] ~ dnorm(mu[1], 1/sigma^2)
+  prec_y[1] <- exp(-x[1]) 
+  y[1] ~ dnorm(0, prec_y[1])
   for (t in 2:t_max)
   { 
     c[t] ~ dcat(ifelse(c[t-1]==1, pi[1,], pi[2,]))
-    mu[t,1] <- alpha[1,1] * (c[t]==1) + alpha[2,1]*(c[t]==2) + phi*x[t-1,1]
-    x[t,1] ~ dnorm(mu[t,1], 1/sigma^2)
-    prec_y[t,1] <- exp(-x[t,1])  
-    y[t,1] ~ dnorm(0, prec_y[t,1])
+    mu[t] <- alpha[1] * (c[t]==1) + alpha[2]*(c[t]==2) + phi*x[t-1]
+    x[t] ~ dnorm(mu[t], 1/sigma^2)
+    prec_y[t] <- exp(-x[t])  
+    y[t] ~ dnorm(0, prec_y[t])
   }
 }

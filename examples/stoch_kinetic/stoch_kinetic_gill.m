@@ -113,7 +113,7 @@ summary_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 figure('name', 'SMC: SESS')
 semilogy(out_smc.x.s.ess(1,:))
 hold on
-plot(30*ones(length(out_smc.x.s.ess(1,:)), 1), 'k--')
+plot(30*ones(numel(out_smc.x.s.ess(1,:)), 1), 'k--')
 xlabel('Time')
 ylabel('SESS')
 ylim([1, n_part])

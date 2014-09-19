@@ -30,8 +30,9 @@ Article/exemples :
     - citation de software, R packages (ajouter Rbiips ?)
     - enlever commentaires dans le code ?
 
-Communication :
+Diffusion :
 - [ ] Référencement : wikipédia, <http://probabilistic-programming.org>
+- [ ] CRAN
 - [ ] Réseaux sociaux : twitter, Google+, LinkedIn, google groups
 - [ ] Article : Arxiv, HAL, R journal
 - [ ] Conf/Séminaire : 

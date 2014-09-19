@@ -206,7 +206,7 @@ legend boxoff
 % *Trace of MCMC samples for x*
 time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(out_pmmh.x(tk, :), 'linewidth', 1)
@@ -224,7 +224,7 @@ legend boxoff
 %%
 % *Histogram and kernel density estimate of posteriors of x*
 figure('name', 'PMMH: Histograms marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     hist(out_pmmh.x(tk, :), -16:.3:-7);
@@ -243,7 +243,7 @@ set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 
 figure('name', 'PMMH: KDE estimates marginal posteriors')
-for k=1:length(time_index)
+for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
     plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);

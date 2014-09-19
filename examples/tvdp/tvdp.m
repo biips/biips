@@ -110,7 +110,7 @@ end
 figure
 hold on
 for t=stepsize:stepsize:t_max
-    line(t*ones(length(x0),1), x0, out_true(t, :), 'color', 'k')
+    line(t*ones(numel(x0),1), x0, out_true(t, :), 'color', 'k')
 end
 view(-70, 52)
 xlabel('Time')
@@ -123,7 +123,7 @@ box off
 figure
 hold on
 for t=stepsize:stepsize:t_max
-    line(t*ones(length(x0),1), x0, out(t, :), 'color', 'k')
+    line(t*ones(numel(x0),1), x0, out(t, :), 'color', 'k')
 end
 view(-70, 52)
 xlabel('Time')
