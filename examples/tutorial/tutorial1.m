@@ -148,23 +148,6 @@ legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off
 
-% %%
-% % *Plot Backward smoothing estimates*
-% x_b_mean = summ.x.b.mean;
-% x_b_quant = summ.x.b.quant;
-% figure('name', 'SMC: Backward smoothing estimates')
-% h = fill([1:t_max, t_max:-1:1], [x_b_quant{1}; flipud(x_b_quant{2})],...
-%     light_red);
-% set(h, 'edgecolor', 'none')
-% hold on
-% plot(x_b_mean, 'r', 'linewidth', 3)
-% plot(data.x_true, 'g')
-% xlabel('Time')
-% ylabel('Estimates')
-% legend({'95 % credible interval', 'Backward smoothing mean estimate', 'True value'})
-% legend boxoff
-% box off
-
 %%
 % *Marginal filtering and smoothing densities*
 kde_smc = biips_density(out_smc);
