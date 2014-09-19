@@ -119,7 +119,11 @@ data = model.data;
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameters $\alpha$, $\beta$ and $\sigma$,
-% and of the variables $x$.
+% and of the variables $x$. 
+% Note: We use below a reduced number of MCMC iterations to have reasonable 
+% running times. But the obtained samples are obviously very correlated, 
+% and the number of iterations should be set to a higher value, and proper
+% convergence tests should be used.
 
 %%
 % *Parameters of the PMMH*
