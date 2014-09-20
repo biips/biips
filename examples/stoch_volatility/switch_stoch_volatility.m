@@ -79,15 +79,15 @@ out_smc = biips_smc_samples(model, variables, n_part);
 diag_smc = biips_diagnosis(out_smc);
 
 %%
-% *Plot ESS*
-figure('name', 'SMC: ESS')
+% *Plot Smoothing ESS*
+figure('name', 'SMC: SESS')
 semilogy(out_smc.x.s.ess)
 hold on
 plot(1:t_max, 30*ones(t_max,1), '--k')
 xlabel('Time')
 ylabel('SESS')
 box off
-legend('Effective sample size (smoothing)')
+legend('Smoothing effective sample size')
 legend boxoff
 saveas(gca, 'volatility_ess', 'png')
 

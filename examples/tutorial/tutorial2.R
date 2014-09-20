@@ -203,8 +203,8 @@ yy = c(x_pmmh_quant[[1]], rev(x_pmmh_quant[[2]]))
 plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 
 polygon(xx, yy, col=light_blue, border=NA)
-lines(x_pmmh_mean, col='blue', lwd=3)
-lines(data$x_true, col='green', lwd=2)
+lines(1:t_max, x_pmmh_mean, col='blue', lwd=3)
+lines(1:t_max, data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95 % credible interval', 'PMMH mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
        bty='n')

@@ -101,8 +101,9 @@ data = list(t_max=t_max, prec_x_init=prec_x_init,
             prec_x=prec_x, prec_y=prec_y, mean_x_init=mean_x_init)
 
 #' #### Add the user-defined function `fext`
-fun_bugs = 'fext'; fun_dim = f_dim; fun_eval = f_eval; fun_nb_inputs = 2;
-biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, fun_eval);
+fun_bugs = 'fext'; fun_nb_inputs = 2
+fun_dim = f_dim; fun_eval = f_eval
+biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, fun_eval)
 
 #' #### Compile BUGS model and sample data
 sample_data = TRUE # Boolean
@@ -141,8 +142,8 @@ yy = c(x_f_quant[[1]], rev(x_f_quant[[2]]))
 plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 
 polygon(xx, yy, col=light_blue, border=NA)
-lines(x_f_mean, col='blue', lwd=3)
-lines(data$x_true, col='green', lwd=2)
+lines(1:t_max, x_f_mean, col='blue', lwd=3)
+lines(1:t_max, data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95 % credible interval', 'Filtering mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1), bty='n')
 
@@ -156,8 +157,8 @@ yy = c(x_s_quant[[1]], rev(x_s_quant[[2]]))
 plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 
 polygon(xx, yy, col=light_red, border=NA)
-lines(x_s_mean, col='red', lwd=3)
-lines(data$x_true, col='green', lwd=2)
+lines(1:t_max, x_s_mean, col='red', lwd=3)
+lines(1:t_max, data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95 % credible interval', 'Smoothing mean estimate', 'True value'),
        col=c(light_red,'red','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1), bty='n')
 

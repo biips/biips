@@ -10,8 +10,8 @@ function x = lotka_volterra_gillespie(x, c1, c2, c3, dt)
 z = [1, -1, 0;
     0, 1, -1];
 
-t=0;
-while 1   
+t = 0;
+while true   
     rate = [c1*x(1), c2*x(1)*x(2), c3*x(2)];
     sum_rate = sum(rate);
     t = t - log(rand)/sum_rate; % Sample next event from an exponential distribution

@@ -22,8 +22,8 @@
 
 %% Statistical model in BUGS language
 % Content of the file |'stoch_kinetic_gill.bug'|:
-model_filename = 'stoch_kinetic_gill.bug'; % BUGS model filename
-type(model_filename);
+model_file = 'stoch_kinetic_gill.bug'; % BUGS model filename
+type(model_file);
 
 %% User-defined Matlab functions
 %
@@ -62,8 +62,9 @@ end
 
 %%
 % *Add the user-defined function 'LV' to simulate from the Lotka-Volterra model*
-fun_bugs = 'LV'; fun_dim = 'lotka_volterra_dim'; fun_eval = 'lotka_volterra_gillespie'; fun_nb_inputs = 5;
-biips_add_distribution(fun_bugs, fun_nb_inputs, fun_dim, fun_eval);
+fun_bugs = 'LV'; fun_nb_inputs = 5;
+fun_dim = 'lotka_volterra_dim'; fun_sample = 'lotka_volterra_gillespie';
+biips_add_distribution(fun_bugs, fun_nb_inputs, fun_dim, fun_sample);
 
 %% Load model and data
 %
@@ -79,7 +80,7 @@ data = struct('t_max', t_max, 'c', c, 'x_init', x_init, 'sigma', sigma);
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_file, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %%
@@ -106,23 +107,26 @@ n_part = 10000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part, 'type', 'fs');
 
-summary_smc = biips_summary(out_smc, 'probs', [.025, .975]);
+summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Smoothing ESS*
 figure('name', 'SMC: SESS')
 semilogy(out_smc.x.s.ess(1,:))
 hold on
-plot(30*ones(numel(out_smc.x.s.ess(1,:)), 1), 'k--')
+plot(30*ones(t_max, 1), 'k--')
 xlabel('Time')
 ylabel('SESS')
+box off
+legend('Smoothing effective sample size')
+legend boxoff
 ylim([1, n_part])
 saveas(gca, 'kinetic_sess', 'epsc2')
 
 %%
-% *Posterior mean and quantiles for $x$ *
-x_smc_mean = summary_smc.x.s.mean;
-x_smc_quant = summary_smc.x.s.quant;
+% *Posterior mean and quantiles for x*
+x_smc_mean = summ_smc.x.s.mean;
+x_smc_quant = summ_smc.x.s.quant;
 figure('name', 'SMC: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
     light_blue);
@@ -138,8 +142,8 @@ plot(1:t_max, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
 ylabel('Estimates')
 ylim([0, 450])
-legend({'95 % credible interval (prey)', 'PMMH mean estimate (prey)', 'True number of preys',...
-    '95 % credible interval (predator)', 'PMMH mean estimate (predator)',...
+legend({'95 % credible interval (prey)', 'SMC mean estimate (prey)', 'True number of preys',...
+    '95 % credible interval (predator)', 'SMC mean estimate (predator)',...
     'True number of predators'})
 legend boxoff
 box off
