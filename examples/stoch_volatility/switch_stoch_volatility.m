@@ -76,7 +76,7 @@ out_smc = biips_smc_samples(model, variables, n_part);
 
 %%
 % *Diagnosis of the algorithm*.
-diagnostic = biips_diagnosis(out_smc);
+diag_smc = biips_diagnosis(out_smc);
 
 %%
 % *Plot ESS*
@@ -274,16 +274,16 @@ legend boxoff
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
 saveas(gca, 'volatility_pimh_kde', 'png')
 
-
 %% Biips Sensitivity analysis
-%
+% We want to study sensitivity to the values of the parameter $\alpha$
 
 %%
 % *Parameters of the algorithm*
 n_part = 50; % Number of particles
 param_names = {'alpha'}; % Parameter for which we want to study sensitivity
-[A, B] = meshgrid(-5:.2:2, -5:.2:2);
-param_values = {[A(:), B(:)]'}; % Range of values
+range = -5:.2:2; % Range of values for one component
+[A, B] = meshgrid(range, range); % Grid of values for two components
+param_values = {[A(:), B(:)]'};
 
 %%
 % *Run sensitivity analysis with SMC*
@@ -293,12 +293,10 @@ out_sens = biips_smc_sensitivity(model, param_names, param_values, n_part);
 % *Plot log-marginal likelihood and penalized log-marginal likelihood*
 figure('name', 'Sensitivity: Log-likelihood')
 surf(A, B, reshape(out_sens.log_marg_like, size(A)))
-shading interp, 
+view(2); colormap(hot); shading interp
 caxis([-40, max(out_sens.log_marg_like(:))])
-colormap(hot)
-view(2)
-xlim([min(A(:)), max(A(:))])
-colorbar
+colorbar box off
+box off
 xlabel('\alpha_1', 'fontsize', 20)
 ylabel('\alpha_2', 'fontsize', 20)
 saveas(gca, 'volatility_sensitivity', 'epsc2')

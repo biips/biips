@@ -31,8 +31,6 @@ is.mcmcarray.list <- function(object) {
   return(class(object) == "mcmcarray.list")
 }
 
-
-
 ##' @export
 print.mcmcarray <- function(x, ...) {
   print(summary(x), ...)
@@ -44,7 +42,20 @@ print.mcmcarray.list <- function(x, ...) {
 }
 
 ##' @export
-summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == as.integer(object)), ...) {
+biips_summary <- function(object, ...) UseMethod("biips_summary")
+
+##' @export
+summary.mcmcarray <- function(object, ...) {
+  return(biips_summary(object, ...))
+}
+##' @export
+summary.mcmcarray.list <- function(object, ...) {
+  return(biips_summary(object, ...))
+}
+
+##' @export
+biips_summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == as.integer(object)), ...) {
+  stopifnot(is.mcmcarray(object))
 
   ### TODO check arguments
   if (length(probs) > 0)
@@ -105,7 +116,8 @@ summary.mcmcarray <- function(object, probs = c(), order, mode = all(object == a
 }
 
 ##' @export
-summary.mcmcarray.list <- function(object, ...) {
+biips_summary.mcmcarray.list <- function(object, ...) {
+  stopifnot(is.mcmcarray.list(object))
   ans <- list()
   for (n in names(object)) {
     if (!is.mcmcarray(object[[n]]))
@@ -141,9 +153,44 @@ print.summary.mcmcarray.list <- function(x, ...) {
   invisible()
 }
 
+##' @export
+biips_table <- function(x, ...) UseMethod("biips_table")
+##' @export
+biips_density <- function(x, ...) UseMethod("biips_density")
+##' @export
+biips_hist <- function(x, ...) UseMethod("biips_hist")
 
 ##' @export
 table.mcmcarray <- function(x, ...) {
+  return(biips_table(x, ...))
+}
+##' @export
+table.mcmcarray.list <- function(x, ...) {
+  return(biips_table(x, ...))
+}
+##' @importFrom stats density
+##' @export
+density.mcmcarray <- function(x, ...) {
+  return(biips_density(x, ...))
+}
+##' @export
+density.mcmcarray.list <- function(x, ...) {
+  return(biips_density(x, ...))
+}
+##' @importFrom graphics hist
+##' @export
+hist.mcmcarray <- function(x, ...) {
+  return(biips_hist(x, ...))
+}
+##' @export
+hist.mcmcarray.list <- function(x, ...) {
+  return(biips_hist(x, ...))
+}
+
+
+##' @export
+biips_table.mcmcarray <- function(x, ...) {
+  stopifnot(is.mcmcarray(x))
   out <- list()
 
   dimen <- dim(x)
@@ -164,9 +211,9 @@ table.mcmcarray <- function(x, ...) {
 }
 
 
-##' @importFrom stats density
 ##' @export
-density.mcmcarray <- function(x, bw = "nrd0", ...) {
+biips_density.mcmcarray <- function(x, bw = "nrd0", ...) {
+  stopifnot(is.mcmcarray(x))
   out <- list()
 
   dimen <- dim(x)
@@ -187,7 +234,8 @@ density.mcmcarray <- function(x, bw = "nrd0", ...) {
 }
 
 ##' @export
-hist.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
+biips_hist.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
+  stopifnot(is.mcmcarray(x))
   out <- list()
 
   dimen <- dim(x)
@@ -208,7 +256,8 @@ hist.mcmcarray <- function(x, main=NULL, xlab=NULL, ...) {
 }
 
 ##' @export
-table.mcmcarray.list <- function(x, ...) {
+biips_table.mcmcarray.list <- function(x, ...) {
+  stopifnot(is.mcmcarray.list(x))
   out <- list()
   for (i in 1:length(x)) {
     name <- names(x)[i]
@@ -221,7 +270,8 @@ table.mcmcarray.list <- function(x, ...) {
 }
 
 ##' @export
-density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
+biips_density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
+  stopifnot(is.mcmcarray.list(x))
   out <- list()
   for (i in 1:length(x)) {
     name <- names(x)[i]
@@ -234,7 +284,8 @@ density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
 }
 
 ##' @export
-hist.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
+biips_hist.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
+  stopifnot(is.mcmcarray.list(x))
   out <- list()
   for (i in 1:length(x)) {
     name <- names(x)[i]
@@ -246,6 +297,7 @@ hist.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
   return(invisible(out))
 }
 
+##' @importFrom graphics plot
 ##' @export
 plot.table.mcmcarray <- function(x, main=NULL, xlab=NULL, ylab="Probability", ...) {
   for (d in 1:length(x)) {

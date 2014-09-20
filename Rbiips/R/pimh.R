@@ -1,5 +1,5 @@
 ##' @export
-pimh_init <- function(object, variable_names, ...) {
+biips_pimh_init <- function(object, variable_names, ...) {
   stopifnot(is.biips(object))
   stopifnot(is.character(variable_names), length(variable_names) > 0)
   ## TODO check variable_names
@@ -147,10 +147,10 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output="
 
 
 ##' @export
-pimh_update <- function(object, ...) UseMethod("pimh_update")
+biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 
 ##' @export
-pimh_update.pimh <- function(object, n_iter, n_part, output="l", ...) {
+biips_pimh_update.pimh <- function(object, n_iter, n_part, output="l", ...) {
   out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, return_samples = FALSE, output=output, ...)
   return(invisible(out))
 }
@@ -183,7 +183,7 @@ pimh_update.pimh <- function(object, n_iter, n_part, output="l", ...) {
 ##' ##-- ==>  Define data, use random,
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##'
-pimh_samples <- function(object, n_iter, n_part, thin = 1, output="l", ...) {
+biips_pimh_samples <- function(object, n_iter, n_part, thin = 1, output="l", ...) {
   out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, return_samples = TRUE,
     output=output, ...)
   return(out)

@@ -20,7 +20,8 @@
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin.bug'|:
-type('hmm_1d_nonlin.bug');
+model_file = 'hmm_1d_nonlin.bug'; % BUGS model filename
+type(model_file);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -58,9 +59,8 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'hmm_1d_nonlin.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_file, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %% Biips Sequential Monte Carlo
@@ -83,7 +83,7 @@ out_smc = biips_smc_samples(model, variables, n_part,...
 
 %%
 % *Diagnosis of the algorithm*
-diagnostic = biips_diagnosis(out_smc);
+diag_smc = biips_diagnosis(out_smc);
 
 %%
 % The sequence of filtering distributions is automatically chosen by Biips
@@ -112,12 +112,12 @@ end
 
 %%
 % *Summary statistics*
-summ = biips_summary(out_smc, 'probs', [.025, .975]);
+summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Plot Filtering estimates*
-x_f_mean = summ.x.f.mean;
-x_f_quant = summ.x.f.quant;
+x_f_mean = summ_smc.x.f.mean;
+x_f_quant = summ_smc.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     light_blue);
@@ -133,8 +133,8 @@ box off
 
 %%
 % *Plot Smoothing estimates*
-x_s_mean = summ.x.s.mean;
-x_s_quant = summ.x.s.quant;
+x_s_mean = summ_smc.x.s.mean;
+x_s_quant = summ_smc.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     light_red);

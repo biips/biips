@@ -52,7 +52,8 @@ cat(readLines(model_file), sep = "\n")
 
 #+
 #' # Installation of Rbiips package
-#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the latest version of Rbiips package depending on your system
+#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
+#'     latest version of Rbiips package depending on your system:
 #'
 #'     - `Rbiips_x.x.x.zip` for Windows
 #'     - `Rbiips_x.x.x.tgz` for Mac OS X
@@ -78,7 +79,7 @@ light_blue = rgb(.7, .7, 1)
 light_red = rgb(1, .7, .7)
 
 #' Set the random numbers generator seed for reproducibility
-set.seed(1)
+set.seed(2)
 
 #' # Load model and data
 
@@ -109,18 +110,20 @@ n_part = 100 # Number of particles
 param_values = list(log_prec_y = seq(-5,3,.2))
 
 #' #### Run sensitivity analysis with SMC
-out_sens = smc_sensitivity(model, param_values, n_part)
+out_sens = biips_smc_sensitivity(model, param_values, n_part)
 
 #' #### Plot log-marginal likelihood and penalized log-marginal likelihood
 #+ fig.cap='Log-marginal likelihood'
 plot(param_values[[1]], out_sens$log_marg_like, col='blue', pch=20,
      xlab ='Parameter log_prec_y',
-     ylab = 'Log-marginal likelihood')
+     ylab = 'Log-marginal likelihood',
+     ylim=c(-110, max(out_sens$log_marg_like)))
 
 #+ fig.cap='Penalized log-marginal likelihood'
 plot(param_values[[1]], out_sens$log_marg_like_pen, col='blue', pch=20,
      xlab ='Parameter log_prec_y',
-     ylab = 'Penalized log-marginal likelihood')
+     ylab = 'Penalized log-marginal likelihood',
+     ylim=c(-110, max(out_sens$log_marg_like_pen)))
 
 #' # Biips Particle Marginal Metropolis-Hastings
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order
@@ -140,53 +143,52 @@ param_names = c(var_name) # name of the variables updated with MCMC (others are 
 latent_names = c('x') # name of the variables updated with SMC and that need to be monitored
 
 #' #### Init PMMH
-obj_pmmh = pmmh_init(model, param_names, inits=list(log_prec_y=-2),
+obj_pmmh = biips_pmmh_init(model, param_names, inits=list(log_prec_y=-2),
                      latent_names=latent_names) # creates a pmmh object
 
 #' #### Run PMMH
-pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations
-out_pmmh = pmmh_samples(obj_pmmh, n_iter, n_part, thin=thin) # samples
+biips_pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations
+out_pmmh = biips_pmmh_samples(obj_pmmh, n_iter, n_part, thin=thin) # samples
 
 #' #### Some summary statistics
-summ_pmmh = summary(out_pmmh, probs=c(.025, .975))
+summ_pmmh = biips_summary(out_pmmh, probs=c(.025, .975))
 
 #' #### Compute kernel density estimates
-kde_pmmh = density(out_pmmh)
+kde_pmmh = biips_density(out_pmmh)
 
 #' #### Posterior mean and credible interval for the parameter
-summ_var = summ_pmmh[[var_name]]
-cat('Posterior mean of log_prec_y:', summ_var$mean, '\n');
-cat('95% credible interval for log_prec_y: [', summ_var$quant[[1]], ', ', summ_var$quant[[2]],']\n', sep='')
-
+summ_param = summ_pmmh[[var_name]]
+cat('Posterior mean of log_prec_y:', summ_param$mean, '\n');
+cat('95% credible interval for log_prec_y: [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
 
 #' #### Trace of MCMC samples for the parameter
 #+ fig.cap = 'PMMH: Trace samples parameter'
-mcmc_samples = out_pmmh[[var_name]]
-plot(mcmc_samples[1,], col='blue', type='l', lwd=1,
+samples_param = out_pmmh[[var_name]]
+plot(samples_param[1,], col='blue', type='l', lwd=1,
      xlab='Iterations',
      ylab='PMMH samples',
      main=var_name)
-points(0, data$log_prec_y_true, col='green', pch=8, lwd=2)
+points(0, log_prec_y_true, col='green', pch=8, lwd=2)
 legend('topright', leg=c('PMMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
        bty='n')
 
 #' #### Histogram and kde estimate of the posterior for the parameter
 #+ fig.cap = 'PMMH: Histogram posterior parameter'
-hist(mcmc_samples, breaks=15, col='blue', border='white',
+hist(samples_param, breaks=15, col='blue', border='white',
      xlab=var_name, ylab='Number of samples',
      main=var_name)
-points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
+points(log_prec_y_true, 0, col='green', pch=8, lwd=2)
 legend('topright', leg=c('Posterior samples', 'True value'),
        col=c('blue', 'green'), pch=c(22,8), lwd=c(NA,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
        bty='n')
 
 #+ fig.cap = 'PMMH: KDE estimate posterior parameter'
-kde_var = kde_pmmh[[var_name]]
-plot(kde_var, col='blue', lwd=2,
+kde_param = kde_pmmh[[var_name]]
+plot(kde_param, col='blue', lwd=2,
      xlab=var_name, ylab='Posterior density',
      main=var_name)
-points(data$log_prec_y_true, 0, col='green', pch=8, lwd=2)
+points(log_prec_y_true, 0, col='green', pch=8, lwd=2)
 legend('topright', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lty=c(1,NA), lwd=2,
        bty='n')
@@ -206,7 +208,6 @@ lines(data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95 % credible interval', 'PMMH mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
        bty='n')
-
 
 #' #### Trace of MCMC samples for x
 #+ fig.cap = 'PMMH: Trace samples x'
@@ -242,7 +243,6 @@ legend('center', leg=c('Posterior samples', 'True value'),
        col=c('blue', 'green'), pch=c(22,8), lwd=c(1,2), lty=NA, pt.cex=c(2,1), pt.bg=c(4,NA),
        bty='n')
 par(mfrow=c(1,1))
-
 
 #+ fig.cap = 'PMMH: KDE estimates marginal posteriors'
 par(mfrow=c(2,2))

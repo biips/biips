@@ -11,7 +11,6 @@ smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 ##'                the algorithm used for resampling
 ##'
 ##' @return ok boolean. True if success
-##' @export
 smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", seed = get_seed(),
   ...) {
   stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0, rs_thres <=
@@ -32,14 +31,14 @@ smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "st
 
 
 ##' @export
-smc_samples <- function(object, ...) UseMethod("smc_samples")
+biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 
 ##' Generate conditional samples
 ##'
 ##' Function to extract random weighted samples, aka. particles, from the
 ##' conditional distribution of the parameters of a \code{biips} model.
 ##'
-##' The \code{smc_samples} function creates monitors for the given types and
+##' The \code{biips_smc_samples} function creates monitors for the given types and
 ##' variables, runs the SMC algorithm for \code{n_part} particles and returns
 ##' the monitored samples.
 ##'
@@ -68,7 +67,7 @@ smc_samples <- function(object, ...) UseMethod("smc_samples")
 ##' @note By default, the seed of the random number generation is chosen
 ##' randomly.
 ##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips_model}}, \code{\link{pmmh.samples}},
+##' @seealso \code{\link{biips_model}}, \code{\link{pmmh_samples}},
 ##' \code{\link{pimh_samples}}
 ##' @keywords models
 ##' @export
@@ -78,7 +77,7 @@ smc_samples <- function(object, ...) UseMethod("smc_samples")
 ##' ##-- ==>  Define data, use random,
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##'
-smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_thres = 0.5,
+biips_smc_samples.biips <- function(object, variable_names, n_part, type = "fs", rs_thres = 0.5,
   rs_type = "stratified", ...) {
 
   ## check arguments

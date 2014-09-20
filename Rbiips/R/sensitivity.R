@@ -17,7 +17,7 @@
 ##' ##-- ==>  Define data, use random,
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##'
-smc_sensitivity <- function(object, param_values, n_part, ...) {
+biips_smc_sensitivity <- function(object, param_values, n_part, ...) {
   stopifnot(is.biips(object))
 
   n_param <- length(param_values)

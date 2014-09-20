@@ -19,7 +19,8 @@
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin_fext.bug'|:
-type('hmm_1d_nonlin_fext.bug');
+model_file = 'hmm_1d_nonlin_fext.bug'; % BUGS model filename
+type(model_file);
 
 %%%
 % Although the nonlinear function $f$ can be defined in BUGS language, we
@@ -78,9 +79,8 @@ biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, fun_eval);
 
 %%
 % *Compile BUGS model and sample data*
-model_filename = 'hmm_1d_nonlin_fext.bug'; % BUGS model filename
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_file, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %% Biips Sequential Monte Carlo
@@ -103,16 +103,16 @@ out_smc = biips_smc_samples(model, variables, n_part, ...
 
 %%
 % *Diagnosis on the algorithm*.
-diagnostic = biips_diagnosis(out_smc);
+diag_smc = biips_diagnosis(out_smc);
 
 %%
 % *Summary statistics*
-summary = biips_summary(out_smc, 'probs', [.025, .975]);
+summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Plot Filtering estimates*
-x_f_mean = summary.x.f.mean;
-x_f_quant = summary.x.f.quant;
+x_f_mean = summ_smc.x.f.mean;
+x_f_quant = summ_smc.x.f.quant;
 figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     light_blue);
@@ -128,8 +128,8 @@ box off
 
 %%
 % *Plot Smoothing estimates*
-x_s_mean = summary.x.s.mean;
-x_s_quant = summary.x.s.quant;
+x_s_mean = summ_smc.x.s.mean;
+x_s_quant = summ_smc.x.s.quant;
 figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     light_red);
@@ -145,15 +145,15 @@ box off
 
 %%
 % *Marginal filtering and smoothing densities*
-kde_estimates = biips_density(out_smc);
+kde_smc = biips_density(out_smc);
 time_index = [5, 10, 15];
 figure('name', 'SMC: Marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates.x.f(tk).x, kde_estimates.x.f(tk).f);
+    plot(kde_smc.x.f(tk).x, kde_smc.x.f(tk).f);
     hold on
-    plot(kde_estimates.x.s(tk).x, kde_estimates.x.s(tk).f, 'r');
+    plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
     xlim([-20, 20])
     xlabel(['x_{', num2str(tk), '}']);

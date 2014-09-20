@@ -37,7 +37,7 @@ function [dens] = biips_density(samples, varargin)
 
 %% PROCESS AND CHECK INPUTS
 optarg_names = {'type', 'adjust', 'bw', 'n'};
-optarg_default = {'fsb', 1, [], 100};
+optarg_default = {'fsb', 1, [], 500};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 10],...
     [0,intmax], [0,intmax]};
 optarg_type = {'char', 'numeric', 'numeric', 'numeric'};
@@ -85,10 +85,17 @@ elseif is_smc_fsb
     names = fieldnames(samples);
     dens = struct();
     
+    % same bandwidth for all f,s,b estimates
     if isempty(bw)
-        % select bandwidth with filtering particles
-        d = ndims(samples.f.values);
-        bw = cellfun(@(x,w) bw_select(x, w), num2cell(samples.f.values, d), num2cell(samples.f.weights, d), 'uniformoutput', false);
+        if isfield(samples, 'f') % use filtering particles first
+            s = getfield(samples, 'f');
+        elseif isfield(samples, 'f') % then backward smoothing
+            s = getfield(samples, 'b');
+        else % otherwise smoothing
+            s = getfield(samples, 's');
+        end
+        d = ndims(s.values);
+        bw = cellfun(@(x,w) bw_select(x, w), num2cell(s.values, d), num2cell(s.weights, d), 'uniformoutput', false);
     end
         
     for i=1:numel(names)

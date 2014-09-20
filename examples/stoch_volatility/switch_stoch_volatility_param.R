@@ -74,7 +74,8 @@ cat(readLines(model_file), sep = "\n")
 
 #+
 #' # Installation of Rbiips package
-#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the latest version of Rbiips package depending on your system
+#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
+#'     latest version of Rbiips package depending on your system:
 #'
 #'     - `Rbiips_x.x.x.zip` for Windows
 #'     - `Rbiips_x.x.x.tgz` for Mac OS X
@@ -157,25 +158,25 @@ latent_names = c('x', 'alpha[1]', 'alpha[2]', 'sigma') # names of the variables 
 
 #' #### Init PMMH
 inits = list(-1, 1, .5, 5, .8, .8)
-obj_pmmh = pmmh_init(model, param_names, inits=inits,
+obj_pmmh = biips_pmmh_init(model, param_names, inits=inits,
                      latent_names=latent_names) # creates a pmmh object
 
 #' #### Run PMMH
-pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations
-out_pmmh = pmmh_samples(obj_pmmh, n_iter, n_part, thin=thin) # samples
+biips_pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations
+out_pmmh = biips_pmmh_samples(obj_pmmh, n_iter, n_part, thin=thin) # samples
 
 #' #### Some summary statistics
-summ_pmmh = summary(out_pmmh, probs=c(.025, .975))
+summ_pmmh = biips_summary(out_pmmh, probs=c(.025, .975))
 
 #' #### Compute kernel density estimates
-kde_pmmh = density(out_pmmh)
+kde_pmmh = biips_density(out_pmmh)
 
 param_plot = c('alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]')
 
 #' #### Posterior mean and credible interval for the parameters
-for (i in 1:length(param_plot)) {
-  summ_param = summ_pmmh[[param_plot[i]]]
-  cat('Posterior mean of ',  param_plot[i], ': ', summ_param$mean, '\n', sep='');
+for (k in 1:length(param_plot)) {
+  summ_param = summ_pmmh[[param_plot[k]]]
+  cat('Posterior mean of ',  param_plot[k], ': ', summ_param$mean, '\n', sep='');
   cat('95% credible interval for log_prec_y: [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
 }
 
@@ -187,8 +188,8 @@ if (sample_data)
 title_names = expression(alpha[1], alpha[2], phi, sigma, pi[11], pi[22])
 
 for (k in 1:length(param_plot)) {
-  mcmc_samples_param = out_pmmh[[param_plot[k]]]
-  plot(mcmc_samples_param[1,], type='l', col='blue', lwd=1,
+  samples_param = out_pmmh[[param_plot[k]]]
+  plot(samples_param[1,], type='l', col='blue', lwd=1,
        xlab='Iterations', ylab='PMMH samples',
        main=title_names[k])
   if (sample_data)
@@ -198,8 +199,8 @@ for (k in 1:length(param_plot)) {
 #' #### Histogram and kde estimate of the posterior of the parameters
 #+ fig.cap = 'PMMH: Histogram posterior parameter', fig.subcap = param_plot, fig.mfrow=c(2,3)
 for (k in 1:length(param_plot)) {
-  mcmc_samples_param = out_pmmh[[param_plot[k]]]
-  hist(mcmc_samples_param, breaks=15, col='blue', border='white',
+  samples_param = out_pmmh[[param_plot[k]]]
+  hist(samples_param, breaks=15, col='blue', border='white',
        xlab=title_names[k], ylab='Number of samples',
        main=title_names[k])
   if (sample_data)
@@ -236,7 +237,6 @@ if (sample_data) {
   legend('topright', leg=c('95 % credible interval', 'PMMH mean estimate'),
          col=c(light_blue,'blue'), lwd=c(NA,3), pch=c(15,NA), pt.cex=c(2,1),
          bty='n')
-
 
 #' #### Trace of MCMC samples for x
 #+ fig.cap = 'PMMH: Trace samples x'
@@ -280,7 +280,6 @@ if (sample_data) {
 
 }
 par(mfrow=c(1,1))
-
 
 #+ fig.cap = 'PMMH: KDE estimates marginal posteriors'
 par(mfrow=c(2,2))

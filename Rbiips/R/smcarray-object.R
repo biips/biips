@@ -51,29 +51,23 @@ NULL
 is.smcarray <- function(object) {
   return(class(object) == "smcarray")
 }
-
 ##' @export
 is.smcarray.fsb <- function(object) {
   return(class(object) == "smcarray.fsb")
 }
-
 ##' @export
 is.smcarray.fsb.list <- function(object) {
   return(class(object) == "smcarray.fsb.list")
 }
 
-
 ##' @export
 print.smcarray <- function(x, ...) {
   print(summary(x), ...)
 }
-
-
 ##' @export
 print.smcarray.fsb <- function(x, ...) {
   print(summary(x), ...)
 }
-
 ##' @export
 print.smcarray.fsb.list <- function(x, ...) {
   print(summary(x), ...)
@@ -81,9 +75,22 @@ print.smcarray.fsb.list <- function(x, ...) {
     cat("Log-marginal likelihood: ", x$log_marg_like, "\n")
 }
 
+##' @export
+summary.smcarray <- function(object, ...) {
+  return(biips_summary(object, ...))
+}
+##' @export
+summary.smcarray.fsb <- function(object, ...) {
+  return(biips_summary(object, ...))
+}
+##' @export
+summary.smcarray.fsb.list <- function(object, ...) {
+  return(biips_summary(object, ...))
+}
 
 ##' @export
-summary.smcarray <- function(object, probs = c(), order, mode = all(object$discrete), ...) {
+biips_summary.smcarray <- function(object, probs = c(), order, mode = all(object$discrete), ...) {
+  stopifnot(is.smcarray(object))
 
   ### TODO check arguments
   if (length(probs) > 0)
@@ -159,13 +166,14 @@ summary.smcarray <- function(object, probs = c(), order, mode = all(object$discr
 
 ##' @export
 mean.smcarray <- function(x, ...) {
+  stopifnot(is.smcarray(x))
   s <- summary(x, order = 1)
   return(s$mean)
 }
 
-
 ##' @export
-summary.smcarray.fsb <- function(object, ...) {
+biips_summary.smcarray.fsb <- function(object, ...) {
+  stopifnot(is.smcarray.fsb(object))
   out <- list()
   for (n in names(object)) out[[n]] <- summary(object[[n]], ...)
 
@@ -175,7 +183,8 @@ summary.smcarray.fsb <- function(object, ...) {
 }
 
 ##' @export
-summary.smcarray.fsb.list <- function(object, ...) {
+biips_summary.smcarray.fsb.list <- function(object, ...) {
+  stopifnot(is.smcarray.fsb.list(object))
   out <- list()
 
   for (n in names(object)) {
@@ -189,7 +198,6 @@ summary.smcarray.fsb.list <- function(object, ...) {
   return(out)
 }
 
-
 ##' @export
 print.summary.smcarray <- function(x, ...) {
   cat("smcarray:\n")
@@ -200,7 +208,6 @@ print.summary.smcarray <- function(x, ...) {
   }
   invisible()
 }
-
 
 ##' @export
 print.summary.smcarray.fsb <- function(x, prefix=NULL, ...) {
@@ -223,7 +230,6 @@ print.summary.smcarray.fsb.list <- function(x, ...) {
   invisible()
 }
 
-
 ##' @export
 print.diagnosis.smcarray <- function(x, ...) {
   if (x$valid) {
@@ -240,10 +246,10 @@ print.diagnosis.smcarray <- function(x, ...) {
 
 
 ##' @export
-diagnosis <- function(object, ...) UseMethod("diagnosis")
+biips_diagnosis <- function(object, ...) UseMethod("biips_diagnosis")
 
 ##' @export
-diagnosis.smcarray <- function(object, ess_thres = 30, quiet = FALSE, ...) {
+biips_diagnosis.smcarray <- function(object, ess_thres = 30, quiet = FALSE, ...) {
   stopifnot(is.smcarray(object))
   stopifnot(is.numeric(ess_thres), length(ess_thres) == 1, is.finite(ess_thres),
             ess_thres >= 0)
@@ -270,7 +276,7 @@ diagnosis.smcarray <- function(object, ess_thres = 30, quiet = FALSE, ...) {
 }
 
 ##' @export
-diagnosis.smcarray.fsb <- function(object, type = "fsb", quiet = FALSE, ...) {
+biips_diagnosis.smcarray.fsb <- function(object, type = "fsb", quiet = FALSE, ...) {
   stopifnot(is.smcarray.fsb(object))
   type <- check_type(type)
 
@@ -283,7 +289,7 @@ diagnosis.smcarray.fsb <- function(object, type = "fsb", quiet = FALSE, ...) {
   for (n in names(object)) {
     if (!(n %in% type))
       next
-    out[[n]] <- diagnosis(object[[n]], quiet = TRUE, ...)
+    out[[n]] <- biips_diagnosis(object[[n]], quiet = TRUE, ...)
     if (!quiet) {
       switch(n, f = {
         cat("  Filtering: ")
@@ -300,14 +306,14 @@ diagnosis.smcarray.fsb <- function(object, type = "fsb", quiet = FALSE, ...) {
 }
 
 ##' @export
-diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...) {
+biips_diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...) {
   stopifnot(is.smcarray.fsb.list(object))
 
   out <- list()
   for (n in names(object)) {
     if (!is.smcarray.fsb(object[[n]]))
       next
-    out <- diagnosis(object[[n]], type = type, quiet = quiet, ...)
+    out <- biips_diagnosis(object[[n]], type = type, quiet = quiet, ...)
   }
 
   return(invisible(out))
@@ -315,6 +321,33 @@ diagnosis.smcarray.fsb.list <- function(object, type = "fsb", quiet = FALSE, ...
 
 ##' @export
 table.smcarray <- function(x, ...) {
+  return(biips_table(x, ...))
+}
+##' @export
+table.smcarray.fsb <- function(x, ...) {
+  return(biips_table(x, ...))
+}
+##' @export
+table.smcarray.fsb.list <- function(x, ...) {
+  return(biips_table(x, ...))
+}
+##' @importFrom stats density
+##' @export
+density.smcarray <- function(x, ...) {
+  return(biips_density(x, ...))
+}
+##' @export
+density.smcarray.fsb <- function(x, ...) {
+  return(biips_density(x, ...))
+}
+##' @export
+density.smcarray.fsb.list <- function(x, ...) {
+  return(biips_density(x, ...))
+}
+
+##' @export
+biips_table.smcarray <- function(x, ...) {
+  stopifnot(is.smcarray(x))
   out <- list()
 
   dimen <- dim(x$values)
@@ -339,9 +372,9 @@ table.smcarray <- function(x, ...) {
   return(out)
 }
 
-##' @importFrom stats density
 ##' @export
-density.smcarray <- function(x, bw="nrd0", ...) {
+biips_density.smcarray <- function(x, bw="nrd0", ...) {
+  stopifnot(is.smcarray(x))
   out <- list()
 
   dimen <- dim(x$values)
@@ -366,9 +399,9 @@ density.smcarray <- function(x, bw="nrd0", ...) {
   return(out)
 }
 
-
 ##' @export
-table.smcarray.fsb <- function(x, ...) {
+biips_table.smcarray.fsb <- function(x, ...) {
+  stopifnot(is.smcarray.fsb(x))
   out <- list()
   for (fsb in names(x)) {
     if (!is.smcarray(x[[fsb]]))
@@ -381,7 +414,8 @@ table.smcarray.fsb <- function(x, ...) {
 }
 
 ##' @export
-density.smcarray.fsb <- function(x, bw="nrd0", adjust=1, ...) {
+biips_density.smcarray.fsb <- function(x, bw="nrd0", adjust=1, ...) {
+  stopifnot(is.smcarray.fsb(x))
   out <- list()
   bw_s <- bw
 
@@ -433,7 +467,8 @@ density.smcarray.fsb <- function(x, bw="nrd0", adjust=1, ...) {
 
 
 ##' @export
-table.smcarray.fsb.list <- function(x, ...) {
+biips_table.smcarray.fsb.list <- function(x, ...) {
+  stopifnot(is.smcarray.fsb.list(x))
   out <- list()
   for (i in 1:length(x)) {
     if (!is.smcarray.fsb(x[[i]]))
@@ -448,7 +483,8 @@ table.smcarray.fsb.list <- function(x, ...) {
 
 
 ##' @export
-density.smcarray.fsb.list <- function(x, bw="nrd0", ...) {
+biips_density.smcarray.fsb.list <- function(x, bw="nrd0", ...) {
+  stopifnot(is.smcarray.fsb.list(x))
   out <- list()
   for (i in 1:length(x)) {
     if (!is.smcarray.fsb(x[[i]]))
@@ -462,6 +498,7 @@ density.smcarray.fsb.list <- function(x, bw="nrd0", ...) {
   return(out)
 }
 
+##' @importFrom graphics plot
 ##' @export
 plot.density.smcarray <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
   for (i in 1:length(x)) {

@@ -36,7 +36,9 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #' $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
 #'
 #' where $\mathcal N\left (m, S\right )$ denotes the Gaussian distribution
-#' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$, $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$, $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
+#' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$,
+#' $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$,
+#' $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
 
 #+
 #' # Statistical model in BUGS language
@@ -46,7 +48,8 @@ cat(readLines(model_file), sep = "\n")
 
 #+
 #' # Installation of Rbiips package
-#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the latest version of Rbiips package depending on your system
+#' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
+#'     latest version of Rbiips package depending on your system:
 #'
 #'     - `Rbiips_x.x.x.zip` for Windows
 #'     - `Rbiips_x.x.x.tgz` for Mac OS X
@@ -103,11 +106,11 @@ variables = c('x') # Variables to be monitored
 mn_type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5 # Optional parameters
 
 #' #### Run SMC
-out_smc = smc_samples(model, variables, n_part,
+out_smc = biips_smc_samples(model, variables, n_part,
                       type=mn_type, rs_type=rs_type, rs_thres=rs_thres)
 
-#' #### Diagnosis of the algorithm
-diagnostic = diagnosis(out_smc)
+#' #### Diagnostics of the algorithm
+diag_smc = biips_diagnosis(out_smc)
 
 #' The sequence of filtering distributions is automatically chosen by Biips
 #' based on the topology of the graphical model, and is returned in the
@@ -129,12 +132,12 @@ for (i in 1:length(out_smc$x$s$iterations)) {
 }
 
 #' #### Summary statistics
-summ = summary(out_smc, probs=c(.025, .975))
+summ_smc = biips_summary(out_smc, probs=c(.025, .975))
 
 #' #### Plot Filtering estimates
 #+ fig.cap='SMC: Filtering estimates'
-x_f_mean = summ$x$f$mean
-x_f_quant = summ$x$f$quant
+x_f_mean = summ_smc$x$f$mean
+x_f_quant = summ_smc$x$f$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_f_quant[[1]], rev(x_f_quant[[2]]))
@@ -149,8 +152,8 @@ legend('topright', leg=c('95 % credible interval', 'Filtering mean estimate', 'T
 
 #' #### Plot Smoothing estimates
 #+ fig.cap='SMC: Smoothing estimates'
-x_s_mean = summ$x$s$mean
-x_s_quant = summ$x$s$quant
+x_s_mean = summ_smc$x$s$mean
+x_s_quant = summ_smc$x$s$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_s_quant[[1]], rev(x_s_quant[[2]]))
@@ -164,7 +167,7 @@ legend('topright', leg=c('95 % credible interval', 'Smoothing mean estimate', 'T
 
 #' #### Marginal filtering and smoothing densities
 #+ fig.cap='SMC: Marginal posteriors'
-kde_smc = density(out_smc)
+kde_smc = biips_density(out_smc)
 time_index = c(5, 10, 15)
 par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
@@ -191,12 +194,12 @@ thin = 1
 n_part = 100
 
 #' #### Run PIMH
-obj_pimh = pimh_init(model, variables)
-pimh_update(obj_pimh, n_burn, n_part) # burn-in iterations
-out_pimh = pimh_samples(obj_pimh, n_iter, n_part, thin=thin)
+obj_pimh = biips_pimh_init(model, variables)
+biips_pimh_update(obj_pimh, n_burn, n_part) # burn-in iterations
+out_pimh = biips_pimh_samples(obj_pimh, n_iter, n_part, thin=thin)
 
 #' #### Some summary statistics
-summ_pimh = summary(out_pimh, probs=c(.025, .975))
+summ_pimh = biips_summary(out_pimh, probs=c(.025, .975))
 
 #' #### Posterior mean and quantiles
 #+ fig.cap='PIMH: Posterior mean and quantiles'
@@ -229,7 +232,6 @@ plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
 legend('center', leg=c('PIMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
        bty='n')
-
 
 #' #### Histograms of posteriors
 #+ fig.cap='PIMH: Histograms marginal posteriors'

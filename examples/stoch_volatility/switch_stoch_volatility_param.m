@@ -44,11 +44,10 @@
 % $\mathcal {TN}_{(a,b)}(m,\sigma^2)$ denotes the truncated normal
 % distribution of mean $m$ and variance $\sigma^2$.
 
-
 %% Statistical model in BUGS language
 % Content of the file |'switch_stoch_volatility_param.bug'|:
-model_filename = 'switch_stoch_volatility_param.bug'; % BUGS model filename
-type(model_filename);
+model_file = 'switch_stoch_volatility_param.bug'; % BUGS model filename
+type(model_file);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -115,7 +114,7 @@ end
 
 %%
 % *Compile BUGS model and sample data if simulated data*
-model = biips_model(model_filename, data, 'sample_data', sample_data);
+model = biips_model(model_file, data, 'sample_data', sample_data);
 data = model.data;
 
 %% Biips Particle Marginal Metropolis-Hastings
@@ -175,9 +174,9 @@ end
 title_names = {'\alpha_1', '\alpha_2', '\phi', '\sigma', '\pi_{11}', '\pi_{22}'};
 
 for k=1:numel(param_plot)
-    mcmc_samples_param = getfield(out_pmmh, param_plot{k});
+    samples_param = getfield(out_pmmh, param_plot{k});
     figure
-    plot(mcmc_samples_param, 'linewidth', 1)
+    plot(samples_param, 'linewidth', 1)
     if sample_data
         hold on
         plot(0, param_true(k), '*g', 'markersize', 10);
@@ -191,9 +190,9 @@ end
 %%
 % *Histogram and kde estimate of the posterior for the parameters*
 for k=1:numel(param_plot)
-    mcmc_samples_param = getfield(out_pmmh, param_plot{k});
+    samples_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
-    hist(mcmc_samples_param, 15)
+    hist(samples_param, 15)
     h = findobj(gca, 'Type', 'patch');
     set(h, 'EdgeColor', 'w')
     if sample_data
@@ -224,7 +223,6 @@ for k=1:numel(param_plot)
     box off
 end
 
-
 %%
 % *Posterior mean and quantiles for x*
 x_pmmh_mean = summ_pmmh.x.mean;
@@ -247,7 +245,6 @@ saveas(gca, 'switch_stoch_param_x', 'epsc2')
 saveas(gca, 'switch_stoch_param_x', 'png')
 box off
 legend boxoff
-
 
 %%
 % *Trace of MCMC samples for x*
@@ -317,7 +314,6 @@ if sample_data
     set(h, 'position', [0.7, 0.25, .1, .1])
     legend boxoff
 end
-
 
 %% Clear model
 %

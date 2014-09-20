@@ -26,8 +26,8 @@
 
 %% Statistical model in BUGS language
 % We describe the model in BUGS language in the file |'hmm_1d_nonlin.bug'|:
-model_filename = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
-type(model_filename);
+model_file = 'hmm_1d_nonlin_param.bug'; % BUGS model filename
+type(model_file);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -67,7 +67,7 @@ data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data); % Create Biips model and sample data
+model = biips_model(model_file, data, 'sample_data', sample_data); % Create Biips model and sample data
 data = model.data;
 
 %% Biips Sensitivity analysis with Sequential Monte Carlo
@@ -98,7 +98,6 @@ plot(param_values{1}, out_sens.log_marg_like_pen, '.')
 xlabel('Parameter log\_prec\_y')
 ylabel('Penalized log-marginal likelihood')
 box off
-
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
@@ -135,21 +134,20 @@ summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 
 %%
 % *Compute kernel density estimates*
-kde_estimates_pmmh = biips_density(out_pmmh);
+kde_pmmh = biips_density(out_pmmh);
 
 %%
 % *Posterior mean and credible interval for the parameter*
-summ_var = getfield(summ_pmmh, var_name);
-fprintf('Posterior mean of log_prec_y: %.1f\n', summ_var.mean);
+summ_param = getfield(summ_pmmh, var_name);
+fprintf('Posterior mean of log_prec_y: %.1f\n', summ_param.mean);
 fprintf('95%% credible interval for log_prec_y: [%.1f, %.1f]\n',...
-    summ_var.quant{1}, summ_var.quant{2});
-
+    summ_param.quant{1}, summ_param.quant{2});
 
 %%
 % *Trace of MCMC samples for the parameter*
-mcmc_samples = getfield(out_pmmh, var_name);
+samples_param = getfield(out_pmmh, var_name);
 figure('name', 'PMMH: Trace samples parameter')
-plot(mcmc_samples, 'linewidth', 1)
+plot(samples_param, 'linewidth', 1)
 hold on
 plot(0, data.log_prec_y_true, '*g');
 xlabel('Iterations')
@@ -162,7 +160,7 @@ box off
 %%
 % *Histogram and kde estimate of the posterior for the parameter*
 figure('name', 'PMMH: Histogram posterior parameter')
-hist(mcmc_samples, 15)
+hist(samples_param, 15)
 h = findobj(gca, 'Type', 'patch');
 set(h, 'EdgeColor', 'w')
 hold on
@@ -173,9 +171,9 @@ legend({'Posterior samples', 'True value'})
 legend boxoff
 box off
 
-kde_var = getfield(kde_estimates_pmmh, var_name);
+kde_param = getfield(kde_pmmh, var_name);
 figure('name', 'PMMH: KDE estimate posterior parameter')
-plot(kde_var.x, kde_var.f);
+plot(kde_param.x, kde_param.f);
 hold on
 plot(data.log_prec_y_true, 0, '*g');
 xlabel('log\_prec\_y');
@@ -246,7 +244,7 @@ figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_estimates_pmmh.x(tk).x, kde_estimates_pmmh.x(tk).f);
+    plot(kde_pmmh.x(tk).x, kde_pmmh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlim([-16, -7])

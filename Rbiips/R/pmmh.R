@@ -1,7 +1,6 @@
 
 pmmh_set_param <- function(object, ...) UseMethod("pmmh_set_param")
 
-##' @export
 pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 
   stopifnot(is.biips(object))
@@ -42,7 +41,7 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 
 
 ##' @export
-pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), rw_step = list(),
+biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), rw_step = list(),
   n_rescale = 400, alpha = 0.99, beta = 0.05, ...) {
   ## check arguments
   stopifnot(is.biips(object))
@@ -388,7 +387,6 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
 
 pmmh_algo <- function(object, ...) UseMethod("pmmh_algo")
 
-##' @export
 pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max_fail = 0,
   rw_adapt = FALSE, output = "p", ...) {
   stopifnot(is.pmmh(object))
@@ -556,7 +554,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
 
 
 ##' @export
-pmmh_update <- function(object, ...) UseMethod("pmmh_update")
+biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 
 ##' Update Particle Marginal Metropolis-Hastings samples
 ##'
@@ -594,7 +592,7 @@ pmmh_update <- function(object, ...) UseMethod("pmmh_update")
 ##' ##-- ==>  Define data, use random,
 ##' ##--  or do  help(data=index)  for the standard data sets.
 ##'
-pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE,
+biips_pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE,
                              output = "p", ...) {
   out <- pmmh_algo(object, n_iter, n_part, return_samples = FALSE, max_fail = max_fail,
     rw_adapt = rw_adapt, output = output, ...)
@@ -604,7 +602,7 @@ pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TR
 
 ##' Generate Particle Marginal Metropolis-Hastings samples
 ##'
-##' The \code{pmmh.samples} function creates monitors for the given variables,
+##' The \code{pmmh_samples} function creates monitors for the given variables,
 ##' runs the model for \code{n_iter} iterations and returns the monitored
 ##' samples.
 ##'
@@ -634,7 +632,7 @@ pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TR
 ##' ##-- ==>  Define data, use random,
 ##' ##--\tor do  help(data=index)  for the standard data sets.
 ##'
-pmmh_samples <- function(object, n_iter, n_part, thin = 1, max_fail = 0, output = "p", ...) {
+biips_pmmh_samples <- function(object, n_iter, n_part, thin = 1, max_fail = 0, output = "p", ...) {
 
   out <- pmmh_algo(object, n_iter, n_part, return_samples = TRUE, max_fail = max_fail,
                    output = output, ...)
