@@ -52,7 +52,7 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #'
 #' $x_{t1}$ and $x_{t2}$ respectively correspond to the number of preys and predators and $y_t$ is the approximated number of preys. The model is the approximation of the Lotka-Volterra model.
 
-#+
+#'
 #' # Statistical model in BUGS language
 model_file = 'stoch_kinetic_cle.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
@@ -78,7 +78,7 @@ require(Rbiips)
 #' **Note**: Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -122,7 +122,7 @@ legend('topright', leg=c('Prey', 'Predator', 'Measurements'),
 
 #' # Biips Sensitivity analysis with Sequential Monte Carlo
 
-#+
+#'
 #' #### Parameters of the algorithm
 n_part = 100 # Number of particles
 n_grid = 20
@@ -143,7 +143,7 @@ plot(param_values[[1]], out_sens$log_marg_like_pen, col='blue', pch=20,
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 #' to obtain posterior MCMC samples of the parameters and variables $x$.
 
-#+
+#'
 #' #### Parameters of the PMMH
 n_burn = 2000 # nb of burn-in/adaptation iterations
 n_iter = 20000 # nb of iterations after burn-in

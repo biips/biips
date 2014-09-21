@@ -44,13 +44,12 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #'
 #' $$ \log(\lambda_y) \sim Unif(-3,3) $$
 
-#+
+#'
 #' # Statistical model in BUGS language
 #' We describe the model in BUGS language in the file `'hmm_1d_nonlin_param.bug'`:
 model_file = 'hmm_1d_nonlin_param.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
-#+
 #' # Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
 #'     latest version of Rbiips package depending on your system:
@@ -72,7 +71,7 @@ require(Rbiips)
 #' **Note:** Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -103,7 +102,7 @@ data = model$data()
 #' penalized marginal log-likelihood given various values of the
 #' log-precision parameters $\log(\lambda_y)$.
 
-#+
+#'
 #' #### Parameters of the algorithm
 n_part = 100 # Number of particles
 # Range of values of the parameter for which we want to study sensitivity
@@ -129,7 +128,7 @@ plot(param_values[[1]], out_sens$log_marg_like_pen, col='blue', pch=20,
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 #' to obtain posterior MCMC samples of the parameter and the variables $x$.
 
-#+
+#'
 #' #### Parameters of the PMMH
 #' `param_names` indicates the parameters to be sampled using a random walk
 #' Metroplis-Hastings step. For all the other variables, Biips will use a

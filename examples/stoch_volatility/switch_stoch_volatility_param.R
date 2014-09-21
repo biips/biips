@@ -72,7 +72,6 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 model_file = 'switch_stoch_volatility_param.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
-#+
 #' # Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
 #'     latest version of Rbiips package depending on your system:
@@ -163,7 +162,7 @@ latent_names = c('x', 'alpha[1]', 'alpha[2]', 'sigma') # names of the variables 
 #' #### Init PMMH
 inits = list(-1, 1, .5, 5, .8, .8)
 obj_pmmh = biips_pmmh_init(model, param_names, inits=inits,
-                     latent_names=latent_names) # creates a pmmh object
+                           latent_names=latent_names) # creates a pmmh object
 
 #' #### Run PMMH
 biips_pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations

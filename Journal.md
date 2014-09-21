@@ -160,7 +160,7 @@ Tâches :
 --------
 - [x] typographies biips, matbiips, rbiips
 - [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
-- [x] ajouter cible `publishmatbiipsexamples.m` dans cmake
+- [ ] ajouter cible `publishmatbiipsexamples.m` dans cmake
 - [x] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
 - [ ] passer à boost 1.54 (standard sous ubuntu)

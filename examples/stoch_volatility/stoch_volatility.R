@@ -49,13 +49,12 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #' $\alpha$, $\beta$ and $\sigma$ are unknown
 #' parameters that need to be estimated.
 
-#+
+#'
 #' # Statistical model in BUGS language
 #' Content of the file `'stoch_volatility.bug'`:
 model_file = 'stoch_volatility.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
-#+
 #' # Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
 #'     latest version of Rbiips package depending on your system:
@@ -77,7 +76,7 @@ require(Rbiips)
 #' **Note:** Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -128,7 +127,7 @@ data = model$data()
 #' to obtain posterior MCMC samples of the parameters $\alpha$, $\beta$ and $\sigma$,
 #' and of the variables $x$.
 
-#+
+#'
 #' #### Parameters of the PMMH
 n_burn = 5000 # nb of burn-in/adaptation iterations
 n_iter = 10000 # nb of iterations after burn-in

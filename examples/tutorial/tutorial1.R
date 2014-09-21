@@ -40,13 +40,12 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #' $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$,
 #' $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
 
-#+
+#'
 #' # Statistical model in BUGS language
 #' We describe the model in BUGS language in the file `'hmm_1d_nonlin.bug'`:
 model_file = 'hmm_1d_nonlin.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
-#+
 #' # Installation of Rbiips package
 #' 1. [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) the
 #'     latest version of Rbiips package depending on your system:
@@ -68,7 +67,7 @@ require(Rbiips)
 #' **Note:** Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -95,8 +94,7 @@ data = model$data()
 
 #' # Biips Sequential Monte Carlo
 #' Let now use Biips to run a particle filter.
-
-#+
+#'
 #' #### Parameters of the algorithm
 #' We want to monitor the variable `x`, and to
 #' get the filtering and smoothing particle approximations. The algorithm
@@ -185,8 +183,7 @@ par(mfrow=c(1,1))
 
 #' # Biips Particle Independent Metropolis-Hastings
 #' We now use Biips to run a Particle Independent Metropolis-Hastings.
-
-#+
+#'
 #' #### Parameters of the PIMH
 n_burn = 500
 n_iter = 500

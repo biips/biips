@@ -39,13 +39,13 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #'
 #' $$ Y(t)=X_1(t) + \epsilon(t), ~~\epsilon(t)\sim\mathcal N(0,\sigma^2) $$
 
-#+
+#'
 #' # Statistical model in BUGS language
 #' Content of the file `'stoch_kinetic_gill.bug'`:
 model_file = 'stoch_kinetic_gill.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
-#+
+#'
 #' # User-defined R functions
 lotka_volterra_gillespie <- function(x, c1, c2, c3, dt) {
   # Simulation from a Lotka-Volterra model with the Gillepsie algorithm
@@ -54,8 +54,7 @@ lotka_volterra_gillespie <- function(x, c1, c2, c3, dt) {
   # R1: (x1,x2) -> (x1+1,x2)      At rate c1x1
   # R2: (x1,x2) -> (x1-1,x2+1)    At rate c2x1x2
   # R3: (x1,x2) -> (x1,x2-1)      At rate c3xx2
-  z = matrix(c(1, -1, 0,
-               0, 1, -1), nrow=2, byrow=TRUE)
+  z = matrix(c(1, -1, 0, 0, 1, -1), nrow=2, byrow=TRUE)
 
   t = 0
   while (TRUE) {
@@ -67,7 +66,7 @@ lotka_volterra_gillespie <- function(x, c1, c2, c3, dt) {
       break
     x = x + z[,ind]
   }
-  return(as.numeric(x))
+  return(x)
 }
 
 lotka_volterra_dim <- function(x_dim, c1_dim, c2_dim, c3_dim, dt_dim) { c(2,1) }
@@ -93,7 +92,7 @@ require(Rbiips)
 #' **Note**: Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -106,7 +105,7 @@ set.seed(0)
 
 #' # Add new sampler to Biips
 
-#+
+#'
 #' #### Add the user-defined function 'LV' to simulate from the Lotka-Volterra model
 fun_bugs = 'LV'; fun_nb_inputs = 5
 fun_dim = lotka_volterra_dim; fun_sample = lotka_volterra_gillespie
@@ -141,9 +140,9 @@ legend('topright', leg=c('Prey', 'Predator', 'Measurements'),
 
 #' # Biips Sequential Monte Carlo algorithm
 
-#+
+#'
 #' #### Run SMC
-n_part = 100000 # Number of particles
+n_part = 10000 # Number of particles
 variables = c('x') # Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part, type='fs')
 
@@ -154,7 +153,7 @@ summ_smc = biips_summary(out_smc, probs=c(.025, .975))
 #+ fig.cap = 'SMC: SESS'
 plot(out_smc$x$s$ess[1,], type='l', log='y', col='blue', lwd=2,
      xlab='Time', ylab='SESS',
-     ylim=c(1,max(out_smc$x$s$ess[1,])))
+     ylim=c(10, n_part))
 lines(1:t_max, rep(30,t_max), lwd=2, lty=2)
 legend('topright', leg='Smoothing effective sample size',
        col='blue', lwd=2, bty='n')

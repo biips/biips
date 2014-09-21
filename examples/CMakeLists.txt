@@ -42,7 +42,12 @@ endif(SED)
 file(GLOB ex_files_common RELATIVE "${CMAKE_SOURCE_DIR}"
     *.md
 )
-foreach(_ex_dir tutorial object_tracking stoch_volatility stoch_kinetic)
+
+set(example_dirs
+    tutorial object_tracking stoch_volatility stoch_kinetic
+)
+
+foreach(_ex_dir ${example_dirs})
 
     # matbiips source files
     file(GLOB _ex_files_mat RELATIVE "${CMAKE_SOURCE_DIR}"
@@ -126,4 +131,3 @@ add_custom_target(examples_package
     DEPENDS  ${EXAMPLES_ARCHIVE_LIST}
     COMMENT "Packaging Biips examples"
 )
-

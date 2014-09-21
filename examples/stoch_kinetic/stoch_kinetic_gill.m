@@ -120,7 +120,7 @@ ylabel('SESS')
 box off
 legend('Smoothing effective sample size')
 legend boxoff
-ylim([1, n_part])
+ylim([10, n_part])
 saveas(gca, 'kinetic_sess', 'epsc2')
 
 %%
