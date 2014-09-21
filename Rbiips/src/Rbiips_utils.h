@@ -96,28 +96,33 @@ template<typename StorageOrderType>
 SEXP getMonitors(const std::map<String, NodeArrayMonitor> & monitorsMap, const String & type);
 
 template <class InType> 
-InType apply(const std::vector<InType> & invec, const Rcpp::Function & fun, int nrhs) {
-     
-      InType outvec;
-      switch(nrhs) {
+InType evalRfun(const Rcpp::Function & fun, const std::vector<InType> & invec) {
 
-       case 1: outvec = fun(invec[0]); 
-           break;
-       case 2: outvec = fun(invec[0], invec[1]);
-           break;
-       case 3: outvec = fun(invec[0], invec[1], invec[2]);
-           break;                        
-       case 4: outvec = fun(invec[0], invec[1], invec[2], invec[3]);
-           break;                        
-       case 5: outvec = fun(invec[0], invec[1], invec[2], invec[3], invec[4]);
-           break;                              
-       default: throw Biips::LogicError("Too much arguments in RFunction must be <= 5");
-                break;
+  InType outvec;
+  switch(invec.size()) {
+    case 1:
+      outvec = fun(invec[0]);
+      break;
+    case 2:
+      outvec = fun(invec[0], invec[1]);
+      break;
+    case 3:
+      outvec = fun(invec[0], invec[1], invec[2]);
+      break;
+    case 4:
+      outvec = fun(invec[0], invec[1], invec[2], invec[3]);
+      break;
+    case 5:
+      outvec = fun(invec[0], invec[1], invec[2], invec[3], invec[4]);
+      break;
+    default:
+      throw Biips::RuntimeError("Too many arguments in R function. must be <= 5");
+      break;
       }
     return outvec;
 }
 
-Rcpp::NumericVector convArrayVector(const Biips::NumArray & array );
+Rcpp::NumericVector arrayToVector(const Biips::NumArray & array );
 
 
 #endif /* RBIIPS_UTILS_H_ */

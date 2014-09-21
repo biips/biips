@@ -119,8 +119,8 @@ data = model.data;
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
-% to obtain posterior MCMC samples of the parameters $\alpha$, $\beta$ and $\sigma$,
-% and of the variables $x$. 
+% to obtain posterior MCMC samples of the parameters $\alpha$, $\phi$,
+% $\sigma$, $\pi$, and of the variables $x$. 
 % Note: We use below a reduced number of MCMC iterations to have reasonable 
 % running times. But the obtained samples are obviously very correlated, 
 % and the number of iterations should be set to a higher value, and proper
@@ -156,26 +156,25 @@ summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 kde_pmmh = biips_density(out_pmmh);
 
 param_plot = {'alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
+param_lab = {'\alpha_1', '\alpha_2', '\phi', '\sigma', '\pi_{11}', '\pi_{22}'};
+if sample_data
+    param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
+end
 
 %%
-% *Posterior mean and credible interval for the parameters*
+% *Posterior mean and credible interval of the parameters*
 for i=1:numel(param_plot)
     summ_param = getfield(summ_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, summ_param.mean);
-    fprintf('95%% credibilist interval for %s: [%.3f, %.3f]\n',...
+    fprintf('95%% credibilist interval of %s: [%.3f, %.3f]\n',...
         param_plot{i}, summ_param.quant{1}, summ_param.quant{2});
 end
 
 %%
 % *Trace of MCMC samples for the parameters*
-if sample_data
-    param_true = [alpha_true', phi_true, sigma_true, pi11, pi22];
-end
-title_names = {'\alpha_1', '\alpha_2', '\phi', '\sigma', '\pi_{11}', '\pi_{22}'};
-
 for k=1:numel(param_plot)
+    figure('name', 'PMMH: Trace samples parameter')
     samples_param = getfield(out_pmmh, param_plot{k});
-    figure
     plot(samples_param, 'linewidth', 1)
     if sample_data
         hold on
@@ -183,15 +182,15 @@ for k=1:numel(param_plot)
     end
     xlabel('Iterations', 'fontsize', 20)
     ylabel('PMMH samples', 'fontsize', 20)
-    title(title_names{k}, 'fontsize', 20)
+    title(param_lab{k}, 'fontsize', 20)
     box off
 end
 
 %%
-% *Histogram and kde estimate of the posterior for the parameters*
+% *Histogram and KDE estimate of the posterior for the parameters*
 for k=1:numel(param_plot)
-    samples_param = getfield(out_pmmh, param_plot{k});
     figure('name', 'PMMH: Histogram posterior parameter')
+    samples_param = getfield(out_pmmh, param_plot{k});
     hist(samples_param, 15)
     h = findobj(gca, 'Type', 'patch');
     set(h, 'EdgeColor', 'w')
@@ -199,7 +198,7 @@ for k=1:numel(param_plot)
         hold on
         plot(param_true(k), 0, '*g', 'markersize', 10);
     end
-    xlabel(title_names{k}, 'fontsize', 20)
+    xlabel(param_lab{k}, 'fontsize', 20)
     ylabel('Number of samples', 'fontsize', 20)
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
@@ -208,14 +207,14 @@ for k=1:numel(param_plot)
 end
 
 for k=1:numel(param_plot)
-    kde_param = getfield(kde_pmmh, param_plot{k});
     figure('name', 'PMMH: KDE estimate posterior parameter')
+    kde_param = getfield(kde_pmmh, param_plot{k});
     plot(kde_param.x, kde_param.f)
     if sample_data
         hold on
         plot(param_true(k), 0, '*g', 'markersize', 10);
     end
-    xlabel(title_names{k}, 'fontsize', 20)
+    xlabel(param_lab{k}, 'fontsize', 20)
     ylabel('Posterior density', 'fontsize', 20)
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'png')
@@ -225,19 +224,19 @@ end
 
 %%
 % *Posterior mean and quantiles for x*
+figure('name', 'PMMH: Posterior mean and quantiles')
 x_pmmh_mean = summ_pmmh.x.mean;
 x_pmmh_quant = summ_pmmh.x.quant;
-figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'linewidth', 3)
+plot(1:t_max, x_pmmh_mean, 'linewidth', 3)
 if sample_data
-    plot(data.x_true, 'g')
-    legend({'95 % credible interval', 'PMMH mean estimate', 'True value'})
+    plot(1:t_max, data.x_true, 'g')
+    legend({'95% credible interval', 'PMMH mean estimate', 'True value'})
 else
-    legend({'95 % credible interval', 'PMMH mean estimate'})
+    legend({'95% credible interval', 'PMMH mean estimate'})
 end
 xlabel('Time')
 ylabel('Estimates')
@@ -248,8 +247,8 @@ legend boxoff
 
 %%
 % *Trace of MCMC samples for x*
-time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
+time_index = [5, 10, 15];
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)

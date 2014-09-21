@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * Biips software is a set of C++ libraries for
+ * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * Biips is derived software based on:
+ * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of Biips.
+ * This file is part of BiiPS.
  *
- * Biips is free software: you can redistribute it and/or modify
+ * BiiPS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,57 +25,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file Sum.hpp
- * \brief 
+/*! \file   Probit.hpp
+ * \brief   
  * 
  * \author  $LastChangedBy$
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
  */
+#ifndef BIIPS_PROBIT_HPP_
+#define BIIPS_PROBIT_HPP_
 
-#ifndef BIIPS_SUM_HPP_
-#define BIIPS_SUM_HPP_
+#include <cmath>
 
-#include "function/Function.hpp"
+#include "functions/ScalarFunction.hpp"
 
 namespace Biips
 {
 
-  class Sum: public Function
+  struct ProbitScalar: public std::unary_function<Scalar, Scalar>
   {
+    Scalar operator()(Scalar val) const;
+  };
+
+  struct PhiScalar: public std::unary_function<Scalar, Scalar>
+  {
+    Scalar operator()(Scalar val) const;
+  };
+
+  class Probit: public UnaryScalarFunction<ProbitScalar>
+  {
+    public:
+    typedef Probit SelfType;
+    typedef UnaryScalarFunction<ProbitScalar> BaseType;
+
   protected:
-    typedef Sum SelfType;
-
-    Sum() :
-      Function("sum", 1)
+    Probit() :
+      BaseType("probit")
     {
-    }
-
-    virtual Bool
-    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
-    {
-      return true;
-    }
-    virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const
-    {
-      return *P_SCALAR_DIM;
-    }
-    virtual void
-        eval(ValArray & values, const NumArray::Array & paramValues) const
-    {
-      values[0] = paramValues[0].Values().Sum();
     }
 
   public:
-    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
-    {
-      return true;
-    }
-    virtual Bool IsDiscreteValued(const Flags & mask) const
-    {
-      return mask[0];
-    }
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const;
+
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());
@@ -83,6 +75,31 @@ namespace Biips
     }
   };
 
-}
+  class Phi: public UnaryScalarFunction<PhiScalar>
+  {
+    public:
+    typedef Phi SelfType;
+    typedef UnaryScalarFunction<PhiScalar> BaseType;
 
-#endif /* BIIPS_SUM_HPP_ */
+  protected:
+    Phi() :
+      BaseType("phi")
+    {
+    }
+
+  public:
+    virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
+    {
+      return true;
+    }
+
+    static Function::Ptr Instance()
+    {
+      static Function::Ptr p_instance(new SelfType());
+      return p_instance;
+    }
+  };
+
+} /* namespace Biips */
+
+#endif /* BIIPS_PROBIT_HPP_ */

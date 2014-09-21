@@ -85,7 +85,7 @@ data = model.data;
 
 %%
 % *Plot data*
-figure('name', 'data')
+figure('name', 'Data')
 plot(1:t_max, data.x_true(1,:))
 hold on
 plot(1:t_max, data.x_true(2,:), 'r')
@@ -112,9 +112,9 @@ summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 %%
 % *Smoothing ESS*
 figure('name', 'SMC: SESS')
-semilogy(out_smc.x.s.ess(1,:))
+semilogy(1:t_max, out_smc.x.s.ess(1,:))
 hold on
-plot(30*ones(t_max, 1), 'k--')
+plot(1:t_max, 30*ones(t_max, 1), 'k--')
 xlabel('Time')
 ylabel('SESS')
 box off
@@ -125,9 +125,9 @@ saveas(gca, 'kinetic_sess', 'epsc2')
 
 %%
 % *Posterior mean and quantiles for x*
+figure('name', 'SMC: Posterior mean and quantiles')
 x_smc_mean = summ_smc.x.s.mean;
 x_smc_quant = summ_smc.x.s.quant;
-figure('name', 'SMC: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
     light_blue);
 set(h, 'edgecolor', 'none')
@@ -142,8 +142,8 @@ plot(1:t_max, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
 ylabel('Estimates')
 ylim([0, 450])
-legend({'95 % credible interval (prey)', 'SMC mean estimate (prey)', 'True number of preys',...
-    '95 % credible interval (predator)', 'SMC mean estimate (predator)',...
+legend({'95% credible interval (prey)', 'SMC mean estimate (prey)', 'True number of preys',...
+    '95% credible interval (predator)', 'SMC mean estimate (predator)',...
     'True number of predators'})
 legend boxoff
 box off

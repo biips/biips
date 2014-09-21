@@ -26,7 +26,6 @@
 % For $t=m,2m,3m,\ldots,T$,
 % $$ y_t|x_t\sim \mathcal N(x_{1t},\sigma^2) $$
 %
-%
 % and for $i=1,\ldots,3$
 %
 % $$ \log(c_i)\sim Unif(-7,2) $$
@@ -67,10 +66,10 @@ end
 %%
 % *Model parameters*
 t_max = 20;
-dt = 0.20;
+dt = .2;
 x_init_mean = [100; 100];
 x_init_var = 10*eye(2);
-c_true = [.5, 0.0025, .3];
+c_true = [.5, .0025, .3];
 prec_y = 1/10;
 data = struct('t_max', t_max, 'dt', dt, 'c_true', c_true,...
     'x_init_mean', x_init_mean, 'x_init_var', x_init_var, 'prec_y', prec_y);
@@ -84,10 +83,11 @@ data = model.data;
 %%
 % *Plot data*
 figure('name', 'Data')
-plot(dt:dt:t_max, data.x_true(1,:))
+t_vec = dt:dt:t_max;
+plot(t_vec, data.x_true(1,:))
 hold on
-plot(dt:dt:t_max, data.x_true(2,:), 'r')
-plot(dt:dt:t_max, data.y, 'g*')
+plot(t_vec, data.x_true(2,:), 'r')
+plot(t_vec, data.y, 'g*')
 xlabel('Time')
 ylabel('Number of individuals')
 legend('Prey', 'Predator', 'Measurements')
@@ -101,7 +101,8 @@ legend boxoff
 % *Parameters of the algorithm*
 n_part = 100; % Number of particles
 param_names = {'logc[1]', 'logc[2]', 'logc[3]'}; % Parameter for which we want to study sensitivity
-param_values = {linspace(-7,1,20), log(c_true(2))*ones(20,1), log(c_true(3))*ones(20,1)}; % Range of values
+n_grid = 20;
+param_values = {linspace(-7,1,n_grid), repmat(log(c_true(2)), n_grid, 1), repmat(log(c_true(3)), n_grid, 1)}; % Range of values
 
 % n_grid = 5;
 % [param_values{1:3}] = meshgrid(linspace(-7,1,n_grid), linspace(-7,1,n_grid), linspace(-7,1,n_grid));
@@ -109,33 +110,29 @@ param_values = {linspace(-7,1,20), log(c_true(2))*ones(20,1), log(c_true(3))*one
 
 %%
 % *Run sensitivity analysis with SMC*
-out = biips_smc_sensitivity(model, param_names, param_values, n_part);
+out_sens = biips_smc_sensitivity(model, param_names, param_values, n_part);
 
 %%
 % *Plot penalized log-marginal likelihood*
 figure('name', 'Sensitivity: Penalized log-marginal likelihood');
-plot(param_values{1}, out.log_marg_like_pen, '.')
+plot(param_values{1}, out_sens.log_marg_like_pen, '.')
 xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
 box off
-
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
 % to obtain posterior MCMC samples of the parameters and variables $x$.
 
 %%
-% *Parameters of the PMMH*.
-% param_names indicates the parameters to be sampled using a random walk
-% Metroplis-Hastings step. For all the other variables, Biips will use a
-% sequential Monte Carlo as proposal.
+% *Parameters of the PMMH*
 n_burn = 2000; % nb of burn-in/adaptation iterations
 n_iter = 20000; % nb of iterations after burn-in
 thin = 10; % thinning of MCMC outputs
 n_part = 100; % nb of particles for the SMC
 
-param_names = {'logc[1]', 'logc[2]', 'logc[3]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x'}; % name of the variables updated with SMC and that need to be monitored
+param_names = {'logc[1]', 'logc[2]', 'logc[3]'}; % names of the variables updated with MCMC (others are updated with SMC)
+latent_names = {'x'}; % names of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
@@ -144,95 +141,95 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1},...
 
 %%
 % *Run PMMH*
-[obj_pmmh, stats] = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-    'thin', 1); % Samples
+obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+    'thin', thin); % Samples
 
 %%
 % *Some summary statistics*
-summary_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
+summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 
 %%
 % *Compute kernel density estimates*
-kde_estimates_pmmh = biips_density(out_pmmh);
+kde_pmmh = biips_density(out_pmmh);
 
 param_true = log(c_true);
-leg = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
+param_lab = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 
 %%
-% *Posterior mean and credibilist interval for the parameter*
+% *Posterior mean and credible interval of the parameters*
 for i=1:numel(param_names)
-    quantile_param = getfield(getfield(summary_pmmh,param_names{i}), 'quant');
-    fprintf('Posterior mean of %s: %.1f\n', leg{i},...
-        getfield(getfield(summary_pmmh, param_names{i}), 'mean'));
-    fprintf('95%% credibilist interval for %s: [%.1f, %.1f]\n', leg{i},...
-        quantile_param{1}, quantile_param{2});
+    summ_param = getfield(summ_pmmh, param_names{i});
+    fprintf('Posterior mean of %s: %.3f\n', param_names{i}, summ_param.mean);
+    fprintf('95%% credibilist interval of %s: [%.1f, %.1f]\n',...
+        param_names{i}, summ_param.quant{1}, summ_param.quant{2});
 end
 
 %%
-% *Trace of MCMC samples for the parameter*
+% *Trace of MCMC samples for the parameters*
 for i=1:numel(param_names)
     figure('name', 'PMMH: Trace samples parameter')
-    plot(getfield(out_pmmh,param_names{i}), 'linewidth', 1);
+    samples_param = getfield(out_pmmh, param_names{i});
+    plot(samples_param, 'linewidth', 1);
     hold on
     plot(0, param_true(i), '*g');
     xlabel('Iterations')
     ylabel('PMMH samples')
-    title(leg{i})
+    title(param_lab{i})
     box off
 end
 
 %%
-% *Histogram and kde estimate of the posterior for the parameter*
+% *Histogram and KDE estimate of the posterior for the parameters*
 for i=1:numel(param_names)
     figure('name', 'PMMH: Histogram posterior parameter')
-    hist(getfield(out_pmmh,param_names{i}), 15)
+    samples_param = getfield(out_pmmh, param_names{i});
+    hist(samples_param, 15)
     h = findobj(gca, 'Type', 'patch');
     set(h, 'EdgeColor', 'w')
     hold on
     plot(param_true(i), 0, '*g');
-    xlabel(leg{i})
+    xlabel(param_lab{i})
     ylabel('Number of samples')
-    title(leg{i})
+    title(param_lab{i})
     box off
 end
 saveas(gca, 'stoch_kinetic_param', 'epsc2')
 saveas(gca, 'stoch_kinetic_param', 'png')
 
 for i=1:numel(param_names)
-    kde_x = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'x');
-    kde_f = getfield(getfield(kde_estimates_pmmh, param_names{i}), 'f');
     figure('name', 'PMMH: KDE estimate posterior parameter')
-    plot(kde_x, kde_f);
+    kde_param = getfield(kde_pmmh, param_names{i});
+    plot(kde_param.x, kde_param.f);
     hold on
     plot(param_true(i), 0, '*g');
-    xlabel(leg{i});
+    xlabel(param_lab{i});
     ylabel('Posterior density');
+    title(param_lab{i})
     box off
 end
 
-
 %%
-% *Posterior mean and quantiles for $x$ *
-x_pmmh_mean = summary_pmmh.x.mean;
-x_pmmh_quant = summary_pmmh.x.quant;
+% *Posterior mean and quantiles for x*
 figure('name', 'PMMH: Posterior mean and quantiles')
-h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
+x_pmmh_mean = summ_pmmh.x.mean;
+x_pmmh_quant = summ_pmmh.x.quant;
+h = fill([t_vec, fliplr(t_vec)], [x_pmmh_quant{1}(1,:), fliplr(x_pmmh_quant{2}(1,:))],...
     light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(1:t_max/dt, x_pmmh_mean(1, :), 'linewidth', 3)
-plot(1:t_max/dt, data.x_true(1,:), '--', 'color', dark_blue)
-h = fill([1:t_max/dt, t_max/dt:-1:1], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
+plot(t_vec, x_pmmh_mean(1, :), 'linewidth', 3)
+plot(t_vec, data.x_true(1,:), '--', 'color', dark_blue)
+h = fill([t_vec, fliplr(t_vec)], [x_pmmh_quant{1}(2,:), fliplr(x_pmmh_quant{2}(2,:))],...
     light_red);
 set(h, 'edgecolor', 'none')
-plot(1:t_max/dt, x_pmmh_mean(2, :), 'r', 'linewidth', 3)
-plot(1:t_max/dt, data.x_true(2,:), '--', 'color', dark_red)
+plot(t_vec, x_pmmh_mean(2, :), 'r', 'linewidth', 3)
+plot(t_vec, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
 ylabel('Estimates')
 ylim([0, 1500])
-legend({'95 % credible interval (prey)', 'PMMH mean estimate (prey)', 'True number of preys',...
-    '95 % credible interval (predator)', 'PMMH mean estimate (predator)',...
+legend({'95% credible interval (prey)', 'PMMH mean estimate (prey)', 'True number of preys',...
+    '95% credible interval (predator)', 'PMMH mean estimate (predator)',...
     'True number of predators'})
 legend boxoff
 box off

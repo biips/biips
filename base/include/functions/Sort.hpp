@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * Biips software is a set of C++ libraries for
+ * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * Biips is derived software based on:
+ * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of Biips.
+ * This file is part of BiiPS.
  *
- * Biips is free software: you can redistribute it and/or modify
+ * BiiPS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,47 +25,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file Sum.hpp
- * \brief 
+/*! \file   Sort.hpp
+ * \brief   
  * 
  * \author  $LastChangedBy$
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
  */
-
-#ifndef BIIPS_SUM_HPP_
-#define BIIPS_SUM_HPP_
+#ifndef BIIPS_SORT_HPP_
+#define BIIPS_SORT_HPP_
 
 #include "function/Function.hpp"
 
 namespace Biips
 {
 
-  class Sum: public Function
+  class Sort: public Function
   {
   protected:
-    typedef Sum SelfType;
+    typedef Sort SelfType;
 
-    Sum() :
-      Function("sum", 1)
+    Sort() :
+      Function("sort", 1)
     {
     }
 
     virtual Bool
     checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
     {
-      return true;
+      return paramDims[0]->Drop().IsVector();
     }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const
     {
-      return *P_SCALAR_DIM;
+      return *(paramDims[0]);
     }
     virtual void
-        eval(ValArray & values, const NumArray::Array & paramValues) const
-    {
-      values[0] = paramValues[0].Values().Sum();
-    }
+        eval(ValArray & values, const NumArray::Array & paramValues) const;
 
   public:
     virtual Bool CheckParamValues(const NumArray::Array & paramValues) const
@@ -83,6 +79,6 @@ namespace Biips
     }
   };
 
-}
+} /* namespace Biips */
 
-#endif /* BIIPS_SUM_HPP_ */
+#endif /* BIIPS_SORT_HPP_ */

@@ -57,6 +57,10 @@ extern "C" {
 #include "functions/Min.hpp"
 #include "functions/Prod.hpp"
 #include "functions/Equals.hpp"
+#include "functions/Sort.hpp"
+#include "functions/Logit.hpp"
+#include "functions/Probit.hpp"
+#include "functions/CLogLog.hpp"
 
 #include "distributions/DNorm.hpp"
 #include "distributions/DNormVar.hpp"
@@ -142,6 +146,13 @@ namespace Biips
     funcTab.Insert(Round::Instance(), true);
     funcTab.Insert(Trunc::Instance(), true);
 
+    funcTab.Insert(Logit::Instance(), true);
+    funcTab.Insert(ILogit::Instance(), true);
+    funcTab.Insert(Probit::Instance(), true);
+    funcTab.Insert(Phi::Instance(), true);
+    funcTab.Insert(CLogLog::Instance(), true);
+    funcTab.Insert(ICLogLog::Instance(), true);
+
     funcTab.Insert(Step::Instance(), true);
 
     funcTab.Insert(Transpose::Instance(), true);
@@ -150,6 +161,7 @@ namespace Biips
     funcTab.Insert(Max::Instance(), true);
     funcTab.Insert(Min::Instance(), true);
     funcTab.Insert(Prod::Instance(), true);
+    funcTab.Insert(Sort::Instance(), true);
 
     // TODO check returned boolean
     distTab.Insert(DNorm::Instance(), true);

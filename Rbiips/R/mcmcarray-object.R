@@ -122,7 +122,7 @@ biips_summary.mcmcarray.list <- function(object, ...) {
   for (n in names(object)) {
     if (!is.mcmcarray(object[[n]]))
       next
-    ans[[n]] <- summary(object[[n]], ...)
+    ans[[n]] <- biips_summary(object[[n]], ...)
   }
 
   class(ans) <- "summary.mcmcarray.list"
@@ -263,7 +263,7 @@ biips_table.mcmcarray.list <- function(x, ...) {
     name <- names(x)[i]
     if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
       next
-    out[[name]] <- table(x[[i]], ...)
+    out[[name]] <- biips_table(x[[i]], ...)
   }
   class(out) <- "table.mcmcarray.list"
   return(out)
@@ -277,7 +277,7 @@ biips_density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
     name <- names(x)[i]
     if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
       next
-    out[[name]] <- density(x[[i]], bw = rec(bw,i), ...) # recycle bw
+    out[[name]] <- biips_density(x[[i]], bw = rec(bw,i), ...) # recycle bw
   }
   class(out) <- "density.mcmcarray.list"
   return(out)
@@ -291,7 +291,7 @@ biips_hist.mcmcarray.list <- function(x, main=NULL, xlab=NULL, ...) {
     name <- names(x)[i]
     if (!is.mcmcarray(x[[i]]) || name %in% c("log_marg_like_pen", "log_marg_like", "info"))
       next
-    out[[name]] <- hist(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
+    out[[name]] <- biips_hist(x[[i]], main=rec(main,i), xlab=rec(xlab,i), ...) # recycle arguments
   }
   class(out) <- "histogram.mcmcarray.list"
   return(invisible(out))

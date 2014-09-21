@@ -1,17 +1,17 @@
 //                                               -*- C++ -*-
 /*
- * Biips software is a set of C++ libraries for
+ * BiiPS software is a set of C++ libraries for
  * Bayesian inference with interacting Particle Systems.
  * Copyright (C) Inria, 2012
  * Authors: Adrien Todeschini, Francois Caron
  *
- * Biips is derived software based on:
+ * BiiPS is derived software based on:
  * JAGS, Copyright (C) Martyn Plummer, 2002-2010
  * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
  *
- * This file is part of Biips.
+ * This file is part of BiiPS.
  *
- * Biips is free software: you can redistribute it and/or modify
+ * BiiPS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,28 +25,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file Prod.cpp
- * \brief
- *
+/*! \file   Sort.cpp
+ * \brief   
+ * 
  * \author  $LastChangedBy$
  * \date    $LastChangedDate$
  * \version $LastChangedRevision$
  * Id:      $Id$
  */
-
-#include "functions/Prod.hpp"
+#include "functions/Sort.hpp"
+#include <algorithm>
 
 namespace Biips
 {
 
-  void Prod::eval(ValArray & values, const NumArray::Array & paramValues) const
+  void Sort::eval(ValArray & values, const NumArray::Array & paramValues) const
   {
-    const NumArray & val = paramValues[0];
-
-    values[0] = std::accumulate(val.Values().begin(),
-                                val.Values().end(),
-                                1.0,
-                                std::multiplies<Scalar>());
+    values = paramValues[0].Values();
+    std::sort(values.begin(), values.end());
   }
 
-}
+} /* namespace Biips */

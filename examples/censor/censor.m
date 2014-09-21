@@ -55,7 +55,7 @@ model = biips_model('censor.bug', {'x0', 'tmax', 'interv', 'y', 'sigma', 'rho'})
 %% 
 % *Plot trajectories of the particles constrained to a tube*
 figure;
-plot(out_smc.x.s.values(:,out_smc.x.s.weights(end,:)>0));
+plot(1:t_max, out_smc.x.s.values(:,out_smc.x.s.weights(end,:)>0));
 hold on
 plot(repmat((1:tmax)', 1, size(interv,1)), interv', 'k--')
 ylim([0,6])
@@ -105,7 +105,7 @@ plot(repmat((1:tmax)', 1, size(interv,1)), interv', 'k--')
 xlabel('time')
 ylabel('x')
 y_lim = ylim;
-legend({'95 % credible interval', 'Mean estimate', 'Cutpoints'})
+legend({'95% credible interval', 'Mean estimate', 'Cutpoints'})
 box off
 legend boxoff
 ylim([0,6])

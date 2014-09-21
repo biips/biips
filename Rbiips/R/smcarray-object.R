@@ -135,14 +135,14 @@ biips_summary.smcarray <- function(object, probs = c(), order, mode = all(object
       indvec <- seq(d, len * (n_part - 1) + d, len)
       stat_d <- Rbiips("wtd_quantile", object$values[indvec], n_part * object$weights[indvec],
                        probs)
-      stat_names <- names(stat_d)
+      quant_names <- names(stat_d)
       if (d == 1) {
-        for (n in stat_names) {
-          if (is.null(summ[[n]]))
+        for (n in quant_names) {
+          if (is.null(summ$quant[[n]]))
             summ$quant[[n]] <- array(dim = dim_array)
         }
       }
-      for (n in stat_names) summ$quant[[n]][d] <- stat_d[[n]]
+      for (n in quant_names) summ$quant[[n]][d] <- stat_d[[n]]
     }
   }
 
@@ -153,7 +153,7 @@ biips_summary.smcarray <- function(object, probs = c(), order, mode = all(object
     for (d in 1:len) {
       indvec <- seq(d, len * (n_part - 1) + d, len)
       stat_d <- Rbiips("wtd_mode", object$values[indvec], n_part * object$weights[indvec])
-      summ$mode[d] <- stat_d[[n]]
+      summ$mode[d] <- stat_d
     }
   }
 
@@ -175,7 +175,7 @@ mean.smcarray <- function(x, ...) {
 biips_summary.smcarray.fsb <- function(object, ...) {
   stopifnot(is.smcarray.fsb(object))
   out <- list()
-  for (n in names(object)) out[[n]] <- summary(object[[n]], ...)
+  for (n in names(object)) out[[n]] <- biips_summary(object[[n]], ...)
 
   class(out) <- "summary.smcarray.fsb"
 
@@ -190,7 +190,7 @@ biips_summary.smcarray.fsb.list <- function(object, ...) {
   for (n in names(object)) {
     if (!is.smcarray.fsb(object[[n]]))
       next
-    out[[n]] <- summary(object[[n]], ...)
+    out[[n]] <- biips_summary(object[[n]], ...)
   }
 
   class(out) <- "summary.smcarray.fsb.list"
@@ -406,7 +406,7 @@ biips_table.smcarray.fsb <- function(x, ...) {
   for (fsb in names(x)) {
     if (!is.smcarray(x[[fsb]]))
       next
-    out[[fsb]] <- table(x[[fsb]],...)
+    out[[fsb]] <- biips_table(x[[fsb]],...)
   }
 
   class(out) <- "table.smcarray.fsb"
@@ -474,7 +474,7 @@ biips_table.smcarray.fsb.list <- function(x, ...) {
     if (!is.smcarray.fsb(x[[i]]))
       next
     name <- names(x)[i]
-    out[[name]] <- table(x[[i]], ...)
+    out[[name]] <- biips_table(x[[i]], ...)
   }
 
   class(out) <- "table.smcarray.fsb.list"
@@ -490,7 +490,7 @@ biips_density.smcarray.fsb.list <- function(x, bw="nrd0", ...) {
     if (!is.smcarray.fsb(x[[i]]))
       next
     name <- names(x)[i]
-    out[[name]] <- density(x[[i]], bw=rec(bw,i), ...) # recycle bw
+    out[[name]] <- biips_density(x[[i]], bw=rec(bw,i), ...) # recycle bw
   }
 
   class(out) <- "density.smcarray.fsb.list"

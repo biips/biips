@@ -1,5 +1,5 @@
 #' ---
-#' title: "Rbiips example: Switching Stochastic volatility with estimation of static parameters"
+#' title: "Rbiips example: Stochastic volatility"
 #' author: NULL
 #' date: NULL
 #' output:
@@ -13,11 +13,11 @@
 #'     fig_caption: TRUE
 #'     highlight: tango
 #' ---
-#' In this example, we consider the Markov switching stochastic volatility
-#' model with parameter estimation.
+#' In this example, we consider the stochastic volatility model SV0 for
+#' application e.g. in finance.
 #'
-#' Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
-#' stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.
+#' Reference: S. Chib, F. Nardari, N. Shepard. Markov chain Monte Carlo methods
+#' for stochastic volatility models. Journal of econometrics, vol. 108, pp. 281-316, 2002.
 
 #+ setup, include=FALSE
 knitr::opts_chunk$set(cache=TRUE, comment=NA, warning=FALSE, fig.show='hold', fig.align='center', pars=TRUE)
@@ -29,47 +29,30 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 
 #' # Statistical model
 #'
-#' Let $y_t$ be the response variable and $x_t$ the unobserved
-#' log-volatility of $y_t$. The stochastic volatility model is defined as follows
-#' for $t\leq t_{max}$
+#' The stochastic volatility model is defined as follows
 #'
-#' $$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$
+#' $$ \alpha\sim \mathcal N (0, .0001),~~~$$
+#' $$ logit(\beta) \sim  \mathcal N (0, 10),~~~$$
+#' $$ log(\sigma) \sim  \mathcal N (0, 1)$$
 #'
-#' $$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$
+#' and for $t\leq t_{max}$
 #'
-#' The regime variables $c_t$ follow a two-state Markov process with
-#' transition probabilities
+#' $$x_t|(x_{t-1},\alpha,\beta,\sigma) \sim \mathcal N (\alpha + \beta(x_{t-1}
+#' -\alpha), \sigma^2)$$
 #'
-#' $$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$
+#' $$ y_t|x_t \sim \mathcal N (0, exp(x_t)) $$
 #'
-#' We assume the following
-#' priors over the parameters $\alpha $, $\phi $, $\sigma $ and $p$:
-#'
-#' $$ \alpha_1=\gamma_1$$
-#'
-#' $$\alpha_2 = \gamma_1+\gamma_2$$
-#'
-#' $$\gamma_1 \sim \mathcal N(0,100)$$
-#'
-#' $$\gamma_2 \sim \mathcal {TN}_{(0,\infty)}(0,100)$$
-#'
-#' $$\phi \sim \mathcal {TN}_{(-1,1)}(0,100) $$
-#'
-#' $$\sigma^2 \sim invGamma(2.001,1) $$
-#'
-#' $$\pi_{11} \sim Beta(0.5,0.5)$$
-#'
-#' $$\pi_{22} \sim Beta(0.5,0.5)$$
-#'
-#' $\mathcal N(m,\sigma^2)$ denotes the normal
+#' where $y_t$ is the response variable and $x_t$ is the unobserved
+#' log-volatility of $y_t$. $\mathcal N(m,\sigma^2)$ denotes the normal
 #' distribution of mean $m$ and variance $\sigma^2$.
-#' $\mathcal {TN}_{(a,b)}(m,\sigma^2)$ denotes the truncated normal
-#' distribution of mean $m$ and variance $\sigma^2$.
+#'
+#' $\alpha$, $\beta$ and $\sigma$ are unknown
+#' parameters that need to be estimated.
 
 #+
 #' # Statistical model in BUGS language
-#' Content of the file `'switch_stoch_volatility_param.bug'`:
-model_file = 'switch_stoch_volatility_param.bug' # BUGS model filename
+#' Content of the file `'stoch_volatility.bug'`:
+model_file = 'stoch_volatility.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
 #+
@@ -85,7 +68,7 @@ cat(readLines(model_file), sep = "\n")
 #'     archive extension for your system.
 #' 2. Install the package from R
 
-#+ eval=FALSE
+#+ eval=FALS
 install.packages('path/to/Rbiips_x.x.x.ext', repos=NULL)
 
 #' 3. Load Rbiips package
@@ -106,7 +89,7 @@ set.seed(0)
 #' # Load model and load or simulate data
 #+ fig.cap='Log-returns'
 sample_data = TRUE # Simulated data or SP500 data
-t_max = 200
+t_max = 100
 
 if (!sample_data) {
   # Load the data
@@ -131,11 +114,9 @@ if (!sample_data) {
 if (!sample_data) {
   data = list(t_max=t_max, y=y)
 } else {
-  sigma_true = .4; alpha_true = c(-2.5, -1); phi_true = .5
-  pi11 = .9; pi22 = .9
-  pi_true = matrix(c(pi11, 1-pi11, pi22, 1-pi22), nrow = 2, byrow=TRUE)
+  sigma_true = .4; alpha_true = 0; beta_true=.99;
   data = list(t_max=t_max, sigma_true=sigma_true,
-              alpha_true=alpha_true, phi_true=phi_true, pi_true=pi_true)
+              alpha_true=alpha_true, beta_true=beta_true)
 }
 
 #' #### Compile BUGS model and sample data if simulated data
@@ -144,26 +125,22 @@ data = model$data()
 
 #' # Biips Particle Marginal Metropolis-Hastings
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order
-#' to obtain posterior MCMC samples of the parameters $\alpha$, $\phi$,
-#' $\sigma$, $\pi$, and of the variables $x$.
-#' Note: We use below a reduced number of MCMC iterations to have reasonable
-#' running times. But the obtained samples are obviously very correlated,
-#' and the number of iterations should be set to a higher value, and proper
-#' convergence tests should be used.
+#' to obtain posterior MCMC samples of the parameters $\alpha$, $\beta$ and $\sigma$,
+#' and of the variables $x$.
 
 #+
 #' #### Parameters of the PMMH
-n_burn = 2000 # nb of burn-in/adaptation iterations
-n_iter = 40000 # nb of iterations after burn-in
-thin = 10 # thinning of MCMC outputs
+n_burn = 5000 # nb of burn-in/adaptation iterations
+n_iter = 10000 # nb of iterations after burn-in
+thin = 5 # thinning of MCMC outputs
 n_part = 50 # nb of particles for the SMC
-param_names = c('gamma[1]', 'gamma[2]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]') # names of the variables updated with MCMC (others are updated with SMC)
-latent_names = c('x', 'alpha[1]', 'alpha[2]', 'sigma') # names of the variables updated with SMC and that need to be monitored
+param_names = c('alpha', 'logit_beta', 'log_sigma') # names of the variables updated with MCMC (others are updated with SMC)
+latent_names = c('x') # names of the variables updated with SMC and that need to be monitored
 
 #' #### Init PMMH
-inits = list(-1, 1, .5, 5, .8, .8)
+inits = list(0, 5, -2)
 obj_pmmh = biips_pmmh_init(model, param_names, inits=inits,
-                     latent_names=latent_names) # creates a pmmh object
+                           latent_names=latent_names) # creates a pmmh object
 
 #' #### Run PMMH
 biips_pmmh_update(obj_pmmh, n_burn, n_part) # adaptation and burn-in iterations
@@ -175,22 +152,21 @@ summ_pmmh = biips_summary(out_pmmh, probs=c(.025, .975))
 #' #### Compute kernel density estimates
 kde_pmmh = biips_density(out_pmmh)
 
-param_plot = c('alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]')
-param_lab = expression(alpha[1], alpha[2], phi, sigma, pi[11], pi[22])
-if (sample_data)
-  param_true = c(alpha_true, phi_true, sigma_true, pi11, pi22)
-
 #' #### Posterior mean and credible interval of the parameters
-for (k in 1:length(param_plot)) {
-  summ_param = summ_pmmh[[param_plot[k]]]
-  cat('Posterior mean of ',  param_plot[k], ': ', summ_param$mean, '\n', sep='');
-  cat('95% credible interval of ',  param_plot[k], ': [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
+for (k in 1:length(param_names)) {
+  summ_param = summ_pmmh[[param_names[k]]]
+  cat('Posterior mean of ',  param_names[k], ': ', summ_param$mean, '\n', sep='');
+  cat('95% credible interval of ',  param_names[k], ': [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
 }
 
 #' #### Trace of MCMC samples of the parameters
-#+ fig.cap = 'PMMH: Trace samples parameter', fig.subcap = param_plot, fig.mfrow=c(2,3)
-for (k in 1:length(param_plot)) {
-  samples_param = out_pmmh[[param_plot[k]]]
+#+ fig.cap = 'PMMH: Trace samples parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+if (sample_data)
+  param_true = c(alpha_true, log(data$beta_true/(1-data$beta_true)), log(sigma_true))
+param_lab = expression(alpha, logit(beta), log(sigma))
+
+for (k in 1:length(param_names)) {
+  samples_param = out_pmmh[[param_names[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
        xlab='Iterations', ylab='PMMH samples',
        main=param_lab[k])
@@ -199,9 +175,9 @@ for (k in 1:length(param_plot)) {
 }
 
 #' #### Histogram and KDE estimate of the posterior of the parameters
-#+ fig.cap = 'PMMH: Histogram posterior parameter', fig.subcap = param_plot, fig.mfrow=c(2,3)
-for (k in 1:length(param_plot)) {
-  samples_param = out_pmmh[[param_plot[k]]]
+#+ fig.cap = 'PMMH: Histogram posterior parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+for (k in 1:length(param_names)) {
+  samples_param = out_pmmh[[param_names[k]]]
   hist(samples_param, breaks=15, col='blue', border='white',
        xlab=param_lab[k], ylab='Number of samples',
        main=param_lab[k])
@@ -209,9 +185,9 @@ for (k in 1:length(param_plot)) {
     points(param_true[k], 0, col='green', pch=8, lwd=2)
 }
 
-#+ fig.cap = 'PMMH: KDE estimate posterior parameter', fig.subcap = param_plot, fig.mfrow=c(2,3)
-for (k in 1:length(param_plot)) {
-  kde_param = kde_pmmh[[param_plot[k]]]
+#+ fig.cap = 'PMMH: KDE estimate posterior parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+for (k in 1:length(param_names)) {
+  kde_param = kde_pmmh[[param_names[k]]]
   plot(kde_param, col='blue', lwd=2,
        xlab=param_lab[k], ylab='Posterior density',
        main=param_lab[k])

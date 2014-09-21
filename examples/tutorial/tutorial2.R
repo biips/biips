@@ -156,12 +156,12 @@ summ_pmmh = biips_summary(out_pmmh, probs=c(.025, .975))
 #' #### Compute kernel density estimates
 kde_pmmh = biips_density(out_pmmh)
 
-#' #### Posterior mean and credible interval for the parameter
+#' #### Posterior mean and credible interval of the parameter
 summ_param = summ_pmmh[[var_name]]
-cat('Posterior mean of log_prec_y:', summ_param$mean, '\n');
-cat('95% credible interval for log_prec_y: [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
+cat('Posterior mean of ', var_name, ':', summ_param$mean, '\n');
+cat('95% credible interval of ', var_name, ': [', summ_param$quant[[1]], ', ', summ_param$quant[[2]],']\n', sep='')
 
-#' #### Trace of MCMC samples for the parameter
+#' #### Trace of MCMC samples of the parameter
 #+ fig.cap = 'PMMH: Trace samples parameter'
 samples_param = out_pmmh[[var_name]]
 plot(samples_param[1,], col='blue', type='l', lwd=1,
@@ -173,7 +173,7 @@ legend('topright', leg=c('PMMH samples', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=c(1,2), lty=c(1,NA),
        bty='n')
 
-#' #### Histogram and kde estimate of the posterior for the parameter
+#' #### Histogram and KDE estimate of the posterior for the parameter
 #+ fig.cap = 'PMMH: Histogram posterior parameter'
 hist(samples_param, breaks=15, col='blue', border='white',
      xlab=var_name, ylab='Number of samples',
@@ -205,7 +205,7 @@ plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pmmh_mean, col='blue', lwd=3)
 lines(1:t_max, data$x_true, col='green', lwd=2)
-legend('topright', leg=c('95 % credible interval', 'PMMH mean estimate', 'True value'),
+legend('topright', leg=c('95% credible interval', 'PMMH mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
        bty='n')
 

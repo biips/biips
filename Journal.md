@@ -3,7 +3,7 @@ Adrien le 17/09/2014 :
 - [x] arguments cycliques pour density et plot.density
 - [ ] ajouter plot.table.smcarray
 - [ ] ajouter biips_table pour variables discrètes
-- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips ?
+- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips (cf Rbiips) ?
 - [x] vérifier choix de la bandwidth dans matbiips
 - [ ] Rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
 - [ ] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
@@ -11,13 +11,15 @@ Adrien le 17/09/2014 :
 - [ ] ajouter références sur méthodes SMC dans les liens du site
 - [ ] ajouter calcul régions HDP
 - [ ] ajouter histogrammes de particules
+- [ ] ajouter conversion vers mcmc pour coda dans Rbiips
+- [ ] ajouter cible `publish_Rbiips_examples` dans cmake
 
 Article/exemples :
-- [ ] diagnosis: expliquer pourquoi ess>=30 ?
-- [ ] tutorial1: backward smoothing en commentaire ?
+- [x] diagnosis: expliquer pourquoi ess>=30 ?
+- [x] tutorial1: backward smoothing en commentaire ?
 - [ ] préciser que les fonctions externes sont obligatoirement des `.m`
-- [ ] préciser : `biips_add_function` doit être déterministe
-- [ ] préciser : `biips_add_distribution` limité aux lois d'exploration, pas vraisemblance
+- [x] préciser : `biips_add_function` doit être déterministe
+- [x] préciser : `biips_add_distribution` limité aux lois d'exploration, pas vraisemblance
 - [ ] expliquer différence entre smoothing et backward smoothing
 - [ ] numéroter exemples dans l'article : Exemple 1, Exemple 2
 - [ ] figures de l'article : `box off`
@@ -46,7 +48,7 @@ Adrien le 21/08/2014 :
 ======================
 Matbiips:
 - [x] renommer `log_post` -> `log_marg_like_pen`
-- [ ] vérifier champs `iterations` backward smoothing
+- [x] vérifier champs `iterations` backward smoothing
 - [x] ajouter champs `iterations` dans help `biips_smc_samples`
 
 exemples:
@@ -158,7 +160,7 @@ Tâches :
 --------
 - [x] typographies biips, matbiips, rbiips
 - [x] archives exemples matbiips, rbiips, les deux (sans tvdp)
-- [ ] ajouter cible `publishmatbiipsexamples.m` dans cmake
+- [x] ajouter cible `publishmatbiipsexamples.m` dans cmake
 - [x] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
 - [ ] passer à boost 1.54 (standard sous ubuntu)

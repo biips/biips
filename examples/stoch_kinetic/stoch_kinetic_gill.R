@@ -67,7 +67,7 @@ lotka_volterra_gillespie <- function(x, c1, c2, c3, dt) {
       break
     x = x + z[,ind]
   }
-  return(c(x))
+  return(as.numeric(x))
 }
 
 lotka_volterra_dim <- function(x_dim, c1_dim, c2_dim, c3_dim, dt_dim) { c(2,1) }
@@ -136,14 +136,14 @@ plot(1:t_max, data$x_true[1,],
 lines(1:t_max, data$x_true[2,], col='red', lwd=2)
 points(1:t_max, data$y, pch=8, col='green', lwd=2)
 legend('topright', leg=c('Prey', 'Predator', 'Measurements'),
-       col=c('blue', 'red', 'green'), lwd=2, pch=c(NA,NA,8),
+       col=c('blue', 'red', 'green'), lwd=2, lty=c(1,1,NA), pch=c(NA,NA,8),
        bty='n')
 
 #' # Biips Sequential Monte Carlo algorithm
 
 #+
 #' #### Run SMC
-n_part = 10#000 # Number of particles
+n_part = 100000 # Number of particles
 variables = c('x') # Variables to be monitored
 out_smc = biips_smc_samples(model, variables, n_part, type='fs')
 
@@ -167,22 +167,22 @@ x_smc_quant = summ_smc$x$s$quant
 xx = c(1:t_max, t_max:1)
 yy = c(x_smc_quant[[1]][1,], rev(x_smc_quant[[2]][1,]))
 plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
-     ylim=c(0, 450))
+     ylim=c(0, 750))
 polygon(xx, yy, col=light_blue, border=NA)
 
 yy = c(x_smc_quant[[1]][2,], rev(x_smc_quant[[2]][2,]))
 polygon(xx, yy, col=light_red, border=NA)
 
 lines(1:t_max, x_smc_mean[1,], col='blue', lwd=3)
-lines(1:t_max, data$x_true[1,], col='dark_blue', lwd=2, lty=2)
+lines(1:t_max, data$x_true[1,], col=dark_blue, lwd=2, lty=2)
 
 lines(1:t_max, x_smc_mean[2,], col='red', lwd=3)
-lines(1:t_max, data$x_true[2,], col='dark_red', lwd=2, lty=2)
+lines(1:t_max, data$x_true[2,], col=dark_red, lwd=2, lty=2)
 
-legend('topright', leg=c('95 % credible interval (prey)',
+legend('topright', leg=c('95% credible interval (prey)',
                          'SMC mean estimate (prey)',
                          'True number of preys',
-                         '95 % credible interval (predator)',
+                         '95% credible interval (predator)',
                          'SMC mean estimate (predator)',
                          'True number of predators'),
        col=c(light_blue,'blue',dark_blue,light_red,'red',dark_red),

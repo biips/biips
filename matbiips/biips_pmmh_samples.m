@@ -40,7 +40,7 @@ function [obj_pmmh, samples, varargout] = ...
 % obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
 % [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-%     'thin', 1); 
+%     'thin', thin); 
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

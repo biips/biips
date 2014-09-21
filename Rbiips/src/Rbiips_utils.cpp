@@ -256,19 +256,9 @@ SEXP getMonitors<ColumnMajorOrder>(const std::map<String, NodeArrayMonitor> & mo
 }
 
 
-Rcpp::NumericVector convArrayVector(const Biips::NumArray & array ) {
-  const Biips::ValArray & values = array.Values();
-  const Biips::DimArray & dims = array.Dim();
-  const int ndim = dims.size();
-  Rcpp::Dimension * pdim;
-  switch (ndim) {
-    case 1: pdim = new Rcpp::Dimension(dims[0]); break;
-    case 2: pdim = new Rcpp::Dimension(dims[0], dims[1]); break;
-    case 3: pdim = new Rcpp::Dimension(dims[0], dims[1], dims[2]); break;
-    default : throw Biips::RuntimeError("Array limited to 3 dims max in RDistribution"); break;
-  }
-  Rcpp::NumericVector vec(*pdim);
-  vec.assign(values.begin(), values.end());
-  delete pdim;
+Rcpp::NumericVector arrayToVector(const Biips::NumArray & array ) {
+  Rcpp::NumericVector vec(array.Values().begin(), array.Values().end());
+  Rcpp::IntegerVector dim(array.Dim().begin(), array.Dim().end());
+  vec.attr("dim") = dim;
   return vec;
 }

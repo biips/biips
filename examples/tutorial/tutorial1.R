@@ -146,7 +146,7 @@ plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_f_mean, col='blue', lwd=3)
 lines(1:t_max, data$x_true, col='green', lwd=2)
-legend('topright', leg=c('95 % credible interval', 'Filtering mean estimate', 'True value'),
+legend('topright', leg=c('95% credible interval', 'Filtering mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
        bty='n')
 
@@ -162,7 +162,7 @@ plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 polygon(xx, yy, col=light_red, border=NA)
 lines(1:t_max, x_s_mean, col='red', lwd=3)
 lines(1:t_max, data$x_true, col='green', lwd=2)
-legend('topright', leg=c('95 % credible interval', 'Smoothing mean estimate', 'True value'),
+legend('topright', leg=c('95% credible interval', 'Smoothing mean estimate', 'True value'),
        col=c(light_red,'red','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1), bty='n')
 
 #' #### Marginal filtering and smoothing densities
@@ -213,7 +213,7 @@ plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pimh_mean, col='blue', lwd=3)
 lines(1:t_max, data$x_true, col='green', lwd=2)
-legend('topright', leg=c('95 % credible interval', 'PIMH mean estimate', 'True value'),
+legend('topright', leg=c('95% credible interval', 'PIMH mean estimate', 'True value'),
        col=c(light_blue,'blue','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
        bty='n')
 

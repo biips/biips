@@ -2,7 +2,7 @@
 # cf Boys, Wilkinson and Kirkwood
 # Bayesian inference for a discretely observed stochastic kinetic model
 
-var x_true[2,t_max], x[2,t_max], y[t_max],c[3]
+var x_true[2,t_max], x[2,t_max], y[t_max], c[3]
 
 data
 {

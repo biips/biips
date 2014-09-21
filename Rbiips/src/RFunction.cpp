@@ -5,48 +5,49 @@
 namespace Biips 
 {
 
-    void RFunction::eval(ValArray & output,
-                        const NumArray::Array & params) const {
-   
-        int nrhs  = params.size();
-        std::vector<Rcpp::NumericVector> vecParams(nrhs);
-        for(int i = 0; i < nrhs ; ++i ){
-            vecParams[i] = convArrayVector(params[i]);
-        }
-        
-        Rcpp::NumericVector outvec = apply(vecParams, fun_eval_, nrhs); 
-        output.assign(outvec.begin(), outvec.end()); 
+  void RFunction::eval(ValArray & values,
+                       const NumArray::Array & paramValues) const {
+
+    Size nrhs  = paramValues.size();
+    std::vector<Rcpp::NumericVector> vec_params(nrhs);
+    for(Size i = 0; i < nrhs ; ++i ){
+      vec_params[i] = arrayToVector(paramValues[i]);
     }
 
-    DimArray RFunction::dim(const std::vector<DimArray::Ptr> & paramDims) const {
-        int nrhs = paramDims.size();
-        std::vector<Rcpp::IntegerVector> paramvec(nrhs);
-        for(int i = 0; i < nrhs; ++i) {
-            paramvec[i].assign(paramDims[i]->begin(), paramDims[i]->end());
+    Rcpp::NumericVector outvec = evalRfun(fun_eval_, vec_params);
+    values.assign(outvec.begin(), outvec.end());
+  }
 
-        }
-        Rcpp::IntegerVector outvec = apply(paramvec, fun_dim_, nrhs);
-       
-        return DimArray(outvec.begin(), outvec.end());
+  DimArray RFunction::dim(const Types<DimArray::Ptr>::Array & paramDims) const {
+    Size nrhs = paramDims.size();
+    std::vector<Rcpp::IntegerVector> vec_dims(nrhs);
+    for(Size i = 0; i < nrhs; ++i) {
+      vec_dims[i].assign(paramDims[i]->begin(), paramDims[i]->end());
     }
+    Rcpp::IntegerVector outvec = evalRfun(fun_dim_, vec_dims);
 
-    Bool RFunction::CheckParamValues(const NumArray::Array & paramValues) const {
+    return DimArray(outvec.begin(), outvec.end());
+  }
 
-       int nrhs = paramValues.size();
-       std::vector<Rcpp::NumericVector> vecParamValues(nrhs);
-       for(int i = 0; i < nrhs; ++i) {
-        vecParamValues[i] = convArrayVector(paramValues[i]);
-       }
-       Rcpp::NumericVector res = apply(vecParamValues, fun_check_param_, nrhs);
-       
-       int mybool = static_cast<int>(res[0]);
-       return mybool;
+  Bool RFunction::CheckParamValues(const NumArray::Array & paramValues) const {
+
+    Size nrhs = paramValues.size();
+    std::vector<Rcpp::NumericVector> vec_params(nrhs);
+    for(Size i = 0; i < nrhs; ++i) {
+      vec_params[i] = arrayToVector(paramValues[i]);
     }
+    Rcpp::NumericVector res = evalRfun(fun_check_param_, vec_params);
+    return static_cast<Bool>(res[0]);
+  }
 
-    Bool RFunction::IsDiscreteValued(const std::vector<bool> & mask) const {
-       
-         bool res = apply(mask, fun_is_discrete_, mask.size());
-         return static_cast<bool>(res); 
+  Bool RFunction::IsDiscreteValued(const Flags & mask) const {
+    Size nrhs = mask.size();
+    std::vector<Rcpp::LogicalVector> vec_mask(nrhs);
+    for (Size i = 0; i < nrhs; ++i) {
+      vec_mask[i] = Rcpp::LogicalVector(1, mask[i]);
     }
-      
+    Rcpp::LogicalVector res = evalRfun(fun_is_discrete_, vec_mask);
+    return static_cast<Bool>(res[0]);
+  }
+
 }

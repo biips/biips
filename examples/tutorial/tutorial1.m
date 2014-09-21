@@ -116,43 +116,43 @@ summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Plot Filtering estimates*
+figure('name', 'SMC: Filtering estimates')
 x_f_mean = summ_smc.x.f.mean;
 x_f_quant = summ_smc.x.f.quant;
-figure('name', 'SMC: Filtering estimates')
 h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
     light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_f_mean, 'linewidth', 3)
-plot(data.x_true, 'g')
+plot(1:t_max, x_f_mean, 'linewidth', 3)
+plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Filtering mean estimate', 'True value'})
+legend({'95% credible interval', 'Filtering mean estimate', 'True value'})
 legend boxoff
 box off
 
 %%
 % *Plot Smoothing estimates*
+figure('name', 'SMC: Smoothing estimates')
 x_s_mean = summ_smc.x.s.mean;
 x_s_quant = summ_smc.x.s.quant;
-figure('name', 'SMC: Smoothing estimates')
 h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
     light_red);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_s_mean, 'r', 'linewidth', 3)
-plot(data.x_true, 'g')
+plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
+plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'})
+legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off
 
 %%
 % *Marginal filtering and smoothing densities*
+figure('name', 'SMC: Marginal posteriors')
 kde_smc = biips_density(out_smc);
 time_index = [5, 10, 15];
-figure('name', 'SMC: Marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -194,25 +194,25 @@ summ_pimh = biips_summary(samples_pimh, 'probs', [.025, .975]);
 
 %%
 % *Posterior mean and quantiles*
+figure('name', 'PIMH: Posterior mean and quantiles')
 x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
-figure('name', 'PIMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
     light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pimh_mean, 'linewidth', 3)
-plot(data.x_true, 'g')
+plot(1:t_max, x_pimh_mean, 'linewidth', 3)
+plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PIMH mean estimate', 'True value'})
+legend({'95% credible interval', 'PIMH mean estimate', 'True value'})
 legend boxoff
 box off
 
 %%
 % *Trace of MCMC samples*
-time_index = [5, 10, 15];
 figure('name', 'PIMH: Trace samples')
+time_index = [5, 10, 15];
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
@@ -251,8 +251,8 @@ legend boxoff
 
 %%
 % *Kernel density estimates of posteriors*
-kde_pimh = biips_density(samples_pimh);
 figure('name', 'PIMH: KDE estimates marginal posteriors')
+kde_pimh = biips_density(samples_pimh);
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)

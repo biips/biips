@@ -53,7 +53,10 @@ namespace Biips
     }
 
     virtual Bool
-    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const;
+    checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
+    {
+      return true;
+    }
     virtual DimArray dim(const Types<DimArray::Ptr>::Array & paramDims) const
     {
       return *P_SCALAR_DIM;
@@ -66,7 +69,10 @@ namespace Biips
     {
       return true;
     }
-    virtual Bool IsDiscreteValued(const Flags & mask) const;
+    virtual Bool IsDiscreteValued(const Flags & mask) const
+    {
+      return mask[0];
+    }
     static Function::Ptr Instance()
     {
       static Function::Ptr p_instance(new SelfType());

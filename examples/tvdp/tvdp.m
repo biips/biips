@@ -55,7 +55,7 @@ y(301:600) = sqrt(1/prec_y)*randn(300, 1) + 3*(u>0.25) + 3*(u>0.75)  -3;
 mov_mean = linspace(0, 3, 400);
 y(601:1000) = sqrt(1/prec_y)*randn(400, 1) + repmat(mov_mean', 1, 1);
 figure
-plot(y, '*g')
+plot(1:t_max, y, '*g')
 xlabel('Time')
 ylabel('y_t')
 box off

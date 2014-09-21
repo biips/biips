@@ -137,22 +137,23 @@ summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 kde_pmmh = biips_density(out_pmmh);
 
 %%
-% *Posterior mean and credible interval for the parameter*
+% *Posterior mean and credible interval of the parameter*
 summ_param = getfield(summ_pmmh, var_name);
-fprintf('Posterior mean of log_prec_y: %.1f\n', summ_param.mean);
-fprintf('95%% credible interval for log_prec_y: [%.1f, %.1f]\n',...
+fprintf('Posterior mean of %s: %.1f\n', var_name, summ_param.mean);
+fprintf('95%% credible interval of %s: [%.1f, %.1f]\n', var_name, ...
     summ_param.quant{1}, summ_param.quant{2});
 
 %%
 % *Trace of MCMC samples for the parameter*
-samples_param = getfield(out_pmmh, var_name);
 figure('name', 'PMMH: Trace samples parameter')
+samples_param = getfield(out_pmmh, var_name);
+param_lab = 'log\_prec\_y';
 plot(samples_param, 'linewidth', 1)
 hold on
 plot(0, data.log_prec_y_true, '*g');
 xlabel('Iterations')
 ylabel('PMMH samples')
-title('log\_prec\_y')
+title(param_lab)
 legend({'PMMH samples', 'True value'})
 legend boxoff
 box off
@@ -165,18 +166,18 @@ h = findobj(gca, 'Type', 'patch');
 set(h, 'EdgeColor', 'w')
 hold on
 plot(data.log_prec_y_true, 0, '*g');
-xlabel('log\_prec\_y')
+xlabel(param_lab)
 ylabel('Number of samples')
 legend({'Posterior samples', 'True value'})
 legend boxoff
 box off
 
-kde_param = getfield(kde_pmmh, var_name);
 figure('name', 'PMMH: KDE estimate posterior parameter')
+kde_param = getfield(kde_pmmh, var_name);
 plot(kde_param.x, kde_param.f);
 hold on
 plot(data.log_prec_y_true, 0, '*g');
-xlabel('log\_prec\_y');
+xlabel(param_lab);
 ylabel('Posterior density');
 legend({'Posterior density', 'True value'})
 legend boxoff
@@ -185,25 +186,25 @@ box off
 
 %%
 % *Posterior mean and quantiles for x*
+figure('name', 'PMMH: Posterior mean and quantiles')
 x_pmmh_mean = summ_pmmh.x.mean;
 x_pmmh_quant = summ_pmmh.x.quant;
-figure('name', 'PMMH: Posterior mean and quantiles')
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
     light_blue);
 set(h, 'edgecolor', 'none')
 hold on
-plot(x_pmmh_mean, 'linewidth', 3)
-plot(data.x_true, 'g')
+plot(1:t_max, x_pmmh_mean, 'linewidth', 3)
+plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
 ylabel('Estimates')
-legend({'95 % credible interval', 'PMMH mean estimate', 'True value'})
+legend({'95% credible interval', 'PMMH mean estimate', 'True value'})
 box off
 legend boxoff
 
 %%
 % *Trace of MCMC samples for x*
-time_index = [5, 10, 15];
 figure('name', 'PMMH: Trace samples x')
+time_index = [5, 10, 15];
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
