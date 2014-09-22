@@ -9,6 +9,8 @@ function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, var
 %   - n_iter:       positive integer. Number of burn-in iterations
 %   - n_part:       positive integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
+%   - thin:         positive integer. Returns output every thin iterations
+%                   (default=1)
 %   - rs_thres:     positive real (default = 0.5).
 %                   Threshold for the resampling step (adaptive SMC).
 %                   if rs_thres is in [0,1] --> resampling occurs when 

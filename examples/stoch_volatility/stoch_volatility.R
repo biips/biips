@@ -159,7 +159,7 @@ for (k in 1:length(param_names)) {
 }
 
 #' #### Trace of MCMC samples of the parameters
-#+ fig.cap = 'PMMH: Trace samples parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+#+ fig.cap = 'PMMH: Trace samples parameter', fig.subcap = param_names, fig.mfrow=c(2,2)
 if (sample_data)
   param_true = c(alpha_true, log(data$beta_true/(1-data$beta_true)), log(sigma_true))
 param_lab = expression(alpha, logit(beta), log(sigma))
@@ -167,14 +167,14 @@ param_lab = expression(alpha, logit(beta), log(sigma))
 for (k in 1:length(param_names)) {
   samples_param = out_pmmh[[param_names[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
-       xlab='Iterations', ylab='PMMH samples',
+       xlab='Iteration', ylab='PMMH samples',
        main=param_lab[k])
   if (sample_data)
     points(0, param_true[k], col='green', pch=8, lwd=2)
 }
 
 #' #### Histogram and KDE estimate of the posterior of the parameters
-#+ fig.cap = 'PMMH: Histogram posterior parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+#+ fig.cap = 'PMMH: Histogram posterior parameter', fig.subcap = param_names, fig.mfrow=c(2,2)
 for (k in 1:length(param_names)) {
   samples_param = out_pmmh[[param_names[k]]]
   hist(samples_param, breaks=15, col='blue', border='white',
@@ -184,7 +184,7 @@ for (k in 1:length(param_names)) {
     points(param_true[k], 0, col='green', pch=8, lwd=2)
 }
 
-#+ fig.cap = 'PMMH: KDE estimate posterior parameter', fig.subcap = param_names, fig.mfrow=c(1,3)
+#+ fig.cap = 'PMMH: KDE estimate posterior parameter', fig.subcap = param_names, fig.mfrow=c(2,2)
 for (k in 1:length(param_names)) {
   kde_param = kde_pmmh[[param_names[k]]]
   plot(kde_param, col='blue', lwd=2,
@@ -222,7 +222,7 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(c(out_pmmh$x[tk,]), col='blue', type='l',
-       xlab='Iterations',
+       xlab='Iteration',
        ylab='PMMH samples',
        main=paste('t=', tk, sep=''))
   if (sample_data)

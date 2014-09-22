@@ -191,7 +191,7 @@ for (k in 1:length(param_plot)) {
 for (k in 1:length(param_plot)) {
   samples_param = out_pmmh[[param_plot[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
-       xlab='Iterations', ylab='PMMH samples',
+       xlab='Iteration', ylab='PMMH samples',
        main=param_lab[k])
   if (sample_data)
     points(0, param_true[k], col='green', pch=8, lwd=2)
@@ -246,7 +246,7 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(c(out_pmmh$x[tk,]), col='blue', type='l',
-       xlab='Iterations',
+       xlab='Iteration',
        ylab='PMMH samples',
        main=paste('t=', tk, sep=''))
   if (sample_data)

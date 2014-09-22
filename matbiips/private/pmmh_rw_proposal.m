@@ -1,8 +1,8 @@
-function [obj, prop] = pmmh_rw_proposal(obj)
+function [prop] = pmmh_rw_proposal(obj)
 
 %--------------------------------------------------------------------------
 % PMMH_RW_PROPOSAL samples from the proposal distribution
-% [obj, prop] = pmmh_rw_proposal(obj)
+% [prop] = pmmh_rw_proposal(obj)
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

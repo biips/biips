@@ -10,7 +10,7 @@ Article :
 
 Exemples :
 - [ ] republier exemples matbiips sous windows
-- [ ] stoch_kinetic Rbiips : vérifier adaptation
+- [x] stoch_kinetic Rbiips : vérifier adaptation
 - [ ] ajouter html Rbiips sur le site
 
 Release :
@@ -36,6 +36,8 @@ Adrien le 17/09/2014 :
 - [ ] ajouter histogrammes de particules
 - [ ] conversion des sorties mcmc pour coda dans Rbiips
 - [ ] ajouter cible `publishRbiipsexamples.R` dans cmake
+- [ ] ajouter option 'gibbs' dans pmmh pour échantillonner composante par composante
+- [ ] renvoyer accept_rate dans pimh
 
 Article/exemples :
 - [x] diagnosis: expliquer pourquoi ess>=30 ?

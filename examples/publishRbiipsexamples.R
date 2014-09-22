@@ -4,7 +4,7 @@ root_dir = "~/workspace/biips-git/examples"
 
 output_dir = "/home/adrien-alea/Dropbox/Biips/biips-share/website/examples"
 
-clear_cache = FALSE
+clear_cache = TRUE
 
 example_scripts = list()
 example_scripts[["tutorial"]] = c("tutorial1", "tutorial2", "tutorial3")

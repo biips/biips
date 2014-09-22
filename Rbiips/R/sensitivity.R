@@ -29,13 +29,7 @@ biips_smc_sensitivity <- function(object, param_values, n_part, ...) {
   pn <- parse_varnames(varnames)
 
   ## Get the sizes of parameter values
-  sizes <- lapply(param_values, function(x) {
-    d <- dim(x)
-    if (is.null(d))
-      length(x)
-    else
-      d
-  })
+  sizes <- lapply(param_values, function(x) dim(as.array(x)))
 
   ## Get the number of parameter values to evaluate (the last dimension)
   n_val <- lapply(sizes, function(x) x[length(x)])

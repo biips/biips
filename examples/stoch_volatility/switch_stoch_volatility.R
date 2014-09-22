@@ -1,5 +1,5 @@
 #' ---
-#' title: "Rbiips: Tutorial 1"
+#' title: "Rbiips example: Switching Stochastic volatility"
 #' author: NULL
 #' date: NULL
 #' output:
@@ -13,8 +13,10 @@
 #'     fig_caption: TRUE
 #'     highlight: tango
 #' ---
-#' In this tutorial, we consider applying sequential Monte Carlo methods for
-#' Bayesian inference in a nonlinear non-Gaussian hidden Markov model.
+#' In this example, we consider the Markov switching stochastic volatility model.
+#'
+#' Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
+#' stochastic volatility models. Computational Statistics and Data analysis (2007) 4526-4542.
 
 #+ setup, include=FALSE
 knitr::opts_chunk$set(cache=TRUE, comment=NA, warning=FALSE, fig.show='hold', fig.align='center', pars=TRUE)
@@ -23,27 +25,26 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 })
 
 #' # Statistical model
-#' The statistical model is defined as follows.
 #'
-#' $$ x_1\sim \mathcal N\left (\mu_0, \frac{1}{\lambda_0}\right )$$
+#' Let $y_t$ be the response variable and $x_t$ the unobserved
+#' log-volatility of $y_t$. The stochastic volatility model is defined as follows
+#' for $t\leq t_{max}$
 #'
-#' $$ y_1\sim \mathcal N\left (h(x_1), \frac{1}{\lambda_y}\right )$$
+#' $$x_t|(x_{t-1},\alpha,\phi,\sigma,c_t) \sim \mathcal N (\alpha_{c_t} + \phi x_{t-1} , \sigma^2)$$
 #'
-#' For $t=2:t_{max}$
+#' $$ y_t|x_t \sim \mathcal N (0, \exp(x_t)) $$
 #'
-#' $$ x_t|x_{t-1} \sim \mathcal N\left ( f(x_{t-1},t-1), \frac{1}{\lambda_x}\right )$$
+#' The regime variables $c_t$ follow a two-state Markov process with
+#' transition probabilities
 #'
-#' $$ y_t|x_t \sim \mathcal N\left ( h(x_{t}), \frac{1}{\lambda_y}\right )$$
+#' $$p_{ij}=Pr(c_t=j|c_{t-1}=i)$$
 #'
-#' where $\mathcal N\left (m, S\right )$ denotes the Gaussian distribution
-#' of mean $m$ and covariance matrix $S$, $h(x)=x^2/20$,
-#' $f(x,t-1)=0.5 x+25 x/(1+x^2)+8 \cos(1.2 (t-1))$,
-#' $\mu_0=0$, $\lambda_0 = 5$, $\lambda_x = 0.1$ and $\lambda_y=1$.
-
+#' $\mathcal N(m,\sigma^2)$ denotes the normal
+#' distribution of mean $m$ and variance $\sigma^2$.
 #'
 #' # Statistical model in BUGS language
-#' We describe the model in BUGS language in the file `'hmm_1d_nonlin.bug'`:
-model_file = 'hmm_1d_nonlin.bug' # BUGS model filename
+#' Content of the file `'switch_stoch_volatility.bug'`:
+model_file = 'switch_stoch_volatility.bug' # BUGS model filename
 cat(readLines(model_file), sep = "\n")
 
 #' # Installation of Rbiips package
@@ -72,61 +73,55 @@ require(Rbiips)
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
 light_red = rgb(1, .7, .7)
+hot_colors = colorRampPalette(c('black', 'red', 'yellow', 'white'))
 
 #' Set the random numbers generator seed for reproducibility
-set.seed(2)
+set.seed(0)
 
 #' # Load model and data
 
 #' #### Model parameters
-t_max = 20
-mean_x_init = 0
-prec_x_init = 1/5
-prec_x = 1/10
-prec_y = 1
-data = list(t_max=t_max, prec_x_init=prec_x_init,
-            prec_x=prec_x, prec_y=prec_y, mean_x_init=mean_x_init)
+sigma = .4; alpha = c(-2.5, -1); phi = .5; c0 = 1; x0 = 0; t_max = 100
+pi = matrix(c(.9, .1, .1, .9), nrow=2, byrow=TRUE)
+data = list(t_max=t_max, sigma=sigma,
+            alpha=alpha, phi=phi, pi=pi, c0=c0, x0=x0)
 
-#' #### Compile BUGS model and sample data
-sample_data = TRUE # Boolean
-model = biips_model(model_file, data, sample_data=sample_data) # Create Biips model and sample data
+#' #### Parse and compile BUGS model, and sample data
+model = biips_model(model_file, data, sample_data=TRUE)
 data = model$data()
 
 #' # Biips Sequential Monte Carlo
-#' Let now use Biips to run a particle filter.
+
 #'
-#' #### Parameters of the algorithm
-#' We want to monitor the variable `x`, and to
-#' get the filtering and smoothing particle approximations. The algorithm
-#' will use 10000 particles, stratified resampling, with a threshold of 0.5.
-n_part = 10000 # Number of particles
-variables = c('x') # Variables to be monitored
-mn_type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5 # Optional parameters
-
 #' #### Run SMC
-out_smc = biips_smc_samples(model, variables, n_part,
-                      type=mn_type, rs_type=rs_type, rs_thres=rs_thres)
+n_part = 5000 # Number of particles
+variables = c('x') # Variables to be monitored
+out_smc = biips_smc_samples(model, variables, n_part)
 
-#' #### Diagnostics of the algorithm
+#' #### Diagnosis of the algorithm
 diag_smc = biips_diagnosis(out_smc)
 
-#' The sequence of filtering distributions is automatically chosen by Biips
-#' based on the topology of the graphical model, and is returned in the
-#' subfield `f$conditionals`. For this particular example, the sequence of
-#' filtering distributions is $\pi(x_{t}|y_{1:t})$, for $t=1,\ldots,t_{max}$.
-#+ results='hold'
-cat('Filtering distributions:\n')
-for (i in 1:length(out_smc$x$f$conditionals)) {
-  cat(out_smc$x$f$iterations[i], ': x[', i, '] | ', sep='');
-  cat(paste(out_smc$x$f$conditionals[[i]], collapse=','), '\n');
-}
+#' #### Plot Smoothing ESS
+#+ fig.cap = 'SMC: SESS'
+plot(out_smc$x$s$ess, type='l', log='y', col='blue', lwd=2,
+     xlab='Time', ylab='SESS',
+     ylim=c(10, n_part))
+lines(1:t_max, rep(30,t_max), lwd=2, lty=2)
+legend('topright', leg='Smoothing effective sample size',
+       col='blue', lwd=2, bty='n')
 
-#' while the smoothing distributions are $\pi(x_{t}|y_{1:t_{max}})$, for $t=1,\ldots,t_{max}$.
-#+ results='hold'
-cat('Smoothing distributions:\n')
-for (i in 1:length(out_smc$x$s$iterations)) {
-  cat('x[', i, '] | ', sep='');
-  cat(paste(out_smc$x$s$conditionals, collapse=','), '\n');
+#' #### Plot weighted particles
+#+ fig.cap = 'SMC: Particles (smoothing)'
+matplot(1:t_max, out_smc$x$s$values, type='n',
+        xlab='Time', ylab='Particles (smoothing)')
+for (t in 1:t_max) {
+  val = unique(out_smc$x$s$values[t,])
+  weight = sapply(val, FUN=function(x) {
+    ind = out_smc$x$s$values[t,] == x
+    return(sum(out_smc$x$s$weights[t,ind]))
+  })
+  points(rep(t, length(val)), val, col='red', pch=20,
+         cex=sapply(weight, FUN=function(x) {min(2, .02*n_part*x)}))
 }
 
 #' #### Summary statistics
@@ -161,7 +156,8 @@ polygon(xx, yy, col=light_red, border=NA)
 lines(1:t_max, x_s_mean, col='red', lwd=3)
 lines(1:t_max, data$x_true, col='green', lwd=2)
 legend('topright', leg=c('95% credible interval', 'Smoothing mean estimate', 'True value'),
-       col=c(light_red,'red','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1), bty='n')
+       col=c(light_red,'red','green'), lwd=c(NA,3,2), pch=c(15,NA,NA), pt.cex=c(2,1,1),
+       bty='n')
 
 #' #### Marginal filtering and smoothing densities
 #+ fig.cap='SMC: Marginal posteriors'
@@ -182,18 +178,18 @@ legend('center', leg=c('Filtering density', 'Smoothing density', 'True value'),
 par(mfrow=c(1,1))
 
 #' # Biips Particle Independent Metropolis-Hastings
-#' We now use Biips to run a Particle Independent Metropolis-Hastings.
+
 #'
 #' #### Parameters of the PIMH
-n_burn = 500
-n_iter = 500
+n_burn = 2000
+n_iter = 10000
 thin = 1
-n_part = 100
+n_part = 50
 
 #' #### Run PIMH
 obj_pimh = biips_pimh_init(model, variables)
-biips_pimh_update(obj_pimh, n_burn, n_part) # burn-in iterations
-out_pimh = biips_pimh_samples(obj_pimh, n_iter, n_part, thin=thin)
+biips_pimh_update(obj_pimh, n_burn, n_part) # Burn-in iterations
+out_pimh = biips_pimh_samples(obj_pimh, n_iter, n_part, thin=thin) # Return samples
 
 #' #### Some summary statistics
 summ_pimh = biips_summary(out_pimh, probs=c(.025, .975))
@@ -261,3 +257,30 @@ legend('center', leg=c('Posterior density', 'True value'),
        col=c('blue', 'green'), pch=c(NA,8), lwd=2, lty=c(1,NA),
        bty='n')
 par(mfrow=c(1,1))
+
+#' # Biips Sensitivity analysis
+#' We want to study sensitivity to the values of the parameter $\alpha$
+
+#'
+#' #### Parameters of the algorithm
+n_part = 50 # Number of particles
+range <- seq(-5,2,.2) # Range of values for one component
+A = rep(range, times=length(range)) # Values of the first component
+B = rep(range, each=length(range)) # Values of the second component
+param_values = list('alpha' = rbind(A, B))
+
+#' #### Run sensitivity analysis with SMC
+out_sens = biips_smc_sensitivity(model, param_values, n_part)
+
+#' #### Plot log-marginal likelihood and penalized log-marginal likelihood
+#+ fig.cap='Sensitivity: Log-likelihood'
+# Avoid scaling problems by thresholding the values
+thres = -40
+zz = matrix(pmax(thres, out_sens$log_marg_like), nrow=length(range))
+
+require(lattice)
+levelplot(zz, row.values=range, column.values=range, bg='black',
+          at=seq(thres, max(zz), len=100), col.regions=hot_colors(100),
+          xlim=c(-5,2), ylim=c(-5,2),
+          xlab=expression(alpha[1]), ylab=expression(alpha[2]),
+          interpolate=TRUE, useRaster=TRUE, bty='l')

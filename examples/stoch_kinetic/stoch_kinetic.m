@@ -118,6 +118,7 @@ figure('name', 'Sensitivity: Penalized log-marginal likelihood');
 plot(param_values{1}, out_sens.log_marg_like_pen, '.')
 xlabel('log(c_1)')
 ylabel('Penalized log-marginal likelihood')
+ylim([-15000, 0])
 box off
 
 %% Biips Particle Marginal Metropolis-Hastings
@@ -142,7 +143,7 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1},...
 %%
 % *Run PMMH*
 obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+[obj_pmmh, out_pmmh, log_marg_like_pen] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
     'thin', thin); % Samples
 
 %%
@@ -173,7 +174,7 @@ for i=1:numel(param_names)
     plot(samples_param, 'linewidth', 1);
     hold on
     plot(0, param_true(i), '*g');
-    xlabel('Iterations')
+    xlabel('Iteration')
     ylabel('PMMH samples')
     title(param_lab{i})
     box off

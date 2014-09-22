@@ -154,7 +154,7 @@ for k=1:numel(param_names)
         hold on
         plot(0, param_true(k), '*g');
     end
-    xlabel('Iterations')
+    xlabel('Iteration')
     ylabel('PMMH samples')
     title(param_lab{k})
     box off
@@ -228,7 +228,7 @@ for k=1:numel(time_index)
         hold on
         plot(0, data.x_true(tk), '*g');
     end
-    xlabel('Iterations')
+    xlabel('Iteration')
     ylabel('PMMH samples')
     title(['t=', num2str(tk)]);
     box off

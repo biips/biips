@@ -164,7 +164,7 @@ cat('95% credible interval of ', var_name, ': [', summ_param$quant[[1]], ', ', s
 #+ fig.cap = 'PMMH: Trace samples parameter'
 samples_param = out_pmmh[[var_name]]
 plot(samples_param[1,], col='blue', type='l', lwd=1,
-     xlab='Iterations',
+     xlab='Iteration',
      ylab='PMMH samples',
      main=var_name)
 points(0, log_prec_y_true, col='green', pch=8, lwd=2)
@@ -215,7 +215,7 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(c(out_pmmh$x[tk,]), col='blue', type='l', lwd=1,
-       xlab='Iterations',
+       xlab='Iteration',
        ylab='PMMH samples',
        main=paste('t=', tk, sep=''))
   points(0, data$x_true[tk], col='green', pch=8, lwd=2)

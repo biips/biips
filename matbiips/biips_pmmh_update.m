@@ -10,6 +10,8 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 %   - n_iter:       positive integer. Number of adaptation and burn-in iterations
 %   - n_part:       positive integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
+%   - thin:         positive integer. Returns output every thin iterations
+%                   (default=1)
 %   - rw_adapt:     boolean=1 if adaptation, 0 otherwise (default=1)
 %   - rs_thres:     positive real (default = 0.5).
 %                   Threshold for the resampling step (adaptive SMC).
@@ -50,12 +52,12 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'max_fail', 'rw_adapt', 'rs_thres', 'rs_type'};
-optarg_default = {0, true, .5, 'stratified'};
-optarg_valid = {[0, intmax], {true, false}, [0, n_part],...
+optarg_names = {'thin', 'max_fail', 'rw_adapt', 'rs_thres', 'rs_type'};
+optarg_default = {1, 0, true, .5, 'stratified'};
+optarg_valid = {[1, n_iter], [0, intmax], {true, false}, [0, n_part],...
     {'multinomial', 'stratified', 'residual', 'systematic'}};
-optarg_type = {'numeric', 'logical', 'numeric', 'char'};
-[max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
+optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'char'};
+[thin, max_fail, rw_adapt, rs_thres, rs_type] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
 %% Call pmmh_algo internal routine
@@ -63,5 +65,5 @@ return_samples = false;
 
 varargout = cell(nargout-1,1);
 [obj_pmmh, varargout{:}] = pmmh_algo(obj_pmmh, n_iter, n_part,...
-    return_samples, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...
+    return_samples, 'thin', thin, 'max_fail', max_fail, 'rw_adapt', rw_adapt,...
     'rs_thres', rs_thres, 'rs_type', rs_type);

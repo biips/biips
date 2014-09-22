@@ -219,7 +219,7 @@ for k=1:numel(time_index)
     plot(samples_pimh.x(tk, :), 'linewidth', 1)
     hold on
     plot(0, data.x_true(tk), '*g');
-    xlabel('Iterations')
+    xlabel('Iteration')
     ylabel('PIMH samples')
     title(['t=', num2str(tk)]);
     box off

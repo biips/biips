@@ -65,7 +65,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output="
   log_marg_like <- object$log_marg_like()
 
   ## Output structure with MCMC samples
-  n_samples <- ceiling(n_iter/thin)
+  n_samples <- floor(n_iter/thin)
   ind_sample <- 0
 
   out <- list()
@@ -103,7 +103,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output="
     }
 
     ## Store output
-    if ((i - 1)%%thin == 0) {
+    if ((i%%thin) == 0) {
       ind_sample <- ind_sample + 1
 
       if ("l" %in% output)
@@ -150,8 +150,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output="
 biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 
 ##' @export
-biips_pimh_update.pimh <- function(object, n_iter, n_part, output="l", ...) {
-  out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, return_samples = FALSE, output=output, ...)
+biips_pimh_update.pimh <- function(object, n_iter, n_part, thin = 1, output="l", ...) {
+  out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, return_samples = FALSE, output=output, ...)
   return(invisible(out))
 }
 

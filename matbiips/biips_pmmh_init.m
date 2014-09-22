@@ -143,7 +143,7 @@ if isempty(rw_step)
     rw_step = cell(n_param, 1);
     % default values
     for i=1:n_param
-        rw_step{i} = .1/sqrt(obj.len)*ones(sample_dim{i});
+        rw_step{i} = 0.1/sqrt(obj.len)*ones(sample_dim{i});
     end
 else
     for i=1:n_param

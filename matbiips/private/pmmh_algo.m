@@ -61,16 +61,15 @@ pn_param = cellfun(@parse_varname, param_names);
 pmmh_set_param(console, param_names, pn_param, sample_param);
 
 % Initialize counters
-n_samples = ceil((n_iter)/thin);
+n_samples = floor(n_iter/thin);
 ind_sample = 0;
 n_fail = 0;
 
 % Output structure with MCMC samples
-accept_rate = zeros(n_samples, 1);
-rw_step = zeros(n_samples, numel(obj.log_step));
-log_marg_like_st = zeros(n_samples, 1);
-log_marg_like_pen_st = zeros(n_samples, 1);
-%%% TODO check dimensions: n_samples should be the last dimension?
+accept_rate = zeros(1, n_samples);
+rw_step = zeros(numel(obj.log_step), n_samples);
+log_marg_like_st = zeros(1, n_samples);
+log_marg_like_pen_st = zeros(1, n_samples);
 
 if return_samples
     samples_st = cell(n_param+n_latent, 1);
@@ -101,7 +100,6 @@ for i=1:n_iter
     [obj, accept_rate_step, n_fail_step] = pmmh_one_update(obj, pn_param, ...
         n_part, rs_thres, rs_type, rw_rescale, rw_adapt);
     
-    
     n_fail = n_fail + n_fail_step;
     
     % Check nb of failures FC: MODIFY THIS EVENTUALLY
@@ -110,21 +108,19 @@ for i=1:n_iter
     end
     
     % Stop rescale
-    if rw_rescale && (obj.n_iter==obj.n_rescale)
-        %%% FIXME problem if n_rescale > n_iter
-        %%% should compare to total n_iter
+    if rw_rescale && (obj.n_iter>=obj.n_rescale)
         rw_rescale = false;
     end
     
     % Store output
-    if mod(i-1, thin)==0
+    if mod(i, thin)==0
         ind_sample = ind_sample + 1;
         
         log_prior = obj.log_prior;
         log_marg_like = obj.log_marg_like;
         
         accept_rate(ind_sample) = accept_rate_step;
-        rw_step(ind_sample, :) = exp(obj.log_step);
+        rw_step(:, ind_sample) = exp(obj.log_step(:));
         log_marg_like_st(ind_sample) = log_marg_like;
         log_marg_like_pen_st(ind_sample) = log_marg_like + log_prior;
         

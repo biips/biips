@@ -79,6 +79,7 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
       if (any(duplicated(sapply(init_names, to_biips_vname))))
         stop("duplicated names in inits")
     }
+    inits <- inits[param_names]
   }
 
   ## check rw_step
@@ -87,11 +88,14 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
     stopifnot(length(rw_step) == n_param, sapply(rw_step, is.numeric))
     stopifnot(sapply(rw_step, function(x) all(is.finite(x) && x > 0)))
     step_names <- names(rw_step)
-    if (!is.null(step_names)) {
+    if (is.null(step_names)) {
+      names(rw_step) <- param_names
+    } else {
       stopifnot(step_names %in% param_names)
       if (any(duplicated(sapply(step_names, to_biips_vname))))
         stop("duplicated names in rw_step")
     }
+    rw_step <- rw_step[param_names]
   }
 
   ## stop biips verbosity
@@ -124,7 +128,7 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
   ## Init random walk stepsize for the part with diagonal covariance matrix
   if (length(rw_step) == 0) {
     ## default values
-    rw_step <- lapply(sample_dim, function(x) 1/sqrt(sample_len) * array(1, dim = x))
+    rw_step <- lapply(sample_dim, function(x) 0.1/sqrt(sample_len) * array(1, dim = x))
   } else {
     ## check dimensions
     rw_step_dim <- lapply(rw_step, fun_get_dim)
@@ -137,7 +141,7 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
   # local initial parameters of the algorithm of adaptation of the step of random
   # walk in the PMMH algorithm
   rw <- list(n_rescale = n_rescale, n_cov = n_rescale/2, n_iter = 0, ar_mean = 0,
-    log_step = log_step, beta = 0.05, alpha = alpha, target_prob = target_prob,
+    log_step = log_step, beta = beta, alpha = alpha, target_prob = target_prob,
     dim = sample_dim, len = sample_len, mean = c(), cov = c())
   # we start learning the covariance matrix after n_cov iterations
 
@@ -170,12 +174,8 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
     rw$len
   }, rw_step = function() {
     exp(rw$log_step)
-  }, rw_mean = function(rw_mean) {
-    if (!missing(rw_mean)) rw$mean <<- rw_mean
-    invisible(rw$mean)
-  }, rw_cov = function(rw_cov) {
-    if (!missing(rw_cov)) rw$cov <<- rw_cov
-    invisible(rw$cov)
+  }, rw_cov = function() {
+    rw$cov
   }, rw_alpha = function() {
     rw$alpha
   }, rw_beta = function() {
@@ -204,7 +204,7 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
       q2 <- (n_iter - n_cov - 1)/(n_iter - n_cov)^2
       z <- sample_vec - rw$mean
       rw$cov <<- q * rw$cov + q2 * outer(z, z)
-      rw$mean <<- q * rw$mean + (1 - q) * sample_vec
+      rw$mean <<- q * rw$mean + 1/(n_iter-n_cov) * sample_vec
     }
 
     return(invisible())
@@ -229,6 +229,7 @@ pmmh_rw_proposal <- function(object) {
   rw_len <- object$rw_len()
   stopifnot(length(sample_vec) == rw_len)
 
+  n_iter <- object$n_iter()
   n_rescale <- object$n_rescale()
   beta <- object$rw_beta()
   cov <- object$rw_cov()
@@ -238,8 +239,8 @@ pmmh_rw_proposal <- function(object) {
     prop_vec <- sample_vec + object$rw_step() * rnorm(rw_len)
   } else {
     # proposal with learnt covariance
-    eps <- 1e-05  # For numerical stability
-    cov_chol <- t(chol(cov + eps * diag(1, nrow = rw_len)))
+    epsilon <- 1e-5  # For numerical stability
+    cov_chol <- t(chol(cov + epsilon * diag(1, nrow = rw_len)))
     ## TODO use pivot in chol ? check positive semi-definite ?
     prop_vec <- sample_vec + 2.38/sqrt(rw_len) * cov_chol %*% rnorm(rw_len)
   }
@@ -441,7 +442,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
   pmmh_set_param(object$model(), param_names, pn_param, sample_param)
 
   # Initialize counters
-  n_samples <- ceiling(n_iter/thin)
+  n_samples <- floor(n_iter/thin)
   ind_sample <- 0
   n_fail <- 0
 
@@ -467,7 +468,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
 
   ## display message and progress bar
   mess <- if (return_samples)
-    "Generating PMMH samples with" else {
+    paste("Generating", n_samples, "PMMH samples with") else {
     if (rw_adapt)
       "Adapting PMMH with" else "Updating PMMH with"
   }
@@ -489,13 +490,12 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
       stop("Number of failures exceeds max_fail: ", n_fail, " failures.")
 
     # Stop rescale
-    if (rw_rescale && (object$n_iter() == object$n_rescale())) {
-      ## FIXME problem if n_rescale > n_iter should compare to total n_iter
+    if (rw_rescale && (object$n_iter() >= object$n_rescale())) {
       rw_rescale <- FALSE
     }
 
     ## Store output
-    if ((i - 1)%%thin == 0) {
+    if ((i%%thin) == 0) {
       ind_sample <- ind_sample + 1
       log_marg_like <- object$log_marg_like()
       log_prior <- object$log_prior()
@@ -507,7 +507,7 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
       if ("a" %in% output)
         out$info$accept_rate[ind_sample] <- out_step$accept_rate
       if ("s" %in% output)
-        out$info$rw_step[, ind_sample] <- exp(object$rw_step())
+        out$info$rw_step[, ind_sample] <- object$rw_step()
 
       if (return_samples) {
         sample_param <- object$sample_param()
@@ -523,8 +523,8 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples, thin = 1, max
         if (ind_sample == 1) {
           ## pre-allocation here to be sure that sample is not empty
           for (var in latent_names) {
-          dimen <- dim(sample_latent[[var]])
-          out[[var]] <- mcmcarray(dim = c(dimen, n_samples))
+            dimen <- dim(sample_latent[[var]])
+            out[[var]] <- mcmcarray(dim = c(dimen, n_samples))
           }
         }
 
@@ -592,9 +592,9 @@ biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 ##' ##-- ==>  Define data, use random,
 ##' ##--  or do  help(data=index)  for the standard data sets.
 ##'
-biips_pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adapt = TRUE,
+biips_pmmh_update.pmmh <- function(object, n_iter, n_part, thin = 1, max_fail = 0, rw_adapt = TRUE,
                              output = "p", ...) {
-  out <- pmmh_algo(object, n_iter, n_part, return_samples = FALSE, max_fail = max_fail,
+  out <- pmmh_algo(object, n_iter, n_part, thin = thin, return_samples = FALSE, max_fail = max_fail,
     rw_adapt = rw_adapt, output = output, ...)
   return(invisible(out))
 }
@@ -634,7 +634,7 @@ biips_pmmh_update.pmmh <- function(object, n_iter, n_part, max_fail = 0, rw_adap
 ##'
 biips_pmmh_samples <- function(object, n_iter, n_part, thin = 1, max_fail = 0, output = "p", ...) {
 
-  out <- pmmh_algo(object, n_iter, n_part, return_samples = TRUE, max_fail = max_fail,
+  out <- pmmh_algo(object, n_iter, n_part, thin = thin, return_samples = TRUE, max_fail = max_fail,
                    output = output, ...)
   return(out)
 }

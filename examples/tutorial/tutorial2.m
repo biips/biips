@@ -151,7 +151,7 @@ param_lab = 'log\_prec\_y';
 plot(samples_param, 'linewidth', 1)
 hold on
 plot(0, data.log_prec_y_true, '*g');
-xlabel('Iterations')
+xlabel('Iteration')
 ylabel('PMMH samples')
 title(param_lab)
 legend({'PMMH samples', 'True value'})
@@ -211,7 +211,7 @@ for k=1:numel(time_index)
     plot(out_pmmh.x(tk, :), 'linewidth', 1)
     hold on
     plot(0, data.x_true(tk), '*g');
-    xlabel('Iterations')
+    xlabel('Iteration')
     ylabel('PMMH samples')
     title(['t=', num2str(tk)]);
     box off

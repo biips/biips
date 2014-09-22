@@ -280,7 +280,7 @@ par(mfrow=c(1,1))
 #     plot(samples_pimh$x(tk, :))
 # 
 #     plot(0, data$x_true[tk], col='green3', pch=8)
-#     title(xlab='Iterations')
+#     title(xlab='Iteration')
 #     title(ylab='PIMH samples')
 #     title(main=paste('t=', tk, sep=''))
 # 

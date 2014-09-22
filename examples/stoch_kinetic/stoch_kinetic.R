@@ -137,7 +137,8 @@ out_sens = biips_smc_sensitivity(model, param_values, n_part)
 #+ fig.cap='Sensitivity: Penalized log-marginal likelihood'
 plot(param_values[[1]], out_sens$log_marg_like_pen, col='blue', pch=20,
      xlab=expression(log(c[1])),
-     ylab='Penalized log-marginal likelihood')
+     ylab='Penalized log-marginal likelihood',
+     ylim=c(-15000, 0))
 
 #' # Biips Particle Marginal Metropolis-Hastings
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order
@@ -181,7 +182,7 @@ for (k in 1:length(param_names)) {
 for (k in 1:length(param_names)) {
   samples_param = out_pmmh[[param_names[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
-       xlab='Iterations', ylab='PMMH samples',
+       xlab='Iteration', ylab='PMMH samples',
        main=param_lab[k])
   if (sample_data)
     points(0, param_true[k], col='green', pch=8, lwd=2)

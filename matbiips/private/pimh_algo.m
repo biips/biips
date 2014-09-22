@@ -86,8 +86,8 @@ log_marg_like = obj.log_marg_like;
 % Output structure with MCMC samples
 n_var = numel(variable_names);
     
-n_samples = ceil(n_iter/thin);
-log_marg_like_st = zeros(n_samples, 1);
+n_samples = floor(n_iter/thin);
+log_marg_like_st = zeros(1, n_samples);
 
 if return_samples
     samples_st = cell(n_var, 1);
@@ -131,7 +131,7 @@ for i=1:n_iter
     end
     
     % Store output
-    if mod(i-1, thin)==0
+    if mod(i, thin)==0
         ind_sample = ind_sample + 1;
         
         log_marg_like_st(ind_sample) = log_marg_like;

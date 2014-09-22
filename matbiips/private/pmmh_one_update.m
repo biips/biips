@@ -32,7 +32,7 @@ n_latent = numel(latent_names);
 obj.n_iter = obj.n_iter + 1;
 
 % Random walk proposal
-[obj, prop] = pmmh_rw_proposal(obj);
+prop = pmmh_rw_proposal(obj);
 
 % Compute log prior density
 log_prior_prop = 0;
