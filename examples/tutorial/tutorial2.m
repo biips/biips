@@ -231,7 +231,6 @@ for k=1:numel(time_index)
     set(h, 'EdgeColor', 'w')
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlim([-16, -7])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
@@ -248,7 +247,6 @@ for k=1:numel(time_index)
     plot(kde_pmmh.x(tk).x, kde_pmmh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlim([-16, -7])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);

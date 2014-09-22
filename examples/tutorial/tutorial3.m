@@ -155,7 +155,6 @@ for k=1:numel(time_index)
     hold on
     plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
-    xlim([-20, 20])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);

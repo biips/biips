@@ -163,7 +163,6 @@ for k=1:numel(time_index)
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
-    xlim([-20, 20])
     box off
 end
 h = legend({'Filtering density', 'Smoothing density', 'True value'});
@@ -242,7 +241,6 @@ for k=1:numel(time_index)
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
-    xlim([-15, 15])
     box off
 end
 h = legend({'Posterior density', 'True value'});
@@ -262,7 +260,6 @@ for k=1:numel(time_index)
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
-    xlim([-15, 15])
     box off
 end
 h = legend({'Posterior density', 'True value'});

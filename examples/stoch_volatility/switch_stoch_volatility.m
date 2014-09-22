@@ -146,7 +146,6 @@ ylabel('Log-volatility')
 legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off
-ylim([-8, 0])
 saveas(gca, 'volatility_s', 'epsc2')
 saveas(gca, 'volatility_s', 'png')
 
@@ -296,6 +295,7 @@ view(2); colormap(hot); shading interp
 caxis([-40, max(out_sens.log_marg_like(:))])
 colorbar box off
 box off
+xlim([-5, 2])
 xlabel('\alpha_1')
 ylabel('\alpha_2')
 saveas(gca, 'volatility_sensitivity', 'epsc2')

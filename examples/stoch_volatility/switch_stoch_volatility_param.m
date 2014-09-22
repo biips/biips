@@ -282,7 +282,6 @@ for k=1:numel(time_index)
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
-    xlim([-10, 0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
@@ -303,7 +302,6 @@ for k=1:numel(time_index)
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
-    xlim([-10, 0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);

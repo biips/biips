@@ -117,7 +117,7 @@ box off
 % *Plot particles*
 figure('name', 'SMC: Particles (filtering)')
 plot(out_smc.x.f.values(1,:), out_smc.x.f.values(2,:), 'ro', ...
-    'markersize', 3, 'markerfacecolor', 'r')
+    'markersize', 2, 'markerfacecolor', 'r')
 hold on
 plot(x_pos_true(1,:), x_pos_true(2,:), '--g')
 plot(x_pos(1), x_pos(2), 'sk')

@@ -4,6 +4,7 @@ function [] = publishmatbiipsexamples(varargin)
 
 outdir = 'D:/caron/Dropbox/biips/website/examples/';
 % outdir = '/home/adrien-alea/Dropbox/Biips/biips-share/website/examples/';
+% outdir = 'C:/Users/adrien/Dropbox/Biips/biips-share/website/examples/';
 if nargin>=1
     outdir = varargin{1};
 end
@@ -37,6 +38,7 @@ names_mfiles = {...
 %     {{'stoch_volatility.bug', 'SP500.csv'}, {'switch_stoch_volatility.bug', 'SP500.csv'}, {'switch_stoch_volatility_param.bug', 'SP500.csv'}}...
 %     };
 
+fprintf('========================================================\n')
 for i=ind_folders
     mdir = fullfile('.', name_folders{i});
     cd(mdir);
@@ -44,6 +46,7 @@ for i=ind_folders
     files_i = names_mfiles{i};
     for j=1:length(files_i)
         % Publish html file
+        fprintf('Publishing matbiips example: %s\n', files_i{j})
         publish([files_i{j} '.m'], options);
         close all
         
@@ -51,7 +54,8 @@ for i=ind_folders
 %         addfiles{end+1} = [files_i{j}, '.m'];
 %         % zip the Matlab and bugs files
 %         zip(files_i{j}, addfiles);
-%         movefile([files_i{j}, '.zip'], [outputdir, files_i{j}, '.zip']);            
+%         movefile([files_i{j}, '.zip'], [outputdir, files_i{j}, '.zip']);   
+        fprintf('------------------------------------------------\n')         
     end
     
     cd('../')    
