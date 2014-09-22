@@ -40,7 +40,7 @@ names_mfiles = {...
 for i=ind_folders
     mdir = fullfile('.', name_folders{i});
     cd(mdir);
-    options.outputdir = fullfile(outdir, name_folders{i}, 'matbiips');
+    options.outputDir = fullfile(outdir, name_folders{i}, 'matbiips');
     files_i = names_mfiles{i};
     for j=1:length(files_i)
         % Publish html file
