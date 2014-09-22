@@ -239,7 +239,7 @@ print.diagnosis.smcarray <- function(x, ...) {
     cat("    The minimum effective sample size is too low:", x$ess_min,
         "\n")
     cat("    Estimates may be poor for some variables.\n")
-    cat("    You should increase the number of particles.")
+    cat("    You should increase the number of particles\n.")
   }
   invisible()
 }

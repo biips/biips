@@ -66,7 +66,7 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #' $\mathcal {TN}_{(a,b)}(m,\sigma^2)$ denotes the truncated normal
 #' distribution of mean $m$ and variance $\sigma^2$.
 
-#+
+#'
 #' # Statistical model in BUGS language
 #' Content of the file `'switch_stoch_volatility_param.bug'`:
 model_file = 'switch_stoch_volatility_param.bug' # BUGS model filename
@@ -93,7 +93,7 @@ require(Rbiips)
 #' **Note:** Linux installation needs a previous installation of
 #' Biips libraries and headers as well as Boost.
 
-#+
+#'
 #' # General settings
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
@@ -150,7 +150,7 @@ data = model$data()
 #' and the number of iterations should be set to a higher value, and proper
 #' convergence tests should be used.
 
-#+
+#'
 #' #### Parameters of the PMMH
 n_burn = 2000 # nb of burn-in/adaptation iterations
 n_iter = 40000 # nb of iterations after burn-in

@@ -20,8 +20,8 @@
 
 %% Statistical model in BUGS language
 %
-model_filename = 'hmm_4d_nonlin_tracking.bug'; % BUGS model filename
-type(model_filename);
+model_file = 'hmm_4d_nonlin_tracking.bug'; % BUGS model filename
+type(model_file);
 
 %% Installation of Matbiips
 % # <https://alea.bordeaux.inria.fr/biips/doku.php?id=download Download> the latest version of Matbiips
@@ -51,10 +51,10 @@ end
 % *Model parameters*
 t_max = 20;
 mean_x_init = [0, 0, 1, 0]';
-prec_x_init = diag(1000*ones(4,1));
+prec_x_init = 1000*eye(4);
 x_pos = [60, 0];
 mean_v = zeros(2, 1);
-prec_v = diag(1*ones(2,1));
+prec_v = eye(2);
 prec_y = diag([100 500]);
 delta_t = 1;
 F =[1, 0, delta_t, 0;
@@ -72,7 +72,7 @@ data = struct('t_max', t_max, 'mean_x_init', mean_x_init, 'prec_x_init', ...
 %%
 % *Compile BUGS model and sample data*
 sample_data = true; % Boolean
-model = biips_model(model_filename, data, 'sample_data', sample_data);
+model = biips_model(model_file, data, 'sample_data', sample_data);
 data = model.data;
 x_pos_true = data.x_true(1:2,:);
 
@@ -80,7 +80,7 @@ x_pos_true = data.x_true(1:2,:);
 %
 
 %%
-% *Parameters of the algorithm*.
+% *Parameters of the algorithm*
 n_part = 100000; % Number of particles
 variables = {'x'}; % Variables to be monitored
 
@@ -90,17 +90,17 @@ out_smc = biips_smc_samples(model, {'x'}, n_part);
 
 %%
 % *Diagnostic*
-diagnostic = biips_diagnosis(out_smc);
+diag_smc = biips_diagnosis(out_smc);
 
 %%
 % *Summary statistics*
-summary = biips_summary(out_smc, 'probs', [.025, .975]);
+summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 
 %%
 % *Plot estimates*
-x_f_mean = summary.x.f.mean;
-x_s_mean = summary.x.s.mean;
 figure('name', 'SMC: Filtering and smoothing estimates')
+x_f_mean = summ_smc.x.f.mean;
+x_s_mean = summ_smc.x.s.mean;
 plot(x_f_mean(1, :), x_f_mean(2, :))
 hold on
 plot(x_s_mean(1, :), x_s_mean(2, :), '-.r')
@@ -129,7 +129,7 @@ box off
 
 %%
 % *Plot Filtering estimates*
-x_f_quant = summary.x.f.quant;
+x_f_quant = summ_smc.x.f.quant;
 title_fig = {'Position X', 'Position Y', 'Velocity X', 'Velocity Y'};
 for k=1:4
     figure('name', 'SMC: Filtering estimates')
@@ -142,7 +142,7 @@ for k=1:4
     plot(data.x_true(k,:), 'g')
     xlabel('Time')
     ylabel('Estimates')
-    legend({'95 % credible interval', 'Filtering mean estimate', 'True value'},...
+    legend({'95% credible interval', 'Filtering mean estimate', 'True value'},...
         'location', 'Northwest')
     legend boxoff
     box off
@@ -150,7 +150,7 @@ end
 
 %%
 % *Plot Smoothing estimates*
-x_s_quant = summary.x.s.quant;
+x_s_quant = summ_smc.x.s.quant;
 for k=1:4
     figure('name', 'SMC: Smoothing estimates')
     title(title_fig{k})
@@ -162,7 +162,7 @@ for k=1:4
     plot(data.x_true(k,:), 'g')
     xlabel('Time')
     ylabel('Estimates')
-    legend({'95 % credible interval', 'Smoothing mean estimate', 'True value'},...
+    legend({'95% credible interval', 'Smoothing mean estimate', 'True value'},...
         'location', 'Northwest')
     legend boxoff
     box off
