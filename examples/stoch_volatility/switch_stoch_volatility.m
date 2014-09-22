@@ -164,6 +164,7 @@ for k=1:numel(time_index)
     hold on
     plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
+    xlim([-7,1])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
@@ -243,7 +244,7 @@ for k=1:numel(time_index)
     subplot(2, 2, k)
     hist(out_pimh.x(tk, :), 20);
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'EdgeColor', 'w')
+    set(h, 'EdgeColor', 'w', 'FaceColor', 'r')
     hold on
     plot(data.x_true(tk), 0, '*g');
     xlabel(['x_{', num2str(tk), '}']);
@@ -265,6 +266,7 @@ for k=1:numel(time_index)
     plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f, 'r');
     hold on
     plot(data.x_true(tk), 0, '*g');
+    xlim([-7,1])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
@@ -300,8 +302,8 @@ caxis([-40, max(out_sens.log_marg_like(:))])
 colorbar box off
 box off
 xlim([-5, 2])
-xlabel('\alpha_1', 'fontsize', 18)
-ylabel('\alpha_2', 'fontsize', 18)
+xlabel('\alpha_1', 'fontsize', 20)
+ylabel('\alpha_2', 'fontsize', 20)
 saveas(gca, 'volatility_sensitivity', 'epsc2')
 saveas(gca, 'volatility_sensitivity', 'png')
 
