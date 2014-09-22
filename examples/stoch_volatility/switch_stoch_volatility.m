@@ -40,6 +40,7 @@ addpath(matbiips_path)
 %
 set(0, 'DefaultAxesFontsize', 16);
 set(0, 'Defaultlinelinewidth', 2);
+set(0, 'DefaultLineMarkerSize', 8);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
 
@@ -122,6 +123,7 @@ set(h, 'edgecolor', 'none')
 hold on
 plot(1:t_max, x_f_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
+ylim([-6.5, 1])
 xlabel('Time')
 ylabel('Log-volatility')
 legend({'95% credible interval', 'Filtering mean estimate', 'True value'})
@@ -141,6 +143,7 @@ set(h, 'edgecolor', 'none')
 hold on
 plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
+ylim([-6.5, 1])
 xlabel('Time')
 ylabel('Log-volatility')
 legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
@@ -199,11 +202,12 @@ figure('name', 'PIMH: Posterior mean and quantiles')
 x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
 h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    light_blue);
+    light_red);
 set(h, 'edgecolor', 'none')
 hold on
-plot(1:t_max, x_pimh_mean, 'linewidth', 3)
+plot(1:t_max, x_pimh_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
+ylim([-6.5, 1])
 xlabel('Time')
 ylabel('Log-volatility')
 legend({'95% credible interval', 'PIMH mean estimate', 'True value'})
@@ -258,15 +262,15 @@ kde_pimh = biips_density(out_pimh);
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f);
+    plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f, 'r');
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{', num2str(tk), '}'], 'fontsize', 20);
-    ylabel('Posterior density', 'fontsize', 20);
-    title(['t=', num2str(tk)], 'fontsize', 20);
+    xlabel(['x_{', num2str(tk), '}']);
+    ylabel('Posterior density');
+    title(['t=', num2str(tk)]);
     box off
 end
-h = legend({'Posterior density', 'True value'}, 'fontsize', 20);
+h = legend({'Posterior density', 'True value'});
 set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
@@ -296,8 +300,8 @@ caxis([-40, max(out_sens.log_marg_like(:))])
 colorbar box off
 box off
 xlim([-5, 2])
-xlabel('\alpha_1')
-ylabel('\alpha_2')
+xlabel('\alpha_1', 'fontsize', 18)
+ylabel('\alpha_2', 'fontsize', 18)
 saveas(gca, 'volatility_sensitivity', 'epsc2')
 saveas(gca, 'volatility_sensitivity', 'png')
 
