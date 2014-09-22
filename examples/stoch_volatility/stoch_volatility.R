@@ -67,7 +67,7 @@ cat(readLines(model_file), sep = "\n")
 #'     archive extension for your system.
 #' 2. Install the package from R
 
-#+ eval=FALS
+#+ eval=FALSE
 install.packages('path/to/Rbiips_x.x.x.ext', repos=NULL)
 
 #' 3. Load Rbiips package
