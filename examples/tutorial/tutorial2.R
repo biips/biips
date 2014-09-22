@@ -165,7 +165,7 @@ cat('95% credible interval of ', var_name, ': [', summ_param$quant[[1]], ', ', s
 samples_param = out_pmmh[[var_name]]
 plot(samples_param[1,], col='blue', type='l', lwd=1,
      xlab='Iteration',
-     ylab='PMMH samples',
+     ylab=var_name,
      main=var_name)
 points(0, log_prec_y_true, col='green', pch=8, lwd=2)
 legend('topright', leg=c('PMMH samples', 'True value'),
@@ -199,7 +199,7 @@ x_pmmh_quant = summ_pmmh$x$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_pmmh_quant[[1]], rev(x_pmmh_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='x')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pmmh_mean, col='blue', lwd=3)
@@ -216,7 +216,7 @@ for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(c(out_pmmh$x[tk,]), col='blue', type='l', lwd=1,
        xlab='Iteration',
-       ylab='PMMH samples',
+       ylab=bquote(x[.(tk)]),
        main=paste('t=', tk, sep=''))
   points(0, data$x_true[tk], col='green', pch=8, lwd=2)
 }

@@ -105,7 +105,7 @@ if (!sample_data) {
   # Plot the SP500 data
   plot(SP500_date_num, y, type='l', col='blue', lwd=2,
        main='Observed data: S&P 500',
-       xlab='Date', ylab='Log-returns', xaxt = 'n')
+       xlab='Date', ylab='Log-return', xaxt = 'n')
   axis.Date(1, SP500_date_num, format="%Y-%m-%d")
 }
 
@@ -167,7 +167,7 @@ param_lab = expression(alpha, logit(beta), log(sigma))
 for (k in 1:length(param_names)) {
   samples_param = out_pmmh[[param_names[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
-       xlab='Iteration', ylab='PMMH samples',
+       xlab='Iteration', ylab=param_lab[k],
        main=param_lab[k])
   if (sample_data)
     points(0, param_true[k], col='green', pch=8, lwd=2)
@@ -201,7 +201,7 @@ x_pmmh_quant = summ_pmmh$x$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_pmmh_quant[[1]], rev(x_pmmh_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='Log-volatility')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pmmh_mean, col='blue', lwd=3)
@@ -223,7 +223,7 @@ for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(c(out_pmmh$x[tk,]), col='blue', type='l',
        xlab='Iteration',
-       ylab='PMMH samples',
+       ylab=bquote(x[.(tk)]),
        main=paste('t=', tk, sep=''))
   if (sample_data)
     points(0, data$x_true[tk], col='green', pch=8, lwd=2)

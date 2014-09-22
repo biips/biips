@@ -126,7 +126,7 @@ hold on
 plot(1:t_max, x_f_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'Filtering mean estimate', 'True value'})
 legend boxoff
 box off
@@ -143,7 +143,7 @@ hold on
 plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off
@@ -204,7 +204,7 @@ hold on
 plot(1:t_max, x_pimh_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'PIMH mean estimate', 'True value'})
 legend boxoff
 box off
@@ -220,7 +220,7 @@ for k=1:numel(time_index)
     hold on
     plot(0, data.x_true(tk), '*g');
     xlabel('Iteration')
-    ylabel('PIMH samples')
+    ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
     box off
 end

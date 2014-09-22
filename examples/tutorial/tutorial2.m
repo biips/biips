@@ -152,7 +152,7 @@ plot(samples_param, 'linewidth', 1)
 hold on
 plot(0, data.log_prec_y_true, '*g');
 xlabel('Iteration')
-ylabel('PMMH samples')
+ylabel(param_lab)
 title(param_lab)
 legend({'PMMH samples', 'True value'})
 legend boxoff
@@ -196,7 +196,7 @@ hold on
 plot(1:t_max, x_pmmh_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'PMMH mean estimate', 'True value'})
 box off
 legend boxoff
@@ -212,7 +212,7 @@ for k=1:numel(time_index)
     hold on
     plot(0, data.x_true(tk), '*g');
     xlabel('Iteration')
-    ylabel('PMMH samples')
+    ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
     box off
 end

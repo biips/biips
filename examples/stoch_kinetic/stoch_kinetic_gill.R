@@ -155,8 +155,6 @@ plot(out_smc$x$s$ess[1,], type='l', log='y', col='blue', lwd=2,
      xlab='Time', ylab='SESS',
      ylim=c(10, n_part))
 lines(1:t_max, rep(30,t_max), lwd=2, lty=2)
-legend('topright', leg='Smoothing effective sample size',
-       col='blue', lwd=2, bty='n')
 
 #' #### Posterior mean and quantiles for x
 #+ fig.cap='SMC: Posterior mean and quantiles'
@@ -165,7 +163,7 @@ x_smc_quant = summ_smc$x$s$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_smc_quant[[1]][1,], rev(x_smc_quant[[2]][1,]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
+plot(xx, yy, type='n', xlab='Time', ylab='Number of individuals',
      ylim=c(0, 750))
 polygon(xx, yy, col=light_blue, border=NA)
 

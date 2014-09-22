@@ -43,8 +43,9 @@ addpath(matbiips_path)
 
 %% General settings
 %
-set(0, 'DefaultAxesFontsize', 14);
+set(0, 'DefaultAxesFontsize', 16);
 set(0, 'Defaultlinelinewidth', 2);
+set(0, 'DefaultLineMarkerSize', 8);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
 dark_blue = [0, 0, .5];
@@ -97,6 +98,7 @@ legend boxoff
 box off
 ylim([0, 450])
 saveas(gca, 'kinetic_data', 'epsc2')
+saveas(gca, 'kinetic_data', 'png')
 
 %% Biips Sequential Monte Carlo algorithm
 %
@@ -118,10 +120,9 @@ plot(1:t_max, 30*ones(t_max, 1), 'k--')
 xlabel('Time')
 ylabel('SESS')
 box off
-legend('Smoothing effective sample size')
-legend boxoff
 ylim([10, n_part])
 saveas(gca, 'kinetic_sess', 'epsc2')
+saveas(gca, 'kinetic_sess', 'png')
 
 %%
 % *Posterior mean and quantiles for x*
@@ -140,7 +141,7 @@ set(h, 'edgecolor', 'none')
 plot(1:t_max, x_smc_mean(2, :), 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Number of individuals')
 ylim([0, 450])
 legend({'95% credible interval (prey)', 'SMC mean estimate (prey)', 'True number of preys',...
     '95% credible interval (predator)', 'SMC mean estimate (predator)',...

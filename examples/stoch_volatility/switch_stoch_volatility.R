@@ -107,13 +107,11 @@ plot(out_smc$x$s$ess, type='l', log='y', col='blue', lwd=2,
      xlab='Time', ylab='SESS',
      ylim=c(10, n_part))
 lines(1:t_max, rep(30,t_max), lwd=2, lty=2)
-legend('topright', leg='Smoothing effective sample size',
-       col='blue', lwd=2, bty='n')
 
 #' #### Plot weighted particles
 #+ fig.cap = 'SMC: Particles (smoothing)'
 matplot(1:t_max, out_smc$x$s$values, type='n',
-        xlab='Time', ylab='Particles (smoothing)')
+        xlab='Time', ylab='Log-volatility')
 for (t in 1:t_max) {
   val = unique(out_smc$x$s$values[t,])
   weight = sapply(val, FUN=function(x) {
@@ -123,6 +121,10 @@ for (t in 1:t_max) {
   points(rep(t, length(val)), val, col='red', pch=20,
          cex=sapply(weight, FUN=function(x) {min(2, .02*n_part*x)}))
 }
+lines(1:t_max, data$x_true, col='green', lwd=2)
+legend('topright', leg=c('Particles (smoothing)', 'True value'),
+       col=c('red','green'), lwd=c(NA,2), pch=c(20,NA),
+       bty='n')
 
 #' #### Summary statistics
 summ_smc = biips_summary(out_smc, probs=c(.025, .975))
@@ -134,7 +136,7 @@ x_f_quant = summ_smc$x$f$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_f_quant[[1]], rev(x_f_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='Log-volatility')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_f_mean, col='blue', lwd=3)
@@ -150,7 +152,7 @@ x_s_quant = summ_smc$x$s$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_s_quant[[1]], rev(x_s_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='Log-volatility')
 
 polygon(xx, yy, col=light_red, border=NA)
 lines(1:t_max, x_s_mean, col='red', lwd=3)
@@ -201,7 +203,7 @@ x_pimh_quant = summ_pimh$x$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_pimh_quant[[1]], rev(x_pimh_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='Log-volatility')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pimh_mean, col='blue', lwd=3)
@@ -217,7 +219,7 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(out_pimh$x[tk,], col='blue', type='l',
-       xlab='Iteration', ylab='PIMH samples',
+       xlab='Iteration', ylab=bquote(x[.(tk)]),
        main=paste('t=', tk, sep=''))
   points(0, data$x_true[tk], col='green', pch=8, lwd=2)
 }

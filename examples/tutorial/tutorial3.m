@@ -121,7 +121,7 @@ hold on
 plot(1:t_max, x_f_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'Filtering mean estimate', 'True value'})
 legend boxoff
 box off
@@ -138,7 +138,7 @@ hold on
 plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('x')
 legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off

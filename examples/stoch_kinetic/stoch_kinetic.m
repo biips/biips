@@ -162,7 +162,7 @@ param_lab = {'log(c_1)', 'log(c_2)', 'log(c_3)'};
 for i=1:numel(param_names)
     summ_param = getfield(summ_pmmh, param_names{i});
     fprintf('Posterior mean of %s: %.3f\n', param_names{i}, summ_param.mean);
-    fprintf('95%% credibilist interval of %s: [%.1f, %.1f]\n',...
+    fprintf('95%% credibile interval of %s: [%.1f, %.1f]\n',...
         param_names{i}, summ_param.quant{1}, summ_param.quant{2});
 end
 
@@ -175,7 +175,7 @@ for i=1:numel(param_names)
     hold on
     plot(0, param_true(i), '*g');
     xlabel('Iteration')
-    ylabel('PMMH samples')
+    ylabel(param_lab{i})
     title(param_lab{i})
     box off
 end
@@ -227,7 +227,7 @@ set(h, 'edgecolor', 'none')
 plot(t_vec, x_pmmh_mean(2, :), 'r', 'linewidth', 3)
 plot(t_vec, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Number of individuals')
 ylim([0, 1500])
 legend({'95% credible interval (prey)', 'PMMH mean estimate (prey)', 'True number of preys',...
     '95% credible interval (predator)', 'PMMH mean estimate (predator)',...

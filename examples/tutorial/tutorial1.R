@@ -139,7 +139,7 @@ x_f_quant = summ_smc$x$f$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_f_quant[[1]], rev(x_f_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='x')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_f_mean, col='blue', lwd=3)
@@ -155,7 +155,7 @@ x_s_quant = summ_smc$x$s$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_s_quant[[1]], rev(x_s_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='x')
 
 polygon(xx, yy, col=light_red, border=NA)
 lines(1:t_max, x_s_mean, col='red', lwd=3)
@@ -205,7 +205,7 @@ x_pimh_quant = summ_pimh$x$quant
 
 xx = c(1:t_max, t_max:1)
 yy = c(x_pimh_quant[[1]], rev(x_pimh_quant[[2]]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates')
+plot(xx, yy, type='n', xlab='Time', ylab='x')
 
 polygon(xx, yy, col=light_blue, border=NA)
 lines(1:t_max, x_pimh_mean, col='blue', lwd=3)
@@ -221,7 +221,7 @@ par(mfrow=c(2,2))
 for (k in 1:length(time_index)) {
   tk = time_index[k]
   plot(out_pimh$x[tk,], col='blue', type='l',
-       xlab='Iteration', ylab='PIMH samples',
+       xlab='Iteration', ylab=bquote(x[.(tk)]),
        main=paste('t=', tk, sep=''))
   points(0, data$x_true[tk], col='green', pch=8, lwd=2)
 }

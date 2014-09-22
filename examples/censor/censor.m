@@ -102,7 +102,7 @@ h = fill([1:tmax, tmax:-1:1], [x_inf; flipud(x_sup)], light_blue);
 set(h, 'edgecolor', 'none')
 plot(1:tmax, x_mean)
 plot(repmat((1:tmax)', 1, size(interv,1)), interv', 'k--')
-xlabel('time')
+xlabel('Time')
 ylabel('x')
 y_lim = ylim;
 legend({'95% credible interval', 'Mean estimate', 'Cutpoints'})

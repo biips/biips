@@ -58,8 +58,9 @@ addpath(matbiips_path)
 
 %% General settings
 %
-set(0, 'DefaultAxesFontsize', 14);
+set(0, 'DefaultAxesFontsize', 16);
 set(0, 'Defaultlinelinewidth', 2);
+set(0, 'DefaultLineMarkerSize', 8);
 light_blue = [.7, .7, 1];
 
 % Set the random numbers generator seed for reproducibility
@@ -90,7 +91,7 @@ if ~sample_data
     figure('name', 'Log-returns')
     plot(SP500_date_num, y)
     datetick('x', 'mmmyyyy', 'keepticks')
-    ylabel('Log-returns')
+    ylabel('Log-return')
     xlabel('Date')
     title('Observed data: S&P 500')
 end
@@ -166,7 +167,7 @@ end
 for i=1:numel(param_plot)
     summ_param = getfield(summ_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, summ_param.mean);
-    fprintf('95%% credibilist interval of %s: [%.3f, %.3f]\n',...
+    fprintf('95%% credible interval of %s: [%.3f, %.3f]\n',...
         param_plot{i}, summ_param.quant{1}, summ_param.quant{2});
 end
 
@@ -178,11 +179,11 @@ for k=1:numel(param_plot)
     plot(samples_param, 'linewidth', 1)
     if sample_data
         hold on
-        plot(0, param_true(k), '*g', 'markersize', 10);
+        plot(0, param_true(k), '*g', 'markersize', 12);
     end
     xlabel('Iteration', 'fontsize', 20)
-    ylabel('PMMH samples', 'fontsize', 20)
-    title(param_lab{k}, 'fontsize', 20)
+    ylabel(param_lab{k}, 'fontsize', 20)
+    title(param_lab{k})
     box off
 end
 
@@ -196,13 +197,13 @@ for k=1:numel(param_plot)
     set(h, 'EdgeColor', 'w')
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g', 'markersize', 10);
+        plot(param_true(k), 0, '*g', 'markersize', 12);
     end
     xlabel(param_lab{k}, 'fontsize', 20)
     ylabel('Number of samples', 'fontsize', 20)
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
-%     title(title_names{k}, 'fontsize', 20)
+%     title(title_names{k})
     box off
 end
 
@@ -212,13 +213,13 @@ for k=1:numel(param_plot)
     plot(kde_param.x, kde_param.f)
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g', 'markersize', 10);
+        plot(param_true(k), 0, '*g', 'markersize', 12);
     end
     xlabel(param_lab{k}, 'fontsize', 20)
     ylabel('Posterior density', 'fontsize', 20)
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'png')
-%     title(title_names{k}, 'fontsize', 20)
+%     title(title_names{k})
     box off
 end
 
@@ -239,7 +240,7 @@ else
     legend({'95% credible interval', 'PMMH mean estimate'})
 end
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Log-volatility')
 saveas(gca, 'switch_stoch_param_x', 'epsc2')
 saveas(gca, 'switch_stoch_param_x', 'png')
 box off
@@ -258,7 +259,7 @@ for k=1:numel(time_index)
         plot(0, data.x_true(tk), '*g');
     end
     xlabel('Iteration')
-    ylabel('PMMH samples')
+    ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
     box off
 end

@@ -182,7 +182,7 @@ for (k in 1:length(param_names)) {
 for (k in 1:length(param_names)) {
   samples_param = out_pmmh[[param_names[k]]]
   plot(samples_param[1,], type='l', col='blue', lwd=1,
-       xlab='Iteration', ylab='PMMH samples',
+       xlab='Iteration', ylab=param_lab[k],
        main=param_lab[k])
   if (sample_data)
     points(0, param_true[k], col='green', pch=8, lwd=2)
@@ -216,7 +216,7 @@ x_pmmh_quant = summ_pmmh$x$quant
 
 xx = c(t_vec, rev(t_vec))
 yy = c(x_pmmh_quant[[1]][1,], rev(x_pmmh_quant[[2]][1,]))
-plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
+plot(xx, yy, type='n', xlab='Time', ylab='Number of individuals',
      ylim=c(0, 750))
 polygon(xx, yy, col=light_blue, border=NA)
 

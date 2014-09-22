@@ -157,7 +157,7 @@ x_f_quant = summ_smc$x$f$quant
 for (k in 1:4) {
   xx = c(1:t_max, t_max:1)
   yy = c(x_f_quant[[1]][k,], rev(x_f_quant[[2]][k,]))
-  plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
+  plot(xx, yy, type='n', xlab='Time', ylab=title_fig[k],
        main=title_fig[k])
 
   polygon(xx, yy, col=light_blue, border=NA)
@@ -175,7 +175,7 @@ x_s_quant = summ_smc$x$s$quant
 for (k in 1:4) {
   xx = c(1:t_max, t_max:1)
   yy = c(x_s_quant[[1]][k,], rev(x_s_quant[[2]][k,]))
-  plot(xx, yy, type='n', xlab='Time', ylab='Estimates',
+  plot(xx, yy, type='n', xlab='Time', ylab=title_fig[k],
        main=title_fig[k])
 
   polygon(xx, yy, col=light_red, border=NA)

@@ -73,7 +73,7 @@ if ~sample_data
     figure('name', 'Log-returns')
     plot(SP500_date_num, y)
     datetick('x', 'mmmyyyy', 'keepticks')
-    ylabel('Log-returns')
+    ylabel('Log-return')
     xlabel('Date')
     title('Observed data: S&P 500')
 end
@@ -155,7 +155,7 @@ for k=1:numel(param_names)
         plot(0, param_true(k), '*g');
     end
     xlabel('Iteration')
-    ylabel('PMMH samples')
+    ylabel(param_lab{k})
     title(param_lab{k})
     box off
     legend boxoff
@@ -212,7 +212,7 @@ else
     legend({'95% credible interval', 'PMMH mean estimate'})
 end
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Log-volatility')
 box off
 legend boxoff
 
@@ -229,7 +229,7 @@ for k=1:numel(time_index)
         plot(0, data.x_true(tk), '*g');
     end
     xlabel('Iteration')
-    ylabel('PMMH samples')
+    ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
     box off
 end

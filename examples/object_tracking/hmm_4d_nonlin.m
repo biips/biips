@@ -141,7 +141,7 @@ for k=1:4
     plot(x_f_mean(k, :), 'linewidth', 3)
     plot(data.x_true(k,:), 'g')
     xlabel('Time')
-    ylabel('Estimates')
+    ylabel(title_fig{k})
     legend({'95% credible interval', 'Filtering mean estimate', 'True value'},...
         'location', 'Northwest')
     legend boxoff
@@ -161,7 +161,7 @@ for k=1:4
     plot(x_s_mean(k, :), 'r', 'linewidth', 3)
     plot(data.x_true(k,:), 'g')
     xlabel('Time')
-    ylabel('Estimates')
+    ylabel(title_fig{k})
     legend({'95% credible interval', 'Smoothing mean estimate', 'True value'},...
         'location', 'Northwest')
     legend boxoff

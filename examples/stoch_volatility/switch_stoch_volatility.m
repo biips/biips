@@ -38,7 +38,7 @@ addpath(matbiips_path)
 
 %% General settings
 %
-set(0, 'DefaultAxesFontsize', 14);
+set(0, 'DefaultAxesFontsize', 16);
 set(0, 'Defaultlinelinewidth', 2);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
@@ -87,8 +87,7 @@ plot(1:t_max, 30*ones(t_max,1), '--k')
 xlabel('Time')
 ylabel('SESS')
 box off
-legend('Smoothing effective sample size')
-legend boxoff
+saveas(gca, 'volatility_ess', 'epsc2')
 saveas(gca, 'volatility_ess', 'png')
 
 %%
@@ -104,7 +103,8 @@ for t=1:t_max
         'markerfacecolor', 'r')
 end
 xlabel('Time')
-ylabel('Particles (smoothing)')
+ylabel('Log-volatility')
+saveas(gca, 'volatility_particles_s', 'epsc2')
 saveas(gca, 'volatility_particles_s', 'png')
 
 %%
@@ -123,11 +123,10 @@ hold on
 plot(1:t_max, x_f_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Log-volatility')
 legend({'95% credible interval', 'Filtering mean estimate', 'True value'})
 legend boxoff
 box off
-ylim([-8, 0])
 saveas(gca, 'volatility_f', 'epsc2')
 saveas(gca, 'volatility_f', 'png')
 
@@ -143,7 +142,7 @@ hold on
 plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Log-volatility')
 legend({'95% credible interval', 'Smoothing mean estimate', 'True value'})
 legend boxoff
 box off
@@ -207,7 +206,7 @@ hold on
 plot(1:t_max, x_pimh_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
 xlabel('Time')
-ylabel('Estimates')
+ylabel('Log-volatility')
 legend({'95% credible interval', 'PIMH mean estimate', 'True value'})
 legend boxoff
 box off
@@ -225,7 +224,7 @@ for k=1:numel(time_index)
     hold on
     plot(0, data.x_true(tk), '*g');
     xlabel('Iteration')
-    ylabel('PIMH samples')
+    ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
     box off
 end
@@ -263,12 +262,12 @@ for k=1:numel(time_index)
     plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f);
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlabel(['x_{', num2str(tk), '}']);
-    ylabel('posterior density');
-    title(['t=', num2str(tk)]);
+    xlabel(['x_{', num2str(tk), '}'], 'fontsize', 20);
+    ylabel('Posterior density', 'fontsize', 20);
+    title(['t=', num2str(tk)], 'fontsize', 20);
     box off
 end
-h = legend({'Posterior density', 'True value'});
+h = legend({'Posterior density', 'True value'}, 'fontsize', 20);
 set(h, 'position', [0.7, 0.25, .1, .1])
 legend boxoff
 saveas(gca, 'volatility_pimh_kde', 'epsc2')
@@ -297,8 +296,8 @@ view(2); colormap(hot); shading interp
 caxis([-40, max(out_sens.log_marg_like(:))])
 colorbar box off
 box off
-xlabel('\alpha_1', 'fontsize', 20)
-ylabel('\alpha_2', 'fontsize', 20)
+xlabel('\alpha_1')
+ylabel('\alpha_2')
 saveas(gca, 'volatility_sensitivity', 'epsc2')
 saveas(gca, 'volatility_sensitivity', 'png')
 
