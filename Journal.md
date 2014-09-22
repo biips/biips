@@ -1,3 +1,26 @@
+Adrien le 22/09/2014 :
+======================
+Article :
+- [ ] discussion sur temps de calcul vs Jags
+- [ ] ajouter adaptation du PMMH
+- [ ] coloration syntaxique Rbiips
+- [ ] vérifier explications du code : 'out_smc is a structure' spécifique à matlab
+- [ ] citer Doucet pour smoothing/backward smoothing
+- [ ] table de fonctions classées par étape du workflow
+
+Exemples :
+- [ ] republier exemples matbiips sous windows
+- [ ] stoch_kinetic Rbiips : vérifier adaptation
+- [ ] ajouter html Rbiips sur le site
+
+Release :
+- [ ] mettre à jour binaires toutes plateformes
+- [ ] écrire Release note
+- [ ] ajouter doc Rbiips
+- [ ] soumettre Rbiips sur CRAN
+- [ ] lien vers Jags manual pour doc sur le langauge BUGS
+- [ ] énumérer différences entre Biips et Jags
+
 Adrien le 17/09/2014 :
 ======================
 - [x] arguments cycliques pour density et plot.density
@@ -11,8 +34,8 @@ Adrien le 17/09/2014 :
 - [ ] ajouter références sur méthodes SMC dans les liens du site
 - [ ] ajouter calcul régions HDP
 - [ ] ajouter histogrammes de particules
-- [ ] ajouter conversion vers mcmc pour coda dans Rbiips
-- [ ] ajouter cible `publish_Rbiips_examples` dans cmake
+- [ ] conversion des sorties mcmc pour coda dans Rbiips
+- [ ] ajouter cible `publishRbiipsexamples.R` dans cmake
 
 Article/exemples :
 - [x] diagnosis: expliquer pourquoi ess>=30 ?

@@ -6,8 +6,8 @@ file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 set(mtests 
     test_console test_output test_smc test_macros test_internals 
-    test_funcmat test_distmat test_matbiips
-    test_crash1 test_crash2 test_crash3 test_crash5)
+    test_funcmat test_distmat
+    test_crash1 test_crash2)
     
 foreach(_test ${mtests})
     set (MAT_COMS "cd ${CMAKE_CURRENT_BINARY_DIR}; addpath('..'); ${_test}; exit")
