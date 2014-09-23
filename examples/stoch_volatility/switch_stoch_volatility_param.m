@@ -62,6 +62,7 @@ set(0, 'DefaultAxesFontsize', 16);
 set(0, 'Defaultlinelinewidth', 2);
 set(0, 'DefaultLineMarkerSize', 8);
 light_blue = [.7, .7, 1];
+light_red = [1, .7, .7];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -181,10 +182,10 @@ for k=1:numel(param_plot)
     plot(samples_param, 'linewidth', 1)
     if sample_data
         hold on
-        plot(0, param_true(k), '*g', 'markersize', 12);
+        plot(0, param_true(k), '*g', 'linewidth', 3, 'markersize', 16);
     end
-    xlabel('Iteration', 'fontsize', 20)
-    ylabel(param_lab{k}, 'fontsize', 20)
+    xlabel('Iteration', 'fontsize', 24)
+    ylabel(param_lab{k}, 'fontsize', 24)
     title(param_lab{k})
     box off
 end
@@ -199,30 +200,30 @@ for k=1:numel(param_plot)
     set(h, 'EdgeColor', 'w', 'FaceColor', 'r')
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g', 'markersize', 12);
+        plot(param_true(k), 0, '*g', 'linewidth', 3, 'markersize', 16);
     end
-    xlabel(param_lab{k}, 'fontsize', 20)
-    ylabel('Number of samples', 'fontsize', 20)
+    xlabel(param_lab{k}, 'fontsize', 24)
+    ylabel('Number of samples', 'fontsize', 24)
+    box off
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
 %     title(title_names{k})
-    box off
 end
 
 for k=1:numel(param_plot)
     figure('name', 'PMMH: KDE estimate posterior parameter')
     kde_param = getfield(kde_pmmh, param_plot{k});
-    plot(kde_param.x, kde_param.f)
+    plot(kde_param.x, kde_param.f, 'r')
     if sample_data
         hold on
-        plot(param_true(k), 0, '*g', 'markersize', 12);
+        plot(param_true(k), 0, '*g', 'linewidth', 3, 'markersize', 16);
     end
-    xlabel(param_lab{k}, 'fontsize', 20)
-    ylabel('Posterior density', 'fontsize', 20)
+    xlabel(param_lab{k}, 'fontsize', 24)
+    ylabel('Posterior density', 'fontsize', 24)
+    box off
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'png')
 %     title(title_names{k})
-    box off
 end
 
 %%
@@ -231,21 +232,22 @@ figure('name', 'PMMH: Posterior mean and quantiles')
 x_pmmh_mean = summ_pmmh.x.mean;
 x_pmmh_quant = summ_pmmh.x.quant;
 h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    light_blue);
+    light_red);
 set(h, 'edgecolor', 'none')
 hold on
-plot(1:t_max, x_pmmh_mean, 'linewidth', 3)
+plot(1:t_max, x_pmmh_mean, 'r', 'linewidth', 3)
 if sample_data
     plot(1:t_max, data.x_true, 'g')
     legend({'95% credible interval', 'PMMH mean estimate', 'True value'})
 else
     legend({'95% credible interval', 'PMMH mean estimate'})
 end
+ylim([-6.5,1])
 xlabel('Time')
 ylabel('Log-volatility')
+box off
 saveas(gca, 'switch_stoch_param_x', 'epsc2')
 saveas(gca, 'switch_stoch_param_x', 'png')
-box off
 legend boxoff
 
 %%
@@ -260,6 +262,7 @@ for k=1:numel(time_index)
         hold on
         plot(0, data.x_true(tk), '*g');
     end
+    ylim([-7,0])
     xlabel('Iteration')
     ylabel(['x_{', num2str(tk), '}'])
     title(['t=', num2str(tk)]);
@@ -277,13 +280,14 @@ figure('name', 'PMMH: Histograms marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    hist(out_pmmh.x(tk, :), -10:.5:0);
-    h = findobj(gca, 'Type' ,'patch');
-    set(h, 'EdgeColor', 'w')
+    hist(out_pmmh.x(tk, :), 20);
+    h = findobj(gca, 'Type', 'patch');
+    set(h, 'EdgeColor', 'w', 'FaceColor', 'r')
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
+    xlim([-7,0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Number of samples');
     title(['t=', num2str(tk)]);
@@ -299,11 +303,12 @@ figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:numel(time_index)
     tk = time_index(k);
     subplot(2, 2, k)
-    plot(kde_pmmh.x(tk).x, kde_pmmh.x(tk).f);
+    plot(kde_pmmh.x(tk).x, kde_pmmh.x(tk).f, 'r');
     if sample_data
         hold on
         plot(data.x_true(tk), 0, '*g');
     end
+    xlim([-7,0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
