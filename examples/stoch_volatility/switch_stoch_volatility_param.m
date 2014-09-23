@@ -68,9 +68,7 @@ light_red = [1, .7, .7];
 if isoctave() || verLessThan('matlab', '7.12')
     rand('state', 0)
 else
-%     rng('default')
-    rng('shuffle')
-    seed = rng
+    rng('default')
 end
 
 %% Load model and load or simulate data
