@@ -164,7 +164,7 @@ for k=1:numel(time_index)
     hold on
     plot(kde_smc.x.s(tk).x, kde_smc.x.s(tk).f, 'r');
     plot(data.x_true(tk), 0, '*g');
-    xlim([-7,1])
+    xlim([-7,0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);
@@ -266,7 +266,7 @@ for k=1:numel(time_index)
     plot(kde_pimh.x(tk).x, kde_pimh.x(tk).f, 'r');
     hold on
     plot(data.x_true(tk), 0, '*g');
-    xlim([-7,1])
+    xlim([-7,0])
     xlabel(['x_{', num2str(tk), '}']);
     ylabel('Posterior density');
     title(['t=', num2str(tk)]);

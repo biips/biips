@@ -67,7 +67,9 @@ light_blue = [.7, .7, 1];
 if isoctave() || verLessThan('matlab', '7.12')
     rand('state', 0)
 else
-    rng('default')
+%     rng('default')
+    rng('shuffle')
+    seed = rng
 end
 
 %% Load model and load or simulate data
@@ -194,7 +196,7 @@ for k=1:numel(param_plot)
     samples_param = getfield(out_pmmh, param_plot{k});
     hist(samples_param, 15)
     h = findobj(gca, 'Type', 'patch');
-    set(h, 'EdgeColor', 'w')
+    set(h, 'EdgeColor', 'w', 'FaceColor', 'r')
     if sample_data
         hold on
         plot(param_true(k), 0, '*g', 'markersize', 12);
