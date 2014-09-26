@@ -1,5 +1,5 @@
 #' ---
-#' title: "Rbiips example: Switching Stochastic volatility"
+#' title: "Rbiips example: Switching stochastic volatility"
 #' author: NULL
 #' date: NULL
 #' output:
@@ -89,6 +89,12 @@ data = list(t_max=t_max, sigma=sigma,
 #' #### Parse and compile BUGS model, and sample data
 model = biips_model(model_file, data, sample_data=TRUE)
 data = model$data()
+
+#' Plot the data
+#+ fig.cap='Log-returns'
+plot(1:t_max, data$y, type='l', col='blue', lwd=2,
+     main='Observed data',
+     xlab='Time', ylab='Log-return', xaxt = 'n')
 
 #' # Biips Sequential Monte Carlo
 

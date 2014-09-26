@@ -1,4 +1,4 @@
-%% Matbiips example: Switching Stochastic volatility
+%% Matbiips example: Switching stochastic volatility
 % In this example, we consider the Markov switching stochastic volatility model.
 %
 % Reference: C.M. Carvalho and H.F. Lopes. Simulation-based sequential analysis of Markov switching
@@ -65,6 +65,14 @@ data = struct('t_max', t_max, 'sigma', sigma,...
 % *Parse and compile BUGS model, and sample data*
 model = biips_model(model_file, data, 'sample_data', true);
 data = model.data;
+
+%%
+% Plot the data
+figure('name', 'Log-returns')
+plot(1:t_max, data.y)
+title('Observed data')
+xlabel('Time')
+ylabel('Log-return')
 
 %% Biips Sequential Monte Carlo
 %

@@ -68,14 +68,6 @@ if ~sample_data
     SP500_date_str = SP500_date_str(ind);
     
     SP500_date_num = datenum(SP500_date_str);
-    
-    % Plot the SP500 data
-    figure('name', 'Log-returns')
-    plot(SP500_date_num, y)
-    datetick('x', 'mmmyyyy', 'keepticks')
-    ylabel('Log-return')
-    xlabel('Date')
-    title('Observed data: S&P 500')
 end
 
 %%
@@ -94,6 +86,21 @@ end
 % *Compile BUGS model and sample data if simulated data*
 model = biips_model(model_file, data, 'sample_data', sample_data);
 data = model.data;
+
+%%
+% Plot the data
+figure('name', 'Log-returns')
+if sample_data
+    plot(1:t_max, data.y)
+    title('Observed data')
+    xlabel('Time')
+else
+    plot(SP500_date_num, data.y)
+    title('Observed data: S&P 500')
+    datetick('x', 'mmmyyyy', 'keepticks')
+    xlabel('Date')
+end
+ylabel('Log-return')
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order

@@ -1,5 +1,5 @@
 #' ---
-#' title: "Rbiips example: Switching Stochastic volatility with estimation of static parameters"
+#' title: "Rbiips example: Switching stochastic volatility with estimation of static parameters"
 #' author: NULL
 #' date: NULL
 #' output:
@@ -57,9 +57,9 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #'
 #' $$\sigma^2 \sim invGamma(2.001,1) $$
 #'
-#' $$\pi_{11} \sim Beta(0.5,0.5)$$
+#' $$\pi_{11} \sim Beta(10,0.5)$$
 #'
-#' $$\pi_{22} \sim Beta(0.5,0.5)$$
+#' $$\pi_{22} \sim Beta(10,0.5)$$
 #'
 #' $\mathcal N(m,\sigma^2)$ denotes the normal
 #' distribution of mean $m$ and variance $\sigma^2$.
@@ -103,7 +103,6 @@ light_red = rgb(1, .7, .7)
 set.seed(0)
 
 #' # Load model and load or simulate data
-#+ fig.cap='Log-returns'
 sample_data = TRUE # Simulated data or SP500 data
 t_max = 100
 
@@ -118,12 +117,6 @@ if (!sample_data) {
   SP500_date_str = SP500_date_str[ind]
 
   SP500_date_num = as.Date(SP500_date_str)
-
-  # Plot the SP500 data
-  plot(SP500_date_num, y, type='l', col='blue', lwd=2,
-       main='Observed data: S&P 500',
-       xlab='Date', ylab='Log-return', xaxt = 'n')
-  axis.Date(1, SP500_date_num, format="%Y-%m-%d")
 }
 
 #' #### Model parameters
@@ -140,6 +133,19 @@ if (!sample_data) {
 #' #### Compile BUGS model and sample data if simulated data
 model = biips_model(model_file, data, sample_data=sample_data)
 data = model$data()
+
+#' Plot the data
+#+ fig.cap='Log-returns'
+if (sample_data) {
+  plot(1:t_max, data$y, type='l', col='blue', lwd=2,
+       main='Observed data',
+       xlab='Time', ylab='Log-return', xaxt = 'n')
+} else {
+  plot(SP500_date_num, data$y, type='l', col='blue', lwd=2,
+       main='Observed data: S&P 500',
+       xlab='Date', ylab='Log-return', xaxt = 'n')
+  axis.Date(1, SP500_date_num, format="%Y-%m-%d")
+}
 
 #' # Biips Particle Marginal Metropolis-Hastings
 #' We now use Biips to run a Particle Marginal Metropolis-Hastings in order

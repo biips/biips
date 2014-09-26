@@ -11,9 +11,25 @@ function [dens] = biips_density(samples, varargin)
 %                       default is '' for all present fields in particles
 %   - adjust:           time factor for the bw. default is 1
 %   - bw:               bandwidth. default is estimated from the samples
-%   - n:                nb of points of evaluation. default is 100
+%   - bw_type:          character string. The type of bandwidth selector 
+%                       used in case bw value is not given. Possible values:
+%                           * 'nrd0' (default): Silverman's rule of thumb [1]
+%                           * 'nrd': Scott's variation of Silverman with factor 1.06 [2]
+%                           * 'matlab': Matlab's rule from the stat toolbox ksdensity function
+%   - n:                integer. nb of points of evaluation. default is 100
 %   OUTPUT
-%   - dens:             output structure
+%   - dens:             output structure whth the same fields as the input
+%                       samples structure. The leaves of the structure contain
+%                       the following fields:
+%                           * x: points of the density (n points in the range [min-4*bw, max+4*bw]
+%                           * f: values of the density at x
+%
+% References:
+% [1] Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall
+% (page 48, eqn (3.31))
+% [2] Scott, D. W. (1992) Multivariate Density Estimation: Theory,
+% Practice, and Visualization. Wiley.
+% 
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
@@ -36,12 +52,12 @@ function [dens] = biips_density(samples, varargin)
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS
-optarg_names = {'type', 'adjust', 'bw', 'n'};
-optarg_default = {'fsb', 1, [], 500};
+optarg_names = {'type', 'adjust', 'bw', 'bw_type', 'n'};
+optarg_default = {'fsb', 1, [], 'nrd0', 500};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 10],...
-    [0,intmax], [0,intmax]};
-optarg_type = {'char', 'numeric', 'numeric', 'numeric'};
-[type, adjust, bw, npoints] = parsevar(varargin, optarg_names, optarg_type,...
+    [0,intmax], {'nrd0', 'nrd', 'matlab'}, [0,intmax]};
+optarg_type = {'char', 'numeric', 'numeric', 'char', 'numeric'};
+[type, adjust, bw, bw_type, npoints] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
 %%
@@ -56,7 +72,8 @@ if is_mcmc
     weights = 1/nsamples * ones(dim);
     d = ndims(samples);
     if isempty(bw)
-        bw = cellfun(@(x,w) bw_select(x, w), num2cell(samples, d), num2cell(weights, d), 'uniformoutput', false);
+%         bw = cellfun(@(x,w) bw_select(x, w, bw_type), num2cell(samples, d), num2cell(weights, d), 'uniformoutput', false);
+        bw = cellfun(@(x) bw_select(x, [], bw_type), num2cell(samples, d), 'uniformoutput', false);
     end
     if iscell(bw)
         dens = cellfun(@(x,w,b) kde(x, w, adjust*b, npoints), num2cell(samples, d), num2cell(weights, d), bw);
@@ -70,7 +87,8 @@ elseif is_smc
     %% samples corresponds to the output of a SMC algorithm
     d = ndims(samples.values);
     if isempty(bw)
-        bw = cellfun(@(x,w) bw_select(x, w), num2cell(samples.values, d), num2cell(samples.weights, d), 'uniformoutput', false);
+%         bw = cellfun(@(x,w) bw_select(x, w, bw_type), num2cell(samples.values, d), num2cell(samples.weights, d), 'uniformoutput', false);
+        bw = cellfun(@(x) bw_select(x, [], bw_type), num2cell(samples.values, d), 'uniformoutput', false);
     end
     if iscell(bw)
         dens = cellfun(@(x,w,b) kde(x, w, adjust*b, npoints), num2cell(samples.values, d), num2cell(samples.weights, d), bw);
@@ -95,7 +113,8 @@ elseif is_smc_fsb
             s = getfield(samples, 's');
         end
         d = ndims(s.values);
-        bw = cellfun(@(x,w) bw_select(x, w), num2cell(s.values, d), num2cell(s.weights, d), 'uniformoutput', false);
+%         bw = cellfun(@(x,w) bw_select(x, w, bw_type), num2cell(s.values, d), num2cell(s.weights, d), 'uniformoutput', false);
+        bw = cellfun(@(x) bw_select(x, [], bw_type), num2cell(s.values, d), 'uniformoutput', false);
     end
         
     for i=1:numel(names)
