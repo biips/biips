@@ -30,9 +30,9 @@ model
   phi ~ dnorm(0, 1/100) T(-1,1)
   tau ~ dgamma(2.001, 1)
   sigma <- 1/sqrt(tau)
-  pi[1,1] ~ dbeta(.5, .5)
+  pi[1,1] ~ dbeta(10, .5)
   pi[1,2] <- 1 - pi[1,1]
-  pi[2,2] ~ dbeta(.5, .5)
+  pi[2,2] ~ dbeta(10, .5)
   pi[2,1] <- 1 - pi[2,2]
 
 

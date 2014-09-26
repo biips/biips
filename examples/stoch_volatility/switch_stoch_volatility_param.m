@@ -74,7 +74,7 @@ end
 %% Load model and load or simulate data
 %
 sample_data = true; % Simulated data or SP500 data
-t_max = 200;
+t_max = 100;
 
 if ~sample_data
     % Load the data

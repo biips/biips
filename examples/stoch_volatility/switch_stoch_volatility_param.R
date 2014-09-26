@@ -105,7 +105,7 @@ set.seed(0)
 #' # Load model and load or simulate data
 #+ fig.cap='Log-returns'
 sample_data = TRUE # Simulated data or SP500 data
-t_max = 200
+t_max = 100
 
 if (!sample_data) {
   # Load the data
@@ -132,7 +132,7 @@ if (!sample_data) {
 } else {
   sigma_true = .4; alpha_true = c(-2.5, -1); phi_true = .5
   pi11 = .9; pi22 = .9
-  pi_true = matrix(c(pi11, 1-pi11, pi22, 1-pi22), nrow = 2, byrow=TRUE)
+  pi_true = matrix(c(pi11, 1-pi11, 1-pi22, pi22), nrow = 2, byrow=TRUE)
   data = list(t_max=t_max, sigma_true=sigma_true,
               alpha_true=alpha_true, phi_true=phi_true, pi_true=pi_true)
 }
