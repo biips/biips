@@ -56,7 +56,8 @@ end
 
 %%
 % *Model parameters*
-sigma = .4; alpha = [-2.5; -1]; phi = .5; c0 = 1; x0 = 0; t_max = 100;
+t_max = 100;
+sigma = .4; alpha = [-2.5; -1]; phi = .5; c0 = 1; x0 = 0;
 pi = [.9, .1; .1, .9];
 data = struct('t_max', t_max, 'sigma', sigma,...
     'alpha', alpha, 'phi', phi, 'pi', pi, 'c0', c0, 'x0', x0);
@@ -73,6 +74,9 @@ plot(1:t_max, data.y)
 title('Observed data')
 xlabel('Time')
 ylabel('Log-return')
+box off
+saveas(gca, 'volatility_obs', 'epsc2')
+saveas(gca, 'volatility_obs', 'png')
 
 %% Biips Sequential Monte Carlo
 %

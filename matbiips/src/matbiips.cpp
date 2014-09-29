@@ -875,7 +875,43 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         prior = std::numeric_limits<Scalar>::quiet_NaN();
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
       *mxGetPr(plhs[0]) = prior;
+    }
 
+    /////////////////////////////////////////
+    // GET_FIXED_SUPPORT FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "get_fixed_support") {
+
+      CheckRhs(nrhs, 4, name_func);
+      Size id = GetConsoleId(consoles, prhs[1], name_func);
+      Console_ptr p_console = consoles[id];
+
+      CheckArgIsString(2);
+      String name = GetString(prhs[2]);
+
+      CheckArgIsDouble(3);
+      const mxArray * lower = prhs[3];
+
+      CheckArgIsDouble(4);
+      const mxArray * upper = prhs[4];
+
+      IndexRange range = makeRange(lower, upper);
+      ValArray lower_bound;
+      ValArray upper_bound;
+
+
+      Bool ok = p_console->GetFixedSupport(lower_bound, upper_bound, name, range);
+      if(!ok)
+        throw RuntimeError("Failed to get fixed support density.");
+
+      Size n = lower_bound.size();
+
+      plhs[0] = mxCreateDoubleMatrix(n, 2, mxREAL);
+
+      double * support_out = mxGetPr(plhs[0]);
+
+      std::copy(lower_bound.begin(), lower_bound.end(), support_out);
+      std::copy(upper_bound.begin(), upper_bound.end(), support_out+n);
     }
 
     /////////////////////////////////////////
@@ -1031,7 +1067,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       const mxArray * weights = prhs[2];
       const mxArray * probas  = prhs[3];
 
-
       CheckArgIsDouble(1);
       CheckArgIsDouble(2);
       CheckArgIsDouble(3);
@@ -1060,7 +1095,53 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       for (int i = 0; i<probas_size; ++i) {
         probas_out[i] = accu.Quantile(i);
       }
+    }
 
+    /////////////////////////////////////////
+    // WTD_TABLE FUNCTION
+    /////////////////////////////////////////
+    else if (name_func == "wtd_table") {
+
+      CheckRhs(nrhs, 2, name_func);
+
+      const mxArray * values  = prhs[1];
+      const mxArray * weights = prhs[2];
+
+      CheckArgIsDouble(1);
+      CheckArgIsDouble(2);
+
+      double * values_vec = mxGetPr(values);
+      double * weights_vec = mxGetPr(weights);
+
+      int values_size = mxGetNumberOfElements(values);
+      int weights_size = mxGetNumberOfElements(weights);
+
+      if (values_size != weights_size)
+        throw LogicError("values and weights must have same length.");
+
+      DiscreteAccumulator accu;
+      accu.Init();
+
+      for (int i = 0; i< values_size; ++i)
+        accu.Push(values_vec[i], weights_vec[i]);
+
+      const DiscreteHistogram & hist = accu.Pdf();
+      Types<Scalar>::Array xvec = hist.GetPositions();
+      Types<Scalar>::Array fvec = hist.GetFrequencies();
+
+      const char *field_names[] = {"x", "f"};
+      mwSize  dims[] = {1};
+      plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
+
+      mxArray * xval = mxCreateDoubleMatrix(xvec.size(), 1, mxREAL);
+      std::replace_copy(xvec.begin(), xvec.end(), mxGetPr(xval),
+                        static_cast<Scalar>(BIIPS_SIZENA), std::numeric_limits<Scalar>::quiet_NaN());
+      mxSetFieldByNumber(plhs[0], 0, 0, xval);
+
+      mxArray * fval = mxCreateDoubleMatrix(fvec.size(), 1, mxREAL);
+      std::replace_copy(fvec.begin(), fvec.end(), mxGetPr(fval),
+                        static_cast<Scalar>(BIIPS_SIZENA), std::numeric_limits<Scalar>::quiet_NaN());
+      mxSetFieldByNumber(plhs[0], 0, 1, fval);
     }
 
     /////////////////////////////////////////

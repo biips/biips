@@ -13,7 +13,19 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 %   - inits:        cell of numeric values of the same length as param_names 
 %                   containing init values for the parameters
 %   - rw_step:      cell of numeric values of the same length as param_names 
-%                   containing random walk variance
+%                   containing random walk standard deviations. If
+%                   transform=true (default), the given steps apply to the
+%                   transformed space. Think about deactivating
+%                   transformation if you wish to give steps in the
+%                   untransformed space.
+%   - transform:    boolean (default=true). Activate automatic variable
+%                   transformation. Transformations apply independently to 
+%                   each component of the parameter depending on their 
+%                   support:
+%                       * [L, +Inf): f(x) = log(x-L)
+%                       * (-Inf, U]: f(x) = log(U-x)
+%                       * [L, U]:    f(x) = log((x-L)/(U-x))
+%                   so that we apply random walk on unbounded variables.
 %   - n_rescale:    Number of iterations for rescaling
 %   - beta:         Parameter of the proposal (default=0.05)
 %   - alpha:        Tuning parameter of the rescaling (default=0.99)
@@ -42,11 +54,11 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 %--------------------------------------------------------------------------
 
 %%% Process and check optional arguments
-optarg_names = {'inits', 'rw_step', 'n_rescale', 'beta', 'alpha', 'latent_names'};
-optarg_default = {{}, [], 400, .05, .99, {}};
-optarg_valid = {{}, [], [0,intmax], [0,1], [0,1],{}};
-optarg_type = {'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'char'};
-[inits, rw_step, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
+optarg_names = {'inits', 'rw_step', 'transform', 'n_rescale', 'beta', 'alpha', 'latent_names'};
+optarg_default = {{}, [], true, 400, .05, .99, {}};
+optarg_valid = {{}, [], {true, false}, [0,intmax], [0,1], [0,1],{}};
+optarg_type = {'numeric', 'numeric', 'logical', 'numeric', 'numeric', 'numeric', 'char'};
+[inits, rw_step, transform, n_rescale, beta, alpha, latent_names] = parsevar(varargin, optarg_names,...
     optarg_type, optarg_valid, optarg_default);
 
 check_struct(model, 'biips'); % Checks if the structure model is valid
@@ -110,6 +122,8 @@ matbiips('message', 'Initializing PMMH');
 obj.model = clone_model(model);
 console = obj.model.id;
 
+
+
 %% Init the parameters of the random walk
 sample_param = pmmh_set_param(console, param_names, pn_param, inits);
 
@@ -160,5 +174,67 @@ obj.log_step = cell2mat(cellfun(@(x) log(x(:)), rw_step(:), 'UniformOutput', fal
 % Covariance matrix
 obj.rw_mean = [];
 obj.rw_cov = [];  
+
+%% Define variable transformations
+obj.transform = cell(obj.len, 1);
+obj.transform_inv= cell(obj.len, 1);
+obj.transform_lderiv = cell(obj.len, 1);
+
+k = 0;
+for i=1:n_param
+    len = prod(obj.dim{i});
+    if transform
+        try
+            support = matbiips('get_fixed_support', console, pn_param(i).name, ...
+                pn_param(i).lower, pn_param(i).upper);
+        catch
+            error('CANNOT GET FIXED SUPPORT OF VARIABLE %s: BUG TO BE FIXED', param_names{i})
+        end
+        if size(support,1) ~= len
+            error('support size does not match')
+        end
+    else
+        support = [-Inf*ones(len,1), +Inf*ones(len,1)];
+    end
+    for j=1:len
+        k = k+1;
+        L = support(j,1);
+        U = support(j,2);
+        if isfinite(L)
+            if isfinite(U) % lower-upper bounded support: logit transform
+                obj.transform{k} = @(x) log((x-L)/(U-x));
+                obj.transform_inv{k} = @(y) L+(U-L)/(1+exp(-y));
+                obj.transform_lderiv{k} = @(x) log(U-L)-log(x-L)-log(U-x);
+            else
+                if (U<0)
+                    error('upper can not be -Inf')
+                end
+                % lower bounded support: log transform
+                obj.transform{k} = @(x) log(x-L);
+                obj.transform_inv{k} = @(y) L+exp(y);
+                obj.transform_lderiv{k} = @(x) -log(x-L);
+            end
+        else
+            if (L>0)
+                error('lower can not be +Inf')
+            end
+            if isfinite(U) % upper bounded support: -log transform
+                obj.transform{k} = @(x) log(U-x);
+                obj.transform_inv{k} = @(y) U-exp(y);
+                obj.transform_lderiv{k} = @(x) -log(U-x);
+            else
+                if (U<0)
+                    error('upper can not be -Inf')
+                end
+                % unbounded support: identity
+                obj.transform{k} = @(x) x;
+                obj.transform_inv{k} = @(y) y;
+                obj.transform_lderiv{k} = @(x) 0;
+            end
+        end
+    end
+end
+
+obj.sample_param_tr = pmmh_rw_transform(sample_param, obj);
 
 obj.class = 'pmmh';

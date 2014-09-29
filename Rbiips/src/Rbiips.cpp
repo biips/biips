@@ -899,11 +899,42 @@ RcppExport SEXP get_log_prior_density(SEXP pConsole, SEXP varName, SEXP lower, S
   Scalar prior;
 
   if(!p_console->GetLogPriorDensity(prior, name, range))
-    throw RuntimeError("Failed to get prior density.");
+    throw RuntimeError("Failed to get log prior density.");
 
   if (isNA(prior))
     prior = NA_REAL;
 
   return Rcpp::wrap(prior);
+  END_RBIIPS
+}
+
+
+RcppExport SEXP get_fixed_support(SEXP pConsole, SEXP varName, SEXP lower, SEXP upper)
+{
+  BEGIN_RBIIPS
+  checkConsole(pConsole);
+  Rcpp::XPtr<Console> p_console(pConsole);
+
+  Rcpp::StringVector var(varName);
+
+  String name(var[0]);
+  IndexRange range = makeRange(lower, upper);
+  ValArray lower_bound;
+  ValArray upper_bound;
+
+  if(!p_console->GetFixedSupport(lower_bound, upper_bound, name, range))
+    throw RuntimeError("Failed to get fixed support.");
+
+  Size n = lower_bound.size();
+
+  Rcpp::NumericVector support(n*2);
+
+  std::copy(lower_bound.begin(), lower_bound.end(), support.begin());
+  std::copy(upper_bound.begin(), upper_bound.end(), support.begin()+n);
+
+  Rcpp::Dimension supp_dim(n, 2);
+  support.attr("dim") = supp_dim;
+
+  return support;
   END_RBIIPS
 }

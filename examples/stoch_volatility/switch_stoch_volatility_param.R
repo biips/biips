@@ -98,6 +98,8 @@ require(Rbiips)
 par(bty='l')
 light_blue = rgb(.7, .7, 1)
 light_red = rgb(1, .7, .7)
+light_green = rgb(.7, 1, .7)
+light_gray = rgb(.9, .9, .9)
 
 #' Set the random numbers generator seed for reproducibility
 set.seed(0)
@@ -163,10 +165,10 @@ n_iter = 40000 # nb of iterations after burn-in
 thin = 10 # thinning of MCMC outputs
 n_part = 50 # nb of particles for the SMC
 param_names = c('gamma[1]', 'gamma[2]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]') # names of the variables updated with MCMC (others are updated with SMC)
-latent_names = c('x', 'alpha[1]', 'alpha[2]', 'sigma') # names of the variables updated with SMC and that need to be monitored
+latent_names = c('x', 'c', 'alpha[1]', 'alpha[2]', 'sigma') # names of the variables updated with SMC and that need to be monitored
 
 #' #### Init PMMH
-inits = list(-1, 1, .5, 5, .8, .8)
+inits = list(-1, 1, .5, 10, .8, .8)
 obj_pmmh = biips_pmmh_init(model, param_names, inits=inits,
                            latent_names=latent_names) # creates a pmmh object
 
@@ -179,6 +181,9 @@ summ_pmmh = biips_summary(out_pmmh, probs=c(.025, .975))
 
 #' #### Compute kernel density estimates
 kde_pmmh = biips_density(out_pmmh)
+
+#' #### Compute probability mass function estimates of the discrete marginal variables c[t]
+table_c = biips_table(out_pmmh$c)
 
 param_plot = c('alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]')
 param_lab = expression(alpha[1], alpha[2], phi, sigma, pi[11], pi[22])
@@ -223,6 +228,25 @@ for (k in 1:length(param_plot)) {
   if (sample_data)
     points(param_true[k], 0, col='green', pch=8, lwd=2)
 }
+
+#' #### Posterior probability of c[t]=2
+#+ fig.cap = 'PMMH: Posterior probabilities of c[t]=2'
+prob_c2 = rep(0, t_max)
+plot(1:t_max, rep(1, t_max), type='n', ylim=c(0,1),
+     xlab='Time', ylab='Posterior probability')
+for (t in 1:t_max) {
+  if (data$c_true[t]==2)
+    polygon(c(t-1,t,t,t-1), c(0,0,1,1), col=light_green, border=NA)
+  ind = which(names(table_c[[t]]) == 2)
+  if (length(ind)==0)
+    prob_c2[t] = 1-sum(table_c[[t]])
+  else
+    prob_c2[t] = table_c[[t]][ind]
+}
+lines(1:t_max, prob_c2, col='red', lwd=2)
+legend('topleft', leg=expression(paste('True ', c[t]==2, ' intervals'), paste('PMMH estimate of ', Pr(c[t]==2))),
+       col=c(light_green, 'red'), lwd=c(NA,3), pch=c(15,NA), pt.cex=c(2,1),
+       box.col=light_gray, inset=.01)
 
 #' #### Posterior mean and quantiles for x
 #+ fig.cap = 'PMMH: Posterior mean and quantiles'

@@ -1653,4 +1653,26 @@ namespace Biips
 
     return true;
   }
+
+  Bool Console::GetFixedSupport(ValArray & lower, ValArray & upper,
+                                const String & variable,
+                                const IndexRange & range)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't get fixed support. No model!\n";
+      return false;
+    }
+    try
+    {
+      if (!pModel_->GetFixedSupport(lower, upper, variable, range))
+      {
+        err_ << "Failed to get fixed support.\n";
+        return false;
+      }
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
 }

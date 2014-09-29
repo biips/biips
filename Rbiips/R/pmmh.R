@@ -42,9 +42,10 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 
 ##' @export
 biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = list(), rw_step = list(),
-  n_rescale = 400, alpha = 0.99, beta = 0.05, ...) {
+  transform = TRUE, n_rescale = 400, alpha = 0.99, beta = 0.05, ...) {
   ## check arguments
   stopifnot(is.biips(object))
+  stopifnot(is.logical(transform), length(transform) == 1)
   stopifnot(is.numeric(n_rescale), length(n_rescale) == 1, n_rescale >= 1, is.finite(n_rescale))
   stopifnot(is.numeric(alpha), length(alpha) == 1, alpha >= 0, alpha <= 1)
   stopifnot(is.numeric(beta), length(beta) == 1, beta >= 0, beta <= 1)
@@ -142,9 +143,94 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
   # walk in the PMMH algorithm
   rw <- list(n_rescale = n_rescale, n_cov = n_rescale/2, n_iter = 0, ar_mean = 0,
     log_step = log_step, beta = beta, alpha = alpha, target_prob = target_prob,
-    dim = sample_dim, len = sample_len, mean = c(), cov = c())
+    dim = sample_dim, len = sample_len, mean = c(), cov = c(),
+    transform = list(), transform_inv = list(), transform_lderiv = list())
   # we start learning the covariance matrix after n_cov iterations
 
+  ## Define variable transformations
+  k <- 0
+  for (i in 1:n_param) {
+    var <- param_names[[i]]
+    len = prod(sample_dim[[i]])
+    if (transform) {
+      tryCatch({
+        support <- Rbiips("get_fixed_support", model$ptr(), pn_param$names[[i]],
+                          pn_param$lower[[i]], pn_param$upper[[i]])
+      }, error = function(e) {
+        print(e)
+        stop("CANNOT GET FIXED SUPPORT OF VARIABLE ", var, ": BUG TO BE FIXED")
+      })
+      if (nrow(support) != len)
+        stop('support size does not match')
+    } else {
+      support <- matrix(c(rep(-Inf, len), rep(+Inf, len)), nrow=len)
+    }
+    for (j in 1:len) {
+      k <- k+1
+      L <- support[j, 1]
+      U <- support[j, 2]
+      if (is.finite(L)) {
+        if (is.finite(U)) {
+          # lower-upper bounded support: logit transform
+          rw$transform[[k]] <- function(x) log((x-L)/(U-x))
+          rw$transform_inv[[k]] <- function(y) L+(U-L)/(1+exp(-y))
+          rw$transform_lderiv[[k]] <- function(x) log(U-L)-log(x-L)-log(U-x)
+        } else {
+          if (U<0)
+            stop('upper can not be -Inf')
+          # lower bounded support: -log transform
+          rw$transform[[k]] <- function(x) log(x-L)
+          rw$transform_inv[[k]] <- function(y) L+exp(y)
+          rw$transform_lderiv[[k]] <- function(x) -log(x-L)
+        }
+      } else {
+        if (L>0)
+          stop('lower can not be +Inf')
+        if (is.finite(U)) {
+          # upper bounded support: log transform
+          rw$transform[[k]] <- function(x) log(U-x)
+          rw$transform_inv[[k]] <- function(y) U-exp(y)
+          rw$transform_lderiv[[k]] <- function(x) -log(U-x)
+        } else {
+          if (U<0)
+            stop('upper can not be -Inf')
+          # upper bounded support: identity
+          rw$transform[[k]] <- function(x) x
+          rw$transform_inv[[k]] <- function(y) y
+          rw$transform_lderiv[[k]] <- function(x) 0
+        }
+      }
+    }
+  }
+
+  # function that applies transformation functions to samples
+  rw_transform <- function (sample, funtype="transform") {
+
+    funlist <- switch(funtype,
+                     transform = rw$transform, # direct transformation
+                     inverse = rw$transform_inv, # inverse transformation
+                     lderiv = rw$transform_lderiv) # log derivative
+
+    # concatenate all variables in a vector always in the order of rw$dim
+    sample_vec <- c(unlist(sample))
+
+    out_vec <- mapply(FUN = function(x, fun) fun(x), sample_vec, funlist)
+
+    # rearrange vectorized parameter to list of arrays with appropriate dimensions
+    out <- list()
+    from <- 1
+    for (n in names(rw$dim)) {
+      len <- prod(rw$dim[[n]])
+      to <- from + len - 1
+      out[[n]] <- array(out_vec[from:to], dim = rw$dim[[n]])
+      from <- from + len
+    }
+    return(out)
+  }
+
+  state$sample_param_tr <- rw_transform(sample_param)
+
+  ## output object
   obj_pmmh <- list(model = function() {
     model
   }, param_names = function() {
@@ -154,6 +240,9 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
   }, sample_param = function(sample) {
     if (!missing(sample)) state$sample_param <<- sample
     invisible(state$sample_param)
+  }, sample_param_tr = function(sample_tr) {
+    if (!missing(sample_tr)) state$sample_param_tr <<- sample_tr
+    invisible(state$sample_param_tr)
   }, sample_latent = function(sample) {
     if (!missing(sample)) state$sample_latent <<- sample
     invisible(state$sample_latent)
@@ -180,7 +269,8 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
     rw$alpha
   }, rw_beta = function() {
     rw$beta
-  }, rw_rescale = function(ar) {
+  }, rw_transform = rw_transform,
+  rw_rescale = function(ar) {
     ar <- min(1, ar)
 
     rw$ar_mean <<- rw$ar_mean + 1 * (ar - rw$ar_mean)/rw$n_iter
@@ -193,18 +283,18 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(), inits = lis
     n_cov <- rw$n_cov
 
     ## Concatenate all variables in a column vector
-    sample_vec <- unlist(state$sample_param)
+    sample_vec_tr <- unlist(state$sample_param_tr)
 
     if (n_iter == n_cov + 1) {
-      rw$mean <<- sample_vec
-      rw$cov <<- outer(sample_vec, sample_vec)
+      rw$mean <<- sample_vec_tr
+      rw$cov <<- outer(sample_vec_tr, sample_vec_tr)
     } else if (n_iter > n_cov + 1) {
       ## Recursive update of the empirical mean and covariance matrix
       q <- (n_iter - n_cov - 1)/(n_iter - n_cov)
       q2 <- (n_iter - n_cov - 1)/(n_iter - n_cov)^2
-      z <- sample_vec - rw$mean
+      z <- sample_vec_tr - rw$mean
       rw$cov <<- q * rw$cov + q2 * outer(z, z)
-      rw$mean <<- q * rw$mean + 1/(n_iter-n_cov) * sample_vec
+      rw$mean <<- q * rw$mean + 1/(n_iter-n_cov) * sample_vec_tr
     }
 
     return(invisible())
@@ -221,13 +311,12 @@ is.pmmh <- function(object) {
 }
 
 pmmh_rw_proposal <- function(object) {
-  # concatenate all variables in a vector always in the order of rw$dim
-
-  sample_vec <- c(unlist(object$sample_param()))
+  # concatenate all variables in a vector always in the order of rw_dim
+  sample_vec_tr <- c(unlist(object$sample_param_tr()))
 
   ## Check dimension
   rw_len <- object$rw_len()
-  stopifnot(length(sample_vec) == rw_len)
+  stopifnot(length(sample_vec_tr) == rw_len)
 
   n_iter <- object$n_iter()
   n_rescale <- object$n_rescale()
@@ -236,27 +325,27 @@ pmmh_rw_proposal <- function(object) {
 
   if (length(cov) == 0 || (n_iter < n_rescale) || (runif(1) < beta)) {
     # Proposal with diagonal covariance
-    prop_vec <- sample_vec + object$rw_step() * rnorm(rw_len)
+    prop_vec_tr <- sample_vec_tr + object$rw_step() * rnorm(rw_len)
   } else {
     # proposal with learnt covariance
     epsilon <- 1e-5  # For numerical stability
     cov_chol <- t(chol(cov + epsilon * diag(1, nrow = rw_len)))
     ## TODO use pivot in chol ? check positive semi-definite ?
-    prop_vec <- sample_vec + 2.38/sqrt(rw_len) * cov_chol %*% rnorm(rw_len)
+    prop_vec_tr <- sample_vec_tr + 2.38/sqrt(rw_len) * cov_chol %*% rnorm(rw_len)
   }
 
   # rearrange vectorized parameter to list of arrays with appropriate dimensions
   rw_dim <- object$rw_dim()
-  prop <- list()
+  prop_tr <- list()
   from <- 1
   for (n in names(rw_dim)) {
     len <- prod(rw_dim[[n]])
     to <- from + len - 1
-    prop[[n]] <- array(prop_vec[from:to], dim = rw_dim[[n]])
+    prop_tr[[n]] <- array(prop_vec_tr[from:to], dim = rw_dim[[n]])
     from <- from + len
   }
 
-  return(prop)
+  return(prop_tr)
 }
 
 
@@ -270,6 +359,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
   param_names <- object$param_names()
   latent_names <- object$latent_names()
   sample_param <- object$sample_param()
+  sample_param_tr <- object$sample_param_tr()
   sample_latent <- object$sample_latent()
   log_prior <- object$log_prior()
   log_marg_like <- object$log_marg_like()
@@ -283,7 +373,9 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
   object$n_iter(n_iter)
 
   ## Random walk proposal
-  prop <- pmmh_rw_proposal(object)
+  prop_tr <- pmmh_rw_proposal(object)
+  prop <- object$rw_transform(prop_tr, "inverse")
+  lderiv <- object$rw_transform(prop, "lderiv")
 
   ### TODO: check NA ?
 
@@ -304,7 +396,6 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
       ## DATA CHANGE FAILED: proposed parameter value might be out of bounds ?  TODO:
       ## double check this is the case and there is no other reason.
       log_prior_prop <- -Inf
-      # n_fail <- n_fail + 1
 
       # warning('Data change failed:', var, '=', prop[[var]], '\n')
       break
@@ -312,6 +403,8 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
 
     log_p <- Rbiips("get_log_prior_density", console, pn_param$names[[i]], pn_param$lower[[i]],
       pn_param$upper[[i]])
+
+    log_p <- log_p - sum(abs(lderiv[[var]]))
 
     if (is.na(log_p))
       stop("Failed to get log prior density: node ", var, " is not stochastic.")
@@ -350,6 +443,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
     ## Accept-Reject step
     if (runif(1) < accept_rate) {
       sample_param <- prop
+      sample_param_tr <- prop_tr
       log_prior <- log_prior_prop
       log_marg_like <- log_marg_like_prop
 
@@ -368,6 +462,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale, rw_learn, ...)
 
   ## Update PMMH object with current state
   object$sample_param(sample_param)
+  object$sample_param_tr(sample_param_tr)
   object$sample_latent(sample_latent)
   object$log_prior(log_prior)
   object$log_marg_like(log_marg_like)

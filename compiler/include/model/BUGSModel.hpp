@@ -124,7 +124,9 @@ namespace Biips
     Bool RemoveData(const String & variable, const IndexRange & range);
     Bool GetLogPriorDensity(Scalar & prior, const String & variable,
                             IndexRange range = NULL_RANGE) const;
-
+    Bool GetFixedSupport(ValArray & lower, ValArray & upper,
+                         const String & variable,
+                         IndexRange range = NULL_RANGE) const;
     Bool
     DumpFilterMonitors(std::map<String, NodeArrayMonitor> & monitorsMap) const;
     Bool

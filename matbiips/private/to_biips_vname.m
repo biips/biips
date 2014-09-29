@@ -6,4 +6,4 @@ end
 %% remove spaces
 v = regexprep(var, ' ', '');
 
-%%% FIXME transfrom variable name. eg: x[1, ] => x[1,1:100]
+%%% FIXME transform variable name. eg: x[1, ] => x[1,1:100]

@@ -454,7 +454,7 @@ namespace Biips
 
       // check bound is observed
       if (!bound_values.second.ValuesPtr())
-        throw LogicError("GetFixedSupportValuesVisitor::visit : node has unobserved upper bound.");
+        throw LogicError("GetFixedSupportValuesVisitor::visit: node has unobserved upper bound.");
     }
     if (node.IsLowerBounded())
     {
@@ -463,7 +463,7 @@ namespace Biips
 
       // check bound is observed
       if (!bound_values.first.ValuesPtr())
-        throw LogicError("GetFixedSupportValuesVisitor::visit : node has unobserved upper bound.");
+        throw LogicError("GetFixedSupportValuesVisitor::visit: node has unobserved upper bound.");
     }
 
     // get unbounded support limits

@@ -101,6 +101,7 @@ else
     xlabel('Date')
 end
 ylabel('Log-return')
+box off
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order

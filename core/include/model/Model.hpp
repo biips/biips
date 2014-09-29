@@ -134,6 +134,7 @@ namespace Biips
     void virtual ClearBackwardSmoothMonitors(Bool release_only = false);
 
     Scalar GetLogPriorDensity(NodeId nodeId) const;
+    Types<ValArray>::Pair GetFixedSupport(NodeId nodeId) const;
   };
 
 }

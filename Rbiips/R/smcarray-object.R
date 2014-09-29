@@ -364,7 +364,7 @@ biips_table.smcarray <- function(x, ...) {
     values <- x$values[ind_vec]
     weights <- x$weights[ind_vec]
 
-    out[[d]] <- Rbiips("wtd_table", values, weights) # recycle bw
+    out[[d]] <- Rbiips("wtd_table", values, weights)
   }
 
   dim(out) <- dimen[!drop_dim]

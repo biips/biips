@@ -92,7 +92,7 @@ biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet =
   unused <- setdiff(names(data), varnames)
   data[unused] <- NULL
   if (length(unused) > 0)
-    warning("Unused variables in data: ", paste(unused_variables, collapse = ", "))
+    warning("Unused variables in data: ", paste(unused, collapse = ", "))
 
   # compile model
   Rbiips("compile_model", ptr, data, sample_data, get_seed())

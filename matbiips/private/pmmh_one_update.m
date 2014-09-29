@@ -20,6 +20,7 @@ console = obj.model.id;
 param_names = obj.param_names;
 latent_names = obj.latent_names;
 sample_param = obj.sample_param;
+sample_param_tr = obj.sample_param_tr;
 sample_latent = obj.sample_latent;
 log_marg_like = obj.log_marg_like;
 log_prior = obj.log_prior;
@@ -32,7 +33,9 @@ n_latent = numel(latent_names);
 obj.n_iter = obj.n_iter + 1;
 
 % Random walk proposal
-prop = pmmh_rw_proposal(obj);
+prop_tr = pmmh_rw_proposal(obj);
+prop = pmmh_rw_transform(prop_tr, obj, 'inverse');
+lderiv = pmmh_rw_transform(prop, obj, 'lderiv');
 
 % Compute log prior density
 log_prior_prop = 0;
@@ -50,10 +53,13 @@ for i=1:n_param
     log_p = matbiips('get_log_prior_density', console, pn_param(i).name, ...
         pn_param(i).lower, pn_param(i).upper);
     
+    log_p = log_p - sum(abs(lderiv{i}(:)));
+    
     %%% FIXME check node is not stochastic: log_p = NA in R
     
     log_prior_prop = log_prior_prop + log_p;
 end
+
 if isnan(log_prior_prop)
 %     accept_rate = 0;
     error('Failed to compute log prior density : %g', log_prior_prop);
@@ -85,6 +91,7 @@ else
     % Accept-reject step
     if rand < accept_rate
         sample_param = prop;
+        sample_param_tr = prop_tr;
         log_prior = log_prior_prop;
         log_marg_like = log_marg_like_prop;
         
@@ -92,7 +99,7 @@ else
             % Sample one realization of the monitored latent variables
             sampled_value = matbiips('sample_gen_tree_smooth_particle', console, get_seed());
             for i=1:n_latent
-                %%% FIXME transfrom variable name. eg: x[1,] => x[1,1:100]
+                %%% FIXME transform variable name. eg: x[1,] => x[1,1:100]
                 var = to_biips_vname(latent_names{i});
                 sample_latent{i} = getfield(sampled_value, var);
             end   
@@ -102,6 +109,7 @@ end
 
 %% Update PMMH object with current state 
 obj.sample_param = sample_param;
+obj.sample_param_tr = sample_param_tr;
 obj.sample_latent = sample_latent;
 obj.log_prior = log_prior;
 obj.log_marg_like = log_marg_like;

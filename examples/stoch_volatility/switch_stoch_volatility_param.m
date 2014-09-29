@@ -63,6 +63,8 @@ set(0, 'Defaultlinelinewidth', 2);
 set(0, 'DefaultLineMarkerSize', 8);
 light_blue = [.7, .7, 1];
 light_red = [1, .7, .7];
+light_green = [.7, 1, .7];
+light_gray = [.9,.9,.9];
 
 % Set the random numbers generator seed for reproducibility
 if isoctave() || verLessThan('matlab', '7.12')
@@ -126,6 +128,9 @@ else
     xlabel('Date')
 end
 ylabel('Log-return')
+box off
+saveas(gca, 'switch_stoch_param_obs', 'epsc2')
+saveas(gca, 'switch_stoch_param_obs', 'png')
 
 %% Biips Particle Marginal Metropolis-Hastings
 % We now use Biips to run a Particle Marginal Metropolis-Hastings in order
@@ -144,18 +149,37 @@ thin = 10; % thinning of MCMC outputs
 n_part = 50; % nb of particles for the SMC
 
 param_names = {'gamma[1]', 'gamma[2]', 'phi', 'tau', 'pi[1,1]', 'pi[2,2]'}; % name of the variables updated with MCMC (others are updated with SMC)
-latent_names = {'x', 'alpha[1]', 'alpha[2]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
+latent_names = {'x', 'c', 'alpha[1]', 'alpha[2]', 'sigma'}; % name of the variables updated with SMC and that need to be monitored
 
 %%
 % *Init PMMH*
-inits = {-1, 1, .5, 5, .8, .8};
+inits = {-1, 1, .5, 10, .8, .8};
 obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', latent_names); % creates a pmmh object
 
 %%
 % *Run PMMH*
-obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
-[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like] =...
+[obj_pmmh, log_marg_like_pen, ~, info_pmmh]  = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+
+h1=figure;subplot(2,1,1);plot(log_marg_like_pen);title('Burnin');xlabel('Iteration');ylabel('Pen. log marg. like.')
+h2=figure;subplot(2,1,1);plot(info_pmmh.accept_rate);title('Burnin');xlabel('Iteration');ylabel('Log accept. rate')
+figure;plot(info_pmmh.rw_step(1,:));title('Burnin');xlabel('Iteration');ylabel('rw step')
+
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] =...
     biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', thin); % Samples
+
+figure(h1);subplot(2,1,2);plot(log_marg_like_pen);title('Samples');xlabel('Iteration');ylabel('Pen. log marg. like.')
+figure(h2);subplot(2,1,2);plot(info_pmmh.accept_rate);title('Samples');xlabel('Iteration');ylabel('Log accept. rate')
+
+%%
+% *Penalized marginal log-likelihood*
+figure('name', 'PMMH: Penalized marginal log-likelihood')
+iter = thin:thin:n_iter;
+plot(iter, log_marg_like_pen, 'linewidth', 1)
+xlabel('Iteration')
+ylabel('Penalized marginal log-likelihood')
+box off
+saveas(gca, 'switch_stoch_param_pmll', 'epsc2')
+saveas(gca, 'switch_stoch_param_pmll', 'png')
 
 %%
 % *Some summary statistics*
@@ -165,6 +189,10 @@ summ_pmmh = biips_summary(out_pmmh, 'probs', [.025, .975]);
 % *Compute kernel density estimates*
 kde_pmmh = biips_density(out_pmmh);
 
+%%
+% *Compute probability mass function estimates of the discrete marginal variables c[t]*
+table_c = biips_table(out_pmmh.c);
+
 param_plot = {'alpha[1]', 'alpha[2]', 'phi', 'sigma', 'pi[1,1]', 'pi[2,2]'};
 param_lab = {'\alpha_1', '\alpha_2', '\phi', '\sigma', '\pi_{11}', '\pi_{22}'};
 if sample_data
@@ -172,10 +200,13 @@ if sample_data
 end
 
 %%
-% *Posterior mean and credible interval of the parameters*
+% *Posterior mean, MAP and credible interval of the parameters*
+[~, ind_map] = max(log_marg_like_pen);
 for i=1:numel(param_plot)
     summ_param = getfield(summ_pmmh, param_plot{i});
+    out_param = getfield(out_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, summ_param.mean);
+    fprintf('MAP of %s: %.3f\n', param_plot{i}, out_param(i));
     fprintf('95%% credible interval of %s: [%.3f, %.3f]\n',...
         param_plot{i}, summ_param.quant{1}, summ_param.quant{2});
 end
@@ -192,8 +223,10 @@ for k=1:numel(param_plot)
     end
     xlabel('Iteration', 'fontsize', 24)
     ylabel(param_lab{k}, 'fontsize', 24)
-    title(param_lab{k})
     box off
+%     title(param_lab{k})
+    saveas(gca, ['switch_stoch_param_trace', num2str(k)], 'epsc2')
+    saveas(gca, ['switch_stoch_param_trace', num2str(k)], 'png')
 end
 
 %%
@@ -211,9 +244,9 @@ for k=1:numel(param_plot)
     xlabel(param_lab{k}, 'fontsize', 24)
     ylabel('Number of samples', 'fontsize', 24)
     box off
+%     title(param_lab{k})
     saveas(gca, ['switch_stoch_param', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param', num2str(k)], 'png')
-%     title(title_names{k})
 end
 
 for k=1:numel(param_plot)
@@ -227,10 +260,37 @@ for k=1:numel(param_plot)
     xlabel(param_lab{k}, 'fontsize', 24)
     ylabel('Posterior density', 'fontsize', 24)
     box off
+%     title(param_lab{k})
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'epsc2')
     saveas(gca, ['switch_stoch_param_kde', num2str(k)], 'png')
-%     title(title_names{k})
 end
+
+%% 
+% *Posterior probability of c[t]=2*
+prob_c2 = zeros(1,t_max);
+figure('name', 'PMMH: Posterior probabilities of c[t]=2')
+hold on
+for t=1:t_max
+    if data.c_true(t)==2
+        h = fill([t-1,t,t,t-1], [0,0,1,1], light_green);
+        set(h, 'edgecolor', 'none')
+        set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off')
+    end
+    ind = find(table_c(t).x == 2);
+    if isempty(ind)
+        prob_c2(t) = 1-sum(table_c(t).f);
+    else
+        prob_c2(t) = table_c(t).f(ind);
+    end
+end
+set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','on')
+plot(1:t_max, prob_c2, 'r')
+xlabel('Time')
+ylabel('Posterior probability')
+legend({'True c_t=2 intervals', 'PMMH estimate of Pr(c_t=2)'},...
+    'Location', 'NorthWest', 'EdgeColor', light_gray)
+saveas(gca, 'switch_stoch_param_c', 'epsc2')
+saveas(gca, 'switch_stoch_param_c', 'png')
 
 %%
 % *Posterior mean and quantiles for x*
@@ -252,9 +312,9 @@ ylim([-6.5,1])
 xlabel('Time')
 ylabel('Log-volatility')
 box off
+legend boxoff
 saveas(gca, 'switch_stoch_param_x', 'epsc2')
 saveas(gca, 'switch_stoch_param_x', 'png')
-legend boxoff
 
 %%
 % *Trace of MCMC samples for x*
@@ -279,6 +339,8 @@ if sample_data
     set(h, 'position', [0.7, 0.25, .1, .1])
     legend boxoff
 end
+saveas(gca, 'switch_stoch_param_x_trace', 'epsc2')
+saveas(gca, 'switch_stoch_param_x_trace', 'png')
 
 %%
 % *Histogram and kernel density estimate of posteriors of x*
@@ -304,6 +366,8 @@ if sample_data
     set(h, 'position', [0.7, 0.25, .1, .1])
     legend boxoff
 end
+saveas(gca, 'switch_stoch_param_x_hist', 'epsc2')
+saveas(gca, 'switch_stoch_param_x_hist', 'png')
 
 figure('name', 'PMMH: KDE estimates marginal posteriors')
 for k=1:numel(time_index)
@@ -325,7 +389,11 @@ if sample_data
     set(h, 'position', [0.7, 0.25, .1, .1])
     legend boxoff
 end
+saveas(gca, 'switch_stoch_param_x_kde', 'epsc2')
+saveas(gca, 'switch_stoch_param_x_kde', 'png')
 
 %% Clear model
 %
 biips_clear()
+
+save switch_stoch_param_workspace.mat

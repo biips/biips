@@ -620,4 +620,20 @@ namespace Biips
 
     return log_prior_vis.GetPrior();
   }
+
+  Types<ValArray>::Pair Model::GetFixedSupport(NodeId nodeId) const
+  {
+    if (pGraph_->GetNode(nodeId).GetType() != STOCHASTIC)
+      throw RuntimeError("Can not get fixed support: node is not stochastic.");
+
+    // check that support is fixed
+    if (!isSupportFixed(nodeId, *pGraph_))
+      throw NodeError(nodeId, "Can not get fixed support: node distribution support is not fixed.");
+
+    Size len = pGraph_->GetNode(nodeId).DimPtr()->Length();
+    ValArray lower(len), upper(len);
+    getFixedSupportValues(lower, upper, nodeId, *pGraph_);
+
+    return std::make_pair(lower, upper);
+  }
 }

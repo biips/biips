@@ -12,7 +12,7 @@ is_legal_vname <- function(name) {
   return(is_legal)
 }
 
-### FIXME transfrom variable name. eg: x[1, ] => x[1,1:100]
+### FIXME transform variable name. eg: x[1, ] => x[1,1:100]
 to_biips_vname <- function(var) {
   stopifnot(is.character(var), length(var) == 1, nchar(var) > 0)
   ## remove spaces

@@ -758,6 +758,29 @@ namespace Biips
     return true;
   }
 
+  Bool BUGSModel::GetFixedSupport(ValArray & lower, ValArray & upper,
+                                  const String & variable,
+                                  IndexRange range) const
+  {
+    if (!symbolTable_.Contains(variable))
+      throw RuntimeError(String("Can not get fixed support: variable ")
+                         + variable + " not found.");
+
+    const NodeArray & array = symbolTable_.GetNodeArray(variable);
+    if (range.IsNull())
+      range = array.Range();
+    NodeId node_id = array.GetNode(range);
+    if (node_id == NULL_NODEID)
+      throw RuntimeError(String("Can not get fixed support: invalid range: ")
+                         + variable + print(range));
+
+    Types<ValArray>::Pair support = BaseType::GetFixedSupport(node_id);
+    lower = support.first;
+    upper = support.second;
+
+    return true;
+  }
+
   void BUGSModel::ClearFilterMonitors(Bool release_only)
   {
     BaseType::ClearFilterMonitors(release_only);
