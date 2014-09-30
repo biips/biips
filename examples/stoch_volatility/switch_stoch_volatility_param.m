@@ -35,9 +35,9 @@
 %
 % $$\sigma^2 \sim invGamma(2.001,1) $$
 %
-% $$\pi_{11} \sim Beta(10,0.5)$$
+% $$\pi_{11} \sim Beta(10,1)$$
 %
-% $$\pi_{22} \sim Beta(10,0.5)$$
+% $$\pi_{22} \sim Beta(10,1)$$
 %
 % $\mathcal N(m,\sigma^2)$ denotes the normal
 % distribution of mean $m$ and variance $\sigma^2$.
@@ -158,17 +158,10 @@ obj_pmmh = biips_pmmh_init(model, param_names, 'inits', inits, 'latent_names', l
 
 %%
 % *Run PMMH*
-[obj_pmmh, log_marg_like_pen, ~, info_pmmh]  = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
+obj_pmmh  = biips_pmmh_update(obj_pmmh, n_burn, n_part); % adaptation and burn-in iterations
 
-h1=figure;subplot(2,1,1);plot(log_marg_like_pen);title('Burnin');xlabel('Iteration');ylabel('Pen. log marg. like.')
-h2=figure;subplot(2,1,1);plot(info_pmmh.accept_rate);title('Burnin');xlabel('Iteration');ylabel('Log accept. rate')
-figure;plot(info_pmmh.rw_step(1,:));title('Burnin');xlabel('Iteration');ylabel('rw step')
-
-[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] =...
+[obj_pmmh, out_pmmh, log_marg_like_pen, log_marg_like] =...
     biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', thin); % Samples
-
-figure(h1);subplot(2,1,2);plot(log_marg_like_pen);title('Samples');xlabel('Iteration');ylabel('Pen. log marg. like.')
-figure(h2);subplot(2,1,2);plot(info_pmmh.accept_rate);title('Samples');xlabel('Iteration');ylabel('Log accept. rate')
 
 %%
 % *Penalized marginal log-likelihood*
@@ -180,6 +173,17 @@ ylabel('Penalized marginal log-likelihood')
 box off
 saveas(gca, 'switch_stoch_param_pmll', 'epsc2')
 saveas(gca, 'switch_stoch_param_pmll', 'png')
+
+%%
+% *Marginal log-likelihood*
+figure('name', 'PMMH: Marginal log-likelihood')
+iter = thin:thin:n_iter;
+plot(iter, log_marg_like, 'linewidth', 1)
+xlabel('Iteration')
+ylabel('Marginal log-likelihood')
+box off
+saveas(gca, 'switch_stoch_param_mll', 'epsc2')
+saveas(gca, 'switch_stoch_param_mll', 'png')
 
 %%
 % *Some summary statistics*
@@ -202,13 +206,15 @@ end
 %%
 % *Posterior mean, MAP and credible interval of the parameters*
 [~, ind_map] = max(log_marg_like_pen);
+[~, ind_mle] = max(log_marg_like);
 for i=1:numel(param_plot)
     summ_param = getfield(summ_pmmh, param_plot{i});
     out_param = getfield(out_pmmh, param_plot{i});
     fprintf('Posterior mean of %s: %.3f\n', param_plot{i}, summ_param.mean);
-    fprintf('MAP of %s: %.3f\n', param_plot{i}, out_param(i));
     fprintf('95%% credible interval of %s: [%.3f, %.3f]\n',...
         param_plot{i}, summ_param.quant{1}, summ_param.quant{2});
+    fprintf('MAP of %s: %.3f\n', param_plot{i}, out_param(ind_map));
+    fprintf('MLE of %s: %.3f\n', param_plot{i}, out_param(ind_mle));
 end
 
 %%
