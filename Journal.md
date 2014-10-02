@@ -1,3 +1,25 @@
+Adrien le 2/10/2014 :
+=======================
+L'exemple `switch_stoch_volatility_param.R` plantait sous R.
+
+C'était un problème numérique :
+marche aléatoire sur log(tau) -> petite valeur de tau proposée -> grande valeur de x[t] -> précision de y : exp(-x[t])=0 (arrondi numérique) -> impossible de calculer la vraisemblance
+
+J'ai résolu le problème en rajoutant une troncation sur x :
+
+`x[t] ~ dnorm(mu[t], 1/sigma^2) T(-500,500)`
+
+de cette façon on s'assure de ne jamais avoir exp(-x[t]) = 0
+
+J'ai essayé de mettre une borne supérieure seulement, mais plantage de R...
+`x[t] ~ dnorm(mu[t], 1/sigma^2) T(,500)`
+
+Pas de problème avec borne inf seule, ou borne inf et sup, mais juste borne sup il n'aime pas...
+- [ ] Un autre prolème à investiguer...
+
+J'ai aussi remarqué que les nombres aléatoires générés avec Matbiips sont différents sous Linux et Windows, c'est pour ça qu'on n'a pas les mêmes données.
+- [ ] vérifier en compilant avec la même version de boost
+
 Adrien le 22/09/2014 :
 ======================
 Article :
@@ -5,8 +27,8 @@ Article :
 - [ ] ajouter adaptation du PMMH
 - [ ] coloration syntaxique Rbiips
 - [ ] vérifier explications du code : 'out_smc is a structure' spécifique à matlab
-- [ ] citer Doucet pour smoothing/backward smoothing
-- [ ] table de fonctions classées par étape du workflow
+- [x] citer Doucet pour smoothing/backward smoothing
+- [x] table de fonctions classées par étape du workflow
 
 Exemples :
 - [ ] republier exemples matbiips sous windows
