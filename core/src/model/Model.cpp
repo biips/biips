@@ -581,7 +581,12 @@ namespace Biips
                                graph_.GetValues()[node.Upper()].get());
       }
 
-      prior_ = node.LogPriorDensity(x, parents, bounds);
+      try {
+        prior_ = node.LogPriorDensity(x, parents, bounds);
+      }
+      catch (RuntimeError & except) {
+        throw NodeError(nodeId_, String(except.what()));
+      }
     }
 
     Scalar GetPrior() const

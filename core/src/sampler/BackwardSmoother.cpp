@@ -181,14 +181,19 @@ namespace Biips
                                              graph_,
                                              *p_last_monitor,
                                              j);
+        Scalar d;
+        try {
+          d = std::exp(last_node.LogPriorDensity(last_particle_value_j,
+                                                        param_values_i,
+                                                        bound_values_i));
+          //        d = last_node.LogPriorDensity(last_particle_value_j,
+          //                                             param_values_i,
+          //                                             bound_values_i);
+        }
+        catch (RuntimeError & except) {
+          throw NodeError(last_node_id, String(except.what()));
+        }
 
-        Scalar d = std::exp(last_node.LogPriorDensity(last_particle_value_j,
-                                                      param_values_i,
-                                                      bound_values_i));
-
-        //        Scalar d = last_node.LogPriorDensity(last_particle_value_j,
-        //                                             param_values_i,
-        //                                             bound_values_i);
         if (isNan(d))
           throw NodeError(last_node_id,
                           "Failure to calculate log prior density.");

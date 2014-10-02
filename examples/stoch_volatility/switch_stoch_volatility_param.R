@@ -57,9 +57,9 @@ knitr::knit_hooks$set(pars = function(before, options, envir) {
 #'
 #' $$\sigma^2 \sim invGamma(2.001,1) $$
 #'
-#' $$\pi_{11} \sim Beta(10,0.5)$$
+#' $$\pi_{11} \sim Beta(10,1)$$
 #'
-#' $$\pi_{22} \sim Beta(10,0.5)$$
+#' $$\pi_{22} \sim Beta(10,1)$$
 #'
 #' $\mathcal N(m,\sigma^2)$ denotes the normal
 #' distribution of mean $m$ and variance $\sigma^2$.

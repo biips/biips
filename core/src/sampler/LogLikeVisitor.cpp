@@ -76,7 +76,13 @@ namespace Biips
     NumArray::Pair bound_values = getBoundValues(nodeId_,
                                                    graph_,
                                                    nodeSampler_);
-    Scalar log_like = node.LogPriorDensity(x_value, param_values, bound_values);
+    Scalar log_like;
+    try {
+      log_like = node.LogPriorDensity(x_value, param_values, bound_values);
+    }
+    catch (RuntimeError & except) {
+      throw NodeError(nodeId_, String(except.what()));
+    }
     if (isNan(log_like))
       throw NodeError(nodeId_, "Failure to calculate log density.");
 
