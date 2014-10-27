@@ -14,8 +14,8 @@ RBiips-package.R
 -----------------
 - [x][ ] .onLoad
 - [x][ ] Rbiips
-- [x][ ] biips_add_function
-- [x][ ] biips_add_distribution
+- [x][x] biips_add_function
+- [x][x] biips_add_distribution
 
 utils.R
 -----------------
@@ -31,16 +31,16 @@ utils.R
 
 biips_model.R
 ---------------
-- [x][ ] biips_model
+- [x][x] biips_model
 
 biips-object.R
 ---------------
-- [x][ ] is.biips
-- [v][ ] print.biips
-- [x][ ] variable.names
-- [x][ ] nodes
-- [x][ ] print_dot
-- [x][ ] build_sampler
+- [x][x] is.biips
+- [v][x] print.biips
+- [x][x] biips_variable_names
+- [x][x] biips_nodes
+- [x][x] biips_print_dot
+- [x][x] biips_build_sampler
 - [v][ ] monitor
 - [v][ ] is_monitored
 - [v][ ] clear_monitors
@@ -48,52 +48,54 @@ biips-object.R
 
 smc.R
 ---------------
-- [v][ ] smc_samples
+- [v][ ] biips_smc_samples
 - [v][ ] smc_forward_algo
 
 smcarray-object.R
 ---------------
 - [x][ ] is.smcarray
 - [v][ ] print.smcarray
-- [ ][ ] summary
-- [ ][ ] print.summary
-- [ ][ ] mean
-- [x][ ] print.diagnosis
-- [x][ ] diagnosis
-- [ ][ ] get_index
-- [ ][ ] density
+- [v][ ] biips_summary
+- [v][ ] print.biips_summary
+- [v][ ] mean
+- [x][ ] biips_diagnosis
+- [x][ ] print.biips_diagnosis
+- [v][ ] get_index
+- [v][ ] biips_density
+- [v][ ] biips_table
+- [v][ ] biips_hist
 
 pimh.R
 --------
-- [ ][ ] pimh_init
-- [ ][ ] is.pimh
-- [ ][ ] pimh_algo
-- [ ][ ] pimh_update
-- [ ][ ] pimh_samples
+- [v][ ] pimh_init
+- [v][ ] is.pimh
+- [v][ ] pimh_algo
+- [v][ ] pimh_update
+- [v][ ] pimh_samples
 
 mcmcarray-object.R
 -------------------
 - [x][ ] is.mcmcarray
-- [ ][ ] summary
-- [ ][ ] print.summary
-- [ ][ ] mean
-- [ ][ ] density
-- [ ][ ] plot.density
+- [v][ ] summary
+- [v][ ] print.summary
+- [v][ ] mean
+- [v][ ] density
+- [v][ ] plot.density
 
 sensitivity.R
 ---------------
-- [ ][ ] smc_sensitivity
+- [v][ ] smc_sensitivity
 
 pmmh.R
 ----------
-- [ ][ ] pmmh_set_param
-- [ ][ ] pmmh_init
-- [ ][ ] pmmh_rw_proposal
-- [ ][ ] pmmh_rw_rescale
-- [ ][ ] pmmh_rw_learn_cov
+- [v][ ] pmmh_set_param
+- [v][ ] pmmh_init
+- [v][ ] pmmh_rw_proposal
+- [v][ ] pmmh_rw_rescale
+- [v][ ] pmmh_rw_learn_cov
 - [x][ ] is.pmmh
-- [ ][ ] pmmh_one_update
-- [ ][ ] pmmh_algo
-- [ ][ ] pmmh_update
-- [ ][ ] pmmh_samples
+- [v][ ] pmmh_one_update
+- [v][ ] pmmh_algo
+- [v][ ] pmmh_update
+- [v][ ] pmmh_samples
 

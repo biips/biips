@@ -1,45 +1,51 @@
 function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, varargin)
-
-%
-% BIIPS_PMMH_UPDATE performs adaptation and burn-in iterations for the PMMH algorithm
+% BIIPS_PMMH_UPDATE Perform adaptation and burn-in iterations for the PMMH algorithm.
 % [obj_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_update(obj_pmmh, n_iter, n_part,...
-%                               'PropertyName', propertyvalue, ...)
+%                           'PropertyName', PropertyValue, ...)
 %
 %   INPUT: 
-%   - obj_pmmh:          PMMH structure (returned by biips_pmmh_object)
-%   - n_iter:       positive integer. Number of adaptation and burn-in iterations
-%   - n_part:       positive integer. Number of particles used in SMC algorithms
+%   - obj_pmmh:     PMMH structure as returned by BIIPS_PMMH_INIT
+%   - n_iter:       integer. Number of adaptation and burn-in iterations
+%   - n_part:       integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
-%   - thin:         positive integer. Returns output every thin iterations
-%                   (default=1)
-%   - rw_adapt:     boolean=1 if adaptation, 0 otherwise (default=1)
-%   - rs_thres:     positive real (default = 0.5).
-%                   Threshold for the resampling step (adaptive SMC).
-%                   if rs_thres is in [0,1] --> resampling occurs when 
-%                                           (ESS > rs_thres * nb_part)
-%                   if rs_thres is in [2,nb_part] --> resampling occurs when 
-%                                               (ESS > rs_thres)
-%   - rs_type:      string (default = 'stratified')
-%                   Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
-%                   Indicates the type of algorithm used for the resampling step.             
+%   - thin:         integer. Returns output every 'thin' iterations
+%                   (default = 1)
+%   - rw_adapt:     boolean. Activate adaptation of the proposal (default=true)
+%   - rs_thres :    real. Threshold for the adaptive SMC resampling.
+%                   (default = 0.5)
+%                   * if 'rs_thres' is in [0,1], resampling occurs when
+%                     (ESS < rs_thres * n_part)
+%                   * if 'rs_thres' is in [2,nb_part], resampling occurs when
+%                     (ESS < rs_thres)
+%   - rs_type :     string. The type of algorithm used for the SMC resampling.
+%                   Possible values are 'stratified', 'systematic',
+%                   'residual', 'multinomial'. (default = 'stratified')
+%   - max_fail:    integer. maximum number of failed SMC algorithms allowed.
+%                  (default=0)
 %
-%   OUTPUT
-%   - obj_pmmh:          Updated PMMH object
-%   Optional Output:
-%   - log_marg_like_pen:  vector with penalized log marginal likelihood over iterations
-%   - log_marg_like:     vector with log marginal likelihood over iterations
-%   - info_pmmh:          Structure with additional information on the MCMC run
+%   OUTPUT:
+%   - obj_pmmh:          structure. updated PMMH object
+%   Optional output:
+%   - log_marg_like_pen:  vector of penalized log marginal likelihood estimates over iterations
+%   - log_marg_like:      vector of log marginal likelihood estimates over iterations
+%   - info_pmmh:          structure. Additional information on the MCMC run
+%                         with the fields:
+%                         * accept_rate: vector of acceptance rates over
+%                         iterations
+%                         * n_fail: number of failed SMC algorithms
+%                         * rw_step: standard deviations of the random walk
+%                         over iterations.
 %
-%   See also BIIPS_MODEL, BIIPS_PMMH_OBJECT, BIIPS_PMMH_SAMPLES
+%   See also BIIPS_MODEL, BIIPS_PMMH_INIT, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
-% param_names = {'log_prec_y[1:1]';}
+% param_names = {'log_prec_y';}
 % latent_names = {'x'};
-% obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-2});
+% obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, samples, log_marg_like_pen, log_marg_like, out_pmmh] = ...
-%   biips_pmmh_samples(obj_pmmh, n_iter, n_part, 'thin', thin); 
+% [obj_pmmh, samples_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+%     'thin', thin); 
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -47,7 +53,7 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 

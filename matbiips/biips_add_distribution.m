@@ -1,40 +1,40 @@
 function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
-
-%
-% BIIPS_ADD_DISTRIBUTION adds a Matlab distribution to the BUGS language
-% Currently, we can only provide the sampling function but not the density
-% function. Consequently the added distributions can only define 
-% unobserved nodes.
+% BIIPS_ADD_DISTRIBUTION Add a user-defined distribution to the BUGS language
+%   Currently, the added sampling distributions can only define 
+%   unobserved nodes.
+% 
 %   biips_add_distribution(name, n_param, fun_dim, fun_sample, ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
-%   - name:     string. name of the function that will be used in the bug file.
-%               must be a valid BUGS language function name
-%   - n_param: integer. number of arguments of the function
-%   - fun_dim:  string. name of the Matlab function returning the size 
-%               vector of the output. The model compiler will request it to build
-%               the graph and compute the dimension of the node
-%   - fun_sample: string. name of the Matlab function which realizes the
-%       sampling
+%   - name:    string. Name of the function that will be used in the BUGS model.
+%              must be a valid BUGS language distribution name.
+%   - n_param: integer. Number of arguments of the distribution.
+%   - fun_dim: string. Name of the Matlab function returning the size 
+%              vector of the output. It will be called when compiling the
+%              model. Its arguments are the dimension vectors of the
+%              inputs.
+%   - fun_sample: string. Name of the Matlab function which samples from
+%   the distribution. Its arguments are the parameters values. 
 %
-%   Optional inputs
-%   - fun_check_param: string. name of the Matlab function which checks if
-%                      the argument values are valid.
-%                      This function must return a boolean.
-%                      The default implementation returns always true
-%   - fun_is_discrete: string. name of the Matlab function indicating if the
-%                      output is discrete or not, depending on booleans
+%   Optional inputs:
+%   - fun_check_param: string. Name of the Matlab function which checks if
+%                      the argument values are valid. Its arguments are the parameters values. 
+%                      Returns a boolean. (default returns true)
+%   - fun_is_discrete: string. Name of the Matlab function returning a boolean that is true if the
+%                      output is discrete. Its arguments are booleans
 %                      indicating if the arguments are discrete.
-%                      This function must return a boolean.
-%                      The default implementation returns false
+%                      (default returns false)
 % 
-%  All the given Matlab functions must have the same number of input
-%  arguments, and they must return a single output.
+%   All the given Matlab functions must be .m files. They have the same number of input
+%   arguments, and they must return a single output.
+% 
+%   See also BIIPS_ADD_FUNCTION, BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% dist_bugs = 'distmat'; fun_dim = 'f_dim'; fun_sample = 'f_sample';
-% dist_nb_inputs = 2;
-% biips_add_distribution(dist_bugs, dist_nb_inputs, fun_dim, fun_sample);
+% %% Add sampling distribution dMN to BUGS language
+% type('dMN_dim.m');
+% type('dMN_sample.m');
+% biips_add_distribution('dMN', 2, 'dMN_dim', 'dMN_sample');
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -42,7 +42,7 @@ function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 25-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 

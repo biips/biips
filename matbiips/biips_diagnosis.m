@@ -1,32 +1,45 @@
-function diagn = biips_diagnosis(S, varargin)
-
-%
-% BIIPS_DIAGNOSIS diagnosis of the SMC algorithm
-% diagn = biips_diagnosis(parts, 'Propertyname', propertyvalue, ...)
+function diagn = biips_diagnosis(samples, varargin)
+% BIIPS_DIAGNOSIS Diagnosis of the SMC algorithm
+% diagn = biips_diagnosis(samples, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT
-%   - S:    input structure containing the particles of one or several variables.
-%           usually returned by biips_smc_samples function
+%   - samples: structure containing either the output of a SMC algorithm
+%              as returned by BIIPS_SMC_SAMPLES or the output of a MCMC algorithm
+%              as returned by BIIPS_PIMH_SAMPLES or BIIPS_PMMH_SAMPLES
 %   Optional Inputs:
-%   - type:             string containing the characters 'f', 's' and/or 'b'
-%   - ess_thres :       integer. Threshold on the Effective Sample Size (ESS) of the
-%                       examined particles. If all the ESS components are over the
-%                       threshold, the diagnostic is valid, otherwise it is not
-%                       valid. default is 30
-%   - quiet:            flag. deactivate message display. default is 0
+%   - type:             string containing the characters 'f' (fitering), 
+%                       's' (smoothing) and/or 'b' (backward smoothing).
+%                       Select the corresponding fields of the input to be diagnosed.
+%                       (default = 'fsb').
+%   - ess_thres :       integer. Threshold on the Effective Sample Size (ESS).
+%                       If all the ESS components are over the
+%                       threshold, the diagnostic is 'GOOD', otherwise it is
+%                       'BAD'. (default = 30).
+%   - quiet:            boolean. Disable message display. (default = false)
 %
 %   OUTPUT
-%   - diagn:   output structure providing the minimum value of the
-%              effective sample size for each variable
+%   - diagn:   structure with the same nested fields as the input
+%                 'samples' structure. Contains the minimum ESS value.
 %
 %   See also BIIPS_SMC_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-% npart = 100; variables = {'x'};
-% out_smc = biips_smc_samples(model_id, variables, npart);
-% diagn = biips_diagnosis(out_smc);
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
+% biips_diagnosis(out_smc);
+% out_smc2 = getfield(out_smc, 'x[8:10]')
+% biips_diagnosis(out_smc2);
+% biips_diagnosis(out_smc2.f);
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
+% biips_diagnosis(out_smc);
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -34,7 +47,7 @@ function diagn = biips_diagnosis(S, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 %
 %% PROCESS AND CHECK INPUTS
@@ -48,25 +61,25 @@ optarg_type = {'char', 'numeric', 'logical'};
     optarg_valid, optarg_default);
 
 
-if ~isstruct(S)
-    error('S must be a struct')
+if ~isstruct(samples)
+    error('samples must be a struct')
 end
 
-if is_smc_array(S) 
+if is_smc_array(samples) 
     %% S contains only one variable 
-    ess_min = min(S.ess(:));
+    ess_min = min(samples.ess(:));
     valid = (ess_min > ess_thres);
     
     diagn.ess_min = ess_min;
     diagn.valid = valid;
     
     if ~quiet
-        varname = deparse_varname(S.name, S.lower, S.upper);
+        varname = deparse_varname(samples.name, samples.lower, samples.upper);
         disp(['* Diagnosis of variable: ' , varname]);
     end
     
     if ~quiet
-        switch (S.type)
+        switch (samples.type)
             case 'filtering'
                 name = '  Filtering: ';
             case 'smoothing'
@@ -83,10 +96,10 @@ if is_smc_array(S)
             disp('    You should increase the number of particles.')
         end
     end
-elseif has_fsb_fields(S) 
+elseif has_fsb_fields(samples) 
     %% S contains only one variable with f,s,b fields
-    names = fieldnames(S);
-    s = getfield(S, names{1});
+    names = fieldnames(samples);
+    s = getfield(samples, names{1});
     
     if ~quiet
         varname = deparse_varname(s.name, s.lower, s.upper);
@@ -101,7 +114,7 @@ elseif has_fsb_fields(S)
             continue
         end
         
-        s = getfield(S, fsb);
+        s = getfield(samples, fsb);
         ess_min = min(s.ess(:));
         valid = (ess_min > ess_thres);
         
@@ -132,11 +145,11 @@ elseif has_fsb_fields(S)
     end
 else
     %% S contains several variables
-    varnames = fieldnames(S);
+    varnames = fieldnames(samples);
     diagn = cell(size(varnames));
     
     for i=1:numel(varnames)
-        s = getfield(S, varnames{i});
+        s = getfield(samples, varnames{i});
         diagn{i} = biips_diagnosis(s, varargin{:});
     end
     

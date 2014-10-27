@@ -1,6 +1,4 @@
 function [obj, varargout] = pimh_algo(obj, n_iter, n_part, return_samples, varargin)
-
-%
 % PIMH_ALGO performs iterations for the PIMH algorithm
 % [obj, samples_st, log_marg_like_st] = pimh_algo(obj,...
 %                           n_iter, n_part, true, varargin)

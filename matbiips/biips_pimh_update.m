@@ -1,41 +1,39 @@
 function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
-
-%
 % BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm
-% obj_pimh = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
+% [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part, 'PropertyName', PropertyValue, ...)
 %
 %   INPUT: 
-%   - obj_pimh:     structure containing information about the PIMH
-%   - n_iter:       positive integer. Number of burn-in iterations
-%   - n_part:       positive integer. Number of particles used in SMC algorithms
+%   - obj_pimh:     structure. PIMH object as returned by BIIPS_PIMH_INIT
+%   - n_iter:       integer. Number of burn-in iterations
+%   - n_part:       integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
-%   - thin:         positive integer. Returns output every thin iterations
-%                   (default=1)
-%   - rs_thres:     positive real (default = 0.5).
-%                   Threshold for the resampling step (adaptive SMC).
-%                   if rs_thres is in [0,1] --> resampling occurs when 
-%                                           (ESS > rs_thres * nb_part)
-%                   if rs_thres is in [2,nb_part] --> resampling occurs when 
-%                                               (ESS > rs_thres)
-%   - rs_type:      string (default = 'stratified')
-%                   Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
-%                   Indicates the type of algorithm used for the resampling step. 
+%   - thin :        integer. Returns samples every 'thin' iterations
+%                   (default = 1)
+%   - rs_thres :    real. Threshold for the adaptive SMC resampling.
+%                   (default = 0.5)
+%                   * if 'rs_thres' is in [0,1], resampling occurs when
+%                     (ESS < rs_thres * n_part)
+%                   * if 'rs_thres' is in [2,nb_part], resampling occurs when
+%                     (ESS < rs_thres)
+%   - rs_type :     string. The type of algorithm used for the SMC resampling.
+%                   Possible values are 'stratified', 'systematic',
+%                   'residual', 'multinomial'. (default = 'stratified')
 % 
 %   OUTPUT
-%   - obj_pimh:     structure. PIMH object modified
+%   - obj_pimh:     structure. updated PIMH object
 %   Optional Output:
-%   - log_marg_like: vector with log marginal likelihood over iterations
+%   - log_marg_like: vector of log marginal likelihood estimates over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % data = struct('var1', 0, 'var2', 1.2);
 % model = biips_model('model.bug', data)
-% variables = {'x'}; 
-% nburn = 1000; niter = 1000; npart = 100; 
+% variables = {'x'};
+% n_burn = 1000; n_iter = 1000; n_part = 100;
 % obj_pimh = biips_pimh_init(model, variables); %Initialize
-% obj_pimh = biips_pimh_update(obj_pimh, nburn, npart); % Burn-in
-% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, niter, npart); % Samples
+% obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % Burn-in
+% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part); % Samples
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -43,7 +41,7 @@ function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, var
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 return_samples = false;

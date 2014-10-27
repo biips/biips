@@ -1,46 +1,67 @@
-function out = biips_smc_sensitivity(model, param_names, param_values, ...
+function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
     n_part, varargin)
-
-%
-% BIIPS_SMC_SENSITIVITY performs sensitivity analysis of parameters with SMC
-%  out = biips_smc_sensitivity(console, param_names, param_values, ...
+% BIIPS_SMC_SENSITIVITY Perform sensitivity analysis of parameters with SMC
+%  out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 %    n_part, 'PropertyName', propertyvalue, ...)
 %
-%   INPUT
-%   - model:        structure containing the model,
-%                   returned by the 'biips_model' function
-%   - param_names:  cell of strings. Contains the names of the
-%                   unobserved variables for sensitivity analysis
+%   INPUT:
+%   - model:        Biips model as returned by the BIIPS_MODEL function
+%   - param_names:  cell of strings. Names of the parameters for which we 
+%                   want to study sensitivity.
 %   - param_values: cell of numeric values, of the same length as
-%                   param_names.
+%                   param_names. Each element is an array whose last dimension is the number of
+%                   values for which we want to study sensitivity.
+%   - n_part:       integer. Number of particles.
+% 
 %   Optional Inputs:
-%   - rs_thres :    positive real (default = 0.5).
-%                   Threshold for the resampling step (adaptive SMC).
-%                   if rs_thres is in [0,1] --> resampling occurs when
-%                                           (ESS > rs_thres * nb_part)
-%                   if rs_thres is in [2,nb_part] --> resampling occurs when
-%                                               (ESS > rs_thres)
-%   - rs_type :     string (default = 'stratified')
-%                   Possible values are 'stratified', 'systematic', 'residual', 'multinomial'
-%                   Indicates the type of algorithm used for the resampling step.
+%   - rs_thres:    real. Threshold for the adaptive SMC resampling. (default = 0.5)
+%                   * if 'rs_thres' is in [0,1], resampling occurs when
+%                     (ESS < rs_thres * n_part)
+%                   * if 'rs_thres' is in [2,n_part], resampling occurs when
+%                     (ESS < rs_thres)
+%   - rs_type:     string. Name of the algorithm used for the SMC resampling.
+%                   Possible values are 'stratified', 'systematic',
+%                   'residual', 'multinomial'. (default = 'stratified')
 %
-%   OUTPUT
-%   - out:          Structure with the following fields:
-%                   * log_marg_like
-%                   * log_marg_like_pen
-%                   * max_param
-%                   * max_log_marg_like
-%                   * max_param_pen
-%                   * max_log_marg_like_pen
+%   OUTPUT:
+%   - out_sens:  Structure with the following fields:
+%                   * log_marg_like: vector of log marginal likelihood
+%                   estimates at the different values of the parameters.
+%                   * log_marg_like_pen: vector of penalized log marginal likelihood
+%                   estimates at the different values of the parameters.
+%                   * max_param: parameters value with maximum log_marg_like.
+%                   * max_log_marg_like: maximum log_marg_like value.
+%                   * max_param_pen: parameters value with maximum
+%                   log_marg_like_pen.
+%                   * max_log_marg_like_pen: maximum log_marg_like_pen
+%                   value.
 %
 %   See also BIIPS_MODEL, BIIPS_SMC_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% model = biips_model('file.bug', data);
-% n_part = 100;
-% param_names = {'log_prec_y[1:1]'};
-% param_values = {-5:.2:3};
-% out = biips_smc_sensitivity(model, param_names, param_values, n_part);
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% n_part = 50;
+% logtau_val = -10:10;
+% out_sens = biips_smc_sensitivity(model, {'logtau'}, {logtau_val}, n_part);
+% 
+% figure
+% subplot(2,1,1); hold on
+% title('SMC sensitivity')
+% plot(logtau_val, out_sens.log_marg_like)
+% plot(logtau, min(out_sens.log_marg_like), 'g^', 'markerfacecolor', 'g')
+% xlabel('logtau')
+% ylabel('log marginal likelihood')
+% 
+% subplot(2,1,2); hold on
+% plot(logtau_val, out_sens.log_marg_like_pen)
+% yl = ylim;
+% plot(logtau, yl(1), 'g^', 'markerfacecolor', 'g')
+% xlabel('logtau')
+% ylabel('penalized log marginal likelihood')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -48,7 +69,7 @@ function out = biips_smc_sensitivity(model, param_names, param_values, ...
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 n_param = numel(param_names);
@@ -170,9 +191,9 @@ end
 %% Delete clone console
 matbiips('clear_console', console);
 
-out.log_marg_like = log_marg_like;
-out.log_marg_like_pen = log_marg_like_pen;
-out.max_param = max_param;
-out.max_log_marg_like = max_log_marg_like;
-out.max_param_pen = max_param_pen;
-out.max_log_marg_like_pen = max_log_marg_like_pen;
+out_sens.log_marg_like = log_marg_like;
+out_sens.log_marg_like_pen = log_marg_like_pen;
+out_sens.max_param = max_param;
+out_sens.max_log_marg_like = max_log_marg_like;
+out_sens.max_param_pen = max_param_pen;
+out_sens.max_log_marg_like_pen = max_log_marg_like_pen;

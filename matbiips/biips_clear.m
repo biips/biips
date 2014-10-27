@@ -1,17 +1,21 @@
 function biips_clear(varargin)
-
-%
-% BIIPS_CLEAR  clears one or several biips consoles
+% BIIPS_CLEAR Clear allocated Biips consoles
 %
 %   biips_clear(obj) clears the internal console of the biips object
-%   biips_clear(obj, obj2) 
+%   biips_clear(obj, obj2, ...) 
 %   biips_clear()    clears all created consoles
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PMMH_INIT
 %--------------------------------------------------------------------------
 % EXAMPLE
-% model = biips_model('model.bug');
-% biips_clear(model);
+% modelfile = 'hmm.bug';
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% obj_pimh = biips_pimh_init(model, {'x'});
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% biips_clear(model)
+% biips_clear(obj_pimh, obj_pmmh)
+% biips_clear
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -19,7 +23,7 @@ function biips_clear(varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 17-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 if nargin==0

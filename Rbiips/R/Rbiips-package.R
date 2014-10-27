@@ -17,12 +17,12 @@
 ##' Typical usage of \emph{Rbiips} consits in: \enumerate{ \item
 ##' compiling your model with \code{\link{biips_model}} function \item
 ##' optionally analyzing sensitivity to parameters with
-##' \code{\link{smc.sensitivity}} \item generate samples from the conditional
+##' \code{\link{biips_smc_sensitivity}} \item generating samples from the conditional
 ##' distributions \itemize{ \item using standard SMC algorithm with
-##' \code{\link{smc_samples}} function \item using particle MCMC methods with
-##' \code{\link{pmmh_samples}} or \code{\link{pimh_samples}} functions } \item
+##' \code{\link{biips_smc_samples}} function \item using particle MCMC methods with
+##' \code{\link{biips_pimh_samples}} or \code{\link{biips_pmmh_samples}} functions } \item
 ##' analysing output from \code{\link[smcarray-object]{smcarray}} and
-##' \code{mcarray} objects }
+##' \code{mcmcarray} objects }
 ##'
 ##' @name Rbiips-package
 ##' @aliases Rbiips-package Rbiips
@@ -31,9 +31,7 @@
 ##' \href{http://alea.bordeaux.inria.fr}{ALEA} at
 ##' \href{http://www.inria.fr/en/centre/bordeaux}{Inria Bordeaux Sud-Ouest}.
 ##'
-##' Individual authors: \itemize{ \item Adrien Todeschini (Software design and
-##' development) \item Francois Caron (Probability expertise and
-##' specifications) }
+##' Individual authors: \itemize{ \item Adrien Todeschini \item Francois Caron \item Marc Fuentes \item Pierrick Legrand \item Pierre Del-Moral}
 ##'
 ##' Maintainer: \email{biips-project@@lists.gforge.inria.fr}
 ##' @seealso \code{\link[rjags:jags.model]{rjags}},
@@ -50,13 +48,13 @@ NULL
 
 
 .onLoad <- function(lib, pkg) {
-  Rbiips("load_module", "basemod")
+    Rbiips("load_module", "basemod")
 }
 
 
 ##' helper function to call Rbiips c++ routines
 Rbiips <- function(funcname, ...) {
-  stopifnot(is.character(funcname), length(funcname) == 1, nchar(funcname) > 0)
-  .Call(funcname, ..., PACKAGE = "Rbiips")
-}
-
+    stopifnot(is.character(funcname), length(funcname) == 1, 
+        nchar(funcname) > 0)
+    .Call(funcname, ..., PACKAGE = "Rbiips")
+} 

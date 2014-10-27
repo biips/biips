@@ -1,17 +1,27 @@
 function varnames = biips_variable_names(model)
-
+% BIIPS_VARIABLE_NAMES Variable names of the Biips model
+%  varnames = biips_variable_names(model)
 %
-% BIIPS_VARIABLE_NAMES returns the variable names of the current model
-%  variable_names = biips_variable_names(model)
+%   INPUT:
+%   - model:   Biips model as returned by the BIIPS_MODEL function
+% 
+%   OUTPUT:
+%   - varnames: cell of strings. the list of variable names of the model
 %
-%   INPUT
-%   - model:        structure containing the model, 
-%                   returned by the 'biips_model' function
-%
-%   OUTPUT
-%   -variable_names: cell containing the current variable names 
-%
-%   See also BIIPS_MODEL
+%   See also BIIPS_MODEL, BIIPS_NODES, BIIPS_PRINT_DOT
+%--------------------------------------------------------------------------
+% EXAMPLES:
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% model.model
+% model.data
+% biips_variable_names(model)
+% biips_nodes(model)
+% biips_print_dot(model, 'hmm.dot');
+% biips_clear(model)
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

@@ -1,20 +1,21 @@
 function biips_build_sampler(model, varargin)
-
-%
-% BIIPS_BUILD_SAMPLER assigns a sampler to each node of the graph
+% BIIPS_BUILD_SAMPLER Assign a sampler to each node of the graph
 %   biips_build_sampler(model, 'PropertyName', PropertyValue)
 %   INPUT: 
-%   - model:        structure containing the model, 
-%                   returned by the 'biips_model' function
+%   - model:    Biips model as returned by the BIIPS_MODEL function
 %   Optional Input:
-%   - proposal:string. Keyword defining the type of proposal desired.
-%              Possible values are 'auto' and 'prior'. 'auto' selects the best sampler
-%              among available ones automatically. 'prior' forces asignment of the prior
-%              sampler to every node. 'prior' switches off lots of instructions and can
-%              speed up the startup of the SMC for big models.
-%              default is 'auto'
+%   - proposal: string. Keyword defining the type of proposal desired.
+%               Possible values are 'auto' and 'prior'. 'auto' selects the best sampler
+%               among available ones automatically. 'prior' forces asignment of the prior
+%               sampler to every node. 'prior' switches off lots of instructions and can
+%               speed up the startup of the SMC for large models.
+%               (default = 'auto')
 %
-%   See also BIIPS_MODEL
+%   In case you want to specify the proposal used by the SMC algorithm.
+%   This function has to be called before BIIPS_SMC_SAMPLES. Otherwise, it will be automatically
+%   called by BIIPS_SMC_SAMPLES with the default parameters.
+% 
+%   See also BIIPS_SMC_SAMPLES, BIIPS_NODES
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -22,7 +23,7 @@ function biips_build_sampler(model, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 17-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS

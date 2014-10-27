@@ -1,37 +1,47 @@
 function model = biips_model(file, data, varargin)
-
-%
-% BIIPS_MODEL instantiates a stochastic model under a DAG form 
+% BIIPS_MODEL Create a stochastic model described in BUGS language
 % model = biips_model(file, data, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT: 
 %   - file:         string. path of the BUGS file which defines the stochastic model
 %   - data:         either a struct containing constants and observed values
 %                   or a cell of strings containing names of variables
-%                   existing in the 'base' workspace
+%                   existing in the 'base' workspace. Any numeric objects
+%                   in 'data' corresponding to node arrays used in 'file' are taken
+%                   to represent the values of observed nodes in the model.
 %   Optional inputs:
-%   - sample_data:  boolean to toggle the evaluation of the 'data' block of the
-%                   BUGS model that generates data. default is 'true'
-%   - quiet:        boolean to deactivate verbosity. default is 'false'
+%   - sample_data:  boolean. Toggle the evaluation of the 'data' block of the
+%                   BUGS model that generates or transforms data. (default = true).
+%   - quiet:        boolean. Deactivate verbosity. (default = false).
 %
 %   OUTPUT:
-%   - model: A biips model structure with the following fields:
+%   - model: A Biips model structure with the following fields:
 %                   * id: integer. index of the compiled model object
 %                         in the internal table of models.
-%                   * file: string. filename of the BUGS model
-%                   * model: string containing the BUGS model definition
-%                   * data: structure containing the data.
+%                   * file: string. Filename of the BUGS model
+%                   * model: string. the BUGS model definition
+%                   * data: structure. observed data of the model.
 %
-%   See also BIIPS_NODES, BIIPS_VARIABLE_NAMES, BIIPS_PRINT_DOT
+%   See also BIIPS_VARIABLE_NAMES, BIIPS_NODES, BIIPS_PRINT_DOT,
+%   BIIPS_CLEAR, BIIPS_ADD_FUNCTION, BIIPS_ADD_DISTRIBUTION
 %--------------------------------------------------------------------------
 % EXAMPLES:
-% data = struct('var1', 0, 'var2', 1.2);
-% model = biips_model('model.bug', data, 'sample_data', true);
-%
-% var1 = 0; var2 = 1.2;
-% data_names = {'var1', 'var2'};
-% model = biips_model('model.bug', data_names, 'sample_data', true);
+% modelfile = 'hmm.bug';
+% type(modelfile);
 % 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% model.model
+% model.data
+% biips_variable_names(model)
+% biips_nodes(model)
+% biips_print_dot(model, 'hmm.dot');
+% biips_clear(model)
+% 
+% tmax = 10;
+% logtau = log(10);
+% datanames = {'tmax', 'logtau'};
+% model = biips_model(modelfile, datanames, 'sample_data', true);
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -39,7 +49,7 @@ function model = biips_model(file, data, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 

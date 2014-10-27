@@ -1,3 +1,23 @@
+Adrien le 26/10/2014 :
+======================
+- [ ] Pb avec déclaration de noeuds constants égaux dans bloc data. seul le premier
+  prend la valeur, les suivants sont manquants. ex:
+        for (i in 1:10) {
+          z[t] <- 1
+        }
+- [ ] Tri topologique : les noeuds stochastiques sans enfants doivent être prioritaires.
+  Ex: considérons le modèle suivant où `y` est observé
+for (i in 2:10)
+{
+  x[t] ~ dnorm(f(x[t-1]), px)
+  y[t] ~ dnorm(g(x[t]), py)
+  y_pred[t] ~ dnorm(g(x[t]), py)
+}
+Actuellement, l'observation `y[t]` est prioritaire donc `y_pred[t]` est échantillonné 
+à l'itération de `y[t+1]`.
+Les distributions prédictives de filtrages approchées sont `p(y_pred[t]|y[1:t+1])` au
+lieu de `p(y_pred[t]|y[1:t])`.
+
 Adrien le 2/10/2014 :
 =======================
 L'exemple `switch_stoch_volatility_param.R` plantait sous R.
@@ -11,14 +31,14 @@ J'ai résolu le problème en rajoutant une troncation sur x :
 
 de cette façon on s'assure de ne jamais avoir exp(-x[t]) = 0
 
-J'ai essayé de mettre une borne supérieure seulement, mais plantage de R...
+- [ ] J'ai essayé de mettre une borne supérieure seulement, mais plantage de R...
 `x[t] ~ dnorm(mu[t], 1/sigma^2) T(,500)`
-
 Pas de problème avec borne inf seule, ou borne inf et sup, mais juste borne sup il n'aime pas...
-- [ ] Un autre prolème à investiguer...
+Un autre prolème à investiguer...
 
 J'ai aussi remarqué que les nombres aléatoires générés avec Matbiips sont différents sous Linux et Windows, c'est pour ça qu'on n'a pas les mêmes données.
-- [ ] vérifier en compilant avec la même version de boost
+- [x] vérifier en compilant avec la même version de boost : toujours pareil
+- [ ] peut-être lié au compilo : vérifier séquences générées avec boost::random::mt19937 sous Linux gcc et windows msvc
 
 Adrien le 22/09/2014 :
 ======================

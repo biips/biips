@@ -1,46 +1,64 @@
 function [dens] = biips_density(samples, varargin)
-
-%
-% BIIPS_DENSITY computes 1D kernel density estimates
-% dens = biips_density(samples, 'PropertyName', PropertyValue, ...)
-%   INPUT
-%   - samples:  input structure containing either the output of a SMC algorithm
-%               or of a PIMH/PMMH algorithm.
-%   Optional inputs
-%   - type:             string containing the characters 'f', 's' and/or 'b'.
-%                       default is '' for all present fields in particles
-%   - adjust:           time factor for the bw. default is 1
-%   - bw:               bandwidth. default is estimated from the samples
-%   - bw_type:          character string. The type of bandwidth selector 
-%                       used in case bw value is not given. Possible values:
+% BIIPS_DENSITY Computes univariate marginal kernel density estimates
+%   dens = biips_density(samples, 'PropertyName', PropertyValue, ...)
+%   INPUT:
+%   - samples: structure containing either the output of a SMC algorithm
+%              as returned by BIIPS_SMC_SAMPLES or the output of a MCMC algorithm
+%              as returned by BIIPS_PIMH_SAMPLES or BIIPS_PMMH_SAMPLES
+%   Optional inputs:
+%   - type:             string containing the characters 'f' (fitering), 
+%                       's' (smoothing) and/or 'b' (backward smoothing).
+%                       Select fields of the input to be processed.
+%                       (default = 'fsb').
+%   - adjust:           scale factor for the bandwidth. (default = 1)
+%   - bw:               positive real. The kernel bandwidth. default is estimated from the samples
+%   - bw_type:          string. The type of bandwidth selector 
+%                       used in case 'bw' value is not given. Possible values:
 %                           * 'nrd0' (default): Silverman's rule of thumb [1]
 %                           * 'nrd': Scott's variation of Silverman with factor 1.06 [2]
-%                           * 'matlab': Matlab's rule from the stat toolbox ksdensity function
-%   - n:                integer. nb of points of evaluation. default is 100
-%   OUTPUT
-%   - dens:             output structure whth the same fields as the input
-%                       samples structure. The leaves of the structure contain
-%                       the following fields:
+%                           * 'matlab': Matlab's rule from the stat toolbox KSDENSITY function
+%   - n:                integer. nb of points of evaluation. (default = 100)
+%   OUTPUTOUTPUT
+%   - dens:             structure with the same nested fields as the input
+%                       'samples' structure. Contains the following subfields:
 %                           * x: points of the density (n points in the range [min-4*bw, max+4*bw]
 %                           * f: values of the density at x
+%   
+%   See also BIIPS_SMC_SAMPLES, BIIPS_PIMH_SAMPLES, BIIPS_PMMH_SAMPLES
 %
-% References:
-% [1] Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall
-% (page 48, eqn (3.31))
-% [2] Scott, D. W. (1992) Multivariate Density Estimation: Theory,
-% Practice, and Visualization. Wiley.
+%   References:
+%   [1] Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall
+%   (page 48, eqn (3.31))
+%   [2] Scott, D. W. (1992) Multivariate Density Estimation: Theory,
+%   Practice, and Visualization. Wiley.
 % 
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-% n_part = 100; variables = {'x'};
-% out_smc = biips_smc_samples(model_id, variables, n_part);
-% kde_estimates = biips_density(out_smc);
-%
-% n_iter = 100;
-% out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part);
-% kde_estimates_pimh = biips_density(out_pimh);
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
+% dens_smc = biips_density(out_smc)
+% out_smc2 = getfield(out_smc, 'x[8:10]')
+% dens_smc = biips_density(out_smc2)
+% dens_smc = biips_density(out_smc2.f)
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
+% dens_smc = biips_density(out_smc, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100);
+% 
+% hold on
+% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_smc.x.f(1).x, dens_smc.x.f(1).f, 'b')
+% plot(dens_smc.x.s(1).x, dens_smc.x.s(1).f, 'r')
+% xlabel('x[1]')
+% ylabel('posterior density')
+% legend('SMC filtering estimate', 'SMC smoothing estimate')
+% legend boxoff
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -48,7 +66,7 @@ function [dens] = biips_density(samples, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 17-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS

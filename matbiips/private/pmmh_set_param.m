@@ -13,7 +13,7 @@ if ~isempty(values)
         ok = matbiips('change_data', console, pn_param(i).name, ...
             pn_param(i).lower, pn_param(i).upper, values{i}, true);
         if ~ok
-            error('Data change failed: invalid initial value for variable %s', param_names{i});
+            error('Data change failed: invalid initial value: %s = %g', param_names{i}, values{i});
         end
         sample_param{i} = values{i};
     end

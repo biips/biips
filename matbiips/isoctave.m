@@ -1,13 +1,12 @@
 function res = isoctave()
-
-%
-% ISOCTAVE checks if octave is running
-%  res = isoctave() returns a boolean equal to 1 if octave is running, 0 otherwise
+% ISOCTAVE Check if octave is running.
+%  res = isoctave()
+%  OUTPUT: boolean. true if octave is running, false otherwise.
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface
-% Authors: Adrien Todeschini, Marc Fuentes, François Caron
+% Authors: Adrien Todeschini, Marc Fuentes, Franï¿½ois Caron
 % Copyright (C) Inria
 % License: GPL-3
 % Jan 2014; Last revision: 18-03-2014

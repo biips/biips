@@ -293,6 +293,23 @@ namespace Biips
         return;
       }
 
+//      // determine if the unobserved stochastic node has any stochastic children
+//      Bool has_sto_children = false;
+//      GraphTypes::ChildIterator it_chilren, it_chilren_end;
+//      boost::tie(it_chilren, it_chilren_end) = graph_.GetChildren(nodeId_);
+//      for (; it_chilren!=it_chilren_end; ++it_chilren) {
+//        if (graph_.GetNode(*it_chilren).GetType() == STOCHASTIC) {
+//          has_sto_children = true;
+//          break;
+//        }
+//      }
+//
+//      // keep the same iteration if the current node has no stochastic children
+//      if (!has_sto_children) {
+//        smcIterations_.back().push_back(SMCIteration(nodeId_, topCondNodes_));
+//        topCondNodes_.clear();
+//      }
+
       // keep the same iteration if the last node has no likelihood children.
       if (!smcIterations_.empty() && smcIterations_.back().back().LikelihoodNodes().empty()) {
         smcIterations_.back().push_back(SMCIteration(nodeId_, topCondNodes_));
@@ -405,13 +422,14 @@ namespace Biips
                                       pRng_);
       smc_iter.at(i).NodeSamplerPtr()->Sample(smc_iter.at(i).StoUnobs());
 
-      // compute all logical children
+      // compute all children that are logical
       // TODO only update nodes which have a monitored child
-      Types<NodeId>::ConstIterator it_logical_children = smc_iter.at(i).SampledNodes().begin()+1;
-      while (it_logical_children != smc_iter.at(i).SampledNodes().end())
+      // TODO update also children that are stochastic with no children
+      Types<NodeId>::ConstIterator it_children = smc_iter.at(i).SampledNodes().begin()+1;
+      while (it_children != smc_iter.at(i).SampledNodes().end())
       {
-        smc_iter.at(i).NodeSamplerPtr()->Sample(*it_logical_children);
-        ++it_logical_children;
+        smc_iter.at(i).NodeSamplerPtr()->Sample(*it_children);
+        ++it_children;
       }
     }
     // update particle log weight

@@ -1,36 +1,37 @@
 function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
-
-%
-% BIIPS_ADD_FUNCTION adds a Matlab function to the BUGS language
+% BIIPS_ADD_FUNCTION Add a Matlab function to the BUGS language
 %   biips_add_function(name, n_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
-%   - name:     string. name of the function that will be used in the bug file.
-%               must be a valid BUGS language function name
-%   - n_param: integer. number of arguments of the function
-%   - fun_dim:  string. name of the Matlab function returning the size 
-%               vector of the output. The model compiler will request it to build
-%               the graph and compute the dimension of the node
-%   - fun_eval: string. name of the Matlab function which realizes the evaluation
+%   - name:    string. Name of the function that will be used in the BUGS model.
+%              must be a valid BUGS language function name.
+%   - n_param: integer. Number of arguments of the function
+%   - fun_dim: string. Name of the Matlab function returning the size 
+%              vector of the output. It will be called when compiling the
+%              model. Its arguments are the dimension vectors of the
+%              inputs.
+%   - fun_eval: string. Name of the Matlab function which evaluates the
+%   function. Its arguments are the parameters values.
 %
 %   Optional inputs
-%   - fun_check_param: string. name of the Matlab function which checks if
-%                      the argument values are valid.
-%                      This function must return a boolean.
-%                      The default implementation returns always true
-%   - fun_is_discrete: string. name of the Matlab function indicating if the
-%                      output is discrete or not, depending on booleans
+%   - fun_check_param: string. Name of the Matlab function which checks if
+%                      the argument values are valid. Its arguments are the parameters values. 
+%                      Returns a boolean. (default returns true)
+%   - fun_is_discrete: string. Name of the Matlab function returning a boolean that is true if the
+%                      output is discrete. Its arguments are booleans
 %                      indicating if the arguments are discrete.
-%                      This function must return a boolean.
-%                      The default implementation returns false
+%                      (default returns false)
 % 
-%  All the given Matlab functions must have the same number of input
-%  arguments, and they must return a single output.
+%   All the given Matlab functions must be .m files. They have the same number of input
+%   arguments, and they must return a single output.
+%  
+%   See also BIIPS_ADD_DISTRIBUTION, BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% fun_bugs = 'funmat'; fun_dim = 'f_dim'; funeval = 'f_eval';
-% fun_nb_inputs = 2;
-% biips_add_function(fun_bugs, fun_nb_inputs, fun_dim, funeval);
+% %% Add function f to BUGS language
+% type('f_dim.m');
+% type('f_eval.m');
+% biips_add_function('f', 2, 'f_dim', 'f_eval');
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -38,7 +39,7 @@ function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 17-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 

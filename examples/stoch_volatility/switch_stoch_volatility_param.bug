@@ -8,14 +8,14 @@ data
 {
   c_true[1] ~ dcat(pi_true[1,])
   mu_true[1] <- alpha_true[1] * (c_true[1]==1) + alpha_true[2]*(c_true[1]==2)
-  x_true[1] ~ dnorm(mu_true[1], 1/sigma_true^2)
+  x_true[1] ~ dnorm(mu_true[1], 1/sigma_true^2) T(-500,500)
   prec_y_true[1] <- exp(-x_true[1])
   y[1] ~ dnorm(0, prec_y_true[1])
   for (t in 2:t_max)
   {
     c_true[t] ~ dcat(ifelse(c_true[t-1]==1,pi_true[1,],pi_true[2,]))
     mu_true[t] <- alpha_true[1] * (c_true[t]==1) + alpha_true[2] * (c_true[t]==2) + phi_true * x_true[t-1];
-    x_true[t] ~ dnorm(mu_true[t], 1/sigma_true^2)
+    x_true[t] ~ dnorm(mu_true[t], 1/sigma_true^2) T(-500,500)
     prec_y_true[t] <- exp(-x_true[t])
     y[t] ~ dnorm(0, prec_y_true[t])
   }

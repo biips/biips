@@ -1,48 +1,77 @@
-function obj = biips_pmmh_init(model, param_names, varargin)
-
-%
-% BIIPS_PMMH_INIT creates a PMMH object
-% obj = biips_pmmh_init(model, param_names, 'PropertyName', propertyvalue, ...)
+function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
+% BIIPS_PMMH_INIT Create a PMMH object.
+%   Initializes the Particle Marginal Metropolis-Hastings algorithm
+%   obj_pmmh = biips_pmmh_init(model, param_names, 'PropertyName', PropertyValue, ...)
 %
 %   INPUT 
-%   - model:        structure containing the model, 
-%                   returned by the 'biips_model' function
-%   - param_names:  cell of strings containing the list of variables to be
+%   - model:    Biips model as returned by the BIIPS_MODEL function
+%   - param_names:  cell of strings. The list of variables to be
 %                   updated with MH proposal. Other are updated with SMC
 %   Optional Inputs:
-%   - inits:        cell of numeric values of the same length as param_names 
-%                   containing init values for the parameters
-%   - rw_step:      cell of numeric values of the same length as param_names 
-%                   containing random walk standard deviations. If
-%                   transform=true (default), the given steps apply to the
-%                   transformed space. Think about deactivating
-%                   transformation if you wish to give steps in the
-%                   untransformed space.
-%   - transform:    boolean (default=true). Activate automatic variable
-%                   transformation. Transformations apply independently to 
-%                   each component of the parameter depending on their 
-%                   support:
+%   - latent_names: cell of strings. The list of variables updated 
+%                   with SMC proposal that need to be monitored.
+%   - inits:        cell of numeric values of the same length as param_names.
+%                   Init values for the parameters. (default = samples from
+%                   the prior)
+%   - transform:    boolean. Activate automatic parameters transformation (default = true).
+%                   Transformations applies independently to each component 
+%                   of the parameters depending on their support:
 %                       * [L, +Inf): f(x) = log(x-L)
 %                       * (-Inf, U]: f(x) = log(U-x)
 %                       * [L, U]:    f(x) = log((x-L)/(U-x))
 %                   so that we apply random walk on unbounded variables.
-%   - n_rescale:    Number of iterations for rescaling
-%   - beta:         Parameter of the proposal (default=0.05)
-%   - alpha:        Tuning parameter of the rescaling (default=0.99)
+%   - rw_step:      cell of numeric values of the same length as
+%                   param_names. Random walk standard deviations. If
+%                   transform is true (default), the given steps apply to the
+%                   transformed space. Set transform to false if you wish to give steps in the
+%                   untransformed space.
+%   - n_rescale:    Number of iterations for rescaling (default = 400)
+%   - alpha:        Tuning parameter of the rescaling (default = 0.99)
+%   - beta:         Tuning parameter of the proposal (default = 0.05)
 %
 %   OUTPUT
-%  - obj:           PMMH structure
+%   - obj_pmmh: structure containing the current state of the algorithm
+%               * param_names: cell with the names of the parameters to be
+%                 monitored
+%               * latent_names: cell with the names of the latents to be
+%                 monitored
+%               * sample_param: current sample value of the parameters
+%               * sample_latent: current sample value of the latents
+%               * sample_param_tr: current sample value of the transformed parameters
+%               * log_marg_like: current value of the log marginal likelihood
+%               * log_prior: log prior of the current parameters
+%               * model: biips model
+%               * dim: dimensions of the parameters
+%               * n_iter: curent nb of iterations
+%               * ar_mean: mean acceptance rate
+%               * alpha: tuning parameter of the rescaling
+%               * beta: tuning parameter of the proposal
+%               * n_rescale: nb of iterations for rescaling
+%               * n_cov: nb of iterations before starting to learn the
+%               empirical covariance matrix
+%               * target_prob: target acceptance probability for the
+%               rescaling
+%               * log_step: log random walk standard deviations for the
+%               rescaling
+%               * rw_mean: empirical mean of the samples
+%               * rw_cov: empirical covariance matrix of the samples
+%               * transform: cell of transformation function handles for each
+%               parameter component
+%               * transform_inv: cell of inverse transformation function handles for each
+%               parameter component
+%               * transform_lderiv: cell of transformation log-derivative function handles for each
+%               parameter component
 %
 %   See also BIIPS_MODEL, BIIPS_PMMH_UPDATE, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
-% param_names = {'log_prec_y[1:1]';}
+% param_names = {'log_prec_y'};
 % latent_names = {'x'};
-% obj_pmmh = biips_pmmh_object(model, param_names, 'inits', {-2});
+% obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
 % obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [out_pmmh, log_marg_like_pen, log_marg_like, stats_pmmh] = ...
-%   biips_pmmh_samples(obj_pmmh, n_iter, n_part,'thin', 1, 'latent_names', latent_names); 
+% [obj_pmmh, samples_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
+%     'thin', thin); 
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -50,7 +79,7 @@ function obj = biips_pmmh_init(model, param_names, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 %%% Process and check optional arguments
@@ -119,8 +148,8 @@ cleanupObj = onCleanup(@() matbiips('verbosity', verb));% reset verbosity when f
 matbiips('message', 'Initializing PMMH');
 
 %% Clone console
-obj.model = clone_model(model);
-console = obj.model.id;
+obj_pmmh.model = clone_model(model);
+console = obj_pmmh.model.id;
 
 
 
@@ -128,28 +157,28 @@ console = obj.model.id;
 sample_param = pmmh_set_param(console, param_names, pn_param, inits);
 
 % Parameters and latent
-obj.param_names = param_names;
-obj.latent_names = latent_names;
-obj.sample_param = sample_param;
-obj.sample_latent = [];
-obj.log_marg_like = -Inf;
-obj.log_prior = -Inf;
+obj_pmmh.param_names = param_names;
+obj_pmmh.latent_names = latent_names;
+obj_pmmh.sample_param = sample_param;
+obj_pmmh.sample_latent = [];
+obj_pmmh.log_marg_like = -Inf;
+obj_pmmh.log_prior = -Inf;
 
 sample_dim = cellfun(@size, sample_param, 'UniformOutput', false);
 
-obj.dim = sample_dim;
-obj.n_iter = 0;
-obj.ar_mean = 0;
-obj.alpha = alpha;
-obj.beta = beta;
-obj.n_rescale = n_rescale;
-obj.n_cov = n_rescale/2; % we start learning the covariance matrix after ncov iterations
+obj_pmmh.dim = sample_dim;
+obj_pmmh.n_iter = 0;
+obj_pmmh.ar_mean = 0;
+obj_pmmh.alpha = alpha;
+obj_pmmh.beta = beta;
+obj_pmmh.n_rescale = n_rescale;
+obj_pmmh.n_cov = n_rescale/2; % we start learning the covariance matrix after n_cov iterations
 
-obj.len = sum(cellfun(@prod, sample_dim, 'UniformOutput', true));
-if obj.len==1
-    obj.target_prob = 0.44;
+obj_pmmh.len = sum(cellfun(@prod, sample_dim, 'UniformOutput', true));
+if obj_pmmh.len==1
+    obj_pmmh.target_prob = 0.44;
 else
-    obj.target_prob = 0.234;
+    obj_pmmh.target_prob = 0.234;
 end
 
 % Init random walk stepsize for the part with diagonal covariance matrix
@@ -157,7 +186,7 @@ if isempty(rw_step)
     rw_step = cell(n_param, 1);
     % default values
     for i=1:n_param
-        rw_step{i} = 0.1/sqrt(obj.len)*ones(sample_dim{i});
+        rw_step{i} = 0.1/sqrt(obj_pmmh.len)*ones(sample_dim{i});
     end
 else
     for i=1:n_param
@@ -169,20 +198,20 @@ else
 end
 
 % Concatenate all log value in a vector
-obj.log_step = cell2mat(cellfun(@(x) log(x(:)), rw_step(:), 'UniformOutput', false));
+obj_pmmh.log_step = cell2mat(cellfun(@(x) log(x(:)), rw_step(:), 'UniformOutput', false));
 
 % Covariance matrix
-obj.rw_mean = [];
-obj.rw_cov = [];  
+obj_pmmh.rw_mean = [];
+obj_pmmh.rw_cov = [];  
 
 %% Define variable transformations
-obj.transform = cell(obj.len, 1);
-obj.transform_inv= cell(obj.len, 1);
-obj.transform_lderiv = cell(obj.len, 1);
+obj_pmmh.transform = cell(obj_pmmh.len, 1);
+obj_pmmh.transform_inv= cell(obj_pmmh.len, 1);
+obj_pmmh.transform_lderiv = cell(obj_pmmh.len, 1);
 
 k = 0;
 for i=1:n_param
-    len = prod(obj.dim{i});
+    len = prod(obj_pmmh.dim{i});
     if transform
         try
             support = matbiips('get_fixed_support', console, pn_param(i).name, ...
@@ -202,39 +231,39 @@ for i=1:n_param
         U = support(j,2);
         if isfinite(L)
             if isfinite(U) % lower-upper bounded support: logit transform
-                obj.transform{k} = @(x) log((x-L)/(U-x));
-                obj.transform_inv{k} = @(y) L+(U-L)/(1+exp(-y));
-                obj.transform_lderiv{k} = @(x) log(U-L)-log(x-L)-log(U-x);
+                obj_pmmh.transform{k} = @(x) log((x-L)/(U-x));
+                obj_pmmh.transform_inv{k} = @(y) L+(U-L)/(1+exp(-y));
+                obj_pmmh.transform_lderiv{k} = @(x) log(U-L)-log(x-L)-log(U-x);
             else
                 if (U<0)
                     error('upper can not be -Inf')
                 end
                 % lower bounded support: log transform
-                obj.transform{k} = @(x) log(x-L);
-                obj.transform_inv{k} = @(y) L+exp(y);
-                obj.transform_lderiv{k} = @(x) -log(x-L);
+                obj_pmmh.transform{k} = @(x) log(x-L);
+                obj_pmmh.transform_inv{k} = @(y) L+exp(y);
+                obj_pmmh.transform_lderiv{k} = @(x) -log(x-L);
             end
         else
             if (L>0)
                 error('lower can not be +Inf')
             end
             if isfinite(U) % upper bounded support: -log transform
-                obj.transform{k} = @(x) log(U-x);
-                obj.transform_inv{k} = @(y) U-exp(y);
-                obj.transform_lderiv{k} = @(x) -log(U-x);
+                obj_pmmh.transform{k} = @(x) log(U-x);
+                obj_pmmh.transform_inv{k} = @(y) U-exp(y);
+                obj_pmmh.transform_lderiv{k} = @(x) -log(U-x);
             else
                 if (U<0)
                     error('upper can not be -Inf')
                 end
                 % unbounded support: identity
-                obj.transform{k} = @(x) x;
-                obj.transform_inv{k} = @(y) y;
-                obj.transform_lderiv{k} = @(x) 0;
+                obj_pmmh.transform{k} = @(x) x;
+                obj_pmmh.transform_inv{k} = @(y) y;
+                obj_pmmh.transform_lderiv{k} = @(x) 0;
             end
         end
     end
 end
 
-obj.sample_param_tr = pmmh_rw_transform(sample_param, obj);
+obj_pmmh.sample_param_tr = pmmh_rw_transform(sample_param, obj_pmmh);
 
-obj.class = 'pmmh';
+obj_pmmh.class = 'pmmh';

@@ -1,32 +1,24 @@
 function [tab] = biips_table(samples, varargin)
-
-%
-% BIIPS_TABLE 1D frequency tables or probability mass estimates of dicrete variables
-% dens = biips_table(samples, 'PropertyName', PropertyValue, ...)
-%   INPUT
-%   - samples:  input structure containing either the output of a SMC algorithm
-%               or of a PIMH/PMMH algorithm.
-%   Optional inputs
-%   - type:             string containing the characters 'f', 's' and/or 'b'.
-%                       default is '' for all present fields in particles
+% BIIPS_TABLE Univariate frequency tables or probability mass estimates of discrete variables
+% tab = biips_table(samples, 'PropertyName', PropertyValue, ...)
+%   INPUT:
+%   - samples: structure containing either the output of a SMC algorithm
+%              as returned by BIIPS_SMC_SAMPLES or the output of a MCMC algorithm
+%              as returned by BIIPS_PIMH_SAMPLES or BIIPS_PMMH_SAMPLES
+%   Optional inputs:
+%   - type:             string containing the characters 'f' (fitering), 
+%                       's' (smoothing) and/or 'b' (backward smoothing).
+%                       Select fields of the input to be processed.
+%                       (default = 'fsb').
 %   OUTPUT
-%   - tab:             output structure whth the same fields as the input
-%                       samples structure. The leaves of the structure contain
-%                       the following fields:
-%                           * x: points of the density (n points in the range [min-4*bw, max+4*bw]
-%                           * f: values of the density at x
+%   - tab:   structure with the same nested fields as the input
+%             'samples' structure. Contains the following subfields:
+%            * x: locations
+%            * f: values of the mass at x
 %
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-% n_part = 100; variables = {'c'};
-% out_smc = biips_smc_samples(model_id, variables, n_part);
-% tables_smc = biips_table(out_smc);
-%
-% n_iter = 100;
-% out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part);
-% tables_pimh = biips_table(out_pimh);
+% %%% TODO: add example to demo
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -34,7 +26,7 @@ function [tab] = biips_table(samples, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 17-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 %% PROCESS AND CHECK INPUTS

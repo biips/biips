@@ -1,34 +1,66 @@
 function [summ] = biips_summary(samples, varargin)
-
-%
-% BIIPS_SUMMARY computes some statistics on selected variables
+% BIIPS_SUMMARY Compute some univariate summary statistics
 %  summ = biips_summary(samples, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT
-%   - samples:      input structure containing either the output of a SMC algorithm
-%                   or of a PIMH/PMMH algorithm.
+%   - samples: structure containing either the output of a SMC algorithm
+%              as returned by BIIPS_SMC_SAMPLES or the output of a MCMC algorithm
+%              as returned by BIIPS_PIMH_SAMPLES or BIIPS_PMMH_SAMPLES
 %   Optional inputs
-%   - type:         string containing the characters 'f', 's' and/or 'b'
-%   - probs:        vector of reals in ]0,1[. probability levels for quantiles.
-%                   default is [] for no quantile
+%   - type:             string containing the characters 'f' (fitering), 
+%                       's' (smoothing) and/or 'b' (backward smoothing).
+%                       Select fields of the input to be processed.
+%                       (default = 'fsb').
+%   - probs:        vector of reals. probability levels in ]0,1[ for quantiles.
+%                   (default = [])
 %   - order:        integer. Moment statistics of order below or equal to the
-%                   value are returned. Default is 1.
+%                   value are returned. (default = 1 if all components are
+%                   continuous variables and 0 otherwise)
 %   OUTPUT
-%   - summ:         output structure
-%
-%   See also BIIPS_SMC_SAMPLES, BIIPS_PIMH_SAMPLES, BIIPS_PMMH_SAMPLES
+%   - summ:   structure with the same nested fields as the input
+%             'samples' structure. Contains univariate marginal statistics.
+%             The subfields can be:
+%             * mean: if order>=1
+%             * var: variance, if order>=2
+%             * skew: skewness, if order>=3
+%             * kurt: kurtosis, if order>=4
+%             * probs: vector of quantile probabilities
+%             * quant: cell of quantile values, if probs is not empty
+%             * mode: most frequent values for discrete components
+% 
+%   See also BIIPS_SMC_SAMPLES, BIIPS_PIMH_SAMPLES, BIIPS_PMMH_SAMPLES,
+%   BIIPS_DENSITY, BIIPS_TABLE
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model_id = biips_model('model.bug', data)
-%
-% n_part = 100; variables = {'x'};
-% out_smc = biips_smc_samples(model_id, variables, n_part);
-% summ = biips_summary(out_smc, 'probs', [.025, .975]);
-%
-% n_iter = 100;
-% out_pimh = biips_pimh_samples(model_id, variables, n_iter, n_part)
-% summ_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
+% summ_smc = biips_summary(out_smc)
+% out_smc2 = getfield(out_smc, 'x[8:10]')
+% summ_smc = biips_summary(out_smc2)
+% summ_smc = biips_summary(out_smc2.f)
+% 
+% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
+% summ_smc = biips_summary(out_smc, 'order', 2, 'probs', [.025, .975]);
+% 
+% hold on
+% plot(model.data.x_true, 'g')
+% plot(summ_smc.x.f.mean, 'b')
+% plot(summ_smc.x.s.mean, 'r')
+% plot(summ_smc.x.f.quant{1}, '--b')
+% plot(summ_smc.x.f.quant{2}, '--b')
+% plot(summ_smc.x.s.quant{1}, '--r')
+% plot(summ_smc.x.s.quant{2}, '--r')
+% xlabel('t')
+% ylabel('x[t]')
+% legend('true', 'SMC filtering estimate', 'SMC smoothing estimate')
+% legend boxoff
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -36,7 +68,7 @@ function [summ] = biips_summary(samples, varargin)
 % Authors: Adrien Todeschini, Marc Fuentes, Fran�ois Caron
 % Copyright (C) Inria
 % License: GPL-3
-% Jan 2014; Last revision: 18-03-2014
+% Jan 2014; Last revision: 21-10-2014
 %--------------------------------------------------------------------------
 
 order_default = 1;
