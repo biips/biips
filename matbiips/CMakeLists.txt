@@ -19,6 +19,7 @@ endif()
 add_subdirectory(private)
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(demo)
 add_subdirectory(doc)
 
 file(GLOB mfiles *.m)
@@ -47,6 +48,10 @@ file(GLOB pvt_packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
     private/*.m
     private/*.${MEX_EXT}
 )
+file(GLOB demo_packfiles RELATIVE "${CMAKE_SOURCE_DIR}"
+    demo/*.m
+    demo/*.bug
+)
 
 if (_ext STREQUAL tar.gz)
     # using cmake -E
@@ -60,7 +65,7 @@ add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
   DEPENDS matbiips
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMAND ${ARCHIVE_COMMAND} ${MATBIIPS_ARCHIVE}
-  ${packfiles} ${pvt_packfiles}
+  ${packfiles} ${pvt_packfiles} ${demo_packfiles}
   COMMENT "Packaging Matbiips"
 )
 
