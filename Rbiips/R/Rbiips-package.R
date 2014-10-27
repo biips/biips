@@ -31,7 +31,7 @@
 ##' \href{http://alea.bordeaux.inria.fr}{ALEA} at
 ##' \href{http://www.inria.fr/en/centre/bordeaux}{Inria Bordeaux Sud-Ouest}.
 ##' @author \href{https://sites.google.com/site/adrientodeschini/}{Adrien Todeschini}
-##' @author \href{http://www.stats.ox.ac.uk/~caron/}{François Caron}
+##' @author \href{http://www.stats.ox.ac.uk/~caron/}{Francois Caron}
 ##' @author Marc Fuentes
 ##' @author Adapted from \pkg{rjags}.
 ##' @seealso \link[rjags:jags.model]{rjags}, \link[pomp:pomp-package]{pomp}
