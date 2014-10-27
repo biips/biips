@@ -35,6 +35,7 @@
 #'
 NULL
 
+#' Create \code{mcmcarray} object
 #' @param data      numerical vector
 #' @param dim       vector of integers
 #' @param dimnames  character vector
@@ -67,14 +68,14 @@ mcmcarray <- function(data = NA, dim = length(data), dimnames = NULL,
 
 #' @export
 #' @rdname mcmcarray-object
-#' @return The function \code{is.mcmcarray} returns TRUE if the object is of class \code{mcmcarray}.
+#' @return The function \code{is.mcmcarray} returns \code{TRUE} if the object is of class \code{mcmcarray}.
 is.mcmcarray <- function(object) {
     return(class(object) == "mcmcarray")
 }
 
 #' @export
 #' @rdname mcmcarray-object
-#' @return The function \code{is.mcmcarray.list} returns TRUE if the object is of class \code{mcmcarray.list}.
+#' @return The function \code{is.mcmcarray.list} returns \code{TRUE} if the object is of class \code{mcmcarray.list}.
 is.mcmcarray.list <- function(object) {
     return(class(object) == "mcmcarray.list")
 }
@@ -339,7 +340,7 @@ biips_hist.mcmcarray.list <- function(x, main = NULL, xlab = NULL,
 
 #' @importFrom graphics plot
 #' @export
-#' @seealso \code{\link{plot.table}}
+#' @seealso \code{\link[graphics]{plot.table}}
 plot.table.mcmcarray <- function(x, main = NULL, xlab = NULL,
     ylab = "Probability", ...) {
     for (d in 1:length(x)) {
@@ -350,7 +351,7 @@ plot.table.mcmcarray <- function(x, main = NULL, xlab = NULL,
 }
 
 #' @export
-#' @seealso \code{\link{plot.density}}
+#' @seealso \code{\link[stats]{plot.density}}
 plot.density.mcmcarray <- function(x, main = NULL, xlab = NULL,
     ...) {
     for (d in 1:length(x)) {
@@ -361,7 +362,7 @@ plot.density.mcmcarray <- function(x, main = NULL, xlab = NULL,
 }
 
 #' @export
-#' @seealso \code{\link{plot.histogram}}
+#' @seealso \code{\link[graphics]{plot.histogram}}
 plot.histogram.mcmcarray <- function(x, main = NULL, xlab = NULL,
     ...) {
     for (d in 1:length(x)) {
@@ -418,6 +419,7 @@ summary.mcmcarray.list <- function(object, ...) {
 #' @export
 #' @rdname mcmcarray-object
 #' @return The method \code{density} is an alias for \code{biips_density}.
+#' @seealso \code{\link[stats]{density}}
 density.mcmcarray <- function(x, ...) {
   return(biips_density(x, ...))
 }

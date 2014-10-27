@@ -13,11 +13,11 @@
 #'
 #' @param fun_check_param  R function which checks if
 #'                      the argument values are valid. Its arguments are the parameters values.
-#'                      Returns a boolean. (default returns TRUE)
-#' @param fun_is_discrete R function returning a boolean that is TRUE if the
+#'                      Returns a boolean. (default returns \code{TRUE})
+#' @param fun_is_discrete R function returning a boolean that is \code{TRUE} if the
 #'                      output is discrete. Its arguments are booleans
 #'                      indicating if the arguments are discrete.
-#'                      (default returns FALSE)
+#'                      (default returns \code{FALSE})
 #'
 #'   All the given R functions must have the same number of input
 #'   arguments.
@@ -105,8 +105,8 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample,
 #'                 in \code{data} corresponding to node arrays used in \code{file} are taken
 #'                 to represent the values of observed nodes in the model.
 #' @param sample_data   boolean. Toggle the evaluation of the 'data' block of the
-#'                 BUGS model that generates or transforms data. (default = TRUE).
-#' @param quiet    boolean. Deactivate verbosity. (default = FALSE).
+#'                 BUGS model that generates or transforms data. (default = \code{TRUE}).
+#' @param quiet    boolean. Deactivate verbosity. (default = \code{FALSE}).
 #'
 #' @return An object of class \code{biips} which can be used to generate samples from the
 #' posterior distribution of the parameters.
@@ -116,7 +116,7 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample,
 #' \item{ptr()}{Returns an external pointer to the compiled model object.}
 #' \item{file()}{Returns a string. filename of the BUGS model}
 #' \item{data()}{Returns a list. observed data of the model.}
-#' \item{model()}{Returns a character vector. BUGS-language representation of the model.}
+#' \item{model()}{Returns a character vector. BUGS language definition of the model.}
 #' \item{recompile()}{Recompiles the model using the original data set.}
 #' @keywords models graphs
 #' @export

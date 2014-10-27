@@ -1,4 +1,8 @@
+
+##' Initializes a Particle Independent Metropolis-Hastings algorithm
 ##' @export
+##' @param variable_names a character vector giving the names of variables to
+##' be monitored
 biips_pimh_init <- function(object, variable_names, ...) {
     stopifnot(is.biips(object))
     stopifnot(is.character(variable_names), length(variable_names) >
@@ -172,25 +176,18 @@ biips_pimh_update.pimh <- function(object, n_iter, n_part, thin = 1,
 
 ##' Generate Particle Independent Metropolis-Hastings samples
 ##'
-##' The \code{pimh_samples} function creates monitors for the given variables,
+##' The \code{biips_pimh_samples} function creates monitors for the given variables,
 ##' runs the model for \code{n_iter} iterations and returns the monitored
 ##' samples.
 ##'
-##' @param model a biips model object
-##' @param variable_names a character vector giving the names of variables to
-##' be monitored
-##' @param n_iter number of iterations of the Markov chain to run
-##' @param thin thinning interval for monitors
-##' @param n_part number of particles
-##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link[rjags:mcmcarray.object]{mcmcarray}}
-##' objects, with one element for each element of the \code{variable_names}
-##' argument.
-##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips_model}}, \code{\link{pmmh_samples}},
-##' \code{\link{smc_samples}}
-##' @keywords models
 ##' @export
+##' @param object a biips model object
+##' @param n_iter number of iterations of the PIMH.
+##' @param n_part number of particles.
+##' @param thin thinning interval for monitors.
+##' @param ... additional arguments to be passed to the SMC algorithm.
+##' @return A list of \code{\link{mcmcarray}} objects.
+##' @seealso \code{\link{biips_model}}
 ##' @examples
 ##'
 ##' ## Should be DIRECTLY executable !!

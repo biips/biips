@@ -113,12 +113,12 @@ deparse_varname <- function(name, lower = NULL, upper = lower) {
 }
 
 
-#' Preprocess the data (list or env) to list for stan
+#' Preprocess the data (list or env) to list.
 #' @param data  A list or an environment of objects.
 #' @details stop if no-name lists; duplicate names.
 #'   stop if the objects given name is not found.
 #'   remove NULL, non-numeric elements
-#' @author Adapted from rstan.
+#' @author Adapted from \pkg{rstan}.
 #' @keywords internal
 data_preprocess <- function(data) {
 

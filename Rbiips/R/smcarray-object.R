@@ -16,7 +16,7 @@
 #' and return a list with the same nested named members as the input object.
 #'
 #' @details
-#' Assuming \code{dim} is the dimension of the monitored variable, a \code{\link{smcarray}}
+#' Assuming \code{dim} is the dimension of the monitored variable, a \code{smcarray}
 #' object is a list with the members:
 #' \itemize{
 #'   \item \code{values}: array of dimension \code{c(dim, n_part)} with the values of the particles.
@@ -38,7 +38,7 @@
 #'   \item \code{type}: string with the type of monitor (\code{"filtering"}, \code{"smoothing"} or \code{"backward_smoothing"}).
 #' }
 #'
-#' For instance, if \code{out_smc} is a \code{\link{smcarray.fsb.list}} object,
+#' For instance, if \code{out_smc} is a \code{smcarray.fsb.list} object,
 #' one can access the values of the smoothing particles for the variable \code{"x"} with:
 #'     \code{out_smc$x$s$values}.
 #'
@@ -133,19 +133,19 @@ NULL
 
 #' @export
 #' @rdname smcarray-object
-#' @return The function \code{is.smcarray} returns TRUE if the object is of class \code{smcarray}.
+#' @return The function \code{is.smcarray} returns \code{TRUE} if the object is of class \code{smcarray}.
 is.smcarray <- function(object) {
     return(class(object) == "smcarray")
 }
 #' @export
 #' @rdname smcarray-object
-#' @return The function \code{is.smcarray.fsb} returns TRUE if the object is of class \code{smcarray.fsb}.
+#' @return The function \code{is.smcarray.fsb} returns \code{TRUE} if the object is of class \code{smcarray.fsb}.
 is.smcarray.fsb <- function(object) {
     return(class(object) == "smcarray.fsb")
 }
 #' @export
 #' @rdname smcarray-object
-#' @return The function \code{is.smcarray.fsb.list} returns TRUE if the object is of class \code{smcarray.fsb.list}.
+#' @return The function \code{is.smcarray.fsb.list} returns \code{TRUE} if the object is of class \code{smcarray.fsb.list}.
 is.smcarray.fsb.list <- function(object) {
     return(class(object) == "smcarray.fsb.list")
 }
@@ -174,7 +174,8 @@ biips_diagnosis <- function(object, ...) UseMethod("biips_diagnosis")
 #'  \code{"GOOD"}, otherwise it is \code{"BAD"}. (default=30).
 #' @param quiet  boolean. Disable message display. (default=\code{FALSE}).
 #'
-#' @return The method \code{biips_diagnosis} prints diagnosis of the SMC output and returns the minimum ESS value.
+#' @return The method \code{biips_diagnosis} prints diagnosis of the SMC output
+#'   and returns the minimum ESS value.
 biips_diagnosis.smcarray <- function(object, ess_thres = 30,
                                      quiet = FALSE, ...) {
   stopifnot(is.smcarray(object))
@@ -475,8 +476,8 @@ biips_density <- function(x, ...) UseMethod("biips_density")
 
 #' @export
 #' @rdname smcarray-object
-#' @param bw    either a real with the smoothing bandwidth to be used or
-#'   a string giving a rule to choose the bandwidth. See \code{\link{bw.nrd}}.
+#' @param bw   either a real with the smoothing bandwidth to be used or
+#'   a string giving a rule to choose the bandwidth. See \code{\link[stats]{bw.nrd}}.
 #'   (default=\code{"nrd0"})
 #' @return The method \code{biips_density} returns univariate marginal kernel density estimates.
 #'   The output innermost members are objects of class \code{density.smcarray}.
@@ -619,7 +620,7 @@ biips_density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
 
 #' @importFrom graphics plot
 #' @export
-#' @seealso \code{\link{plot.density}}
+#' @seealso \code{\link[stats]{plot.density}}
 plot.density.smcarray.fsb.univariate <- function(x, type = "l",
                                                  col = 1:6, pch = NULL, lwd = NULL, lty = NULL, main = NULL,
                                                  xlab = NULL, ylab="Density", xlim, ylim, ...) {
@@ -716,7 +717,7 @@ summary.smcarray.fsb.list <- function(object, ...) {
 #' @rdname smcarray-object
 #' @export
 #' @return The method \code{density} is an alias for \code{biips_density}.
-#' @seealso \code{\link{density}}
+#' @seealso \code{\link[stats]{density}}
 density.smcarray <- function(x, ...) {
   return(biips_density(x, ...))
 }

@@ -9,7 +9,7 @@ smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 ##' @param seed integer. RNG seed passed to Biips SMC algorithm
 ##' @param ... unused
 ##'
-##' @return A boolean. True if success.
+##' @return A boolean. \code{TRUE} if success.
 ##' @keywords internal
 smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5,
     rs_type = "stratified", seed = get_seed(), ...) {
@@ -62,9 +62,9 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #' @return A \code{\link{smcarray.fsb.list}} object, with one member for each variable in the \code{variable_names}
 #' argument and a member named \code{log_marg_like} with an estimate of the log marginal likelihood.
 #'
-#'   A \code{\link{smcarray.fsb.list}} object is a list of \code{smcarray.fsb} objects for
+#'   A \code{\link{smcarray.fsb.list}} object is a list of \code{\link{smcarray.fsb}} objects for
 #'   different variables.
-#'   Each \code{smcarray.fsb} object is a list of
+#'   Each \code{\link{smcarray.fsb}} object is a list of
 #'   \code{\link{smcarray}} object, with one member for each type of monitoring
 #'   (\code{f}, \code{s} and/or \code{b}) in the \code{type} argument.
 #'   Assuming \code{dim} is the dimension of the monitored variable, a \code{\link{smcarray}}

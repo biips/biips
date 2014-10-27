@@ -1,12 +1,12 @@
 #' Manipulate \code{biips} model objects.
 #'
 #' A \code{biips} object is returned by function \code{\link{biips_model}}.
-#' It represents a Bayesian graphical model described using the BUGS language.
+#' It represents a Bayesian graphical model described in BUGS language.
 #'
 #' @name biips-object
 #' @aliases biips is.biips print.biips variable.names.biips biips_variable_names
 #'   biips_nodes biips_print_dot biips_build_sampler
-#' @param ... Arguments to be passed to methods.
+#' @param ... Additional arguments to be passed to default methods.
 #' @param object,x \code{biips} model object as returned by \code{\link{biips_model}}.
 #' @seealso \code{\link{biips_model}}
 #' @examples
@@ -43,7 +43,7 @@ NULL
 
 #' @export
 #' @rdname biips-object
-#' @return The function \code{is.biips} returns TRUE if the object is of class \code{biips}.
+#' @return The function \code{is.biips} returns \code{TRUE} if the object is of class \code{biips}.
 is.biips <- function(object) {
   return(class(object) == "biips")
 }
@@ -80,7 +80,6 @@ biips_variable_names <- function(object, ...) UseMethod("biips_variable_names")
 #' @rdname biips-object
 #' @return The method \code{biips_variable_names} returns a character vector.
 #'   Names of node arrays used in the model.
-#' @method variable.names biips
 biips_variable_names.biips <- function(object, ...) {
     stopifnot(is.biips(object))
     variable_names <- Rbiips("get_variable_names", object$ptr())
@@ -101,7 +100,7 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #' @export
 #' @rdname biips-object
 #' @param type   string. Return only a specific type of node. Possible values are
-#'               'const', 'logic' or 'stoch'. default returns all types
+#'               \code{"const"}, \code{"logic"} or \code{"stoch"}. default returns all types
 #'               of nodes.
 #' @param observed  boolean. Return only observed or unobserved nodes.
 #'   default returns all.
@@ -111,8 +110,8 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #'   \itemize{
 #'     \item{\code{id}: integer. node ids.}
 #'     \item{\code{name}: string. node names.}
-#'     \item{\code{type}: string. node types ("const", "logic" or "stoch").}
-#'     \item{\code{observed}: boolean. TRUE if the node is observed.}
+#'     \item{\code{type}: string. node types (\code{"const"}, \code{"logic"} or \code{"stoch"}).}
+#'     \item{\code{observed}: boolean. \code{TRUE} if the node is observed.}
 #'
 #'     If the function is called after the sampler is built (by calling
 #'         \code{\link{biips_build_sampler}} or \code{\link{biips_smc_samples}}), it will also
@@ -170,15 +169,15 @@ biips_build_sampler <- function(object, ...) UseMethod("biips_build_sampler")
 #' @rdname biips-object
 #' @export
 #' @param proposal string. Keyword defining the type of proposal desired.
-#'              Possible values are "auto" and "prior". "auto" selects the best sampler
-#'              among available ones automatically. "prior" forces asignment of the prior
-#'              sampler to every node. "prior" switches off lots of instructions and can
-#'              speed up the startup of the SMC for big models. (default = "auto").
+#'              Possible values are \code{"auto"} and \code{"prior"}. "auto" selects the best sampler
+#'              among available ones automatically. \code{"prior"} forces asignment of the prior
+#'              sampler to every node. \code{"prior"} switches off lots of instructions and can
+#'              speed up the startup of the SMC for big models. (default = \code{"auto"}).
 #'
 #' @return The method \code{biips_build_sampler} assigns a sampler to each node of the graph.
 #'   In case you want to specify the proposal used by the SMC algorithm.
-#'   This function has to be called before \code{\link{biips_smc_sample}}.
-#'   Otherwise, it will be automatically called by \code{\link{biips_smc_sample}}
+#'   This function has to be called before \code{\link{biips_smc_samples}}.
+#'   Otherwise, it will be automatically called by \code{\link{biips_smc_samples}}
 #'   with the default parameters.
 biips_build_sampler.biips <- function(object, proposal = "auto",
     ...) {
@@ -239,12 +238,12 @@ is_monitored.biips <- function(object, variable_names, type = "s",
 
 clear_monitors <- function(object, ...) UseMethod("clear_monitors")
 
-#' Clears monitors
+#' Clear monitors
 #' @param object \code{biips} model object
-#' @param type string with characters 'f' (filtering), 's' (smoothing) and/or
-#'   'b' (backward smoothing).
-#' @param release_only boolean. If TRUE, only releases memory occupied by monitors.
-#'   Information about monitored nodes is still present. If FALSE clears all
+#' @param type string with characters \code{'f'} (filtering), \code{'s'} (smoothing) and/or
+#'   \code{'b'} (backward smoothing).
+#' @param release_only boolean. If \code{TRUE}, only releases memory occupied by monitors.
+#'   Information about monitored nodes is still present. If \code{FALSE} clears all
 #'   information about monitored nodes as well as memory.
 #' @keywords internal
 clear_monitors.biips <- function(object, type = "fsb", release_only = FALSE,
