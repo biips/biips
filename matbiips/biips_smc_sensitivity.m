@@ -1,6 +1,6 @@
 function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
     n_part, varargin)
-% BIIPS_SMC_SENSITIVITY Perform sensitivity analysis of parameters with SMC
+% BIIPS_SMC_SENSITIVITY Perform sensitivity analysis of parameters with SMC.
 %  out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 %    n_part, 'PropertyName', propertyvalue, ...)
 %
@@ -14,14 +14,8 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 %   - n_part:       integer. Number of particles.
 % 
 %   Optional Inputs:
-%   - rs_thres:    real. Threshold for the adaptive SMC resampling. (default = 0.5)
-%                   * if 'rs_thres' is in [0,1], resampling occurs when
-%                     (ESS < rs_thres * n_part)
-%                   * if 'rs_thres' is in [2,n_part], resampling occurs when
-%                     (ESS < rs_thres)
-%   - rs_type:     string. Name of the algorithm used for the SMC resampling.
-%                   Possible values are 'stratified', 'systematic',
-%                   'residual', 'multinomial'. (default = 'stratified')
+%   - rs_thres, rs_type, ... : Additional arguments to be passed to the SMC
+%      algorithm. See BIIPS_SMC_SAMPLES for for details.
 %
 %   OUTPUT:
 %   - out_sens:  Structure with the following fields:
@@ -44,6 +38,7 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 % 
 % data = struct('tmax', 10, 'logtau', log(10));
 % model = biips_model(modelfile, data, 'sample_data', true);
+% 
 % n_part = 50;
 % logtau_val = -10:10;
 % out_sens = biips_smc_sensitivity(model, {'logtau'}, {logtau_val}, n_part);
@@ -52,14 +47,14 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 % subplot(2,1,1); hold on
 % title('SMC sensitivity')
 % plot(logtau_val, out_sens.log_marg_like)
-% plot(logtau, min(out_sens.log_marg_like), 'g^', 'markerfacecolor', 'g')
+% plot(data.logtau, min(out_sens.log_marg_like), 'g^', 'markerfacecolor', 'g')
 % xlabel('logtau')
 % ylabel('log marginal likelihood')
 % 
 % subplot(2,1,2); hold on
 % plot(logtau_val, out_sens.log_marg_like_pen)
 % yl = ylim;
-% plot(logtau, yl(1), 'g^', 'markerfacecolor', 'g')
+% plot(data.logtau, yl(1), 'g^', 'markerfacecolor', 'g')
 % xlabel('logtau')
 % ylabel('penalized log marginal likelihood')
 %--------------------------------------------------------------------------

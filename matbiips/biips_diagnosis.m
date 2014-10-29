@@ -1,5 +1,5 @@
 function diagn = biips_diagnosis(samples, varargin)
-% BIIPS_DIAGNOSIS Diagnosis of the SMC algorithm
+% BIIPS_DIAGNOSIS Diagnosis of the SMC algorithm.
 % diagn = biips_diagnosis(samples, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT

@@ -1,23 +1,16 @@
 function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
-% BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm
+% BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm.
 % [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part, 'PropertyName', PropertyValue, ...)
 %
 %   INPUT: 
-%   - obj_pimh:     structure. PIMH object as returned by BIIPS_PIMH_INIT
-%   - n_iter:       integer. Number of burn-in iterations
-%   - n_part:       integer. Number of particles used in SMC algorithms
+%   - obj_pimh:     structure. PIMH object as returned by BIIPS_PIMH_INIT.
+%   - n_iter:       integer. Number of burn-in iterations.
+%   - n_part:       integer. Number of particles used in SMC algorithms.
 %   Optional Inputs:
-%   - thin :        integer. Returns samples every 'thin' iterations
-%                   (default = 1)
-%   - rs_thres :    real. Threshold for the adaptive SMC resampling.
-%                   (default = 0.5)
-%                   * if 'rs_thres' is in [0,1], resampling occurs when
-%                     (ESS < rs_thres * n_part)
-%                   * if 'rs_thres' is in [2,nb_part], resampling occurs when
-%                     (ESS < rs_thres)
-%   - rs_type :     string. The type of algorithm used for the SMC resampling.
-%                   Possible values are 'stratified', 'systematic',
-%                   'residual', 'multinomial'. (default = 'stratified')
+%   - thin :        integer. Thinning interval. Returns samples every 'thin' iterations
+%                   (default = 1
+%   - rs_thres, rs_type, ... : Additional arguments to be passed to the SMC
+%      algorithm. See BIIPS_SMC_SAMPLES for for details.
 % 
 %   OUTPUT
 %   - obj_pimh:     structure. updated PIMH object
@@ -27,13 +20,15 @@ function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, var
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model = biips_model('model.bug', data)
-% variables = {'x'};
-% n_burn = 1000; n_iter = 1000; n_part = 100;
-% obj_pimh = biips_pimh_init(model, variables); %Initialize
-% obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % Burn-in
-% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part); % Samples
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% n_part = 50;
+% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 200, n_part); % Burn-in
+% [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 200, n_part); % Samples
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

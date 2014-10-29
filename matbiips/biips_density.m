@@ -1,5 +1,5 @@
 function [dens] = biips_density(samples, varargin)
-% BIIPS_DENSITY Computes univariate marginal kernel density estimates
+% BIIPS_DENSITY Univariate marginal kernel density estimates.
 %   dens = biips_density(samples, 'PropertyName', PropertyValue, ...)
 %   INPUT:
 %   - samples: structure containing either the output of a SMC algorithm

@@ -5,20 +5,24 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %
 %   INPUT 
 %   - model:    Biips model as returned by the BIIPS_MODEL function
-%   - param_names:  cell of strings. The list of variables to be
-%                   updated with MH proposal. Other are updated with SMC
+%   - param_names:  cell of strings. The names of the variables to be
+%                   updated with MH proposal. Other are updated with SMC. 
+%                   The names can contain subset indices which must define a valid subset of 
+%                   the variables of the model.
+%                   Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
 %   Optional Inputs:
-%   - latent_names: cell of strings. The list of variables updated 
-%                   with SMC proposal that need to be monitored.
+%   - latent_names: cell of strings. The names of the variables to be
+%                   updated with SMC proposal that need to be monitored.
 %   - inits:        cell of numeric values of the same length as param_names.
-%                   Init values for the parameters. (default = samples from
-%                   the prior)
+%                   Init values for the parameters in param_names.
+%                   (default = samples from the prior distribution)
 %   - transform:    boolean. Activate automatic parameters transformation (default = true).
 %                   Transformations applies independently to each component 
 %                   of the parameters depending on their support:
-%                       * [L, +Inf): f(x) = log(x-L)
-%                       * (-Inf, U]: f(x) = log(U-x)
-%                       * [L, U]:    f(x) = log((x-L)/(U-x))
+%                       * unbounded (-Inf, +Inf): f(x) = x
+%                       * lower bounded [L, +Inf): f(x) = log(x-L)
+%                       * upper bounded (-Inf, U]: f(x) = log(U-x)
+%                       * lower-upper bounded [L, U]: f(x) = log((x-L)/(U-x))
 %                   so that we apply random walk on unbounded variables.
 %   - rw_step:      cell of numeric values of the same length as
 %                   param_names. Random walk standard deviations. If
@@ -65,13 +69,17 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %   See also BIIPS_MODEL, BIIPS_PMMH_UPDATE, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
-% param_names = {'log_prec_y'};
-% latent_names = {'x'};
-% obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
-% obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, samples_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-%     'thin', thin); 
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% logtau_true = 10;
+% data = struct('tmax', 10);
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
+% [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

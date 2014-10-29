@@ -8,17 +8,10 @@ function [obj_pimh, samples_pimh, varargout] = biips_pimh_samples(obj_pimh, n_it
 %   - n_iter:       integer. Number of iterations
 %   - n_part:       integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
-%   - thin :        integer. Returns samples every 'thin' iterations
+%   - thin :        integer. Thinning interval. Returns samples every 'thin' iterations
 %                   (default = 1)
-%   - rs_thres :    real. Threshold for the adaptive SMC resampling.
-%                   (default = 0.5)
-%                   * if 'rs_thres' is in [0,1], resampling occurs when
-%                     (ESS < rs_thres * n_part)
-%                   * if 'rs_thres' is in [2,nb_part], resampling occurs when
-%                     (ESS < rs_thres)
-%   - rs_type :     string. The type of algorithm used for the SMC resampling.
-%                   Possible values are 'stratified', 'systematic',
-%                   'residual', 'multinomial'. (default = 'stratified')
+%   - rs_thres, rs_type, ... : Additional arguments to be passed to the SMC
+%      algorithm. See BIIPS_SMC_SAMPLES for for details.
 %
 %   OUTPUT:
 %   - obj_pimh:     structure. updated PIMH object
@@ -29,13 +22,55 @@ function [obj_pimh, samples_pimh, varargout] = biips_pimh_samples(obj_pimh, n_it
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_UPDATE
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% data = struct('var1', 0, 'var2', 1.2);
-% model = biips_model('model.bug', data)
-% variables = {'x'};
-% n_burn = 1000; n_iter = 1000; n_part = 100;
-% obj_pimh = biips_pimh_init(model, variables); %Initialize
-% obj_pimh = biips_pimh_update(obj_pimh, n_burn, n_part); % Burn-in
-% [obj_pimh, samples_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part); % Samples
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'logtau', log(10));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% n_part = 50;
+% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 200, n_part); % Burn-in
+% [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 200, n_part); % Samples
+% 
+% out_pimh
+% summ_pimh = biips_summary(out_pimh)
+% dens_pimh = biips_density(out_pimh)
+% 
+% out_pimh.x
+% summ_pimh = biips_summary(out_pimh.x)
+% dens_pimh = biips_density(out_pimh.x)
+% 
+% figure
+% subplot(2,2,1); hold on
+% plot([lml_pimh_burn, lml_pimh])
+% xlabel('PIMH iteration')
+% ylabel('log marginal likelihood')
+% 
+% subplot(2,2,2); hold on
+% plot(0, model.data.x_true(1), 'g>', 'markerfacecolor', 'g')
+% plot(out_pimh.x(1,:))
+% xlabel('PIMH iteration')
+% ylabel('x[1]')
+% 
+% summ_pimh = biips_summary(out_pimh, 'order', 2, 'probs', [.025, .975]);
+% 
+% subplot(2,2,3); hold on
+% plot(model.data.x_true, 'g')
+% plot(summ_pimh.x.mean, 'b')
+% plot(summ_pimh.x.quant{1}, '--b')
+% plot(summ_pimh.x.quant{2}, '--b')
+% xlabel('t')
+% ylabel('x[t]')
+% legend('true', 'PIMH estimate')
+% legend boxoff
+% 
+% dens_pimh = biips_density(out_pimh);
+% 
+% subplot(2,2,4); hold on
+% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_pimh.x(1).x, dens_pimh.x(1).f, 'b')
+% xlabel('x[1]')
+% ylabel('posterior density')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

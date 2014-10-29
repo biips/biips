@@ -113,11 +113,11 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample,
 #'
 #' An object of class \code{biips} is a list of functions that share a common
 #' environment. The functions can be used to query information on the model.
-#' \item{ptr()}{Returns an external pointer to the compiled model object.}
-#' \item{file()}{Returns a string. filename of the BUGS model}
-#' \item{data()}{Returns a list. observed data of the model.}
-#' \item{model()}{Returns a character vector. BUGS language definition of the model.}
-#' \item{recompile()}{Recompiles the model using the original data set.}
+#' \item{ptr()}{Get an external pointer to the compiled model object.}
+#' \item{file()}{Get a string. filename of the BUGS model}
+#' \item{data()}{Get a named list of the original data of the model.}
+#' \item{model()}{Get a character vector. BUGS language definition of the model.}
+#' \item{recompile()}{Recompile the model using the original data set.}
 #' @keywords models graphs
 #' @export
 #' @seealso \code{\link{biips_variable_names}}, \code{\link{biips_nodes}},

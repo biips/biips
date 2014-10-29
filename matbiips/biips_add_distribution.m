@@ -1,5 +1,5 @@
 function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
-% BIIPS_ADD_DISTRIBUTION Add a user-defined distribution to the BUGS language
+% BIIPS_ADD_DISTRIBUTION Add a user-defined distribution to the BUGS language.
 %   Currently, the added sampling distributions can only define 
 %   unobserved nodes.
 % 

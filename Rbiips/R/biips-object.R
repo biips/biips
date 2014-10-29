@@ -4,8 +4,7 @@
 #' It represents a Bayesian graphical model described in BUGS language.
 #'
 #' @name biips-object
-#' @aliases biips is.biips print.biips variable.names.biips biips_variable_names
-#'   biips_nodes biips_print_dot biips_build_sampler
+#' @aliases biips biips_variable_names biips_nodes biips_print_dot biips_build_sampler
 #' @param ... Additional arguments to be passed to default methods.
 #' @param object,x \code{biips} model object as returned by \code{\link{biips_model}}.
 #' @seealso \code{\link{biips_model}}
@@ -74,6 +73,7 @@ print.biips <- function(x, ...) {
   return(invisible())
 }
 
+#' @export
 biips_variable_names <- function(object, ...) UseMethod("biips_variable_names")
 
 #' @export
@@ -95,6 +95,7 @@ variable.names.biips <- function(object, ...) {
   return(biips_variable_names(object, ...))
 }
 
+#' @export
 biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 
 #' @export
@@ -151,6 +152,7 @@ biips_nodes.biips <- function(object, type, observed, ...) {
     return(sorted_nodes)
 }
 
+#' @export
 biips_print_dot <- function(object, ...) UseMethod("biips_print_dot")
 
 #' @export
@@ -164,6 +166,7 @@ biips_print_dot.biips <- function(object, file, ...) {
     return(invisible())
 }
 
+#' @export
 biips_build_sampler <- function(object, ...) UseMethod("biips_build_sampler")
 
 #' @rdname biips-object

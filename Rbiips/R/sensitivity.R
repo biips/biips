@@ -7,17 +7,8 @@
 #'                      dimension is equal to the number of values for which
 #'                      we want to study sensitivity.
 #' @param n_part        integer. Number of particles.
-#' @param ... additional arguments to be passed to the SMC algorithm
-#' @param rs_thres     real. Threshold for the adaptive SMC resampling. (default = 0.5)
-#'   \itemize{
-#'     \item if \code{rs_thres} is in \code{[0,1]}, resampling occurs when
-#'                     \code{ESS < rs_thres * n_part}.
-#'     \item if \code{rs_thres} is in \code{[2,n_part]}, resampling occurs when
-#'                     \code{ESS < rs_thres}.
-#'   }
-#' @param rs_type      string. Name of the algorithm used for the SMC resampling.
-#'                   Possible values are \code{"stratified"}, \code{"systematic"},
-#'                   \code{"residual"}, \code{"multinomial"}. (default = \code{"stratified"})
+#' @param rs_thres,rs_type,... Additional arguments to be passed to the SMC algorithm.
+#'   See \code{\link{biips_smc_samples}} for more details.
 #'
 #' @return \code{biips_smc_sensitivity} returns a list with the following members:
 #' \item{log_marg_like}{vector of log marginal likelihood
@@ -45,13 +36,13 @@
 #' par(mfrow = c(2, 1))
 #' plot(logtau_val, out_sens$log_marg_like, type = "l", col = "blue",
 #'      xlab = "logtau", ylab = "log p(y|logtau) ", main = "SMC sensitivity")
-#' points(logtau, min(out_sens$log_marg_like), pch = 17, col = "green")
+#' points(data$logtau, min(out_sens$log_marg_like), pch = 17, col = "green")
 #'
 #' plot(logtau_val, out_sens$log_marg_like_pen, type = "l", col = "blue",
 #'      xlab = "logtau", ylab = "log p(y|logtau)+log p(logtau)")
 #' plml <- out_sens$log_marg_like_pen
 #' ymin <- min(plml[is.finite(plml)])
-#' points(logtau, ymin, pch = 17, col = "green")
+#' points(data$logtau, ymin, pch = 17, col = "green")
 biips_smc_sensitivity <- function(object, param_values, n_part,
     ...) {
     stopifnot(is.biips(object))

@@ -1,9 +1,9 @@
 function nodes = biips_nodes(model, varargin)
-% BIIPS_NODES Table of nodes of the current model
+% BIIPS_NODES Table of nodes of the Biips model.
 % nodes = biips_nodes(model)
 %
 %   INPUT
-%   - model:   Biips model as returned by the BIIPS_MODEL function
+%   - model:   Biips model as returned by the BIIPS_MODEL function.
 % 
 %   Optional input parameters
 %   - type:     string. Return only a specific type of node. Possible values are

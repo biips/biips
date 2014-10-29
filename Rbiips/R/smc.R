@@ -37,7 +37,7 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #' @export
 #' @rdname biips_smc_samples
 #' @param object \code{biips} model object as returned by \code{\link{biips_model}}.
-#' @param variable_names  character vector. Contains the names of the
+#' @param variable_names  character vector. The names of the
 #'                      unobserved variables to monitor.
 #'                      Example: \code{c("var1", "var2[1]", "var3[1:10]", "var4[1, 5:10, 3]")}.
 #'                      Subset indices must define a valid subset of the variables
@@ -59,12 +59,13 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #'                   \code{"residual"}, \code{"multinomial"}. (default = \code{"stratified"})
 #' @param ... additional arguments to pass to internal functions
 #'
-#' @return A \code{\link{smcarray.fsb.list}} object, with one member for each variable in the \code{variable_names}
-#' argument and a member named \code{log_marg_like} with an estimate of the log marginal likelihood.
+#' @return A \code{\link{smcarray.fsb.list}} object, with one named member for each
+#'   monitored variable in the \code{variable_names} argument and a member named
+#'   \code{log_marg_like} with an estimate of the log marginal likelihood.
 #'
-#'   A \code{\link{smcarray.fsb.list}} object is a list of \code{\link{smcarray.fsb}} objects for
+#'   A \code{\link{smcarray.fsb.list}} object is a named list of \code{\link{smcarray.fsb}} objects for
 #'   different variables.
-#'   Each \code{\link{smcarray.fsb}} object is a list of
+#'   Each \code{\link{smcarray.fsb}} object is a named list of
 #'   \code{\link{smcarray}} object, with one member for each type of monitoring
 #'   (\code{f}, \code{s} and/or \code{b}) in the \code{type} argument.
 #'   Assuming \code{dim} is the dimension of the monitored variable, a \code{\link{smcarray}}

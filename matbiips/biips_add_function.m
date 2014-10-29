@@ -1,5 +1,5 @@
 function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
-% BIIPS_ADD_FUNCTION Add a Matlab function to the BUGS language
+% BIIPS_ADD_FUNCTION Add a user-defined function to the BUGS language.
 %   biips_add_function(name, n_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:

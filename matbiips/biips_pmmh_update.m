@@ -8,18 +8,11 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 %   - n_iter:       integer. Number of adaptation and burn-in iterations
 %   - n_part:       integer. Number of particles used in SMC algorithms
 %   Optional Inputs:
-%   - thin:         integer. Returns output every 'thin' iterations
+%   - thin:         integer. Thinning interval. Returns output every 'thin' iterations
 %                   (default = 1)
 %   - rw_adapt:     boolean. Activate adaptation of the proposal (default=true)
-%   - rs_thres :    real. Threshold for the adaptive SMC resampling.
-%                   (default = 0.5)
-%                   * if 'rs_thres' is in [0,1], resampling occurs when
-%                     (ESS < rs_thres * n_part)
-%                   * if 'rs_thres' is in [2,nb_part], resampling occurs when
-%                     (ESS < rs_thres)
-%   - rs_type :     string. The type of algorithm used for the SMC resampling.
-%                   Possible values are 'stratified', 'systematic',
-%                   'residual', 'multinomial'. (default = 'stratified')
+%   - rs_thres, rs_type, ... : Additional arguments to be passed to the SMC
+%      algorithm. See BIIPS_SMC_SAMPLES for for details.
 %   - max_fail:    integer. maximum number of failed SMC algorithms allowed.
 %                  (default=0)
 %
@@ -39,13 +32,17 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 %   See also BIIPS_MODEL, BIIPS_PMMH_INIT, BIIPS_PMMH_SAMPLES
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% n_burn = 2000; n_iter = 2000; thin = 1; n_part = 50; 
-% param_names = {'log_prec_y';}
-% latent_names = {'x'};
-% obj_pmmh = biips_pmmh_init(model, param_names, 'latent_names', latent_names, 'inits', {-2});
-% obj_pmmh = biips_pmmh_update(obj_pmmh, n_burn, n_part); 
-% [obj_pmmh, samples_pmmh, log_marg_like_pen, log_marg_like, info_pmmh] = biips_pmmh_samples(obj_pmmh, n_iter, n_part,...
-%     'thin', thin); 
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% logtau_true = 10;
+% data = struct('tmax', 10);
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
+% [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

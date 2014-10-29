@@ -1,5 +1,5 @@
 function [summ] = biips_summary(samples, varargin)
-% BIIPS_SUMMARY Compute some univariate summary statistics
+% BIIPS_SUMMARY Univariate marginal summary statistics.
 %  summ = biips_summary(samples, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT
@@ -76,7 +76,7 @@ is_mcmc = isnumeric(samples);
 is_smc = ~is_mcmc && is_smc_array(samples);
 is_smc_fsb = ~is_mcmc && ~is_smc && has_fsb_fields(samples);
 if is_mcmc
-    mode = all(floor(samples) == samples);
+    mode = all(floor(samples(:)) == samples(:));
 elseif is_smc
     mode = all(samples.discrete(:));
     % by default, do not return the mean if all the components are discrete

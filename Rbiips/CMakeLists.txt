@@ -13,6 +13,8 @@ set(PKG_FILES ${PKG_FILES} cleanup configure.ac configure COPYING DESCRIPTION NA
 # add subdirectories
 add_subdirectory(R)
 add_subdirectory(src)
+add_subdirectory(inst)
+add_subdirectory(demo)
 
 
 # add command to copy files in PKG_FILES to PKG_BIN_DIR

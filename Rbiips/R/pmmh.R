@@ -1,7 +1,8 @@
 
+#' @keywords internal
 pmmh_set_param <- function(object, ...) UseMethod("pmmh_set_param")
 
-##' @keywords internal
+#' @keywords internal
 pmmh_set_param.biips <- function(object, param_names, pn_param,
     values) {
 
@@ -45,17 +46,98 @@ pmmh_set_param.biips <- function(object, param_names, pn_param,
 }
 
 
-##' Initialize a Particle Marginal Metropolis-Hastings algorithm.
-##' @export
-##' @param param_names a character vector giving the variables uptaded with MCMC
-##' @param latent_names a character vector giving the variables uptaded with SMC
-##'  that you want to monitor
-##' @param n_rescale integer
-biips_pmmh_init <- function(object, param_names, latent_names = c(),
+#' Create PMMH objects.
+#'
+#' The function \code{biips_pmmh_init} initializes the Particle Marginal Metropolis-Hastings algorithm.
+#'
+#' @export
+#' @param model \code{biips} model object as returned by \code{\link{biips_model}}.
+#' @param param_names  character vector. The names of the variables updated with
+#'                      MH proposal. Other are updated with SMC. The names can contain subset
+#'                      indices which must define a valid subset of the variables
+#'                      of the model.
+#'                      Example: \code{c("var1", "var2[1]", "var3[1:10]", "var4[1, 5:10, 3]")}.
+#' @param latent_names  character vector. The names of the variables to be
+#'                    updated with SMC proposal that need to be monitored.
+#' @param inits       list of numeric values. Initial values for the parameters in \code{param_names}.
+#'                   (default = samples from the prior distribution). \code{inits}
+#'                   can either be a named list with no unnamed member or an unnamed list
+#'                    of the same length as \code{param_names}.
+#' @param transform   boolean. Activate automatic parameters transformation (default = \code{TRUE}).
+#'                   Transformations applies independently to each component
+#'                   of the parameters depending on their support:
+#'                   \itemize{
+#'                     \item unbounded (-\eqn{\infty}, +\eqn{\infty}): f(x) = x
+#'                     \item lower bounded [L, +\eqn{\infty}): f(x) = log(x-L)
+#'                     \item upper bounded (-\eqn{\infty}, U]: f(x) = log(U-x)
+#'                     \item lower-upper bounded [L, U]: f(x) = log((x-L)/(U-x))
+#'                   }
+#'                   so that we apply random walk on unbounded variables.
+#' @param rw_step   list of numeric values. Random walk standard deviations. \code{rw_step}
+#'                   can either be a named list with no unnamed member or an unnamed list
+#'                    of the same length as \code{param_names}. If \code{transform}
+#'                    is \code{TRUE} (default), the given steps apply to the
+#'                   transformed space. Set \code{transform} to \code{FALSE} if you wish to give steps in the
+#'                   untransformed space.
+#' @param n_rescale     integer. Number of iterations for rescaling (default = 400).
+#' @param alpha         real in [0,1]. Tuning parameter of the rescaling (default = 0.99).
+#' @param beta          real in [0,1]. Tuning parameter of the proposal (default = 0.05).
+#'
+#' @return The function \code{biips_pmmh_init} returns an object of class \code{pmmh}
+#' which can be used to generate samples from the
+#' posterior distribution of the monitored variables in \code{param_names} and
+#'  \code{latent_names}.
+#'
+#' An object of class \code{pmmh} is a list of functions that share a common
+#' environment. These functions are meant for internal purpose only.
+#' They are used to query information on the current state of the algorithm.
+#' \item{model()}{Get the \code{\link{biips}} model object.}
+#' \item{param_names()}{Get a character vector with the names of the monitored parameters.}
+#' \item{latent_names()}{Get a character vector with the names of the monitored latents.}
+#' \item{sample_param(sample)}{Get and set the current sample value of the parameters.}
+#' \item{sample_param_tr(sample)}{Get and set the current sample value of the transfromed parameters.}
+#' \item{sample_latent(sample)}{Get and set the current sample value of the latents.}
+#' \item{log_prior(log_prior)}{Get and set the current value of the log prior of the parameters.}
+#' \item{log_marg_like(log_marg_like)}{Get and set the current value of the log marginal likelihood.}
+#' \item{n_iter()}{Get and set the current curent number of iterations.}
+#' \item{n_rescale()}{Get the nb of iterations for rescaling.}
+#' \item{rw_dim()}{Get the dimensions of the parameters.}
+#' \item{rw_len()}{Get the total length of the parameters.}
+#' \item{rw_step()}{Get the random walk standard deviations for the
+#'               rescaling.}
+#' \item{rw_cov()}{Get the empirical covariance matrix of the samples.}
+#' \item{rw_alpha()}{Get the tuning parameter of the rescaling.}
+#' \item{rw_beta()}{Get the tuning parameter of the proposal.}
+#'
+#' \item{rw_transform(sample, funtype = "transform")}{Applies transformation function
+#'   defined by the \code{funtype} string argument. Possible values are
+#'   \code{"transform"} (direct transformation), \code{"inverse"} (inverse
+#'   transformation) and \code{"lderiv"} (log derivative of the transformation). }
+#' \item{rw_rescale(ar)}{rescales the random walk step to target an optimal acceptance rate}
+#' \item{rw_learn_cov()}{update the empirical covariance matrix of the samples.}
+#'
+#' @seealso \code{\link{biips_model}}, \code{\link{biips_pmmh_update}},
+#'   \code{\link{biips_pmmh_samples}}
+#'
+#' @examples
+#' modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
+#' stopifnot(nchar(modelfile)>0)
+#'
+#' logtau_true <- 10
+#' data <- list(tmax = 10)
+#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#'
+#' n_part <- 50
+#' obj_pmmh <- biips_pmmh_init(model, "logtau", latent_names = "x",
+#'                             inits = list(logtau = -2))  # Initialize
+#' is.pmmh(obj_pmmh)
+#' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
+#' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
+biips_pmmh_init <- function(model, param_names, latent_names = c(),
     inits = list(), rw_step = list(), transform = TRUE, n_rescale = 400,
     alpha = 0.99, beta = 0.05, ...) {
     ## check arguments
-    stopifnot(is.biips(object))
+    stopifnot(is.biips(model))
     stopifnot(is.logical(transform), length(transform) == 1)
     stopifnot(is.numeric(n_rescale), length(n_rescale) == 1,
         n_rescale >= 1, is.finite(n_rescale))
@@ -123,7 +205,7 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(),
     Rbiips("message", "Initializing PMMH")
 
     ## Clone console
-    model <- clone_model(object)
+    model <- clone_model(model)
 
     ## Init the parameters of the random walk
     sample_param <- pmmh_set_param(model, param_names, pn_param,
@@ -337,12 +419,23 @@ biips_pmmh_init <- function(object, param_names, latent_names = c(),
     return(obj_pmmh)
 }
 
-##' @export
+#' Manipulate PMMH objects.
+#'
+#' @name pmmh-object
+#' @aliases pmmh biips_pmmh_update biips_pmmh_samples
+#' @param object a \code{pmmh} object as returned by \code{\link{biips_pmmh_init}}.
+#' @seealso \code{\link{biips_pmmh_init}}
+NULL
+
+
+#' @rdname pmmh-object
+#' @export
+#' @return The function \code{is.pmmh} returns \code{TRUE} if the object is of class \code{pmmh}.
 is.pmmh <- function(object) {
     return(class(object) == "pmmh")
 }
 
-##' @keywords internal
+#' @keywords internal
 pmmh_rw_proposal <- function(object) {
     # concatenate all variables in a vector always in the order
     # of rw_dim
@@ -386,8 +479,8 @@ pmmh_rw_proposal <- function(object) {
 }
 
 
-##' Realize one step of the PMMH algorithm
-##' @keywords internal
+#' Realize one step of the PMMH algorithm.
+#' @keywords internal
 pmmh_one_update <- function(object, pn_param, n_part, rw_rescale,
     rw_learn, ...) {
 
@@ -525,7 +618,7 @@ pmmh_one_update <- function(object, pn_param, n_part, rw_rescale,
 
 pmmh_algo <- function(object, ...) UseMethod("pmmh_algo")
 
-##' @keywords internal
+#' @keywords internal
 pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples,
     thin = 1, max_fail = 0, rw_adapt = FALSE, output = "p", ...) {
     stopifnot(is.pmmh(object))
@@ -700,45 +793,69 @@ pmmh_algo.pmmh <- function(object, n_iter, n_part, return_samples,
 
 
 
-##' @export
+#' @export
 biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 
-##' Update Particle Marginal Metropolis-Hastings samples
-##'
-##' The \code{update.pmmh} function creates monitors for the given variables,
-##' runs the model for \code{n_iter} iterations and returns the monitored
-##' samples.
-##'
-##' @param model a biips model object
-##' @param param_names character vector. names of the variables uptaded with MCMC
-##' @param n_iter integer. number of iterations of the Markov chain
-##' @param n_part integer. number of particles of the SMC
-##' @param max_fail integer. maximum number of failures allowed
-##' @param inits named list of initial values for the variables in param_names.
-##' If empty, inits are sampled from the prior.
-##' @param rw_step positive steps of the random walk (std. dev. of the proposal
-##' kernel). If numeric,  the value is duplicated for all variables.
-##' If named list, the numeric components are assigned to the named variables.
-##' If unnamed list, the numeric components are assigned to the variables in
-##' param_names with same ordering.
-##' @param rw.rescale boolean. Toggle the rescaling of the rw.step.
-##' @param rw.learn boolean. Toggle the online learning the empirical covariance
-##' matrix of the parameters
-##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link[rjags:mcmcarray.object]{mcmcarray}}
-##' objects, with one element for each element of the \code{variable.names}
-##' argument.
-##' @author Adrien Todeschini, Francois Caron
-##' @seealso \code{\link{biips_model}}, \code{\link{pimh_samples}},
-##' \code{\link{smc_samples}}
-##' @keywords models
-##' @export
-##' @examples
-##'
-##' ## Should be DIRECTLY executable !!
-##' ##-- ==>  Define data, use random,
-##' ##--  or do  help(data=index)  for the standard data sets.
-##'
+#' The method \code{biips_pmmh_update} performs adaptation and burn-in iterations for the PMMH algorithm.
+#'
+#' @export
+#' @rdname pmmh-object
+#' @param n_iter   integer. Number of burn-in iterations.
+#' @param thin     integer. Thinning interval. Returns samples every \code{thin} iterations
+#'                   (default = 1)
+#' @param n_part   integer. Number of particles used in SMC algorithms.
+#' @param rs_thres,rs_type,... Additional arguments to be passed to the SMC algorithm.
+#'   See \code{\link{biips_smc_samples}} for more details.
+#' @param output string. Select additional members to be returned in the \code{\link{mcmcarray.list}} output.
+#'  The string can contain several characters in \code{('p', 'l', 'a', 's', 'f')}. See details.
+#'
+#' @details The \code{output} string arguments can be used to query additional
+#'   members in the \code{\link{mcmcarray.list}} output. If \code{output} contains:
+#'  \itemize{
+#'    \item \code{p}: \code{log_marg_like_pen}. \code{\link{mcmcarray}} with penalized log marginal likelihood over iterations.
+#'    \item \code{l}: \code{log_marg_like}. \code{\link{mcmcarray}} with log marginal likelihood over iterations.
+#'    \item \code{a}: \code{info$accept_rate}. \code{\link{mcmcarray}} with acceptance rate over iterations.
+#'    \item \code{s}: \code{info$rw_step}. \code{\link{mcmcarray}} with standard deviations of the random walk
+#'                         over iterations.
+#'    \item \code{f}: \code{info$n_fail}. number of failed SMC algorithms.
+#'  }
+#'
+#' @param max_fail integer. maximum number of failed SMC algorithms allowed.
+#'                  (default=0).
+#' @param rw_adapt      boolean. Activate adaptation of the proposal (default=TRUE)
+#'
+#' @return The methods \code{biips_pmmh_update} and \code{biips_pmmh_update} return
+#'   an object of class \code{\link{mcmcarray.list}}.
+#'
+#' @return \code{biips_pmmh_samples} output contains one \code{\link{mcmcarray}}
+#'   member for each monitored variable returned by the \code{param_names()} and
+#'   \code{latent_names()} member functions of the \code{pmmh} object.
+#'
+#' @return Members of the \code{\link{mcmcarray.list}} object are \code{\link{mcmcarray}}
+#'   objects for different variables.
+#'   Assuming \code{dim} is the dimension of the monitored variable, the \code{\link{mcmcarray}}
+#'   object is an array of dimension \code{c(dim, n_iter)} with the following
+#'   attributes (accessible with \code{\link[base]{attr}}):
+#'   \item{name}{string with the name of the variable.}
+#'   \item{lower}{vector with the lower bounds of the variable.}
+#'   \item{upper}{vector with the upper bounds of the variable.}
+#'
+#' @return If the \code{output} argument is not empty, the output contains additional members. See details.
+#'
+#' @examples
+#' modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
+#' stopifnot(nchar(modelfile)>0)
+#'
+#' logtau_true <- 10
+#' data <- list(tmax = 10)
+#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#'
+#' n_part <- 50
+#' obj_pmmh <- biips_pmmh_init(model, "logtau", latent_names = "x",
+#'                             inits = list(logtau = -2))  # Initialize
+#' is.pmmh(obj_pmmh)
+#' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
+#' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
 biips_pmmh_update.pmmh <- function(object, n_iter, n_part, thin = 1,
     max_fail = 0, rw_adapt = TRUE, output = "p", ...) {
     out <- pmmh_algo(object, n_iter, n_part, thin = thin, return_samples = FALSE,
@@ -747,29 +864,15 @@ biips_pmmh_update.pmmh <- function(object, n_iter, n_part, thin = 1,
     return(invisible(out))
 }
 
+#' @export
+biips_pmmh_samples <- function(object, ...) UseMethod("biips_pmmh_samples")
 
-##' Generate Particle Marginal Metropolis-Hastings samples
-##'
-##' The \code{biips_pmmh_samples} function creates monitors for the given variables,
-##' runs the model for \code{n_iter} iterations and returns the monitored
-##' samples.
-##'
-##' @export
-##' @param object a biips model object
-##' @param n_iter number of iterations of the Markov chain
-##' @param thin thinning interval for monitors
-##' @param n_part number of particles of the SMC
-##' @param max_fail maximum number of failures allowed
-##' @param ... additional arguments to be passed to the SMC algorithm
-##' @return A list of \code{\link{mcmcarray}} objects.
-##' @seealso \code{\link{biips_model}}
-##' @examples
-##'
-##' ## Should be DIRECTLY executable !!
-##' ##-- ==>  Define data, use random,
-##' ##--\tor do  help(data=index)  for the standard data sets.
-##'
-biips_pmmh_samples <- function(object, n_iter, n_part, thin = 1,
+#' The method \code{biips_pmmh_samples} performs iterations for the PMMH
+#' algorithm and returns samples.
+#'
+#' @export
+#' @rdname pmmh-object
+biips_pmmh_samples.pmmh <- function(object, n_iter, n_part, thin = 1,
     max_fail = 0, output = "p", ...) {
 
     out <- pmmh_algo(object, n_iter, n_part, thin = thin, return_samples = TRUE,

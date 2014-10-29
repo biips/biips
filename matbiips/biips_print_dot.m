@@ -1,5 +1,5 @@
 function biips_print_dot(model, file)
-% BIIPS_PRINT_DOT Print the graph in a file in dot format
+% BIIPS_PRINT_DOT Print the Biips model graph in a file in dot format.
 %   biips_print_dot(model, filename)
 %
 %   INPUT

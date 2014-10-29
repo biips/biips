@@ -6,7 +6,7 @@ Title: @Biips_DESCRIPTION_SUMMARY@
 Author: @Biips_OWNER@
 Maintainer: @Biips_CONTACT@
 Depends: R (>= @R_VERSION_REQUIRED@), Rcpp (>= @Rcpp_VERSION@), stats
-SystemRequirements: (Linux only) biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@) 
+SystemRequirements: Linux only: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@) 
 Description:@Biips_DESCRIPTION@
 License: @Biips_LICENSE@
 Copyright: Copyright (C) @Biips_OWNER@, @Biips_COPYRIGHT_YEAR@

@@ -1,5 +1,5 @@
 function biips_clear(varargin)
-% BIIPS_CLEAR Clear allocated Biips consoles
+% BIIPS_CLEAR Clear allocated Biips consoles.
 %
 %   biips_clear(obj) clears the internal console of the biips object
 %   biips_clear(obj, obj2, ...) 

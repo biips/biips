@@ -1,14 +1,14 @@
 function [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names, n_part, varargin)
-% BIIPS_SMC_SAMPLES Run a sequential Monte Carlo algorithm
+% BIIPS_SMC_SAMPLES Run a sequential Monte Carlo algorithm.
 %   [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names,...
 %        nb_part, 'PropertyName', PropertyValue, ...)
 %   INPUT: 
 %   - model:    Biips model as returned by the BIIPS_MODEL function
-%   - variable_names: cell of strings. Contains the names of the 
-%                      unobserved variables to monitor.
-%                      Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
-%                      Subset indices must define a valid subset of 
+%   - variable_names: cell of strings. The names of the 
+%                      unobserved variables to monitor. The names can
+%                      contain subset indices which must define a valid subset of 
 %                      the variables of the model.
+%                      Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
 %   - n_part:         integer. Number of particles.
 %
 %   Optional Inputs:

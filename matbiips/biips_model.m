@@ -1,5 +1,5 @@
 function model = biips_model(file, data, varargin)
-% BIIPS_MODEL Create a stochastic model described in BUGS language
+% BIIPS_MODEL Create a Biips model described in BUGS language.
 % model = biips_model(file, data, 'Propertyname', propertyvalue, ...)
 %
 %   INPUT: 

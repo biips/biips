@@ -1,5 +1,5 @@
 function varnames = biips_variable_names(model)
-% BIIPS_VARIABLE_NAMES Variable names of the Biips model
+% BIIPS_VARIABLE_NAMES Variable names of the Biips model.
 %  varnames = biips_variable_names(model)
 %
 %   INPUT:

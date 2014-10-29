@@ -1,5 +1,5 @@
 function [tab] = biips_table(samples, varargin)
-% BIIPS_TABLE Univariate frequency tables or probability mass estimates of discrete variables
+% BIIPS_TABLE Univariate frequency tables or probability mass estimates of discrete variables.
 % tab = biips_table(samples, 'PropertyName', PropertyValue, ...)
 %   INPUT:
 %   - samples: structure containing either the output of a SMC algorithm

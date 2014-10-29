@@ -1,10 +1,14 @@
 #' Objects for representing SMC output.
 #'
+#' @name smcarray-object
+#' @aliases smcarray.fsb-object smcarray.fsb.list-object
+#'   smcarray smcarray.fsb smcarray.fsb.list
+#'
 #' @description
 #' A \code{smcarray} object is used by the \code{\link{biips_smc_samples}} function to
 #' represent SMC output or particles of a given variable.
 #'
-#' A \code{smcarray.fsb} object is a list of \code{smcarray} objects with
+#' A \code{smcarray.fsb} object is a named list of \code{smcarray} objects with
 #' different types of monitoring for the same variable. Members in this list
 #' have names \code{f} (filtering), \code{s} (smoothing) or \code{b} (backward smoothing).
 #'
@@ -13,7 +17,7 @@
 #' with an estimate of the log marginal likelihood.
 #'
 #' Methods apply identically to \code{smcarray}, \code{smcarray.fsb} or \code{smcarray.fsb.list} objects
-#' and return a list with the same nested named members as the input object.
+#' and return a named list with the same named members as the input object.
 #'
 #' @details
 #' Assuming \code{dim} is the dimension of the monitored variable, a \code{smcarray}
@@ -42,22 +46,12 @@
 #' one can access the values of the smoothing particles for the variable \code{"x"} with:
 #'     \code{out_smc$x$s$values}.
 #'
-#' @name smcarray-object
-#' @aliases smcarray.fsb-object smcarray.fsb.list-object
-#'   smcarray smcarray.fsb smcarray.fsb.list
-#'   is.smcarray is.smcarray.fsb is.smcarray.fsb.list
-#'   biips_diagnosis
-#'   biips_summary.smcarray biips_summary.smcarray.fsb biips_summary.smcarray.fsb.list
-#'   biips_density.smcarray biips_density.smcarray.fsb biips_density.smcarray.fsb.list
-#'   biips_table.smcarray biips_table.smcarray.fsb biips_table.smcarray.fsb.list
-#'   summary.smcarray summary.smcarray.fsb summary.smcarray.fsb.list
-#'   density.smcarray density.smcarray.fsb density.smcarray.fsb.list
-#'   table.smcarray table.smcarray.fsb table.smcarray.fsb.list
 #' @param object,x a \code{smcarray}, \code{smcarray.fsb} or \code{smcarray.fsb.list} object.
 #' @param ... additional arguments to be passed to the default methods.
+#'   See \code{\link[stats]{density}}, \code{\link[stats]{table}}
 #'
 #' @return Methods apply identically to \code{smcarray}, \code{smcarray.fsb} or \code{smcarray.fsb.list} objects
-#'   and return a list with the same nested named members as the input object.
+#'   and return a named list with the same named members as the input object.
 #'
 #' @examples
 #' modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
@@ -165,6 +159,7 @@ print.smcarray.fsb.list <- function(x, ...) {
         cat("Log-marginal likelihood: ", x$log_marg_like, "\n")
 }
 
+#' @export
 biips_diagnosis <- function(object, ...) UseMethod("biips_diagnosis")
 
 #' @export
@@ -274,25 +269,28 @@ print.diagnosis.smcarray <- function(x, ...) {
 }
 
 
+#' @export
 biips_summary <- function(object, ...) UseMethod("biips_summary")
 
-#' @export
 #' @rdname smcarray-object
+#' @export
 #' @param probs    vector of reals. probability levels in ]0,1[ for quantiles.
 #'                   (default = \code{c()})
 #' @param order    integer. Moment statistics of order below or equal to \code{order}
 #'                 are returned. (default = 1 if all components are
 #'                   continuous variables and 0 otherwise)
 #' @return The method \code{biips_summary} returns univariate marginal statistics.
-#'   The output innermost members are objects of class \code{summary.smcarray},
-#'   \emph{i.e.} lists with members:
-#'   \item{mean}{if \code{order>=1}.}
-#'   \item{var}{variance, if \code{order>=2}.}
-#'   \item{skew}{skewness, if \code{order>=3}.}
-#'   \item{kurt}{kurtosis, if \code{order>=4}.}
+#'   The output innermost members are objects of class \code{summary.smcarray}.
+#'   Assuming \code{dim} is the dimension of the variable, the \code{summary.smcarray}
+#'   object is a list with the following members:
+#'   \item{mean}{array of size \code{dim}. The mean if \code{order>=1}.}
+#'   \item{var}{array of size \code{dim}. The variance, if \code{order>=2}.}
+#'   \item{skew}{array of size \code{dim}. The skewness, if \code{order>=3}.}
+#'   \item{kurt}{array of size \code{dim}. The kurtosis, if \code{order>=4}.}
 #'   \item{probs}{vector of quantile probabilities.}
-#'   \item{quant}{list of quantile values, if \code{probs} is not empty.}
-#'   \item{mode}{most frequent values for discrete components.}
+#'   \item{quant}{list of arrays of size \code{dim} for each probability level in \code{probs}.
+#'     The quantile values, if \code{probs} is not empty.}
+#'   \item{mode}{ array of size \code{dim}. The most frequent values for discrete components.}
 biips_summary.smcarray <- function(object, probs = c(), order,
     mode = all(object$discrete), ...) {
     stopifnot(is.smcarray(object))
@@ -437,6 +435,7 @@ print.summary.smcarray.fsb.list <- function(x, ...) {
 }
 
 
+#' @export
 biips_table <- function(x, ...) UseMethod("biips_table")
 
 #' @export
@@ -472,6 +471,7 @@ biips_table.smcarray <- function(x, ...) {
 
 
 
+#' @export
 biips_density <- function(x, ...) UseMethod("biips_density")
 
 #' @export
@@ -618,9 +618,23 @@ biips_density.smcarray.fsb.list <- function(x, bw = "nrd0", ...) {
     return(out)
 }
 
+
+#' Plot methods.
+#' @name plot-methods
 #' @importFrom graphics plot
+#' @param x a density object.
+#' @param main,xlab,ylab plotting parameters with useful defaults.
+#' @param type,col,pch,lwd,lty plotting parameters with useful defaults.
+#' @param xlim,ylim plotting parameters with useful defaults.
+#' @param ... further plotting parameters. See \code{\link[stats]{plot.density}},
+#'   \code{\link[graphics]{plot.histogram}}, \code{\link[graphics]{plot.table}}
+#' @return \code{NULL}
+#' @seealso \code{\link[stats]{plot.density}},
+#'   \code{\link[graphics]{plot.histogram}}, \code{\link[graphics]{plot.table}}
+NULL
+
+#' @rdname plot-methods
 #' @export
-#' @seealso \code{\link[stats]{plot.density}}
 plot.density.smcarray.fsb.univariate <- function(x, type = "l",
                                                  col = 1:6, pch = NULL, lwd = NULL, lty = NULL, main = NULL,
                                                  xlab = NULL, ylab="Density", xlim, ylim, ...) {
@@ -658,6 +672,7 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l",
   invisible(NULL)
 }
 
+#' @rdname plot-methods
 #' @export
 plot.density.smcarray <- function(x, main = NULL, xlab = NULL,
     ylab = "Density", ...) {
@@ -676,6 +691,7 @@ plot.density.smcarray <- function(x, main = NULL, xlab = NULL,
     invisible(NULL)
 }
 
+#' @rdname plot-methods
 #' @export
 plot.density.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab="Density",
     ...) {
@@ -686,6 +702,7 @@ plot.density.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab="Density
     invisible(NULL)
 }
 
+#' @rdname plot-methods
 #' @export
 plot.density.smcarray.fsb.list <- function(x, main=NULL, xlab=NULL, ylab="Density", ...) {
     for (i in 1:length(x)) {
