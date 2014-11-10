@@ -12,11 +12,12 @@ set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION
 file (WRITE VERSION.txt ${Biips_VERSION})
 
 set (Biips_OWNER Inria)
-set (Biips_COPYRIGHT_YEAR 2012)
+set (Biips_COPYRIGHT_YEAR 2012-2014)
 set (Biips_LICENSE GPL-3)
 set (Biips_URL http://alea.bordeaux.inria.fr/biips)
 set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
-set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting Particle Systems")
+set (Biips_BUGREPORTS https://gforge.inria.fr/tracker/?group_id=2515)
+set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting particle systems")
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
 
@@ -74,16 +75,16 @@ if (UNIX) # Linux or MacOSX
 
 elseif (WIN32) # Windows
   option(BUILD_64BIT "Build 64bit binaries" ON)
-  
+
   if(BUILD_64BIT)
       set(BITS "64")
   endif()
 
-  if (BITS STREQUAL 64) 
-    set( SYSTEM_ARCH "x86_64" ) 
-  else() 
-    set( SYSTEM_ARCH "x86" ) 
-  endif() 
+  if (BITS STREQUAL 64)
+    set( SYSTEM_ARCH "x86_64" )
+  else()
+    set( SYSTEM_ARCH "x86" )
+  endif()
 endif()
 
 # Determine compiler
@@ -106,7 +107,7 @@ if (UNIX) # Linux or MacOSX
     set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC")
     set(RBIIPS_COMPILE_FLAGS ${BIIPS_COMPILE_FLAGS})
     set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
-  
+
   else()
     message(WARNING "FIXME: Could not determine compiler name")
     set(BIIPS_COMPILE_FLAGS "-fPIC")
@@ -156,7 +157,7 @@ if (BUILD_TESTS)
   if(Boost_PROGRAM_OPTIONS_FOUND)
       set(EXTRA_LIBS ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} ${EXTRA_LIBS})
   else()
-     message(FATAL_ERROR "Boost Program Options Not Found!") 	
+     message(FATAL_ERROR "Boost Program Options Not Found!")
   endif()
 endif()
 
@@ -167,7 +168,7 @@ if (UNIX)
 	set (Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/biips)
 	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR}/biips)
-	
+
 	set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR})
 	set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Biips_INSTALL_LIBDIR})
 	set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Biips_INSTALL_BINDIR})
@@ -217,22 +218,22 @@ enable_testing()
 # ==============================
 # define INCLUDE VARIABLES
 # ==============================
-set(Core_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/core 
-	              ${CMAKE_SOURCE_DIR}/core/include 
-		      ${CMAKE_BINARY_DIR}/core/include # for Config.hpp 
-			   
+set(Core_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/core
+	              ${CMAKE_SOURCE_DIR}/core/include
+		      ${CMAKE_BINARY_DIR}/core/include # for Config.hpp
+
 )
 
 set(Base_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/base
-	              ${CMAKE_SOURCE_DIR}/base/include 
-			   
+	              ${CMAKE_SOURCE_DIR}/base/include
+
 )
 set(Compiler_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/compiler
-	                  ${CMAKE_SOURCE_DIR}/compiler/include 
-			   
+	                  ${CMAKE_SOURCE_DIR}/compiler/include
+
 )
 if (WIN32)
-  set(Compiler_INCLUDE_DIRS ${Compiler_INCLUDE_DIRS} 
+  set(Compiler_INCLUDE_DIRS ${Compiler_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/compiler/win32)
 endif()
 
@@ -285,12 +286,12 @@ set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-
 set (CPACK_SOURCE_GENERATOR TGZ;ZIP)
 set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
 "/\\\\.git/"
-"\\\\.Rhistory$" 
-"\\\\.gitignore$" 
-"\\\\.project$" 
-"/\\\\.settings/" 
-".*\\\\.html$" 
-".*\\\\.wiki$" 
+"\\\\.Rhistory$"
+"\\\\.gitignore$"
+"\\\\.project$"
+"/\\\\.settings/"
+".*\\\\.html$"
+".*\\\\.wiki$"
 ".*\\\\.sh"
 ".*\\\\.bat"
 ".*\\\\.pdf"
@@ -298,11 +299,11 @@ set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
 "/\\\\.Rproj\\\\.user"
 ".*\\\\.mex.*"
 ".*_m2R\\\\.R"
-"/old/" 
+"/old/"
 "/html/"
-".*~" 
-"Journal.*" 
-"journal.*" 
+".*~"
+"Journal.*"
+"journal.*"
 "todo.*"
 "Todo.*"
 "TODO.*"

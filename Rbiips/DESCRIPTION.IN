@@ -3,12 +3,18 @@ Version: @Biips_VERSION@
 Type: Package
 Date: @Biips_DATE@
 Title: @Biips_DESCRIPTION_SUMMARY@
-Author: @Biips_OWNER@
+Authors@R: as.person(c(
+    "Adrien Todeschini <adrien.todeschini@inria.fr> [aut, cre]",
+    "François Caron <francois.caron@stat.ox.ac.uk> [aut]",
+    "Marc Fuentes <marc.fuentes@inria.fr> [aut]",
+    "@Biips_OWNER@ [cph]"
+  ))
 Maintainer: @Biips_CONTACT@
 Depends: R (>= @R_VERSION_REQUIRED@), Rcpp (>= @Rcpp_VERSION@), stats
-SystemRequirements: Linux only: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@) 
+SystemRequirementsForLinux: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
 Description:@Biips_DESCRIPTION@
 License: @Biips_LICENSE@
 Copyright: Copyright (C) @Biips_OWNER@, @Biips_COPYRIGHT_YEAR@
 URL: @Biips_URL@
+BugReports: @Biips_BUGREPORTS@
 LinkingTo: Rcpp

@@ -628,7 +628,9 @@ NULL
 #' @rdname plot-methods
 #' @export
 plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch = NULL,
-  lwd = NULL, lty = NULL, main = NULL, xlab = NULL, ylab = "Density", xlim, ylim,
+  lwd = NULL, lty = NULL, main = NULL, xlab = NULL, ylab = "Density",
+  xlim = range(unlist(lapply(x, function(x) x$x))),
+  ylim = c(0, max(unlist(lapply(x, function(x) x$y)))),
   ...) {
 
   if (is.null(main)) {
@@ -636,23 +638,6 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch =
   }
   if (is.null(xlab)) {
     xlab <- paste("N =", x[[1]]$n, "  Bandwidth =", format(x[[1]]$bw, digits = 4))
-  }
-
-  # compute axis limits
-  if (missing(xlim)) {
-    xmin <- +Inf
-    xmax <- -Inf
-
-    for (fsb in 1:length(x)) {
-      xmin <- min(xmin, x[[fsb]]$x)
-      xmax <- max(xmin, x[[fsb]]$x)
-    }
-    xlim <- c(xmin, xmax)
-  }
-  if (missing(ylim)) {
-    ymax <- -Inf
-    for (fsb in 1:length(x)) ymax <- max(ymax, x[[fsb]]$y)
-    ylim <- c(0, ymax)
   }
 
   plot(NULL, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
@@ -663,6 +648,31 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch =
   }
   invisible(NULL)
 }
+
+
+#' @rdname plot-methods
+#' @export
+plot.table.smcarray.fsb.univariate <- function(x, type="h", col = 1:6, pch = NULL,
+                                               lwd = 2, lty = NULL, main = NULL, xlab = NULL, ylab = "Probability",
+                                               xlim = range(as.numeric(unlist(lapply(x, names)))),
+                                               ylim = c(0, max(unlist(x))),
+                                               width = .1,
+                                               ...) {
+  if (is.null(xlab)) {
+    xlab <- ""
+  }
+
+  plot(NULL, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+       ...)
+  for (fsb in 1:length(x)) {
+    # separate the lines
+    shift <- (fsb-(length(x)+1)/2)*width/max(length(x)-1,2)
+    lines(as.numeric(names(x[[fsb]])) + shift, x[[fsb]],  type = type, col = rec(col, fsb), pch = rec(pch, fsb),
+          lwd = rec(lwd, fsb), lty = rec(lty, fsb), ...)  # recycle arguments
+  }
+  invisible(NULL)
+}
+
 
 #' @rdname plot-methods
 #' @export
@@ -685,6 +695,17 @@ plot.density.smcarray <- function(x, main = NULL, xlab = NULL, ylab = "Density",
 
 #' @rdname plot-methods
 #' @export
+plot.table.smcarray <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
+                                 ...) {
+  for (d in 1:length(x)) {
+    plot(x[[d]], main = rec(main, d), xlab = rec(xlab, d), ylab = rec(ylab, d),
+         ...)  # recycle arguments
+  }
+  invisible(NULL)
+}
+
+#' @rdname plot-methods
+#' @export
 plot.density.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab = "Density",
   ...) {
   for (i in 1:length(x)) {
@@ -696,11 +717,33 @@ plot.density.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab = "Densi
 
 #' @rdname plot-methods
 #' @export
+plot.table.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
+                                ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
+         ...)  # recycle arguments
+  }
+  invisible(NULL)
+}
+
+#' @rdname plot-methods
+#' @export
 plot.density.smcarray.fsb.list <- function(x, main = NULL, xlab = NULL, ylab = "Density",
   ...) {
   for (i in 1:length(x)) {
     plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
       ...)  # recycle arguments
+  }
+  invisible(NULL)
+}
+
+#' @rdname plot-methods
+#' @export
+plot.table.smcarray.fsb.list <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
+                                ...) {
+  for (i in 1:length(x)) {
+    plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
+         ...)  # recycle arguments
   }
   invisible(NULL)
 }
