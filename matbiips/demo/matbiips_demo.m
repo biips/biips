@@ -26,16 +26,16 @@ modelfile = 'hmm.bug';
 type(modelfile);
 
 tmax = 10;
-pi = [.5; .5];
+p = [.5; .5];
 logtau_true = log(1);
 logtau = logtau_true;
 
-data = struct('tmax', tmax, 'pi', pi, 'logtau_true', logtau_true, 'logtau', logtau);
+data = struct('tmax', tmax, 'p', p, 'logtau_true', logtau_true, 'logtau', logtau);
 model = biips_model(modelfile, data, 'sample_data', true);
 
 biips_clear(model)
 
-datanames = {'tmax', 'pi', 'logtau_true', 'logtau'};
+datanames = {'tmax', 'p', 'logtau_true', 'logtau'};
 model = biips_model(modelfile, datanames, 'sample_data', true);
 
 model.data
@@ -104,8 +104,6 @@ ylim([0,3])
 xlabel('t')
 ylabel('c[t]==1')
 
-dens_smc = biips_density(out_smc, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100);
-
 t = 5;
 subplot(2,2,3); hold on
 plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
@@ -126,10 +124,10 @@ modelfile = 'hmm.bug';
 type(modelfile);
 
 tmax = 10;
-pi = [.5; .5];
+p = [.5; .5];
 logtau_true = log(1);
 logtau = logtau_true;
-model = biips_model(modelfile, {'tmax', 'pi', 'logtau_true', 'logtau'});
+model = biips_model(modelfile, {'tmax', 'p', 'logtau_true', 'logtau'});
 
 n_part = 50;
 obj_pimh = biips_pimh_init(model, {'x', 'c[2:10]'}); % Initialize
@@ -196,10 +194,10 @@ modelfile = 'hmm.bug';
 type(modelfile);
 
 tmax = 10;
-pi = [.5; .5];
+p = [.5; .5];
 logtau_true = log(1);
 logtau = logtau_true;
-model = biips_model(modelfile, {'tmax', 'pi', 'logtau_true', 'logtau'});
+model = biips_model(modelfile, {'tmax', 'p', 'logtau_true', 'logtau'});
 
 n_part = 50;
 logtau_val = -10:10;
@@ -225,9 +223,9 @@ modelfile = 'hmm.bug';
 type(modelfile);
 
 tmax = 10;
-pi = [.5; .5];
+p = [.5; .5];
 logtau_true = log(1);
-model = biips_model(modelfile, {'tmax', 'pi', 'logtau_true'});
+model = biips_model(modelfile, {'tmax', 'p', 'logtau_true'});
 
 n_part = 50;
 obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize

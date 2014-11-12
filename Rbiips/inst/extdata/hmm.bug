@@ -2,23 +2,25 @@ var x_true[tmax], x[tmax], y[tmax]
 
 data
 {
-  x_true[1] ~ dnorm(0, 1)
-  y[1] ~ dnorm(x_true[1], 10)
+  x_true[1] ~ dnorm(0, 1/5)
+  y[1] ~ dnorm(x_true[1], exp(logtau_true))
   for (t in 2:tmax)
   {
-    x_true[t] ~ dnorm(x_true[t-1], 1)
-    y[t] ~ dnorm(x_true[t], 10)
+    c_true[t] ~ dcat(p)
+    x_true[t] ~ dnorm(f(x_true[t-1], t-1), ifelse(c_true[t]==1, 1/10, 1/100))
+    y[t] ~ dnorm(x_true[t], exp(logtau_true))
   }
 }
 
 model
 {
   logtau ~ dunif(-3, 3)
-  x[1] ~ dnorm(0, 1)
+  x[1] ~ dnorm(0, 1/5)
   y[1] ~ dnorm(x[1], exp(logtau))
   for (t in 2:tmax)
   {
-    x[t] ~ dnorm(x[t-1], 1)
+    c[t] ~ dcat(p)
+    x[t] ~ dnorm(f(x[t-1], t-1), ifelse(c_true[t]==1, 1/10, 1/100))
     y[t] ~ dnorm(x[t], exp(logtau))
   }
 }

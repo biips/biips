@@ -458,6 +458,12 @@ biips_table.smcarray <- function(x, ...) {
     weights <- x$weights[ind_vec]
 
     out[[d]] <- Rbiips("wtd_table", values, weights)
+    dn <- list(names(out[[d]]))
+    ind <- x$lower + get_index(d, rep(0, length(x$lower)), x$upper - x$lower)
+    names(dn) <- deparse_varname(x$name, ind, ind)
+
+    out[[d]] <- array(Rbiips("wtd_table", values, weights), dimnames = dn)
+    out[[d]] <- as.table(out[[d]])
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -513,11 +519,23 @@ biips_density.smcarray <- function(x, bw = "nrd0", ...) {
 biips_table.smcarray.fsb <- function(x, ...) {
   stopifnot(is.smcarray.fsb(x))
   out <- list()
+
   for (fsb in names(x)) {
     if (!is.smcarray(x[[fsb]]))
       next
-    out[[fsb]] <- biips_table(x[[fsb]], ...)
+    dimen <- dim(x[[fsb]]$values)
+    tab <- biips_table(x[[fsb]], ...)
+    for (d in 1:length(tab)) {
+      if (length(out) < d)
+        out[[d]] <- list()
+      out[[d]][[fsb]] <- tab[[d]]
+    }
   }
+
+  for (d in 1:length(tab)) class(out[[d]]) <- "table.smcarray.fsb.univariate"
+
+  drop_dim <- names(dimen) %in% c("particle")
+  dim(out) <- dimen[!drop_dim]
 
   class(out) <- "table.smcarray.fsb"
   return(out)
@@ -645,7 +663,7 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch =
   }
 
   plot(NULL, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-    ...)
+       ...)
   for (fsb in 1:length(x)) {
     lines(x[[fsb]], type = rec(type, fsb), col = rec(col, fsb), pch = rec(pch,
       fsb), lwd = rec(lwd, fsb), lty = rec(lty, fsb), ...)  # recycle arguments
@@ -658,18 +676,29 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch =
 #' @export
 #' @param width real. width of spacing for bars at the same value.
 plot.table.smcarray.fsb.univariate <- function(x, type = "h", col = 1:6, pch = NULL,
-  lwd = 2, lty = NULL, main = NULL, xlab = NULL, ylab = "Probability", xlim = range(as.numeric(unlist(lapply(x,
-    names)))), ylim = c(0, max(unlist(x))), width = 0.1, ...) {
+  lwd = 2, lty = NULL, main = NULL, xlab = NULL, ylab = "Probability", xlim,
+  ylim = c(0, max(unlist(x))), width = 0.1, ...) {
+
   if (is.null(xlab)) {
-    xlab <- ""
+    xlab <- names(dimnames(x[[1]]))
+  }
+  if (missing(xlim)) {
+    xlim <- range(as.numeric(unlist(lapply(x, dimnames)))) + .5*width*c(-1, 1)
   }
 
+  xval <- sort(unique(as.numeric(unlist(lapply(x, dimnames)))))
+
   plot(NULL, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-    ...)
+       xaxt = "n", ...)
+  axis(1, at=1:length(xval), labels=xval)
+
   for (fsb in 1:length(x)) {
     # separate the lines
     shift <- (fsb - (length(x) + 1)/2) * width/max(length(x) - 1, 2)
-    lines(as.numeric(names(x[[fsb]])) + shift, x[[fsb]], type = type, col = rec(col,
+
+    xx <- as.numeric(unlist(dimnames(x[[fsb]])))
+    ind <- match(xx, xval)
+    lines(ind + shift, x[[fsb]], type = type, col = rec(col,
       fsb), pch = rec(pch, fsb), lwd = rec(lwd, fsb), lty = rec(lty, fsb),
       ...)  # recycle arguments
   }
