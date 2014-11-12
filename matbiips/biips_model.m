@@ -10,9 +10,9 @@ function model = biips_model(file, data, varargin)
 %                   in 'data' corresponding to node arrays used in 'file' are taken
 %                   to represent the values of observed nodes in the model.
 %   Optional inputs:
-%   - sample_data:  boolean. Toggle the evaluation of the 'data' block of the
+%   - sample_data:  logical. Toggle the evaluation of the 'data' block of the
 %                   BUGS model that generates or transforms data. (default = true).
-%   - quiet:        boolean. Deactivate verbosity. (default = false).
+%   - quiet:        logical. Deactivate verbosity. (default = false).
 %
 %   OUTPUT:
 %   - model: A Biips model structure with the following fields:

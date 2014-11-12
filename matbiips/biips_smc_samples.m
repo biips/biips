@@ -36,7 +36,7 @@ function [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names,
 %     * values: array of size [dim, n_part] with the values of the particles.
 %     * weights: array of size [dim, n_part] with the weights of the particles.
 %     * ess: array of size dim with Effective Sample Sizes (ESS) of the particles set.
-%     * discrete: array of size dim with booleans indicating discreteness of each component.
+%     * discrete: array of size dim with logicals indicating discreteness of each component.
 %     * iterations: array of size dim with sampling iterations of each component.
 %     * conditionals: lists of the contitioning
 %     variables (observations). Its value is:

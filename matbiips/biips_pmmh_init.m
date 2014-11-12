@@ -16,7 +16,7 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %   - inits:        cell of numeric values of the same length as param_names.
 %                   Init values for the parameters in param_names.
 %                   (default = samples from the prior distribution)
-%   - transform:    boolean. Activate automatic parameters transformation (default = true).
+%   - transform:    logical. Activate automatic parameters transformation (default = true).
 %                   Transformations applies independently to each component 
 %                   of the parameters depending on their support:
 %                       * unbounded (-Inf, +Inf): f(x) = x

@@ -105,7 +105,7 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #' @param type   string. Return only a specific type of node. Possible values
 #'   are \code{'const'}, \code{'logic'} or \code{'stoch'}. default returns all
 #'   types of nodes.
-#' @param observed  boolean. Return only observed or unobserved nodes. default
+#' @param observed  logical. Return only observed or unobserved nodes. default
 #'   returns all.
 #'
 #' @return The method \code{biips_nodes} returns a \code{data.frame} with a row
@@ -113,7 +113,7 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #'   following columns: \itemize{ \item{\code{id}: integer. node ids.}
 #'   \item{\code{name}: string. node names.} \item{\code{type}: string. node
 #'   types (\code{'const'}, \code{'logic'} or \code{'stoch'}).}
-#'   \item{\code{observed}: boolean. \code{TRUE} if the node is observed.}
+#'   \item{\code{observed}: logical. \code{TRUE} if the node is observed.}
 #'
 #'   If the function is called after the sampler is built (by calling
 #'   \code{\link{biips_build_sampler}} or \code{\link{biips_smc_samples}}), it
@@ -168,20 +168,22 @@ biips_print_dot.biips <- function(object, file, ...) {
 #' @export
 biips_build_sampler <- function(object, ...) UseMethod("biips_build_sampler")
 
+#' The method \code{biips_build_sampler} assigns a sampler to each node
+#' of the graph. In order to specify the proposal used by the SMC
+#' algorithm, this function has to be called before \code{\link{biips_smc_samples}}.
+#' Otherwise, it will be automatically called by \code{\link{biips_smc_samples}}
+#' with the default parameters.
+#'
 #' @rdname biips-object
 #' @export
-#' @param proposal string. Keyword defining the type of proposal desired.
-#'   Possible values are \code{'auto'} and \code{'prior'}. 'auto' selects the
+#' @param proposal string. The type of proposal used by the SMC algorithm.
+#'   Possible values are \code{'auto'} and \code{'prior'}. \code{'auto'} selects the
 #'   best sampler among available ones automatically. \code{'prior'} forces
 #'   asignment of the prior sampler to every node. \code{'prior'} switches off
-#'   lots of instructions and can speed up the startup of the SMC for big
+#'   lots of instructions and can speed up the startup of the SMC for large
 #'   models. (default = \code{'auto'}).
 #'
-#' @return The method \code{biips_build_sampler} assigns a sampler to each node
-#'   of the graph. In case you want to specify the proposal used by the SMC
-#'   algorithm. This function has to be called before
-#'   \code{\link{biips_smc_samples}}. Otherwise, it will be automatically called
-#'   by \code{\link{biips_smc_samples}} with the default parameters.
+#' @return The method \code{biips_build_sampler} returns \code{NULL}.
 biips_build_sampler.biips <- function(object, proposal = "auto", ...) {
   stopifnot(is.biips(object))
   proposal <- match.arg(proposal, c("auto", "prior"))
@@ -238,7 +240,7 @@ clear_monitors <- function(object, ...) UseMethod("clear_monitors")
 #' @param object \code{biips} model object
 #' @param type string with characters \code{'f'} (filtering), \code{'s'}
 #'   (smoothing) and/or \code{'b'} (backward smoothing).
-#' @param release_only boolean. If \code{TRUE}, only releases memory occupied by
+#' @param release_only logical. If \code{TRUE}, only releases memory occupied by
 #'   monitors. Information about monitored nodes is still present. If
 #'   \code{FALSE} clears all information about monitored nodes as well as
 #'   memory.

@@ -59,6 +59,41 @@ function [dens] = biips_density(samples, varargin)
 % ylabel('posterior density')
 % legend('SMC filtering estimate', 'SMC smoothing estimate')
 % legend boxoff
+% 
+% %% PIMH algorithm
+% n_part = 50;
+% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 100, n_part); % Burn-in
+% [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 100, n_part); % Samples
+% 
+% dens_pimh = biips_density(out_pimh.x)
+% dens_pimh = biips_density(out_pimh);
+% 
+% subplot(2,2,4); hold on
+% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_pimh.x(1).x, dens_pimh.x(1).f, 'b')
+% xlabel('x[1]')
+% ylabel('posterior density')
+% 
+% %% PMMH algorithm
+% modelfile = 'hmm.bug';
+% logtau_true = 10;
+% data = struct('tmax', 10);
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
+% [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
+% 
+% dens_pmmh = biips_density(out_pmmh.x)
+% dens_pmmh = biips_density(out_pmmh);
+% 
+% subplot(2,2,4); hold on
+% plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
+% plot(dens_pmmh.logtau.x, dens_pmmh.logtau.f, 'b')
+% xlabel('logtau')
+% ylabel('posterior density')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

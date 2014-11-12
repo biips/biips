@@ -1,29 +1,43 @@
-#' Bayesian inference with interacting Particle Systems
+#' Bayesian inference with interacting particle systems.
 #'
-#' \pkg{Rbiips} is an interface with the
-#' \href{http://alea.bordeaux.inria.fr/biips}{Biips} C++ libraries for analysing
+#' \pkg{Rbiips} is an interface with the \href{http://alea.bordeaux.inria.fr/biips}{Biips} C++ libraries for analysing
 #' Bayesian graphical models using advanced particle methods.
 #'
 #' Biips is a general software for Bayesian inference with interacting particle
 #' systems, a.k.a. sequential Monte Carlo (SMC) methods. It aims at popularizing
 #' the use of these methods to non-statistician researchers and students, thanks
 #' to its automated \dQuote{black box} inference engine. It borrows from the
-#' BUGS/JAGS software, widely used in Bayesian statistics, the statistical
+#' \href{http://www.mrc-bsu.cam.ac.uk/software/bugs/}{BUGS}/\href{http://mcmc-jags.sourceforge.net/}{JAGS}
+#' software, widely used in Bayesian statistics, the statistical
 #' modeling with graphical models and the language associated with their
 #' descriptions. Unlike MCMC methods used by BUGS/JAGS, SMC methods are more
 #' adapted to dynamic problems (tracking, signal filtering, etc).
 #'
-#' Typical usage of \pkg{Rbiips} consits in: \itemize{ \item compiling your
-#' model with \code{\link{biips_model}} function \item analyzing sensitivity to
-#' parameters with \code{\link{biips_smc_sensitivity}} \item generating samples
-#' from the conditional distributions \itemize{ \item using standard SMC
-#' algorithm with \code{\link{biips_smc_samples}} function \item using particle
-#' MCMC methods with \code{\link{biips_pimh_samples}} or
-#' \code{\link{biips_pmmh_samples}} functions } \item analysing output from
-#' \code{\link{smcarray}} and \code{\link{mcmcarray}} objects }
+#' See the \href{http://alea.bordeaux.inria.fr/biips}{Biips website} for more
+#' information.
+#'
+#' The typical workflow is the following:
+#' \itemize{
+#'   \item Define the model in BUGS language (see the \href{http://sourceforge.net/projects/mcmc-jags/files/Manuals/3.x/jags_user_manual.pdf/download}{JAGS User Manual}
+#'   for help) and the data.
+#'   \item Add custom functions or distributions with
+#'     \code{\link{biips_add_function}} and \code{\link{biips_add_distribution}}.
+#'   \item Compile the model with \code{\link{biips_model}}
+#'   \item Run inference algorithms:
+#'     \itemize{
+#'       \item Analyse sensitivity to parameters with \code{\link{biips_smc_sensitivity}}.
+#'       \item Run SMC filtering and smoothing algorithms with \code{\link{biips_smc_samples}}.
+#'       \item Run particle MCMC algorithms with \code{\link{biips_pimh_samples}} or
+#'         \code{\link{biips_pmmh_samples}}.
+#'     }
+#'   \item Diagnose and analyze the output obtained as \code{\link{smcarray}} and
+#'     \code{\link{mcmcarray}} objects with \code{\link{biips_diagnosis}},
+#'     \code{\link{biips_summary}}, \code{\link{biips_density}},
+#'     \code{\link{biips_hist}} and \code{\link{biips_table}}
+#'  }
 #'
 #' @name Rbiips-package
-#' @aliases Rbiips-package Rbiips
+#' @aliases Rbiips
 #' @docType package
 #' @author \pkg{Rbiips} development is supported by the team
 #'   \href{http://alea.bordeaux.inria.fr}{ALEA} at
@@ -32,14 +46,20 @@
 #'   Todeschini}
 #' @author \href{http://www.stats.ox.ac.uk/~caron/}{Francois Caron}
 #' @author Marc Fuentes
-#' @author \pkg{Rbiips} is adapted from \pkg{rjags} interface for
+#' @author \pkg{Rbiips} is adapted from \pkg{\link[rjags:rjags-package]{rjags}} interface for
 #'   \href{http://mcmc-jags.sourceforge.net/}{JAGS}.
-#' @seealso \link[rjags:jags.model]{rjags}, \link[pomp:pomp-package]{pomp}
+#' @seealso \code{\link{biips_add_function}}, \code{\link{biips_add_distribution}},
+#'   \code{\link{biips_model}}, \code{\link{biips_smc_sensitivity}}, \code{\link{biips_smc_samples}},
+#'   \code{\link{biips_pimh_samples}}, \code{\link{biips_pmmh_samples}}, \code{\link{smcarray}},
+#'   \code{\link{mcmcarray}}, \code{\link{biips_diagnosis}}, \code{\link{biips_summary}},
+#'   \code{\link{biips_density}}, \code{\link{biips_hist}}, \code{\link{biips_table}},
+#'   \href{http://alea.bordeaux.inria.fr/biips}{Biips website},
+#'   \href{http://sourceforge.net/projects/mcmc-jags/files/Manuals/3.x/jags_user_manual.pdf/download}{JAGS User Manual}
 #' @references TODO ******* add references ********
 #' @keywords package
 #' @useDynLib Rbiips
 #' @examples
-#' ## Compile model ------------------------------
+#' #' # Compile model
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 #' stopifnot(nchar(modelfile)>0)
 #' cat(readLines(modelfile), sep='\n')
@@ -47,7 +67,7 @@
 #' data <- list(tmax = 10, logtau = log(10))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
-#' ## SMC ------------------------------
+#' #' # SMC algorithm
 #' n_part <- 100
 #'
 #' out_smc <- biips_smc_samples(model, 'x', n_part)
@@ -56,7 +76,7 @@
 #' summ_smc <- biips_summary(out_smc, order = 2, probs = c(0.025, 0.975))
 #' dens_smc <- biips_density(out_smc, bw='nrd0', adjust=1, n = 100)
 #'
-#' ## PIMH ------------------------------
+#' #' # PIMH algorithm
 #' n_part <- 50
 #' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
@@ -65,13 +85,13 @@
 #' summ_pimh <- biips_summary(out_pimh, order = 2, probs = c(0.025, 0.975))
 #' dens_pimh <- biips_density(out_pimh)
 #'
-#' ## SMC sensitivity analysis ------------------------------
+#' #' # SMC sensitivity analysis
 #' n_part <- 50
 #' logtau_val <- -10:10
 #' out_sens <- biips_smc_sensitivity(model, list(logtau = logtau_val),
 #'                                   n_part)
 #'
-#' ## PMMH ------------------------------
+#' #' # PMMH algorithm
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 #' stopifnot(nchar(modelfile)>0)
 #'
@@ -90,14 +110,12 @@ NULL
 
 
 #' @keywords internal
-.onLoad <- function(lib, pkg) {
-  Rbiips("load_module", "basemod")
-}
-
-
-#' Helper function to call Rbiips C++ routines
-#' @keywords internal
 Rbiips <- function(funcname, ...) {
   stopifnot(is.character(funcname), length(funcname) == 1, nchar(funcname) > 0)
   .Call(funcname, ..., PACKAGE = "Rbiips")
+}
+
+#' @keywords internal
+.onLoad <- function(lib, pkg) {
+  Rbiips("load_module", "basemod")
 }

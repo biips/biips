@@ -9,7 +9,7 @@ function nodes = biips_nodes(model, varargin)
 %   - type:     string. Return only a specific type of node. Possible values are
 %               'const', 'logic' or 'stoch'. default returns all types
 %               of nodes.
-%   - observed: boolean. Return only observed or unobserved nodes.
+%   - observed: logical. Return only observed or unobserved nodes.
 %   default returns all.
 %
 %   OUTPUT

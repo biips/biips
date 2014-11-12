@@ -1,13 +1,13 @@
 #' Objects for representing MCMC output.
 #'
-#' @description A \code{mcmcarray} object is used by the
+#' @description A \code{mcmcarray} object is returned by the
 #'   \code{\link{biips_pimh_samples}} or \code{\link{biips_pmmh_samples}}
 #'   functions to represent MCMC output of a given variable.
 #'
 #'   A \code{mcmcarray.list} object is a named list of \code{mcmcarray} objects
 #'   for different monitored variables.
 #'
-#'   Methods apply identically to \code{mcmcarray} or \code{mcmcarray.list}
+#'   The methods apply identically to \code{mcmcarray} or \code{mcmcarray.list}
 #'   objects and return a named list with the same named members as the input
 #'   object.
 #'
@@ -15,10 +15,10 @@
 #' @aliases mcmcarray.list-object mcmcarray mcmcarray.list
 #' @param object,x a \code{mcmcarray} or \code{mcmcarray.list} object.
 #' @param ... additional arguments to be passed to the default methods. See
-#'   \code{\link[stats]{density}}, \code{\link[stats]{hist}},
-#'   \code{\link[stats]{table}}
+#'   \code{\link[stats]{density}}, \code{\link[graphics]{hist}},
+#'   \code{\link{table}}
 #'
-#' @return Methods apply identically to \code{mcmcarray} or
+#' @return The methods apply identically to \code{mcmcarray} or
 #'   \code{mcmcarray.list} objects and return a named list with the same named
 #'   members as the input object.
 #'
@@ -30,14 +30,14 @@
 #' data <- list(tmax = 10, logtau = log(10))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
-#' PIMH ------------------------------
+#' #' # PIMH algorithm
 #' n_part <- 50
 #' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
 #' is.pimh(obj_pimh)
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 #' out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
 #'
-#' ### Manipulate mcmcarray.list object
+#' #' Manipulate mcmcarray.list object
 #' is.mcmcarray.list(out_pimh)
 #' names(out_pimh)
 #' out_pimh
@@ -46,7 +46,7 @@
 #' plot(biips_density(out_pimh))
 #' biips_hist(out_pimh)
 #'
-#' ### Manipulate mcmcarray object
+#' #' Manipulate mcmcarray object
 #' is.mcmcarray(out_pimh$x)
 #' out_pimh$x
 #' biips_summary(out_pimh$x)
@@ -78,7 +78,7 @@
 #'      main = NA)
 #' points(model$data()$x_true[1], 0, pch = 17, col = 'green')
 #'
-#' PMMH ------------------------------
+#' #' # PMMH algorithm
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 #' stopifnot(nchar(modelfile)>0)
 #'
@@ -93,7 +93,7 @@
 #' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 #' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
 #'
-#' ### Manipulate mcmcarray.list object
+#' #' Manipulate mcmcarray.list object
 #' is.mcmcarray.list(out_pmmh)
 #' names(out_pmmh)
 #' out_pmmh
@@ -102,7 +102,7 @@
 #' plot(biips_density(out_pmmh))
 #' biips_hist(out_pmmh)
 #'
-#' ### Manipulate mcmcarray object
+#' #' Manipulate mcmcarray object
 #' is.mcmcarray(out_pmmh$x)
 #' out_pmmh$x
 #' biips_summary(out_pmmh$x)
@@ -137,9 +137,9 @@
 #' points(logtau_true, 0, pch = 17, col = 'green')
 NULL
 
-#' Create \code{mcmcarray} object
+#' @rdname mcmcarray-object
 #' @param data      numerical vector
-#' @param dim       vector of integers
+#' @param dim       vector of integers. dimension of the array
 #' @param dimnames  character vector
 #' @param iteration integer. index of the dimension corresponding to iterations
 #'   of the MCMC.
@@ -148,7 +148,7 @@ NULL
 #' @param name   string. variable name
 #' @param lower   vector of integers. variable lower bound
 #' @param upper   vector of integers. variable upper bound
-#' @keywords internal
+#' @return The \code{mcmcarray} function returns an object of class \code{mcmcarray}.
 mcmcarray <- function(data = NA, dim = length(data), dimnames = NULL, iteration = length(dim),
   chain = NA, name = "mcmcarray", lower = NULL, upper = NULL) {
   stopifnot(length(iteration) == 1, length(chain) == 1)
@@ -223,16 +223,13 @@ print.mcmcarray.list <- function(x, ...) {
 #'   \code{order>=4}.} \item{probs}{vector of quantile probabilities.}
 #'   \item{quant}{list of quantile values, if \code{probs} is not empty.}
 #'   \item{mode}{most frequent values for discrete components.}
-biips_summary.mcmcarray <- function(object, probs = c(), order, mode = all(object ==
-  as.integer(object)), ...) {
+biips_summary.mcmcarray <- function(object, probs = c(), order = ifelse(mode, 0,
+  1), mode = all(object == as.integer(object)), ...) {
   stopifnot(is.mcmcarray(object))
 
   ### TODO check arguments
   if (length(probs) > 0)
     stopifnot(is.numeric(probs), probs > 0, probs < 1)
-
-  if (missing(order))
-    order <- ifelse(mode, 0, 1)
 
   drop_dims <- names(dim(object)) %in% c("iteration", "chain")
   dim_array <- dim(object)[!drop_dims]
@@ -383,6 +380,7 @@ biips_density.mcmcarray <- function(x, bw = "nrd0", ...) {
 
 
 #' @export
+#' @rdname mcmcarray-object
 biips_hist <- function(x, ...) UseMethod("biips_hist")
 
 #' @export
@@ -452,6 +450,7 @@ biips_density.mcmcarray.list <- function(x, bw = "nrd0", ...) {
 
 #' @export
 #' @rdname mcmcarray-object
+#' @param main,xlab plotting parameters with useful defaults.
 biips_hist.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ...) {
   stopifnot(is.mcmcarray.list(x))
   out <- list()
@@ -467,6 +466,7 @@ biips_hist.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ...) {
   return(invisible(out))
 }
 
+#' @name plot-methods
 #' @rdname plot-methods
 #' @export
 plot.table.mcmcarray <- function(x, main = NULL, xlab = NULL, ylab = "Probability",

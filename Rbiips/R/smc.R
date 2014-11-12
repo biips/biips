@@ -1,30 +1,30 @@
 
 smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 
-##' Runs a forward SMC algorithm
-##' @param object    biips model object
-##' @param n_part    integer. number of particles
-##' @param rs_thres  real. resampling threshold.
-##' @param rs_type  string. Name of the resampling algorithm
-##' @param seed integer. RNG seed passed to Biips SMC algorithm
-##' @param ... unused
-##'
-##' @return A boolean. \code{TRUE} if success.
-##' @keywords internal
-smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified",
+#' Runs a forward SMC algorithm
+#' @param object    biips model object
+#' @param n_part    integer. number of particles
+#' @param rs_thres  real. resampling threshold.
+#' @param rs_type  string. Name of the resampling algorithm
+#' @param seed integer. RNG seed passed to Biips SMC algorithm
+#' @param ... unused
+#'
+#' @return A logical. \code{TRUE} if success.
+#' @keywords internal
+smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "stratified", 
   seed = get_seed(), ...) {
-  stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0, rs_thres <=
+  stopifnot(is.numeric(rs_thres), length(rs_thres) == 1, rs_thres >= 0, rs_thres <= 
     n_part)
   rs_type <- match.arg(rs_type, c("stratified", "systematic", "residual", "multinomial"))
-
+  
   ## build smc sampler
-  if (!Rbiips("is_sampler_built", object$ptr()))
+  if (!Rbiips("is_sampler_built", object$ptr())) 
     Rbiips("build_smc_sampler", object$ptr(), FALSE)
-
+  
   ## run smc sampler
-  ok <- Rbiips("run_smc_sampler", object$ptr(), as.integer(n_part), seed, rs_thres,
+  ok <- Rbiips("run_smc_sampler", object$ptr(), as.integer(n_part), seed, rs_thres, 
     rs_type)
-
+  
   return(ok)
 }
 
@@ -70,7 +70,7 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #'   dimension \code{c(dim, n_part)} with the weights of the particles.}
 #'   \item{ess}{array of dimension \code{dim} with Effective Sample Sizes (ESS)
 #'   of the particles set.} \item{discrete}{array of dimension \code{dim} with
-#'   booleans indicating discreteness of each component.}
+#'   logicals indicating discreteness of each component.}
 #'   \item{iterations}{array of dimension \code{dim} with sampling iterations of
 #'   each component.} \item{conditionals}{lists of the contitioning variables
 #'   (observations). Its value is: \itemize{ \item for filtering: a list of
@@ -113,59 +113,59 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #' biips_diagnosis(out_smc)
 #' summ_smc <- biips_summary(out_smc, order = 2, probs = c(0.025, 0.975))
 #' dens_smc <- biips_density(out_smc)
-biips_smc_samples.biips <- function(object, variable_names, n_part, type = "fs",
+biips_smc_samples.biips <- function(object, variable_names, n_part, type = "fs", 
   rs_thres = 0.5, rs_type = "stratified", ...) {
-
+  
   ## check arguments
   stopifnot(is.biips(object))
   stopifnot(is.numeric(n_part), length(n_part) == 1, n_part >= 1, is.finite(n_part))
   type <- check_type(type, several.ok = TRUE)
-
+  
   backward <- ("b" %in% type)
-
+  
   ## monitor
-  if (backward)
+  if (backward) 
     Rbiips("set_default_monitors", object$ptr())
-
-  if (!missing(variable_names))
+  
+  if (!missing(variable_names)) 
     monitor(object, variable_names, type)
-
+  
   ## smc forward sampler
-  smc_forward_algo(object, n_part = n_part, rs_thres = rs_thres, rs_type = rs_type,
+  smc_forward_algo(object, n_part = n_part, rs_thres = rs_thres, rs_type = rs_type, 
     ...)
-
+  
   log_marg_like <- Rbiips("get_log_norm_const", object$ptr())
   out_smc <- list()
-
+  
   mon <- Rbiips("get_filter_monitors", object$ptr())
   for (n in names(mon)) out_smc[[n]]$f <- mon[[n]]
-
-  if (!backward)
+  
+  if (!backward) 
     clear_monitors(object, type = "f")
-
+  
   mon <- Rbiips("get_gen_tree_smooth_monitors", object$ptr())
   for (n in names(mon)) out_smc[[n]]$s <- mon[[n]]
-
+  
   clear_monitors(object, type = "s")
-
+  
   ## smc backward smoother
   if (backward) {
     ## run backward smoother
     Rbiips("run_backward_smoother", object$ptr())
-
+    
     clear_monitors(object, type = "f")
-
+    
     mon <- Rbiips("get_backward_smooth_monitors", object$ptr())
     for (n in names(mon)) out_smc[[n]]$b <- mon[[n]]
-
+    
     clear_monitors(object, type = "b")
   }
-
+  
   for (n in names(out_smc)) class(out_smc[[n]]) <- "smcarray.fsb"
-
+  
   out_smc$log_marg_like <- log_marg_like
-
+  
   class(out_smc) <- "smcarray.fsb.list"
-
+  
   return(out_smc)
-}
+} 

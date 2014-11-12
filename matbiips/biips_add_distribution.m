@@ -1,27 +1,27 @@
 function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
-% BIIPS_ADD_DISTRIBUTION Add a user-defined distribution to the BUGS language.
+% BIIPS_ADD_DISTRIBUTION Add a custom distribution to the BUGS language.
 %   Currently, the added sampling distributions can only define 
 %   unobserved nodes.
 % 
 %   biips_add_distribution(name, n_param, fun_dim, fun_sample, ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
-%   - name:    string. Name of the function that will be used in the BUGS model.
+%   - name:    string. Name of the custom function that will be used in the BUGS model.
 %              must be a valid BUGS language distribution name.
-%   - n_param: integer. Number of arguments of the distribution.
-%   - fun_dim: string. Name of the Matlab function returning the size 
+%   - n_param: integer. Number of arguments of the custom distribution.
+%   - fun_dim: string. Name of the custom Matlab function returning the size 
 %              vector of the output. It will be called when compiling the
 %              model. Its arguments are the dimension vectors of the
 %              inputs.
-%   - fun_sample: string. Name of the Matlab function which samples from
+%   - fun_sample: string. Name of the custom Matlab function which samples from
 %   the distribution. Its arguments are the parameters values. 
 %
 %   Optional inputs:
-%   - fun_check_param: string. Name of the Matlab function which checks if
+%   - fun_check_param: string. Name of the custom Matlab function which checks if
 %                      the argument values are valid. Its arguments are the parameters values. 
-%                      Returns a boolean. (default returns true)
-%   - fun_is_discrete: string. Name of the Matlab function returning a boolean that is true if the
-%                      output is discrete. Its arguments are booleans
+%                      Returns a logical. (default returns true)
+%   - fun_is_discrete: string. Name of the custom Matlab function returning a logical that is true if the
+%                      output is discrete. Its arguments are logicals
 %                      indicating if the arguments are discrete.
 %                      (default returns false)
 % 
@@ -31,7 +31,7 @@ function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 %   See also BIIPS_ADD_FUNCTION, BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% %% Add sampling distribution dMN to BUGS language
+% %% Add custom sampling distribution dMN to BUGS language
 % type('dMN_dim.m');
 % type('dMN_sample.m');
 % biips_add_distribution('dMN', 2, 'dMN_dim', 'dMN_sample');

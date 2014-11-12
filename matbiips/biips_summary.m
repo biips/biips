@@ -14,8 +14,11 @@ function [summ] = biips_summary(samples, varargin)
 %   - probs:        vector of reals. probability levels in ]0,1[ for quantiles.
 %                   (default = [])
 %   - order:        integer. Moment statistics of order below or equal to the
-%                   value are returned. (default = 1 if all components are
-%                   continuous variables and 0 otherwise)
+%                   value are returned. (default = 0 if all the components are
+%                   discrete variables and 1 otherwise)
+%   - mode:         logical. Activate computation of the mode, i.e. the most
+%                   frequent value among the particles. (default = true if all 
+%                   the components are discrete variables and false otherwise)
 %   OUTPUT
 %   - summ:   structure with the same nested fields as the input
 %             'samples' structure. Contains univariate marginal statistics.
@@ -38,6 +41,7 @@ function [summ] = biips_summary(samples, varargin)
 % data = struct('tmax', 10, 'logtau', log(10));
 % model = biips_model(modelfile, data, 'sample_data', true);
 % 
+% %% SMC algorithm
 % n_part = 50;
 % 
 % [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
@@ -61,6 +65,49 @@ function [summ] = biips_summary(samples, varargin)
 % ylabel('x[t]')
 % legend('true', 'SMC filtering estimate', 'SMC smoothing estimate')
 % legend boxoff
+% 
+% %% PIMH algorithm
+% n_part = 50;
+% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 100, n_part); % Burn-in
+% [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 100, n_part); % Samples
+% 
+% summ_pimh = biips_summary(out_pimh.x)
+% summ_pimh = biips_summary(out_pimh, 'order', 2, 'probs', [.025, .975]);
+% 
+% subplot(2,2,3); hold on
+% plot(model.data.x_true, 'g')
+% plot(summ_pimh.x.mean, 'b')
+% plot(summ_pimh.x.quant{1}, '--b')
+% plot(summ_pimh.x.quant{2}, '--b')
+% xlabel('t')
+% ylabel('x[t]')
+% legend('true', 'PIMH estimate')
+% legend boxoff
+% 
+% %% PMMH algorithm
+% modelfile = 'hmm.bug';
+% logtau_true = 10;
+% data = struct('tmax', 10);
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% n_part = 50;
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
+% [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
+% 
+% summ_pmmh = biips_summary(out_pmmh.x)
+% summ_pmmh = biips_summary(out_pmmh, 'order', 2, 'probs', [.025, .975]);
+% 
+% subplot(2,2,3); hold on
+% plot(model.data.x_true, 'g')
+% plot(summ_pmmh.x.mean, 'b')
+% plot(summ_pmmh.x.quant{1}, '--b')
+% plot(summ_pmmh.x.quant{2}, '--b')
+% xlabel('t')
+% ylabel('x[t]')
+% legend('true', 'PMMH estimate')
+% legend boxoff
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
@@ -72,23 +119,24 @@ function [summ] = biips_summary(samples, varargin)
 %--------------------------------------------------------------------------
 
 order_default = 1;
+mode_default = false;
 is_mcmc = isnumeric(samples);
 is_smc = ~is_mcmc && is_smc_array(samples);
 is_smc_fsb = ~is_mcmc && ~is_smc && has_fsb_fields(samples);
 if is_mcmc
-    mode = all(floor(samples(:)) == samples(:));
+    mode_default = all(floor(samples(:)) == samples(:));
 elseif is_smc
-    mode = all(samples.discrete(:));
+    mode_default = all(samples.discrete(:));
     % by default, do not return the mean if all the components are discrete
-    if mode
+    if mode_default
         order_default = 0;
     end
 elseif is_smc_fsb
     names = fieldnames(samples);
     s = getfield(samples, names{1});
-    mode = all(s.discrete(:));
+    mode_default = all(s.discrete(:));
     % by default, do not return the mean if all the components are discrete
-    if mode
+    if mode_default
         order_default = 0;
     end
 elseif ~isstruct(samples)
@@ -97,12 +145,12 @@ end
 
 %% PROCESS AND CHECK INPUTS
     
-optarg_names = {'type', 'probs', 'order'};
-optarg_default = {'fsb', [], order_default};
+optarg_names = {'type', 'probs', 'order', 'mode'};
+optarg_default = {'fsb', [], order_default, mode_default};
 optarg_valid = {{'f', 's', 'b', 'fs', 'fb', 'sb', 'fsb'}, [0, 1],...
-    [0,4]};
-optarg_type = {'char', 'numeric', 'numeric'};
-[type, probs, order] = parsevar(varargin, optarg_names, optarg_type,...
+    [0,4], {true, false}};
+optarg_type = {'char', 'numeric', 'numeric', 'logical'};
+[type, probs, order, mode] = parsevar(varargin, optarg_names, optarg_type,...
     optarg_valid, optarg_default);
 
 if is_mcmc

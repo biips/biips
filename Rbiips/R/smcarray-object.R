@@ -17,7 +17,7 @@
 #' objects for different monitored variables. It might also contain a member
 #' named \code{log_marg_like} with an estimate of the log marginal likelihood.
 #'
-#' Methods apply identically to \code{smcarray}, \code{smcarray.fsb} or
+#' The methods apply identically to \code{smcarray}, \code{smcarray.fsb} or
 #' \code{smcarray.fsb.list} objects and return a named list with the same named
 #' members as the input object.
 #'
@@ -27,7 +27,7 @@
 #' the particles. \item \code{weights}: array of dimension \code{c(dim, n_part)}
 #' with the weights of the particles. \item \code{ess}: array of dimension
 #' \code{dim} with Effective Sample Sizes of the particles set. \item
-#' \code{discrete}: array of dimension \code{dim} with booleans indicating
+#' \code{discrete}: array of dimension \code{dim} with logicals indicating
 #' discreteness of each component. \item \code{iterations}: array of dimension
 #' \code{dim} with sampling iterations of each component. \item
 #' \code{conditionals}: lists of the contitioning variables (observations). Its
@@ -48,9 +48,9 @@
 #' @param object,x a \code{smcarray}, \code{smcarray.fsb} or
 #'   \code{smcarray.fsb.list} object.
 #' @param ... additional arguments to be passed to the default methods. See
-#'   \code{\link[stats]{density}}, \code{\link[stats]{table}}
+#'   \code{\link[stats]{density}}, \code{\link{table}}
 #'
-#' @return Methods apply identically to \code{smcarray}, \code{smcarray.fsb} or
+#' @return The methods apply identically to \code{smcarray}, \code{smcarray.fsb} or
 #'   \code{smcarray.fsb.list} objects and return a named list with the same
 #'   named members as the input object.
 #'
@@ -61,12 +61,13 @@
 #' data <- list(tmax = 10, logtau = log(10))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
+#' #' # SMC algorithm
 #' n_part <- 100
 #'
 #' out_smc <- biips_smc_samples(model, c('x[1]', 'x[8:10]'), n_part, type = 'fs',
 #'                              rs_thres = 0.5, rs_type = 'stratified')
 #'
-#' ### Manipulate smcarray.fsb.list object
+#' #' Manipulate smcarray.fsb.list object
 #' is.smcarray.fsb.list(out_smc)
 #' names(out_smc)
 #' out_smc
@@ -75,7 +76,7 @@
 #' par(mfrow=c(2,2))
 #' plot(biips_density(out_smc))
 #'
-#' ### Manipulate smcarray.fsb object
+#' #' Manipulate smcarray.fsb object
 #' is.smcarray.fsb(out_smc[['x[8:10]']])
 #' names(out_smc[['x[8:10]']])
 #' out_smc[['x[8:10]']]
@@ -84,7 +85,7 @@
 #' par(mfrow=c(2,2))
 #' plot(biips_density(out_smc[['x[8:10]']]))
 #'
-#' ### Manipulate smcarray object
+#' #' Manipulate smcarray object
 #' is.smcarray(out_smc[['x[8:10]']]$f)
 #' names(out_smc[['x[8:10]']]$f)
 #' out_smc[['x[8:10]']]$f
@@ -163,6 +164,7 @@ print.smcarray.fsb.list <- function(x, ...) {
 }
 
 #' @export
+#' @rdname smcarray-object
 biips_diagnosis <- function(object, ...) UseMethod("biips_diagnosis")
 
 #' @export
@@ -170,7 +172,7 @@ biips_diagnosis <- function(object, ...) UseMethod("biips_diagnosis")
 #' @param ess_thres  integer. Threshold on the Effective Sample Size (ESS). If
 #'   all the ESS components are over \code{ess_thres}, the diagnostic is
 #'   \code{'GOOD'}, otherwise it is \code{'BAD'}. (default=30).
-#' @param quiet  boolean. Disable message display. (default=\code{FALSE}).
+#' @param quiet  logical. Disable message display. (default=\code{FALSE}).
 #'
 #' @return The method \code{biips_diagnosis} prints diagnosis of the SMC output
 #'   and returns the minimum ESS value.
@@ -266,6 +268,7 @@ print.diagnosis.smcarray <- function(x, ...) {
 
 
 #' @export
+#' @rdname smcarray-object
 biips_summary <- function(object, ...) UseMethod("biips_summary")
 
 #' @rdname smcarray-object
@@ -273,8 +276,11 @@ biips_summary <- function(object, ...) UseMethod("biips_summary")
 #' @param probs    vector of reals. probability levels in ]0,1[ for quantiles.
 #'   (default = \code{c()})
 #' @param order    integer. Moment statistics of order below or equal to
-#'   \code{order} are returned. (default = 1 if all components are continuous
-#'   variables and 0 otherwise)
+#'   \code{order} are returned. (default = 0 if all the components are discrete
+#'   variables and 1 otherwise)
+#' @param mode     logical. Activate computation of the mode, i.e. the most
+#'   frequent value among the particles. (default = \code{TRUE} if all the components
+#'   are discrete variables and \code{FALSE} otherwise)
 #' @return The method \code{biips_summary} returns univariate marginal
 #'   statistics. The output innermost members are objects of class
 #'   \code{summary.smcarray}. Assuming \code{dim} is the dimension of the
@@ -288,16 +294,13 @@ biips_summary <- function(object, ...) UseMethod("biips_summary")
 #'   in \code{probs}. The quantile values, if \code{probs} is not empty.}
 #'   \item{mode}{ array of size \code{dim}. The most frequent values for
 #'   discrete components.}
-biips_summary.smcarray <- function(object, probs = c(), order, mode = all(object$discrete),
-  ...) {
+biips_summary.smcarray <- function(object, probs = c(), order = ifelse(mode, 0, 1),
+  mode = all(object$discrete), ...) {
   stopifnot(is.smcarray(object))
 
   ### TODO check arguments
   if (length(probs) > 0)
     stopifnot(is.numeric(probs), probs > 0, probs < 1)
-
-  if (missing(order))
-    order <- ifelse(mode, 0, 1)
 
   drop_dims <- names(dim(object$values)) %in% c("particle")
   n_part <- dim(object$values)["particle"]
@@ -428,6 +431,7 @@ print.summary.smcarray.fsb.list <- function(x, ...) {
 
 
 #' @export
+#' @rdname smcarray-object
 biips_table <- function(x, ...) UseMethod("biips_table")
 
 #' @export
@@ -464,6 +468,7 @@ biips_table.smcarray <- function(x, ...) {
 
 
 #' @export
+#' @rdname smcarray-object
 biips_density <- function(x, ...) UseMethod("biips_density")
 
 #' @export
@@ -628,9 +633,8 @@ NULL
 #' @rdname plot-methods
 #' @export
 plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch = NULL,
-  lwd = NULL, lty = NULL, main = NULL, xlab = NULL, ylab = "Density",
-  xlim = range(unlist(lapply(x, function(x) x$x))),
-  ylim = c(0, max(unlist(lapply(x, function(x) x$y)))),
+  lwd = NULL, lty = NULL, main = NULL, xlab = NULL, ylab = "Density", xlim = range(unlist(lapply(x,
+    function(x) x$x))), ylim = c(0, max(unlist(lapply(x, function(x) x$y)))),
   ...) {
 
   if (is.null(main)) {
@@ -652,23 +656,22 @@ plot.density.smcarray.fsb.univariate <- function(x, type = "l", col = 1:6, pch =
 
 #' @rdname plot-methods
 #' @export
-plot.table.smcarray.fsb.univariate <- function(x, type="h", col = 1:6, pch = NULL,
-                                               lwd = 2, lty = NULL, main = NULL, xlab = NULL, ylab = "Probability",
-                                               xlim = range(as.numeric(unlist(lapply(x, names)))),
-                                               ylim = c(0, max(unlist(x))),
-                                               width = .1,
-                                               ...) {
+#' @param width real. width of spacing for bars at the same value.
+plot.table.smcarray.fsb.univariate <- function(x, type = "h", col = 1:6, pch = NULL,
+  lwd = 2, lty = NULL, main = NULL, xlab = NULL, ylab = "Probability", xlim = range(as.numeric(unlist(lapply(x,
+    names)))), ylim = c(0, max(unlist(x))), width = 0.1, ...) {
   if (is.null(xlab)) {
     xlab <- ""
   }
 
   plot(NULL, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-       ...)
+    ...)
   for (fsb in 1:length(x)) {
     # separate the lines
-    shift <- (fsb-(length(x)+1)/2)*width/max(length(x)-1,2)
-    lines(as.numeric(names(x[[fsb]])) + shift, x[[fsb]],  type = type, col = rec(col, fsb), pch = rec(pch, fsb),
-          lwd = rec(lwd, fsb), lty = rec(lty, fsb), ...)  # recycle arguments
+    shift <- (fsb - (length(x) + 1)/2) * width/max(length(x) - 1, 2)
+    lines(as.numeric(names(x[[fsb]])) + shift, x[[fsb]], type = type, col = rec(col,
+      fsb), pch = rec(pch, fsb), lwd = rec(lwd, fsb), lty = rec(lty, fsb),
+      ...)  # recycle arguments
   }
   invisible(NULL)
 }
@@ -696,10 +699,10 @@ plot.density.smcarray <- function(x, main = NULL, xlab = NULL, ylab = "Density",
 #' @rdname plot-methods
 #' @export
 plot.table.smcarray <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
-                                 ...) {
+  ...) {
   for (d in 1:length(x)) {
     plot(x[[d]], main = rec(main, d), xlab = rec(xlab, d), ylab = rec(ylab, d),
-         ...)  # recycle arguments
+      ...)  # recycle arguments
   }
   invisible(NULL)
 }
@@ -718,10 +721,10 @@ plot.density.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab = "Densi
 #' @rdname plot-methods
 #' @export
 plot.table.smcarray.fsb <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
-                                ...) {
+  ...) {
   for (i in 1:length(x)) {
     plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
-         ...)  # recycle arguments
+      ...)  # recycle arguments
   }
   invisible(NULL)
 }
@@ -740,10 +743,10 @@ plot.density.smcarray.fsb.list <- function(x, main = NULL, xlab = NULL, ylab = "
 #' @rdname plot-methods
 #' @export
 plot.table.smcarray.fsb.list <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
-                                ...) {
+  ...) {
   for (i in 1:length(x)) {
     plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
-         ...)  # recycle arguments
+      ...)  # recycle arguments
   }
   invisible(NULL)
 }

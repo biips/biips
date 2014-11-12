@@ -1,18 +1,29 @@
-#' ---
-#' title: 'Quick examples of Rbiips usage'
-#' author: NULL
-#' output:
-#'   html_document:
-#'     toc: TRUE
-#'   pdf_document:
-#'     toc: TRUE
-#' ---
+---
+title: "Quick examples of Rbiips usage"
+author: "Adrien Todeschini, Fran\u00e7ois Caron"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: yes
+    fig_width: 7
+    fig_height: 5
+vignette: >
+  %\VignetteIndexEntry{Quick examples of Rbiips usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
 
+This vignette gathers the examples used in the Rbiips reference manual.
+
+```{r}
 require(Rbiips)
+```
 
-#' # Add user-defined functions and distributions to BUGS language
+# Add custom functions and distributions to BUGS language
 
-#' Add function f
+Add custom function `f`
+
+```{r}
 f_dim <- function(x_dim, t_dim) {
   # Check dimensions of the input and return dimension of the output of function f
   stopifnot(prod(x_dim) == 1, prod(t_dim) == 1)
@@ -23,8 +34,11 @@ f_eval <- function(x, t) {
   0.5 * x + 25 * x/(1 + x^2) + 8 * cos(1.2 * t)
 }
 biips_add_function("f", 2, f_dim, f_eval)
+```
 
-#' Add sampling distribution dMN
+Add custom sampling distribution `dMN`
+
+```{r}
 dMN_dim <- function(mu_dim, Sig_dim) {
   # Check dimensions of the input and return dimension of the output of
   # distribution dMN
@@ -36,8 +50,11 @@ dMN_sample <- function(mu, Sig) {
   mu + t(chol(Sig)) %*% rnorm(length(mu))
 }
 biips_add_distribution("dMN", 2, dMN_dim, dMN_sample)
+```
 
-#' # Compile model
+# Compile model
+
+```{r}
 modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
 stopifnot(nchar(modelfile) > 0)
 cat(readLines(modelfile), sep = "\n")
@@ -65,8 +82,11 @@ tmax <- 10
 logtau <- log(10)
 datanames <- c("tmax", "logtau")
 model <- biips_model(modelfile, datanames, sample_data = TRUE)
+```
 
-#' # SMC
+# SMC algorithm
+
+```{r}
 biips_build_sampler(model, proposal = "prior")
 biips_nodes(model, type = "stoch", observed = FALSE)
 
@@ -75,10 +95,14 @@ biips_nodes(model, type = "stoch", observed = FALSE)
 
 n_part <- 100
 
-out_smc <- biips_smc_samples(model, c("x[1]", "x[8:10]"), n_part, type = "fs", rs_thres = 0.5, 
+out_smc <- biips_smc_samples(model, c("x[1]", "x[8:10]"), n_part, type = "fs", rs_thres = 0.5,
   rs_type = "stratified")
 
-#' Manipulate smcarray.fsb.list object
+```
+
+Manipulate `smcarray.fsb.list` object
+
+```{r}
 is.smcarray.fsb.list(out_smc)
 names(out_smc)
 out_smc
@@ -86,8 +110,11 @@ biips_diagnosis(out_smc)
 biips_summary(out_smc)
 par(mfrow = c(2, 2))
 plot(biips_density(out_smc))
+```
 
-#' Manipulate smcarray.fsb object
+Manipulate `smcarray.fsb` object
+
+```{r}
 is.smcarray.fsb(out_smc[["x[8:10]"]])
 names(out_smc[["x[8:10]"]])
 out_smc[["x[8:10]"]]
@@ -95,8 +122,11 @@ biips_diagnosis(out_smc[["x[8:10]"]])
 biips_summary(out_smc[["x[8:10]"]])
 par(mfrow = c(2, 2))
 plot(biips_density(out_smc[["x[8:10]"]]))
+```
 
-#' Manipulate smcarray object
+Manipulate `smcarray` object
+
+```{r}
 is.smcarray(out_smc[["x[8:10]"]]$f)
 names(out_smc[["x[8:10]"]]$f)
 out_smc[["x[8:10]"]]$f
@@ -124,17 +154,20 @@ lines(summ_smc$x$f$quant[[1]], lty = 2, col = "blue")
 lines(summ_smc$x$f$quant[[2]], lty = 2, col = "blue")
 lines(summ_smc$x$s$quant[[1]], lty = 2, col = "red")
 lines(summ_smc$x$s$quant[[2]], lty = 2, col = "red")
-legend("topright", leg = c("true", "SMC filtering estimate", "SMC smoothing estimate"), 
+legend("topright", leg = c("true", "SMC filtering estimate", "SMC smoothing estimate"),
   lty = 1, col = c("green", "blue", "red"), bty = "n")
 
 dens_smc <- biips_density(out_smc, bw = "nrd0", adjust = 1, n = 100)
 
-plot(dens_smc$x[[1]]$f, col = "blue", xlab = "x[1]", ylab = "posterior density", 
+plot(dens_smc$x[[1]]$f, col = "blue", xlab = "x[1]", ylab = "posterior density",
   main = NA)
 lines(dens_smc$x[[1]]$s, col = "red")
 points(model$data()$x_true[1], 0, pch = 17, col = "green")
+```
 
-#' # PIMH
+# PIMH algorithm
+
+```{r}
 modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
 stopifnot(nchar(modelfile) > 0)
 cat(readLines(modelfile), sep = "\n")
@@ -147,8 +180,11 @@ obj_pimh <- biips_pimh_init(model, "x")  # Initialize
 is.pimh(obj_pimh)
 out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
+```
 
-#' Manipulate mcmcarray.list object
+Manipulate `mcmcarray.list` object
+
+```{r}
 is.mcmcarray.list(out_pimh)
 names(out_pimh)
 out_pimh
@@ -157,8 +193,11 @@ par(mfrow = c(2, 2))
 plot(biips_density(out_pimh))
 par(mfrow = c(2, 2))
 biips_hist(out_pimh)
+```
 
-#' Manipulate mcmcarray object
+Manipulate `mcmcarray` object
+
+```{r}
 is.mcmcarray(out_pimh$x)
 out_pimh$x
 biips_summary(out_pimh$x)
@@ -168,7 +207,7 @@ par(mfrow = c(2, 2))
 biips_hist(out_pimh$x)
 
 par(mfrow = c(2, 2))
-plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like), type = "l", col = "blue", 
+plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like), type = "l", col = "blue",
   xlab = "PIMH iteration", ylab = "log p(y)")
 
 plot(out_pimh$x[1, ], type = "l", col = "blue", xlab = "PIMH iteration", ylab = "x[1]")
@@ -180,15 +219,18 @@ plot(model$data()$x_true, type = "l", col = "green", xlab = "t", ylab = "x[t]")
 lines(summ_pimh$x$mean, col = "blue")
 lines(summ_pimh$x$quant[[1]], lty = 2, col = "blue")
 lines(summ_pimh$x$quant[[2]], lty = 2, col = "blue")
-legend("topright", leg = c("true", "PIMH estimate"), lty = c(2, 1), col = c("green", 
+legend("topright", leg = c("true", "PIMH estimate"), lty = c(2, 1), col = c("green",
   "blue"), bty = "n")
 
 dens_pimh <- biips_density(out_pimh)
 
 plot(dens_pimh$x[[1]], col = "blue", xlab = "x[1]", ylab = "posterior density", main = NA)
 points(model$data()$x_true[1], 0, pch = 17, col = "green")
+```
 
-#' # SMC sensitivity analysis
+# SMC sensitivity analysis
+
+```{r}
 modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
 data <- list(tmax = 10, logtau = log(10))
 model <- biips_model(modelfile, data, sample_data = TRUE)
@@ -198,17 +240,20 @@ logtau_val <- -10:10
 out_sens <- biips_smc_sensitivity(model, list(logtau = logtau_val), n_part)
 
 par(mfrow = c(2, 1))
-plot(logtau_val, out_sens$log_marg_like, type = "l", col = "blue", xlab = "logtau", 
+plot(logtau_val, out_sens$log_marg_like, type = "l", col = "blue", xlab = "logtau",
   ylab = "log p(y|logtau) ", main = "SMC sensitivity")
 points(data$logtau, min(out_sens$log_marg_like), pch = 17, col = "green")
 
-plot(logtau_val, out_sens$log_marg_like_pen, type = "l", col = "blue", xlab = "logtau", 
+plot(logtau_val, out_sens$log_marg_like_pen, type = "l", col = "blue", xlab = "logtau",
   ylab = "log p(y|logtau)+log p(logtau)")
 plml <- out_sens$log_marg_like_pen
 ymin <- min(plml[is.finite(plml)])
 points(data$logtau, ymin, pch = 17, col = "green")
+```
 
-#' # PMMH
+# PMMH algorithm
+
+```{r}
 modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
 stopifnot(nchar(modelfile) > 0)
 
@@ -221,8 +266,11 @@ obj_pmmh <- biips_pmmh_init(model, "logtau", latent_names = "x", inits = list(lo
 is.pmmh(obj_pmmh)
 out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
+```
 
-#' Manipulate mcmcarray.list object
+Manipulate `mcmcarray.list` object
+
+```{r}
 is.mcmcarray.list(out_pmmh)
 names(out_pmmh)
 out_pmmh
@@ -231,8 +279,11 @@ par(mfrow = c(2, 2))
 plot(biips_density(out_pmmh))
 par(mfrow = c(2, 2))
 biips_hist(out_pmmh)
+```
 
-#' Manipulate mcmcarray object
+Manipulate `mcmcarray` object
+
+```{r}
 is.mcmcarray(out_pmmh$x)
 out_pmmh$x
 biips_summary(out_pmmh$x)
@@ -242,7 +293,7 @@ par(mfrow = c(2, 2))
 biips_hist(out_pmmh$x)
 
 par(mfrow = c(2, 2))
-plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen), type = "l", 
+plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen), type = "l",
   col = "blue", xlab = "PMMH iteration", ylab = "log p(y|logtau) + log p(logtau)")
 
 plot(out_pmmh$logtau[1, ], type = "l", col = "blue", xlab = "PMMH iteration", ylab = "logtau")
@@ -254,11 +305,12 @@ plot(model$data()$x_true, type = "l", col = "green", xlab = "t", ylab = "x[t]")
 lines(summ_pmmh$x$mean, col = "blue")
 lines(summ_pmmh$x$quant[[1]], lty = 2, col = "blue")
 lines(summ_pmmh$x$quant[[2]], lty = 2, col = "blue")
-legend("topright", leg = c("true", "PMMH estimate"), lty = c(2, 1), col = c("green", 
+legend("topright", leg = c("true", "PMMH estimate"), lty = c(2, 1), col = c("green",
   "blue"), bty = "n")
 
 dens_pmmh <- biips_density(out_pmmh)
 
-plot(dens_pmmh$logtau, col = "blue", xlab = "logtau", ylab = "posterior density", 
+plot(dens_pmmh$logtau, col = "blue", xlab = "logtau", ylab = "posterior density",
   main = NA)
-points(logtau_true, 0, pch = 17, col = "green") 
+points(logtau_true, 0, pch = 17, col = "green")
+```

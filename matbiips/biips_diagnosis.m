@@ -15,7 +15,7 @@ function diagn = biips_diagnosis(samples, varargin)
 %                       If all the ESS components are over the
 %                       threshold, the diagnostic is 'GOOD', otherwise it is
 %                       'BAD'. (default = 30).
-%   - quiet:            boolean. Disable message display. (default = false)
+%   - quiet:            logical. Disable message display. (default = false)
 %
 %   OUTPUT
 %   - diagn:   structure with the same nested fields as the input

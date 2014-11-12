@@ -126,7 +126,7 @@ fi
 
 OLDFLAGS=${LDFLAGS}
 AC_LANG_PUSH(C)
-LDFLAGS="-L${BIIPS_LIB} -std=c++11 -fPIC"
+LDFLAGS="-L${BIIPS_LIB} -std=c++11 -fPIC -Wno-unused-local-typedefs"
 LIBS="-lm -lstdc++"
 AC_CHECK_LIB(BiipsCore, BiipsCore_is_present, [],
              [AC_MSG_ERROR("Cannot load BiipsCore library in ${BIIPS_LIB}")])
@@ -141,7 +141,7 @@ LDFLAGS=${OLDFLAGS}
 BIIPS_LD_FLAGS="${BIIPS_LIB}/libBiipsCompiler.a ${BIIPS_LIB}/libBiipsBase.a ${BIIPS_LIB}/libBiipsCore.a"
 
 
-RBIIPS_COMPILE_FLAGS="-std=c++11 -fPIC"
+RBIIPS_COMPILE_FLAGS="-std=c++11 -fPIC -Wno-unused-local-typedefs"
 RBIIPS_LINK_FLAGS=""
 
 AC_SUBST(RBIIPS_COMPILE_FLAGS)

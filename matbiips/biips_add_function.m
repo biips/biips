@@ -1,24 +1,24 @@
 function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
-% BIIPS_ADD_FUNCTION Add a user-defined function to the BUGS language.
+% BIIPS_ADD_FUNCTION Add a custom function to the BUGS language.
 %   biips_add_function(name, n_param, fun_dim, fun_eval , ...
 %                       'PropertyName', PropertyValue, ...)
 %   INPUT:
-%   - name:    string. Name of the function that will be used in the BUGS model.
+%   - name:    string. Name of the custom function that will be used in the BUGS model.
 %              must be a valid BUGS language function name.
-%   - n_param: integer. Number of arguments of the function
-%   - fun_dim: string. Name of the Matlab function returning the size 
+%   - n_param: integer. Number of arguments of the custom function
+%   - fun_dim: string. Name of the custom Matlab function returning the size 
 %              vector of the output. It will be called when compiling the
 %              model. Its arguments are the dimension vectors of the
 %              inputs.
-%   - fun_eval: string. Name of the Matlab function which evaluates the
+%   - fun_eval: string. Name of the custom Matlab function which evaluates the
 %   function. Its arguments are the parameters values.
 %
 %   Optional inputs
-%   - fun_check_param: string. Name of the Matlab function which checks if
+%   - fun_check_param: string. Name of the custom Matlab function which checks if
 %                      the argument values are valid. Its arguments are the parameters values. 
-%                      Returns a boolean. (default returns true)
-%   - fun_is_discrete: string. Name of the Matlab function returning a boolean that is true if the
-%                      output is discrete. Its arguments are booleans
+%                      Returns a logical. (default returns true)
+%   - fun_is_discrete: string. Name of the custom Matlab function returning a logical that is true if the
+%                      output is discrete. Its arguments are logicals
 %                      indicating if the arguments are discrete.
 %                      (default returns false)
 % 
@@ -28,7 +28,7 @@ function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 %   See also BIIPS_ADD_DISTRIBUTION, BIIPS_MODEL
 %--------------------------------------------------------------------------
 % EXAMPLE:
-% %% Add function f to BUGS language
+% %% Add custom function f to BUGS language
 % type('f_dim.m');
 % type('f_eval.m');
 % biips_add_function('f', 2, 'f_dim', 'f_eval');

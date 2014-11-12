@@ -8,7 +8,7 @@ function clear_monitors(console, type, release_only)
 %   - type :        string containing   'f' - forward
 %                                       's' - smoothing
 %                                       'b' - backward smoothing
-%   - release_only: boolean flag to indicate what kind of clearing has 
+%   - release_only: logical flag to indicate what kind of clearing has 
 %                   to be done
 %--------------------------------------------------------------------------
 

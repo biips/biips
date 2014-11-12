@@ -51,7 +51,7 @@ namespace Biips
   {
     const DimArray & weights_dim = *paramDims[0];
     const DimArray & size_dim = *paramDims[1];
-    return weights_dim.IsVector() && (weights_dim[0] > 0) && size_dim.IsScalar() &&  (size_dim[0] > 0) ;
+    return weights_dim.Drop().IsVector() && (weights_dim[0] > 0) && size_dim.IsScalar() &&  (size_dim[0] > 0) ;
   }
 
   Bool DMulti::CheckParamValues(const NumArray::Array & paramValues) const

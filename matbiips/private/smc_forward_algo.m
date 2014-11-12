@@ -13,7 +13,7 @@ function ok = smc_forward_algo(id, n_part, rs_thres, rs_type, seed)
 %   - seed:      seed for the random number generator
 %
 %   OUTPUT
-%   - ok: boolean 
+%   - ok: logical 
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

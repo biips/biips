@@ -4,16 +4,17 @@ function biips_build_sampler(model, varargin)
 %   INPUT: 
 %   - model:    Biips model as returned by the BIIPS_MODEL function
 %   Optional Input:
-%   - proposal: string. Keyword defining the type of proposal desired.
+%   - proposal: string. The type of proposal used by the SMC algorithm.
 %               Possible values are 'auto' and 'prior'. 'auto' selects the best sampler
 %               among available ones automatically. 'prior' forces asignment of the prior
 %               sampler to every node. 'prior' switches off lots of instructions and can
 %               speed up the startup of the SMC for large models.
 %               (default = 'auto')
 %
-%   In case you want to specify the proposal used by the SMC algorithm.
-%   This function has to be called before BIIPS_SMC_SAMPLES. Otherwise, it will be automatically
-%   called by BIIPS_SMC_SAMPLES with the default parameters.
+%   In order to specify the proposal used by the SMC algorithm,
+%   this function has to be called before BIIPS_SMC_SAMPLES.
+%   Otherwise, it will be automatically called by BIIPS_SMC_SAMPLES 
+%   with the default parameters.
 % 
 %   See also BIIPS_SMC_SAMPLES, BIIPS_NODES
 %--------------------------------------------------------------------------

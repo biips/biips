@@ -45,7 +45,7 @@ namespace Biips
   Bool DCat::checkParamDims(const Types<DimArray::Ptr>::Array & paramDims) const
   {
     const DimArray & dim = *paramDims[0];
-    if (dim.IsVector())
+    if (dim.Drop().IsVector())
       return (dim[0] > 0);
     else
       return false;

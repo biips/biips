@@ -10,7 +10,7 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 %   Optional Inputs:
 %   - thin:         integer. Thinning interval. Returns output every 'thin' iterations
 %                   (default = 1)
-%   - rw_adapt:     boolean. Activate adaptation of the proposal (default=true)
+%   - rw_adapt:     logical. Activate adaptation of the proposal (default=true)
 %   - rs_thres, rs_type, ... : Additional arguments to be passed to the SMC
 %      algorithm. See BIIPS_SMC_SAMPLES for for details.
 %   - max_fail:    integer. maximum number of failed SMC algorithms allowed.

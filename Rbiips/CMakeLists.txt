@@ -14,7 +14,7 @@ set(PKG_FILES ${PKG_FILES} cleanup configure.ac configure COPYING DESCRIPTION NA
 add_subdirectory(R)
 add_subdirectory(src)
 add_subdirectory(inst)
-add_subdirectory(demo)
+add_subdirectory(vignettes)
 
 
 # add command to copy files in PKG_FILES to PKG_BIN_DIR
@@ -40,7 +40,7 @@ if (NOT WIN32)
 
   # find autoconf
   find_program (AUTOCONF autoconf)
-  
+
   if (${AUTOCONF} STREQUAL AUTOCONF-NOTFOUND)
 		message (SEND_ERROR "autoconf not found")
   else ()
@@ -94,7 +94,7 @@ add_custom_command (OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION ${CMAKE_CURRE
     COMMENT "Roxygenize ${PKG_NAME} DESCRIPTION and NAMESPACE"
     VERBATIM
 )
-	
+
 # generate man directory documentation in binary dir
 add_custom_command (OUTPUT ${PKG_BIN_DIR}/man/${PKG_NAME}-package.Rd
     DEPENDS ${PKG_BIN_FILES}
@@ -109,24 +109,24 @@ add_custom_target(${PKG_NAME}_pkg_dir
     DEPENDS ${PKG_BIN_DIR}/man/${PKG_NAME}-package.Rd
     COMMENT "Setting up ${PKG_NAME} package dir"
 )
-    
+
 # add R CMD check target
-add_custom_target (${PKG_NAME}_check  
-	DEPENDS ${PKG_NAME}_pkg_dir
-	COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD check ${PKG_NAME}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	COMMENT "Checking ${PKG_NAME} package"
-	VERBATIM
+add_custom_target (${PKG_NAME}_check
+  	DEPENDS ${PKG_NAME}_pkg_dir
+  	COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD check ${PKG_NAME}
+  	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  	COMMENT "Checking ${PKG_NAME} package"
+  	VERBATIM
 )
 
 # add R CMD Rd2pdf target
 add_custom_target (${PKG_NAME}_Rd2pdf
-	DEPENDS ${PKG_BIN_DIR}/man/${PKG_NAME}-package.Rd
-	COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD Rd2pdf --no-preview --force ${PKG_BIN_DIR}
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	COMMENT "Generate ${PKG_NAME} documentation PDF output from the Rd sources"
-	VERBATIM
-)    
+    DEPENDS ${PKG_BIN_DIR}/man/${PKG_NAME}-package.Rd
+    COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD Rd2pdf --no-preview --force ${PKG_BIN_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  	COMMENT "Generate ${PKG_NAME} documentation PDF output from the Rd sources"
+  	VERBATIM
+)
 
 
 if (WIN32)
@@ -138,7 +138,7 @@ if (WIN32)
     endif ()
 
 # TODO: add R CMD INSTALL --build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.zip
+    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.zip
         DEPENDS ${PKG_NAME}_pkg_dir
         COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD INSTALL --preclean --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -146,13 +146,13 @@ if (WIN32)
         VERBATIM
     )
     add_custom_target (${PKG_NAME}_INSTALL_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}.zip
+        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.zip
     )
-  
+
 elseif (APPLE)
 
     # add R CMD INSTALL --build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.tgz
+    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tgz
         DEPENDS ${PKG_NAME}_pkg_dir
         COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD INSTALL --build ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -160,13 +160,13 @@ elseif (APPLE)
         VERBATIM
     )
     add_custom_target (${PKG_NAME}_INSTALL_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}.tgz
+        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tgz
     )
-  
+
 elseif (UNIX AND NOT APPLE)
 
     # add R CMD build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}.tar.gz
+    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tar.gz
         DEPENDS ${PKG_NAME}_pkg_dir
         COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD build ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -174,11 +174,10 @@ elseif (UNIX AND NOT APPLE)
         VERBATIM
     )
     add_custom_target (${PKG_NAME}_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}.tar.gz
+        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tar.gz
     )
-  
 endif()
-      
+
 # add R CMD INSTALL target
 add_custom_target (${PKG_NAME}_INSTALL
     DEPENDS ${PKG_NAME}_pkg_dir

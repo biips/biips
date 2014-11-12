@@ -1,10 +1,10 @@
 Biips
 =============================================================================
-**Biips** is a probabilistic programming software for **Bayesian inference with interacting particle systems**.
+**Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
-- Version:       0.9.1
-- Last modified: 2014-11-10
-- Maintainer:    biips-project <biips-project@lists.gforge.inria.fr>
+- Version:       0.10.0
+- Last modified: 2014-11-11
+- Maintainer:    Adrien Todeschini biips-project@lists.gforge.inria.fr
 - License:       GPL-3
 - Website:       <http://alea.bordeaux.inria.fr/biips>
 
@@ -13,7 +13,7 @@ Its main objective is to popularize the use of particle methods to researchers, 
 
 Overview
 -----------------------------------------------------------------------------
- Biips is a probabilistic programming software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+ Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
  It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).
@@ -50,7 +50,7 @@ To contact us with non-public matters, please write to <biips-project@lists.gfor
 Otherwise you can use the discusssion forum.
 
 Getting Help
------------------------------------------------------------------------------ 
+-----------------------------------------------------------------------------
 The discusssion [forum](https://gforge.inria.fr/forum/?group_id=2515) can be used for any question or feedback about Biips.
 This is the best place for getting help. All Biips users are invited to participate.
 
@@ -58,7 +58,7 @@ We recommend [creating an account](https://gforge.inria.fr/account/register.php)
 In the registration form, you can enter "ALEA" in the *INRIA research team* field.
 
 Development
------------------------------------------------------------------------------ 
+-----------------------------------------------------------------------------
 The core software libraries are written in C++.
 An R package allows running Biips from the R statistical software and provides posterior analysis and plotting functions.
 A Matlab toolbox provides similar capabilities.
@@ -66,7 +66,7 @@ A Matlab toolbox provides similar capabilities.
 The Biips source code is hosted on a git repository at GForge Inria. If you want to keep track of the development version, you can find downloading instructions on the [GForge Biips project](https://gforge.inria.fr/scm/?group_id=2515).
 
 License
------------------------------------------------------------------------------ 
+-----------------------------------------------------------------------------
 Biips is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
 
 The source code is freely accessible at [GForge Inria](https://gforge.inria.fr/projects/biips/).
@@ -85,7 +85,7 @@ Biips code is adapted from:
 
 - [JAGS](http://mcmc-jags.sourceforge.net/), Copyright (C) Martyn Plummer, 2002-2010
 - [SMCTC](http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/smctc/), Copyright (C) Adam M. Johansen, 2008-2009
-  
+
 Additional information concerning adapted open source software
 is included in the file NOTICES.
 
@@ -95,8 +95,8 @@ Thanks for supporting the project:
 
 - [ALEA project-team](http://alea.bordeaux.inria.fr) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux)
 and especially:
-- [Pierre Del Moral](http://www.math.u-bordeaux1.fr/~pdelmora/) (Head of ALEA team): guidelines, probability expertise, testing methodology
-- [Pierrick Legrand](http://www.sm.u-bordeaux2.fr/~legrand/): continuous project monitoring, software deployment expertise
+- [Pierre Del Moral](http://www.math.u-bordeaux1.fr/~pdelmora/) (Head of ALEA team): guidelines, probability expertise
+- [Pierrick Legrand](http://www.sm.u-bordeaux2.fr/~legrand/): project monitoring, software deployment expertise
 
 Logo design:
 

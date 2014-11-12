@@ -5,8 +5,8 @@ cmake_minimum_required (VERSION 2.8)
 project (Biips CXX C)
 
 set (Biips_VERSION_MAJOR 0)
-set (Biips_VERSION_MINOR 9)
-set (Biips_VERSION_PATCH 1)
+set (Biips_VERSION_MINOR 10)
+set (Biips_VERSION_PATCH 0)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
 file (WRITE VERSION.txt ${Biips_VERSION})
@@ -21,7 +21,7 @@ set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting particle sys
 set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
 
-set (Biips_DESCRIPTION " Biips is a probabilistic programming software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+set (Biips_DESCRIPTION " Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
  It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
  It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
  Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).")
@@ -104,7 +104,7 @@ if (UNIX) # Linux or MacOSX
 
   elseif (COMPILER_NAME STREQUAL gcc)
       # TODO : check if g++ version >= 4.7 or 4.8 ?
-    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC")
+    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-unused-local-typedefs")
     set(RBIIPS_COMPILE_FLAGS ${BIIPS_COMPILE_FLAGS})
     set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
 

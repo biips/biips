@@ -1,26 +1,27 @@
-#' Add a R function or distribution to the BUGS language.
+#' Add a custom R function or distribution to the BUGS language.
 #'
 #' @export
-#' @param name     string. Name of the function that will be used in the BUGS
+#' @name extend-bugs
+#' @param name     string. Name of the custom function that will be used in the BUGS
 #'   model. must be a valid BUGS language function name.
-#' @param n_param  integer. Number of arguments of the function
-#' @param fun_dim  R function returning the size vector of the output. It will
+#' @param n_param  integer. Number of arguments of the custom function or distribution.
+#' @param fun_dim  custom R function returning the size vector of the output. It will
 #'   be called when compiling the model. Its arguments are the dimension vectors
 #'   of the inputs.
-#' @param fun_eval R function which evaluates the function. Its arguments are
+#' @param fun_eval custom R function which evaluates the function. Its arguments are
 #'   the parameters values.
 #'
-#' @param fun_check_param  R function which checks if the argument values are
-#'   valid. Its arguments are the parameters values. Returns a boolean. (default
+#' @param fun_check_param  custom R function which checks if the argument values are
+#'   valid. Its arguments are the parameters values. Returns a logical. (default
 #'   returns \code{TRUE})
-#' @param fun_is_discrete R function returning a boolean that is \code{TRUE} if
-#'   the output is discrete. Its arguments are booleans indicating if the
+#' @param fun_is_discrete custom R function returning a logical that is \code{TRUE} if
+#'   the output is discrete. Its arguments are logicals indicating if the
 #'   arguments are discrete. (default returns \code{FALSE})
 #'
 #'   All the given R functions must have the same number of input arguments.
 #' @seealso \code{\link{biips_model}}
 #' @examples
-#' ## Add function f to BUGS language
+#' #' Add custom function `f` to BUGS language
 #' f_dim <- function(x_dim, t_dim) {
 #'   # Check dimensions of the input and return
 #'   # dimension of the output of function f
@@ -51,13 +52,13 @@ biips_add_function <- function(name, n_param, fun_dim, fun_eval, fun_check_param
 
 #' Currently, the added sampling distributions can only define unobserved nodes.
 #'
-#' @rdname biips_add_function
+#' @rdname extend-bugs
 #' @export
-#' @param fun_sample  R function which samples from the distribution. Its
+#' @param fun_sample custom R function which samples from the distribution. Its
 #'   arguments are the parameters values.
 #'
 #' @examples
-#' ## Add sampling distribution dMN to BUGS language
+#' #' Add custom sampling distribution `dMN` to BUGS language
 #' dMN_dim <- function(mu_dim, Sig_dim) {
 #'   # Check dimensions of the input and return
 #'   # dimension of the output of distribution dMN
@@ -95,9 +96,9 @@ biips_add_distribution <- function(name, n_param, fun_dim, fun_sample, fun_check
 #'   existing in the workspace. Any numeric objects in \code{data} corresponding
 #'   to node arrays used in \code{file} are taken to represent the values of
 #'   observed nodes in the model.
-#' @param sample_data   boolean. Toggle the evaluation of the 'data' block of
+#' @param sample_data   logical. Toggle the evaluation of the 'data' block of
 #'   the BUGS model that generates or transforms data. (default = \code{TRUE}).
-#' @param quiet    boolean. Deactivate verbosity. (default = \code{FALSE}).
+#' @param quiet    logical. Deactivate verbosity. (default = \code{FALSE}).
 #'
 #' @return An object of class \code{biips} which can be used to generate samples
 #'   from the posterior distribution of the parameters.

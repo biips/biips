@@ -1,10 +1,10 @@
 ====== Biips ======
 
-**Biips** is a probabilistic programming software for **Bayesian inference with interacting particle systems**.
+**Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
-  * Version: 0.9.1
-  * Last modified: 2014-10-02
-  * Maintainer: biips-project <biips-project@lists.gforge.inria.fr>
+  * Version: 0.10.0
+  * Last modified: 2014-11-10
+  * Maintainer: Adrien Todeschini biips-project@lists.gforge.inria.fr
   * License: GPL-3
   * Website: http://alea.bordeaux.inria.fr/biips
 
@@ -12,7 +12,7 @@ The project has started on Dec. 2009 and is supported by the [[http://alea.borde
 
 ===== Overview =====
 
-Biips is a probabilistic programming software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods. It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine. It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions. Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).
+Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods. It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine. It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions. Unlike MCMC methods used by BUGS/JAGS, SMC methods are more adapted to dynamic problems (tracking, signal filtering, etc).
 
 ===== More context =====
 
@@ -84,8 +84,8 @@ Additional information concerning adapted open source software is included in th
 Thanks for supporting the project:
 
   * [[http://alea.bordeaux.inria.fr|ALEA project-team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]] and especially:
-  * [[http://www.math.u-bordeaux1.fr/~pdelmora/|Pierre Del Moral]] (Head of ALEA team): guidelines, probability expertise, testing methodology
-  * [[http://www.sm.u-bordeaux2.fr/~legrand/|Pierrick Legrand]]: continuous project monitoring, software deployment expertise
+  * [[http://www.math.u-bordeaux1.fr/~pdelmora/|Pierre Del Moral]] (Head of ALEA team): guidelines, probability expertise
+  * [[http://www.sm.u-bordeaux2.fr/~legrand/|Pierrick Legrand]]: project monitoring, software deployment expertise
 
 Logo design:
 

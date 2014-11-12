@@ -9,7 +9,7 @@ function [obj, varargout] = pimh_algo(obj, n_iter, n_part, return_samples, varar
 %   - obj:     structure. PIMH object
 %   - n_iter:       positive integer. Number of iterations
 %   - n_part:       positive integer. Number of particles used in SMC algorithms
-%   - return_samples: boolean. 
+%   - return_samples: logical. 
 %   Optional Inputs:
 %   - thin :        positive integer. Returns samples every thin iterations
 %                   (default=1)
