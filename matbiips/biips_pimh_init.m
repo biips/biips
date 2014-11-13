@@ -12,7 +12,9 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 %                      Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
 %
 %   OUTPUT
-%   - obj_pimh: structure containing the current state of the algorithm:
+%   - obj_pimh: structure with fields meant for internal purpose only. They 
+%               are used to query information on the current state of the
+%               algorithm:
 %               * model: biips model
 %               * variable_names: cell with the names of the monitored variables
 %               * sample: current sample

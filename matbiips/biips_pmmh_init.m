@@ -34,7 +34,9 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %   - beta:         Tuning parameter of the proposal (default = 0.05)
 %
 %   OUTPUT
-%   - obj_pmmh: structure containing the current state of the algorithm
+%   - obj_pmmh: structure with fields meant for internal purpose only. They 
+%               are used to query information on the current state of the
+%               algorithm:
 %               * param_names: cell with the names of the parameters to be
 %                 monitored
 %               * latent_names: cell with the names of the latents to be

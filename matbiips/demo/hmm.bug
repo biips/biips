@@ -1,4 +1,4 @@
-var x_true[tmax], x[tmax], y[tmax]
+var c_true[tmax], x_true[tmax], c[tmax], x[tmax], y[tmax]
 
 data
 {
@@ -20,7 +20,7 @@ model
   for (t in 2:tmax)
   {
     c[t] ~ dcat(p)
-    x[t] ~ dnorm(f(x[t-1], t-1), ifelse(c_true[t]==1, 1/10, 1/100))
+    x[t] ~ dnorm(f(x[t-1], t-1), ifelse(c[t]==1, 1/10, 1/100))
     y[t] ~ dnorm(x[t], exp(logtau))
   }
 }

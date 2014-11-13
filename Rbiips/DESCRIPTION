@@ -1,6 +1,6 @@
 Package: Rbiips
 Version: 0.10.0
-Date: 2014-11-11
+Date: 2014-11-13
 Title: Bayesian inference with interacting particle systems
 Authors@R: as.person(c(
     "Adrien Todeschini <adrien.todeschini@inria.fr> [aut, cre]",

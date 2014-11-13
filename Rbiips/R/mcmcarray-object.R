@@ -339,7 +339,12 @@ biips_table.mcmcarray <- function(x, ...) {
     ind_vec <- seq(d, len * (n_samples - 1) + d, len)
     values <- x[ind_vec]
 
-    out[[d]] <- table(values, ...)/n_samples
+    l <- attr(x, "lower")
+    u <- attr(x, "upper")
+    ind <- l + get_index(d, rep(0, length(l)), u - l)
+    dnn <- deparse_varname(attr(x, "name"), ind, ind)
+
+    out[[d]] <- table(values, dnn = dnn, ...)/n_samples
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -367,10 +372,12 @@ biips_density.mcmcarray <- function(x, bw = "nrd0", ...) {
     ind_vec <- seq(d, len * (n_samples - 1) + d, len)
     values <- x[ind_vec]
 
-    out[[d]] <- density(values, bw = rec(bw, d), ...)  # recycle
+    out[[d]] <- density(values, bw = rec(bw, d), ...)  # recycle bw
     ind <- attr(x, "lower") + get_index(d, rep(0, length(attr(x, "lower"))),
       attr(x, "upper") - attr(x, "lower"))
     out[[d]]$data.name <- deparse_varname(attr(x, "name"), ind, ind)
+
+    class(out[[d]]) <- "density.mcmcarray.univariate"
   }
 
   dim(out) <- dimen[!drop_dim]
@@ -464,78 +471,6 @@ biips_hist.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ...) {
   }
   class(out) <- "histogram.mcmcarray.list"
   return(invisible(out))
-}
-
-#' @name plot-methods
-#' @rdname plot-methods
-#' @export
-plot.table.mcmcarray <- function(x, main = NULL, xlab = NULL, ylab = "Probability",
-  ...) {
-  for (d in 1:length(x)) {
-    plot(x[[d]], main = rec(main, d), xlab = rec(xlab, d), ylab = rec(ylab, d),
-      ...)  # recycle arguments
-  }
-  invisible(NULL)
-}
-
-#' @rdname plot-methods
-#' @export
-plot.density.mcmcarray <- function(x, main = NULL, xlab = NULL, ...) {
-  if (is.null(main)) {
-    main <- list()
-    for (i in 1:length(x)) {
-      main[[i]] <- x[[i]]$data.name
-    }
-  }
-
-  for (d in 1:length(x)) {
-    plot(x[[d]], main = rec(main, d), xlab = rec(xlab, d), ...)  # recycle arguments
-  }
-  invisible(NULL)
-}
-
-#' @rdname plot-methods
-#' @export
-plot.histogram.mcmcarray <- function(x, main = NULL, xlab = NULL, ...) {
-  if (is.null(main)) {
-    main <- list()
-    for (i in 1:length(x)) {
-      main[[i]] <- paste("Histogram of", x[[i]]$xname)
-    }
-  }
-  for (d in 1:length(x)) {
-    plot(x[[d]], main = rec(main, d), xlab = rec(xlab, d), ...)  # recycle arguments
-  }
-  invisible(NULL)
-}
-
-#' @rdname plot-methods
-#' @export
-plot.table.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ...) {
-  for (i in 1:length(x)) {
-    plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ...)  # recycle arguments
-  }
-  invisible(NULL)
-}
-
-#' @rdname plot-methods
-#' @export
-plot.density.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ylab = "Density",
-  ...) {
-  for (i in 1:length(x)) {
-    plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ylab = rec(ylab, i),
-      ...)  # recycle arguments
-  }
-  invisible(NULL)
-}
-
-#' @rdname plot-methods
-#' @export
-plot.histogram.mcmcarray.list <- function(x, main = NULL, xlab = NULL, ...) {
-  for (i in 1:length(x)) {
-    plot(x[[i]], main = rec(main, i), xlab = rec(xlab, i), ...)  # recycle arguments
-  }
-  invisible(NULL)
 }
 
 

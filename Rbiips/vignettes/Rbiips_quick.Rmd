@@ -1,7 +1,7 @@
 ---
-title: "Quick examples of Rbiips usage"
-author: "Adrien Todeschini, Fran\u00e7ois Caron"
-date: "`r Sys.Date()`"
+title: 'Quick examples of Rbiips usage'
+author: 'Adrien Todeschini, Fran\u00e7ois Caron'
+date: '`r Sys.Date()`'
 output:
   rmarkdown::html_vignette:
     toc: yes
@@ -33,7 +33,7 @@ f_eval <- function(x, t) {
   # Evaluate function f
   0.5 * x + 25 * x/(1 + x^2) + 8 * cos(1.2 * t)
 }
-biips_add_function("f", 2, f_dim, f_eval)
+biips_add_function('f', 2, f_dim, f_eval)
 ```
 
 Add custom sampling distribution `dMN`
@@ -49,15 +49,15 @@ dMN_sample <- function(mu, Sig) {
   # Draw a sample of distribution dMN
   mu + t(chol(Sig)) %*% rnorm(length(mu))
 }
-biips_add_distribution("dMN", 2, dMN_dim, dMN_sample)
+biips_add_distribution('dMN', 2, dMN_dim, dMN_sample)
 ```
 
 # Compile model
 
 ```{r}
-modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
+modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 stopifnot(nchar(modelfile) > 0)
-cat(readLines(modelfile), sep = "\n")
+cat(readLines(modelfile), sep = '\n')
 
 tmax <- 10
 p <- c(.5, .5)
@@ -69,7 +69,7 @@ model <- biips_model(modelfile, data, sample_data = TRUE)
 
 rm(model)
 
-datanames <- c("tmax", "p", "logtau_true", "logtau")
+datanames <- c('tmax', 'p', 'logtau_true', 'logtau')
 model <- biips_model(modelfile, datanames, sample_data = TRUE)
 
 is.biips(model)
@@ -82,24 +82,24 @@ biips_variable_names(model)
 
 biips_nodes(model)
 
-dotfile <- "hmm.dot"
+dotfile <- 'hmm.dot'
 biips_print_dot(model, dotfile)
-# cat(readLines(dotfile), sep = "\n")
+# cat(readLines(dotfile), sep = '\n')
 ```
 
 # SMC algorithm
 
 ```{r}
-biips_build_sampler(model, proposal = "prior")
-biips_nodes(model, type = "stoch", observed = FALSE)
+biips_build_sampler(model, proposal = 'prior')
+biips_nodes(model, type = 'stoch', observed = FALSE)
 
-biips_build_sampler(model, proposal = "auto")
-biips_nodes(model, type = "stoch", observed = FALSE)
+biips_build_sampler(model, proposal = 'auto')
+biips_nodes(model, type = 'stoch', observed = FALSE)
 
 n_part <- 100
 
-out_smc <- biips_smc_samples(model, c("x", "c[2:10]"), n_part, type = "fs", rs_thres = 0.5,
-  rs_type = "stratified")
+out_smc <- biips_smc_samples(model, c('x', 'c[2:10]'), n_part, type = 'fs', rs_thres = 0.5,
+  rs_type = 'stratified')
 
 ```
 
@@ -122,19 +122,17 @@ out_smc$x
 biips_diagnosis(out_smc$x)
 summ_smc_x <- biips_summary(out_smc$x, order = 2, probs = c(.025, .975))
 summ_smc_x
-dens_smc_x <- biips_density(out_smc$x, bw = "nrd0", adjust = 1, n = 100)
-dens_smc_x
+dens_smc_x <- biips_density(out_smc$x, bw = 'nrd0', adjust = 1, n = 100)
 par(mfrow = c(2, 2))
 plot(dens_smc_x)
 
-is.smcarray.fsb(out_smc[["c[2:10]"]])
-names(out_smc[["c[2:10]"]])
-out_smc[["c[2:10]"]]
-biips_diagnosis(out_smc[["c[2:10]"]])
-summ_smc_c <- biips_summary(out_smc[["c[2:10]"]])
+is.smcarray.fsb(out_smc[['c[2:10]']])
+names(out_smc[['c[2:10]']])
+out_smc[['c[2:10]']]
+biips_diagnosis(out_smc[['c[2:10]']])
+summ_smc_c <- biips_summary(out_smc[['c[2:10]']])
 summ_smc_c
-table_smc_c <- biips_table(out_smc[["c[2:10]"]])
-table_smc_c
+table_smc_c <- biips_table(out_smc[['c[2:10]']])
 par(mfrow = c(2, 2))
 plot(table_smc_c)
 ```
@@ -151,59 +149,63 @@ biips_summary(out_smc$x$f)
 par(mfrow = c(2, 2))
 plot(biips_density(out_smc$x$f))
 
-is.smcarray(out_smc[["c[2:10]"]]$f)
-names(out_smc[["c[2:10]"]]$f)
-out_smc[["c[2:10]"]]$f
-out_smc[["c[2:10]"]]$s
-biips_diagnosis(out_smc[["c[2:10]"]]$f)
-biips_summary(out_smc[["c[2:10]"]]$f)
+is.smcarray(out_smc[['c[2:10]']]$f)
+names(out_smc[['c[2:10]']]$f)
+out_smc[['c[2:10]']]$f
+out_smc[['c[2:10]']]$s
+biips_diagnosis(out_smc[['c[2:10]']]$f)
+biips_summary(out_smc[['c[2:10]']]$f)
 par(mfrow = c(2, 2))
-plot(biips_table(out_smc[["c[2:10]"]]$f))
+plot(biips_table(out_smc[['c[2:10]']]$f))
 ```
 
 
 ```{r}
 par(mfrow = c(2, 2))
-plot(model$data()$x_true, type = "l", col = "green", xlab = "t", ylab = "x[t]")
-lines(summ_smc_x$f$mean, col = "blue")
-lines(summ_smc_x$s$mean, col = "red")
-matlines(cbind(summ_smc_x$f$quant), lty = 2, col = "blue")
-matlines(cbind(summ_smc_x$s$quant), lty = 2, col = "red")
-legend("topright", leg = c("true", "SMC filtering estimate", "SMC smoothing estimate"),
-  lty = 1, col = c("green", "blue", "red"), bty = "n")
+plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't', ylab = 'x[t]')
+lines(summ_smc_x$f$mean, col = 'blue')
+lines(summ_smc_x$s$mean, col = 'red')
+matlines(matrix(unlist(summ_smc_x$f$quant), tmax), lty = 2, col = 'blue')
+matlines(matrix(unlist(summ_smc_x$s$quant), tmax), lty = 2, col = 'red')
+legend('topright', leg = c('true', 'SMC filtering estimate', 'SMC smoothing estimate'),
+  lty = 1, col = c('green', 'blue', 'red'), bty = 'n')
 
-barplot(2.5*(model$data()$c_true==1), col = "green", border = NA, space = 0, ylim=c(0,3),
-        xlab=t, ylab="c[t]==1", axes = FALSE)
+barplot(2.5*(model$data()$c_true==1), col = 'green', border = NA, space = 0, ylim=c(0,3),
+        xlab='t', ylab='c[t]==1', axes = FALSE)
 axis(1, at=1:tmax-.5, labels=1:tmax)
 axis(2, line = 1, at=c(0,3), labels=NA)
-barplot(2*(model$data()$c_true==1), col = "white", border = NA, space = 0, axes = FALSE, add = TRUE)
-text(tmax/2, 2.75, "true")
-barplot(1.5*(summ_smc_c$f$mode==1), col = "blue", border = NA, space = 0, axes = FALSE, add = TRUE)
-barplot(1*(summ_smc_c$f$mode==1), col = "white", border = NA, space = 0, axes = FALSE, add = TRUE)
-text(tmax/2, 1.75, "SMC filtering mode")
-barplot(.5*(summ_smc_c$s$mode==1), col = "red", border = NA, space = 0, axes = FALSE, add = TRUE)
-text(tmax/2, .75, "SMC smoothing mode")
+barplot(2*(model$data()$c_true==1), col = 'white', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, 2.75, 'true')
+barplot(1.5*(summ_smc_c$f$mode==1), col = 'blue', border = NA, space = 0, axes = FALSE, add = TRUE)
+barplot(1*(summ_smc_c$f$mode==1), col = 'white', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, 1.75, 'SMC filtering mode')
+barplot(.5*(summ_smc_c$s$mode==1), col = 'red', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, .75, 'SMC smoothing mode')
 
 t <- 5
-plot(dens_smc_x[[t]], col = c("blue","red"), ylab = "posterior density")
-points(model$data()$x_true[t], 0, pch = 17, col = "green")
+plot(dens_smc_x[[t]], col = c('blue','red'), ylab = 'posterior density')
+points(model$data()$x_true[t], 0, pch = 17, col = 'green')
 
-plot(table_smc_c[[t-1]], col = c("blue","red"), ylab = "posterior probability mass")
-points(model$data()$c_true[t], 0, pch = 17, col = "green")
+plot(table_smc_c[[t-1]], col = c('blue','red'), ylab = 'posterior probability mass')
+points(model$data()$c_true[t], 0, pch = 17, col = 'green')
 ```
 
 # PIMH algorithm
 
 ```{r}
-modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
+modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 stopifnot(nchar(modelfile) > 0)
-cat(readLines(modelfile), sep = "\n")
+cat(readLines(modelfile), sep = '\n')
 
-data <- list(tmax = 10, logtau = log(10))
-model <- biips_model(modelfile, data, sample_data = TRUE)
+tmax <- 10
+p <- c(.5, .5)
+logtau_true <- log(1)
+logtau <- logtau_true
+
+model <- biips_model(modelfile, c('tmax', 'p', 'logtau_true', 'logtau'))
 
 n_part <- 50
-obj_pimh <- biips_pimh_init(model, "x")  # Initialize
+obj_pimh <- biips_pimh_init(model, c('x', 'c[2:10]'))  # Initialize
 is.pimh(obj_pimh)
 out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
@@ -216,10 +218,6 @@ is.mcmcarray.list(out_pimh)
 names(out_pimh)
 out_pimh
 biips_summary(out_pimh)
-par(mfrow = c(2, 2))
-plot(biips_density(out_pimh))
-par(mfrow = c(2, 2))
-biips_hist(out_pimh)
 ```
 
 Manipulate `mcmcarray` object
@@ -227,69 +225,100 @@ Manipulate `mcmcarray` object
 ```{r}
 is.mcmcarray(out_pimh$x)
 out_pimh$x
-biips_summary(out_pimh$x)
+summ_pimh_x <- biips_summary(out_pimh$x, order = 2, probs = c(0.025, 0.975))
+summ_pimh_x
+dens_pimh_x <- biips_density(out_pimh$x)
 par(mfrow = c(2, 2))
-plot(biips_density(out_pimh$x))
+plot(dens_pimh_x)
 par(mfrow = c(2, 2))
 biips_hist(out_pimh$x)
 
+is.mcmcarray(out_pimh[['c[2:10]']])
+out_pimh[['c[2:10]']]
+summ_pimh_c <- biips_summary(out_pimh[['c[2:10]']])
+summ_pimh_c
+table_pimh_c <- biips_table(out_pimh[['c[2:10]']])
 par(mfrow = c(2, 2))
-plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like), type = "l", col = "blue",
-  xlab = "PIMH iteration", ylab = "log p(y)")
+plot(table_pimh_c)
+```
 
-plot(out_pimh$x[1, ], type = "l", col = "blue", xlab = "PIMH iteration", ylab = "x[1]")
-points(0, model$data()$x_true[1], pch = 17, col = "green")
+```{r}
+par(mfrow = c(2, 1))
+plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like), type = 'l', col = 'blue',
+  xlab = 'PIMH iteration', ylab = 'log p(y)')
 
-summ_pimh <- biips_summary(out_pimh, order = 2, probs = c(0.025, 0.975))
+t <- 5
+plot(out_pimh$x[t, ], type = 'l', col = 'blue', xlab = 'PIMH iteration', ylab = paste0('x[',t,']'))
+points(0, model$data()$x_true[t], pch = 17, col = 'green')
 
-plot(model$data()$x_true, type = "l", col = "green", xlab = "t", ylab = "x[t]")
-lines(summ_pimh$x$mean, col = "blue")
-lines(summ_pimh$x$quant[[1]], lty = 2, col = "blue")
-lines(summ_pimh$x$quant[[2]], lty = 2, col = "blue")
-legend("topright", leg = c("true", "PIMH estimate"), lty = c(2, 1), col = c("green",
-  "blue"), bty = "n")
+par(mfrow = c(2, 2))
+plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't', ylab = 'x[t]')
+lines(summ_pimh_x$mean, col = 'blue')
+matlines(matrix(unlist(summ_pimh_x$quant), tmax), lty = 2, col = 'blue')
+legend('topright', leg = c('true', 'PIMH estimate'), lty = c(2, 1), col = c('green',
+  'blue'), bty = 'n')
 
-dens_pimh <- biips_density(out_pimh)
+barplot(1.5*(model$data()$c_true==1), col = 'green', border = NA, space = 0, ylim=c(0,2),
+        xlab='t', ylab='c[t]==1', axes = FALSE)
+axis(1, at=1:tmax-.5, labels=1:tmax)
+axis(2, line = 1, at=c(0,2), labels=NA)
+barplot(1*(model$data()$c_true==1), col = 'white', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, 1.75, 'true')
+barplot(.5*(summ_pimh_c$mode==1), col = 'red', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, .75, 'PIMH mode')
 
-plot(dens_pimh$x[[1]], col = "blue", xlab = "x[1]", ylab = "posterior density", main = NA)
-points(model$data()$x_true[1], 0, pch = 17, col = "green")
+plot(dens_pimh_x[[t]], col="blue", main = , ylab = 'posterior density')
+points(model$data()$x_true[t], 0, pch = 17, col = 'green')
+
+plot(table_pimh_c[[t-1]], col="blue", ylab = 'posterior probability mass')
+points(model$data()$c_true[t], 0, pch = 17, col = 'green')
 ```
 
 # SMC sensitivity analysis
 
 ```{r}
-modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
-data <- list(tmax = 10, logtau = log(10))
-model <- biips_model(modelfile, data, sample_data = TRUE)
+modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
+stopifnot(nchar(modelfile) > 0)
+cat(readLines(modelfile), sep = '\n')
+
+tmax <- 10
+p <- c(.5, .5)
+logtau_true <- log(1)
+logtau <- logtau_true
+
+model <- biips_model(modelfile, c('tmax', 'p', 'logtau_true', 'logtau'))
 
 n_part <- 50
 logtau_val <- -10:10
 out_sens <- biips_smc_sensitivity(model, list(logtau = logtau_val), n_part)
 
 par(mfrow = c(2, 1))
-plot(logtau_val, out_sens$log_marg_like, type = "l", col = "blue", xlab = "logtau",
-  ylab = "log p(y|logtau) ", main = "SMC sensitivity")
-points(data$logtau, min(out_sens$log_marg_like), pch = 17, col = "green")
+plot(logtau_val, out_sens$log_marg_like, type = 'l', col = 'blue', xlab = 'logtau',
+  ylab = 'log p(y|logtau) ', main = 'SMC sensitivity')
+points(data$logtau, min(out_sens$log_marg_like), pch = 17, col = 'green')
 
-plot(logtau_val, out_sens$log_marg_like_pen, type = "l", col = "blue", xlab = "logtau",
-  ylab = "log p(y|logtau)+log p(logtau)")
+plot(logtau_val, out_sens$log_marg_like_pen, type = 'l', col = 'blue', xlab = 'logtau',
+  ylab = 'log p(y|logtau) + log p(logtau)')
 plml <- out_sens$log_marg_like_pen
 ymin <- min(plml[is.finite(plml)])
-points(data$logtau, ymin, pch = 17, col = "green")
+points(data$logtau, ymin, pch = 17, col = 'green')
 ```
 
 # PMMH algorithm
 
 ```{r}
-modelfile <- system.file("extdata", "hmm.bug", package = "Rbiips")
+modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
 stopifnot(nchar(modelfile) > 0)
+cat(readLines(modelfile), sep = '\n')
 
-logtau_true <- 10
-data <- list(tmax = 10)
-model <- biips_model(modelfile, data, sample_data = TRUE)
+tmax <- 10
+p <- c(.5, .5)
+logtau_true <- log(1)
+
+model <- biips_model(modelfile, c('tmax', 'p', 'logtau_true'))
 
 n_part <- 50
-obj_pmmh <- biips_pmmh_init(model, "logtau", latent_names = "x", inits = list(logtau = -2))  # Initialize
+obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = c('x', 'c[2:10]'), inits = list(logtau = -2))  # Initialize
 is.pmmh(obj_pmmh)
 out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
@@ -302,42 +331,70 @@ is.mcmcarray.list(out_pmmh)
 names(out_pmmh)
 out_pmmh
 biips_summary(out_pmmh)
-par(mfrow = c(2, 2))
-plot(biips_density(out_pmmh))
-par(mfrow = c(2, 2))
-biips_hist(out_pmmh)
 ```
 
 Manipulate `mcmcarray` object
 
 ```{r}
+is.mcmcarray(out_pmmh$logtau)
+out_pmmh$logtau
+summ_pmmh_lt <- biips_summary(out_pmmh$logtau, order = 2, probs = c(0.025, 0.975))
+dens_pmmh_lt <- biips_density(out_pmmh$logtau)
+par(mfrow = c(2, 1))
+plot(dens_pmmh_lt)
+biips_hist(out_pmmh$logtau)
+
 is.mcmcarray(out_pmmh$x)
 out_pmmh$x
-biips_summary(out_pmmh$x)
+summ_pmmh_x <- biips_summary(out_pmmh$x, order = 2, probs = c(0.025, 0.975))
+dens_pmmh_x <- biips_density(out_pmmh$x)
 par(mfrow = c(2, 2))
-plot(biips_density(out_pmmh$x))
+plot(dens_pmmh_x)
 par(mfrow = c(2, 2))
 biips_hist(out_pmmh$x)
 
+is.mcmcarray(out_pmmh[['c[2:10]']])
+out_pmmh[['c[2:10]']]
+summ_pmmh_c <- biips_summary(out_pmmh[['c[2:10]']])
+table_pmmh_c <- biips_table(out_pmmh[['c[2:10]']])
 par(mfrow = c(2, 2))
-plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen), type = "l",
-  col = "blue", xlab = "PMMH iteration", ylab = "log p(y|logtau) + log p(logtau)")
+plot(table_pmmh_c)
+```
 
-plot(out_pmmh$logtau[1, ], type = "l", col = "blue", xlab = "PMMH iteration", ylab = "logtau")
-points(0, logtau_true, pch = 17, col = "green")
+```{r}
+par(mfrow = c(2, 2))
+plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen), type = 'l',
+  col = 'blue', xlab = 'PMMH iteration', ylab = 'log p(y|logtau) + log p(logtau)')
 
-summ_pmmh <- biips_summary(out_pmmh, order = 2, probs = c(0.025, 0.975))
+plot(out_pmmh$logtau[1, ], type = 'l', col = 'blue', xlab = 'PMMH iteration', ylab = 'logtau')
+points(0, logtau_true, pch = 17, col = 'green')
 
-plot(model$data()$x_true, type = "l", col = "green", xlab = "t", ylab = "x[t]")
-lines(summ_pmmh$x$mean, col = "blue")
-lines(summ_pmmh$x$quant[[1]], lty = 2, col = "blue")
-lines(summ_pmmh$x$quant[[2]], lty = 2, col = "blue")
-legend("topright", leg = c("true", "PMMH estimate"), lty = c(2, 1), col = c("green",
-  "blue"), bty = "n")
+plot(dens_pmmh_lt, col = 'blue', ylab = 'posterior density')
+points(logtau_true, 0, pch = 17, col = 'green')
 
-dens_pmmh <- biips_density(out_pmmh)
+biips_hist(out_pmmh$logtau, col = 'blue', ylab = 'posterior density')
+points(logtau_true, 0, pch = 17, col = 'green')
 
-plot(dens_pmmh$logtau, col = "blue", xlab = "logtau", ylab = "posterior density",
-  main = NA)
-points(logtau_true, 0, pch = 17, col = "green")
+par(mfrow = c(2, 2))
+plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't', ylab = 'x[t]')
+lines(summ_pmmh_x$mean, col = 'blue')
+matlines(matrix(unlist(summ_pmmh_x$quant), tmax), lty = 2, col = 'blue')
+legend('topright', leg = c('true', 'PMMH estimate'), lty = c(2, 1), col = c('green',
+  'blue'), bty = 'n')
+
+barplot(1.5*(model$data()$c_true==1), col = 'green', border = NA, space = 0, ylim=c(0,2),
+        xlab='t', ylab='c[t]==1', axes = FALSE)
+axis(1, at=1:tmax-.5, labels=1:tmax)
+axis(2, line = 1, at=c(0,2), labels=NA)
+barplot(1*(model$data()$c_true==1), col = 'white', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, 1.75, 'true')
+barplot(.5*(summ_pmmh_c$mode==1), col = 'blue', border = NA, space = 0, axes = FALSE, add = TRUE)
+text(tmax/2, .75, 'PMMH mode')
+
+t <- 5
+plot(dens_pmmh_x[[t]], col="blue", ylab = 'posterior density')
+points(model$data()$x_true[t], 0, pch = 17, col = 'green')
+
+plot(table_pmmh_c[[t-1]], col="blue", ylab = 'posterior probability mass')
+points(model$data()$c_true[t], 0, pch = 17, col = 'green')
 ```

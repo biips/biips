@@ -157,12 +157,6 @@ if [[ $ans == "y" ]]; then set -x
     fi
 fi
 
-set +x; echo -n "*** Translate Matbiips examples to R? (y/[n])"; read ans
-if [[ $ans == "y" ]]; then set -x
-    cd $BIIPS_BUILD
-    $MAKE mat2r_examples
-fi
-
 set +x; echo -n "*** Make examples package? (y/[n])"; read ans
 if [[ $ans == "y" ]]; then set -x
     cd $BIIPS_BUILD
