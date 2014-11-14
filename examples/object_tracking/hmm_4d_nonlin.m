@@ -135,9 +135,8 @@ for k=1:4
     figure('name', 'SMC: Filtering estimates')
     title(title_fig{k})
     hold on
-    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
-        light_blue);
-    set(h, 'edgecolor', 'none')
+    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))], 0);
+    set(h, 'edgecolor', 'none', 'facecolor', light_blue)
     plot(x_f_mean(k, :), 'linewidth', 3)
     plot(data.x_true(k,:), 'g')
     xlabel('Time')
@@ -155,9 +154,8 @@ for k=1:4
     figure('name', 'SMC: Smoothing estimates')
     title(title_fig{k})
     hold on
-    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))],...
-        light_red);
-    set(h, 'edgecolor', 'none')
+    h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}(k,:), fliplr(x_f_quant{2}(k,:))], 0);
+    set(h, 'edgecolor', 'none', 'facecolor', light_red)
     plot(x_s_mean(k, :), 'r', 'linewidth', 3)
     plot(data.x_true(k,:), 'g')
     xlabel('Time')

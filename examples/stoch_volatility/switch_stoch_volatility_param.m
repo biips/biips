@@ -278,8 +278,8 @@ figure('name', 'PMMH: Posterior probabilities of c[t]=2')
 hold on
 for t=1:t_max
     if data.c_true(t)==2
-        h = fill([t-1,t,t,t-1], [0,0,1,1], light_green);
-        set(h, 'edgecolor', 'none')
+        h = fill([t-1,t,t,t-1], [0,0,1,1], 0);
+        set(h, 'edgecolor', 'none', 'facecolor', light_green)
         set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off')
     end
     ind = find(table_c(t).x == 2);
@@ -303,9 +303,8 @@ saveas(gca, 'switch_stoch_param_c', 'png')
 figure('name', 'PMMH: Posterior mean and quantiles')
 x_pmmh_mean = summ_pmmh.x.mean;
 x_pmmh_quant = summ_pmmh.x.quant;
-h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})],...
-    light_red);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_pmmh_quant{1}; flipud(x_pmmh_quant{2})], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_red)
 hold on
 plot(1:t_max, x_pmmh_mean, 'r', 'linewidth', 3)
 if sample_data

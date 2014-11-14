@@ -129,9 +129,8 @@ summ_smc = biips_summary(out_smc, 'probs', [.025, .975]);
 figure('name', 'SMC: Filtering estimates')
 x_f_mean = summ_smc.x.f.mean;
 x_f_quant = summ_smc.x.f.quant;
-h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})],...
-    light_blue);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_f_quant{1}; flipud(x_f_quant{2})], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_blue)
 hold on
 plot(1:t_max, x_f_mean, 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
@@ -149,9 +148,8 @@ saveas(gca, 'volatility_f', 'png')
 figure('name', 'SMC: Smoothing estimates')
 x_s_mean = summ_smc.x.s.mean;
 x_s_quant = summ_smc.x.s.quant;
-h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})],...
-    light_red);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_s_quant{1}; flipud(x_s_quant{2})], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_red)
 hold on
 plot(1:t_max, x_s_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')
@@ -214,9 +212,8 @@ summ_pimh = biips_summary(out_pimh, 'probs', [.025, .975]);
 figure('name', 'PIMH: Posterior mean and quantiles')
 x_pimh_mean = summ_pimh.x.mean;
 x_pimh_quant = summ_pimh.x.quant;
-h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})],...
-    light_red);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_pimh_quant{1}; flipud(x_pimh_quant{2})], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_red)
 hold on
 plot(1:t_max, x_pimh_mean, 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true, 'g')

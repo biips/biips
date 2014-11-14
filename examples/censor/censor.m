@@ -98,8 +98,8 @@ x_sup = summ.x.s.quant{2};
 
 figure
 hold on
-h = fill([1:tmax, tmax:-1:1], [x_inf; flipud(x_sup)], light_blue);
-set(h, 'edgecolor', 'none')
+h = fill([1:tmax, tmax:-1:1], [x_inf; flipud(x_sup)], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_blue)
 plot(1:tmax, x_mean)
 plot(repmat((1:tmax)', 1, size(interv,1)), interv', 'k--')
 xlabel('Time')

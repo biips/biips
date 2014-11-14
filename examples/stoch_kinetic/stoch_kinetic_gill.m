@@ -129,15 +129,13 @@ saveas(gca, 'kinetic_sess', 'png')
 figure('name', 'SMC: Posterior mean and quantiles')
 x_smc_mean = summ_smc.x.s.mean;
 x_smc_quant = summ_smc.x.s.quant;
-h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))],...
-    light_blue);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(1,:), fliplr(x_smc_quant{2}(1,:))], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_blue)
 hold on
 plot(1:t_max, x_smc_mean(1, :), 'linewidth', 3)
 plot(1:t_max, data.x_true(1,:), '--', 'color', dark_blue)
-h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(2,:), fliplr(x_smc_quant{2}(2,:))],...
-    light_red);
-set(h, 'edgecolor', 'none')
+h = fill([1:t_max, t_max:-1:1], [x_smc_quant{1}(2,:), fliplr(x_smc_quant{2}(2,:))], 0);
+set(h, 'edgecolor', 'none', 'facecolor', light_red)
 plot(1:t_max, x_smc_mean(2, :), 'r', 'linewidth', 3)
 plot(1:t_max, data.x_true(2,:), '--', 'color', dark_red)
 xlabel('Time')
