@@ -94,11 +94,11 @@ legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
 bar(1:tmax, 2+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 2, 'edgecolor', 'none')
-annotation('textbox',[.58 .87 .3 .05], 'string', 'true', 'edgecolor', 'none')
+text(2, 2.75, 'true')
 bar(2:tmax, 1+.5*(summ_smc_c.f.mode==1), 'b', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
-annotation('textbox',[.58 .75 .3 .05], 'string', 'SMC filtering mode', 'edgecolor', 'none')
+text(2, 1.75, 'SMC filtering mode')
 bar(2:tmax, .5*(summ_smc_c.s.mode==1), 'r', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
-annotation('textbox',[.58 .64 .3 .05], 'string', 'SMC smoothing mode', 'edgecolor', 'none')
+text(2, .75, 'SMC smoothing mode')
 xlim([1,tmax+1])
 ylim([0,3])
 xlabel('t')
@@ -169,9 +169,9 @@ legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
 bar(1:tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
-annotation('textbox',[.58 .85 .3 .05], 'string', 'true', 'edgecolor', 'none')
+text(2, 1.75, 'true')
 bar(2:tmax, .5*(summ_pimh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
-annotation('textbox',[.58 .68 .3 .05], 'string', 'PIMH mode', 'edgecolor', 'none')
+text(2, .75, 'PIMH mode')
 xlim([1,tmax+1])
 ylim([0,2])
 xlabel('t')
@@ -264,8 +264,8 @@ xlabel('logtau')
 ylabel('posterior density')
 
 subplot(2,2,4); hold on
-plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
 hist(out_pmmh.logtau)
+plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
 xlabel('logtau')
 ylabel('posterior density')
 
@@ -281,9 +281,9 @@ legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
 bar(1:tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
-annotation('textbox',[.58 .85 .3 .05], 'string', 'true', 'edgecolor', 'none')
+text(2, 1.75, 'true')
 bar(2:tmax, .5*(summ_pmmh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
-annotation('textbox',[.58 .68 .3 .05], 'string', 'PMMH mode', 'edgecolor', 'none')
+text(2, .75, 'PMMH mode')
 xlim([1,tmax+1])
 ylim([0,2])
 xlabel('t')
