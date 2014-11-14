@@ -81,7 +81,7 @@ if mode
     % unique values and indices
     [U, ~, Iu] = cellfun(@unique, values, 'uniformoutput', 0);
     % sum of weights for unique values
-    W = cellfun(@(w, iu) sum(bsxfun(@times, w(:), bsxfun(@eq, iu, 1:max(iu)))), weights, Iu, 'uniformoutput', 0);
+    W = cellfun(@(w, iu) sum(bsxfun(@times, w(:), bsxfun(@eq, iu(:), 1:max(iu)))), weights, Iu, 'uniformoutput', 0);
     % indices of the maximum sum of weights
     [~, Im] = cellfun(@max, W, 'uniformoutput', 0);
     % values with the maximum sum of weights
