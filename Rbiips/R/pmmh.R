@@ -772,14 +772,14 @@ biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 #'   See \code{\link{biips_smc_samples}}  for more details.
 #' @param output string. Select additional members to be returned in the
 #'   \code{\link{mcmcarray.list}} output. The string can contain several
-#'   characters in \code{('p', 'l', 'a', 's', 'f')}. See details.
+#'   characters in \code{('p', 'l', 'a', 's', 'f')}. See details. (default = \code{'p'})
 #'
 #' @details The \code{output} string arguments can be used to query additional
 #'   members in the \code{\link{mcmcarray.list}} output. If \code{output}
 #'   contains: \itemize{ \item \code{p}: \code{log_marg_like_pen}.
-#'   \code{\link{mcmcarray}} with penalized log marginal likelihood over
+#'   \code{\link{mcmcarray}} with penalized log marginal likelihood estimates over
 #'   iterations. \item \code{l}: \code{log_marg_like}. \code{\link{mcmcarray}}
-#'   with log marginal likelihood over iterations. \item \code{a}:
+#'   with log marginal likelihood estimates over iterations. \item \code{a}:
 #'   \code{info$accept_rate}. \code{\link{mcmcarray}} with acceptance rate over
 #'   iterations. \item \code{s}: \code{info$rw_step}. \code{\link{mcmcarray}}
 #'   with standard deviations of the random walk over iterations. \item

@@ -1,6 +1,6 @@
 function [obj_pimh, samples_pimh, varargout] = biips_pimh_samples(obj_pimh, n_iter, n_part, varargin)
 % BIIPS_PIMH_SAMPLES Perform iterations for the PIMH algorithm and returns samples.
-% [obj_pimh, samples_pimh, log_marg_like] = biips_pimh_samples(obj_pimh,...
+% [obj_pimh, samples_pimh, log_marg_like, accept_rate] = biips_pimh_samples(obj_pimh,...
 %                           n_iter, n_part, 'PropertyName', PropertyValue, ...)
 %
 %   INPUT:
@@ -17,7 +17,8 @@ function [obj_pimh, samples_pimh, varargout] = biips_pimh_samples(obj_pimh, n_it
 %   - obj_pimh:     structure. updated PIMH object
 %   - samples_pimh: structure. PIMH samples for each monitored variable
 %   Optional Output:
-%   - log_marg_like: vector of log marginal likelihood over iterations
+%   - log_marg_like: vector of log marginal likelihood estimates over iterations
+%   - accept_rate: vector of acceptance rates over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_UPDATE
 %--------------------------------------------------------------------------

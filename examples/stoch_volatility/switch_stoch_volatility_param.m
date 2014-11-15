@@ -401,4 +401,4 @@ saveas(gca, 'switch_stoch_param_x_kde', 'png')
 %
 biips_clear()
 
-save switch_stoch_param_workspace.mat
+% save switch_stoch_param_workspace.mat

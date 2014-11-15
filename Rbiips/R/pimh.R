@@ -98,7 +98,7 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output =
   thin <- as.integer(thin)
   stopifnot(is.character(output))
   output <- unlist(strsplit(output, NULL))
-  output <- match.arg(output, c("l"), several.ok = TRUE)
+  output <- match.arg(output, c("l", "a"), several.ok = TRUE)
   output <- unique(output)
 
   ## stop biips verbosity
@@ -128,6 +128,8 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output =
   out <- list()
   if ("l" %in% output)
     out$log_marg_like <- mcmcarray(dim = c(1, n_samples), name = "log_marg_like")
+  if ("a" %in% output)
+    out$info$accept_rate <- mcmcarray(dim = c(1, n_samples), name = "accept_rate")
 
   ## display message and progress bar
   mess <- if (return_samples)
@@ -143,10 +145,10 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output =
 
     ## Acceptance rate
     log_marg_like_prop <- Rbiips("get_log_norm_const", object$model()$ptr())
-    log_ar <- log_marg_like_prop - log_marg_like
+    accept_rate <- min(1, exp(log_marg_like_prop - log_marg_like))
 
     ## Accept/Reject step
-    if (runif(1) < exp(log_ar)) {
+    if (runif(1) < accept_rate) {
       log_marg_like <- log_marg_like_prop
 
       ## sample one particle
@@ -164,6 +166,9 @@ pimh_algo <- function(object, n_iter, n_part, return_samples, thin = 1, output =
 
       if ("l" %in% output)
         out$log_marg_like[ind_sample] <- log_marg_like
+      if ("a" %in% output)
+        out$info$accept_rate[ind_sample] <- accept_rate
+
 
       if (return_samples) {
         if (ind_sample == 1) {
@@ -220,9 +225,15 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'   algorithm such as \code{rs_thres} and \code{rs_type}.
 #'   See \code{\link{biips_smc_samples}}  for more details.
 #' @param output string. Select additional members to be returned in the
-#'   \code{\link{mcmcarray.list}} output. \code{output = 'l'} returns a
-#'   \code{\link{mcmcarray}} of the log marginal likelihood estimates over
-#'   iterations.
+#'   \code{\link{mcmcarray.list}} output. The string can contain several
+#'   characters in \code{('l', 'a')}. See details. (default = \code{'l'})
+#'
+#' @details The \code{output} string arguments can be used to query additional
+#'   members in the \code{\link{mcmcarray.list}} output. If \code{output}
+#'   contains: \itemize{ \code{l}: \code{log_marg_like}. \code{\link{mcmcarray}}
+#'   with log marginal likelihood estimates over iterations. \item \code{a}:
+#'   \code{info$accept_rate}. \code{\link{mcmcarray}} with acceptance rate over
+#'   iterations. }
 #'
 #' @return The methods \code{biips_pimh_update} and \code{biips_pimh_update}
 #'   return an object of class \code{\link{mcmcarray.list}}.
@@ -231,9 +242,8 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'   member for each monitored variable returned by the \code{variable_names()}
 #'   member function of the \code{pimh} object.
 #'
-#' @return If the \code{output} argument is \code{'l'}, the output contains a
-#'   member named \code{log_marg_like} with a \code{\link{mcmcarray}} of the log
-#'   marginal likelihood estimates over iterations.
+#' @return If the \code{output} argument is not empty, the output contains
+#'   additional members. See details.
 #'
 #' @return The members of the \code{\link{mcmcarray.list}} object are
 #'   \code{\link{mcmcarray}} objects for different variables. Assuming \code{dim}

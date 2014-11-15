@@ -1,8 +1,8 @@
 function [obj, varargout] = pimh_algo(obj, n_iter, n_part, return_samples, varargin)
 % PIMH_ALGO performs iterations for the PIMH algorithm
-% [obj, samples_st, log_marg_like_st] = pimh_algo(obj,...
+% [obj, samples_st, lml_st, ar_st] = pimh_algo(obj,...
 %                           n_iter, n_part, true, varargin)
-% [obj, log_marg_like_st] = pimh_algo(obj,...
+% [obj, lml_st, ar_st] = pimh_algo(obj,...
 %                           n_iter, n_part, false, varargin)
 %
 %   INPUT
@@ -27,7 +27,8 @@ function [obj, varargout] = pimh_algo(obj, n_iter, n_part, return_samples, varar
 %   - obj:     structure. PIMH object modified
 %   Optional Outputs:
 %   - samples_st:       Structure with the PIMH samples for each variable
-%   - log_marg_like_st: vector with log marginal likelihood over iterations
+%   - lml_st: vector with log marginal likelihood extimates over iterations
+%   - ar_st: vector with acceptance rates over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_UPDATE, BIIPS_PIMH_SAMPLES
 %--------------------------------------------------------------------------
@@ -86,6 +87,7 @@ n_var = numel(variable_names);
     
 n_samples = floor(n_iter/thin);
 log_marg_like_st = zeros(1, n_samples);
+accept_rate_st = zeros(1, n_samples);
 
 if return_samples
     samples_st = cell(n_var, 1);
@@ -111,10 +113,10 @@ for i=1:n_iter
     
     % Acceptance rate
     log_marg_like_prop = matbiips('get_log_norm_const', console);
-    log_ar = log_marg_like_prop - log_marg_like;
+    accept_rate = min(1, exp(log_marg_like_prop - log_marg_like));
     
     % Metropolis-Hastings step
-    if rand<exp(log_ar)
+    if rand<accept_rate
         log_marg_like = log_marg_like_prop;
         
         % Sample one particle
@@ -133,6 +135,7 @@ for i=1:n_iter
         ind_sample = ind_sample + 1;
         
         log_marg_like_st(ind_sample) = log_marg_like;
+        accept_rate_st(ind_sample) = accept_rate;
         
         if return_samples
             if ind_sample==1
@@ -178,8 +181,14 @@ if return_samples
     if nout>=2
         varargout{2} = log_marg_like_st;
     end
+    if nout>=3
+        varargout{3} = accept_rate_st;
+    end
 else
     if nout>=1
         varargout{1} = log_marg_like_st;
+    end
+    if nout>=2
+        varargout{2} = accept_rate_st;
     end
 end

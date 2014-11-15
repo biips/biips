@@ -1,6 +1,6 @@
 function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, varargin)
 % BIIPS_PIMH_UPDATE performs burn-in iterations for the PIMH algorithm.
-% [obj_pimh, log_marg_like] = biips_pimh_update(obj_pimh, n_iter, n_part, 'PropertyName', PropertyValue, ...)
+% [obj_pimh, log_marg_like, accept_rate] = biips_pimh_update(obj_pimh, n_iter, n_part, 'PropertyName', PropertyValue, ...)
 %
 %   INPUT: 
 %   - obj_pimh:     structure. PIMH object as returned by BIIPS_PIMH_INIT.
@@ -16,6 +16,7 @@ function [obj_pimh, varargout] = biips_pimh_update(obj_pimh, n_iter, n_part, var
 %   - obj_pimh:     structure. updated PIMH object
 %   Optional Output:
 %   - log_marg_like: vector of log marginal likelihood estimates over iterations
+%   - accept_rate: vector of acceptance rates over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_SAMPLES
 %--------------------------------------------------------------------------
