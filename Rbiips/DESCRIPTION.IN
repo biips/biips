@@ -7,6 +7,7 @@ Authors@R: as.person(c(
     "Fran\\u00e7ois Caron <francois.caron@stat.ox.ac.uk> [aut]",
     "Marc Fuentes <marc.fuentes@inria.fr> [aut]",
     "@Biips_OWNER@ [cph]"))
+Contact: @Biips_CONTACT@
 Depends: R (>= @R_VERSION_REQUIRED@), Rcpp (>= @Rcpp_VERSION@), stats, graphics
 Suggests: knitr
 SystemRequirements: For Linux only: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
