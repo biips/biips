@@ -9,10 +9,13 @@ function biips_clear(varargin)
 %--------------------------------------------------------------------------
 % EXAMPLE
 % modelfile = 'hmm.bug';
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
+% 
 % obj_pimh = biips_pimh_init(model, {'x'});
+% 
 % obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% 
 % biips_clear(model)
 % biips_clear(obj_pimh, obj_pmmh)
 % biips_clear

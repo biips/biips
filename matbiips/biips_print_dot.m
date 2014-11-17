@@ -12,16 +12,12 @@ function biips_print_dot(model, file)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
-% model.model
-% model.data
-% biips_variable_names(model)
-% biips_nodes(model)
+% 
 % dotfile = 'hmm.dot';
 % biips_print_dot(model, dotfile);
 % type(dotfile);
-% biips_clear(model)
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

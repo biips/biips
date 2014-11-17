@@ -17,18 +17,20 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %                   Init values for the parameters in param_names.
 %                   (default = samples from the prior distribution)
 %   - transform:    logical. Activate automatic parameters transformation (default = true).
-%                   Transformations applies independently to each component 
+%                   Transformations apply independently to each component 
 %                   of the parameters depending on their support:
 %                       * unbounded (-Inf, +Inf): f(x) = x
 %                       * lower bounded [L, +Inf): f(x) = log(x-L)
 %                       * upper bounded (-Inf, U]: f(x) = log(U-x)
 %                       * lower-upper bounded [L, U]: f(x) = log((x-L)/(U-x))
-%                   so that we apply random walk on unbounded variables.
+%                   so that we apply a random walk on the real-valued transformed
+%                   vector.
 %   - rw_step:      cell of numeric values of the same length as
 %                   param_names. Random walk standard deviations. If
-%                   transform is true (default), the given steps apply to the
-%                   transformed space. Set transform to false if you wish to give steps in the
-%                   untransformed space.
+%                   transform is true (default), the given standard deviations 
+%                   apply to the transformed variables. Set transform to 
+%                   false if you wish to set the random walk standard deviation
+%                   for the untransformed random variables.
 %   - n_rescale:    Number of iterations for rescaling (default = 400)
 %   - alpha:        Tuning parameter of the rescaling (default = 0.99)
 %   - beta:         Tuning parameter of the proposal (default = 0.05)
@@ -74,12 +76,11 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% logtau_true = 10;
-% data = struct('tmax', 10);
-% model = biips_model(modelfile, data, 'sample_data', true);
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1));
+% model = biips_model(modelfile, data);
 % 
 % n_part = 50;
-% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
 % [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
 % [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 %--------------------------------------------------------------------------

@@ -38,76 +38,116 @@ function [summ] = biips_summary(samples, varargin)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
 % 
 % %% SMC algorithm
-% n_part = 50;
+% n_part = 100;
+% [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 % summ_smc = biips_summary(out_smc)
-% out_smc2 = getfield(out_smc, 'x[8:10]')
-% summ_smc = biips_summary(out_smc2)
-% summ_smc = biips_summary(out_smc2.f)
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
-% summ_smc = biips_summary(out_smc, 'order', 2, 'probs', [.025, .975]);
+% summ_smc_x = biips_summary(out_smc.x, 'order', 2, 'probs', [.025, .975])
 % 
-% hold on
+% out_smc_c = getfield(out_smc, 'c[2:10]')
+% summ_smc_c  = biips_summary(out_smc_c)
+% 
+% biips_summary(out_smc.x.f)
+% biips_summary(out_smc.x.s)
+% 
+% figure
+% subplot(2,1,1); hold on
 % plot(model.data.x_true, 'g')
-% plot(summ_smc.x.f.mean, 'b')
-% plot(summ_smc.x.s.mean, 'r')
-% plot(summ_smc.x.f.quant{1}, '--b')
-% plot(summ_smc.x.f.quant{2}, '--b')
-% plot(summ_smc.x.s.quant{1}, '--r')
-% plot(summ_smc.x.s.quant{2}, '--r')
+% plot(summ_smc_x.f.mean, 'b')
+% plot(summ_smc_x.s.mean, 'r')
+% plot([summ_smc_x.f.quant{:}], '--b')
+% plot([summ_smc_x.s.quant{:}], '--r')
 % xlabel('t')
 % ylabel('x[t]')
 % legend('true', 'SMC filtering estimate', 'SMC smoothing estimate')
 % legend boxoff
 % 
+% subplot(2,1,2,'YTick',zeros(1,0)); hold on
+% bar(1:data.tmax, 2+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 2, 'edgecolor', 'none')
+% text(2, 2.75, 'true')
+% bar(2:data.tmax, 1+.5*(summ_smc_c.f.mode==1), 'b', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+% text(2, 1.75, 'SMC filtering mode')
+% bar(2:data.tmax, .5*(summ_smc_c.s.mode==1), 'r', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+% text(2, .75, 'SMC smoothing mode')
+% xlim([1,data.tmax+1])
+% ylim([0,3])
+% xlabel('t')
+% ylabel('c[t]==1')
+% 
 % %% PIMH algorithm
 % n_part = 50;
-% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% obj_pimh = biips_pimh_init(model, {'x', 'c[2:10]'}); % Initialize
 % [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 100, n_part); % Burn-in
 % [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 100, n_part); % Samples
 % 
-% summ_pimh = biips_summary(out_pimh.x)
-% summ_pimh = biips_summary(out_pimh, 'order', 2, 'probs', [.025, .975]);
+% summ_pimh = biips_summary(out_pimh)
 % 
-% subplot(2,2,3); hold on
+% summ_pimh_x = biips_summary(out_pimh.x, 'order', 2, 'probs', [.025, .975])
+% 
+% out_pimh_c = getfield(out_pimh, 'c[2:10]');
+% summ_pimh_c = biips_summary(out_pimh_c)
+% 
+% figure
+% subplot(2,1,1); hold on
 % plot(model.data.x_true, 'g')
-% plot(summ_pimh.x.mean, 'b')
-% plot(summ_pimh.x.quant{1}, '--b')
-% plot(summ_pimh.x.quant{2}, '--b')
+% plot(summ_pimh_x.mean, 'b')
+% plot([summ_pimh_x.quant{:}], '--b')
 % xlabel('t')
 % ylabel('x[t]')
 % legend('true', 'PIMH estimate')
 % legend boxoff
 % 
+% subplot(2,1,2,'YTick',zeros(1,0)); hold on
+% bar(1:data.tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+% text(2, 1.75, 'true')
+% bar(2:data.tmax, .5*(summ_pimh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+% text(2, .75, 'PIMH mode')
+% xlim([1,data.tmax+1])
+% ylim([0,2])
+% xlabel('t')
+% ylabel('c[t]==1')
+% 
 % %% PMMH algorithm
-% modelfile = 'hmm.bug';
-% logtau_true = 10;
-% data = struct('tmax', 10);
-% model = biips_model(modelfile, data, 'sample_data', true);
+% model = biips_model(modelfile, {'tmax', 'p', 'logtau_true'});
 % 
 % n_part = 50;
-% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
 % [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
 % [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 % 
-% summ_pmmh = biips_summary(out_pmmh.x)
-% summ_pmmh = biips_summary(out_pmmh, 'order', 2, 'probs', [.025, .975]);
+% summ_pmmh = biips_summary(out_pmmh)
 % 
-% subplot(2,2,3); hold on
+% summ_pmmh_lt = biips_summary(out_pmmh.logtau, 'order', 2, 'probs', [.025, .975], 'mode', true)
+% 
+% summ_pmmh_x = biips_summary(out_pmmh.x, 'order', 2, 'probs', [.025, .975], 'mode', true)
+% 
+% out_pmmh_c  = getfield(out_pmmh, 'c[2:10]');
+% summ_pmmh_c = biips_summary(out_pmmh_c)
+% 
+% figure
+% subplot(2,1,1); hold on
 % plot(model.data.x_true, 'g')
-% plot(summ_pmmh.x.mean, 'b')
-% plot(summ_pmmh.x.quant{1}, '--b')
-% plot(summ_pmmh.x.quant{2}, '--b')
+% plot(summ_pmmh_x.mean, 'b')
+% plot([summ_pmmh_x.quant{:}], '--b')
 % xlabel('t')
 % ylabel('x[t]')
 % legend('true', 'PMMH estimate')
 % legend boxoff
+% 
+% subplot(2,1,2,'YTick',zeros(1,0)); hold on
+% bar(1:data.tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+% text(2, 1.75, 'true')
+% bar(2:data.tmax, .5*(summ_pmmh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+% text(2, .75, 'PMMH mode')
+% xlim([1,data.tmax+1])
+% ylim([0,2])
+% xlabel('t')
+% ylabel('c[t]==1')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

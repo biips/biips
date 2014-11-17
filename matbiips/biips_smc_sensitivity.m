@@ -36,8 +36,8 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
-% model = biips_model(modelfile, data, 'sample_data', true);
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
+% model = biips_model(modelfile, data);
 % 
 % n_part = 50;
 % logtau_val = -10:10;
@@ -49,14 +49,14 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 % plot(logtau_val, out_sens.log_marg_like)
 % plot(data.logtau, min(out_sens.log_marg_like), 'g^', 'markerfacecolor', 'g')
 % xlabel('logtau')
-% ylabel('log marginal likelihood')
+% ylabel('log p(y|logtau)')
 % 
 % subplot(2,1,2); hold on
 % plot(logtau_val, out_sens.log_marg_like_pen)
 % yl = ylim;
 % plot(data.logtau, yl(1), 'g^', 'markerfacecolor', 'g')
 % xlabel('logtau')
-% ylabel('penalized log marginal likelihood')
+% ylabel('log p(y|logtau) + log p(logtau)')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

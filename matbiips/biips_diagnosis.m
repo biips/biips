@@ -27,19 +27,22 @@ function diagn = biips_diagnosis(samples, varargin)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
 % 
-% n_part = 50;
+% n_part = 100;
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
-% biips_diagnosis(out_smc);
-% out_smc2 = getfield(out_smc, 'x[8:10]')
-% biips_diagnosis(out_smc2);
-% biips_diagnosis(out_smc2.f);
+% [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
 % biips_diagnosis(out_smc);
+% 
+% biips_diagnosis(out_smc.x);
+% 
+% out_smc_c = getfield(out_smc, 'c[2:10]')
+% biips_diagnosis(out_smc_c);
+% 
+% biips_diagnosis(out_smc.x.f);
+% biips_diagnosis(out_smc.x.s);
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

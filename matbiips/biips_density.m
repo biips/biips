@@ -37,62 +37,66 @@ function [dens] = biips_density(samples, varargin)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
 % 
-% n_part = 50;
+% %% SMC algorithm
+% n_part = 100;
+% [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
-% dens_smc = biips_density(out_smc)
-% out_smc2 = getfield(out_smc, 'x[8:10]')
-% dens_smc = biips_density(out_smc2)
-% dens_smc = biips_density(out_smc2.f)
+% dens_smc_x = biips_density(out_smc.x, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100)
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
-% dens_smc = biips_density(out_smc, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100);
+% dens_smc_x_f = biips_density(out_smc.x.f)
 % 
-% hold on
-% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
-% plot(dens_smc.x.f(1).x, dens_smc.x.f(1).f, 'b')
-% plot(dens_smc.x.s(1).x, dens_smc.x.s(1).f, 'r')
-% xlabel('x[1]')
+% t = 5;
+% figure; hold on
+% plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_smc_x.f(t).x, dens_smc_x.f(t).f, 'b')
+% plot(dens_smc_x.s(t).x, dens_smc_x.s(t).f, 'r')
+% xlabel(sprintf('x[%d]', t))
 % ylabel('posterior density')
-% legend('SMC filtering estimate', 'SMC smoothing estimate')
-% legend boxoff
 % 
 % %% PIMH algorithm
 % n_part = 50;
-% obj_pimh = biips_pimh_init(model, {'x'}); % Initialize
+% obj_pimh = biips_pimh_init(model, {'x', 'c[2:10]'}); % Initialize
 % [obj_pimh, lml_pimh_burn] = biips_pimh_update(obj_pimh, 100, n_part); % Burn-in
 % [obj_pimh, out_pimh, lml_pimh] = biips_pimh_samples(obj_pimh, 100, n_part); % Samples
 % 
-% dens_pimh = biips_density(out_pimh.x)
-% dens_pimh = biips_density(out_pimh);
+% dens_pimh_x = biips_density(out_pimh.x)
 % 
-% subplot(2,2,4); hold on
-% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
-% plot(dens_pimh.x(1).x, dens_pimh.x(1).f, 'b')
-% xlabel('x[1]')
+% figure; hold on
+% plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_pimh_x(t).x, dens_pimh_x(t).f, 'b')
+% xlabel(sprintf('x[%d]', t))
 % ylabel('posterior density')
 % 
 % %% PMMH algorithm
-% modelfile = 'hmm.bug';
-% logtau_true = 10;
-% data = struct('tmax', 10);
-% model = biips_model(modelfile, data, 'sample_data', true);
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1));
+% model = biips_model(modelfile, data);
 % 
 % n_part = 50;
-% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
 % [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
 % [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 % 
-% dens_pmmh = biips_density(out_pmmh.x)
-% dens_pmmh = biips_density(out_pmmh);
+% dens_pmmh_lt = biips_density(out_pmmh.logtau)
 % 
-% subplot(2,2,4); hold on
-% plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
-% plot(dens_pmmh.logtau.x, dens_pmmh.logtau.f, 'b')
+% dens_pmmh_x = biips_density(out_pmmh.x)
+% 
+% biips_density(out_pmmh.x.f)
+% biips_density(out_pmmh.x.s)
+% 
+% figure; hold on
+% plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')
+% plot(dens_pmmh_lt.x, dens_pmmh_lt.f, 'b')
 % xlabel('logtau')
+% ylabel('posterior density')
+% 
+% t = 5;
+% figure; hold on
+% plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_pmmh_x(t).x, dens_pmmh_x(t).f, 'b')
+% xlabel(sprintf('x[%d]', t))
 % ylabel('posterior density')
 %--------------------------------------------------------------------------
 

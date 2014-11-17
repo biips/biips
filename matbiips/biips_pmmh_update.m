@@ -35,12 +35,11 @@ function [obj_pmmh, varargout] = biips_pmmh_update(obj_pmmh, n_iter, n_part, var
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% logtau_true = 10;
-% data = struct('tmax', 10);
-% model = biips_model(modelfile, data, 'sample_data', true);
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1));
+% model = biips_model(modelfile, data);
 % 
 % n_part = 50;
-% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
 % [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
 % [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 %--------------------------------------------------------------------------

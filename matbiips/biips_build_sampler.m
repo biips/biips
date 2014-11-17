@@ -18,6 +18,24 @@ function biips_build_sampler(model, varargin)
 % 
 %   See also BIIPS_SMC_SAMPLES, BIIPS_NODES
 %--------------------------------------------------------------------------
+% EXAMPLES:
+% modelfile = 'hmm.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
+% model = biips_model(modelfile, data, 'sample_data', true);
+% 
+% biips_nodes(model)
+% 
+% biips_build_sampler(model, 'proposal', 'prior')
+% biips_nodes(model, 'type', 'stoch', 'observed', false)
+% 
+% biips_build_sampler(model, 'proposal', 'auto')
+% biips_nodes(model, 'type', 'stoch', 'observed', false)
+% 
+% n_part = 100;
+% [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
+%--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
 % Matbiips interface

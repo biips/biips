@@ -33,54 +33,83 @@ function [obj_pmmh, samples_pmmh, varargout] = biips_pmmh_samples(obj_pmmh, n_it
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% logtau_true = 10;
-% data = struct('tmax', 10);
-% model = biips_model(modelfile, data, 'sample_data', true);
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1));
+% model = biips_model(modelfile, data);
 % 
 % n_part = 50;
-% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x'}, 'inits', {-2}); % Initialize
+% obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
 % [obj_pmmh, plml_pmmh_burn] = biips_pmmh_update(obj_pmmh, 100, n_part); % Burn-in
 % [obj_pmmh, out_pmmh, plml_pmmh] = biips_pmmh_samples(obj_pmmh, 100, n_part, 'thin', 1); % Samples
 % 
 % out_pmmh
 % summ_pmmh = biips_summary(out_pmmh)
-% dens_pmmh = biips_density(out_pmmh)
 % 
-% out_pmmh.x
-% summ_pmmh = biips_summary(out_pmmh.x)
-% dens_pmmh = biips_density(out_pmmh.x)
+% summ_pmmh_lt = biips_summary(out_pmmh.logtau, 'order', 2, 'probs', [.025, .975], 'mode', true)
+% dens_pmmh_lt = biips_density(out_pmmh.logtau)
+% 
+% summ_pmmh_x = biips_summary(out_pmmh.x, 'order', 2, 'probs', [.025, .975], 'mode', true)
+% dens_pmmh_x = biips_density(out_pmmh.x)
+% 
+% out_pmmh_c  = getfield(out_pmmh, 'c[2:10]');
+% summ_pmmh_c = biips_summary(out_pmmh_c)
+% table_pmmh_c = biips_table(out_pmmh_c)
 % 
 % figure
 % subplot(2,2,1); hold on
 % plot([plml_pmmh_burn, plml_pmmh])
 % xlabel('PMMH iteration')
-% ylabel('penalized log marginal likelihood')
+% ylabel('log p(y|logtau) + log p(logtau)')
 % 
 % subplot(2,2,2); hold on
-% plot(0, logtau_true, 'g>', 'markerfacecolor', 'g')
+% plot(0, model.data.logtau_true, 'g>', 'markerfacecolor', 'g')
 % plot(out_pmmh.logtau)
 % xlabel('PMMH iteration')
 % ylabel('logtau')
 % 
-% summ_pmmh = biips_summary(out_pmmh, 'order', 2, 'probs', [.025, .975]);
-% 
 % subplot(2,2,3); hold on
+% plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')
+% plot(dens_pmmh_lt.x, dens_pmmh_lt.f, 'b')
+% xlabel('logtau')
+% ylabel('posterior density')
+% 
+% subplot(2,2,4); hold on
+% hist(out_pmmh.logtau)
+% plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')
+% xlabel('logtau')
+% ylabel('posterior density')
+% 
+% figure
+% subplot(2,2,1); hold on
 % plot(model.data.x_true, 'g')
-% plot(summ_pmmh.x.mean, 'b')
-% plot(summ_pmmh.x.quant{1}, '--b')
-% plot(summ_pmmh.x.quant{2}, '--b')
+% plot(summ_pmmh_x.mean, 'b')
+% plot([summ_pmmh_x.quant{:}], '--b')
 % xlabel('t')
 % ylabel('x[t]')
 % legend('true', 'PMMH estimate')
 % legend boxoff
 % 
-% dens_pmmh = biips_density(out_pmmh);
+% subplot(2,2,2,'YTick',zeros(1,0)); hold on
+% bar(1:data.tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+% text(2, 1.75, 'true')
+% bar(2:data.tmax, .5*(summ_pmmh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+% text(2, .75, 'PMMH mode')
+% xlim([1,data.tmax+1])
+% ylim([0,2])
+% xlabel('t')
+% ylabel('c[t]==1')
+% 
+% t = 5;
+% subplot(2,2,3); hold on
+% plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_pmmh_x(t).x, dens_pmmh_x(t).f, 'b')
+% xlabel(sprintf('x[%d]', t))
+% ylabel('posterior density')
 % 
 % subplot(2,2,4); hold on
-% plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
-% plot(dens_pmmh.logtau.x, dens_pmmh.logtau.f, 'b')
-% xlabel('logtau')
-% ylabel('posterior density')
+% bar(table_pmmh_c(t-1).x, table_pmmh_c(t-1).f, 'b', 'barwidth', .1)
+% plot(model.data.c_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% xlabel(sprintf('c[%d]', t))
+% ylabel('posterior probability mass')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

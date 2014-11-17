@@ -32,6 +32,13 @@ function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 % type('f_dim.m');
 % type('f_eval.m');
 % biips_add_function('f', 2, 'f_dim', 'f_eval');
+% 
+% %% Compile model
+% modelfile = 'hmm_f.bug';
+% type(modelfile);
+% 
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
+% model = biips_model(modelfile, data);
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

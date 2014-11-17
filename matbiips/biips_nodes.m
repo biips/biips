@@ -7,10 +7,10 @@ function nodes = biips_nodes(model, varargin)
 % 
 %   Optional input parameters
 %   - type:     string. Return only a specific type of node. Possible values are
-%               'const', 'logic' or 'stoch'. default returns all types
+%               'const', 'logic' or 'stoch'. Default returns all types
 %               of nodes.
 %   - observed: logical. Return only observed or unobserved nodes.
-%   default returns all.
+%               Default returns all.
 %
 %   OUTPUT
 %   - nodes: table containing the nodes with the following variables:
@@ -34,21 +34,16 @@ function nodes = biips_nodes(model, varargin)
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
-% model.model
-% model.data
-% biips_variable_names(model)
+% 
 % biips_nodes(model)
-% biips_print_dot(model, 'hmm.dot');
 % 
 % biips_build_sampler(model, 'proposal', 'prior')
 % biips_nodes(model, 'type', 'stoch', 'observed', false)
 % 
 % biips_build_sampler(model, 'proposal', 'auto')
 % biips_nodes(model, 'type', 'stoch', 'observed', false)
-%
-% biips_clear(model)
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

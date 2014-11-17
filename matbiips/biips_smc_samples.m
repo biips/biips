@@ -44,7 +44,7 @@ function [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names,
 %           with the respective conditioning variables of the node array element.
 %         - for smoothing/backward_smoothing: a cell of strings, the same for all the 
 %           elements of the node array.
-%     * name: string with the name of the variable.
+%     * name: string with the name of the variable (without subset indices).
 %     * lower: vector with the lower bounds of the variable.
 %     * upper: vector with the upper bounds of the variable.
 %     * type: string with the type of monitor ('filtering', 'smoothing' or 'backward_smoothing').
@@ -60,60 +60,81 @@ function [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names,
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 
-% data = struct('tmax', 10, 'logtau', log(10));
+% data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);
 % 
-% n_part = 50;
+% biips_build_sampler(model, 'proposal', 'prior')
+% biips_nodes(model, 'type', 'stoch', 'observed', false)
 % 
-% [out_smc, lml] = biips_smc_samples(model, {'x[1]', 'x[8:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
+% biips_build_sampler(model, 'proposal', 'auto')
+% biips_nodes(model, 'type', 'stoch', 'observed', false)
+% 
+% n_part = 100;
+% [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 % 
 % out_smc
 % biips_diagnosis(out_smc);
-% summ_smc = biips_summary(out_smc)
-% dens_smc = biips_density(out_smc)
+% biips_summary(out_smc);
 % 
-% out_smc2 = getfield(out_smc, 'x[8:10]')
-% biips_diagnosis(out_smc2);
-% summ_smc = biips_summary(out_smc2)
-% dens_smc = biips_density(out_smc2)
+% out_smc.x
+% biips_diagnosis(out_smc.x);
+% summ_smc_x = biips_summary(out_smc.x, 'order', 2, 'probs', [.025, .975])
+% dens_smc_x = biips_density(out_smc.x, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100)
 % 
-% out_smc2.f
-% out_smc2.s
-% biips_diagnosis(out_smc2.f);
-% summ_smc = biips_summary(out_smc2.f)
-% dens_smc = biips_density(out_smc2.f)
-% 
-% 
-% [out_smc, lml] = biips_smc_samples(model, {'x'}, n_part);
+% out_smc_c = getfield(out_smc, 'c[2:10]')
+% biips_diagnosis(out_smc_c);
+% summ_smc_c  = biips_summary(out_smc_c)
+% table_smc_c = biips_table(out_smc_c)
 % 
 % out_smc.x.f
 % out_smc.x.s
-% 
-% biips_diagnosis(out_smc);
-% summ_smc = biips_summary(out_smc, 'order', 2, 'probs', [.025, .975]);
+% biips_diagnosis(out_smc.x.f);
+% biips_diagnosis(out_smc.x.s);
+% biips_summary(out_smc.x.f)
+% biips_summary(out_smc.x.s)
+% biips_density(out_smc.x.f)
+% biips_density(out_smc.x.s)
+% biips_table(out_smc_c.f)
+% biips_table(out_smc_c.s)
 % 
 % figure
-% subplot(2,1,1); hold on
+% subplot(2,2,1); hold on
 % plot(model.data.x_true, 'g')
-% plot(summ_smc.x.f.mean, 'b')
-% plot(summ_smc.x.s.mean, 'r')
-% plot(summ_smc.x.f.quant{1}, '--b')
-% plot(summ_smc.x.f.quant{2}, '--b')
-% plot(summ_smc.x.s.quant{1}, '--r')
-% plot(summ_smc.x.s.quant{2}, '--r')
+% plot(summ_smc_x.f.mean, 'b')
+% plot(summ_smc_x.s.mean, 'r')
+% plot([summ_smc_x.f.quant{:}], '--b')
+% plot([summ_smc_x.s.quant{:}], '--r')
 % xlabel('t')
 % ylabel('x[t]')
 % legend('true', 'SMC filtering estimate', 'SMC smoothing estimate')
 % legend boxoff
 % 
-% dens_smc = biips_density(out_smc, 'bw_type', 'nrd0', 'adjust', 1, 'n', 100);
+% subplot(2,2,2,'YTick',zeros(1,0)); hold on
+% bar(1:data.tmax, 2+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 2, 'edgecolor', 'none')
+% text(2, 2.75, 'true')
+% bar(2:data.tmax, 1+.5*(summ_smc_c.f.mode==1), 'b', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+% text(2, 1.75, 'SMC filtering mode')
+% bar(2:data.tmax, .5*(summ_smc_c.s.mode==1), 'r', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+% text(2, .75, 'SMC smoothing mode')
+% xlim([1,data.tmax+1])
+% ylim([0,3])
+% xlabel('t')
+% ylabel('c[t]==1')
 % 
-% subplot(2,1,2); hold on
-% plot(model.data.x_true(1), 0, 'g^', 'markerfacecolor', 'g')
-% plot(dens_smc.x.f(1).x, dens_smc.x.f(1).f, 'b')
-% plot(dens_smc.x.s(1).x, dens_smc.x.s(1).f, 'r')
-% xlabel('x[1]')
+% t = 5;
+% subplot(2,2,3); hold on
+% plot(model.data.x_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% plot(dens_smc_x.f(t).x, dens_smc_x.f(t).f, 'b')
+% plot(dens_smc_x.s(t).x, dens_smc_x.s(t).f, 'r')
+% xlabel(sprintf('x[%d]', t))
 % ylabel('posterior density')
+% 
+% subplot(2,2,4); hold on
+% bar(table_smc_c.f(t-1).x, table_smc_c.f(t-1).f, 'b', 'barwidth', .1)
+% bar(table_smc_c.s(t-1).x+.1, table_smc_c.s(t-1).f, 'r', 'barwidth', .1)
+% plot(model.data.c_true(t), 0, 'g^', 'markerfacecolor', 'g')
+% xlabel(sprintf('c[%d]', t))
+% ylabel('posterior probability mass')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

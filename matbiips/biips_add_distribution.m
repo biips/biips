@@ -1,6 +1,6 @@
 function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 % BIIPS_ADD_DISTRIBUTION Add a custom distribution to the BUGS language.
-%   Currently, the added sampling distributions can only define 
+%   In the current version, the custom distributions can only be used for 
 %   unobserved nodes.
 % 
 %   biips_add_distribution(name, n_param, fun_dim, fun_sample, ...
