@@ -137,7 +137,7 @@ latent_names = {'x'}; % names of the variables updated with SMC and that need to
 
 %%
 % *Init PMMH*
-obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -6, -1},...
+obj_pmmh = biips_pmmh_init(model, param_names, 'inits', {-1, -5, -1},...
     'latent_names', latent_names); % creates a pmmh object
 
 %%
@@ -195,8 +195,6 @@ for i=1:numel(param_names)
     title(param_lab{i})
     box off
 end
-saveas(gca, 'stoch_kinetic_param', 'epsc2')
-saveas(gca, 'stoch_kinetic_param', 'png')
 
 for i=1:numel(param_names)
     figure('name', 'PMMH: KDE estimate posterior parameter')
