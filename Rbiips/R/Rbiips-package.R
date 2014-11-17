@@ -10,8 +10,7 @@
 #' \href{http://www.mrc-bsu.cam.ac.uk/software/bugs/}{BUGS}/\href{http://mcmc-jags.sourceforge.net/}{JAGS}
 #' software, widely used in Bayesian statistics, the statistical
 #' modeling with graphical models and the language associated with their
-#' descriptions. Unlike MCMC methods used by BUGS/JAGS, SMC methods are more
-#' adapted to dynamic problems (tracking, signal filtering, etc).
+#' descriptions.
 #'
 #' See the \href{http://alea.bordeaux.inria.fr/biips}{Biips website} for more
 #' information.
@@ -55,67 +54,89 @@
 #'   \code{\link{biips_density}}, \code{\link{biips_hist}}, \code{\link{biips_table}},
 #'   \href{http://alea.bordeaux.inria.fr/biips}{Biips website},
 #'   \href{http://sourceforge.net/projects/mcmc-jags/files/Manuals/3.x/jags_user_manual.pdf/download}{JAGS User Manual}
-#' @references TODO ******* add references ********
+#' @references A. Todeschini, F. Caron, M. Fuentes, P. Legrand, P. Del Moral.
+#'   Biips: A Software for Bayesian Inference with Interacting Particle Systems.
+#'   Technical Report, 2014.
 #' @keywords package
 #' @useDynLib Rbiips
 #' @examples
-#' #' # Compile model
-#' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#' cat(readLines(modelfile), sep='\n')
+#' #' # Add custom functions and distributions to BUGS language
+#' #' Add custom function `f`
+#' f_dim <- function(x_dim, t_dim) {
+#'   # Check dimensions of the input and return dimension of the output of function f
+#'   stopifnot(prod(x_dim) == 1, prod(t_dim) == 1)
+#'   x_dim
+#' }
+#' f_eval <- function(x, t) {
+#'   # Evaluate function f
+#'   0.5 * x + 25 * x/(1 + x^2) + 8 * cos(1.2 * t)
+#' }
+#' biips_add_function('f', 2, f_dim, f_eval)
 #'
-#' data <- list(tmax = 10, logtau = log(10))
+#' #' Add custom sampling distribution `dMN`
+#' dMN_dim <- function(mu_dim, Sig_dim) {
+#'   # Check dimensions of the input and return dimension of the output of
+#'   # distribution dMN
+#'   stopifnot(prod(mu_dim) == mu_dim[1], length(Sig_dim) == 2, mu_dim[1] == Sig_dim)
+#'   mu_dim
+#' }
+#' dMN_sample <- function(mu, Sig) {
+#'   # Draw a sample of distribution dMN
+#'   mu + t(chol(Sig)) %*% rnorm(length(mu))
+#' }
+#' biips_add_distribution('dMN', 2, dMN_dim, dMN_sample)
+#'
+#' #' # Compile model
+#' modelfile <- system.file('extdata', 'hmm_f.bug', package = 'Rbiips')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
+#'
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
 #' #' # SMC algorithm
 #' n_part <- 100
-#'
-#' out_smc <- biips_smc_samples(model, 'x', n_part)
+#' out_smc <- biips_smc_samples(model, c('x', 'c[2:10]'), n_part, type = 'fs',
+#'                              rs_thres = 0.5, rs_type = 'stratified')
 #'
 #' biips_diagnosis(out_smc)
-#' summ_smc <- biips_summary(out_smc, order = 2, probs = c(0.025, 0.975))
-#' dens_smc <- biips_density(out_smc, bw='nrd0', adjust=1, n = 100)
+#' biips_summary(out_smc)
+#' par(mfrow = c(2, 2))
+#' plot(biips_density(out_smc$x, bw = 'nrd0', adjust = 1, n = 100))
+#' plot(biips_table(out_smc[['c[2:10]']]))
 #'
 #' #' # PIMH algorithm
 #' n_part <- 50
-#' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
+#' obj_pimh <- biips_pimh_init(model, c('x', 'c[2:10]'))  # Initialize
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 #' out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
 #'
-#' summ_pimh <- biips_summary(out_pimh, order = 2, probs = c(0.025, 0.975))
-#' dens_pimh <- biips_density(out_pimh)
+#' biips_summary(out_pimh)
+#' par(mfrow = c(2, 2))
+#' plot(biips_density(out_pimh$x))
+#' biips_hist(out_pimh$x)
+#' plot(biips_table(out_pimh[['c[2:10]']]))
 #'
 #' #' # SMC sensitivity analysis
 #' n_part <- 50
 #' logtau_val <- -10:10
-#' out_sens <- biips_smc_sensitivity(model, list(logtau = logtau_val),
-#'                                   n_part)
+#' out_sens <- biips_smc_sensitivity(model, list(logtau = logtau_val), n_part)
 #'
 #' #' # PMMH algorithm
-#' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#'
-#' data <- list(tmax = 10)
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = 'x',
+#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = c('x', 'c[2:10]'),
 #'                             inits = list(logtau = -2))  # Initialize
 #' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 #' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
 #'
-#' summ_pmmh <- biips_summary(out_pmmh, order = 2, probs = c(0.025, 0.975))
-#' dens_pmmh <- biips_density(out_pmmh)
+#' biips_summary(out_pmmh)
+#' par(mfrow = c(2, 2))
+#' plot(biips_density(out_pmmh$logtau))
+#' biips_hist(out_pmmh$logtau)
+#' plot(biips_density(out_pmmh$x))
+#' biips_hist(out_pmmh$x)
+#' plot(biips_table(out_pmmh[['c[2:10]']]))
 NULL
-
-
-#' @keywords internal
-Rbiips <- function(funcname, ...) {
-  stopifnot(is.character(funcname), length(funcname) == 1, nchar(funcname) > 0)
-  .Call(funcname, ..., PACKAGE = "Rbiips")
-}
-
-#' @keywords internal
-.onLoad <- function(lib, pkg) {
-  Rbiips("load_module", "basemod")
-}

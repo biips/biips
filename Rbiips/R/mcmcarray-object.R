@@ -24,117 +24,83 @@
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#' cat(readLines(modelfile), sep='\n')
-#'
-#' data <- list(tmax = 10, logtau = log(10))
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
 #' #' # PIMH algorithm
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
+#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#'
 #' n_part <- 50
-#' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
-#' is.pimh(obj_pimh)
+#' obj_pimh <- biips_pimh_init(model, c('x', 'c[2:10]'))  # Initialize
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 #' out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
 #'
-#' #' Manipulate mcmcarray.list object
+#' #' Manipulate `mcmcarray.list` object
 #' is.mcmcarray.list(out_pimh)
 #' names(out_pimh)
 #' out_pimh
 #' biips_summary(out_pimh)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_pimh))
-#' biips_hist(out_pimh)
 #'
-#' #' Manipulate mcmcarray object
+#' #' Manipulate `mcmcarray` object
 #' is.mcmcarray(out_pimh$x)
 #' out_pimh$x
-#' biips_summary(out_pimh$x)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_pimh$x))
+#' summ_pimh_x <- biips_summary(out_pimh$x, order = 2, probs = c(0.025, 0.975))
+#' summ_pimh_x
+#' dens_pimh_x <- biips_density(out_pimh$x)
+#' par(mfrow = c(2, 2))
+#' plot(dens_pimh_x)
+#' par(mfrow = c(2, 2))
 #' biips_hist(out_pimh$x)
 #'
+#' is.mcmcarray(out_pimh[['c[2:10]']])
+#' out_pimh[['c[2:10]']]
+#' summ_pimh_c <- biips_summary(out_pimh[['c[2:10]']])
+#' summ_pimh_c
+#' table_pimh_c <- biips_table(out_pimh[['c[2:10]']])
 #' par(mfrow = c(2, 2))
-#' plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like),
-#'      type = 'l', col = 'blue', xlab = 'PIMH iteration', ylab = 'log p(y)')
-#'
-#' plot(out_pimh$x[1, ], type = 'l', col = 'blue', xlab = 'PIMH iteration',
-#'      ylab = 'x[1]')
-#' points(0, model$data()$x_true[1], pch = 17, col = 'green')
-#'
-#' summ_pimh <- biips_summary(out_pimh, order = 2, probs = c(0.025, 0.975))
-#'
-#' plot(model$data()$x_true, type = 'l', col = 'green',
-#'      xlab = 't', ylab = 'x[t]')
-#' lines(summ_pimh$x$mean, col = 'blue')
-#' lines(summ_pimh$x$quant[[1]], lty = 2, col = 'blue')
-#' lines(summ_pimh$x$quant[[2]], lty = 2, col = 'blue')
-#' legend('topright', leg = c('true', 'PIMH estimate'), lty = c(2, 1),
-#'        col = c('green', 'blue'), bty = 'n')
-#'
-#' dens_pimh <- biips_density(out_pimh)
-#'
-#' plot(dens_pimh$x[[1]], col = 'blue', xlab = 'x[1]', ylab = 'posterior density',
-#'      main = NA)
-#' points(model$data()$x_true[1], 0, pch = 17, col = 'green')
+#' plot(table_pimh_c)
 #'
 #' #' # PMMH algorithm
-#' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#'
-#' logtau_true <- 10
-#' data <- list(tmax = 10)
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = 'x',
+#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = c('x', 'c[2:10]'),
 #'                             inits = list(logtau = -2))  # Initialize
-#' is.pmmh(obj_pmmh)
 #' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 #' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
 #'
-#' #' Manipulate mcmcarray.list object
+#' #' Manipulate `mcmcarray.list` object
 #' is.mcmcarray.list(out_pmmh)
 #' names(out_pmmh)
 #' out_pmmh
 #' biips_summary(out_pmmh)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_pmmh))
-#' biips_hist(out_pmmh)
 #'
-#' #' Manipulate mcmcarray object
+#' #' Manipulate `mcmcarray` object
+#' is.mcmcarray(out_pmmh$logtau)
+#' out_pmmh$logtau
+#' summ_pmmh_lt <- biips_summary(out_pmmh$logtau, order = 2, probs = c(0.025, 0.975))
+#' dens_pmmh_lt <- biips_density(out_pmmh$logtau)
+#' par(mfrow = c(2, 1))
+#' plot(dens_pmmh_lt)
+#' biips_hist(out_pmmh$logtau)
+#'
 #' is.mcmcarray(out_pmmh$x)
 #' out_pmmh$x
-#' biips_summary(out_pmmh$x)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_pmmh$x))
+#' summ_pmmh_x <- biips_summary(out_pmmh$x, order = 2, probs = c(0.025, 0.975))
+#' dens_pmmh_x <- biips_density(out_pmmh$x)
+#' par(mfrow = c(2, 2))
+#' plot(dens_pmmh_x)
+#' par(mfrow = c(2, 2))
 #' biips_hist(out_pmmh$x)
 #'
+#' is.mcmcarray(out_pmmh[['c[2:10]']])
+#' out_pmmh[['c[2:10]']]
+#' summ_pmmh_c <- biips_summary(out_pmmh[['c[2:10]']])
+#' table_pmmh_c <- biips_table(out_pmmh[['c[2:10]']])
 #' par(mfrow = c(2, 2))
-#' plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen),
-#'      type = 'l', col = 'blue', xlab = 'PMMH iteration',
-#'      ylab = 'log p(y|logtau) + log p(logtau)')
-#'
-#' plot(out_pmmh$logtau[1, ], type = 'l', col = 'blue', xlab = 'PMMH iteration',
-#'      ylab = 'logtau')
-#' points(0, logtau_true, pch = 17, col = 'green')
-#'
-#' summ_pmmh <- biips_summary(out_pmmh, order = 2, probs = c(0.025,
-#'                                                           0.975))
-#'
-#' plot(model$data()$x_true, type = 'l', col = 'green',
-#'      xlab = 't', ylab = 'x[t]')
-#' lines(summ_pmmh$x$mean, col = 'blue')
-#' lines(summ_pmmh$x$quant[[1]], lty = 2, col = 'blue')
-#' lines(summ_pmmh$x$quant[[2]], lty = 2, col = 'blue')
-#' legend('topright', leg = c('true', 'PMMH estimate'), lty = c(2, 1),
-#'        col = c('green', 'blue'), bty = 'n')
-#'
-#' dens_pmmh <- biips_density(out_pmmh)
-#'
-#' plot(dens_pmmh$logtau, col = 'blue', xlab = 'logtau', ylab = 'posterior density',
-#'      main = NA)
-#' points(logtau_true, 0, pch = 17, col = 'green')
+#' plot(table_pmmh_c)
 NULL
 
 #' @rdname mcmcarray-object

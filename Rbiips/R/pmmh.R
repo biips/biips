@@ -53,7 +53,8 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 #' @param param_names  character vector. The names of the variables updated with
 #'   MH proposal. Other are updated with SMC. The names can contain subset
 #'   indices which must define a valid subset of the variables of the model.
-#'   Example: \code{c('var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]')}.
+#'   Example: \code{c('var1',} \code{'var2[1]',} \code{'var3[1:10]',}
+#'   \code{'var4[1, 5:10, 3]')}.
 #' @param latent_names  character vector. The names of the variables to be
 #'   updated with SMC proposal that need to be monitored.
 #' @param inits       list of numeric values. Initial values for the parameters
@@ -61,18 +62,18 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 #'   \code{inits} can either be a named list with no unnamed member or an
 #'   unnamed list of the same length as \code{param_names}.
 #' @param transform   logical. Activate automatic parameters transformation
-#'   (default = \code{TRUE}). Transformations applies independently to each
+#'   (default = \code{TRUE}). Transformations apply independently to each
 #'   component of the parameters depending on their support: \itemize{ \item
 #'   unbounded (-\eqn{\infty}, +\eqn{\infty}): f(x) = x \item lower bounded [L,
 #'   +\eqn{\infty}): f(x) = log(x-L) \item upper bounded (-\eqn{\infty}, U]:
 #'   f(x) = log(U-x) \item lower-upper bounded [L, U]: f(x) = log((x-L)/(U-x)) }
-#'   so that we apply random walk on unbounded variables.
+#'   so that we apply a random walk on the real-valued transformed vector.
 #' @param rw_step   list of numeric values. Random walk standard deviations.
 #'   \code{rw_step} can either be a named list with no unnamed member or an
 #'   unnamed list of the same length as \code{param_names}. If \code{transform}
-#'   is \code{TRUE} (default), the given steps apply to the transformed space.
-#'   Set \code{transform} to \code{FALSE} if you wish to give steps in the
-#'   untransformed space.
+#'   is \code{TRUE} (default), the given standard deviations apply to the transformed variables.
+#'   Set \code{transform} to \code{FALSE} if you wish to set the random walk standard deviation for the
+#'   untransformed random variables.
 #' @param n_rescale     integer. Number of iterations for rescaling (default =
 #'   400).
 #' @param alpha         real in [0,1]. Tuning parameter of the rescaling
@@ -119,14 +120,14 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' logtau_true <- 10
-#' data <- list(tmax = 10)
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = 'x',
+#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = c('x', 'c[2:10]'),
 #'                             inits = list(logtau = -2))  # Initialize
 #' is.pmmh(obj_pmmh)
 #' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
@@ -811,18 +812,61 @@ biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' logtau_true <- 10
-#' data <- list(tmax = 10)
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = 'x',
+#' obj_pmmh <- biips_pmmh_init(model, 'logtau', latent_names = c('x', 'c[2:10]'),
 #'                             inits = list(logtau = -2))  # Initialize
 #' is.pmmh(obj_pmmh)
 #' out_pmmh_burn <- biips_pmmh_update(obj_pmmh, 100, n_part)  # Burn-in
 #' out_pmmh <- biips_pmmh_samples(obj_pmmh, 100, n_part, thin = 1)  # Samples
+#'
+#' dens_pmmh_lt <- biips_density(out_pmmh$logtau)
+#' summ_pmmh_x <- biips_summary(out_pmmh$x, order = 2, probs = c(0.025, 0.975))
+#' dens_pmmh_x <- biips_density(out_pmmh$x)
+#' summ_pmmh_c <- biips_summary(out_pmmh[['c[2:10]']])
+#' table_pmmh_c <- biips_table(out_pmmh[['c[2:10]']])
+#'
+#' par(mfrow = c(2, 2))
+#' plot(c(out_pmmh_burn$log_marg_like_pen, out_pmmh$log_marg_like_pen), type = 'l',
+#'      col = 'blue', xlab = 'PMMH iteration', ylab = 'log p(y|logtau) + log p(logtau)')
+#'
+#' plot(out_pmmh$logtau[1, ], type = 'l', col = 'blue',
+#'      xlab = 'PMMH iteration', ylab = 'logtau')
+#' points(0, model$data()$logtau_true, pch = 17, col = 'green')
+#'
+#' plot(dens_pmmh_lt, col = 'blue', ylab = 'posterior density')
+#' points(model$data()$logtau_true, 0, pch = 17, col = 'green')
+#'
+#' biips_hist(out_pmmh$logtau, col = 'blue', ylab = 'posterior density')
+#' points(model$data()$logtau_true, 0, pch = 17, col = 'green')
+#'
+#' par(mfrow = c(2, 2))
+#' plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't', ylab = 'x[t]')
+#' lines(summ_pmmh_x$mean, col = 'blue')
+#' matlines(matrix(unlist(summ_pmmh_x$quant), data$tmax), lty = 2, col = 'blue')
+#' legend('topright', leg = c('true', 'PMMH estimate'), lty = c(2, 1),
+#'        col = c('green', 'blue'), bty = 'n')
+#'
+#' barplot(.5*(model$data()$c_true==1), col = 'green', border = NA, space = 0, offset = 1,
+#'         ylim=c(0,2), xlab='t', ylab='c[t]==1', axes = FALSE)
+#' axis(1, at=1:data$tmax-.5, labels=1:data$tmax)
+#' axis(2, line = 1, at=c(0,2), labels=NA)
+#' text(data$tmax/2, 1.75, 'true')
+#' barplot(.5*c(NA, summ_pmmh_c$mode==1), col = 'blue', border = NA, space = 0,
+#'         axes = FALSE, add = TRUE)
+#' text(data$tmax/2, .75, 'PMMH mode')
+#'
+#' t <- 5
+#' plot(dens_pmmh_x[[t]], col='blue', ylab = 'posterior density')
+#' points(model$data()$x_true[t], 0, pch = 17, col = 'green')
+#'
+#' plot(table_pmmh_c[[t-1]], col='blue', ylab = 'posterior probability mass')
+#' points(model$data()$c_true[t], 0, pch = 17, col = 'green')
 biips_pmmh_update.pmmh <- function(object, n_iter, n_part, thin = 1, max_fail = 0,
   rw_adapt = TRUE, output = "p", ...) {
   out <- pmmh_algo(object, n_iter, n_part, thin = thin, return_samples = FALSE,

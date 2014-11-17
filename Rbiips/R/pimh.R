@@ -9,10 +9,11 @@
 #'   \code{\link{biips_model}}.
 #' @param variable_names  character vector. The names of the unobserved
 #'   variables to monitor. Names can contain subset indices which must define a
-#'   valid subset of the variables of the model. Example: \code{c('var1',
-#'   'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]')}.
+#'   valid subset of the variables of the model. Example: \code{c('var1',}
+#'   \code{'var2[1]',} \code{'var3[1:10]',} \code{'var4[1, 5:10, 3]')}.
 #'
-#' @return An object of class \code{pimh} which can be used to generate samples
+#' @return The function \code{biips_pimh_init} returns an object of class
+#'   \code{pimh} which can be used to generate samples
 #'   from the posterior distribution of the monitored variables in
 #'   \code{variable_names}.
 #'
@@ -30,14 +31,15 @@
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#' cat(readLines(modelfile), sep='\n')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' data <- list(tmax = 10, logtau = log(10))
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
+#' obj_pimh <- biips_pimh_init(model, c('x', 'c[2:10]'))  # Initialize
+#' is.pimh(obj_pimh)
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 #' out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
 biips_pimh_init <- function(model, variable_names) {
@@ -255,17 +257,53 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' stopifnot(nchar(modelfile)>0)
-#' cat(readLines(modelfile), sep='\n')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' data <- list(tmax = 10, logtau = log(10))
-#' model <- biips_model(modelfile, data, sample_data = TRUE)
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
+#' model <- biips_model(modelfile, data)
 #'
 #' n_part <- 50
-#' obj_pimh <- biips_pimh_init(model, 'x')  # Initialize
+#' obj_pimh <- biips_pimh_init(model, c('x', 'c[2:10]'))  # Initialize
 #' is.pimh(obj_pimh)
 #' out_pimh_burn <- biips_pimh_update(obj_pimh, 100, n_part)  # Burn-in
 #' out_pimh <- biips_pimh_samples(obj_pimh, 100, n_part)  # Samples
+#'
+#' summ_pimh_x <- biips_summary(out_pimh$x, order = 2, probs = c(0.025, 0.975))
+#' dens_pimh_x <- biips_density(out_pimh$x)
+#' summ_pimh_c <- biips_summary(out_pimh[['c[2:10]']])
+#' table_pimh_c <- biips_table(out_pimh[['c[2:10]']])
+#'
+#' par(mfrow = c(2, 1))
+#' plot(c(out_pimh_burn$log_marg_like, out_pimh$log_marg_like), type = 'l', col = 'blue',
+#'      xlab = 'PIMH iteration', ylab = 'log p(y)')
+#'
+#' t <- 5
+#' plot(out_pimh$x[t, ], type = 'l', col = 'blue', xlab = 'PIMH iteration',
+#'      ylab = paste0('x[',t,']'))
+#' points(0, model$data()$x_true[t], pch = 17, col = 'green')
+#'
+#' par(mfrow = c(2, 2))
+#' plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't', ylab = 'x[t]')
+#' lines(summ_pimh_x$mean, col = 'blue')
+#' matlines(matrix(unlist(summ_pimh_x$quant), data$tmax), lty = 2, col = 'blue')
+#' legend('topright', leg = c('true', 'PIMH estimate'), lty = c(2, 1),
+#'        col = c('green', 'blue'), bty = 'n')
+#'
+#' barplot(.5*(model$data()$c_true==1), col = 'green', border = NA, space = 0, offset = 1,
+#'         ylim=c(0,2), xlab='t', ylab='c[t]==1', axes = FALSE)
+#' axis(1, at=1:data$tmax-.5, labels=1:data$tmax)
+#' axis(2, line = 1, at=c(0,2), labels=NA)
+#' text(data$tmax/2, 1.75, 'true')
+#' barplot(.5*c(NA, summ_pimh_c$mode==1), col = 'blue', border = NA, space = 0,
+#'         axes = FALSE, add = TRUE)
+#' text(data$tmax/2, .75, 'PIMH mode')
+#'
+#' plot(dens_pimh_x[[t]], col='blue', main = , ylab = 'posterior density')
+#' points(model$data()$x_true[t], 0, pch = 17, col = 'green')
+#'
+#' plot(table_pimh_c[[t-1]], col='blue', ylab = 'posterior probability mass')
+#' points(model$data()$c_true[t], 0, pch = 17, col = 'green')
 biips_pimh_update.pimh <- function(object, n_iter, n_part, thin = 1, output = "l",
   ...) {
   out <- pimh_algo(object, n_iter = n_iter, n_part = n_part, thin = thin, return_samples = FALSE,

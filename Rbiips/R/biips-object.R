@@ -12,33 +12,41 @@
 #' @seealso \code{\link{biips_model}}
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' cat(readLines(modelfile), sep='\n')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' data <- list(tmax = 10, logtau = log(10))
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
+#'
+#' rm(model)
+#'
+#' tmax <- 10
+#' p <- c(.5, .5)
+#' logtau_true <- log(1)
+#' logtau <- logtau_true
+#'
+#' datanames <- c('tmax', 'p', 'logtau_true', 'logtau')
+#' model <- biips_model(modelfile, datanames, sample_data = TRUE)
 #'
 #' is.biips(model)
 #' print(model)
 #'
 #' model$data()
-#' model$model()
 #'
 #' variable.names(model)
 #' biips_variable_names(model)
 #'
 #' biips_nodes(model)
 #'
-#' dotfile = 'hmm.dot'
+#' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' cat(readLines(dotfile), sep='\n')
+#' cat(readLines(dotfile), sep = '\n')
 #'
 #' biips_build_sampler(model, proposal = 'prior')
 #' biips_nodes(model, type = 'stoch', observed = FALSE)
 #'
 #' biips_build_sampler(model, proposal = 'auto')
 #' biips_nodes(model, type = 'stoch', observed = FALSE)
-#'
-#' rm(model)
 NULL
 
 
@@ -103,9 +111,9 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #' @export
 #' @rdname biips-object
 #' @param type   string. Return only a specific type of node. Possible values
-#'   are \code{'const'}, \code{'logic'} or \code{'stoch'}. default returns all
+#'   are \code{'const'}, \code{'logic'} or \code{'stoch'}. Default returns all
 #'   types of nodes.
-#' @param observed  logical. Return only observed or unobserved nodes. default
+#' @param observed  logical. Return only observed or unobserved nodes. Default
 #'   returns all.
 #'
 #' @return The method \code{biips_nodes} returns a \code{data.frame} with a row

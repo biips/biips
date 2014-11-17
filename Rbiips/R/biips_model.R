@@ -30,32 +30,35 @@
 #'   \code{\link{biips_add_distribution}}
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' cat(readLines(modelfile), sep='\n')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' data <- list(tmax = 10, logtau = log(10))
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
+#'
+#' rm(model)
+#'
+#' tmax <- 10
+#' p <- c(.5, .5)
+#' logtau_true <- log(1)
+#' logtau <- logtau_true
+#'
+#' datanames <- c('tmax', 'p', 'logtau_true', 'logtau')
+#' model <- biips_model(modelfile, datanames, sample_data = TRUE)
 #'
 #' is.biips(model)
 #' print(model)
 #'
 #' model$data()
-#' model$model()
 #'
 #' variable.names(model)
 #' biips_variable_names(model)
 #'
 #' biips_nodes(model)
 #'
-#' dotfile = 'hmm.dot'
+#' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' cat(readLines(dotfile), sep='\n')
-#'
-#' rm(model)
-#'
-#' tmax <- 10
-#' logtau <- log(10)
-#' datanames <- c('tmax', 'logtau')
-#' model <- biips_model(modelfile, datanames, sample_data = TRUE)
+#' cat(readLines(dotfile), sep = '\n')
 biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet = FALSE) {
   if (missing(file)) {
     stop("Model file name missing")

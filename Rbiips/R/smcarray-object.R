@@ -56,74 +56,62 @@
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')
-#' cat(readLines(modelfile), sep='\n')
+#' stopifnot(nchar(modelfile) > 0)
+#' cat(readLines(modelfile), sep = '\n')
 #'
-#' data <- list(tmax = 10, logtau = log(10))
+#' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
-#' #' # SMC algorithm
 #' n_part <- 100
-#'
-#' out_smc <- biips_smc_samples(model, c('x[1]', 'x[8:10]'), n_part, type = 'fs',
+#' out_smc <- biips_smc_samples(model, c('x', 'c[2:10]'), n_part, type = 'fs',
 #'                              rs_thres = 0.5, rs_type = 'stratified')
 #'
-#' #' Manipulate smcarray.fsb.list object
+#' #' Manipulate `smcarray.fsb.list` object
 #' is.smcarray.fsb.list(out_smc)
 #' names(out_smc)
 #' out_smc
 #' biips_diagnosis(out_smc)
 #' biips_summary(out_smc)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_smc))
 #'
-#' #' Manipulate smcarray.fsb object
-#' is.smcarray.fsb(out_smc[['x[8:10]']])
-#' names(out_smc[['x[8:10]']])
-#' out_smc[['x[8:10]']]
-#' biips_diagnosis(out_smc[['x[8:10]']])
-#' biips_summary(out_smc[['x[8:10]']])
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_smc[['x[8:10]']]))
+#' #' Manipulate `smcarray.fsb` object
+#' is.smcarray.fsb(out_smc$x)
+#' names(out_smc$x)
+#' out_smc$x
+#' biips_diagnosis(out_smc$x)
+#' summ_smc_x <- biips_summary(out_smc$x, order = 2, probs = c(.025, .975))
+#' summ_smc_x
+#' dens_smc_x <- biips_density(out_smc$x, bw = 'nrd0', adjust = 1, n = 100)
+#' par(mfrow = c(2, 2))
+#' plot(dens_smc_x)
 #'
-#' #' Manipulate smcarray object
-#' is.smcarray(out_smc[['x[8:10]']]$f)
-#' names(out_smc[['x[8:10]']]$f)
-#' out_smc[['x[8:10]']]$f
-#' out_smc[['x[8:10]']]$s
-#' biips_diagnosis(out_smc[['x[8:10]']]$f)
-#' biips_summary(out_smc[['x[8:10]']]$f)
-#' par(mfrow=c(2,2))
-#' plot(biips_density(out_smc[['x[8:10]']]$f))
+#' is.smcarray.fsb(out_smc[['c[2:10]']])
+#' names(out_smc[['c[2:10]']])
+#' out_smc[['c[2:10]']]
+#' biips_diagnosis(out_smc[['c[2:10]']])
+#' summ_smc_c <- biips_summary(out_smc[['c[2:10]']])
+#' summ_smc_c
+#' table_smc_c <- biips_table(out_smc[['c[2:10]']])
+#' par(mfrow = c(2, 2))
+#' plot(table_smc_c)
 #'
-#'
-#' out_smc <- biips_smc_samples(model, 'x', n_part)
-#'
+#' #' Manipulate `smcarray` object
+#' is.smcarray(out_smc$x$f)
+#' names(out_smc$x$f)
 #' out_smc$x$f
 #' out_smc$x$s
+#' biips_diagnosis(out_smc$x$f)
+#' biips_diagnosis(out_smc$x$s)
+#' biips_summary(out_smc$x$f)
+#' biips_summary(out_smc$x$s)
+#' par(mfrow = c(2, 2))
+#' plot(biips_density(out_smc$x$f))
+#' par(mfrow = c(2, 2))
+#' plot(biips_density(out_smc$x$s))
 #'
-#' biips_diagnosis(out_smc)
-#'
-#' summ_smc <- biips_summary(out_smc, order = 2, probs = c(0.025, 0.975))
-#'
-#' par(mfrow = c(2, 1))
-#' plot(model$data()$x_true, type = 'l', col = 'green', xlab = 't',
-#'      ylab = 'x[t]')
-#' lines(summ_smc$x$f$mean, col = 'blue')
-#' lines(summ_smc$x$s$mean, col = 'red')
-#' lines(summ_smc$x$f$quant[[1]], lty = 2, col = 'blue')
-#' lines(summ_smc$x$f$quant[[2]], lty = 2, col = 'blue')
-#' lines(summ_smc$x$s$quant[[1]], lty = 2, col = 'red')
-#' lines(summ_smc$x$s$quant[[2]], lty = 2, col = 'red')
-#' legend('topright', leg = c('true', 'SMC filtering estimate',
-#'                            'SMC smoothing estimate'), lty = 1, col = c('green', 'blue',
-#'                                                                        'red'), bty = 'n')
-#'
-#' dens_smc <- biips_density(out_smc, bw='nrd0', adjust=1, n = 100)
-#'
-#' plot(dens_smc$x[[1]]$f, col = 'blue', xlab = 'x[1]', ylab = 'posterior density',
-#'      main = NA)
-#' lines(dens_smc$x[[1]]$s, col = 'red')
-#' points(model$data()$x_true[1], 0, pch = 17, col = 'green')
+#' par(mfrow = c(2, 2))
+#' plot(biips_table(out_smc[['c[2:10]']]$f))
+#' par(mfrow = c(2, 2))
+#' plot(biips_table(out_smc[['c[2:10]']]$s))
 NULL
 
 
