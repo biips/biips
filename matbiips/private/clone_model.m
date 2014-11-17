@@ -15,7 +15,7 @@ unused = setdiff(v, varnames);
 data = rmfield(model.data, unused);
 
 %% compile model
-matbiips('compile_model', id, data, false, get_seed(), true);
+matbiips('compile_model', id, data, false, 0, true);
 
 %% data after possible sampling (from 'data' block in the BUGS language model)
 model_data = matbiips('get_data', id);

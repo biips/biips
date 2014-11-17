@@ -66,12 +66,12 @@ Release :
 Adrien le 17/09/2014 :
 ======================
 - [x] arguments cycliques pour density et plot.density
-- [ ] ajouter plot.table.smcarray
-- [ ] ajouter biips_table pour variables discrètes
+- [x] ajouter plot.table.smcarray
+- [x] ajouter biips_table pour variables discrètes
 - [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips (cf Rbiips) ?
 - [x] vérifier choix de la bandwidth dans matbiips
 - [ ] Rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
-- [ ] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
+- [x] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
 - [ ] compiler paquets binaires pour centos 64bit, mandriva, opensuse
 - [ ] ajouter références sur méthodes SMC dans les liens du site
 - [ ] ajouter calcul régions HDP
@@ -89,12 +89,12 @@ Article/exemples :
 - [x] préciser : `biips_add_distribution` limité aux lois d'exploration, pas vraisemblance
 - [ ] expliquer différence entre smoothing et backward smoothing
 - [ ] numéroter exemples dans l'article : Exemple 1, Exemple 2
-- [ ] figures de l'article : `box off`
-- [ ] lisibilité figure 9
+- [x] figures de l'article : `box off`
+- [x] lisibilité figure 9
 - [ ] vérifier code matbiips et BUGS
-- [ ] police et couleur de fond matbiips
-- [ ] ajouter abbréviations : PIMH
-- [ ] appliquer style JSS <http://www.jstatsoft.org/style> :
+- [x] police et couleur de fond matbiips
+- [x] ajouter abbréviations : PIMH
+- [x] appliquer style JSS <http://www.jstatsoft.org/style> :
     - vérifier capitalization, title s'applique aussi aux sections et sous sections ?
     - citation de software, R packages (ajouter Rbiips ?)
     - enlever commentaires dans le code ?
@@ -230,7 +230,7 @@ Tâches :
 - [ ] ajouter cible `publishmatbiipsexamples.m` dans cmake
 - [x] créer paquet source
 - [x] déplacer matbiips/matlab dans matbiips
-- [ ] passer à boost 1.54 (standard sous ubuntu)
+- [x] passer à boost 1.54 (standard sous ubuntu)
 - [x] compilation sous mac osx avec clang (matlab et octave)
 - [ ] compiler avec `-DBUILD_TESTS=ON` sous mac
 - [ ] passer à cmake 3 ?

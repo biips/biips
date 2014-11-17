@@ -1,4 +1,4 @@
-% [SOLVED] test_crash3
+% test_crash3
 % PB: Lorsque l'on veut monitorer x[1:2,1], le programme crashe a la fin du
 % SMC sans message d'erreur
 

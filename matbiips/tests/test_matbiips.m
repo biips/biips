@@ -45,7 +45,7 @@ switch(test)
         'prec_x', 'prec_y', 'mean_x_init'};
         
     %%% Compile BUGS model and sample data
-    % model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
+    model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
     sample_data = true; % Boolean
     model = biips_model(model_filename, data, 'sample_data', sample_data);
     data = model.data;
@@ -70,12 +70,12 @@ switch(test)
 
     %MAKES THE PROGRAMM CRASH [SOLVED]
     % Test model with cell data structure
-    data = {'t_max', ...
+    datanames = {'t_max', ...
         'prec_x', 'prec_y', 'mean_x_init'};
     %%% Compile BUGS model and sample data
     model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
     sample_data = true; % Boolean
-    try(biips_model(model_filename, data, 'sample_data', sample_data))
+    try(biips_model(model_filename, datanames, 'sample_data', sample_data))
     catch err;
         if ~isoctave()
             fprintf('[\bError: %s]\b\n', err.message)
@@ -107,7 +107,21 @@ switch(test)
         end
     end
 
-    %% TESTS BIIPS_SMC_SAMPLES
+    %% TESTS BIIPS_SMC_SAMPLES with vectors
+    model_filename = 'hmm_1d_lin.bug'; % BUGS model filename
+    model = biips_model(model_filename, data, 'sample_data', sample_data);
+    n_part = 20; % Number of particles
+    variables = {'x', 'x[1:2]'}; % Variables to be monitored
+    type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
+    % Run SMC
+    out_smc = biips_smc_samples(model, variables, n_part,...
+        'type', type, 'rs_type', rs_type, 'rs_thres', rs_thres);
+    nodes = biips_nodes(model)
+    biips_clear(model)
+    
+    %% TESTS BIIPS_SMC_SAMPLES with matrices *** MAKES THE PROGRAM CRASH *** [SOLVED]
+    model_filename = 'hmm_1d_lin2.bug'; % BUGS model filename
+    model = biips_model(model_filename, data, 'sample_data', sample_data);
     n_part = 20; % Number of particles
     variables = {'x', 'x[1:2,1]'}; % Variables to be monitored
     type = 'fs'; rs_type = 'stratified'; rs_thres = 0.5; % Optional parameters
@@ -142,7 +156,7 @@ switch(test)
     [obj_pimh, samples_pimh, log_marg_like_pimh] = biips_pimh_samples(obj_pimh, n_iter, n_part);
     biips_clear(model)
     
-    % Test pimh with matrices *** CREATES A BUG *** [SOLVED]
+    % Test pimh with matrices *** MAKES THE PROGRAM CRASH ***
     t_max = 10; mean_x_init = 0;prec_x_init = 1;prec_x = 1;prec_y = 10;
     data = struct('t_max', t_max, 'prec_x_init', prec_x_init,...
         'prec_x', prec_x,  'prec_y', prec_y, 'mean_x_init', mean_x_init);

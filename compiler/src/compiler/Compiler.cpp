@@ -834,8 +834,8 @@ namespace Biips
       // by the first compilation. If the model has e.g.: x[1,1] <- x_init
       // the whole x array will be in the data with an observed value in x[1,1]
       // and NaN everywhere else (for matbiips). it appears that the condition
-      //     data_value[j] != BIIPS_REALNA
-      // is not true for eg x[1,2] despite it is NaN and despite the replace_copy
+      //     isNA(data_value[j])
+      // is false for eg x[1,2] despite it is NaN and despite the replace_copy
       // instruction in matbiips writeDataTable function
       return node_id;
     }

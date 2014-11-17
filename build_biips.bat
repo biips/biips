@@ -30,7 +30,8 @@ set CMAKE_BUILD_TYPE=Release
 
 if "%2"=="-g" (
     set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
-    set CMAKE_BUILD_TYPE=RelWithDebInfo
+::    set CMAKE_BUILD_TYPE=RelWithDebInfo
+    set CMAKE_BUILD_TYPE=Debug
 )
 
 if "%2"=="-msvc" (
