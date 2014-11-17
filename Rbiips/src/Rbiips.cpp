@@ -103,21 +103,6 @@ RcppExport void indent_message(SEXP mess)
 }
 
 
-RcppExport SEXP load_module(SEXP name)
-{
-  BEGIN_RBIIPS
-  String mod_name = Rcpp::as<String>(name);
-  if (mod_name == "basemod")
-  {
-    load_base_module();
-    return Rcpp::wrap(true);
-  }
-  else
-    return Rcpp::wrap(false);
-  END_RBIIPS
-}
-
-
 RcppExport void clear_console(SEXP pConsole)
 {
   /* Finalizer for console pointers. Frees the external memory
@@ -137,6 +122,13 @@ RcppExport void clear_console(SEXP pConsole)
 RcppExport SEXP make_console()
 {
   BEGIN_RBIIPS
+
+  // Load Base module of not loaded
+  if (!BASE_MODULE_LOADED)
+  {
+    load_base_module();
+  }
+
   Rcpp::XPtr<Console> p_console(new Console(rbiips_cout, rbiips_cerr));
   return p_console;
   END_RBIIPS

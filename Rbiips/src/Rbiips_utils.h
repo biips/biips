@@ -72,6 +72,7 @@ using namespace Biips;
 using std::endl;
 
 extern Size VERBOSITY;
+extern Bool BASE_MODULE_LOADED;
 
 inline void checkConsole(SEXP ptr)
 {

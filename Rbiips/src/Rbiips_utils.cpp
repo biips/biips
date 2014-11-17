@@ -41,6 +41,7 @@
 
 
 Size VERBOSITY = 1;
+Bool BASE_MODULE_LOADED = false;
 
 
 void load_base_module()
@@ -48,6 +49,7 @@ void load_base_module()
   using namespace Biips;
   BEGIN_RBIIPS
   loadBaseModule(Compiler::FuncTab(), Compiler::DistTab());
+  BASE_MODULE_LOADED = true;
   VOID_END_RBIIPS
 }
 
