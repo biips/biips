@@ -8,6 +8,11 @@ close all
 addpath ..
 biips_clear
 
+if isoctave() || verLessThan('matlab', '7.12')
+    rand('state', 0)
+else
+    rng('default')
+end
 
 %% Add custom functions and distributions to BUGS language
 
@@ -22,19 +27,18 @@ type('dMN_sample.m');
 biips_add_distribution('dMN', 2, 'dMN_dim', 'dMN_sample');
 
 %% Compile model
-modelfile = 'hmm.bug';
+modelfile = 'hmm_f.bug';
 type(modelfile);
 
-tmax = 10;
-p = [.5; .5];
-logtau_true = log(1);
-logtau = logtau_true;
-
-data = struct('tmax', tmax, 'p', p, 'logtau_true', logtau_true, 'logtau', logtau);
+data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 model = biips_model(modelfile, data, 'sample_data', true);
 
 biips_clear(model)
 
+tmax = 10;
+p = [.5; .5];
+logtau_true = log(1);
+logtau = log(1);
 datanames = {'tmax', 'p', 'logtau_true', 'logtau'};
 model = biips_model(modelfile, datanames, 'sample_data', true);
 
@@ -57,7 +61,6 @@ biips_build_sampler(model, 'proposal', 'auto')
 biips_nodes(model, 'type', 'stoch', 'observed', false)
 
 n_part = 100;
-
 [out_smc, lml] = biips_smc_samples(model, {'x', 'c[2:10]'}, n_part, 'type', 'fs', 'rs_thres', .5, 'rs_type', 'stratified');
 
 out_smc
@@ -77,8 +80,13 @@ table_smc_c = biips_table(out_smc_c)
 out_smc.x.f
 out_smc.x.s
 biips_diagnosis(out_smc.x.f);
-summ_smc_x_f = biips_summary(out_smc.x.f)
-dens_smc_x_f = biips_density(out_smc.x.f)
+biips_diagnosis(out_smc.x.s);
+biips_summary(out_smc.x.f)
+biips_summary(out_smc.x.s)
+biips_density(out_smc.x.f)
+biips_density(out_smc.x.s)
+biips_table(out_smc_c.f)
+biips_table(out_smc_c.s)
 
 figure
 subplot(2,2,1); hold on
@@ -93,13 +101,13 @@ legend('true', 'SMC filtering estimate', 'SMC smoothing estimate')
 legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
-bar(1:tmax, 2+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 2, 'edgecolor', 'none')
+bar(1:data.tmax, 2+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 2, 'edgecolor', 'none')
 text(2, 2.75, 'true')
-bar(2:tmax, 1+.5*(summ_smc_c.f.mode==1), 'b', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+bar(2:data.tmax, 1+.5*(summ_smc_c.f.mode==1), 'b', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
 text(2, 1.75, 'SMC filtering mode')
-bar(2:tmax, .5*(summ_smc_c.s.mode==1), 'r', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+bar(2:data.tmax, .5*(summ_smc_c.s.mode==1), 'r', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
 text(2, .75, 'SMC smoothing mode')
-xlim([1,tmax+1])
+xlim([1,data.tmax+1])
 ylim([0,3])
 xlabel('t')
 ylabel('c[t]==1')
@@ -123,11 +131,8 @@ ylabel('posterior probability mass')
 modelfile = 'hmm.bug';
 type(modelfile);
 
-tmax = 10;
-p = [.5; .5];
-logtau_true = log(1);
-logtau = logtau_true;
-model = biips_model(modelfile, {'tmax', 'p', 'logtau_true', 'logtau'});
+data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
+model = biips_model(modelfile, data);
 
 n_part = 50;
 obj_pimh = biips_pimh_init(model, {'x', 'c[2:10]'}); % Initialize
@@ -168,11 +173,11 @@ legend('true', 'PIMH estimate')
 legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
-bar(1:tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+bar(1:data.tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
 text(2, 1.75, 'true')
-bar(2:tmax, .5*(summ_pimh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+bar(2:data.tmax, .5*(summ_pimh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
 text(2, .75, 'PIMH mode')
-xlim([1,tmax+1])
+xlim([1,data.tmax+1])
 ylim([0,2])
 xlabel('t')
 ylabel('c[t]==1')
@@ -193,11 +198,8 @@ ylabel('posterior probability mass')
 modelfile = 'hmm.bug';
 type(modelfile);
 
-tmax = 10;
-p = [.5; .5];
-logtau_true = log(1);
-logtau = logtau_true;
-model = biips_model(modelfile, {'tmax', 'p', 'logtau_true', 'logtau'});
+data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
+model = biips_model(modelfile, data);
 
 n_part = 50;
 logtau_val = -10:10;
@@ -222,10 +224,8 @@ ylabel('log p(y|logtau) + log p(logtau)')
 modelfile = 'hmm.bug';
 type(modelfile);
 
-tmax = 10;
-p = [.5; .5];
-logtau_true = log(1);
-model = biips_model(modelfile, {'tmax', 'p', 'logtau_true'});
+data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1));
+model = biips_model(modelfile, data);
 
 n_part = 50;
 obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize
@@ -252,20 +252,20 @@ xlabel('PMMH iteration')
 ylabel('log p(y|logtau) + log p(logtau)')
 
 subplot(2,2,2); hold on
-plot(0, logtau_true, 'g>', 'markerfacecolor', 'g')
+plot(0, model.data.logtau_true, 'g>', 'markerfacecolor', 'g')
 plot(out_pmmh.logtau)
 xlabel('PMMH iteration')
 ylabel('logtau')
 
 subplot(2,2,3); hold on
-plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
+plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')
 plot(dens_pmmh_lt.x, dens_pmmh_lt.f, 'b')
 xlabel('logtau')
 ylabel('posterior density')
 
 subplot(2,2,4); hold on
 hist(out_pmmh.logtau)
-plot(logtau_true, 0, '^g', 'markerfacecolor', 'g')
+plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')
 xlabel('logtau')
 ylabel('posterior density')
 
@@ -280,11 +280,11 @@ legend('true', 'PMMH estimate')
 legend boxoff
 
 subplot(2,2,2,'YTick',zeros(1,0)); hold on
-bar(1:tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
+bar(1:data.tmax, 1+.5*(model.data.c_true==1), 'g', 'barwidth', 1, 'basevalue', 1, 'edgecolor', 'none')
 text(2, 1.75, 'true')
-bar(2:tmax, .5*(summ_pmmh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
+bar(2:data.tmax, .5*(summ_pmmh_c.mode==1), 'b', 'barwidth', 1, 'basevalue', 0, 'edgecolor', 'none')
 text(2, .75, 'PMMH mode')
-xlim([1,tmax+1])
+xlim([1,data.tmax+1])
 ylim([0,2])
 xlabel('t')
 ylabel('c[t]==1')
@@ -301,4 +301,3 @@ bar(table_pmmh_c(t-1).x, table_pmmh_c(t-1).f, 'b', 'barwidth', .1)
 plot(model.data.c_true(t), 0, 'g^', 'markerfacecolor', 'g')
 xlabel(sprintf('c[%d]', t))
 ylabel('posterior probability mass')
-
