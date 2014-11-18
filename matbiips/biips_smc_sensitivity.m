@@ -31,6 +31,7 @@ function out_sens = biips_smc_sensitivity(model, param_names, param_values, ...
 %                   value.
 %
 %   See also BIIPS_MODEL, BIIPS_SMC_SAMPLES
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

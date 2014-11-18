@@ -33,6 +33,7 @@ function [summ] = biips_summary(samples, varargin)
 % 
 %   See also BIIPS_SMC_SAMPLES, BIIPS_PIMH_SAMPLES, BIIPS_PMMH_SAMPLES,
 %   BIIPS_DENSITY, BIIPS_TABLE
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';
@@ -113,7 +114,7 @@ function [summ] = biips_summary(samples, varargin)
 % ylabel('c[t]==1')
 % 
 % %% PMMH algorithm
-% model = biips_model(modelfile, {'tmax', 'p', 'logtau_true'});
+% model = biips_model(modelfile, struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1)));
 % 
 % n_part = 50;
 % obj_pmmh = biips_pmmh_init(model, {'logtau'}, 'latent_names', {'x', 'c[2:10]'}, 'inits', {-2}); % Initialize

@@ -22,6 +22,7 @@ function diagn = biips_diagnosis(samples, varargin)
 %                 'samples' structure. Contains the minimum ESS value.
 %
 %   See also BIIPS_SMC_SAMPLES
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

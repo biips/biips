@@ -29,6 +29,7 @@ function biips_add_distribution(name, n_param, fun_dim, fun_sample, varargin)
 %   arguments, and they must return a single output.
 % 
 %   See also BIIPS_ADD_FUNCTION, BIIPS_MODEL
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % %% Add custom sampling distribution dMN to BUGS language

@@ -6,8 +6,9 @@ function biips_clear(varargin)
 %   biips_clear()    clears all created consoles
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PMMH_INIT
+
 %--------------------------------------------------------------------------
-% EXAMPLE
+% EXAMPLE:
 % modelfile = 'hmm.bug';
 % data = struct('tmax', 10, 'p', [.5; .5], 'logtau_true', log(1), 'logtau', log(1));
 % model = biips_model(modelfile, data, 'sample_data', true);

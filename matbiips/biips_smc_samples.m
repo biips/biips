@@ -55,6 +55,7 @@ function [smc_samples, log_marg_like] = biips_smc_samples(model, variable_names,
 %
 %   See also BIIPS_MODEL, BIIPS_DIAGNOSIS, BIIPS_SUMMARY, BIIPS_DENSITY,
 %   BIIPS_TABLE
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

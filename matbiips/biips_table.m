@@ -16,6 +16,8 @@ function [tab] = biips_table(samples, varargin)
 %            * x: locations
 %            * f: values of the mass at x
 %
+%   See also biips_density
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';
@@ -72,7 +74,7 @@ function [tab] = biips_table(samples, varargin)
 % bar(table_pmmh_c(t-1).x, table_pmmh_c(t-1).f, 'b', 'barwidth', .1)
 % plot(model.data.c_true(t), 0, 'g^', 'markerfacecolor', 'g')
 % xlabel(sprintf('c[%d]', t))
-% ylabel('posterior probability mass')')
+% ylabel('posterior probability mass')
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems

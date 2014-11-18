@@ -24,8 +24,9 @@ function model = biips_model(file, data, varargin)
 %
 %   See also BIIPS_VARIABLE_NAMES, BIIPS_NODES, BIIPS_PRINT_DOT,
 %   BIIPS_CLEAR, BIIPS_ADD_FUNCTION, BIIPS_ADD_DISTRIBUTION
+
 %--------------------------------------------------------------------------
-% EXAMPLES:
+% EXAMPLE:
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 

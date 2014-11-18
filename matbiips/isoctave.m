@@ -2,6 +2,7 @@ function res = isoctave()
 % ISOCTAVE Check if octave is running.
 %  res = isoctave()
 %  OUTPUT: logical. true if octave is running, false otherwise.
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % % Set the random numbers generator seed for reproducibility

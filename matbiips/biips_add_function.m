@@ -26,6 +26,7 @@ function biips_add_function(name, n_param, fun_dim, fun_eval, varargin)
 %   arguments, and they must return a single output.
 %  
 %   See also BIIPS_ADD_DISTRIBUTION, BIIPS_MODEL
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % %% Add custom function f to BUGS language

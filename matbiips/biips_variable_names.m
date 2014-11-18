@@ -9,8 +9,9 @@ function varnames = biips_variable_names(model)
 %   - varnames: cell of strings. the list of variable names of the model
 %
 %   See also BIIPS_MODEL, BIIPS_NODES, BIIPS_PRINT_DOT
+
 %--------------------------------------------------------------------------
-% EXAMPLES:
+% EXAMPLE:
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 

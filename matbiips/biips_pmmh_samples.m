@@ -28,6 +28,7 @@ function [obj_pmmh, samples_pmmh, varargout] = biips_pmmh_samples(obj_pmmh, n_it
 %                         over iterations.
 %
 %   See also BIIPS_MODEL, BIIPS_PMMH_INIT, BIIPS_PMMH_UPDATE
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

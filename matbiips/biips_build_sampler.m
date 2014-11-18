@@ -17,8 +17,9 @@ function biips_build_sampler(model, varargin)
 %   with the default parameters.
 % 
 %   See also BIIPS_SMC_SAMPLES, BIIPS_NODES
+
 %--------------------------------------------------------------------------
-% EXAMPLES:
+% EXAMPLE:
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 

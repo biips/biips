@@ -71,6 +71,7 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 %               parameter component
 %
 %   See also BIIPS_MODEL, BIIPS_PMMH_UPDATE, BIIPS_PMMH_SAMPLES
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

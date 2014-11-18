@@ -29,8 +29,9 @@ function nodes = biips_nodes(model, varargin)
 %   The nodes are sorted in a topological order.
 %
 %   See also BIIPS_MODEL, BIIPS_BUILD_SAMPLER
+
 %--------------------------------------------------------------------------
-% EXAMPLES:
+% EXAMPLE:
 % modelfile = 'hmm.bug';
 % type(modelfile);
 % 

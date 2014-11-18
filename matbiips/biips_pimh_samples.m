@@ -21,6 +21,7 @@ function [obj_pimh, samples_pimh, varargout] = biips_pimh_samples(obj_pimh, n_it
 %   - accept_rate: vector of acceptance rates over iterations
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_INIT, BIIPS_PIMH_UPDATE
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

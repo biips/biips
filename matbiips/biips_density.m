@@ -31,7 +31,7 @@ function [dens] = biips_density(samples, varargin)
 %   (page 48, eqn (3.31))
 %   [2] Scott, D. W. (1992) Multivariate Density Estimation: Theory,
 %   Practice, and Visualization. Wiley.
-% 
+ 
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';
@@ -82,9 +82,6 @@ function [dens] = biips_density(samples, varargin)
 % dens_pmmh_lt = biips_density(out_pmmh.logtau)
 % 
 % dens_pmmh_x = biips_density(out_pmmh.x)
-% 
-% biips_density(out_pmmh.x.f)
-% biips_density(out_pmmh.x.s)
 % 
 % figure; hold on
 % plot(model.data.logtau_true, 0, '^g', 'markerfacecolor', 'g')

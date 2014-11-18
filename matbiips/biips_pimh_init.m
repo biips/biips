@@ -21,6 +21,7 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 %               * log_marg_like: current value of the log marginal likelihood
 %
 %   See also BIIPS_MODEL, BIIPS_PIMH_UPDATE, BIIPS_PIMH_SAMPLES
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';

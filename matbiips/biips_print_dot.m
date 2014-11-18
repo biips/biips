@@ -7,6 +7,7 @@ function biips_print_dot(model, file)
 %   - file: string. Path of the output file
 % 
 %   See also BIIPS_MODEL, BIIPS_VARIABLE_NAMES, BIIPS_NODES
+
 %--------------------------------------------------------------------------
 % EXAMPLE:
 % modelfile = 'hmm.bug';
