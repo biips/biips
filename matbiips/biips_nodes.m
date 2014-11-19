@@ -101,6 +101,6 @@ if ~isempty(observed)
 end
 
 % transform into table (if allowed)
-if ~(isoctave() || verLessThan('matlab', '7.12'))
+if ~(isoctave() || verLessThan('matlab', '8.2'))
     nodes = struct2table(nodes);
 end
