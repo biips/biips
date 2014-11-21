@@ -1,3 +1,12 @@
+Pierrick le 21/11/2014 :
+========================
+Par contre je me demandais un truc.
+Pourquoi faut-il être dans situé dans le répertoire du fichier *.m pour qu'il fonctionne ? Normalement, si le répertoire est dans le path, il ne devrait pas y  avoir ce genre de problème sauf si tu as placé des chemins "en dur" dans tes codes. C'est le cas ?
+
+---> Adrien: En effet, le problème vient du fait que le fichier est lu par le code c++, il ne cherche pas dans les paths de Matlab.
+- [ ] Il faudra modifier ça : lecture du fichier dans matlab/R et envoi d'une
+  chaine de caractere au code c++
+
 Adrien le 26/10/2014 :
 ======================
 - [ ] Pb avec déclaration de noeuds constants égaux dans bloc data. seul le premier
