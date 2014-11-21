@@ -140,9 +140,13 @@ end
 
 function [tab] = wtd_table(values, weights)
 if nargin<2
-    tab.x = sort(unique(values));
+    tab.x = unique(values);
     tab.f = histc(values, tab.x)/numel(values);
 else
-    tab = matbiips('wtd_table', values, weights);
+    [tab.x, ~, ind] = unique(values);
+    tab.f = bsxfun(@eq, repmat((1:numel(tab.x))', 1, numel(ind)), ind') * (weights(:)*numel(weights));
+    tab.f = tab.f/sum(tab.f);
+    
+%     tab = matbiips('wtd_table', values, weights);
 end
 end
