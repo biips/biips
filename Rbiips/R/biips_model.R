@@ -1,5 +1,5 @@
 
-#' Create a \code{biips} model object described in BUGS language.
+#' @title Create a biips model object described in BUGS language.
 #'
 #' @param file     string. path of the BUGS file which defines the stochastic
 #'   model. Alternatively, \code{file} can be a readable text-mode connection,
@@ -18,11 +18,13 @@
 #'
 #'   An object of class \code{biips} is a list of functions that share a common
 #'   environment. The functions can be used to query information on the model.
-#'   \item{ptr()}{Get an external pointer to the compiled model object.}
-#'   \item{file()}{Get a string. filename of the BUGS model} \item{data()}{Get a
-#'   named list of the original data of the model.} \item{model()}{Get a
-#'   character vector. BUGS language definition of the model.}
-#'   \item{recompile()}{Recompile the model using the original data set.}
+#'   \itemize{
+#'     \item \code{ptr()}: Get an external pointer to the compiled model object.
+#'     \item \code{file()}: Get a string. filename of the BUGS model
+#'     \item \code{data()}: Get a named list of the original data of the model.
+#'     \item \code{model()}: Get a character vector. BUGS language definition of the model.
+#'     \item \code{recompile()}: Recompile the model using the original data set.
+#'  }
 #' @keywords models graphs
 #' @export
 #' @seealso \code{\link{biips_variable_names}}, \code{\link{biips_nodes}},
@@ -36,8 +38,7 @@
 #' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
-#' rm(model)
-#'
+#' \dontrun{
 #' tmax <- 10
 #' p <- c(.5, .5)
 #' logtau_true <- log(1)
@@ -45,6 +46,7 @@
 #'
 #' datanames <- c('tmax', 'p', 'logtau_true', 'logtau')
 #' model <- biips_model(modelfile, datanames, sample_data = TRUE)
+#' }
 #'
 #' is.biips(model)
 #' print(model)

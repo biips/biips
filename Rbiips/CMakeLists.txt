@@ -119,14 +119,15 @@ add_custom_target (${PKG_NAME}_check
   	VERBATIM
 )
 
-# add R CMD Rd2pdf target
-add_custom_target (${PKG_NAME}_Rd2pdf
-    DEPENDS ${PKG_BIN_DIR}/man/${PKG_NAME}-package.Rd
-    COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD Rd2pdf --no-preview --force ${PKG_BIN_DIR}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  	COMMENT "Generate ${PKG_NAME} documentation PDF output from the Rd sources"
+# add R CMD check target
+add_custom_target (${PKG_NAME}_check_cran
+  	DEPENDS ${PKG_NAME}_pkg_dir
+  	COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD check --as-cran ${PKG_NAME}
+  	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  	COMMENT "Checking ${PKG_NAME} package"
   	VERBATIM
 )
+
 
 
 if (WIN32)
@@ -137,49 +138,39 @@ if (WIN32)
         message(FATAL_ERROR "Can not build Rbiips for 64bit. R architecture is 32bit. You can use cmake option -DBUILD_RBIIPS=OFF to deactivate Rbiips build")
     endif ()
 
-# TODO: add R CMD INSTALL --build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.zip
+    # add R CMD INSTALL --build target
+    add_custom_target (${PKG_NAME}_build_bin
         DEPENDS ${PKG_NAME}_pkg_dir
         COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD INSTALL --preclean --build --no-multiarch ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Building ${PKG_NAME} binary package"
         VERBATIM
     )
-    add_custom_target (${PKG_NAME}_INSTALL_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.zip
-    )
 
 elseif (APPLE)
 
     # add R CMD INSTALL --build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tgz
+    add_custom_target (${PKG_NAME}_build_bin
         DEPENDS ${PKG_NAME}_pkg_dir
         COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD INSTALL --build ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Building ${PKG_NAME} binary package"
         VERBATIM
     )
-    add_custom_target (${PKG_NAME}_INSTALL_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tgz
-    )
 
-elseif (UNIX AND NOT APPLE)
-
-    # add R CMD build target
-    add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tar.gz
-        DEPENDS ${PKG_NAME}_pkg_dir
-        COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD build ${PKG_BIN_DIR}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Building ${PKG_NAME} source package"
-        VERBATIM
-    )
-    add_custom_target (${PKG_NAME}_build
-        DEPENDS ${CMAKE_BINARY_DIR}/${PKG_NAME}_${Biips_VERSION}.tar.gz
-    )
 endif()
 
+# add R CMD build target
+add_custom_target (${PKG_NAME}_build_src
+    DEPENDS ${PKG_NAME}_pkg_dir
+    COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD build ${PKG_BIN_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Building ${PKG_NAME} source package"
+    VERBATIM
+)
+    
 # add R CMD INSTALL target
-add_custom_target (${PKG_NAME}_INSTALL
+add_custom_target (${PKG_NAME}_install
     DEPENDS ${PKG_NAME}_pkg_dir
     COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD INSTALL --preclean ${R_INSTALL_FLAGS} ${PKG_BIN_DIR}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -187,3 +178,31 @@ add_custom_target (${PKG_NAME}_INSTALL
     VERBATIM
 )
 
+ 
+# add extract_src package target
+add_custom_target (${PKG_NAME}_extract_src
+    DEPENDS ${PKG_NAME}_build_src
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PKG_NAME}_src
+    COMMAND ${CMAKE_COMMAND} -E chdir ${PKG_NAME}_src tar xvfz ../${PKG_NAME}_${Biips_VERSION}.tar.gz
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Extracting ${PKG_NAME} package"
+    VERBATIM
+)
+
+# add R CMD Rd2pdf target
+add_custom_target (${PKG_NAME}_rd2pdf
+    DEPENDS ${PKG_NAME}_extract_src
+    COMMAND ${R_EXECUTABLE} ${R_FLAGS} CMD Rd2pdf --no-preview --force ${PKG_NAME}_src/${PKG_NAME}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  	COMMENT "Generate ${PKG_NAME} documentation PDF output from the Rd sources"
+  	VERBATIM
+)
+
+# add build_site target
+add_custom_target (${PKG_NAME}_build_site
+    DEPENDS ${PKG_NAME}_extract_src
+    COMMAND ${R_EXECUTABLE} ${R_FLAGS} -e "staticdocs::build_site('.')"
+    COMMENT "Build ${PKG_NAME} documentation site"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PKG_NAME}_src/${PKG_NAME}
+  	VERBATIM
+)

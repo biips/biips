@@ -134,14 +134,18 @@ if [[ $ans == "y" ]]; then set -x
     export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
     cd $BIIPS_BUILD
     if [ "$(uname)" == "Darwin" ]; then
-        $MAKE VERBOSE=1 Rbiips_INSTALL_build
+        $MAKE VERBOSE=1 Rbiips_build_bin
     else
-        $MAKE VERBOSE=1 Rbiips_INSTALL
-        $MAKE Rbiips_build
+        $MAKE VERBOSE=1 Rbiips_build_src
+        $MAKE Rbiips_install
     fi
-    set +x; echo -n "*** Make Rbiips PDF doc? (y/[n])"; read ans
+    set +x; echo -n "*** Make Rbiips doc PDF? (y/[n])"; read ans
     if [[ $ans == "y" ]]; then set -x
-        $MAKE Rbiips_Rd2pdf
+        $MAKE Rbiips_rd2pdf
+    fi
+    set +x; echo -n "*** Make Rbiips doc website? (y/[n])"; read ans
+    if [[ $ans == "y" ]]; then set -x
+        $MAKE VERBOSE=1 Rbiips_build_site
     fi
 fi
 

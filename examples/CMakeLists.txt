@@ -89,15 +89,16 @@ foreach (_ext tar.gz zip)
     if (_ext STREQUAL tar.gz)
         # using cmake -E
         set (ARCHIVE_COMMAND ${CMAKE_COMMAND} -E tar cvfz)
+        set (ext_ tar_gz)
     else(_ext STREQUAL zip AND ZIP)
         # using zip
         set (ARCHIVE_COMMAND ${ZIP_COMMAND})
+        set (ext_ zip)
     endif()
 
    # matbiips examples archive
     file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/matbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_mat)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_mat})
-    add_custom_command( OUTPUT ${ex_archive_mat}
+    add_custom_target(matbiips_examples_package_${ext_}
       DEPENDS ${ex_dep_common} ${ex_dep_mat}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       COMMAND ${ARCHIVE_COMMAND} ${ex_archive_mat}
@@ -106,8 +107,7 @@ foreach (_ext tar.gz zip)
     
    # rbiips examples archive
     file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/rbiips-examples_${Biips_VERSION}.${_ext}" ex_archive_r)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_r})
-    add_custom_command( OUTPUT ${ex_archive_r}
+    add_custom_target(rbiips_examples_package_${ext_}
       DEPENDS ${ex_dep_common} ${ex_dep_r}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       COMMAND ${ARCHIVE_COMMAND} ${ex_archive_r}
@@ -116,18 +116,23 @@ foreach (_ext tar.gz zip)
     
    # all examples archive
     file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/biips-examples_${Biips_VERSION}.${_ext}" ex_archive_all)
-    set(EXAMPLES_ARCHIVE_LIST ${EXAMPLES_ARCHIVE_LIST} ${ex_archive_all})
-    add_custom_command( OUTPUT ${ex_archive_all}
+    add_custom_target(biips_examples_package_${ext_}
       DEPENDS  ${ex_dep_common} ${ex_dep_mat} ${ex_dep_r}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       COMMAND ${ARCHIVE_COMMAND} ${ex_archive_all}
       ${ex_files_common} ${ex_files_mat} ${ex_files_r}
+    )
+    
+    #define target
+    add_custom_target(examples_package_${ext_}
+        DEPENDS matbiips_examples_package_${ext_} rbiips_examples_package_${ext_} biips_examples_package_${ext_}
+        COMMENT "Packaging Biips examples"
     )
 endforeach()
 
     
 #define target
 add_custom_target(examples_package
-    DEPENDS  ${EXAMPLES_ARCHIVE_LIST}
+    DEPENDS examples_package_tar_gz examples_package_zip
     COMMENT "Packaging Biips examples"
 )

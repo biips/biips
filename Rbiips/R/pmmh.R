@@ -27,14 +27,14 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
   } else {
     # or sample init value
     for (i in 1:n_param) {
-      tryCatch({
+#       tryCatch({
         var <- param_names[[i]]
         sample_param[[var]] <- Rbiips("sample_data", console, pn_param$names[[i]],
           pn_param$lower[[i]], pn_param$upper[[i]], get_seed())
-      }, error = function(e) {
-        print(e)
-        stop("CANNOT SAMPLE VARIABLE ", var, ": BUG TO BE FIXED")
-      })
+#       }, error = function(e) {
+#         print(e)
+#         stop("Can not sample variable ", var, ": BUG TO BE FIXED")
+#       })
     }
     #### FIXME what if the variable is observed ?
   }
@@ -42,19 +42,28 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 }
 
 
-#' Create PMMH objects.
+#' @title Create PMMH objects.
 #'
-#' The function \code{biips_pmmh_init} initializes the Particle Marginal
-#' Metropolis-Hastings algorithm.
+#' @description The function \code{biips_pmmh_init} initializes the Particle Marginal
+#' Metropolis-Hastings (PMMH) algorithm.
+#'
+#' The PMMH algorithm is a particle MCMC algorithm using SMC within a MCMC
+#' algorithm. It splits the variables in the graphical model into two sets:
+#' \itemize{
+#'   \item The parameters in \code{param_names} are sampled with a MH proposal
+#'   (multivariate Gaussian random walk). They must be continuous and must be defined as
+#'   single stochastic nodes in the model.
+#'   \item The other latent variables are sampled using a SMC algorithm. They can
+#'   be monitored using the \code{latent_names} parameter.
+#' }
 #'
 #' @export
 #' @param model \code{biips} model object as returned by
 #'   \code{\link{biips_model}}.
 #' @param param_names  character vector. The names of the variables updated with
-#'   MH proposal. Other are updated with SMC. The names can contain subset
-#'   indices which must define a valid subset of the variables of the model.
-#'   Example: \code{c('var1',} \code{'var2[1]',} \code{'var3[1:10]',}
-#'   \code{'var4[1, 5:10, 3]')}.
+#'   MH proposal. The names can contain subset indices which must define a valid
+#'   subset of the variables of the model, e.g.: \code{c('var1',} \code{'var2[1]',}
+#'   \code{'var3[1:10]',} \code{'var4[1, 5:10, 3]')}.
 #' @param latent_names  character vector. The names of the variables to be
 #'   updated with SMC proposal that need to be monitored.
 #' @param inits       list of numeric values. Initial values for the parameters
@@ -89,31 +98,38 @@ pmmh_set_param.biips <- function(object, param_names, pn_param, values) {
 #'   An object of class \code{pmmh} is a list of functions that share a common
 #'   environment. These functions are meant for internal purpose only. They are
 #'   used to query information on the current state of the algorithm.
-#'   \item{model()}{Get the \code{\link{biips}} model object.}
-#'   \item{param_names()}{Get a character vector with the names of the monitored
-#'   parameters.} \item{latent_names()}{Get a character vector with the names of
-#'   the monitored latents.} \item{sample_param(sample)}{Get and set the current
-#'   sample value of the parameters.} \item{sample_param_tr(sample)}{Get and set
-#'   the current sample value of the transfromed parameters.}
-#'   \item{sample_latent(sample)}{Get and set the current sample value of the
-#'   latents.} \item{log_prior(log_prior)}{Get and set the current value of the
-#'   log prior of the parameters.} \item{log_marg_like(log_marg_like)}{Get and
-#'   set the current value of the log marginal likelihood.} \item{n_iter()}{Get
-#'   and set the current curent number of iterations.} \item{n_rescale()}{Get
-#'   the nb of iterations for rescaling.} \item{rw_dim()}{Get the dimensions of
-#'   the parameters.} \item{rw_len()}{Get the total length of the parameters.}
-#'   \item{rw_step()}{Get the random walk standard deviations for the
-#'   rescaling.} \item{rw_cov()}{Get the empirical covariance matrix of the
-#'   samples.} \item{rw_alpha()}{Get the tuning parameter of the rescaling.}
-#'   \item{rw_beta()}{Get the tuning parameter of the proposal.}
-#'
-#'   \item{rw_transform(sample, funtype = 'transform')}{Applies transformation
-#'   function defined by the \code{funtype} string argument. Possible values are
-#'   \code{'transform'} (direct transformation), \code{'inverse'} (inverse
-#'   transformation) and \code{'lderiv'} (log derivative of the transformation).
-#'   } \item{rw_rescale(ar)}{rescales the random walk step to target an optimal
-#'   acceptance rate} \item{rw_learn_cov()}{update the empirical covariance
-#'   matrix of the samples.}
+#'   \itemize{
+#'   \item \code{model()}: Get the \code{\link{biips}} model object.
+#'   \item \code{param_names()}: Get a character vector with the names of the monitored
+#'     parameters.
+#'   \item \code{latent_names()}: Get a character vector with the names of
+#'     the monitored latents.
+#'   \item \code{sample_param(sample)}: Get and set the current sample value of the parameters.
+#'   \item \code{sample_param_tr(sample)}: Get and set
+#'     the current sample value of the transfromed parameters.
+#'   \item \code{sample_latent(sample)}: Get and set the current sample value of the
+#'     latents.
+#'   \item \code{log_prior(log_prior)}: Get and set the current value of the
+#'     log prior of the parameters.
+#'   \item \code{log_marg_like(log_marg_like)}: Get and set the current value of
+#'     the log marginal likelihood.
+#'   \item \code{n_iter()}: Get and set the current curent number of iterations.
+#'   \item \code{n_rescale()}: Get the nb of iterations for rescaling.
+#'   \item \code{rw_dim()}: Get the dimensions of the parameters.
+#'   \item \code{rw_len()}: Get the total length of the parameters.
+#'   \item \code{rw_step()}: Get the random walk standard deviations for the
+#'     rescaling.
+#'   \item \code{rw_cov()}: Get the empirical covariance matrix of the samples.
+#'   \item \code{rw_alpha()}: Get the tuning parameter of the rescaling.
+#'   \item \code{rw_beta()}: Get the tuning parameter of the proposal.
+#'   \item \code{rw_transform(sample, funtype = 'transform')}: Applies transformation
+#'     function defined by the \code{funtype} string argument. Possible values are
+#'     \code{'transform'} (direct transformation), \code{'inverse'} (inverse
+#'     transformation) and \code{'lderiv'} (log derivative of the transformation).
+#'   \item \code{rw_rescale(ar)}: rescales the random walk step to target an optimal
+#'     acceptance rate.
+#'   \item \code{rw_learn_cov()}: update the empirical covariance matrix of the samples.
+#'   }
 #'
 #' @seealso \code{\link{biips_model}}, \code{\link{biips_pmmh_update}},
 #'   \code{\link{biips_pmmh_samples}}
@@ -244,13 +260,13 @@ biips_pmmh_init <- function(model, param_names, latent_names = c(), inits = list
     var <- param_names[[i]]
     len <- prod(sample_dim[[i]])
     if (transform) {
-      tryCatch({
+#       tryCatch({
         support <- Rbiips("get_fixed_support", model$ptr(), pn_param$names[[i]],
           pn_param$lower[[i]], pn_param$upper[[i]])
-      }, error = function(e) {
-        print(e)
-        stop("CANNOT GET FIXED SUPPORT OF VARIABLE ", var, ": BUG TO BE FIXED")
-      })
+#       }, error = function(e) {
+#         print(e)
+#         stop("CANNOT GET FIXED SUPPORT OF VARIABLE ", var, ": BUG TO BE FIXED")
+#       })
       if (nrow(support) != len)
         stop("support size does not match")
     } else {
@@ -803,9 +819,11 @@ biips_pmmh_update <- function(object, ...) UseMethod("biips_pmmh_update")
 #'   \code{dim} is the dimension of the monitored variable, the
 #'   \code{\link{mcmcarray}} object is an array of dimension \code{c(dim,
 #'   n_iter)} with the following attributes (accessible with
-#'   \code{\link[base]{attr}}): \item{name}{string with the name of the
-#'   variable.} \item{lower}{vector with the lower bounds of the variable.}
-#'   \item{upper}{vector with the upper bounds of the variable.}
+#'   \code{\link[base]{attr}}): \itemize{
+#'     \item \code{name}: string with the name of the variable.
+#'     \item \code{lower}: vector with the lower bounds of the variable.
+#'     \item \code{upper}: vector with the upper bounds of the variable.
+#'   }
 #'
 #' @return If the \code{output} argument is not empty, the output contains
 #'   additional members. See details.

@@ -1,7 +1,7 @@
 
 smc_forward_algo <- function(object, ...) UseMethod("smc_forward_algo")
 
-#' Runs a forward SMC algorithm
+#' @title Run a forward SMC algorithm
 #' @param object    biips model object
 #' @param n_part    integer. number of particles
 #' @param rs_thres  real. resampling threshold.
@@ -29,7 +29,7 @@ smc_forward_algo.biips <- function(object, n_part, rs_thres = 0.5, rs_type = "st
 }
 
 
-#' Run a sequential Monte Carlo algorithm.
+#' @title Run a sequential Monte Carlo algorithm.
 #' @export
 biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 
@@ -38,7 +38,7 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #' @param object \code{biips} model object as returned by
 #'   \code{\link{biips_model}}.
 #' @param variable_names  character vector. The names of the unobserved
-#'   variables to monitor. Example: \code{c('var1',} \code{'var2[1]',}
+#'   variables to monitor, e.g.: \code{c('var1',} \code{'var2[1]',}
 #'   \code{'var3[1:10]',} \code{'var4[1, 5:10, 3]')}. Subset indices must define
 #'   a valid subset of the variables of the model.
 #' @param n_part        integer. Number of particles.
@@ -65,26 +65,35 @@ biips_smc_samples <- function(object, ...) UseMethod("biips_smc_samples")
 #'   object, with one member for each type of monitoring (\code{f}, \code{s}
 #'   and/or \code{b}) in the \code{type} argument. Assuming \code{dim} is the
 #'   dimension of the monitored variable, a \code{\link{smcarray}} object is a
-#'   list with the members: \item{values}{array of dimension \code{c(dim,
-#'   n_part)} with the values of the particles.} \item{weights}{array of
-#'   dimension \code{c(dim, n_part)} with the weights of the particles.}
-#'   \item{ess}{array of dimension \code{dim} with Effective Sample Sizes (ESS)
-#'   of the particles set.} \item{discrete}{array of dimension \code{dim} with
-#'   logicals indicating discreteness of each component.}
-#'   \item{iterations}{array of dimension \code{dim} with sampling iterations of
-#'   each component.} \item{conditionals}{lists of the contitioning variables
-#'   (observations). Its value is: \itemize{ \item for filtering: a list of
-#'   dimension \code{dim}. each member is a character vector with the respective
-#'   conditioning variables of the node array component. \item for
-#'   smoothing/backward_smoothing: a character vector, the same for all the
-#'   components of the node array. }} \item{name}{string with the name of the
-#'   variable (without subset indices).} \item{lower}{vector with the lower bounds of the variable.}
-#'   \item{upper}{vector with the upper bounds of the variable.}
-#'   \item{type}{string with the type of monitor (\code{'filtering'},
-#'   \code{'smoothing'} or \code{'backward_smoothing'}).} For instance, if
-#'   \code{out_smc} is a \code{\link{smcarray.fsb.list}} object, one can access
-#'   the values of the smoothing particles for the variable \code{'x'} with:
-#'   \code{out_smc$x$s$values}.
+#'   list with the members:
+#'   \itemize{
+#'     \item \code{values}: array of dimension \code{c(dim, n_part)} with the
+#'       values of the particles.
+#'     \item \code{weights}: array of dimension \code{c(dim, n_part)} with
+#'       the weights of the particles.
+#'     \item \code{ess}: array of dimension \code{dim} with Effective Sample Sizes (ESS)
+#'       of the particles set.
+#'     \item \code{discrete}: array of dimension \code{dim} with
+#'       logicals indicating discreteness of each component.
+#'     \item \code{iterations}: array of dimension \code{dim} with sampling iterations of
+#'       each component.
+#'     \item \code{conditionals}: lists of the contitioning variables
+#'       (observations). Its value is: \itemize{
+#'         \item for filtering: a list of dimension \code{dim}. each member is a
+#'           character vector with the respective conditioning variables of the
+#'           node array component.
+#'         \item for smoothing/backward_smoothing: a character vector, the same
+#'           for all the components of the node array.
+#'         }
+#'     \item \code{name}: string with the name of the variable (without subset indices).
+#'     \item \code{lower}: vector with the lower bounds of the variable.
+#'     \item \code{upper}: vector with the upper bounds of the variable.
+#'     \item \code{type}: string with the type of monitor (\code{'filtering'},
+#'       \code{'smoothing'} or \code{'backward_smoothing'}).
+#'   }
+#'   For instance, if \code{out_smc} is a \code{\link{smcarray.fsb.list}} object,
+#'   one can access the values of the smoothing particles for the variable
+#'   \code{'x'} with: \code{out_smc$x$s$values}.
 #'
 #' @seealso \code{\link{biips_model}}, \code{\link{biips_diagnosis}},
 #'   \code{\link{biips_summary}}, \code{\link{biips_density}},

@@ -41,11 +41,13 @@
 #' @author \pkg{Rbiips} development is supported by the team
 #'   \href{http://alea.bordeaux.inria.fr}{ALEA} at
 #'   \href{http://www.inria.fr/en/centre/bordeaux}{Inria Bordeaux Sud-Ouest}.
-#' @author \href{https://sites.google.com/site/adrientodeschini/}{Adrien
-#'   Todeschini}
-#' @author \href{http://www.stats.ox.ac.uk/~caron/}{Francois Caron}
-#' @author Marc Fuentes
-#' @author \pkg{Rbiips} is adapted from \pkg{\link[rjags:rjags-package]{rjags}} interface for
+#'   \itemize{
+#'     \item \href{https://sites.google.com/site/adrientodeschini/}{Adrien
+#'     Todeschini}
+#'     \item \href{http://www.stats.ox.ac.uk/~caron/}{Francois Caron}
+#'     \item Marc Fuentes
+#'   }
+#' \pkg{Rbiips} is adapted from \pkg{\link[rjags]{rjags}} interface for
 #'   \href{http://mcmc-jags.sourceforge.net/}{JAGS}.
 #' @seealso \code{\link{biips_add_function}}, \code{\link{biips_add_distribution}},
 #'   \code{\link{biips_model}}, \code{\link{biips_smc_sensitivity}}, \code{\link{biips_smc_samples}},
@@ -55,8 +57,8 @@
 #'   \href{http://alea.bordeaux.inria.fr/biips}{Biips website},
 #'   \href{http://sourceforge.net/projects/mcmc-jags/files/Manuals/3.x/jags_user_manual.pdf/download}{JAGS User Manual}
 #' @references A. Todeschini, F. Caron, M. Fuentes, P. Legrand, P. Del Moral.
-#'   Biips: A Software for Bayesian Inference with Interacting Particle Systems.
-#'   Technical Report, 2014.
+#'   Biips: A Software platform for Bayesian Inference with Interacting Particle Systems.
+#'   Technical Report, 2014. (work in progress)
 #' @keywords package
 #' @useDynLib Rbiips
 #' @examples
