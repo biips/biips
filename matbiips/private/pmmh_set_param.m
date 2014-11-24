@@ -20,12 +20,12 @@ if ~isempty(values)
 else
     %% or sample init value
     for i=1:n_param
-        try
+%        try
             sample_param{i} = matbiips('sample_data', console, pn_param(i).name,...
                 pn_param(i).lower, pn_param(i).upper, get_seed());
-        catch
-            error('CANNOT SAMPLE VARIABLE %s: BUG TO BE FIXED', param_names{i})
-        end
+%        catch
+%            error('CANNOT SAMPLE VARIABLE %s: BUG TO BE FIXED', param_names{i})
+%        end
     end
     %%% FIXME what if the variable is observed ?
 end

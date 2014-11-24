@@ -2,14 +2,21 @@ function obj_pmmh = biips_pmmh_init(model, param_names, varargin)
 % BIIPS_PMMH_INIT Create a PMMH object.
 %   Initializes the Particle Marginal Metropolis-Hastings algorithm
 %   obj_pmmh = biips_pmmh_init(model, param_names, 'PropertyName', PropertyValue, ...)
+% 
+%   The PMMH algorithm is a particle MCMC algorithm using SMC within a MCMC
+%   algorithm. It splits the variables in the graphical model into two sets:
+%   - The parameters in 'param_names' are sampled with a MH proposal
+%     (multivariate Gaussian random walk). They must be continuous and must 
+%     be defined as single stochastic nodes in the model.
+%   - The other latent variables are sampled using a SMC algorithm. They can
+%     be monitored using the 'latent_names' parameter.
 %
 %   INPUT 
 %   - model:    Biips model as returned by the BIIPS_MODEL function
-%   - param_names:  cell of strings. The names of the variables to be
-%                   updated with MH proposal. Other are updated with SMC. 
-%                   The names can contain subset indices which must define a valid subset of 
-%                   the variables of the model.
-%                   Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
+%   - param_names:  cell of strings. The names of the variables updated with
+%                   MH proposal. The names can contain subset indices which 
+%                   must define a valid subset of the variables of the model, 
+%                   e.g.: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
 %   Optional Inputs:
 %   - latent_names: cell of strings. The names of the variables to be
 %                   updated with SMC proposal that need to be monitored.
@@ -225,12 +232,12 @@ k = 0;
 for i=1:n_param
     len = prod(obj_pmmh.dim{i});
     if transform
-        try
+%         try
             support = matbiips('get_fixed_support', console, pn_param(i).name, ...
                 pn_param(i).lower, pn_param(i).upper);
-        catch
-            error('CANNOT GET FIXED SUPPORT OF VARIABLE %s: BUG TO BE FIXED', param_names{i})
-        end
+%         catch
+%             error('CANNOT GET FIXED SUPPORT OF VARIABLE %s: BUG TO BE FIXED', param_names{i})
+%         end
         if size(support,1) ~= len
             error('support size does not match')
         end
