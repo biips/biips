@@ -19,6 +19,7 @@
 #'   arguments are discrete. (default returns \code{FALSE})
 #'
 #'   All the given R functions must have the same number of input arguments.
+#' @return \code{NULL}
 #' @seealso \code{\link{biips_model}}
 #' @examples
 #' #' # Add custom functions and distributions to BUGS language

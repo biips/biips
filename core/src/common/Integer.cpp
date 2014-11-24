@@ -48,13 +48,13 @@ namespace Biips
     Scalar int_part;
     if (!pIntPart)
       pIntPart = &int_part;
-    return std::modf(s, pIntPart) <= std::numeric_limits<Scalar>::round_error();
+    return std::abs(std::modf(s, pIntPart)) <= std::numeric_limits<Scalar>::epsilon();
   }
 
 
   Int roundInteger(Scalar s)
   {
-    return boost::math::round(s);
+    return boost::math::iround(s);
   }
 
 

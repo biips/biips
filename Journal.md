@@ -1,3 +1,17 @@
+Adrien le 24/11/2014 :
+========================
+- [ ] vérifier que la valeur est dans le support avant de calculer pdf
+- [ ] exclure les fichiers non trackés dans git pour contruire package Rbiips
+
+Pierrick le 21/11/2014 :
+========================
+Par contre je me demandais un truc.
+Pourquoi faut-il être dans situé dans le répertoire du fichier *.m pour qu'il fonctionne ? Normalement, si le répertoire est dans le path, il ne devrait pas y  avoir ce genre de problème sauf si tu as placé des chemins "en dur" dans tes codes. C'est le cas ?
+
+---> Adrien: En effet, le problème vient du fait que le fichier est lu par le code c++, il ne cherche pas dans les paths de Matlab.
+- [ ] Il faudra modifier ça : lecture du fichier dans matlab/R et envoi d'une
+  chaine de caractere au code c++
+
 Adrien le 18/10/2014:
 ======================
 - [ ] pb matbiips wtd_table renvoie NaN sous Windows

@@ -231,6 +231,7 @@ namespace Biips
     Bool DumpNodeNames(Types<String>::Array & nodeNames);
     Bool DumpNodeTypes(Types<NodeType>::Array & nodeTypes);
     Bool DumpNodeObserved(Flags & nodeObserved);
+    Bool DumpNodeDiscrete(Flags & nodeDiscrete);
     Bool DumpNodeIterations(Types<Size>::Array & nodeIterations);
     Bool DumpNodeSamplers(Types<String>::Array & nodeSamplers);
   };

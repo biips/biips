@@ -1,4 +1,4 @@
-#' Sensitivity analysis of parameters with SMC.
+#' @title Sensitivity analysis of parameters with SMC.
 #'
 #' @export
 #' @param object \code{biips} model object as returned by
@@ -13,14 +13,16 @@
 #'   See \code{\link{biips_smc_samples}}  for more details.
 #'
 #' @return \code{biips_smc_sensitivity} returns a list with the following
-#'   members: \item{log_marg_like}{vector of log marginal likelihood estimates
-#'   at the different values of the parameters.} \item{log_marg_like_pen}{vector
-#'   of penalized log marginal likelihood estimates at the different values of
-#'   the parameters.} \item{max_param}{parameters value with maximum
-#'   \code{log_marg_like}.} \item{max_log_marg_like}{maximum
-#'   \code{log_marg_like} value.} \item{max_param_pen}{parameters value with
-#'   maximum \code{log_marg_like_pen}.} \item{max_log_marg_like_pen}{maximum
-#'   \code{log_marg_like_pen} value.}
+#'   members: \itemize{
+#'     \item \code{log_marg_like}: vector of log marginal likelihood estimates
+#'     at the different values of the parameters.
+#'     \item \code{log_marg_like_pen}: vector of penalized log marginal likelihood
+#'       estimates at the different values of the parameters.
+#'     \item \code{max_param}: parameters value with maximum \code{log_marg_like}.
+#'     \item \code{max_log_marg_like}: maximum \code{log_marg_like} value.
+#'     \item \code{max_param_pen}: parameters value with maximum \code{log_marg_like_pen}.
+#'     \item \code{max_log_marg_like_pen}: maximum \code{log_marg_like_pen} value.
+#'   }
 #'
 #' @seealso \code{\link{biips_model}}, \code{\link{biips_smc_samples}}
 #' @examples

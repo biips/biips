@@ -3,13 +3,13 @@ Biips
 **Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
 - Version:       0.10.0
-- Last modified: 2014-11-17
+- Last modified: 2014-11-24
 - Maintainer:    Adrien Todeschini biips-project@lists.gforge.inria.fr
 - License:       GPL-3
 - Website:       <http://alea.bordeaux.inria.fr/biips>
 
 The project has started on Dec. 2009 and is supported by the [ALEA team](http://alea.bordeaux.inria.fr/) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux).
-Its main objective is to popularize the use of particle methods to researchers, practicians and students by developing a user-friendly software similar to [BUGS](http://www.mrc-bsu.cam.ac.uk/software/bugs/)/[JAGS](http://mcmc-jags.sourceforge.net/).
+Its main objective is to popularize the use of particle methods to researchers, practitioners and students by developing a user-friendly software similar to [BUGS](http://www.mrc-bsu.cam.ac.uk/software/bugs/)/[JAGS](http://mcmc-jags.sourceforge.net/).
 
 Overview
 -----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ Features
 - Core developped in C++
 - R interface: Rbiips
 - Matlab/Octave interface: Matbiips
-- Easy language extensions with user-defined R and Matlab functions
+- Easy language extensions with custom R and Matlab functions
 - Multi-platform: Linux, Windows, Mac OSX
 - Free and open source (GPL)
 
@@ -76,9 +76,9 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-- [Adrien TODESCHINI](https://sites.google.com/site/adrientodeschini/), software designer and developer
-- [Francois CARON](http://www.stats.ox.ac.uk/~caron/), probability expertise and specifications
-- Marc FUENTES, software designer and developer
+- [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/): software design and development
+- [Francois Caron](http://www.stats.ox.ac.uk/~caron/): probability expertise and specifications
+- Marc Fuentes: software design and development
 
 Biips code is adapted from:
 
@@ -93,10 +93,8 @@ Thanks
 Thanks for supporting the project:
 
 - [ALEA project-team](http://alea.bordeaux.inria.fr) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux)
-and especially:
-- [Pierre Del Moral](http://www.math.u-bordeaux1.fr/~pdelmora/) (Head of ALEA team): guidelines, probability expertise
+- [Pierre Del Moral](http://web.maths.unsw.edu.au/~peterdel-moral/) (Head of ALEA team): guidelines, probability expertise
 - [Pierrick Legrand](http://www.sm.u-bordeaux2.fr/~legrand/): project monitoring, software deployment expertise
+- [Timothée Del Moral](http://rubis3.blogspot.fr/): logo design
+- [Arnaud Doucet](http://www.stats.ox.ac.uk/~doucet/), [Pierre Jacob](https://sites.google.com/site/pierrejacob/home) for useful feedback
 
-Logo design:
-
-- [Timothée Del Moral](http://rubis3.blogspot.fr/)

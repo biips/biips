@@ -93,7 +93,7 @@ choice /m "Build/install Rbiips"
 if "%errorlevel%"=="1" (
 	set "PATH=%RTOOLS_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" VERBOSE=1 Rbiips_INSTALL_build
+	"%MAKE%" VERBOSE=1 Rbiips_build_bin
 	call:ask_make_pdf
 )
 
@@ -149,7 +149,7 @@ goto:eof
 choice /m "Make Rbiips PDF doc"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% Rbiips_Rd2pdf
+	"%MAKE%" %MAKE_OPT% Rbiips_rd2pdf
 )
 goto:eof
 

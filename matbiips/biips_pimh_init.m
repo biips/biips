@@ -2,14 +2,18 @@ function [obj_pimh] = biips_pimh_init(model, variable_names)
 % BIIPS_PIMH_INIT Create a PIMH object.
 %   Initializes the Particle Independent Metropolis-Hastings algorithm
 %   obj_pimh = biips_pimh_init(model, variable_names)
-%
+% 
+%   The PIMH algorithm provides MCMC samples of the variables in 'variable_names', 
+%   using a SMC algorithm as proposal distribution in an independent 
+%   Metropolis-Hastings (MH) algorithm.
+% 
 %   INPUT
 %   - model:    Biips model as returned by the BIIPS_MODEL function
 %   - variable_names: cell of strings. The names of the 
 %                      unobserved variables to monitor. The names can
 %                      contain subset indices which must define a valid subset of 
-%                      the variables of the model.
-%                      Example: {'var1', 'var2[1]', 'var3[1:10]', 'var4[1, 5:10, 3]'}
+%                      the variables of the model, e.g.: {'var1', 'var2[1]',
+%                      'var3[1:10]', 'var4[1, 5:10, 3]'}
 %
 %   OUTPUT
 %   - obj_pimh: structure with fields meant for internal purpose only. They 

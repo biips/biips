@@ -1,6 +1,6 @@
-#' Manipulate \code{biips} model objects.
+#' @title Manipulate biips model objects.
 #'
-#' A \code{biips} object is returned by function \code{\link{biips_model}}. It
+#' @description A \code{biips} object is returned by function \code{\link{biips_model}}. It
 #' represents a Bayesian graphical model described in BUGS language.
 #'
 #' @name biips-object
@@ -18,8 +18,7 @@
 #' data <- list(tmax = 10, p = c(.5, .5), logtau_true = log(1), logtau = log(1))
 #' model <- biips_model(modelfile, data, sample_data = TRUE)
 #'
-#' rm(model)
-#'
+#' \dontrun{
 #' tmax <- 10
 #' p <- c(.5, .5)
 #' logtau_true <- log(1)
@@ -27,6 +26,7 @@
 #'
 #' datanames <- c('tmax', 'p', 'logtau_true', 'logtau')
 #' model <- biips_model(modelfile, datanames, sample_data = TRUE)
+#' }
 #'
 #' is.biips(model)
 #' print(model)
@@ -118,18 +118,23 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #'
 #' @return The method \code{biips_nodes} returns a \code{data.frame} with a row
 #'   for each node of the graphical model sorted in a topological order with the
-#'   following columns: \itemize{ \item{\code{id}: integer. node ids.}
-#'   \item{\code{name}: string. node names.} \item{\code{type}: string. node
-#'   types (\code{'const'}, \code{'logic'} or \code{'stoch'}).}
-#'   \item{\code{observed}: logical. \code{TRUE} if the node is observed.}
+#'   following columns: \itemize{
+#'     \item \code{id}: integer. node ids.
+#'     \item \code{name}: string. node names.
+#'     \item \code{type}: string. node types (\code{'const'}, \code{'logic'} or
+#'        \code{'stoch'}).
+#'     \item \code{observed}: logical. \code{TRUE} if the node is observed.
+#'     \item \code{discrete}: logical. \code{TRUE} if the node is discrete.
 #'
 #'   If the function is called after the sampler is built (by calling
 #'   \code{\link{biips_build_sampler}} or \code{\link{biips_smc_samples}}), it
-#'   will also contain the additional variables: \item{\code{iteration}:
-#'   integer. node sampling iteration of unobserved nodes, starting at 0.
-#'   \code{NA} if the node if observed} \item{\code{sampler}: string. node
-#'   sampler name for stochastic unobserved nodes. An empty string for other
-#'   types of nodes.} }
+#'   will also contain the additional variables:
+#'
+#'     \item \code{iteration}: integer. node sampling iteration of unobserved nodes,
+#'       starting at 0. \code{NA} if the node if observed
+#'     \item \code{sampler}: string. node sampler name for stochastic unobserved
+#'     nodes. An empty string for other types of nodes.
+#'   }
 biips_nodes.biips <- function(object, type, observed, ...) {
   stopifnot(is.biips(object))
 
@@ -176,7 +181,7 @@ biips_print_dot.biips <- function(object, file, ...) {
 #' @export
 biips_build_sampler <- function(object, ...) UseMethod("biips_build_sampler")
 
-#' The method \code{biips_build_sampler} assigns a sampler to each node
+#' @description The method \code{biips_build_sampler} assigns a sampler to each node
 #' of the graph. In order to specify the proposal used by the SMC
 #' algorithm, this function has to be called before \code{\link{biips_smc_samples}}.
 #' Otherwise, it will be automatically called by \code{\link{biips_smc_samples}}
@@ -244,7 +249,7 @@ is_monitored.biips <- function(object, variable_names, type = "s", check_release
 
 clear_monitors <- function(object, ...) UseMethod("clear_monitors")
 
-#' Clear monitors
+#' @title Clear monitors
 #' @param object \code{biips} model object
 #' @param type string with characters \code{'f'} (filtering), \code{'s'}
 #'   (smoothing) and/or \code{'b'} (backward smoothing).

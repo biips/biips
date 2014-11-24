@@ -1,15 +1,19 @@
 
-#' Create a PIMH object.
+#' @title Create a PIMH object.
 #'
-#' The function \code{biips_pimh_init} initializes the Particle Independent
-#' Metropolis-Hastings algorithm.
+#' @description The function \code{biips_pimh_init} initializes the Particle Independent
+#' Metropolis-Hastings (PIMH) algorithm.
+#'
+#' The PIMH algorithm provides MCMC samples of the variables in \code{variable_names},
+#' using a SMC algorithm as proposal distribution in an independent
+#' Metropolis-Hastings (MH) algorithm.
 #'
 #' @export
 #' @param model \code{biips} model object as returned by
 #'   \code{\link{biips_model}}.
 #' @param variable_names  character vector. The names of the unobserved
 #'   variables to monitor. Names can contain subset indices which must define a
-#'   valid subset of the variables of the model. Example: \code{c('var1',}
+#'   valid subset of the variables of the model, e.g.: \code{c('var1',}
 #'   \code{'var2[1]',} \code{'var3[1:10]',} \code{'var4[1, 5:10, 3]')}.
 #'
 #' @return The function \code{biips_pimh_init} returns an object of class
@@ -20,11 +24,14 @@
 #'   An object of class \code{pimh} is a list of functions that share a common
 #'   environment. These functions are meant for internal purpose only. They are
 #'   used to query information on the current state of the algorithm.
-#'   \item{model()}{Get the \code{\link{biips}} model object.}
-#'   \item{variable_names()}{Get a character vector with the names of the
-#'   monitored variables.} \item{sample(sample)}{Get and set the current
-#'   sample.} \item{log_marg_like(log_marg_like)}{Get and set the current value
-#'   of the log marginal likelihood.}
+#'   \itemize{
+#'     \item \code{model()}: Get the \code{\link{biips}} model object.
+#'     \item \code{variable_names()}: Get a character vector with the names of
+#'       the monitored variables.
+#'     \item \code{sample(sample)}: Get and set the current sample.
+#'     \item \code{log_marg_like(log_marg_like)}: Get and set the current value
+#'       of the log marginal likelihood.
+#'   }
 #'
 #' @seealso \code{\link{biips_model}}, \code{\link{biips_pimh_update}},
 #'   \code{\link{biips_pimh_samples}}
@@ -251,9 +258,11 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'   \code{\link{mcmcarray}} objects for different variables. Assuming \code{dim}
 #'   is the dimension of the monitored variable, the \code{\link{mcmcarray}}
 #'   object is an array of dimension \code{c(dim, n_iter)} with the following
-#'   attributes (accessible with \code{\link[base]{attr}}): \item{name}{string
-#'   with the name of the variable.} \item{lower}{vector with the lower bounds of
-#'   the variable.} \item{upper}{vector with the upper bounds of the variable.}
+#'   attributes (accessible with \code{\link[base]{attr}}): \itemize{
+#'     \item{name}: string with the name of the variable.
+#'     \item{lower}: vector with the lower bounds of the variable.
+#'     \item{upper}: vector with the upper bounds of the variable.
+#'   }
 #'
 #' @examples
 #' modelfile <- system.file('extdata', 'hmm.bug', package = 'Rbiips')

@@ -61,7 +61,7 @@ else(_ext STREQUAL zip AND ZIP)
     set (ARCHIVE_COMMAND ${ZIP_COMMAND})
 endif()
 
-add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
+add_custom_target( matbiips_package
   DEPENDS matbiips
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMAND ${ARCHIVE_COMMAND} ${MATBIIPS_ARCHIVE}
@@ -69,8 +69,3 @@ add_custom_command( OUTPUT ${MATBIIPS_ARCHIVE}
   COMMENT "Packaging Matbiips"
 )
 
-    
-#define target
-add_custom_target(matbiips_package
-    DEPENDS  ${MATBIIPS_ARCHIVE}
-)

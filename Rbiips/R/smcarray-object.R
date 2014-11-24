@@ -1,4 +1,4 @@
-#' Objects for representing SMC output.
+#' @title Objects for representing SMC output.
 #'
 #' @name smcarray-object
 #' @aliases smcarray.fsb-object smcarray.fsb.list-object smcarray smcarray.fsb
@@ -273,15 +273,17 @@ biips_summary <- function(object, ...) UseMethod("biips_summary")
 #'   statistics. The output innermost members are objects of class
 #'   \code{summary.smcarray}. Assuming \code{dim} is the dimension of the
 #'   variable, the \code{summary.smcarray} object is a list with the following
-#'   members: \item{mean}{array of size \code{dim}. The mean if
-#'   \code{order>=1}.} \item{var}{array of size \code{dim}. The variance, if
-#'   \code{order>=2}.} \item{skew}{array of size \code{dim}. The skewness, if
-#'   \code{order>=3}.} \item{kurt}{array of size \code{dim}. The kurtosis, if
-#'   \code{order>=4}.} \item{probs}{vector of quantile probabilities.}
-#'   \item{quant}{list of arrays of size \code{dim} for each probability level
-#'   in \code{probs}. The quantile values, if \code{probs} is not empty.}
-#'   \item{mode}{ array of size \code{dim}. The most frequent values for
-#'   discrete components.}
+#'   members: \itemize{
+#'     \item \code{mean}: array of size \code{dim}. The mean if \code{order>=1}.
+#'     \item \code{var}: array of size \code{dim}. The variance, if \code{order>=2}.
+#'     \item \code{skew}: array of size \code{dim}. The skewness, if \code{order>=3}.
+#'     \item \code{kurt}: array of size \code{dim}. The kurtosis, if \code{order>=4}.
+#'     \item \code{probs}: vector of quantile probabilities.
+#'     \item \code{quant}: list of arrays of size \code{dim} for each probability level
+#'       in \code{probs}. The quantile values, if \code{probs} is not empty.
+#'     \item \code{mode}: array of size \code{dim}. The most frequent values for
+#'       discrete components.
+#'   }
 biips_summary.smcarray <- function(object, probs = c(), order = ifelse(mode, 0, 1),
   mode = all(object$discrete), ...) {
   stopifnot(is.smcarray(object))
