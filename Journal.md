@@ -1,3 +1,8 @@
+Adrien le 24/11/2014 :
+========================
+- [ ] vérifier que la valeur est dans le support avant de calculer pdf
+- [ ] exclure les fichiers non trackés dans git pour contruire package Rbiips
+
 Pierrick le 21/11/2014 :
 ========================
 Par contre je me demandais un truc.

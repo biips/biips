@@ -3,12 +3,12 @@
 **Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
   * Version: 0.10.0
-  * Last modified: 2014-11-17
+  * Last modified: 2014-11-23
   * Maintainer: Adrien Todeschini biips-project@lists.gforge.inria.fr
   * License: GPL-3
   * Website: http://alea.bordeaux.inria.fr/biips
 
-The project has started on Dec. 2009 and is supported by the [[http://alea.bordeaux.inria.fr/|ALEA team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]]. Its main objective is to popularize the use of particle methods to researchers, practicians and students by developing a user-friendly software similar to [[http://www.mrc-bsu.cam.ac.uk/software/bugs/|BUGS]]/[[http://mcmc-jags.sourceforge.net/|JAGS]].
+The project has started on Dec. 2009 and is supported by the [[http://alea.bordeaux.inria.fr/|ALEA team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]]. Its main objective is to popularize the use of particle methods to researchers, practitioners and students by developing a user-friendly software similar to [[http://www.mrc-bsu.cam.ac.uk/software/bugs/|BUGS]]/[[http://mcmc-jags.sourceforge.net/|JAGS]].
 
 ===== Overview =====
 
@@ -30,7 +30,7 @@ Emerged as a result of recent research studies, interacting particle based algor
   * Core developped in C++
   * R interface: Rbiips
   * Matlab/Octave interface: Matbiips
-  * Easy language extensions with user-defined R and Matlab functions
+  * Easy language extensions with custom R and Matlab functions
   * Multi-platform: Linux, Windows, Mac OSX
   * Free and open source (GPL)
 
@@ -68,9 +68,9 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-  * [[https://sites.google.com/site/adrientodeschini/|Adrien TODESCHINI]], software designer and developer
-  * [[http://www.stats.ox.ac.uk/~caron/|Francois CARON]], probability expertise and specifications
-  * Marc FUENTES, software designer and developer
+  * [[https://sites.google.com/site/adrientodeschini/|Adrien Todeschini]]: software design and development
+  * [[http://www.stats.ox.ac.uk/~caron/|Francois Caron]]: probability expertise and specifications
+  * Marc Fuentes: software design and development
 
 Biips code is adapted from:
 
@@ -83,11 +83,9 @@ Additional information concerning adapted open source software is included in th
 
 Thanks for supporting the project:
 
-  * [[http://alea.bordeaux.inria.fr|ALEA project-team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]] and especially:
-  * [[http://www.math.u-bordeaux1.fr/~pdelmora/|Pierre Del Moral]] (Head of ALEA team): guidelines, probability expertise
+  * [[http://alea.bordeaux.inria.fr|ALEA project-team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]]
+  * [[http://web.maths.unsw.edu.au/~peterdel-moral/|Pierre Del Moral]] (Head of ALEA team): guidelines, probability expertise
   * [[http://www.sm.u-bordeaux2.fr/~legrand/|Pierrick Legrand]]: project monitoring, software deployment expertise
-
-Logo design:
-
-  * [[http://rubis3.blogspot.fr/|Timothée Del Moral]]
+  * [[http://rubis3.blogspot.fr/|Timothée Del Moral]]: logo design
+  * [[http://www.stats.ox.ac.uk/~doucet/|Arnaud Doucet]], [[https://sites.google.com/site/pierrejacob/home|Pierre Jacob]] for useful feedback
 
