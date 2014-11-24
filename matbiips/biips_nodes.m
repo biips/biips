@@ -18,6 +18,7 @@ function nodes = biips_nodes(model, varargin)
 %             * name: string. node names
 %             * type: string. node types ('const', 'logic' or 'stoch')
 %             * observed: bool. true if the node is observed
+%             * discrete: bool. true if the node is discrete
 %     If the function is called after the sampler is built (by calling 
 %     BIIPS_BUILD_SAMPLER or BIIPS_SMC_SAMPLES), it will also
 %     contain the additional variables:

@@ -1484,6 +1484,7 @@ namespace Biips
     return true;
   }
 
+
   Bool Console::DumpNodeNames(Types<String>::Array & nodeNames)
   {
     if (!pModel_)
@@ -1547,6 +1548,29 @@ namespace Biips
 
       for (Size i = 0; it_nodes != it_nodes_end; ++it_nodes, ++i)
         nodeObserved[i] = pModel_->graph().GetObserved()[*it_nodes];
+    }
+    BIIPS_CONSOLE_CATCH_ERRORS
+
+    return true;
+  }
+
+  Bool Console::DumpNodeDiscrete(Flags & nodeDiscrete)
+  {
+    if (!pModel_)
+    {
+      err_ << "Can't dump nodes discreteness. No model!\n";
+      return false;
+    }
+    try
+    {
+      Types<NodeId>::ConstIterator it_nodes, it_nodes_end;
+      boost::tie(it_nodes, it_nodes_end) =
+          pModel_->graph().GetSortedNodes();
+
+      nodeDiscrete.resize(std::distance(it_nodes, it_nodes_end));
+
+      for (Size i = 0; it_nodes != it_nodes_end; ++it_nodes, ++i)
+        nodeDiscrete[i] = pModel_->graph().GetDiscrete()[*it_nodes];
     }
     BIIPS_CONSOLE_CATCH_ERRORS
 

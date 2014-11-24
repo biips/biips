@@ -800,6 +800,14 @@ RcppExport SEXP get_sorted_nodes(SEXP pConsole)
     std::copy(node_obs_vec.begin(), node_obs_vec.end(), node_observed.begin());
     nodes_data_frame["observed"] = node_observed;
   }
+  {
+    Rcpp::LogicalVector node_discrete(graph_size);
+    Flags node_disc_vec;
+    if (!p_console->DumpNodeDiscrete(node_disc_vec))
+      throw RuntimeError("Failed to dump node discrete boolean.");
+    std::copy(node_disc_vec.begin(), node_disc_vec.end(), node_discrete.begin());
+    nodes_data_frame["discrete"] = node_discrete;
+  }
 
   return nodes_data_frame;
   END_RBIIPS

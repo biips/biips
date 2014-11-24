@@ -569,7 +569,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       Size id = GetConsoleId(consoles, prhs[1], name_func);
       Console_ptr p_console = consoles[id];
 
-      const char *field_names[] = { "id", "name", "type", "observed" };
+      const char *field_names[] = { "id", "name", "type", "observed", "discrete" };
       mwSize  dims[] = { 1};
       plhs[0] = mxCreateStructArray(1, dims, sizeof(field_names)/sizeof(char *), field_names);
 
@@ -643,6 +643,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mxArray * node_obs = mxCreateDoubleMatrix(node_obs_vec.size(), 1, mxREAL);
         std::copy(node_obs_vec.begin(), node_obs_vec.end(), mxGetPr(node_obs));
         mxSetFieldByNumber(plhs[0], 0, 3, node_obs);
+      }
+      {// discrete assignment
+        Flags node_disc_vec;
+        Bool ok_dump = p_console->DumpNodeDiscrete(node_disc_vec);
+        if (!ok_dump)
+          throw RuntimeError("Failed to dump node discrete boolean.");
+        mxArray * node_disc = mxCreateDoubleMatrix(node_disc_vec.size(), 1, mxREAL);
+        std::copy(node_disc_vec.begin(), node_disc_vec.end(), mxGetPr(node_disc));
+        mxSetFieldByNumber(plhs[0], 0, 3, node_disc);
       }
     }
     /////////////////////////////////////////
