@@ -1,4 +1,4 @@
-PKG_CPPFLAGS = -I"$(BOOST_ROOT)" -I"$(BIIPS_ROOT)/include/core" -I"$(BIIPS_ROOT)/include/base" -I"$(BIIPS_ROOT)/include/compiler" @RBIIPS_COMPILE_FLAGS@
+PKG_CPPFLAGS = -I"$(BOOSTLIB)" -I"$(BIIPS_ROOT)/include/core" -I"$(BIIPS_ROOT)/include/base" -I"$(BIIPS_ROOT)/include/compiler" @RBIIPS_COMPILE_FLAGS@
 
 ## Use the R_HOME indirection to support installations of multiple R version
 

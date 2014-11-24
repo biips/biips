@@ -10,11 +10,12 @@ if "%1" == "" (
 set BIIPS_SRC=%~dp0
 set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
 set BIIPS_ROOT=C:\Users\adrien\biips
-set BOOST_ROOT=C:\Program Files\boost\boost_1_54_0
+set BOOSTLIB=C:\Program Files\boost\boost_1_54_0
 set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
 set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
+set R_BINDIR=C:\Program Files\R\R-3.1.2\bin
 set MATLAB_ROOT=C:\Program Files\MATLAB\R2014a
 set OCTAVE_ROOT=C:\Octave\Octave3.6.4_gcc4.6.2
 set GCC_BINDIR=C:\Rtools\gcc-4.6.3\bin
@@ -44,7 +45,7 @@ if "%2"=="-msvc" (
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib" -DR_ARCH=i386
+    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOSTLIB%\stage32\lib" -DR_ARCH=i386
 	
 	if NOT "%4" == "-oct" (
 		set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_MATBIIPS=OFF

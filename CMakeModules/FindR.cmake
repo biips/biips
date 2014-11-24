@@ -44,6 +44,7 @@
 #
 # Variables that can be set by the user:
 # R_EXECUTABLE      
+# R_BINDIR    
 # R_ARCH (Windows only)
 
 
@@ -56,6 +57,7 @@ set (CMAKE_FIND_APPBUNDLE LAST)
 find_program ( R_EXECUTABLE
     NAMES R R.exe
     DOC "Path to the R command interpreter"
+    PATHS ENV R_BINDIR
 )
 
 

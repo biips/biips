@@ -1,3 +1,7 @@
+Adrien le 18/10/2014:
+======================
+- [ ] pb matbiips wtd_table renvoie NaN sous Windows
+
 Adrien le 26/10/2014 :
 ======================
 - [ ] Pb avec déclaration de noeuds constants égaux dans bloc data. seul le premier
