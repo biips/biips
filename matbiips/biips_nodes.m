@@ -72,6 +72,8 @@ nodes = matbiips('get_sorted_nodes', model.id);
 % transform observed to logical
 nodes.observed = nodes.observed==1;
 
+nodes.discrete = nodes.discrete==1;
+
 % add samplers and iterations if sampler is built
 if matbiips('is_sampler_built', model.id)
     names = fieldnames(nodes);
