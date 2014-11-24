@@ -68,7 +68,7 @@ namespace Biips
     Types<IndexType>::Array getIndex(SizeType offset) const;
 
     template<typename StorageOrderType>
-    SizeType getOffset(const Types<IndexType>::Array indices) const;
+    SizeType getOffset(const Types<IndexType>::Array & indices) const;
 
   public:
     IndexRange() :
@@ -160,7 +160,7 @@ namespace Biips
 
     Types<IndexType>::Array GetIndex(SizeType offset) const;
 
-    SizeType GetOffset(const Types<IndexType>::Array indices) const;
+    SizeType GetOffset(const Types<IndexType>::Array & indices) const;
 
     Bool Contains(const IndexRange & range, Bool dropped = false) const;
 

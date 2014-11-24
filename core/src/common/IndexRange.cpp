@@ -92,7 +92,7 @@ namespace Biips
 
   template<>
   IndexRange::SizeType IndexRange::getOffset<RowMajorOrder>(const Types<
-      IndexType>::Array indices) const
+      IndexType>::Array & indices) const
   {
     SizeType offset = 0;
     Size step = 1;
@@ -109,7 +109,7 @@ namespace Biips
 
   template<>
   IndexRange::SizeType IndexRange::getOffset<ColumnMajorOrder>(const Types<
-      IndexType>::Array indices) const
+      IndexType>::Array & indices) const
   {
     SizeType offset = 0;
     Size step = 1;
@@ -129,7 +129,7 @@ namespace Biips
     return getIndex<StorageOrderType> (offset);
   }
 
-  IndexRange::SizeType IndexRange::GetOffset(const Types<IndexType>::Array indices) const
+  IndexRange::SizeType IndexRange::GetOffset(const Types<IndexType>::Array & indices) const
   {
     return getOffset<StorageOrderType> (indices);
   }
