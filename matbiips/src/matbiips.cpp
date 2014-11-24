@@ -651,7 +651,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           throw RuntimeError("Failed to dump node discrete boolean.");
         mxArray * node_disc = mxCreateDoubleMatrix(node_disc_vec.size(), 1, mxREAL);
         std::copy(node_disc_vec.begin(), node_disc_vec.end(), mxGetPr(node_disc));
-        mxSetFieldByNumber(plhs[0], 0, 3, node_disc);
+        mxSetFieldByNumber(plhs[0], 0, 4, node_disc);
       }
     }
     /////////////////////////////////////////
