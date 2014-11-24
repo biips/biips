@@ -147,7 +147,7 @@ if (WIN32)
         VERBATIM
     )
 
-elseif (APPLE)
+elseif (UNIX)
 
     # add R CMD INSTALL --build target
     add_custom_target (${PKG_NAME}_build_bin
