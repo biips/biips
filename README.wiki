@@ -3,7 +3,7 @@
 **Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
   * Version: 0.10.0
-  * Last modified: 2014-11-24
+  * Last modified: 2014-12-03
   * Maintainer: Adrien Todeschini biips-project@lists.gforge.inria.fr
   * License: GPL-3
   * Website: http://alea.bordeaux.inria.fr/biips
@@ -46,7 +46,7 @@ To contact us with non-public matters, please write to <biips-project@lists.gfor
 
 ===== Getting Help =====
 
-The discusssion [[https://gforge.inria.fr/forum/?group_id=2515|forum]] can be used for any question or feedback about Biips. This is the best place for getting help. All Biips users are invited to participate.
+The discussion [[https://gforge.inria.fr/forum/?group_id=2515|forum]] can be used for any question or feedback about Biips. This is the best place for getting help. All Biips users are invited to participate.
 
 We recommend [[https://gforge.inria.fr/account/register.php|creating an account]] at GForge Inria. In the registration form, you can enter "ALEA" in the //INRIA research team// field.
 
@@ -68,9 +68,9 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-  * [[https://sites.google.com/site/adrientodeschini/|Adrien Todeschini]]: software design and development
-  * [[http://www.stats.ox.ac.uk/~caron/|Francois Caron]]: probability expertise and specifications
-  * Marc Fuentes: software design and development
+  * [[https://sites.google.com/site/adrientodeschini/|Adrien Todeschini]] (main developer)
+  * [[http://www.stats.ox.ac.uk/~caron/|Francois Caron]]
+  * Marc Fuentes
 
 Biips code is adapted from:
 
@@ -81,11 +81,8 @@ Additional information concerning adapted open source software is included in th
 
 ===== Thanks =====
 
-Thanks for supporting the project:
-
   * [[http://alea.bordeaux.inria.fr|ALEA project-team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]]
-  * [[http://web.maths.unsw.edu.au/~peterdel-moral/|Pierre Del Moral]] (Head of ALEA team): guidelines, probability expertise
-  * [[http://www.sm.u-bordeaux2.fr/~legrand/|Pierrick Legrand]]: project monitoring, software deployment expertise
-  * [[http://rubis3.blogspot.fr/|Timothée Del Moral]]: logo design
-  * [[http://www.stats.ox.ac.uk/~doucet/|Arnaud Doucet]], [[https://sites.google.com/site/pierrejacob/home|Pierre Jacob]] for useful feedback
+  * [[http://web.maths.unsw.edu.au/~peterdel-moral/|Pierre Del Moral]]
+  * [[http://www.sm.u-bordeaux2.fr/~legrand/|Pierrick Legrand]]
+  * [[http://rubis3.blogspot.fr/|Timothée Del Moral]] (Biips logo design)
 

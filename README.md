@@ -3,7 +3,7 @@ Biips
 **Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
 - Version:       0.10.0
-- Last modified: 2014-11-24
+- Last modified: 2014-12-03
 - Maintainer:    Adrien Todeschini biips-project@lists.gforge.inria.fr
 - License:       GPL-3
 - Website:       <http://alea.bordeaux.inria.fr/biips>
@@ -50,7 +50,7 @@ Otherwise you can use the discusssion forum.
 
 Getting Help
 -----------------------------------------------------------------------------
-The discusssion [forum](https://gforge.inria.fr/forum/?group_id=2515) can be used for any question or feedback about Biips.
+The discussion [forum](https://gforge.inria.fr/forum/?group_id=2515) can be used for any question or feedback about Biips.
 This is the best place for getting help. All Biips users are invited to participate.
 
 We recommend [creating an account](https://gforge.inria.fr/account/register.php) at GForge Inria.
@@ -76,9 +76,9 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-- [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/): software design and development
-- [Francois Caron](http://www.stats.ox.ac.uk/~caron/): probability expertise and specifications
-- Marc Fuentes: software design and development
+- [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) (main developer)
+- [Francois Caron](http://www.stats.ox.ac.uk/~caron/)
+- Marc Fuentes
 
 Biips code is adapted from:
 
@@ -90,11 +90,8 @@ is included in the file NOTICES.
 
 Thanks
 -----------------------------------------------------------------------------
-Thanks for supporting the project:
-
 - [ALEA project-team](http://alea.bordeaux.inria.fr) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux)
-- [Pierre Del Moral](http://web.maths.unsw.edu.au/~peterdel-moral/) (Head of ALEA team): guidelines, probability expertise
-- [Pierrick Legrand](http://www.sm.u-bordeaux2.fr/~legrand/): project monitoring, software deployment expertise
-- [Timothée Del Moral](http://rubis3.blogspot.fr/): logo design
-- [Arnaud Doucet](http://www.stats.ox.ac.uk/~doucet/), [Pierre Jacob](https://sites.google.com/site/pierrejacob/home) for useful feedback
+- [Pierre Del Moral](http://web.maths.unsw.edu.au/~peterdel-moral/)
+- [Pierrick Legrand](http://www.sm.u-bordeaux2.fr/~legrand/)
+- [Timothée Del Moral](http://rubis3.blogspot.fr/) (Biips logo design)
 

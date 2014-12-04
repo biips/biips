@@ -69,32 +69,20 @@ addpath('path/to/matbiips')
 Linux
 =============
 
-Install biips from binary
--------------------------
-* **Requirements**: Debian/Ubuntu, libboost-dev (>=1.49)
+Install Rbiips from binary
+--------------------------
+* **Requirements**: Debian/Ubuntu, R (>= 3.0) with Rcpp package
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) biips package
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
 
-* Root installation from terminal:
-
-```
-sudo dpkg -i biips_x.x.x_Linux.deb
-```
-
-...or double-click on the deb file in your file browser. This will install it as root in `/usr/` directory.
-
-* Local installation from terminal:
+* Install Rbiips package from R console:
 
 ```
-dpkg-deb -x biips_x.x.x.deb  path/to/biips
+install.packages('path/to/Rbiips_x.x.x_R_x86_64-pc-linux-gnu.tar.gz')
 ```
 
-* Other Linux distributions:
-    - OpenSuse: `sudo rpm -i biips_x.x.x_Linux.rpm`
-    - Mandriva: `sudo urpmi biips_x.x.x_Linux.rpm `
-
-Install Rbiips
---------------
+Install Rbiips from source
+--------------------------
 * **Requirements**: biips, R (>= 3.0) with Rcpp package
 
 * [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
@@ -104,18 +92,18 @@ Install Rbiips
 If biips was installed as root in the standard paths:
 
 ```
-R CMD INSTALL Rbiips_0.8.1.tar.gz
+R CMD INSTALL Rbiips_X.X.X.tar.gz
 ```
 
 Else, if biips was installed in local paths:
 
 ```
-env BIIPS_INCLUDE=path/to/biips/include/biips/ BIIPS_LIB=/path/to/biips/lib/ARCH R CMD INSTALL Rbiips_0.8.1.tar.gz
+env BIIPS_INCLUDE=path/to/biips/include/biips/ BIIPS_LIB=/path/to/biips/lib/ARCH R CMD INSTALL Rbiips_X.X.X.tar.gz
 ```
 
 Install Matbiips
 ----------------
-* **Requirements**: No previous biips installation is needed for Matbiips
+* **Requirements**: Debian/Ubuntu, No previous biips installation is needed for Matbiips
 
     - Matlab (>=R2011a)
     - Octave (>=3.6.4)
@@ -147,6 +135,30 @@ This usually requires administrator permissions.
 ```
 addpath('path/to/matbiips')
 ```
+
+Install biips from binary
+-------------------------
+* **Requirements**: Debian/Ubuntu, libboost-dev (>=1.49)
+
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) biips package
+
+* Root installation from terminal:
+
+```
+sudo dpkg -i biips_X.X.X_Linux.deb
+```
+
+...or double-click on the deb file in your file browser. This will install it as root in `/usr/` directory.
+
+* Local installation from terminal:
+
+```
+dpkg-deb -x biips_X.X.X.deb  path/to/biips
+```
+
+* Other Linux distributions:
+    - OpenSuse: `sudo rpm -i biips_x.x.x_Linux.rpm`
+    - Mandriva: `sudo urpmi biips_x.x.x_Linux.rpm `
 
 Install biips from sources
 --------------------------
