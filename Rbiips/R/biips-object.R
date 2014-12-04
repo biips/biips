@@ -40,7 +40,7 @@
 #'
 #' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' cat(readLines(dotfile), sep = '\n')
+#' #cat(readLines(dotfile), sep = '\n')
 #'
 #' biips_build_sampler(model, proposal = 'prior')
 #' biips_nodes(model, type = 'stoch', observed = FALSE)

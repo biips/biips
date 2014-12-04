@@ -4,7 +4,7 @@ Date: @Biips_DATE@
 Title: @Biips_DESCRIPTION_SUMMARY@
 Authors@R: as.person(c(
     "Adrien Todeschini <adrien.todeschini@inria.fr> [aut, cre]",
-    "Fran\\u00e7ois Caron <francois.caron@stat.ox.ac.uk> [aut]",
+    "Francois Caron <francois.caron@stat.ox.ac.uk> [aut]",
     "Marc Fuentes <marc.fuentes@inria.fr> [aut]",
     "@Biips_OWNER@ [cph]"))
 Contact: @Biips_CONTACT@

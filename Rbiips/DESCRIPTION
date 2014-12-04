@@ -1,10 +1,10 @@
 Package: Rbiips
 Version: 0.10.0
-Date: 2014-11-24
+Date: 2014-12-03
 Title: Bayesian inference with interacting particle systems
 Authors@R: as.person(c(
     "Adrien Todeschini <adrien.todeschini@inria.fr> [aut, cre]",
-    "Fran\\u00e7ois Caron <francois.caron@stat.ox.ac.uk> [aut]",
+    "Francois Caron <francois.caron@stat.ox.ac.uk> [aut]",
     "Marc Fuentes <marc.fuentes@inria.fr> [aut]",
     "Inria [cph]"))
 Contact: biips-project <biips-project@lists.gforge.inria.fr>

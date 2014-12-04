@@ -60,7 +60,7 @@
 #'
 #' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' cat(readLines(dotfile), sep = '\n')
+#' #cat(readLines(dotfile), sep = '\n')
 biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet = FALSE) {
   if (missing(file)) {
     stop("Model file name missing")

@@ -1,4 +1,4 @@
-#' Bayesian inference with interacting particle systems.
+#' Bayesian inference with interacting particle systems
 #'
 #' \pkg{Rbiips} is an interface with the \href{http://alea.bordeaux.inria.fr/biips}{Biips} C++ libraries for analysing
 #' Bayesian graphical models using advanced particle methods.
