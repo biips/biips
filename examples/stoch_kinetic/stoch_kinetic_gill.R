@@ -187,3 +187,42 @@ legend('topright', leg=c('95% credible interval (prey)',
        pch=c(15,NA,NA,15,NA,NA),
        lty=c(NA,1,2,NA,1,2),
        pt.cex=c(2,1,1,2,1,1), bty='n')
+
+
+#' #### Marginal filtering and smoothing density
+#+ fig.cap='SMC: Marginal posteriors'
+kde_smc = biips_density(out_smc)
+time_index = c(5, 10, 15)
+par(mfrow=c(2,2))
+for (k in 1:length(time_index)) {
+  tk = time_index[k]
+  plot(kde_smc$x[[2,tk]], col=c('blue', 'red'), lwd=2,
+       xlab=paste('x[2,', tk,']', sep=''), ylab='Posterior density',
+       main=paste('Predator at t=', tk, sep=''))
+  points(data$x_true[tk], 0, col='green', pch=8, lwd=2)
+}
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
+legend('center', leg=c('Filtering density', 'Smoothing density', 'True value'),
+       col=c('blue', 'red', 'green'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
+       bty='n')
+par(mfrow=c(1,1))
+
+
+#' #### Marginal filtering and smoothing probability mass
+#+ fig.cap='SMC: Marginal posteriors'
+table_smc = biips_table(out_smc)
+time_index = c(5, 10, 15)
+par(mfrow=c(2,2))
+for (k in 1:length(time_index)) {
+  tk = time_index[k]
+  plot(table_smc$x[[2,tk]], col=c('blue', 'red'), lwd=2,
+       xlab=paste('x[2,', tk,']', sep=''), ylab='Posterior probability mass',
+       main=paste('Predator at t=', tk, sep=''))
+  points(data$x_true[tk], 0, col='green', pch=8, lwd=2)
+}
+plot(0, type='n', bty='n', xaxt='n', yaxt='n', xlab="", ylab="")
+legend('center', leg=c('Filtering probability mass', 'Smoothing probability mass', 'True value'),
+       col=c('blue', 'red', 'green'), pch=c(NA,NA,8), lty=c(1,1,NA), lwd=2,
+       bty='n')
+par(mfrow=c(1,1))
+
