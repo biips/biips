@@ -154,7 +154,7 @@ param_names = c('logc[1]', 'logc[2]', 'logc[3]') # names of the variables update
 latent_names = c('x') # names of the variables updated with SMC and that need to be monitored
 
 #' #### Init PMMH
-obj_pmmh = biips_pmmh_init(model, param_names, inits=list(-1, -6, -1),
+obj_pmmh = biips_pmmh_init(model, param_names, inits=list(-1, -5, -1),
                            latent_names=latent_names) # creates a pmmh object
 
 #' #### Run PMMH
