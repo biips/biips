@@ -18,7 +18,7 @@ function biips_print_dot(model, file)
 % 
 % dotfile = 'hmm.dot';
 % biips_print_dot(model, dotfile);
-% type(dotfile);
+% %type(dotfile);
 %--------------------------------------------------------------------------
 
 % Biips Project - Bayesian Inference with interacting Particle Systems
