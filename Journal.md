@@ -1,3 +1,7 @@
+Adrien le 01/12/2014 :
+========================
+- [ ] raccourcir exemples dans doc matbiips et rbiips
+
 Adrien le 24/11/2014 :
 ========================
 - [ ] vérifier que la valeur est dans le support avant de calculer pdf
