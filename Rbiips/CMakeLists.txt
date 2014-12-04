@@ -201,7 +201,7 @@ add_custom_target (${PKG_NAME}_rd2pdf
 # add build_site target
 add_custom_target (${PKG_NAME}_build_site
     DEPENDS ${PKG_NAME}_extract_src
-    COMMAND ${R_EXECUTABLE} ${R_FLAGS} -e "staticdocs::build_site('.')"
+    COMMAND ${R_EXECUTABLE} --vanilla -e "staticdocs::build_site('.')"
     COMMENT "Build ${PKG_NAME} documentation site"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PKG_NAME}_src/${PKG_NAME}
   	VERBATIM

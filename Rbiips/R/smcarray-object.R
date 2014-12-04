@@ -48,7 +48,7 @@
 #' @param object,x a \code{smcarray}, \code{smcarray.fsb} or
 #'   \code{smcarray.fsb.list} object.
 #' @param ... additional arguments to be passed to the default methods. See
-#'   \code{\link[stats]{density}}, \code{\link{table}}
+#'   \code{\link[stats]{density}}, \code{\link[base]{table}}
 #'
 #' @return The methods apply identically to \code{smcarray}, \code{smcarray.fsb} or
 #'   \code{smcarray.fsb.list} objects and return a named list with the same

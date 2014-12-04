@@ -2,7 +2,7 @@ require(rmarkdown)
 
 root_dir = "~/workspace/biips-git/examples"
 
-output_dir = "~/Dropbox/Biips/biips-share/website/examples"
+output_dir = "~/Dropbox/Biips/biips-share/website/examples_linux"
 
 clear_cache = TRUE
 
