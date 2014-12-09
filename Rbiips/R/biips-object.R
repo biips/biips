@@ -38,9 +38,11 @@
 #'
 #' biips_nodes(model)
 #'
+#' \dontrun{
 #' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' #cat(readLines(dotfile), sep = '\n')
+#' cat(readLines(dotfile), sep = '\n')
+#' }
 #'
 #' biips_build_sampler(model, proposal = 'prior')
 #' biips_nodes(model, type = 'stoch', observed = FALSE)
@@ -118,23 +120,22 @@ biips_nodes <- function(object, ...) UseMethod("biips_nodes")
 #'
 #' @return The method \code{biips_nodes} returns a \code{data.frame} with a row
 #'   for each node of the graphical model sorted in a topological order with the
-#'   following columns: \itemize{
-#'     \item \code{id}: integer. node ids.
-#'     \item \code{name}: string. node names.
-#'     \item \code{type}: string. node types (\code{'const'}, \code{'logic'} or
-#'        \code{'stoch'}).
-#'     \item \code{observed}: logical. \code{TRUE} if the node is observed.
-#'     \item \code{discrete}: logical. \code{TRUE} if the node is discrete.
+#'   following columns:
+#'   \item{id}{integer. node ids.}
+#'   \item{name}{string. node names.}
+#'   \item{type}{string. node types (\code{'const'}, \code{'logic'} or
+#'     \code{'stoch'}).}
+#'   \item{observed}{logical. \code{TRUE} if the node is observed.}
+#'   \item{discrete}{logical. \code{TRUE} if the node is discrete.}
 #'
 #'   If the function is called after the sampler is built (by calling
 #'   \code{\link{biips_build_sampler}} or \code{\link{biips_smc_samples}}), it
 #'   will also contain the additional variables:
 #'
-#'     \item \code{iteration}: integer. node sampling iteration of unobserved nodes,
-#'       starting at 0. \code{NA} if the node if observed
-#'     \item \code{sampler}: string. node sampler name for stochastic unobserved
-#'     nodes. An empty string for other types of nodes.
-#'   }
+#'   \item{iteration}{integer. node sampling iteration of unobserved nodes,
+#'     starting at 0. \code{NA} if the node if observed.}
+#'   \item{sampler}{string. node sampler name for stochastic unobserved
+#'     nodes. An empty string for other types of nodes. }
 biips_nodes.biips <- function(object, type, observed, ...) {
   stopifnot(is.biips(object))
 

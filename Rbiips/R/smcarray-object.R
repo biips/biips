@@ -22,28 +22,37 @@
 #' members as the input object.
 #'
 #' @details Assuming \code{dim} is the dimension of the monitored variable, a
-#' \code{smcarray} object is a list with the members: \itemize{ \item
-#' \code{values}: array of dimension \code{c(dim, n_part)} with the values of
-#' the particles. \item \code{weights}: array of dimension \code{c(dim, n_part)}
-#' with the weights of the particles. \item \code{ess}: array of dimension
-#' \code{dim} with Effective Sample Sizes of the particles set. \item
-#' \code{discrete}: array of dimension \code{dim} with logicals indicating
-#' discreteness of each component. \item \code{iterations}: array of dimension
-#' \code{dim} with sampling iterations of each component. \item
-#' \code{conditionals}: lists of the contitioning variables (observations). Its
-#' value is: \itemize{ \item for filtering: a list of dimension \code{dim}. each
-#' member is a character vector with the respective conditioning variables of
-#' the node array component. \item for smoothing/backward_smoothing: a character
-#' vector, the same for all the components of the node array. } \item
-#' \code{name}: string with the name of the variable. \item \code{lower}: vector
-#' with the lower bounds of the variable. \item \code{upper}: vector with the
-#' upper bounds of the variable. \item \code{type}: string with the type of
-#' monitor (\code{'filtering'}, \code{'smoothing'} or
-#' \code{'backward_smoothing'}). }
+#'   \code{smcarray} object is a list with the members:
+#'   \describe{
+#'     \item{values}{array of dimension \code{c(dim, n_part)} with the values of
+#'       the particles.}
+#'     \item{weights}{array of dimension \code{c(dim, n_part)} with the weights
+#'       of the particles.}
+#'     \item{ess}{array of dimension \code{dim} with Effective Sample Sizes of
+#'       the particles set.}
+#'     \item{discrete}{array of dimension \code{dim} with logicals indicating
+#'       discreteness of each component.}
+#'     \item{iterations}{array of dimension \code{dim} with sampling iterations
+#'       of each component.}
+#'     \item{conditionals}{lists of the contitioning variables (observations). Its
+#'       value is:
+#'       \itemize{
+#'         \item for filtering: a list of dimension \code{dim}. each member is a
+#'           character vector with the respective conditioning variables of
+#'           the node array component.
+#'         \item for smoothing/backward_smoothing: a character vector, the same
+#'           for all the components of the node array.
+#'       }}
+#'     \item{name}{string with the name of the variable.}
+#'     \item{lower}{vector with the lower bounds of the variable.}
+#'     \item{upper}{vector with the upper bounds of the variable.}
+#'     \item{type}{string with the type of monitor (\code{'filtering'},
+#'       \code{'smoothing'} or \code{'backward_smoothing'}).}
+#'   }
 #'
-#' For instance, if \code{out_smc} is a \code{smcarray.fsb.list} object, one can
-#' access the values of the smoothing particles for the variable \code{'x'}
-#' with: \code{out_smc$x$s$values}.
+#'   For instance, if \code{out_smc} is a \code{smcarray.fsb.list} object, one can
+#'   access the values of the smoothing particles for the variable \code{'x'}
+#'   with: \code{out_smc$x$s$values}.
 #'
 #' @param object,x a \code{smcarray}, \code{smcarray.fsb} or
 #'   \code{smcarray.fsb.list} object.
@@ -273,17 +282,16 @@ biips_summary <- function(object, ...) UseMethod("biips_summary")
 #'   statistics. The output innermost members are objects of class
 #'   \code{summary.smcarray}. Assuming \code{dim} is the dimension of the
 #'   variable, the \code{summary.smcarray} object is a list with the following
-#'   members: \itemize{
-#'     \item \code{mean}: array of size \code{dim}. The mean if \code{order>=1}.
-#'     \item \code{var}: array of size \code{dim}. The variance, if \code{order>=2}.
-#'     \item \code{skew}: array of size \code{dim}. The skewness, if \code{order>=3}.
-#'     \item \code{kurt}: array of size \code{dim}. The kurtosis, if \code{order>=4}.
-#'     \item \code{probs}: vector of quantile probabilities.
-#'     \item \code{quant}: list of arrays of size \code{dim} for each probability level
-#'       in \code{probs}. The quantile values, if \code{probs} is not empty.
-#'     \item \code{mode}: array of size \code{dim}. The most frequent values for
-#'       discrete components.
-#'   }
+#'   members:
+#'   \item{mean}{array of size \code{dim}. The mean if \code{order>=1}.}
+#'   \item{var}{array of size \code{dim}. The variance, if \code{order>=2}.}
+#'   \item{skew}{array of size \code{dim}. The skewness, if \code{order>=3}.}
+#'   \item{kurt}{array of size \code{dim}. The kurtosis, if \code{order>=4}.}
+#'   \item{probs}{vector of quantile probabilities.}
+#'   \item{quant}{list of arrays of size \code{dim} for each probability level
+#'       in \code{probs}. The quantile values, if \code{probs} is not empty.}
+#'   \item{mode}{array of size \code{dim}. The most frequent values for
+#'       discrete components.}
 biips_summary.smcarray <- function(object, probs = c(), order = ifelse(mode, 0, 1),
   mode = all(object$discrete), ...) {
   stopifnot(is.smcarray(object))

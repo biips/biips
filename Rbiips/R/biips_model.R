@@ -18,13 +18,11 @@
 #'
 #'   An object of class \code{biips} is a list of functions that share a common
 #'   environment. The functions can be used to query information on the model.
-#'   \itemize{
-#'     \item \code{ptr()}: Get an external pointer to the compiled model object.
-#'     \item \code{file()}: Get a string. filename of the BUGS model
-#'     \item \code{data()}: Get a named list of the original data of the model.
-#'     \item \code{model()}: Get a character vector. BUGS language definition of the model.
-#'     \item \code{recompile()}: Recompile the model using the original data set.
-#'  }
+#'   \item{ptr()}{Get an external pointer to the compiled model object.}
+#'   \item{file()}{Get a string. filename of the BUGS model.}
+#'   \item{data()}{Get a named list of the original data of the model.}
+#'   \item{model()}{Get a character vector. BUGS language definition of the model.}
+#'   \item{recompile()}{Recompile the model using the original data set.}
 #' @keywords models graphs
 #' @export
 #' @seealso \code{\link{biips_variable_names}}, \code{\link{biips_nodes}},
@@ -58,9 +56,11 @@
 #'
 #' biips_nodes(model)
 #'
+#' \dontrun{
 #' dotfile <- 'hmm.dot'
 #' biips_print_dot(model, dotfile)
-#' #cat(readLines(dotfile), sep = '\n')
+#' cat(readLines(dotfile), sep = '\n')
+#' }
 biips_model <- function(file, data = parent.frame(), sample_data = TRUE, quiet = FALSE) {
   if (missing(file)) {
     stop("Model file name missing")

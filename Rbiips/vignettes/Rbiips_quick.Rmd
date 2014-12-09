@@ -83,8 +83,8 @@ biips_variable_names(model)
 
 biips_nodes(model)
 
-dotfile <- 'hmm.dot'
-biips_print_dot(model, dotfile)
+# dotfile <- 'hmm.dot'
+# biips_print_dot(model, dotfile)
 # cat(readLines(dotfile), sep = '\n')
 ```
 

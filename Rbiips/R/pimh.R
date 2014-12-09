@@ -24,14 +24,12 @@
 #'   An object of class \code{pimh} is a list of functions that share a common
 #'   environment. These functions are meant for internal purpose only. They are
 #'   used to query information on the current state of the algorithm.
-#'   \itemize{
-#'     \item \code{model()}: Get the \code{\link{biips}} model object.
-#'     \item \code{variable_names()}: Get a character vector with the names of
-#'       the monitored variables.
-#'     \item \code{sample(sample)}: Get and set the current sample.
-#'     \item \code{log_marg_like(log_marg_like)}: Get and set the current value
-#'       of the log marginal likelihood.
-#'   }
+#'   \item{model()}{Get the \code{\link{biips}} model object.}
+#'   \item{variable_names()}{Get a character vector with the names of
+#'       the monitored variables.}
+#'   \item{sample(sample)}{Get and set the current sample.}
+#'   \item{log_marg_like(log_marg_like)}{Get and set the current value
+#'       of the log marginal likelihood.}
 #'
 #' @seealso \code{\link{biips_model}}, \code{\link{biips_pimh_update}},
 #'   \code{\link{biips_pimh_samples}}
@@ -239,10 +237,13 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'
 #' @details The \code{output} string arguments can be used to query additional
 #'   members in the \code{\link{mcmcarray.list}} output. If \code{output}
-#'   contains: \itemize{ \code{l}: \code{log_marg_like}. \code{\link{mcmcarray}}
-#'   with log marginal likelihood estimates over iterations. \item \code{a}:
-#'   \code{info$accept_rate}. \code{\link{mcmcarray}} with acceptance rate over
-#'   iterations. }
+#'   contains:
+#'   \describe{
+#'     \item{l}{returns member \code{log_marg_like}. \code{\link{mcmcarray}}
+#'       with log marginal likelihood estimates over iterations.}
+#'     \item{a}{returns member \code{info$accept_rate}. \code{\link{mcmcarray}} with acceptance rate over
+#'       iterations.}
+#'   }
 #'
 #' @return The methods \code{biips_pimh_update} and \code{biips_pimh_update}
 #'   return an object of class \code{\link{mcmcarray.list}}.
@@ -258,10 +259,11 @@ biips_pimh_update <- function(object, ...) UseMethod("biips_pimh_update")
 #'   \code{\link{mcmcarray}} objects for different variables. Assuming \code{dim}
 #'   is the dimension of the monitored variable, the \code{\link{mcmcarray}}
 #'   object is an array of dimension \code{c(dim, n_iter)} with the following
-#'   attributes (accessible with \code{\link[base]{attr}}): \itemize{
-#'     \item{name}: string with the name of the variable.
-#'     \item{lower}: vector with the lower bounds of the variable.
-#'     \item{upper}: vector with the upper bounds of the variable.
+#'   attributes (accessible with \code{\link[base]{attr}}):
+#'   \describe{
+#'     \item{name}{string with the name of the variable.}
+#'     \item{lower}{vector with the lower bounds of the variable.}
+#'     \item{upper}{vector with the upper bounds of the variable.}
 #'   }
 #'
 #' @examples

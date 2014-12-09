@@ -184,15 +184,13 @@ print.mcmcarray.list <- function(x, ...) {
 #' @return The method \code{biips_summary} returns univariate marginal
 #'   statistics. The output innermost members are objects of class
 #'   \code{summary.mcmcarray}, \emph{i.e.} lists with members:
-#'   \itemize{
-#'     \item \code{mean}: if \code{order>=1}.
-#'     \item \code{var}: variance, if \code{order>=2}.
-#'     \item \code{skew}: skewness, if \code{order>=3}.
-#'     \item \code{kurt}: kurtosis, if \code{order>=4}.
-#'     \item \code{probs}: vector of quantile probabilities.
-#'     \item \code{quant}: list of quantile values, if \code{probs} is not empty.
-#'     \item \code{mode}: most frequent values for discrete components.
-#'   }
+#'   \item{mean}{mean, if \code{order>=1}.}
+#'   \item{var}{variance, if \code{order>=2}.}
+#'   \item{skew}{skewness, if \code{order>=3}.}
+#'   \item{kurt}{kurtosis, if \code{order>=4}.}
+#'   \item{probs}{vector of quantile probabilities.}
+#'   \item{quant}{list of quantile values, if \code{probs} is not empty.}
+#'   \item{mode}{most frequent values for discrete components.}
 biips_summary.mcmcarray <- function(object, probs = c(), order = ifelse(mode, 0,
   1), mode = all(object == as.integer(object)), ...) {
   stopifnot(is.mcmcarray(object))
