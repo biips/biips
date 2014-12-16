@@ -1,21 +1,16 @@
 Biips
 =============================================================================
-**Biips** is a general software for **Bayesian inference with interacting particle systems**.
 
 - Version:       @Biips_VERSION@
 - Last modified: @Biips_DATE@
-- Maintainer:    Adrien Todeschini @Biips_CONTACT_EMAIL@
+- Contact:       Biips project team <@Biips_CONTACT_EMAIL@>
+- Maintainer:    [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) <adrien.todeschini@inria.fr>
 - License:       @Biips_LICENSE@
 - Website:       <@Biips_URL@>
 
-The project has started on Dec. 2009 and is supported by the [ALEA team](http://alea.bordeaux.inria.fr/) at [Inria Bordeaux](http://www.inria.fr/centre/bordeaux).
-Its main objective is to popularize the use of particle methods to researchers, practitioners and students by developing a user-friendly software similar to [BUGS](http://www.mrc-bsu.cam.ac.uk/software/bugs/)/[JAGS](http://mcmc-jags.sourceforge.net/).
-
-Overview
------------------------------------------------------------------------------
 @Biips_DESCRIPTION@
 
-More context
+Context
 -----------------------------------------------------------------------------
 Bayesian inference consists in approximating an unknown parameter dependent conditional probability law given a set of observations. A large number of problems, e.g. non-supervised classification, filtering, etc., can be addressed having as basis the aforementioned formulation. The underlying probability law, while not calculable in analytical manner for the general case, can be approximated by using Monte Carlo Markov Chain (MCMC) methods. These methods are popular for bayesian inference thanks to BUGS software and the WinBUGS graphical interface.
 
@@ -43,7 +38,7 @@ Roadmap
 
 Contact
 -----------------------------------------------------------------------------
-To contact us with non-public matters, please write to <biips-project@lists.gforge.inria.fr>.
+To contact us with non-public matters, please write to <@Biips_CONTACT_EMAIL@>.
 Otherwise you can use the discusssion forum.
 
 Getting Help
@@ -66,7 +61,7 @@ License
 -----------------------------------------------------------------------------
 Biips is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
 
-The source code is freely accessible at [GForge Inria](@Biips_SOURCES_URL@).
+The source code is hosted at [GForge Inria](@Biips_SOURCES_URL@).
 
 Authors
 -----------------------------------------------------------------------------
