@@ -277,26 +277,31 @@ biips_pmmh_init <- function(model, param_names, latent_names = c(), inits = list
       if (is.finite(L)) {
         if (is.finite(U)) {
           # lower-upper bounded support: logit transform
-          rw$transform[[k]] <- function(x) log((x - L)/(U - x))  # direct transformation
-          rw$transform_inv[[k]] <- function(y) L + (U - L)/(1 + exp(-y))  # inverse transformation
-          rw$transform_lderiv[[k]] <- function(x) log(U - L) - log(x - L) -
-          log(U - x)  # log derivative
+          rw$transform[[k]] <- function(l,u){ l; u;
+                                              function(x) log((x - l)/(u - x))
+                                              }(L, U)  # direct transformation
+          rw$transform_inv[[k]] <- function(l,u){ l; u;
+                                                  function(y) l + (u - l)/(1 + exp(-y))
+                                                  }(L, U)  # inverse transformation
+          rw$transform_lderiv[[k]] <- function(l,u){ l; u;
+                                                    function(x) log(u - l) - log(x - l) - log(u - x)
+                                                    }(L, U)  # log derivative
         } else {
           if (U < 0)
           stop("upper can not be -Inf")
           # lower bounded support: -log transform
-          rw$transform[[k]] <- function(x) log(x - L)
-          rw$transform_inv[[k]] <- function(y) L + exp(y)
-          rw$transform_lderiv[[k]] <- function(x) -log(x - L)
+          rw$transform[[k]] <- function(l){ l; function(x) log(x - l) }(L)
+          rw$transform_inv[[k]] <- function(l){ l; function(y) l + exp(y) }(L)
+          rw$transform_lderiv[[k]] <- function(l){ l; function(x) -log(x - l) }(L)
         }
       } else {
         if (L > 0)
           stop("lower can not be +Inf")
         if (is.finite(U)) {
           # upper bounded support: log transform
-          rw$transform[[k]] <- function(x) log(U - x)
-          rw$transform_inv[[k]] <- function(y) U - exp(y)
-          rw$transform_lderiv[[k]] <- function(x) -log(U - x)
+          rw$transform[[k]] <-  function(u){ u; function(x) log(u - x) }(U)
+          rw$transform_inv[[k]] <-  function(u){ u; function(y) u - exp(y) }(U)
+          rw$transform_lderiv[[k]] <-  function(u){ u; function(x) -log(u - x) }(U)
         } else {
           if (U < 0)
           stop("upper can not be -Inf")
