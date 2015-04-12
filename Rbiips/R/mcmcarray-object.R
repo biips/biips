@@ -16,7 +16,7 @@
 #' @param object,x a \code{mcmcarray} or \code{mcmcarray.list} object.
 #' @param ... additional arguments to be passed to the default methods. See
 #'   \code{\link[stats]{density}}, \code{\link[graphics]{hist}},
-#'   \code{\link{table}}
+#'   \code{\link[base]{table}}
 #'
 #' @return The methods apply identically to \code{mcmcarray} or
 #'   \code{mcmcarray.list} objects and return a named list with the same named
