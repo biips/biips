@@ -37,3 +37,10 @@ install(DIRECTORY
 	PATTERN .svn EXCLUDE
 	PATTERN *.IN EXCLUDE
 )
+
+# add files to parent scope Core_SOURCES list
+file(GLOB_RECURSE _src RELATIVE ${CMAKE_SOURCE_DIR} *.hpp *.hh *.h *.cpp *.cc *.c)
+foreach(_f ${_src})
+    configure_file(${CMAKE_SOURCE_DIR}/${_f} ${CMAKE_BINARY_DIR}/${_f} COPYONLY)
+endforeach()
+set(Core_SOURCES ${Core_SOURCES} ${_src} PARENT_SCOPE)

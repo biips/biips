@@ -1,20 +1,15 @@
 ====== Biips ======
 
-**Biips** is a general software for **Bayesian inference with interacting particle systems**.
-
-  * Version: 0.10.0
-  * Last modified: 2014-12-03
-  * Maintainer: Adrien Todeschini biips-project@lists.gforge.inria.fr
+  * Version: 0.10.1
+  * Last modified: 2015-06-25
+  * Contact: Biips project team <biips-project@lists.gforge.inria.fr>
+  * Maintainer: [[https://sites.google.com/site/adrientodeschini/|Adrien Todeschini]] <adrien.todeschini@inria.fr>
   * License: GPL-3
   * Website: http://alea.bordeaux.inria.fr/biips
 
-The project has started on Dec. 2009 and is supported by the [[http://alea.bordeaux.inria.fr/|ALEA team]] at [[http://www.inria.fr/centre/bordeaux|Inria Bordeaux]]. Its main objective is to popularize the use of particle methods to researchers, practitioners and students by developing a user-friendly software similar to [[http://www.mrc-bsu.cam.ac.uk/software/bugs/|BUGS]]/[[http://mcmc-jags.sourceforge.net/|JAGS]].
-
-===== Overview =====
-
 Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods. It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine. It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
 
-===== More context =====
+===== Context =====
 
 Bayesian inference consists in approximating an unknown parameter dependent conditional probability law given a set of observations. A large number of problems, e.g. non-supervised classification, filtering, etc., can be addressed having as basis the aforementioned formulation. The underlying probability law, while not calculable in analytical manner for the general case, can be approximated by using Monte Carlo Markov Chain (MCMC) methods. These methods are popular for bayesian inference thanks to BUGS software and the WinBUGS graphical interface.
 
@@ -60,7 +55,7 @@ The Biips source code is hosted on a git repository at GForge Inria. If you want
 
 Biips is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
 
-The source code is freely accessible at [[https://gforge.inria.fr/projects/biips/|GForge Inria]].
+The source code is hosted at [[https://gforge.inria.fr/projects/biips/|GForge Inria]].
 
 ===== Authors =====
 

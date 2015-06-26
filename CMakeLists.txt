@@ -236,6 +236,9 @@ if (WIN32)
     ${CMAKE_SOURCE_DIR}/compiler/win32)
 endif()
 
+set(Core_SOURCES)
+set(Base_SOURCES)
+set(Compiler_SOURCES)
 
 find_package(Zip)
 # ==============================

@@ -29,6 +29,19 @@ foreach(f ${PKG_FILES})
     set(PKG_BIN_FILES ${PKG_BIN_FILES} ${PKG_BIN_DIR}/${f})
 endforeach()
 
+
+# add command to copy files in Core_SOURCES, Base_SOURCES and Compiler_SOURCES to PKG_BIN_DIR/src
+# and add the output files to the list PKG_BIN_FILES
+foreach(f ${Core_SOURCES} ${Base_SOURCES} ${Compiler_SOURCES})
+    add_custom_command(OUTPUT ${PKG_BIN_DIR}/src/${f}
+        DEPENDS ${CMAKE_BINARY_DIR}/${f}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${f} ${PKG_BIN_DIR}/src/${f}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Copying ${f} to ${PKG_NAME}/src package dir"
+    )
+    set(PKG_BIN_FILES ${PKG_BIN_FILES} ${PKG_BIN_DIR}/src/${f})
+endforeach()
+
 # Generate configuration scripts
 if (NOT WIN32)
     # configure configure.ac file
@@ -201,7 +214,7 @@ add_custom_target (${PKG_NAME}_rd2pdf
 # add build_site target
 add_custom_target (${PKG_NAME}_build_site
     DEPENDS ${PKG_NAME}_extract_src
-    COMMAND ${R_EXECUTABLE} --vanilla -e "staticdocs::build_site('.')"
+    COMMAND ${R_EXECUTABLE} --vanilla -e "staticdocs::build_site('.', tracking_id = 'UA-31640193-1')"
     COMMENT "Build ${PKG_NAME} documentation site"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PKG_NAME}_src/${PKG_NAME}
   	VERBATIM
