@@ -252,6 +252,26 @@ biips_pmmh_init <- function(model, param_names, latent_names = c(), inits = list
     transform_inv = list(), transform_lderiv = list())
   # we start learning the covariance matrix after n_cov iterations
 
+  ## helper transformation functions
+  # lower-upper bounded support: logit transform
+  tr_logit <- function(l,u){ l; u;
+    function(x) log((x - l)/(u - x))
+  } # direct transformation
+  tr_logit_inv <- function(l,u){ l; u;
+    function(y) l + (u - l)/(1 + exp(-y))
+  } # inverse transformation
+  tr_logit_lderiv <- function(l,u){ l; u;
+    function(x) log(u - l) - log(x - l) - log(u - x)
+  } # log derivative
+  # lower bounded support: log transform
+  tr_log <- function(l){ l; function(x) log(x - l) }
+  tr_log_inv <- function(l){ l; function(y) l + exp(y) }
+  tr_log_lderiv <- function(l){ l; function(x) -log(x - l) }
+  # upper bounded support: -log transform
+  tr_mlog <-  function(u){ u; function(x) log(u - x) }
+  tr_mlog_inv <-  function(u){ u; function(y) u - exp(y) }
+  tr_mlog_lderiv <-  function(u){ u; function(x) -log(u - x) }
+
   ## Define variable transformations
   k <- 0
   for (i in 1:n_param) {
@@ -277,34 +297,28 @@ biips_pmmh_init <- function(model, param_names, latent_names = c(), inits = list
       if (is.finite(L)) {
         if (is.finite(U)) {
           # lower-upper bounded support: logit transform
-          rw$transform[[k]] <- function(l,u){ l; u;
-                                              function(x) log((x - l)/(u - x))
-                                              }(L, U)  # direct transformation
-          rw$transform_inv[[k]] <- function(l,u){ l; u;
-                                                  function(y) l + (u - l)/(1 + exp(-y))
-                                                  }(L, U)  # inverse transformation
-          rw$transform_lderiv[[k]] <- function(l,u){ l; u;
-                                                    function(x) log(u - l) - log(x - l) - log(u - x)
-                                                    }(L, U)  # log derivative
+          rw$transform[[k]] <- tr_logit(L, U) # direct transformation
+          rw$transform_inv[[k]] <- tr_logit_inv(L, U) # inverse transformation
+          rw$transform_lderiv[[k]] <- tr_logit_lderiv(L, U) # log derivative
         } else {
           if (U < 0)
-          stop("upper can not be -Inf")
-          # lower bounded support: -log transform
-          rw$transform[[k]] <- function(l){ l; function(x) log(x - l) }(L)
-          rw$transform_inv[[k]] <- function(l){ l; function(y) l + exp(y) }(L)
-          rw$transform_lderiv[[k]] <- function(l){ l; function(x) -log(x - l) }(L)
+            stop("upper can not be -Inf")
+          # lower bounded support: log transform
+          rw$transform[[k]] <- tr_log(L)
+          rw$transform_inv[[k]] <- tr_log_inv(L)
+          rw$transform_lderiv[[k]] <- tr_log_lderiv(L)
         }
       } else {
         if (L > 0)
           stop("lower can not be +Inf")
         if (is.finite(U)) {
-          # upper bounded support: log transform
-          rw$transform[[k]] <-  function(u){ u; function(x) log(u - x) }(U)
-          rw$transform_inv[[k]] <-  function(u){ u; function(y) u - exp(y) }(U)
-          rw$transform_lderiv[[k]] <-  function(u){ u; function(x) -log(u - x) }(U)
+          # upper bounded support: -log transform
+          rw$transform[[k]] <-  tr_mlog(U)
+          rw$transform_inv[[k]] <-  tr_mlog_inv(U)
+          rw$transform_lderiv[[k]] <-  tr_mlog_lderiv(U)
         } else {
           if (U < 0)
-          stop("upper can not be -Inf")
+            stop("upper can not be -Inf")
           # upper bounded support: identity
           rw$transform[[k]] <- function(x) x
           rw$transform_inv[[k]] <- function(y) y
@@ -321,7 +335,7 @@ biips_pmmh_init <- function(model, param_names, latent_names = c(), inits = list
       lderiv = rw$transform_lderiv)
 
     # concatenate all variables in a vector always in the order of rw$dim
-    sample_vec <- c(unlist(sample))
+    sample_vec <- as.list(c(unlist(sample)))
 
     out_vec <- mapply(FUN = function(x, fun) fun(x), sample_vec, funlist)
 
