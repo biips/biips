@@ -6,6 +6,21 @@ PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/c
 ## Use the R_HOME indirection to support installations of multiple R version
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @BIIPS_LD_FLAGS@ @RBIIPS_LINK_FLAGS@
 
+.PHONY: all core base compiler
+
+all: $(SHLIB)
+$(SHLIB): core base compiler
+
+core:
+	(cd core && $(MAKE))
+
+base: core
+	(cd base && $(MAKE))
+
+compiler: core base
+	(cd compiler && $(MAKE))
+
+
 ## As an alternative, one can also add this code in a file 'configure'
 ##
 ##    PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
