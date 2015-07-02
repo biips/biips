@@ -10,11 +10,11 @@ Authors@R: as.person(c(
 Contact: @Biips_CONTACT@
 Depends: R (>= @R_VERSION_REQUIRED@), Rcpp (>= @Rcpp_VERSION@), stats, graphics
 Suggests: knitr
-SystemRequirements: For Linux only: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
+SystemRequirements: For Linux only: boost (>= @Boost_VERSION_REQUIRED@)
 Description:@Biips_DESCRIPTION@
 License: @Biips_LICENSE@
 Copyright: Copyright (C) @Biips_OWNER@, @Biips_COPYRIGHT_YEAR@
 URL: @Biips_URL@
 BugReports: @Biips_BUGREPORTS@
-LinkingTo: Rcpp (>= @Rcpp_VERSION@)
+LinkingTo: Rcpp (>= @Rcpp_VERSION@), BH (>= @Boost_VERSION_REQUIRED@)
 VignetteBuilder: knitr

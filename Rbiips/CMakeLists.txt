@@ -8,7 +8,7 @@ set(PKG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PKG_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME})
 
 # list of the package files to be copied in PKG_BIN_DIR
-set(PKG_FILES ${PKG_FILES} cleanup configure.ac configure COPYING DESCRIPTION NAMESPACE NOTICES README)
+set(PKG_FILES ${PKG_FILES} cleanup COPYING DESCRIPTION NAMESPACE NOTICES README)
 
 # add subdirectories
 add_subdirectory(R)
@@ -30,9 +30,9 @@ foreach(f ${PKG_FILES})
 endforeach()
 
 
-# add command to copy files in Core_SOURCES, Base_SOURCES and Compiler_SOURCES to PKG_BIN_DIR/src
+# add command to copy files in Core_INCLUDE_FILES, Base_INCLUDE_FILES and Compiler_INCLUDE_FILES to PKG_BIN_DIR/src
 # and add the output files to the list PKG_BIN_FILES
-foreach(f ${Core_SOURCES} ${Base_SOURCES} ${Compiler_SOURCES})
+foreach(f ${Core_INCLUDE_FILES} ${Base_INCLUDE_FILES} ${Compiler_INCLUDE_FILES})
     add_custom_command(OUTPUT ${PKG_BIN_DIR}/src/${f}
         DEPENDS ${CMAKE_BINARY_DIR}/${f}
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${f} ${PKG_BIN_DIR}/src/${f}
@@ -42,44 +42,18 @@ foreach(f ${Core_SOURCES} ${Base_SOURCES} ${Compiler_SOURCES})
     set(PKG_BIN_FILES ${PKG_BIN_FILES} ${PKG_BIN_DIR}/src/${f})
 endforeach()
 
-# Generate configuration scripts
-if (NOT WIN32)
-    # configure configure.ac file
-    configure_file (configure.ac.IN
-      ${CMAKE_CURRENT_SOURCE_DIR}/configure.ac
-    	@ONLY
-    	NEWLINE_STYLE UNIX
+# add command to copy files in Core_SOURCE_FILES, Base_SOURCE_FILES and Compiler_SOURCE_FILES to PKG_BIN_DIR/src
+# and add the output files to the list PKG_BIN_FILES
+foreach(f ${Core_SOURCE_FILES} ${Base_SOURCE_FILES} ${Compiler_SOURCE_FILES})
+#    get_filename_component(fn ${f} NAME)
+    add_custom_command(OUTPUT ${PKG_BIN_DIR}/src/${f}
+        DEPENDS ${CMAKE_BINARY_DIR}/${f}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${f} ${PKG_BIN_DIR}/src/${f}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Copying ${f} to ${PKG_NAME}/src package dir"
     )
-
-  # find autoconf
-  find_program (AUTOCONF autoconf)
-
-  if (${AUTOCONF} STREQUAL AUTOCONF-NOTFOUND)
-		message (SEND_ERROR "autoconf not found")
-  else ()
-	    # Copy configure.ac to bindir
-	    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.ac
-		    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure.ac
-		    COMMAND ${CMAKE_COMMAND} -E copy configure.ac ${CMAKE_CURRENT_BINARY_DIR}
-		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		    COMMENT "Copying configure.ac to binary dir"
-	    )
-	    # Autoconf takes place in binary dir to avoid polluting source dir with output files
-	    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/configure
-		    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/configure.ac
-	        COMMAND ${AUTOCONF}
-		    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		    COMMENT "Autoconf generating configure file"
-	    )
-	    # Copy configure to sources
-	    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/configure
-		    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/configure
-		    COMMAND ${CMAKE_COMMAND} -E copy configure ${CMAKE_CURRENT_SOURCE_DIR}
-		    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		    COMMENT "Copying configure to source dir"
-	    )
-  endif ()
-endif ()
+    set(PKG_BIN_FILES ${PKG_BIN_FILES} ${PKG_BIN_DIR}/src/${f})
+endforeach()
 
 # configure DESCRIPTION file in binary dir to avoid overwriting modifications by roxygen
 configure_file (

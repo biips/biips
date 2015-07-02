@@ -1,24 +1,12 @@
-# variable substitutions here are processed by the configure script
-# and not by cmake
+SOURCES=$(wildcard *.cpp core/src/*.cpp core/src/*/*.cpp base/src/*.cpp base/src/*/*.cpp compiler/src/*.cpp compiler/src/*/*.cpp)
+SOURCES_CC=$(wildcard compiler/src/*/*.cc)
 
-PKG_CPPFLAGS = -I@BIIPS_INCLUDE@/core -I@BIIPS_INCLUDE@/base -I@BIIPS_INCLUDE@/compiler @RBIIPS_COMPILE_FLAGS@
+OBJECTS = $(SOURCES:.cpp=.o) $(SOURCES_CC:.cc=.o)
+
+PKG_CPPFLAGS=-Icore/include -Ibase/include -Icompiler/include -Icompiler/src @RBIIPS_COMPILE_FLAGS@
 
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @BIIPS_LD_FLAGS@ @RBIIPS_LINK_FLAGS@
-
-.PHONY: all core base compiler
-
-all: $(SHLIB)
-$(SHLIB): core base compiler
-
-core:
-	(cd core && $(MAKE))
-
-base: core
-	(cd base && $(MAKE))
-
-compiler: core base
-	(cd compiler && $(MAKE))
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @RBIIPS_LINK_FLAGS@
 
 
 ## As an alternative, one can also add this code in a file 'configure'

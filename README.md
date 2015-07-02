@@ -2,7 +2,7 @@ Biips
 =============================================================================
 
 - Version:       0.10.1
-- Last modified: 2015-06-26
+- Last modified: 2015-07-02
 - Contact:       Biips project team <biips-project@lists.gforge.inria.fr>
 - Maintainer:    [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) <adrien.todeschini@inria.fr>
 - License:       GPL-3

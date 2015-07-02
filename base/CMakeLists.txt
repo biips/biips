@@ -28,9 +28,16 @@ install(DIRECTORY
 	PATTERN *.in EXCLUDE
 )
 
-# add files to parent scope Base_SOURCES list
-file(GLOB_RECURSE _src RELATIVE ${CMAKE_SOURCE_DIR} *.hpp *.hh *.h *.cpp *.cc *.c)
+# copy include files to binary directory and add them to parent scope Base_INCLUDE_FILES list
+file(GLOB_RECURSE _hdr RELATIVE ${CMAKE_SOURCE_DIR} include/*.hpp include/*.hh include/*.h)
+foreach(_f ${_hdr})
+    configure_file(${CMAKE_SOURCE_DIR}/${_f} ${CMAKE_BINARY_DIR}/${_f} COPYONLY)
+endforeach()
+set(Base_INCLUDE_FILES ${Base_INCLUDE_FILES} ${_hdr} PARENT_SCOPE)
+
+# copy source files to binary directory and add them to parent scope Base_SOURCE_FILES list
+file(GLOB_RECURSE _src RELATIVE ${CMAKE_SOURCE_DIR} src/*.cpp src/*.cc src/*.c src/*.h)
 foreach(_f ${_src})
     configure_file(${CMAKE_SOURCE_DIR}/${_f} ${CMAKE_BINARY_DIR}/${_f} COPYONLY)
 endforeach()
-set(Base_SOURCES ${Base_SOURCES} ${_src} PARENT_SCOPE)
+set(Base_SOURCE_FILES ${Base_SOURCE_FILES} ${_src} PARENT_SCOPE)
