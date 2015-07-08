@@ -8,35 +8,35 @@ if "%1" == "" (
 :: Change these variables to fit your needs
 ::-----------------------------------------
 set BIIPS_SRC=%~dp0
-set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
-set BIIPS_ROOT=C:\Users\adrien\biips
-set BOOSTLIB=C:\Program Files\boost\boost_1_54_0
-set PAGEANT=C:\Program Files (x86)\PuTTY\pageant.exe
-set GFORGE_PRIVATE_KEY=C:\Users\adrien\Dropbox\INRIA\ssh\GForge_Inria_key.ppk
-set TORTOISEGITPROC=C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe
-set ECLIPSE=C:\Program Files\eclipse\eclipse.exe
-set R_BINDIR=C:\Program Files\R\R-3.1.2\bin
-set MATLAB_ROOT=C:\Program Files\MATLAB\R2014a
-set OCTAVE_ROOT=C:\Octave\Octave3.6.4_gcc4.6.2
-set GCC_BINDIR=C:\Rtools\gcc-4.6.3\bin
-set RTOOLS_BINDIR=C:\Rtools\bin
+set BIIPS_ROOT=%USERPROFILE%\biips
+set BOOST_ROOT=%ProgramFiles%\boost\boost_1_58_0
+set BOOSTLIB=%BOOST_ROOT%
+set PAGEANT=%ProgramFiles(x86)%\PuTTY\pageant.exe
+set GFORGE_PRIVATE_KEY=%USERPROFILE%\Documents\GForge_Inria_key.ppk
+set TORTOISEGITPROC=%ProgramFiles%\TortoiseGit\bin\TortoiseGitProc.exe
+set ECLIPSE=%ProgramFiles%\eclipse\eclipse.exe
+set R_BINDIR=%ProgramFiles%\R\R-3.2.0\bin
+set MATLAB_ROOT=%ProgramFiles%\MATLAB\R2012a
+set OCTAVE_ROOT=%HOMEDRIVE%\Octave\Octave3.6.4_gcc4.6.2
+set GCC_BINDIR=%HOMEDRIVE%\Rtools\gcc-4.6.3\bin
+set RTOOLS_BINDIR=%HOMEDRIVE%\Rtools\bin
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1 -DR_ARCH=x64
 set CPACK_GENERATOR=NSIS
-set MAKE=C:\MinGW\bin\mingw32-make
+set MAKE=%HOMEDRIVE%\MinGW\bin\mingw32-make
 set MAKE_OPT=%1
 
-set BIIPS_BUILD=C:\Users\adrien\workspace\biips-build
+set BIIPS_BUILD=%USERPROFILE%\workspace\biips-build
 set CMAKE_BUILD_TYPE=Release
 
 if "%2"=="-g" (
-    set BIIPS_BUILD=C:\Users\adrien\workspace\biips-debug
+    set BIIPS_BUILD=%USERPROFILE%\workspace\biips-debug
 ::    set CMAKE_BUILD_TYPE=RelWithDebInfo
     set CMAKE_BUILD_TYPE=Debug
 )
 
 if "%2"=="-msvc" (
-    set BIIPS_BUILD=C:\Users\adrien\workspace\biips-msvc
+    set BIIPS_BUILD=%USERPROFILE%\workspace\biips-msvc
     set CMAKE_BUILD_TYPE=RelWithDebInfo
 ::    set CMAKE_BUILD_TYPE=Release
     set CMAKE_GENERATOR="MinGW Makefiles"
@@ -45,7 +45,7 @@ if "%2"=="-msvc" (
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOSTLIB%\stage32\lib" -DR_ARCH=i386
+    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib" -DR_ARCH=i386
 	
 	if NOT "%4" == "-oct" (
 		set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_MATBIIPS=OFF
@@ -70,7 +70,6 @@ choice /m "Run CMake"
 if "%errorlevel%"=="1" (
 	call:ask_clear
 	TIMEOUT /T 1
-	set "PATH=%GCC_BINDIR%;%PATH%"
 	cd "%BIIPS_BUILD%"
 	set "PATH=%GCC_BINDIR%;%PATH%"
 	TIMEOUT /T 1
