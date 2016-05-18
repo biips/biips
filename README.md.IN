@@ -18,7 +18,7 @@ Emerged as a result of recent research studies, interacting particle based algor
 
 Features
 -----------------------------------------------------------------------------
-- BUGS language compatible
+- BUGS language compiler adapted from JAGS
 - Black-box inference engine with:
     - SMC/particle algorithms for filtering and smoothing
     - Static parameter estimation using particle MCMC
