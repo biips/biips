@@ -15,9 +15,9 @@ Development tools
 ### Windows
 
 * PuTTY
-* TortoiseGit + msysgit
+* Git + TortoiseGit
 * CMake
-* MinGW (do not add to PATH)
+* MinGW (do not add to `PATH`)
 * R (add to `PATH`: `C:\Program Files\R\R-3.0.2\bin`) + Rcpp package
 * Rtools (add to `PATH`: `C:\Rtools\gcc-4.6.3\bin`)
 * RStudio
