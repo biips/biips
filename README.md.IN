@@ -4,7 +4,7 @@ Biips
 - Version:       @Biips_VERSION@
 - Last modified: @Biips_DATE@
 - Contact:       Biips project team <@Biips_CONTACT_EMAIL@>
-- Maintainer:    [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) <adrien.todeschini@inria.fr>
+- Maintainer:    [Adrien Todeschini](http://adrien.tspace.fr) <adrien.todeschini@gmail.com>
 - License:       @Biips_LICENSE@
 - Website:       <@Biips_URL@>
 
@@ -69,7 +69,7 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-- [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) (main developer)
+- [Adrien Todeschini](http://adrien.tspace.fr) (main developer)
 - [Francois Caron](http://www.stats.ox.ac.uk/~caron/)
 - Marc Fuentes
 

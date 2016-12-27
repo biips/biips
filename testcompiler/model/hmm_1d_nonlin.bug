@@ -1,0 +1,13 @@
+var x[1,t_max], y[1,t_max]
+
+model
+{
+  x0 ~ dnormvar(mean_x0, var_x0)
+  x[,1] ~ dnormvar(0.5*x0+25*x0/(1+x0^2)+8*cos(1.2*1), var_x)
+  y[,1] ~ dnormvar(x[,1]^2/20, var_y)
+  for (t in 2:t_max)
+  {
+    x[,t] ~ dnormvar(0.5*x[,t-1]+25*x[,t-1]/(1+x[,t-1]^2)+8*cos(1.2*t), var_x)
+    y[,t] ~ dnormvar(x[,t]^2/20, var_y)
+  }
+}

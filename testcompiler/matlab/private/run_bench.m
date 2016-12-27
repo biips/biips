@@ -34,7 +34,7 @@
 %  Id:       $Id$
 %
 
-function [errors_filter, errors_smooth, log_norm_const_bench, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, period)
+function [errors_filter, errors_smooth, log_norm_const_bench, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, ind_x)
 %RUN_BENCH Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -47,22 +47,25 @@ y_obs = sample_obs(model_const, model_dim, x_gen);
 %% Compute bench filter and smoother reference
 [x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, log_norm_const_bench] = bench(model_const, model_dim, y_obs);
 
-x_filter_bench = x_filter_bench(period:period:end);
-var_filter_bench = var_filter_bench(period:period:end);
-x_smooth_bench = x_smooth_bench(period:period:end);
-var_smooth_bench = var_smooth_bench(period:period:end);
+x_gen = x_gen(ind_x);
+x_filter_bench = x_filter_bench(ind_x);
+var_filter_bench = var_filter_bench(ind_x);
+x_smooth_bench = x_smooth_bench(ind_x);
+var_smooth_bench = var_smooth_bench(ind_x);
 
 norm_const_bench = exp(log_norm_const_bench(end));
 
-fprintf('True log-norm-const : %g\n',log_norm_const_bench(end))
+log_norm_const_bench = log_norm_const_bench(ind_x);
+
+fprintf('True log-norm-const: %g\n',log_norm_const_bench(end))
 
 %% Run SMC filters and smoothers
 errors_filter = zeros(n_smc, length(n_part), length(smc));
 errors_smooth = zeros(n_smc, length(n_part), length(smc));
 norm_const = zeros(1, n_smc);
 
-fprintf('Particles | Mutation | Log-norm-const-smc | Stutent-stat\n')
-fprintf('--------------------------------------------------------\n')
+fprintf('Particles | Mutation | Log-norm-const-smc | Student p-value (>0.05)\n')
+fprintf('-------------------------------------------------------------------\n')
 
 h = waitbar(0,'Please wait...');
 steps = sum(n_part) * length(smc) * n_smc;
@@ -81,10 +84,10 @@ for j = 1:length(n_part)
             %             plot(0:t_final, x_gen, 0:t_final, x_filter_bench, 0:t_final, x_filter_smc, 0:t_final, x_smooth_bench, 0:t_final, x_smooth_smc)
             %             legend('true', 'bench filter', 'smc filter', 'bench smooth', 'smc smooth')
             
-            x_filter_smc = x_filter_smc(period:period:end);
-%             ess_filter = ess_filter(period:period:end);
-            x_smooth_smc = x_smooth_smc(period:period:end);
-%             ess_smooth = ess_smooth(period:period:end);
+            x_filter_smc = x_filter_smc(ind_x);
+%             ess_filter = ess_filter(ind_x);
+            x_smooth_smc = x_smooth_smc(ind_x);
+%             ess_smooth = ess_smooth(ind_x);
             
 %             errors_filter(i,j,k) = sum((x_filter_smc-x_filter_bench).^2 ./ var_filter_bench .* ess_filter);
 %             errors_smooth(i,j,k) = sum((x_smooth_smc-x_smooth_bench).^2 ./ var_smooth_bench .* ess_smooth);
@@ -108,9 +111,10 @@ for j = 1:length(n_part)
         m = mean(norm_const);
         s = sqrt(mean(norm_const.^2) - m^2);
         
-        t = (m - norm_const_bench) / s * sqrt(n_smc);
+        t_stat = (m - norm_const_bench) / s * sqrt(n_smc);
+        p_val = tcdf(t_stat, n_smc-1, 'upper');
         
-        fprintf('%9d | %8s | %18g | %12g\n', n_part(j), mutation_names{k}, log(m), t)
+        fprintf('%9d | %8s | %18g | %15g (%d)\n', n_part(j), mutation_names{k}, log(m), p_val, p_val>.05)
     end
 end
 toc(t_start)

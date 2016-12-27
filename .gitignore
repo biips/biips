@@ -2,3 +2,5 @@
 build_*/
 .Rproj.user
 /examples/stoch_kinetic/old
+*.o
+*~

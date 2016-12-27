@@ -4,7 +4,7 @@
 #  Bayesian inference with interacting Particle Systems.
 #  Copyright (C) Inria, 2012
 #  Authors: Adrien Todeschini, Francois Caron
-#  
+#
 #  Rbiips is derived software based on:
 #  Biips, Copyright (C) Inria, 2012
 #  rjags, Copyright (C) Martyn Plummer, 2002-2010
@@ -87,10 +87,10 @@ AC_LANG_POP()
 # installed. The user can set the environment variable LIBnn to
 # override this.
 
-# On Debian, we use the dpkg-architecture program to get the  
+# On Debian, we use the dpkg-architecture program to get the
 # architecture-dependent install library path
 
-if test -z "${LIBnn}"; then 
+if test -z "${LIBnn}"; then
    LIBnn=`"${R_HOME}/bin/R" CMD config LIBnn`
 fi
 
@@ -105,19 +105,19 @@ if test [ -n "$biips_lib_path" ] ; then
    BIIPS_LIB=$biips_lib_path
 else
    if test [ -z "${BIIPS_LIB}" ] ; then
-      if test [ "${prefix}" = "NONE" ] ; then 
+      if test [ "${prefix}" = "NONE" ] ; then
          AC_MSG_ERROR("Location of Biips libraries not defined. Use configure arg '--with-biips-lib' or environment variable 'BIIPS_LIB'")
       else
-         # check dpkg-architecture
-		 AC_CHECK_PROG(DPKG_FOUND, dpkg-architecture, "ok")
-         # if found then use DEB_HOST_MULTIARCH to define BIIPS_LIB
-         # else use LIBnn
-		 if test [ "$DPKG_FOUND" = "ok" ] ; then
-		 	DEB_HOST_MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH`
-			BIIPS_LIB=${prefix}/lib/${DEB_HOST_MULTIARCH}
-		 else
+#         # check dpkg-architecture
+#		 AC_CHECK_PROG(DPKG_FOUND, dpkg-architecture, "ok")
+#         # if found then use DEB_HOST_MULTIARCH to define BIIPS_LIB
+#         # else use LIBnn
+#		 if test [ "$DPKG_FOUND" = "ok" ] ; then
+#		 	DEB_HOST_MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH`
+#			BIIPS_LIB=${prefix}/lib/${DEB_HOST_MULTIARCH}
+#		 else
 		 	BIIPS_LIB=${prefix}/${LIBnn}
-		 fi
+#		 fi
       fi
    fi
 fi

@@ -70,7 +70,6 @@ if (MATLAB OR OCTAVE)
  			SUFFIX .${MEX_EXT}
  		)
  	
-     	get_target_property(MATBIIPS_TARGET_LOC matbiips LOCATION)
  	endif()
 else()
     if (FIND_OCTAVE)
@@ -92,7 +91,7 @@ endif()
 # install mexfile in the build directory
 add_custom_command(TARGET matbiips
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_BINARY_DIR}/matbiips/"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:matbiips> "${CMAKE_BINARY_DIR}/matbiips/"
     COMMENT "Copying mexfile in build directory"
     VERBATIM
 )
@@ -100,7 +99,7 @@ add_custom_command(TARGET matbiips
 # copy mexfile in the src directory
 add_custom_command(TARGET matbiips
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MATBIIPS_TARGET_LOC} "${CMAKE_SOURCE_DIR}/matbiips/"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:matbiips> "${CMAKE_SOURCE_DIR}/matbiips/"
     COMMENT "Copying mexfile in source directory"
     VERBATIM
 )

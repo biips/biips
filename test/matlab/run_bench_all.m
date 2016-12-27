@@ -35,9 +35,9 @@
 %
 
 
-function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
+function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names)
 %RUN_BENCH_ALL Runs all implemented benches
-%   [errors_filter_all, errors_smooth_all, norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names, period)
+%   [errors_filter_all, errors_smooth_all, norm_const_bench_all, models] = run_bench_all(model_ids, n_part, ess_thres, n_smc, results_file_names)
 %   
 %   For each model ids, the program
 %   - samples one set of observations,
@@ -45,7 +45,7 @@ function [errors_filter_all, errors_smooth_all, log_norm_const_bench_all, models
 %   unobserved variable
 %   - runs n_smc SMC algorithms with Multinomial resampling for each 
 %   implemented mutation and each particles number
-%   - computes the normalized errors (with optional period)
+%   - computes the normalized errors
 %   - plots errors empirical distributions.
 %   - prints everything in a configuration file using a syntax that can be 
 %   input in BiipsTest program.
@@ -64,7 +64,6 @@ errors_filter_all = {};
 errors_smooth_all = {};
 log_norm_const_bench_all = {};
 
-if nargin < 6, period = 1; end
 
 %% HMM 1D linear gaussian
 
@@ -78,7 +77,7 @@ if (sum(model_ids == 1))
     var_x_0 = 1;
     var_x = 1;
     var_y = 0.5;
-    
+    ind_x = 2:(t_max+1);    
       
     initiate = @(n) mu_x_0 + sqrt(var_x_0) * randn(1, n);
     evolution_model = @(x_t, t) x_t + sqrt(var_x) * randn(size(x_t));
@@ -110,7 +109,7 @@ if (sum(model_ids == 1))
 %     mutation_names = {'prior', 'optimal', 'bad'};
     
     model_const = [t_max, mu_x_0, var_x_0, var_x, var_y];
-    const_names = {'t.max', 'mean.x.0', 'var.x.0', 'var.x', 'var.y'};
+    const_names = {'t_max', 'mean_x0', 'var_x0', 'var_x', 'var_y'};
    
     model_dim = [dimx, dimy];
     var_names = {'x', 'y'};
@@ -132,6 +131,7 @@ if (sum(model_ids == 2))
     var_x_0 = 5;
     var_x = 10;
     var_y = 1;
+    ind_x = 2:(t_max+1);    
     
     f_evolution = @(x, t) 1/2*x + 25*x./(1+x.^2) + 8*cos(1.2*t);
     g_measure = @(x, t) x.^2/20;
@@ -162,12 +162,12 @@ if (sum(model_ids == 2))
     mutation_names = {'prior'};
     
     model_const = [t_max, mu_x_0, var_x_0, var_x, var_y];
-    const_names = {'t.max', 'mean.x.0', 'var.x.0', 'var.x', 'var.y'};
+    const_names = {'t_max', 'mean_x0', 'var_x0', 'var_x', 'var_y'};
     
     model_dim = [dimx, dimy];
     var_names = {'x', 'y'};
     
-    model_name = sprintf('HMM 1D non linear gaussian, t = 0:%d', t_max);
+    model_name = sprintf('HMM 1D nonlinear gaussian, t = 0:%d', t_max);
     
     model = {model_const, model_dim, sample_param, sample_obs, bench, smc, mutation_names, model_name, const_names, var_names, model_id};
     
@@ -189,9 +189,9 @@ for i = 1:length(models)
     model_name = model{8};
     
     fprintf('--------------------------------------------------------\n')
-    fprintf('Model : %s\n', model_name)
+    fprintf('Model: %s\n', model_name)
     
-    [errors_filter, errors_smooth, log_norm_const_bench, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, period);
+    [errors_filter, errors_smooth, log_norm_const_bench, x_gen, y_obs, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench] = run_bench(model_const, model_dim, sample_param, sample_obs, bench, smc, n_part, ess_thres, n_smc, mutation_names, ind_x);
     
     % plot errors distributions
 %     scrsz = get(0, 'ScreenSize');
@@ -207,10 +207,10 @@ for i = 1:length(models)
     %
     %fig_title = sprintf('%s\nParticle smoother: distributions of the sum of normalized squared errors (period = %d)\n%d smc runs, ESS/N resampling threshold = %g', model_name, period, n_smc, ess_thres);
     %%plot_error_dist(errors_smooth, h_fig, 2, n_bin, fig_title, n_part, mutation_names, k_degree)
-    %
+
     %% print results
-    print_results(results_file_names{i}, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
-    %
+    print_results(results_file_names{i}, n_part, ess_thres, model, x_gen, y_obs, log_norm_const_bench(end), x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth);
+
     %errors_filter_all = [errors_filter_all, {errors_filter} ];
     %errors_smooth_all = [errors_smooth_all, {errors_smooth} ];
     %log_norm_const_bench_all = [log_norm_const_bench_all, {log_norm_const_bench(end)} ];
@@ -329,7 +329,7 @@ end
 %end
 
 
-function print_results(file_name, n_part, ess_thres, period, model, x_gen, y_obs, log_norm_const_bench, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth)
+function print_results(file_name, n_part, ess_thres, model, x_gen, y_obs, log_norm_const_bench, x_filter_bench, var_filter_bench, x_smooth_bench, var_smooth_bench, errors_filter, errors_smooth)
     
     model_const = model{1};
     model_dim = model{2};

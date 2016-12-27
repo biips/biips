@@ -9,7 +9,7 @@ Authors@R: as.person(c(
     "@Biips_OWNER@ [cph]"))
 Contact: @Biips_CONTACT@
 Depends: R (>= @R_VERSION_REQUIRED@), Rcpp (>= @Rcpp_VERSION@), stats, graphics
-Suggests: knitr
+Suggests: knitr, rmarkdown
 SystemRequirements: For Linux only: biips (== @Biips_VERSION@), boost (>= @Boost_VERSION_REQUIRED@)
 Description:@Biips_DESCRIPTION@
 License: @Biips_LICENSE@

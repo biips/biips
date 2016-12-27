@@ -487,22 +487,22 @@ BOOST_AUTO_TEST_CASE( my_test )
       Size n_part = n_particles[i_n_part];
       for (Size i_mut=0; i_mut<mutations.size(); ++i_mut)
       {
+        vector<Scalar> errors_filter_new;
+        vector<Scalar> errors_smooth_new;
+        vector<Scalar> log_norm_const_smc;
+
         string mut = mutations[i_mut];
+        p_model_test->BuildSMC(mut=="prior");
+
         if (verbosity>0)
         {
-          cout << "Running " << n_smc << " SMC algorithms of " << p_model_test->ModelUnobsNodesSummary().at(STOCHASTIC) << " iterations with" << endl;
+          cout << "Running " << n_smc << " SMC algorithms of " << p_model_test->NIterations() << " iterations with" << endl;
           cout << INDENT_STRING << "mutation: " << mut << ", particles: " << n_part << endl;
         }
 
         Types<boost::progress_display>::Ptr p_show_progress;
         if (verbosity==1 && n_smc>1)
           p_show_progress = Types<boost::progress_display>::Ptr(new boost::progress_display(n_smc, cout, ""));
-
-        vector<Scalar> errors_filter_new;
-        vector<Scalar> errors_smooth_new;
-        vector<Scalar> log_norm_const_smc;
-
-        p_model_test->BuildSMC(mut=="prior");
 
         for (Size i_smc=0; i_smc<n_smc; ++i_smc)
         {

@@ -1,11 +1,13 @@
-var x[1,t.max+1], y[1, t.max]
+var x[1,t_max], y[1,t_max]
 
 model
 {
-  x[,1] ~ dnormvar(mean.x.init, var.x.init)
-  for (t in 2:t.max+1)
+  x0 ~ dnormvar(mean_x0, var_x0)
+  x[,1] ~ dnormvar(x0, var_x)
+  y[,1] ~ dnormvar(x[,1], var_y)
+  for (t in 2:t_max)
   {
-    x[,t] ~ dnormvar(x[,t-1], var.x)
-    y[,t-1] ~ dnormvar(x[,t], var.y)
+    x[,t] ~ dnormvar(x[,t-1], var_x)
+    y[,t] ~ dnormvar(x[,t], var_y)
   }
 }
