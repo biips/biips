@@ -228,6 +228,7 @@ namespace Biips
 
     void ClearSMC();
     virtual void BuildSMC(Bool prior = false);
+    Size NIterations() { return pSampler_->NIterations(); };
     virtual void RunSMC(Size nParticles,
                         Size rngSeed,
                         const String & rsType = "stratified",

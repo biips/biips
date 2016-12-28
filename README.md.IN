@@ -4,7 +4,7 @@ Biips
 - Version:       @Biips_VERSION@
 - Last modified: @Biips_DATE@
 - Contact:       Biips project team <@Biips_CONTACT_EMAIL@>
-- Maintainer:    [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) <adrien.todeschini@inria.fr>
+- Maintainer:    [Adrien Todeschini](http://adrien.tspace.fr) <adrien.todeschini@gmail.com>
 - License:       @Biips_LICENSE@
 - Website:       <@Biips_URL@>
 
@@ -18,7 +18,7 @@ Emerged as a result of recent research studies, interacting particle based algor
 
 Features
 -----------------------------------------------------------------------------
-- BUGS language compatible
+- BUGS language compiler adapted from JAGS
 - Black-box inference engine with:
     - SMC/particle algorithms for filtering and smoothing
     - Static parameter estimation using particle MCMC
@@ -69,7 +69,7 @@ Biips code is Copyright (C) Inria, 2010-2014.
 
 Authors:
 
-- [Adrien Todeschini](https://sites.google.com/site/adrientodeschini/) (main developer)
+- [Adrien Todeschini](http://adrien.tspace.fr) (main developer)
 - [Francois Caron](http://www.stats.ox.ac.uk/~caron/)
 - Marc Fuentes
 

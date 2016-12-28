@@ -14,7 +14,7 @@ file (WRITE VERSION.txt ${Biips_VERSION})
 set (Biips_OWNER Inria)
 set (Biips_COPYRIGHT_YEAR 2012-2014)
 set (Biips_LICENSE GPL-3)
-set (Biips_URL http://alea.bordeaux.inria.fr/biips)
+set (Biips_URL http://biips.github.io)
 set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_BUGREPORTS https://gforge.inria.fr/tracker/?group_id=2515)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting particle systems")
@@ -164,7 +164,7 @@ endif()
 include (GNUInstallDirs)
 if (UNIX)
 	set (Biips_INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR})
-	set (Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+    set (Biips_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
 	set (Biips_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/biips)
 	set (Biips_INSTALL_TESTROOTDIR ${CMAKE_INSTALL_DATAROOTDIR}/biips)
 
@@ -354,23 +354,3 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
 endif ()
 include (CPack)
-
-#========= Pandoc commands ============
-find_program(PANDOC pandoc PATHS ~/.cabal/bin)
-
-set(_md_file_names README INSTALL Developers_Guide)
-if (PANDOC)
-    foreach(_fname ${_md_file_names})
-        add_custom_command(OUTPUT ${_fname}.wiki
-            DEPENDS ${_fname}.md
-            COMMAND ${PANDOC} -f markdown -t dokuwiki ${_fname}.md -o ${_fname}.wiki
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        )
-        set(_wiki_files ${_wiki_files} ${_fname}.wiki)
-    endforeach()
-    add_custom_target(md2wiki
-        DEPENDS ${_wiki_files}
-        COMMENT "Translating md files to dokuwiki"
-    )
-endif()
-

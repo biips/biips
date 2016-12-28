@@ -49,9 +49,8 @@ foreach(_cfg ${cfg_files})
     get_filename_component(_name ${_cfg} NAME) 
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
-    get_target_property(exe_loc ${EXE_NAME} LOCATION)
-    add_test (NAME ${_name}-testcompiler COMMAND ${exe_loc} ${_cfg}
-        --particles=100 --alpha=1e-6)
+    add_test (NAME ${_name}-testcompiler COMMAND $<TARGET_FILE:${EXE_NAME}> ${_cfg}
+        --particles=100 --alpha=1e-5)
 endforeach()
 
 # #add target for parse_test

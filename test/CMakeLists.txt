@@ -1,3 +1,5 @@
+set (EXE_NAME BiipsTest)
+
 # configure config.hpp
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/config.hpp.IN
@@ -37,8 +39,8 @@ file (GLOB SOURCE_FILES
 set (BIIPS_LIBS	BiipsBase BiipsCore)
 
 # add the executable
-add_executable(BiipsTest ${SOURCE_FILES})
-target_link_libraries(BiipsTest ${EXTRA_LIBS} ${BIIPS_LIBS})
+add_executable(${EXE_NAME} ${SOURCE_FILES})
+target_link_libraries(${EXE_NAME} ${EXTRA_LIBS} ${BIIPS_LIBS})
 
 # add subdirectories
 add_subdirectory(benchmarks)
@@ -54,7 +56,5 @@ foreach(_cfg ${cfg_files})
     get_filename_component(_name ${_cfg} NAME) 
     string (FIND ${_name} .cfg off REVERSE)
     string (SUBSTRING ${_name} 0 ${off} _name)
-    get_target_property(exe_loc BiipsTest LOCATION)
-    add_test (NAME ${_name}-test COMMAND ${exe_loc} ${_cfg} --particles=100
-        --alpha=1e-6)
+    add_test (NAME ${_name}-test COMMAND $<TARGET_FILE:${EXE_NAME}> ${_cfg} --particles=100 --alpha=1e-5)
 endforeach()

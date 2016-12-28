@@ -63,7 +63,7 @@ configure_file (
 )
 
 # find R
-find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp roxygen2)
+find_package(R ${R_VERSION_REQUIRED} REQUIRED COMPONENTS Rcpp roxygen2 pkgdown)
 
 # add debug flag
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -155,7 +155,7 @@ add_custom_target (${PKG_NAME}_build_src
     COMMENT "Building ${PKG_NAME} source package"
     VERBATIM
 )
-    
+
 # add R CMD INSTALL target
 add_custom_target (${PKG_NAME}_install
     DEPENDS ${PKG_NAME}_pkg_dir
@@ -165,7 +165,7 @@ add_custom_target (${PKG_NAME}_install
     VERBATIM
 )
 
- 
+
 # add extract_src package target
 add_custom_target (${PKG_NAME}_extract_src
     DEPENDS ${PKG_NAME}_build_src
@@ -188,7 +188,7 @@ add_custom_target (${PKG_NAME}_rd2pdf
 # add build_site target
 add_custom_target (${PKG_NAME}_build_site
     DEPENDS ${PKG_NAME}_extract_src
-    COMMAND ${R_EXECUTABLE} --vanilla -e "staticdocs::build_site('.', tracking_id = 'UA-31640193-1')"
+    COMMAND ${R_EXECUTABLE} --vanilla -e "pkgdown::build_site()"
     COMMENT "Build ${PKG_NAME} documentation site"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PKG_NAME}_src/${PKG_NAME}
   	VERBATIM
