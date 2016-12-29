@@ -259,8 +259,8 @@ namespace Biips
     {
       const NodeArray & array = model_.GetSymbolTable().GetNodeArray(name);
       // It's a declared node
-      const std::vector<ParseTree*> & range_list = var->parameters();
-
+//      const std::vector<ParseTree*> & range_list = var->parameters();
+// 
 //      if (range_list.empty())
 //      {
 //        //Missing range implies the whole node
