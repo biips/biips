@@ -1,13 +1,3 @@
-//                                            -*- C++ -*-
-/*! \file Function.hpp
- * \brief
- *
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
- */
-
 #ifndef BIIPS_FUNCTION_HPP_
 #define BIIPS_FUNCTION_HPP_
 

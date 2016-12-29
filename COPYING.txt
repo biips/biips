@@ -632,9 +632,9 @@ state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
     Biips software is a set of C++ libraries for
-    Bayesian inference with interacting Particle Systems.
-    Copyright (C) Inria, 2012
-    Authors: Adrien Todeschini, Francois Caron
+    Bayesian inference with interacting particle systems.
+    Copyright (C) Inria, 2012-2017
+    Authors: Adrien Todeschini, Francois Caron, Marc Fuentes
 
     Biips is derived software based on:
     JAGS, Copyright (C) Martyn Plummer, 2002-2010
@@ -658,7 +658,7 @@ Also add information on how to contact you by electronic and paper mail.
   If the program does terminal interaction, make it output a short
 notice like this when it starts in an interactive mode:
 
-    Biips Copyright (C) Inria, 2012
+    Biips Copyright (C) Inria, 2012-2017
     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
     This is free software, and you are welcome to redistribute it
     under certain conditions; type `show c' for details.

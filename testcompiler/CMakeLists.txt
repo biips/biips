@@ -1,4 +1,4 @@
-set (EXE_NAME BiipsTestCompiler)
+set (EXE_NAME biipstestcompiler)
 
 set (INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
@@ -14,6 +14,7 @@ include_directories (
 	${Compiler_INCLUDE_DIRS}
 	${Base_INCLUDE_DIRS}
 	${Core_INCLUDE_DIRS}
+	${Util_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
     )
 
@@ -27,7 +28,7 @@ file (GLOB SOURCE_FILES
 )
 
 # add biips libraries
-set (BIIPS_LIBS	BiipsCompiler BiipsBase BiipsCore)
+set (BIIPS_LIBS biipsutil biipscompiler biipsbase biipscore)
 
 # add the executable
 add_executable(${EXE_NAME} ${SOURCE_FILES})

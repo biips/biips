@@ -21,10 +21,19 @@ namespace Biips
 
   void pressEnterToContinue(std::istream & is = std::cin);
 
-  Bool yesNoQuestion(const String & message,
-                     std::istream & is = std::cin,
-                     char yes = 'y',
-                     char no = 'n');
+  Bool yesNoQuestion(const String & message, char yes = 'y', char no = 'n', Size nb_newlines = 1, std::istream & is = std::cin);
+
+
+  template<typename T>
+  String toString( const T & value )
+  {
+    using namespace std;
+
+    ostringstream oss;
+    oss << value;
+    return oss.str();
+  }
+
 
 //  void progressBar(Scalar progress, Size & currentPos, time_t & timer, std::ostream & os = std::cout, String finalValue = "", Size length = 50);
 }

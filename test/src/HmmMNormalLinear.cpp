@@ -1,39 +1,3 @@
-//                                               -*- C++ -*-
-/*
- * Biips software is a set of C++ libraries for
- * Bayesian inference with interacting Particle Systems.
- * Copyright (C) Inria, 2012
- * Authors: Adrien Todeschini, Francois Caron
- *
- * Biips is derived software based on:
- * JAGS, Copyright (C) Martyn Plummer, 2002-2010
- * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
- *
- * This file is part of Biips.
- *
- * Biips is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*! \file HmmMNormalLinear.cpp
- * \brief 
- * 
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
- */
-
 #include "config.hpp"
 #include "HmmMNormalLinear.hpp"
 
@@ -45,10 +9,6 @@
 #include "KalmanFilter.hpp"
 #include "TestIO.hpp"
 #include "common/cholesky.hpp"
-
-#ifdef USE_Qwt5_Qt4
-#include "Plot.hpp"
-#endif //USE_Qwt5_Qt4
 
 namespace Biips
 {
@@ -503,127 +463,6 @@ namespace Biips
     if (iter==0)
       accumulate(iter, smcSmoothValuesMap_, "Smoothing");
     accumulate(iter+1, smcSmoothValuesMap_, "Smoothing");
-  }
-
-  void HmmMNormalLinear::PlotResults(const String & plotFileName) const
-  {
-#ifdef USE_Qwt5_Qt4
-    const MultiArray::Array & x_gen = dataValuesMap_.at("x");
-    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
-    const MultiArray::Array & x_est_KF = benchFilterValuesMap_.at("x");
-    const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
-    const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
-
-    Size t_max = sizeParamMap_.at("t.max");
-    Size dim_x = (*dimArrayMap_.at("x"))[0];
-    Size dim_y = (*dimArrayMap_.at("y"))[0];
-
-    Plot results_plot(argc_, argv_);
-
-    if (dim_x == 1)
-    {
-      MultiArray::Array time_x(t_max + 1);
-      MultiArray::Array time_y(t_max);
-      time_x[0] = MultiArray(P_SCALAR_DIM, ValArray::Ptr(new ValArray(1, 0.0)));
-      for (Size t = 1; t < t_max + 1; ++t)
-      {
-        time_x[t] = MultiArray(P_SCALAR_DIM,
-                               ValArray::Ptr(new ValArray(1, Scalar(t))));
-        time_y[t - 1] = MultiArray(P_SCALAR_DIM,
-                                   ValArray::Ptr(new ValArray(1, Scalar(t))));
-      }
-
-      results_plot.AddCurve(time_x,
-                            x_gen,
-                            "hidden state",
-                            Qt::black,
-                            2,
-                            Qt::NoPen,
-                            9,
-                            QwtSymbol::Cross);
-      if (dim_y == 1)
-        results_plot.AddCurve(time_y,
-                              y_obs,
-                              "observation",
-                              Qt::gray,
-                              2,
-                              Qt::NoPen,
-                              8,
-                              QwtSymbol::XCross);
-      results_plot.AddCurve(time_x, x_est_KF, "KF estimate", Qt::green, 2);
-      results_plot.AddCurve(time_x, x_est_PF, "PF estimate", Qt::blue, 2);
-      results_plot.AddCurve(time_x, x_est_PS, "PS estimate", Qt::cyan, 2);
-      results_plot.SetTitle("");
-      results_plot.SetAxesLabels("time", "state");
-      results_plot.SetBackgroundColor(Qt::white);
-      results_plot.SetLegend(QwtPlot::RightLegend);
-    }
-    else if (dim_x > 1)
-    {
-      Types<Scalar>::Array x_gen_0(t_max + 1);
-      Types<Scalar>::Array x_gen_1(t_max + 1);
-      Types<Scalar>::Array x_est_KF_0(t_max + 1);
-      Types<Scalar>::Array x_est_KF_1(t_max + 1);
-      Types<Scalar>::Array x_est_PF_0(t_max + 1);
-      Types<Scalar>::Array x_est_PF_1(t_max + 1);
-      Types<Scalar>::Array x_est_PS_0(t_max + 1);
-      Types<Scalar>::Array x_est_PS_1(t_max + 1);
-      for (Size t = 0; t < t_max + 1; ++t)
-      {
-        x_gen_0[t] = x_gen[t].Values()[0];
-        x_gen_1[t] = x_gen[t].Values()[1];
-        x_est_KF_0[t] = x_est_KF[t].Values()[0];
-        x_est_KF_1[t] = x_est_KF[t].Values()[1];
-        x_est_PF_0[t] = x_est_PF[t].Values()[0];
-        x_est_PF_1[t] = x_est_PF[t].Values()[1];
-        x_est_PS_0[t] = x_est_PS[t].Values()[0];
-        x_est_PS_1[t] = x_est_PS[t].Values()[1];
-      }
-
-      results_plot.AddCurve(x_gen_0,
-                            x_gen_1,
-                            "hidden state",
-                            Qt::black,
-                            2,
-                            Qt::NoPen,
-                            9,
-                            QwtSymbol::Cross);
-
-      Types<Scalar>::Array y_obs_0(t_max);
-      Types<Scalar>::Array y_obs_1(t_max);
-      if (dim_y > 1)
-      {
-        for (Size t = 0; t < t_max; ++t)
-        {
-          y_obs_0[t] = y_obs[t].Values()[0];
-          y_obs_1[t] = y_obs[t].Values()[1];
-        }
-        results_plot.AddCurve(y_obs_0,
-                              y_obs_1,
-                              "observation",
-                              Qt::gray,
-                              2,
-                              Qt::NoPen,
-                              8,
-                              QwtSymbol::XCross);
-      }
-
-      results_plot.AddCurve(x_est_KF_0, x_est_KF_1, "KF estimate", Qt::green, 2);
-      results_plot.AddCurve(x_est_PF_0, x_est_PF_1, "PF estimate", Qt::blue, 2);
-      results_plot.AddCurve(x_est_PS_0, x_est_PS_1, "PS estimate", Qt::cyan, 2);
-
-      results_plot.SetTitle("");
-      results_plot.SetAxesLabels("x[0]", "x[1]");
-      results_plot.SetBackgroundColor(Qt::white);
-      results_plot.SetLegend(QwtPlot::RightLegend);
-    }
-
-    if (!plotFileName.empty())
-      results_plot.PrintPdf(plotFileName);
-
-    if (showMode_ >= 1)
-      results_plot.Show();
-#endif //USE_Qwt5_Qt4
   }
 
 }

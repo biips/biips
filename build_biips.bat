@@ -17,7 +17,7 @@ set TORTOISEGITPROC=%ProgramFiles%\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=%ProgramFiles%\eclipse\eclipse.exe
 set GCC_BINDIR=%HOMEDRIVE%\Rtools\gcc-4.6.3\bin
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
-set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1 -DR_ARCH=x64
+set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1
 set CPACK_GENERATOR=NSIS
 set MAKE=%HOMEDRIVE%\MinGW\bin\mingw32-make
 set MAKE_OPT=%1
@@ -41,7 +41,7 @@ if "%2"=="-msvc" (
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
-    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib" -DR_ARCH=i386
+    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib"
 )
 
 ::-----------------------------------------
@@ -81,8 +81,8 @@ pause
 
 goto:eof
 
-::-----------------
-::Functions section
+
+:: Helper functions 
 ::-----------------
 
 :ask_clear

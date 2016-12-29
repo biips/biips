@@ -1,4 +1,4 @@
-set (EXE_NAME BiipsTest)
+set (EXE_NAME biipstest)
 
 # configure config.hpp
 configure_file(
@@ -12,6 +12,7 @@ include_directories (
 	${CMAKE_CURRENT_BINARY_DIR}/include
 	${Core_INCLUDE_DIRS}
 	${Base_INCLUDE_DIRS}
+	${Util_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
 )
 
@@ -23,7 +24,7 @@ file (GLOB SOURCE_FILES
 )
 
 # add biips libraries
-set (BIIPS_LIBS	BiipsBase BiipsCore)
+set (BIIPS_LIBS biipsutil biipsbase biipscore)
 
 # add the executable
 add_executable(${EXE_NAME} ${SOURCE_FILES})

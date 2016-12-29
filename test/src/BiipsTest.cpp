@@ -1,39 +1,3 @@
-//                                               -*- C++ -*-
-/*
- * Biips software is a set of C++ libraries for
- * Bayesian inference with interacting Particle Systems.
- * Copyright (C) Inria, 2012
- * Authors: Adrien Todeschini, Francois Caron
- *
- * Biips is derived software based on:
- * JAGS, Copyright (C) Martyn Plummer, 2002-2010
- * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
- *
- * This file is part of Biips.
- *
- * Biips is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*! \file BiipsTest.cpp
-* \brief
-*
-* \author  $LastChangedBy$
-* \date    $LastChangedDate$
-* \version $LastChangedRevision$
-* Id:      $Id$
-*/
-
 #define BOOST_TEST_MODULE BiipsTest
 #include <boost/test/included/unit_test.hpp>
 
@@ -96,9 +60,6 @@ BOOST_AUTO_TEST_CASE( my_test )
     Size verbosity;
     Size num_bins;
     Size show_mode = 0;
-#ifdef USE_Qwt5_Qt4
-    String plot_file_name;
-#endif //USE_Qwt5_Qt4
 
     // Declare a group of options that will be
     // allowed only on command line
@@ -125,14 +86,6 @@ BOOST_AUTO_TEST_CASE( my_test )
             " 0: \tchecks normalizing-constant mean.\n"
             " 1: \t0 + checks filtering errors goodness of fit.\n"
             " 2: \t1 + checks smoothing errors goodness of fit.")
-#ifdef USE_Qwt5_Qt4
-        ("show-plots,s", po::value<Size>(&show_mode)->default_value(0),"shows plots, interrupting execution.\n"
-            "applies when repeat-smc=1.\n"
-            "values:\n"
-            " 0: \tno plots.\n"
-            " 1: \tshows final results plots.\n"
-            " 2: \t1 + shows pdf histogram plots.")
-#endif //USE_Qwt5_Qt4
         ;
 
     // Declare a group of options that will be
@@ -165,10 +118,6 @@ BOOST_AUTO_TEST_CASE( my_test )
             "applies when repeat-smc=1.")
         ("prec-param", "uses precision parameter instead of variance for normal distributions.")
         ("alpha", po::value<Scalar>(&reject_level)->default_value(1e-4), "accepted level of rejection in checks.")
-#ifdef USE_Qwt5_Qt4
-        ("plot-file", po::value<String>(&plot_file_name), "plots pdf file name.\n"
-            "applies when repeat-smc=1.")
-#endif //USE_Qwt5_Qt4
         ;
 
     // Hidden options, will be allowed both on command line and
@@ -218,20 +167,6 @@ BOOST_AUTO_TEST_CASE( my_test )
 
       store(parsed, vm);
       notify(vm);
-
-#ifdef BIIPS_DEBUG
-      if (parsed.options.size()>0)
-        cout << "[Command line options]" << endl;
-      for (Size op=0; op<parsed.options.size(); ++op)
-      {
-        cout << parsed.options[op].string_key;
-        if (!parsed.options[op].value.empty())
-          cout << " = ";
-        for (Size v=0; v<parsed.options[op].value.size(); ++v)
-          cout << parsed.options[op].value[v] << " ";
-        cout << endl;
-      }
-#endif
     }
 
     // Program options pre-processing
@@ -243,7 +178,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
     if (vm.count("version"))
     {
-      cout << "BiipsTest, version " << BIIPS_VERSION() << endl;
+      cout << "BiipsTest, version " << BiipsVersion() << endl;
       return;
     }
 
@@ -546,20 +481,6 @@ BOOST_AUTO_TEST_CASE( my_test )
 
           if (verbosity>0 && interactive && n_smc==1)
             pressEnterToContinue();
-
-#ifdef USE_Qwt5_Qt4
-          // Plot results
-          if (n_smc==1 && (vm.count("plot-file-name") || show_mode >= 1) )
-          {
-            p_model_test->PlotResults(plot_file_name);
-            if (verbosity>0 && vm.count("plot-file-name"))
-            {
-              cout << "Results plot written in file: " << plot_file_name << endl;
-              if (interactive)
-                pressEnterToContinue();
-            }
-          }
-#endif //USE_Qwt5_Qt4
         }
 
         if (exec_step < 3)

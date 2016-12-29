@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE( my_test )
 
   if (vm.count("version"))
   {
-    cout << "BiipsTestCompiler, version " << BIIPS_VERSION() << endl;
+    cout << "BiipsTestCompiler, version " << BiipsVersion() << endl;
     return;
   }
 

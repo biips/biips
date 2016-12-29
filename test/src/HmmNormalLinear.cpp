@@ -1,39 +1,3 @@
-//                                               -*- C++ -*-
-/*
- * Biips software is a set of C++ libraries for
- * Bayesian inference with interacting Particle Systems.
- * Copyright (C) Inria, 2012
- * Authors: Adrien Todeschini, Francois Caron
- *
- * Biips is derived software based on:
- * JAGS, Copyright (C) Martyn Plummer, 2002-2010
- * SMCTC, Copyright (C) Adam M. Johansen, 2008-2009
- *
- * This file is part of Biips.
- *
- * Biips is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*! \file HmmNormalLinear.cpp
- * \brief
- *
- * \author  $LastChangedBy$
- * \date    $LastChangedDate$
- * \version $LastChangedRevision$
- * Id:      $Id$
- */
-
 #include "config.hpp"
 #include "HmmNormalLinear.hpp"
 #include "BiipsCore.hpp"
@@ -43,10 +7,6 @@
 
 #include "KalmanFilter.hpp"
 #include "TestIO.hpp"
-
-#ifdef USE_Qwt5_Qt4
-#include "Plot.hpp"
-#endif //USE_Qwt5_Qt4
 
 namespace Biips
 {
@@ -322,18 +282,6 @@ namespace Biips
     x_quant_95[t].SetPtr(P_SCALAR_DIM,
                          ValArray::Ptr(new ValArray(1, quantAcc_.Quantile(1U))));
 
-#ifdef USE_Qwt5_Qt4
-    pSampler_->Accumulate(x[t], densAcc_);
-    if (showMode_ >= 2)
-    {
-      Histogram pdf_hist = densAcc_.Density();
-      Plot pdf_plot_PF(argc_, argv_);
-      pdf_plot_PF.AddHistogram(pdf_hist, "", Qt::blue);
-      pdf_plot_PF.SetTitle(title + " x pdf estimates, t = " + toString(t));
-      pdf_plot_PF.SetBackgroundColor(Qt::white);
-      pdf_plot_PF.Show();
-    }
-#endif //USE_Qwt5_Qt4
   }
 
   void HmmNormalLinear::filterAccumulate(Size iter)
@@ -349,80 +297,6 @@ namespace Biips
   void HmmNormalLinear::smoothAccumulate(Size iter)
   {
 	  accumulate(iter, smcSmoothValuesMap_, "Smoothing");
-  }
-
-  void HmmNormalLinear::PlotResults(const String & plotFileName) const
-  {
-#ifdef USE_Qwt5_Qt4
-    const MultiArray::Array & x_gen = dataValuesMap_.at("x");
-    const MultiArray::Array & y_obs = dataValuesMap_.at("y");
-    const MultiArray::Array & x_est_PF = smcFilterValuesMap_.at("x");
-    const MultiArray::Array & x_quant_05_PF = smcFilterValuesMap_.at("x.q05");
-    const MultiArray::Array & x_quant_95_PF = smcFilterValuesMap_.at("x.q95");
-    const MultiArray::Array & x_est_PS = smcSmoothValuesMap_.at("x");
-
-    Size t_max = sizeParamMap_.at("t_max");
-    MultiArray::Array time_x(t_max);
-    for (Size t = 0; t < t_max; ++t)
-    {
-      time_x[t] = MultiArray(P_SCALAR_DIM,
-                             ValArray::Ptr(new ValArray(1, Scalar(t+1))));
-    }
-
-    Plot results_plot(argc_, argv_);
-    results_plot.AddCurve(time_x,
-                          x_gen,
-                          "hidden state",
-                          Qt::black,
-                          2,
-                          Qt::NoPen,
-                          9,
-                          QwtSymbol::Cross);
-    results_plot.AddCurve(time_x,
-                          y_obs,
-                          "observation",
-                          Qt::darkGray,
-                          2,
-                          Qt::NoPen,
-                          8,
-                          QwtSymbol::XCross);
-    if (benchFilterValuesMap_.count("x"))
-      results_plot.AddCurve(time_x,
-                            benchFilterValuesMap_.at("x"),
-                            "KF estimate",
-                            Qt::green,
-                            2);
-    results_plot.AddCurve(time_x, x_est_PF, "PF estimate", Qt::blue, 2);
-    results_plot.AddCurve(time_x,
-                          x_quant_05_PF,
-                          "PF 5% quantile",
-                          Qt::blue,
-                          0.5,
-                          Qt::DashLine);
-    results_plot.AddCurve(time_x,
-                          x_quant_95_PF,
-                          "PF 95% quantile",
-                          Qt::blue,
-                          0.5,
-                          Qt::DashLine);
-    if (benchSmoothValuesMap_.count("x"))
-      results_plot.AddCurve(time_x,
-                            benchSmoothValuesMap_.at("x"),
-                            "KS estimate",
-                            Qt::magenta,
-                            2);
-    results_plot.AddCurve(time_x, x_est_PS, "PS estimate", Qt::cyan, 2);
-    results_plot.SetTitle("");
-    results_plot.SetAxesLabels("time", "state");
-    results_plot.SetBackgroundColor(Qt::white);
-    results_plot.SetLegend(QwtPlot::RightLegend);
-
-    if (!plotFileName.empty())
-      results_plot.PrintPdf(plotFileName);
-
-    if (showMode_ >= 1)
-      results_plot.Show();
-#endif //USE_Qwt5_Qt4
   }
 
 }

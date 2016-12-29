@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "Usage:   ./build_biips.sh [-jN [-g [-oct]]]"
+    echo "Usage:   ./build_biips.sh [-jN [-g]]"
     echo "    Where N=nb of parallel jobs."
     echo "    The options order matters."
     echo "    Use any string that does not match the option, e.g. '-', to skip an option"
@@ -10,7 +10,7 @@ fi
 set -x;
 # Change these variables to fit your needs
 #-----------------------------------------
-# prefer absolute over relative paths
+# use absolute instead of relative paths
 
 if [[ "$(uname)" == "Darwin" ]]; then
     # environment variables for Mac
@@ -18,7 +18,6 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export BIIPS_BUILD=$HOME/workspace/biips-build
     export BIIPS_ROOT=$HOME/biips
     export BOOST_ROOT=$HOME/boost_1_53_0
-    export LIBnn=lib
     export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Unix Makefiles"
     export CMAKE_OPTIONS="-DBUILD_TESTS=OFF"
@@ -36,9 +35,6 @@ else
     export BIIPS_SRC=`pwd`
     export BIIPS_BUILD=/media/data/workspace/biips-build
     export BIIPS_ROOT=$HOME/biips
-    export LIBnn=lib
-    # Debian/Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
-    # OpenSuse: use lib or lib64
     export ECLIPSE=$HOME/eclipse/cpp-neon/eclipse/eclipse
     export CMAKE_ECLIPSE_VERSION=4.6
     export CMAKE_BUILD_TYPE=Release
