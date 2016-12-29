@@ -15,19 +15,6 @@ include_directories (
 	${Boost_INCLUDE_DIRS}
 )
 
-# find qwt5-qt4
-if (USE_Qwt5_Qt4)
-    find_package(Qwt5 REQUIRED)
-    if (NOT Qwt5_Qt4_FOUND)
-    	message(FATAL_ERROR "Qwt5 linked with Qt4 not found")
-    endif ()
-    include_directories (${Qwt5_INCLUDE_DIR})
-    include(UseQt4)
-    set (EXTRA_LIBS ${EXTRA_LIBS}
-    	${Qwt5_Qt4_LIBRARY}
-    )
-endif ()
-
 # source files list generation
 file (GLOB SOURCE_FILES
 	${CMAKE_CURRENT_BINARY_DIR}/include/*.hpp
@@ -43,14 +30,14 @@ add_executable(${EXE_NAME} ${SOURCE_FILES})
 target_link_libraries(${EXE_NAME} ${EXTRA_LIBS} ${BIIPS_LIBS})
 
 # add subdirectories
-add_subdirectory(benchmarks)
+add_subdirectory(cfg)
 
 # copy cfg files to binary directory
-file(COPY biipstest.cfg  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY biipstest.cfg DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
 #=========== CTest commands ===============
-file(GLOB cfg_files ${CMAKE_CURRENT_BINARY_DIR}/benchmarks/*.cfg)
+file(GLOB cfg_files ${CMAKE_CURRENT_BINARY_DIR}/cfg/*.cfg)
 foreach(_cfg ${cfg_files})
     # define name without .cfg extension
     get_filename_component(_name ${_cfg} NAME) 

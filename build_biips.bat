@@ -1,5 +1,5 @@
 if "%1" == "" (
-    echo "Usage:   build_biips.bat [-jN [-g [-32 [-oct]]]]"
+    echo "Usage:   build_biips.bat [-jN [-g [-32]]]"
     echo "    Where N=nb of parallel jobs."
     echo "    The options order matters."
     echo "    Use any string that does not match the option, e.g. '-', to skip an option"
@@ -15,11 +15,7 @@ set PAGEANT=%ProgramFiles(x86)%\PuTTY\pageant.exe
 set GFORGE_PRIVATE_KEY=%USERPROFILE%\Documents\GForge_Inria_key.ppk
 set TORTOISEGITPROC=%ProgramFiles%\TortoiseGit\bin\TortoiseGitProc.exe
 set ECLIPSE=%ProgramFiles%\eclipse\eclipse.exe
-set R_BINDIR=%ProgramFiles%\R\R-3.2.0\bin
-set MATLAB_ROOT=%ProgramFiles%\MATLAB\R2012a
-set OCTAVE_ROOT=%HOMEDRIVE%\Octave\Octave3.6.4_gcc4.6.2
 set GCC_BINDIR=%HOMEDRIVE%\Rtools\gcc-4.6.3\bin
-set RTOOLS_BINDIR=%HOMEDRIVE%\Rtools\bin
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set CMAKE_OPTIONS=-DCMAKE_ECLIPSE_VERSION=4.3 -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=%1 -DR_ARCH=x64
 set CPACK_GENERATOR=NSIS
@@ -40,21 +36,12 @@ if "%2"=="-msvc" (
     set CMAKE_BUILD_TYPE=RelWithDebInfo
 ::    set CMAKE_BUILD_TYPE=Release
     set CMAKE_GENERATOR="MinGW Makefiles"
-    set CMAKE_OPTIONS=-DBUILD_RBIIPS=OFF -DBUILD_TESTS=OFF -DBUILD_MATBIIPS=ON -DSUPPRESS_DEPRECATED_WARNINGS=OFF -DBUILD_64BIT=ON
+    set CMAKE_OPTIONS=-DBUILD_RBIIPS=OFF -DBUILD_TESTS=OFF -DSUPPRESS_DEPRECATED_WARNINGS=OFF -DBUILD_64BIT=ON
 )
 
 if "%3"=="-32" (
     set BIIPS_BUILD=%BIIPS_BUILD%-32bit
     set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_64BIT=OFF -DBOOST_LIBRARYDIR="%BOOST_ROOT%\stage32\lib" -DR_ARCH=i386
-	
-	if NOT "%4" == "-oct" (
-		set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DBUILD_MATBIIPS=OFF
-	)
-)
-
-if "%4" == "-oct" (
-    set BIIPS_BUILD=%BIIPS_BUILD%-oct
-    set CMAKE_OPTIONS=%CMAKE_OPTIONS% -DFIND_OCTAVE=ON
 )
 
 ::-----------------------------------------
@@ -88,27 +75,6 @@ if "%errorlevel%"=="1" (
 	call:ask_testcompiler
 )
 
-choice /m "Build/install Rbiips"
-if "%errorlevel%"=="1" (
-	set "PATH=%RTOOLS_BINDIR%;%PATH%"
-	cd "%BIIPS_BUILD%"
-	"%MAKE%" VERBOSE=1 Rbiips_build_bin
-	call:ask_make_pdf
-)
-
-choice /m "Build Matbiips"
-if "%errorlevel%"=="1" (
-	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% matbiips_package
-	call:ask_test_matbiips
-)
-
-choice /m "Make examples package"
-if "%errorlevel%"=="1" (
-	cd "%BIIPS_BUILD%"
-	"%MAKE%" examples_package
-)
-
 cd "%BIIPS_SRC%"
 
 pause
@@ -139,23 +105,8 @@ goto:eof
 :ask_testcompiler
 choice /m "Run BiipsTestCompiler tests"
 if "%errorlevel%"=="1" (
-	cd "%BIIPS_BUILD%\testcompiler"
+	cd "%BIIPS_BUILD%\test_compiler"
 	"%MAKE%" %MAKE_OPT% test
 )
 goto:eof
 
-:ask_make_pdf
-choice /m "Make Rbiips PDF doc"
-if "%errorlevel%"=="1" (
-	cd "%BIIPS_BUILD%"
-	"%MAKE%" %MAKE_OPT% Rbiips_rd2pdf
-)
-goto:eof
-
-:ask_test_matbiips
-choice /m "Run Matbiips tests"
-if "%errorlevel%"=="1" (
-	cd "%BIIPS_BUILD%\matbiips"
-	ctest -VV test
-)
-goto:eof

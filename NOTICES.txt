@@ -5,8 +5,6 @@ agreements or notices used by these components are included below):
 - JAGS 
 - SMCTC 1.00
 - Boost
-- Biips test programs can use (optional) Qt widgets from 
-  the Qwt project (http://qwt.sf.net).
 
 ================================================================================
 JAGS License

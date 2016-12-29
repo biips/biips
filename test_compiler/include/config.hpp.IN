@@ -1,0 +1,8 @@
+#ifndef BIIPS_TESTCOMPILER_CONFIG_HPP_
+#define BIIPS_TESTCOMPILER_CONFIG_HPP_
+
+#include "BiipsConfig.hpp"
+
+#cmakedefine BIIPS_CATCH_TESTCOMPILER
+
+#endif /* BIIPS_TESTCOMPILER_CONFIG_HPP_ */

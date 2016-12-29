@@ -9,21 +9,19 @@ set (Biips_VERSION_MINOR 10)
 set (Biips_VERSION_PATCH 1)
 set (Biips_VERSION ${Biips_VERSION_MAJOR}.${Biips_VERSION_MINOR}.${Biips_VERSION_PATCH})
 
-file (WRITE VERSION.txt ${Biips_VERSION})
-
 set (Biips_OWNER Inria)
-set (Biips_COPYRIGHT_YEAR 2012-2014)
+set (Biips_COPYRIGHT_YEAR 2012-2017)
 set (Biips_LICENSE GPL-3)
-set (Biips_URL http://biips.github.io)
+set (Biips_URL https://biips.github.io)
 set (Biips_SOURCES_URL https://gforge.inria.fr/projects/biips/)
 set (Biips_BUGREPORTS https://gforge.inria.fr/tracker/?group_id=2515)
 set (Biips_DESCRIPTION_SUMMARY "Bayesian inference with interacting particle systems")
-set (Biips_CONTACT "biips-project <biips-project@lists.gforge.inria.fr>")
 set (Biips_CONTACT_EMAIL "biips-project@lists.gforge.inria.fr")
+set (Biips_CONTACT "biips-project <${Biips_CONTACT_EMAIL}>")
 
-set (Biips_DESCRIPTION " Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
- It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
- It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.")
+set (Biips_DESCRIPTION "Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated \"black box\" inference engine.
+It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.")
 
 if (NOT Biips_DATE)
     if (WIN32)
@@ -44,19 +42,15 @@ if (NOT Biips_DATE)
 endif ()
 message (STATUS Biips_DATE=${Biips_DATE})
 
-file (WRITE Description.txt ${Biips_DESCRIPTION})
+file (WRITE ${Biips_BINARY_DIR}/Description.txt ${Biips_DESCRIPTION})
 
 
 # set dependencies versions
 set (Boost_VERSION_REQUIRED 1.49.0)
-set (Rcpp_VERSION 0.10.6)
-set (R_VERSION_REQUIRED 3.0.2)
-
 
 # configure resource files
 configure_file (README.md.IN README.txt @ONLY)
 configure_file (README.md.IN ${CMAKE_SOURCE_DIR}/README.md @ONLY)
-#configure_file (Welcome Welcome.txt COPYONLY)
 configure_file (COPYING.txt COPYING.txt COPYONLY)
 
 # configure build
@@ -98,26 +92,19 @@ if (UNIX) # Linux or MacOSX
     # set(BIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
     set(BIIPS_COMPILE_FLAGS "-std=c++11 -stdlib=libstdc++ -fPIC -Wno-redeclared-class-member")
     set(BIIPS_LINK_FLAGS "-stdlib=libstdc++")
-    set(RBIIPS_COMPILE_FLAGS "-stdlib=libstdc++ -fPIC -Wno-redeclared-class-member -Wno-c++11-extensions")
-    set(RBIIPS_LINK_FLAGS "-stdlib=libstdc++")
 
   elseif (COMPILER_NAME STREQUAL gcc)
       # TODO : check if g++ version >= 4.7 or 4.8 ?
     set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-unused-local-typedefs")
-    set(RBIIPS_COMPILE_FLAGS ${BIIPS_COMPILE_FLAGS})
-    set(RBIIPS_LINK_FLAGS ${BIIPS_LINK_FLAGS})
 
   else()
     message(WARNING "FIXME: Could not determine compiler name")
     set(BIIPS_COMPILE_FLAGS "-fPIC")
-    set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   endif()
 
 elseif (WIN32) # Windows
   set(BIIPS_COMPILE_FLAGS "-m${BITS}")
-  set(RBIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
   set(BIIPS_LINK_FLAGS "-m${BITS}")
-  set(RBIIPS_LINK_FLAGS "${BIIPS_LINK_FLAGS}")
 endif()
 
 set(BIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS} -Wno-deprecated")
@@ -180,12 +167,6 @@ elseif (WIN32)
 endif ()
 
 
-# configure interfaces build
-option (BUILD_RBIIPS "Activate Rbiips (Biips interface for GNU R) build" ON)
-option (BUILD_MATBIIPS "Activate Matbiips (Biips interface for Matlab) build" ON)
-option (FIND_OCTAVE "Build Matbiips for Octave instead of Matlab" OFF)
-
-
 # print system info
 option(PRINT_SYSTEM_INFO "Print system information when running cmake" OFF)
 if (PRINT_SYSTEM_INFO)
@@ -214,51 +195,18 @@ endif ()
 
 
 enable_testing()
-# ==============================
-# define INCLUDE VARIABLES
-# ==============================
-set(Core_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/core
-	              ${CMAKE_SOURCE_DIR}/core/include
-		      ${CMAKE_BINARY_DIR}/core/include # for Config.hpp
 
-)
-
-set(Base_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/base
-	              ${CMAKE_SOURCE_DIR}/base/include
-
-)
-set(Compiler_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/compiler
-	                  ${CMAKE_SOURCE_DIR}/compiler/include
-
-)
-if (WIN32)
-  set(Compiler_INCLUDE_DIRS ${Compiler_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/compiler/win32)
-endif()
-
-
-find_package(Zip)
 # ==============================
 # Add subdirectories
 # ==============================
-add_subdirectory (core)
-add_subdirectory (base)
+add_subdirectory (bin)
+add_subdirectory (include)
+add_subdirectory (src)
 if(BUILD_TESTS)
   add_subdirectory (test)
-endif ()
-add_subdirectory (compiler)
-if(BUILD_TESTS)
-  add_subdirectory (testcompiler)
+  add_subdirectory (test_compiler)
 endif ()
 add_subdirectory (doc)
-add_subdirectory (examples)
-if (BUILD_RBIIPS)
-    add_subdirectory (Rbiips)
-endif ()
-if (BUILD_MATBIIPS)
-    add_subdirectory (matbiips)
-endif ()
-
 
 #============= CPACK commands ============
 # build a CPack driven installer package
@@ -274,11 +222,10 @@ set (CPACK_PACKAGE_VERSION_MINOR ${Biips_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${Biips_VERSION_PATCH})
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${Biips_DESCRIPTION_SUMMARY})
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "Biips-${Biips_VERSION}")
-set (CPACK_PACKAGE_DESCRIPTION_FILE ${Biips_SOURCE_DIR}/Description.txt)
+set (CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_BINARY_DIR}/Description.txt)
 set (CPACK_PACKAGE_CONTACT ${Biips_CONTACT})
 set (CPACK_RESOURCE_FILE_README ${CMAKE_BINARY_DIR}/README.txt)
-#set (CPACK_RESOURCE_FILE_WELCOME ${CMAKE_BINARY_DIR}/Welcome.txt)
-set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt)
+set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING.txt)
 set (CPACK_PACKAGE_ICON "${Biips_SOURCE_DIR}\\\\doc\\\\biips-logo\\\\biips-logo-large-256.bmp")
 
 # Source packages specific options
@@ -288,16 +235,14 @@ set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/"
 "\\\\.Rhistory$"
 "\\\\.gitignore$"
 "\\\\.project$"
+"\\\\.cproject$"
 "/\\\\.settings/"
 ".*\\\\.html$"
-".*\\\\.wiki$"
 ".*\\\\.sh"
 ".*\\\\.bat"
 ".*\\\\.pdf"
 ".*\\\\.Rproj.*"
 "/\\\\.Rproj\\\\.user"
-".*\\\\.mex.*"
-".*_m2R\\\\.R"
 "/old/"
 "/html/"
 ".*~"
@@ -318,11 +263,6 @@ if (NOT Boost_USE_STATIC_LIBS)
     set (CPACK_DEBIAN_PACKAGE_DEPENDS
         "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libboost-program-options-dev ")
 endif ()
-set (CPACK_DEBIAN_PACKAGE_SUGGESTS "r-base (>= 2.13)")
-if (USE_Qwt5_Qt4)
-    set (CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqwt5-qt4 (>= 5.2.0)")
-endif ()
 set (CPACK_DEBIAN_PACKAGE_SECTION math)
 set (CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set (CPACK_DEBIAN_PACKAGE_HOMEPAGE ${Biips_URL})
@@ -330,15 +270,11 @@ set (CPACK_DEBIAN_PACKAGE_REPLACES "libbiips, libbiips-dev, libbiips-test, biips
 
 # Linux RPM package specific options
 set (CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.7, libstdc++46 >= 4.4.0, boost-devel")
-if (USE_Qwt5_Qt4)
-    set (CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES}, libqwt5 >= 5.2.0")
-endif ()
 set (CPACK_RPM_PACKAGE_RELEASE 1)
 set (CPACK_RPM_PACKAGE_LICENSE ${Biips_LICENSE})
 set (CPACK_RPM_PACKAGE_GROUP Applications/Engineering)
 set (CPACK_RPM_PACKAGE_URL ${Biips_URL})
-set (CPACK_RPM_CHANGELOG_FILE ${Biips_SOURCE_DIR}/ChangeLog.txt)
+#set (CPACK_RPM_CHANGELOG_FILE ${CMAKE_SOURCE_DIR}/ChangeLog.txt)
 
 # Windows NSIS package specific options
 if (WIN32 AND NOT UNIX)
@@ -350,7 +286,7 @@ if (WIN32 AND NOT UNIX)
   set (CPACK_NSIS_HELP_LINK ${Biips_URL})
   set (CPACK_NSIS_URL_INFO_ABOUT ${Biips_URL})
   set (CPACK_NSIS_CONTACT ${Biips_CONTACT})
-  set (CPACK_NSIS_MUI_ICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-48.ico")
-  set (CPACK_NSIS_MUI_UNICON "${Biips_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
+  set (CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/doc/biips-logo/biips-icon-48.ico")
+  set (CPACK_NSIS_MUI_UNICON "${CMAKE_SOURCE_DIR}/doc/biips-logo/biips-icon-dark-blue-48.ico")
 endif ()
 include (CPack)

@@ -15,7 +15,7 @@ Features:
 =========   
 - [x] Monitor de sub range 
 - [ ] (1) fonctions, distributions 
-- [ ] (1) Revoir les messages affichés dans Rbiips 
+- [ ] (1) Revoir les messages affichés dans rbiips 
 - [ ] (2) option quiet 
 - [ ] (2) calcul de stat par Monitor 
 - [ ] (2) Samplers conjugate 

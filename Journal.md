@@ -5,7 +5,7 @@ Adrien le 01/12/2014 :
 Adrien le 24/11/2014 :
 ========================
 - [ ] vérifier que la valeur est dans le support avant de calculer pdf
-- [ ] exclure les fichiers non trackés dans git pour contruire package Rbiips
+- [ ] exclure les fichiers non trackés dans git pour contruire package rbiips
 
 Pierrick le 21/11/2014 :
 ========================
@@ -58,7 +58,7 @@ de cette façon on s'assure de ne jamais avoir exp(-x[t]) = 0
 Pas de problème avec borne inf seule, ou borne inf et sup, mais juste borne sup il n'aime pas...
 Un autre prolème à investiguer...
 
-J'ai aussi remarqué que les nombres aléatoires générés avec Matbiips sont différents sous Linux et Windows, c'est pour ça qu'on n'a pas les mêmes données.
+J'ai aussi remarqué que les nombres aléatoires générés avec matbiips sont différents sous Linux et Windows, c'est pour ça qu'on n'a pas les mêmes données.
 - [x] vérifier en compilant avec la même version de boost : toujours pareil
 - [ ] peut-être lié au compilo : vérifier séquences générées avec boost::random::mt19937 sous Linux gcc et windows msvc
 
@@ -67,21 +67,21 @@ Adrien le 22/09/2014 :
 Article :
 - [ ] discussion sur temps de calcul vs Jags
 - [ ] ajouter adaptation du PMMH
-- [ ] coloration syntaxique Rbiips
+- [ ] coloration syntaxique rbiips
 - [ ] vérifier explications du code : 'out_smc is a structure' spécifique à matlab
 - [x] citer Doucet pour smoothing/backward smoothing
 - [x] table de fonctions classées par étape du workflow
 
 Exemples :
 - [ ] republier exemples matbiips sous windows
-- [x] stoch_kinetic Rbiips : vérifier adaptation
-- [ ] ajouter html Rbiips sur le site
+- [x] stoch_kinetic rbiips : vérifier adaptation
+- [ ] ajouter html rbiips sur le site
 
 Release :
 - [ ] mettre à jour binaires toutes plateformes
 - [ ] écrire Release note
-- [ ] ajouter doc Rbiips
-- [ ] soumettre Rbiips sur CRAN
+- [ ] ajouter doc rbiips
+- [ ] soumettre rbiips sur CRAN
 - [ ] lien vers Jags manual pour doc sur le langauge BUGS
 - [ ] énumérer différences entre Biips et Jags
 
@@ -90,16 +90,16 @@ Adrien le 17/09/2014 :
 - [x] arguments cycliques pour density et plot.density
 - [x] ajouter plot.table.smcarray
 - [x] ajouter biips_table pour variables discrètes
-- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips (cf Rbiips) ?
+- [ ] revoir hiérarchie des champs f,s,b pour biips_density dans matbiips (cf rbiips) ?
 - [x] vérifier choix de la bandwidth dans matbiips
-- [ ] Rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
+- [ ] rbiips : inclure les headers de boost via package BH : <http://dirk.eddelbuettel.com/code/bh.html>
 - [x] matbiips octave : bug d'affichage des couleurs `light_blue`, `light_red` sous linux
 - [ ] compiler paquets binaires pour centos 64bit, mandriva, opensuse
 - [ ] ajouter références sur méthodes SMC dans les liens du site
 - [ ] ajouter calcul régions HDP
 - [ ] ajouter histogrammes de particules
-- [ ] conversion des sorties mcmc pour coda dans Rbiips
-- [ ] ajouter cible `publishRbiipsexamples.R` dans cmake
+- [ ] conversion des sorties mcmc pour coda dans rbiips
+- [ ] ajouter cible `publishrbiipsexamples.R` dans cmake
 - [ ] ajouter option 'gibbs' dans pmmh pour échantillonner composante par composante
 - [ ] renvoyer accept_rate dans pimh
 
@@ -118,7 +118,7 @@ Article/exemples :
 - [x] ajouter abbréviations : PIMH
 - [x] appliquer style JSS <http://www.jstatsoft.org/style> :
     - vérifier capitalization, title s'applique aussi aux sections et sous sections ?
-    - citation de software, R packages (ajouter Rbiips ?)
+    - citation de software, R packages (ajouter rbiips ?)
     - enlever commentaires dans le code ?
 
 Diffusion :
@@ -135,7 +135,7 @@ Diffusion :
 
 Adrien le 21/08/2014 :
 ======================
-Matbiips:
+matbiips:
 - [x] renommer `log_post` -> `log_marg_like_pen`
 - [x] vérifier champs `iterations` backward smoothing
 - [x] ajouter champs `iterations` dans help `biips_smc_samples`
@@ -212,11 +212,11 @@ Adrien le 13/08/2014 :
 Adrien le 12/08/2014 :
 ======================
 Je propose qu'on simplifie les typographies de Biips car il y a un mélange de toutes les variantes qui apparaissent : 
-Biips, Biips, biips, Matbiips, matbiips, Rbiips, Rbiips, rbiips
+Biips, Biips, biips, matbiips, matbiips, Rbiips, Rbiips, rbiips
 
 Plusieurs possiblités :
 
-1) Biips, Matbiips, Rbiips pour désigner les programmes dans un texte (majuscule au début seulement)
+1) Biips, matbiips, Rbiips pour désigner les programmes dans un texte (majuscule au début seulement)
 biips, matbiips, rbiips pour les noms de fichiers, fonctions etc.
 
 2) Biips, MatBiips, RBiips pour le texte (Mat et R en préfixe, et typo de Biips invariante)
@@ -451,7 +451,7 @@ qui permet de désactiver la vérification lorsque l'on clone le modèle.
 
 Adrien le 25/06/2014 :
 ======================
-Pour exécuter Matbiips compilé avec mex+VS2012, la machine a besoin de 
+Pour exécuter matbiips compilé avec mex+VS2012, la machine a besoin de 
 - Visual Studio C++ redistribuable
 
 - [x] l'ajouter aux instructions d'installation
@@ -663,7 +663,7 @@ Stack Trace (from fault):
 
 Marc le 17/3/2014 :
 ===================
-Compilation Matbiips Octave sur CI:
+Compilation matbiips Octave sur CI:
 
 sur ubuntu
         -DBUILD_MATBIIPS=ON  -DCMAKE_BUILD_TYPE:STRING=Release -DFIND_OCTAVE=ON
@@ -1001,7 +1001,7 @@ Questions concernant `inter_biips` et biips:
 
 Adrien le 4/2/2014 :
 ====================
-A faire dans Matbiips :
+A faire dans matbiips :
 - [x] modifier lecture des champs de structure : utiliser getfield
 - [x] harmonisation des noms de variables
 - [x] traitement des sorties MCMC dans `biips_summary` et `biips_density`

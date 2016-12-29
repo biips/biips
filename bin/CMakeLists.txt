@@ -1,0 +1,8 @@
+
+configure_file (
+	${CMAKE_CURRENT_SOURCE_DIR}/biips_info.IN
+	${CMAKE_CURRENT_BINARY_DIR}/biips_info
+)
+
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/biips_info DESTINATION ${Biips_INSTALL_BINDIR})
+

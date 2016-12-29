@@ -19,8 +19,6 @@ if [[ "$(uname)" == "Darwin" ]]; then
     export BIIPS_ROOT=$HOME/biips
     export BOOST_ROOT=$HOME/boost_1_53_0
     export LIBnn=lib
-    export MATLAB_ROOT=/Applications/MATLAB_R2016a.app
-    export OCTAVE_ROOT=/opt/local
     export CMAKE_BUILD_TYPE=Release
     export CMAKE_GENERATOR="Unix Makefiles"
     export CMAKE_OPTIONS="-DBUILD_TESTS=OFF"
@@ -41,7 +39,6 @@ else
     export LIBnn=lib
     # Debian/Ubuntu: use lib/i386-linux-gnu or lib/x86_64-linux-gnu
     # OpenSuse: use lib or lib64
-    export MATLAB_ROOT=/usr/local/MATLAB/R2016a
     export ECLIPSE=$HOME/eclipse/cpp-neon/eclipse/eclipse
     export CMAKE_ECLIPSE_VERSION=4.6
     export CMAKE_BUILD_TYPE=Release
@@ -57,11 +54,6 @@ else
         # export MATLAB_ROOT=/usr/local/MATLAB/R2010b
         export CMAKE_BUILD_TYPE=Debug
     fi
-fi
-
-if [[ "$3" == "-oct" ]]; then
-    export CMAKE_OPTIONS="$CMAKE_OPTIONS -DFIND_OCTAVE=ON"
-    export BIIPS_BUILD=${BIIPS_BUILD}-oct
 fi
 
 
@@ -105,7 +97,7 @@ if [[ $ans == "y" ]]; then set -x
 
     set +x; echo -n "*** Run BiipsTestCompiler tests? (y/N) "; read ans
     if [[ $ans == "y" ]]; then set -x
-        cd $BIIPS_BUILD/testcompiler
+        cd $BIIPS_BUILD/test_compiler
         $MAKE test
     fi
 
@@ -125,46 +117,6 @@ if [[ $ans == "y" ]]; then set -x
             fi
         fi
     fi
-fi
-
-
-set +x; echo -n "*** Install/build Rbiips? (y/N) "; read ans
-if [[ $ans == "y" ]]; then set -x
-    export BIIPS_INCLUDE=${BIIPS_ROOT}/include/biips
-    export BIIPS_LIB=${BIIPS_ROOT}/$LIBnn
-    cd $BIIPS_BUILD
-    if [ "$(uname)" == "Darwin" ]; then
-        $MAKE VERBOSE=1 Rbiips_build_bin
-    else
-        $MAKE VERBOSE=1 Rbiips_build_bin
-        $MAKE VERBOSE=1 Rbiips_build_src
-    fi
-    set +x; echo -n "*** Make Rbiips doc PDF? (y/N) "; read ans
-    if [[ $ans == "y" ]]; then set -x
-        $MAKE Rbiips_rd2pdf
-    fi
-    set +x; echo -n "*** Make Rbiips doc website? (y/N) "; read ans
-    if [[ $ans == "y" ]]; then set -x
-        $MAKE VERBOSE=1 Rbiips_build_site
-    fi
-fi
-
-set +x; echo -n "*** Build Matbiips? (y/N) "; read ans
-if [[ $ans == "y" ]]; then set -x
-    cd $BIIPS_BUILD
-    $MAKE matbiips_package
-
-    set +x; echo -n "*** Run Matbiips tests? (y/N) "; read ans
-    if [[ $ans == "y" ]]; then set -x
-        cd $BIIPS_BUILD/matbiips
-        ctest -VV
-    fi
-fi
-
-set +x; echo -n "*** Make examples package? (y/N) "; read ans
-if [[ $ans == "y" ]]; then set -x
-    cd $BIIPS_BUILD
-    $MAKE examples_package
 fi
 
 

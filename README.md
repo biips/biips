@@ -2,15 +2,15 @@ Biips
 =============================================================================
 
 - Version:       0.10.1
-- Last modified: 2016-12-26
+- Last modified: 2016-12-29
 - Contact:       Biips project team <biips-project@lists.gforge.inria.fr>
 - Maintainer:    [Adrien Todeschini](http://adrien.tspace.fr) <adrien.todeschini@gmail.com>
 - License:       GPL-3
-- Website:       <http://biips.github.io>
+- Website:       <https://biips.github.io>
 
- Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
- It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine.
- It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
+Biips is a general software for Bayesian inference with interacting particle systems, a.k.a. sequential Monte Carlo (SMC) methods.
+It aims at popularizing the use of these methods to non-statistician researchers and students, thanks to its automated "black box" inference engine.
+It borrows from the BUGS/JAGS software, widely used in Bayesian statistics, the statistical modeling with graphical models and the language associated with their descriptions.
 
 Context
 -----------------------------------------------------------------------------
@@ -26,8 +26,8 @@ Features
     - Static parameter estimation using particle MCMC
     - Automatic choice of the proposal samplers
 - Core developped in C++
-- R interface: Rbiips
-- Matlab/Octave interface: Matbiips
+- R interface: rbiips
+- Matlab/Octave interface: matbiips
 - Easy language extensions with custom R and Matlab functions
 - Multi-platform: Linux, Windows, Mac OSX
 - Free and open source (GPL)

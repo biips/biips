@@ -24,8 +24,8 @@ Features
     - Static parameter estimation using particle MCMC
     - Automatic choice of the proposal samplers
 - Core developped in C++
-- R interface: Rbiips
-- Matlab/Octave interface: Matbiips
+- R interface: rbiips
+- Matlab/Octave interface: matbiips
 - Easy language extensions with custom R and Matlab functions
 - Multi-platform: Linux, Windows, Mac OSX
 - Free and open source (GPL)
@@ -59,7 +59,7 @@ The Biips source code is hosted on a git repository at GForge Inria. If you want
 
 License
 -----------------------------------------------------------------------------
-Biips is licensed under the GPL-3 License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
+Biips is licensed under the @Biips_LICENSE@ License. You may freely modify and redistribute it under certain conditions (see the file COPYING for details).
 
 The source code is hosted at [GForge Inria](@Biips_SOURCES_URL@).
 

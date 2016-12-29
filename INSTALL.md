@@ -1,30 +1,30 @@
 Windows
 =============
 
-Install Rbiips
+Install rbiips
 --------------
 * **Requirements**: R (>= 3.0) with Rcpp package
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) rbiips
 
-* Install Rbiips package from R console:
+* Install rbiips package from R console:
 
 ```
-install.packages('path/to/Rbiips_X.X.X.zip')
+install.packages('path/to/rbiips_X.X.X.zip')
 ```
 
-Install Matbiips
+Install matbiips
 ----------------
 * **Requirements**:
 
     - Matlab: Windows (x64), Matlab (>=R2011a), [Visual C++ Redistributable for Visual Studio (x64)](http://www.microsoft.com/en-US/download/details.aspx?id=30679)
     - Octave: Windows (x86 or x64), Octave (MinGW, x86, >=3.6.4)
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) matbiips for either Matlab or Octave
 
-* Extract Matbiips archive
+* Extract matbiips archive
 
-* Before using Matbiips, you need to add the directory to the Matlab/Octave search path by typing in Matlab/Octave console:
+* Before using matbiips, you need to add the directory to the Matlab/Octave search path by typing in Matlab/Octave console:
 
 ```
 addpath('path/to/matbiips')
@@ -35,30 +35,30 @@ addpath('path/to/matbiips')
 Mac OS X
 ============
 
-Install Rbiips
+Install rbiips
 --------------
 * **Requirements**: R (>= 3.0) with Rcpp package
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) rbiips
 
-* Install Rbiips package from R console:
+* Install rbiips package from R console:
 
 ```
-install.packages('path/to/Rbiips_X.X.X.tgz')
+install.packages('path/to/rbiips_X.X.X.tgz')
 ```
 
-Install Matbiips
+Install matbiips
 ----------------
 * **Requirements**:
 
     - Matlab (>=R2011a)
     - Octave (>=3.6.4)
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) matbiips for either Matlab or Octave
 
-* Extract Matbiips archive
+* Extract matbiips archive
 
-* Before using Matbiips, you need to add the directory to the search Matlab/Octave path by typing in Matlab/Octave console:
+* Before using matbiips, you need to add the directory to the search Matlab/Octave path by typing in Matlab/Octave console:
 
 ```
 addpath('path/to/matbiips')
@@ -69,48 +69,48 @@ addpath('path/to/matbiips')
 Linux
 =============
 
-Install Rbiips from binary
+Install rbiips from binary
 --------------------------
 * **Requirements**: Debian/Ubuntu, R (>= 3.0) with Rcpp package
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) rbiips
 
-* Install Rbiips package from R console:
+* Install rbiips package from R console:
 
 ```
-install.packages('path/to/Rbiips_x.x.x_R_x86_64-pc-linux-gnu.tar.gz')
+install.packages('path/to/rbiips_x.x.x_R_x86_64-pc-linux-gnu.tar.gz')
 ```
 
-Install Rbiips from source
+Install rbiips from source
 --------------------------
 * **Requirements**: biips, R (>= 3.0) with Rcpp package
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Rbiips
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) rbiips
 
-* Install Rbiips package from linux terminal:
+* Install rbiips package from linux terminal:
 
 If biips was installed as root in the standard paths:
 
 ```
-R CMD INSTALL Rbiips_X.X.X.tar.gz
+R CMD INSTALL rbiips_X.X.X.tar.gz
 ```
 
 Else, if biips was installed in local paths:
 
 ```
-env BIIPS_INCLUDE=path/to/biips/include/biips/ BIIPS_LIB=/path/to/biips/lib/ARCH R CMD INSTALL Rbiips_X.X.X.tar.gz
+env BIIPS_INCLUDE=path/to/biips/include/biips/ BIIPS_LIB=/path/to/biips/lib/ARCH R CMD INSTALL rbiips_X.X.X.tar.gz
 ```
 
-Install Matbiips
+Install matbiips
 ----------------
-* **Requirements**: Debian/Ubuntu, No previous biips installation is needed for Matbiips
+* **Requirements**: Debian/Ubuntu, No previous biips installation is needed for matbiips
 
     - Matlab (>=R2011a)
     - Octave (>=3.6.4)
 
-* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) Matbiips for either Matlab or Octave
+* [Download](https://alea.bordeaux.inria.fr/biips/doku.php?id=download) matbiips for either Matlab or Octave
 
-* Extract Matbiips archive
+* Extract matbiips archive
 
 ```
 tar -xvzf matbiips_X.X.X.tar.gz
@@ -130,7 +130,7 @@ where `libARCH` is a directory depending on your Linux distribution and architec
 Note: alternatively to using the `LD_PRELOAD=...` command, you can rename the `path/to/MATLAB/R20XXx/sys/os/glnxa64/libstdc++.so.6` to e.g. `libstdc++.so.6.bak`.
 This usually requires administrator permissions.
 
-* Before using Matbiips, you need to add the directory to the search Matlab path by typing in Matlab console:
+* Before using matbiips, you need to add the directory to the search Matlab path by typing in Matlab console:
 
 ```
 addpath('path/to/matbiips')
