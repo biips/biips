@@ -2,7 +2,7 @@
 #include "common/Utility.hpp"
 #include "common/MultiArray.hpp"
 #include "common/Utility.hpp"
-#ifndef WIN32
+#ifndef _WIN32
 #include <pwd.h>
 #endif
 
@@ -16,7 +16,7 @@ namespace Biips
     if(s[0] != '~') return s;
     String name = s;
 
-#ifdef WIN32
+#ifdef _WIN32
     if(isalpha(s[1])) return s;
 #else
     if(name.size() > 1 && s[1] != '/') return s;
@@ -28,15 +28,15 @@ namespace Biips
       if (p)
         UserHOME = p;
 
-#ifdef WIN32
+#ifdef _WIN32
       if (UserHOME.empty())
       {
-        if (p = std::getenv("USERPROFILE"))
+        if ( (p = std::getenv("USERPROFILE")) )
           UserHOME = p;
       }
       if (UserHOME.empty())
       {
-        if (p = std::getenv("HOMEDRIVE"))
+        if ( (p = std::getenv("HOMEDRIVE")) )
         {
           UserHOME = p;
           p = std::getenv("HOMEPATH");
