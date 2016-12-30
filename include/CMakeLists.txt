@@ -2,13 +2,12 @@
 # to the source code
 configure_file (
 	${CMAKE_CURRENT_SOURCE_DIR}/BiipsConfig.hpp.IN
-	${CMAKE_CURRENT_BINARY_DIR}/BiipsConfig.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/BiipsConfig.hpp
 )
 
 # include directories
 set(Core_INCLUDE_DIRS 
 	${CMAKE_CURRENT_SOURCE_DIR}/core
-	${CMAKE_CURRENT_BINARY_DIR} # for BiipsConfig.hpp
 	PARENT_SCOPE
 )
 
@@ -67,7 +66,6 @@ endif()
 
 # add the install targets
 install(DIRECTORY
-	${CMAKE_CURRENT_BINARY_DIR}/
 	${CMAKE_CURRENT_SOURCE_DIR}/
 	DESTINATION ${BIIPS_INSTALL_INCLUDEDIR}
 	COMPONENT Headers

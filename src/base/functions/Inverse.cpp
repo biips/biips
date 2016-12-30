@@ -39,7 +39,6 @@ namespace Biips
     Matrix m_inv(m);
     if (!ublas::cholesky_factorize(m_inv))
     {
-      std::cerr << Matrix(m) << std::endl;
       throw RuntimeError("Inverse::eval: matrix is not positive-semidefinite.");
     }
     ublas::cholesky_invert(m_inv);

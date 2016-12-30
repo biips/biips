@@ -94,7 +94,7 @@ if (UNIX) # Linux or MacOSX
 
   elseif (COMPILER_NAME STREQUAL gcc)
       # TODO : check if g++ version >= 4.7 or 4.8 ?
-    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-unused-local-typedefs")
+    set(BIIPS_COMPILE_FLAGS "-std=c++11 -fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations")
 
   else()
     message(WARNING "FIXME: Could not determine compiler name")
@@ -106,13 +106,11 @@ elseif (WIN32) # Windows
   set(BIIPS_LINK_FLAGS "-m${BITS}")
 endif()
 
-set(BIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS} -Wno-deprecated")
+set(BIIPS_COMPILE_FLAGS "${BIIPS_COMPILE_FLAGS}")
 
 add_definitions(${BIIPS_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BIIPS_LINK_FLAGS}")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${BIIPS_LINK_FLAGS}")
-
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     set (BIIPS_DEBUG TRUE)

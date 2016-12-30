@@ -177,7 +177,7 @@ namespace Biips
     const Types<Size>::Array & GetRanks() const;
 
     // TODO remove from the class
-    void PrintGraph(std::ostream & os = std::cout) const;
+    void PrintGraph(std::ostream & os) const;
 
     template<typename VertexWriter>
     void PrintGraphviz(std::ostream & os, VertexWriter vw) const;
