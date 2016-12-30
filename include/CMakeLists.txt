@@ -1,8 +1,8 @@
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-	${CMAKE_CURRENT_SOURCE_DIR}/BiipsConfig.hpp.IN
-	${CMAKE_CURRENT_SOURCE_DIR}/BiipsConfig.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/BiipsConfig.hpp.IN
+	${CMAKE_CURRENT_SOURCE_DIR}/core/BiipsConfig.hpp
 )
 
 # include directories
@@ -33,7 +33,6 @@ set(Util_INCLUDE_DIRS
 
 # include files list generation
 file (GLOB_RECURSE Core_INCLUDES
-	${CMAKE_CURRENT_BINARY_DIR}/BiipsConfig.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/*.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/*.h
 )

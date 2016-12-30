@@ -9,7 +9,7 @@
 #include "kolmogorov.hpp"
 #include "common/cholesky.hpp"
 #include "iostream/ProgressBar.hpp"
-#include "iostream/DumpReader.hpp"
+#include "DumpReader.hpp"
 
 #include <fstream>
 #include <ctime>

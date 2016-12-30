@@ -2,7 +2,7 @@
  * COPY: Adapted from Stan dump.hpp
  */
 
-#include "iostream/DumpReader.hpp"
+#include "DumpReader.hpp"
 #include <sstream>
 #include <locale>
 

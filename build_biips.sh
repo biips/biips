@@ -85,13 +85,13 @@ if [[ $ans == "y" ]]; then set -x
     rm -rf $BIIPS_ROOT; mkdir $BIIPS_ROOT
     $MAKE install
 
-    set +x; echo -n "*** Run BiipsTest tests? (y/N) "; read ans
+    set +x; echo -n "*** Run biipstest tests? (y/N) "; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test
         $MAKE test
     fi
 
-    set +x; echo -n "*** Run BiipsTestCompiler tests? (y/N) "; read ans
+    set +x; echo -n "*** Run biipstestcompiler tests? (y/N) "; read ans
     if [[ $ans == "y" ]]; then set -x
         cd $BIIPS_BUILD/test_compiler
         $MAKE test

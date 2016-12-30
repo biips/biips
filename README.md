@@ -1,8 +1,8 @@
 Biips
 =============================================================================
 
-- Version:       0.10.1
-- Last modified: 2016-12-29
+- Version:       0.11.0
+- Last modified: 2016-12-30
 - Maintainer:    [Adrien Todeschini](http://adrien.tspace.fr) <adrien.todeschini@gmail.com>
 - License:       GPL-3
 - Website:       <https://biips.github.io>

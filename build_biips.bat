@@ -95,7 +95,7 @@ if "%errorlevel%"=="1" (
 goto:eof
 
 :ask_test
-choice /m "Run BiipsTest tests"
+choice /m "Run biipstest tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\test"
 	"%MAKE%" %MAKE_OPT% test
@@ -103,7 +103,7 @@ if "%errorlevel%"=="1" (
 goto:eof
 
 :ask_testcompiler
-choice /m "Run BiipsTestCompiler tests"
+choice /m "Run biipstestcompiler tests"
 if "%errorlevel%"=="1" (
 	cd "%BIIPS_BUILD%\test_compiler"
 	"%MAKE%" %MAKE_OPT% test
