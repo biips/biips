@@ -14,7 +14,7 @@ namespace Biips
   {
   public:
     ProgressBar(unsigned long expected_count,
-                std::ostream & os = std::cout,
+                std::ostream & os,
                 const std::string & s1 = "\n", //leading string
                 char symbol = '*',
                 const std::string & iter_name = "iterations",

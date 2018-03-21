@@ -20,6 +20,17 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <exception>
+
+ // EDIT: Adrien Todeschini 2017-01-30
+class scannerError : public std::exception {
+	protected:
+	const char* msg_;
+	public:
+	scannerError(const char* msg) : std::exception(), msg_(msg) {}
+	virtual const char* what() const noexcept {return msg_;}
+    virtual ~scannerError() {}
+};
 
 /* end standard C headers. */
 
@@ -1952,8 +1963,9 @@ YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
 
 static void yy_fatal_error (yyconst char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
-	exit( YY_EXIT_FAILURE );
+//    	(void) fprintf( stderr, "%s\n", msg );
+//	exit( YY_EXIT_FAILURE );
+	throw scannerError(msg); // EDIT: Adrien Todeschini 2017-01-30
 }
 
 /* Redefine yyless() so it works in section 3 code. */

@@ -14,12 +14,19 @@
 #include <vector>
 #include <sstream>
   
-  void yyerror(const char *);
+  //void yyerror(const char *);
+  
+void
+yyerror (char const *s)
+{
+  throw std::exception(sprintf("%s\n", s)); // EDIT: Adrien Todeschini 2017-01-30
+}
+  
   int yylex();
   int yylex_destroy();
   extern int yylineno;
   
-#define YYDEBUG 1
+#define YYDEBUG 0  // EDIT: Adrien Todeschini 2017-01-30
   
   static std::vector<ParseTree *> * _pvariables = 0;
   static ParseTree *_pdata = 0;
@@ -429,6 +436,8 @@ int parse_bugs (std::FILE *file, std::vector<ParseTree*> * &dec_list,
 {
     extern std::FILE *yyin;
     yyin = file;
+    extern std::FILE *yyout; // EDIT: Adrien Todeschini 2017-01-30
+    yyout = NULL;
     
     int val = 0;
     error_buf.clear();

@@ -13,7 +13,7 @@
 #define Boost_LIB_VERSION "1_58"
 
 /* #undef BIIPS_SHARED */
-/* #undef BIIPS_DEBUG */
+#define BIIPS_DEBUG
 /* #undef BIIPS_DEBUG_PARSER */
 
 #endif /* BIIPS_CONFIG_HPP_ */
